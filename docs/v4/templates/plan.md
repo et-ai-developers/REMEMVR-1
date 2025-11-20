@@ -1,10 +1,25 @@
 # plan.md Template Specification
 
-**Version:** 4.0
-**Last Updated:** 2025-11-16
+**Version:** 4.1
+**Last Updated:** 2025-11-22
 **Purpose:** Specification for 2_plan.md format (analysis plan created by rq_planner agent)
 **Audience:** rq_planner agent when creating 2_plan.md for RQ workflow
 **Status:** Current (v4.X architecture)
+
+---
+
+## CRITICAL - ASCII-Only Format
+
+**Per universal.md Section 2.1:** ALL content in 2_plan.md must use ASCII-only characters for WSL2/Windows compatibility.
+
+**Mathematical Notation - Use ASCII equivalents ONLY:**
+- Multiplication: Use `x` not `×` (example: "100 x 4 tests")
+- Set membership: Use `in` not `∈` (example: "theta in [-3, 3]")
+- Comparisons: Use `>=` not `≥`, `<=` not `<=`
+- Arrows: Use `->` not `→`
+- Ranges: Write as words (example: "theta range: [-3, 3]" or "theta: -3 to 3")
+
+**Why:** Unicode symbols (×, ∈, ≥, →) cause encoding issues in WSL2, displaying as � or backspace characters. ASCII ensures universal compatibility.
 
 ---
 
@@ -27,13 +42,13 @@ The 2_plan.md file is the **master analysis plan** for an RQ. It is created by t
 ```
 Step 9 (Workflow): rq_planner creates 2_plan.md
                    ↓
-Step 11 (Workflow): rq_tools reads 2_plan.md → creates 3_tools.yaml
+Step 11 (Workflow): rq_tools reads 2_plan.md  ->  creates 3_tools.yaml
                    ↓
-Step 12 (Workflow): rq_analysis reads 2_plan.md + 3_tools.yaml → creates 4_analysis.yaml
+Step 12 (Workflow): rq_analysis reads 2_plan.md + 3_tools.yaml  ->  creates 4_analysis.yaml
                    ↓
-Step 14 (Workflow): g_code reads 4_analysis.yaml (derived from plan) → generates code
+Step 14 (Workflow): g_code reads 4_analysis.yaml (derived from plan)  ->  generates code
                    ↓
-Step 14 (Workflow): rq_inspect reads 2_plan.md → validates outputs match expectations
+Step 14 (Workflow): rq_inspect reads 2_plan.md  ->  validates outputs match expectations
 ```
 
 **Critical Role:** The plan is the **contract** between planning agents and execution agents. If plan is vague, downstream agents will fail or guess incorrectly.
@@ -59,9 +74,9 @@ The plan MUST state for each step:
 > **"Validation tools MUST be used after analysis tool execution"**
 
 **Rationale:**
-- **v3.0 Problem:** Analysis errors cascaded to downstream steps (bad theta → bad LMM → bad plots → bad results)
+- **v3.0 Problem:** Analysis errors cascaded to downstream steps (bad theta  ->  bad LMM  ->  bad plots  ->  bad results)
 - **v4.X Solution:** Embedded validation catches errors immediately at source step
-- **Architecture Dependency:** rq_tools reads plan → specifies validation tools per step → rq_analysis embeds validation calls → g_code generates scripts with validation → errors caught before cascade
+- **Architecture Dependency:** rq_tools reads plan  ->  specifies validation tools per step  ->  rq_analysis embeds validation calls  ->  g_code generates scripts with validation  ->  errors caught before cascade
 
 ### How rq_planner States This
 
@@ -93,7 +108,7 @@ agent will embed validation tool calls after the analysis tool call for this ste
 - [Exact file paths, expected row counts, expected column counts, data types]
 
 *Value Ranges:*
-- [Expected value ranges - e.g., theta ∈ [-3, 3], p ∈ [0, 1], scientifically reasonable bounds]
+- [Expected value ranges - e.g., theta in [-3, 3], p in [0, 1], scientifically reasonable bounds]
 
 *Data Quality:*
 - [Missing data tolerance, expected N, duplicate checks, distribution checks]
@@ -130,9 +145,9 @@ g_code (Step 14):
            ↓
 bash execution (Step 14):
   ├─ Runs stepN_name.py
-  ├─ Analysis tool executes → produces output
-  ├─ Validation tool executes → checks output
-  └─ If validation fails → error raised → g_debug invoked
+  ├─ Analysis tool executes  ->  produces output
+  ├─ Validation tool executes  ->  checks output
+  └─ If validation fails  ->  error raised  ->  g_debug invoked
 ```
 
 **Result:** Errors caught immediately at source, not discovered 5 steps later when fixing is expensive.
@@ -191,7 +206,7 @@ This RQ requires N steps:
 
 **Key Principles:**
 - **Linear order** (step N cannot depend on step N+5)
-- **Logical grouping** (data extraction → calibration → validation → reporting)
+- **Logical grouping** (data extraction  ->  calibration  ->  validation  ->  reporting)
 - **Named clearly** (anyone reading plan understands what step does)
 - **Realistic complexity** (don't claim "low" if 60-minute runtime expected)
 
@@ -220,14 +235,14 @@ This RQ requires N steps:
 **Required Sheets:**
 - `Data` sheet with columns:
   - `UID` (string, format: DDD-SSS-TTT, e.g., VRA-001-000)
-  - Tags matching domain pattern `RVR-{domain}-*` where domain ∈ {OBJ, LOC, SPA, TEM, ACT}
+  - Tags matching domain pattern `RVR-{domain}-*` where domain in {OBJ, LOC, SPA, TEM, ACT}
 
 **Filters:**
 - Paradigm: `V` (VR paradigm, not R for Reality Check)
 - Domain codes: Specified in 1_concept.md (e.g., OBJ+LOC for object-location binding)
 
 **Expected Data Volume:**
-- ~100 participants × 4 test sessions × N items per domain = ~400×N rows
+- ~100 participants x 4 test sessions x N items per domain = ~400 x N rows
 ```
 
 **Example Structure (Mid-Workflow Step):**
@@ -255,7 +270,7 @@ This RQ requires N steps:
 
 **Filters:**
 - Apply to pass1_item_params.csv to identify items meeting thresholds
-- Exclusion logic: item retained if (|Difficulty| ≤ 3.0) AND (Discrimination ≥ 0.4)
+- Exclusion logic: item retained if (|Difficulty| <= 3.0) AND (Discrimination >= 0.4)
 ```
 
 **Key Principles:**
@@ -275,7 +290,7 @@ This RQ requires N steps:
 - **File paths** (relative to RQ root)
 - **File formats** (CSV, PNG, YAML, TXT, etc.)
 - **Column schema** (if tabular)
-- **Dimensions** (if plotting - PNG 800×600 @ 300 DPI)
+- **Dimensions** (if plotting - PNG 800 x 600 @ 300 DPI)
 - **Expected row counts** (if known - helps validation)
 
 **Example Structure:**
@@ -291,7 +306,7 @@ This RQ requires N steps:
   - `composite_ID` (string, format: {UID}_{test}, e.g., VRA-001-000_0)
   - One column per item_code (e.g., `RVR-OBJ-F-MC`, `RVR-LOC-N-MC`, ...)
   - Values: {0, 1, NaN} (0=incorrect, 1=correct, NaN=missing/not administered)
-**Expected Rows:** ~400 (100 participants × 4 tests)
+**Expected Rows:** ~400 (100 participants x 4 tests)
 **Expected Columns:** ~102 items + 1 composite_ID column = 103 total
 
 **File 2:** data/item_metadata.csv
@@ -313,12 +328,12 @@ This RQ requires N steps:
 
 **File 1:** plots/trajectory_theta_scale.png
 **Format:** PNG image
-**Dimensions:** 800×600 pixels @ 300 DPI
+**Dimensions:** 800 x 600 pixels @ 300 DPI
 **Content:** Trajectory plot with theta scale (-3 to +3) on Y-axis, TSVR (hours) on X-axis, participant groups as separate lines
 
 **File 2:** plots/trajectory_probability_scale.png
 **Format:** PNG image
-**Dimensions:** 800×600 pixels @ 300 DPI
+**Dimensions:** 800 x 600 pixels @ 300 DPI
 **Content:** Same trajectory plot with probability scale (0.0 to 1.0) on Y-axis, TSVR on X-axis
 **Note:** Per Decision D069, dual-scale improves interpretability for non-psychometricians
 
@@ -333,7 +348,7 @@ This RQ requires N steps:
 
 **Key Principles:**
 - **Completeness** (list ALL outputs, not just primary files)
-- **Format precision** (PNG 800×600 @ 300 DPI, not "image file")
+- **Format precision** (PNG 800 x 600 @ 300 DPI, not "image file")
 - **Schema documentation** (column names prevent downstream API mismatches)
 - **Expected counts** (row/column counts help validation detect errors)
 - **Metadata files** (YAML metadata helps rq_results summarize plots)
@@ -344,7 +359,7 @@ This RQ requires N steps:
 ### Step 7: Prepare Trajectory Plot Data
 
 **⚠️ CRITICAL NOTE:** Plot data preparation IS an analysis step. It:
-- Gets executed in Step 14 CODE EXECUTION LOOP (g_code → bash → rq_inspect)
+- Gets executed in Step 14 CODE EXECUTION LOOP (g_code  ->  bash  ->  rq_inspect)
 - MUST have validation requirements (same as any analysis step)
 - Outputs to plots/*.csv (not data/*.csv) but still validated by rq_inspect
 - Created by g_code during analysis (NOT by rq_plots during visualization)
@@ -370,7 +385,7 @@ This RQ requires N steps:
 - `CI_upper` (float): Upper 95% confidence bound
 - `domain` (string): Memory domain (What/Where/When)
 
-**Expected Rows:** 12 (3 domains × 4 timepoints)
+**Expected Rows:** 12 (3 domains x 4 timepoints)
 
 **Aggregation Logic:**
 1. Merge theta_scores with tsvr_mapping on composite_ID (adds TSVR_hours, test number)
@@ -388,20 +403,20 @@ tools determined by rq_tools based on plot data format requirements.
 
 *Output Files:*
 - plots/trajectory_theta_data.csv exists (exact path)
-- Expected rows: 12 (3 domains × 4 timepoints)
+- Expected rows: 12 (3 domains x 4 timepoints)
 - Expected columns: 5 (time, theta, CI_lower, CI_upper, domain)
 - Data types: float (time, theta, CI bounds), string (domain)
 
 *Value Ranges:*
-- time ∈ [0, 168] hours (0=encoding, 168=1 week)
-- theta ∈ [-3, 3] (typical IRT ability range)
-- CI_lower ∈ [-3, 3], CI_upper ∈ [-3, 3] (confidence bounds)
-- domain ∈ {What, Where, When} (categorical)
+- time in [0, 168] hours (0=encoding, 168=1 week)
+- theta in [-3, 3] (typical IRT ability range)
+- CI_lower in [-3, 3], CI_upper in [-3, 3] (confidence bounds)
+- domain in {What, Where, When} (categorical)
 
 *Data Quality:*
 - No NaN values tolerated (all cells must have valid values)
 - Expected N: Exactly 12 rows (no more, no less)
-- No duplicate rows (domain × time combinations unique)
+- No duplicate rows (domain x time combinations unique)
 - Distribution check: CI_upper > CI_lower for all rows
 
 *Log Validation:*
@@ -431,7 +446,7 @@ tools determined by rq_tools based on plot data format requirements.
 **Purpose:** Document data transformations and format expectations in detail.
 
 This section provides **additional format details** beyond what fits in Input/Output specifications. Use for:
-- **Complex transformations** (wide → long, stacking, merging)
+- **Complex transformations** (wide  ->  long, stacking, merging)
 - **Column naming conventions** (from names.md if populated)
 - **Data type constraints** (nullable vs non-nullable)
 - **Value ranges** (valid ranges help validation)
@@ -475,7 +490,7 @@ Using TSVR_hours (actual elapsed time) ensures accurate temporal modeling.
 **Example Structure (Reshape Transformation):**
 
 ```markdown
-### Step 6: Reshape Theta Data for LMM (Wide → Long)
+### Step 6: Reshape Theta Data for LMM (Wide  ->  Long)
 
 **Data Transformation:**
 
@@ -486,7 +501,7 @@ Using TSVR_hours (actual elapsed time) ensures accurate temporal modeling.
 - Example row: `VRA-001-000_0, -0.52, 0.18, 0.0` (encoding session, 0 hours elapsed)
 
 **Reshape Logic:**
-- **Parse composite_ID:** Extract UID and test number (e.g., "VRA-001-000_0" → UID="VRA-001-000", test=0)
+- **Parse composite_ID:** Extract UID and test number (e.g., "VRA-001-000_0"  ->  UID="VRA-001-000", test=0)
 - **Group by UID:** All 4 test sessions for same participant grouped together
 - **Long format:** Each row represents one measurement occasion (test session) for one participant
 - **Add test number column:** Extract from composite_ID suffix (_0, _1, _3, _6)
@@ -500,7 +515,7 @@ Using TSVR_hours (actual elapsed time) ensures accurate temporal modeling.
   - `theta` (float, estimated ability)
   - `SE` (float, standard error)
   - `TSVR_hours` (float, actual time since encoding)
-- **Expected Rows:** ~400 rows (100 participants × 4 tests per participant)
+- **Expected Rows:** ~400 rows (100 participants x 4 tests per participant)
 - **Grouping:** 4 consecutive rows per UID (test 0, 1, 3, 6)
 
 **Column Naming Convention:**
@@ -513,7 +528,7 @@ Per names.md (if populated during RQ 5.1):
 
 **Key Principles:**
 - **Transformation clarity** (describe merge/reshape/filter logic step-by-step)
-- **Before/after formats** (show input structure → transformation → output structure)
+- **Before/after formats** (show input structure  ->  transformation  ->  output structure)
 - **Critical decisions** (reference Decision D0XX if transformation based on project-specific requirement)
 - **Naming conventions** (document column names, reference names.md if populated)
 - **Validation hooks** (expected row counts, null handling, format constraints)
@@ -579,7 +594,7 @@ No intermediate outputs from other RQs required.
 **Validation:**
 - Step 1: Check results/ch5/rq1/data/item_parameters_calibrated.csv exists (circuit breaker: FILE_MISSING if absent)
 - Step 1: Check results/ch5/rq3/data/retained_items.csv exists (circuit breaker: FILE_MISSING if absent)
-- If either file missing → quit with error → user must execute dependency RQs first
+- If either file missing  ->  quit with error  ->  user must execute dependency RQs first
 
 **Reference:** Specification section 5.1.6 (Data Source Boundaries)
 ```
@@ -605,7 +620,7 @@ This section is **mandatory per specification**. It is the foundation of v4.X er
 1. **Validation Requirement Statement:** "Validation tools MUST be used after [tool type] execution"
 2. **Substance Validation Criteria (4 layers with explicit headers):**
    - *Output Files:* Exact paths, row counts, column counts, data types
-   - *Value Ranges:* Expected value ranges (e.g., theta ∈ [-3, 3], p ∈ [0, 1])
+   - *Value Ranges:* Expected value ranges (e.g., theta in [-3, 3], p in [0, 1])
    - *Data Quality:* Missing data tolerance, expected N, duplicate checks, distribution checks
    - *Log Validation:* Required patterns, forbidden patterns, acceptable warnings
 3. **Expected Behavior on Validation Failure:** Error handling (quit, log, invoke g_debug)
@@ -632,7 +647,7 @@ downstream steps before discovery).
 - rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
 - rq_analysis (Step 12 workflow) will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
 - g_code (Step 14 workflow) will generate stepN_name.py scripts with validation function calls
-- bash execution (Step 14 workflow) will run analysis → validation → error on validation failure
+- bash execution (Step 14 workflow) will run analysis  ->  validation  ->  error on validation failure
 
 **Downstream Agent Requirements:**
 - **rq_tools:** MUST specify validation tool for EVERY analysis step (no exceptions)
@@ -654,7 +669,7 @@ downstream steps before discovery).
 **What Validation Checks (TECHNICAL - rq_inspect scope):**
 - Output file exists (data/irt_items_wide.csv)
 - Expected column count (~103 columns: composite_ID + 102 items)
-- Expected row count (~400 rows: 100 participants × 4 tests)
+- Expected row count (~400 rows: 100 participants x 4 tests)
 - No unexpected NaN patterns (>50% NaN per item suggests extraction error)
 - composite_ID format correct ({UID}_{test} pattern)
 - Item codes match expected domain pattern (RVR-{domain}-*)
@@ -764,7 +779,7 @@ Validation tools MUST be used after analysis tool execution. [Details about what
 
 ### Step-to-Step Transformations
 
-[Document complex transformations: wide→long, merging, stacking, etc.]
+[Document complex transformations: wide -> long, merging, stacking, etc.]
 
 ### Column Naming Conventions
 
@@ -804,9 +819,9 @@ Every analysis step in this plan MUST use validation tools after analysis tool e
 
 **Next Steps (Workflow):**
 1. User reviews and approves this plan (Step 7 user gate)
-2. Workflow continues to Step 11: rq_tools reads this plan → creates 3_tools.yaml
-3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml → creates 4_analysis.yaml
-4. Workflow continues to Step 14: g_code reads 4_analysis.yaml → generates stepN_name.py scripts
+2. Workflow continues to Step 11: rq_tools reads this plan  ->  creates 3_tools.yaml
+3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml  ->  creates 4_analysis.yaml
+4. Workflow continues to Step 14: g_code reads 4_analysis.yaml  ->  generates stepN_name.py scripts
 
 ---
 

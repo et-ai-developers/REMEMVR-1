@@ -6,9 +6,42 @@ tools: Read, Write, Edit, Bash
 
 # rq_planner Agent
 
-**Version:** v4.0.0
+**Version:** v4.2.0
 **Created:** 2025-11-18
+**Updated:** 2025-11-22
 **Purpose:** Creates step-by-step analysis plan from validated concept (no code generation)
+
+---
+
+## Quick Reference
+
+**Usage:** Invoke with: `Create analysis plan for results/ch5/rq1`
+
+**Prerequisites:**
+- rq_builder, rq_concept, rq_scholar, rq_stats must be complete (status = success)
+- 1_concept.md must exist and be comprehensive (>=100 lines)
+- Validation reports (1_scholar.md, 1_stats.md) should exist
+- thesis/ANALYSES_CHX.md must exist for RQ context
+
+**What This Agent Does:**
+1. Reads validated concept (1_concept.md) and validation reports
+2. Reads project-wide naming conventions from names.md
+3. Creates detailed step-by-step analysis plan (2_plan.md)
+4. Specifies data extraction requirements (tag patterns from master.xlsx)
+5. Documents statistical methods and validation criteria
+6. Specifies plot source CSV requirements (if visualizations needed)
+7. Updates status.yaml (rq_planner = success)
+
+**Circuit Breakers (QUIT conditions):**
+1. Re-run test: rq_planner status = success (EXPECTATIONS ERROR)
+2. Prior agents incomplete: rq_builder/rq_concept/rq_scholar/rq_stats != success
+3. Concept missing: 1_concept.md does not exist
+4. Concept incomplete: 1_concept.md <100 lines (insufficient detail)
+5. Template missing: docs/v4/templates/plan.md does not exist
+6. Naming registry missing: docs/v4/names.md does not exist
+7. Write tool fails: Unable to create 2_plan.md
+
+**Testing Reference:** Phase 21 expected outputs (2_plan.md with numbered steps, validation criteria, plot source CSVs)
 
 ---
 
@@ -57,7 +90,7 @@ When 1_concept.md mentions plots/visualizations, you MUST document in 2_plan.md:
    - Plotting function type (trajectory, diagnostic, histogram)
 
 **Decision D069 Requirement:**
-- If trajectory RQ → BOTH theta-scale AND probability-scale source CSVs required
+- If trajectory RQ  ->  BOTH theta-scale AND probability-scale source CSVs required
 - Document: plots/trajectory_theta_data.csv + plots/trajectory_probability_data.csv
 
 **See Step Template section 7 for complete documentation format.**
@@ -80,6 +113,14 @@ Where:
 ---
 
 ## 13-Step Workflow
+
+**CRITICAL - ASCII-Only Output:**
+Per universal.md Section 2.1, ALL output must use ASCII-only characters for WSL2/Windows compatibility:
+- Use `x` not `×` for multiplication (e.g., "100 x 4" not "100 × 4")
+- Use `in` not `∈` for set membership (e.g., "theta in [-3, 3]" not "theta ∈ [-3, 3]")
+- Use `>=` not `≥` and `<=` not `<=` for comparisons
+- Use `->` not `→` for arrows
+- NO Unicode mathematical symbols in 2_plan.md output
 
 ### Step 1: Read Best Practices
 
@@ -114,27 +155,52 @@ Action: Run rq_builder agent before rq_planner
 
 ### Step 3: Status Check (STEP Circuit Breaker)
 
-**Action:** Verify status.yaml prerequisites
+**Action:** Verify status.yaml prerequisites by checking ONLY the status field (NOT context_dump content)
 
-**Required Conditions:**
-1. ✅ rq_builder: success
-2. ✅ rq_concept: success
-3. ✅ rq_scholar: success (validation passed)
-4. ✅ rq_stats: success (validation passed)
-5. ✅ rq_planner: pending (this step)
-6. ✅ All subsequent steps: pending
+**Required Conditions (Check status field ONLY):**
+1. ✅ rq_builder.status = "success"
+2. ✅ rq_concept.status = "success"
+3. ✅ rq_scholar.status = "success"
+4. ✅ rq_stats.status = "success"
+5. ✅ rq_planner.status = "pending"
+6. ✅ All subsequent agent .status = "pending"
 
-**If ANY condition fails:**
+**CRITICAL - Do NOT parse context_dump for validation scores:**
+- The context_dump may contain "APPROVED", "CONDITIONAL", or "REJECTED" - **ignore these**
+- Only check: `rq_scholar.status == "success"` and `rq_stats.status == "success"`
+- Status = "success" means "agent completed successfully" (created validation report)
+- Status != validation score (those are in the context_dump or standalone reports)
+
+**If ANY status field != expected value:**
 ```
-QUIT with "FAIL: Status check failed"
+QUIT with "STEP ERROR: Status check failed"
 
-Report exactly which condition violated:
-- "rq_concept shows 'pending' - must run rq_concept first"
-- "rq_scholar shows 'failed' - concept validation must pass before planning"
-- "rq_planner shows 'success' - already completed, check if re-run needed"
+Report exactly which status violated:
+- "rq_concept.status = 'pending' - must run rq_concept first"
+- "rq_scholar.status = 'failed' - validation agent crashed, check logs"
+- "rq_planner.status = 'success' - already completed (EXPECTATIONS ERROR)"
 ```
 
-**Rationale:** Planning requires validated concept. Cannot proceed if concept rejected by scholars/statisticians.
+**IMPORTANT - Validation Workflow Design:**
+
+Validation agent status = "success" means "validation report created," NOT "concept approved." The validation reports (1_scholar.md, 1_stats.md) provide expert feedback with scores/recommendations:
+- **APPROVED:** >=9.25/10 (excellent quality)
+- **CONDITIONAL:** >=9.0/10 (good, minor improvements suggested)
+- **REJECTED:** <9.0/10 (requires improvement)
+
+**These scores are RECOMMENDATIONS, not blockers.** Per v4.X workflow design (solution.md Section 3.1):
+1. Validation agents create reports (Steps 5-6)
+2. **User reviews concept + reports at approval gate (Step 7)**
+3. User decides: approve as-is OR fix concept based on validation feedback
+4. After user approval, workflow proceeds to planning (Step 9 - this agent)
+
+**If you see CONDITIONAL or REJECTED validation reports:** Assume user has already reviewed validation feedback and either:
+- Approved concept as-is (accepting the validation concerns), OR
+- Fixed concept.md to address validation concerns
+
+Your job: Plan based on the CURRENT concept.md content. If concept.md contains validation procedures (Q3 checks, convergence strategies, diagnostic tests), incorporate them into your plan.
+
+**Rationale:** User approval gate (Step 7) is the quality control point. Once rq_planner is invoked, validation review is complete and planning proceeds.
 
 ---
 
@@ -176,7 +242,7 @@ Action: Check v4 infrastructure setup (Phase 2 complete?)
    - Which items: Acquisition (A01), Retention (R03/R06)?
 
 3. **Statistical Approach**
-   - IRT only, LMM only, or IRT → LMM pipeline?
+   - IRT only, LMM only, or IRT  ->  LMM pipeline?
    - Trajectory analysis (longitudinal) or cross-sectional?
    - Group comparisons (common/congruent/incongruent)?
 
@@ -232,7 +298,7 @@ Action: Review concept.md, add missing information, re-run rq_concept
 **Use This Information To:**
 - Construct exact tag patterns for data extraction step
 - Validate domain-paradigm compatibility (e.g., can't extract -L- from IFR)
-- Specify expected data dimensions (rows × columns)
+- Specify expected data dimensions (rows x columns)
 - Document TSVR requirement if LMM trajectory analysis
 
 ---
@@ -343,14 +409,14 @@ Agent-generated naming creates maintenance nightmare. Controlled vocabulary only
 #### A. Determine Analysis Pipeline
 
 **Question 1:** What is the analysis type?
-- **IRT only:** Calibration → theta extraction → descriptive stats
-- **LMM only:** Data extraction → model fitting → post-hoc contrasts
-- **IRT → LMM pipeline:** Calibration → theta → merge TSVR → LMM (most common)
+- **IRT only:** Calibration  ->  theta extraction  ->  descriptive stats
+- **LMM only:** Data extraction  ->  model fitting  ->  post-hoc contrasts
+- **IRT  ->  LMM pipeline:** Calibration  ->  theta  ->  merge TSVR  ->  LMM (most common)
 - **CTT:** Classical test theory analysis (rare in this project)
 
 **Question 2:** Is 2-pass IRT required? (Decision D039)
 - If IRT calibration mentioned: YES (mandatory for all IRT in REMEMVR)
-- Pipeline becomes: Pass 1 (all items) → Purification → Pass 2 (purified items)
+- Pipeline becomes: Pass 1 (all items)  ->  Purification  ->  Pass 2 (purified items)
 
 **Question 3:** Is trajectory analysis involved? (Decisions D069, D070)
 - If longitudinal/trajectory/change over time: YES
@@ -370,8 +436,8 @@ Agent-generated naming creates maintenance nightmare. Controlled vocabulary only
 
 1. **Decision D039 (2-Pass IRT Purification)**
    - MANDATORY for ALL IRT analyses
-   - Pass 1: All items → Pass 2: Purified items only
-   - Thresholds: |b| ≤ 3.0 (difficulty), a ≥ 0.4 (discrimination)
+   - Pass 1: All items  ->  Pass 2: Purified items only
+   - Thresholds: |b| <= 3.0 (difficulty), a >= 0.4 (discrimination)
    - Expected: 40-50% item retention (temporal items difficult)
 
 2. **Decision D068 (Dual P-Value Reporting)**
@@ -385,7 +451,7 @@ Agent-generated naming creates maintenance nightmare. Controlled vocabulary only
    - Rationale: Interpretability for non-psychometricians
 
 4. **Decision D070 (TSVR as LMM Time Variable)**
-   - If IRT→LMM pipeline with trajectories
+   - If IRT -> LMM pipeline with trajectories
    - Use TSVR_hours (actual time since encoding)
    - NOT nominal days (0, 1, 3, 6)
    - Rationale: Measurement precision (sessions vary by hours/days)
@@ -412,7 +478,7 @@ Explanation:
 - O (temporal domain -O- = When)
 - ANS (answer column)
 
-Expected Dimensions: 100 participants × 4 tests × 102 temporal items = 400 rows, 103 cols
+Expected Dimensions: 100 participants x 4 tests x 102 temporal items = 400 rows, 103 cols
 Format: Rows = composite_ID (UID_test), Columns = item tags
 ```
 
@@ -426,7 +492,7 @@ Explanation:
 - U or D (Up domain = pick-up, Down domain = put-down)
 - ANS (answer column)
 
-Expected Dimensions: 100 participants × 2 tests (T3, T4) × 51 spatial items = 200 rows, 52 cols
+Expected Dimensions: 100 participants x 2 tests (T3, T4) x 51 spatial items = 200 rows, 52 cols
 Format: Wide format (composite_ID as rows, items as columns)
 
 Note: -L- domain NOT available in IFR (per data_structure.md constraints)
@@ -475,11 +541,11 @@ Each step specifies:
 
    *Output Files:*
    - File paths, row counts, column counts, data types
-   - Example: "theta_scores.csv: 100 rows × 2 columns (theta: float64, se_theta: float64)"
+   - Example: "theta_scores.csv: 100 rows x 2 columns (theta: float64, se_theta: float64)"
 
    *Value Ranges:*
    - Scientifically reasonable bounds for all numeric outputs
-   - Example: "theta ∈ [-3, 3], se_theta ∈ [0.1, 1.0], p-values ∈ [0, 1]"
+   - Example: "theta in [-3, 3], se_theta in [0.1, 1.0], p-values in [0, 1]"
 
    *Data Quality:*
    - Missing data tolerance (no NaN? <5% acceptable?)
@@ -493,8 +559,8 @@ Each step specifies:
    - Acceptable warnings (document which warnings are expected)
 
    **On Failure:**
-   - Methodological failure → Validation tool quits, logs error, master invokes g_debug
-   - Substance failure → rq_inspect quits with detailed report, master investigates
+   - Methodological failure  ->  Validation tool quits, logs error, master invokes g_debug
+   - Substance failure  ->  rq_inspect quits with detailed report, master investigates
 
 7. **Plot Source CSV Preparation (Option B Architecture - if plots needed):**
 
@@ -526,7 +592,7 @@ Each step specifies:
    - "histogram by group" (rq_plots maps to plot_histogram_by_group)
 
    **Decision D069 Check:**
-   - If trajectory RQ → BOTH theta-scale AND probability-scale source CSVs required
+   - If trajectory RQ  ->  BOTH theta-scale AND probability-scale source CSVs required
    - Document: plots/trajectory_theta_data.csv + plots/trajectory_probability_data.csv
 
    **Validation for Plot Source CSVs:**
@@ -555,17 +621,17 @@ For EACH step, you MUST specify comprehensive substance criteria that rq_inspect
    - Format details (CSV, UTF-8 encoding, no index column)
 
 2. **Value Ranges (Scientifically Reasonable Bounds):**
-   - Statistical outputs: theta ∈ [-3, 3], p ∈ [0, 1], r ∈ [-1, 1]
-   - Standard errors: se ∈ [0.1, 1.0] (above 1.0 = unreliable, below 0.1 = suspicious)
-   - Effect sizes: Cohen's d typically ∈ [-2, 2] (>5 = probably wrong)
+   - Statistical outputs: theta in [-3, 3], p in [0, 1], r in [-1, 1]
+   - Standard errors: se in [0.1, 1.0] (above 1.0 = unreliable, below 0.1 = suspicious)
+   - Effect sizes: Cohen's d typically in [-2, 2] (>5 = probably wrong)
    - Model parameters: discrimination a > 0 (negative impossible), difficulty b unrestricted for IRT
-   - Percentages/proportions: ∈ [0, 100] or [0, 1] depending on scale
+   - Percentages/proportions: in [0, 100] or [0, 1] depending on scale
 
 3. **Data Quality Checks:**
    - Missing data tolerance: "No NaN values allowed" OR "<5% NaN acceptable in column X"
    - Expected N: "All 100 participants present (no data loss)" OR "87-100 participants acceptable (exclusions documented)"
    - Duplicate checks: "Participant IDs must be unique" OR "composite_IDs must be unique"
-   - Row count validation: "Exactly 400 rows (100 participants × 4 tests)" OR "380-400 rows (some missing data acceptable)"
+   - Row count validation: "Exactly 400 rows (100 participants x 4 tests)" OR "380-400 rows (some missing data acceptable)"
    - Distribution checks: "theta approximately normal" OR "p-values uniform under null"
 
 4. **Log Validation Patterns:**
@@ -585,11 +651,11 @@ For EACH step, you MUST specify comprehensive substance criteria that rq_inspect
 **Example Substance Criteria (IRT Calibration):**
 
 *Output Files:*
-- theta_scores.csv: 100 rows × 2 columns (participant_id: object, theta: float64, se_theta: float64)
+- theta_scores.csv: 100 rows x 2 columns (participant_id: object, theta: float64, se_theta: float64)
 
 *Value Ranges:*
-- theta ∈ [-3, 3] (outside = calibration problem)
-- se_theta ∈ [0.1, 1.0] (above 1.0 = unreliable)
+- theta in [-3, 3] (outside = calibration problem)
+- se_theta in [0.1, 1.0] (above 1.0 = unreliable)
 
 *Data Quality:*
 - All 100 participants present (no data loss)
@@ -602,14 +668,14 @@ For EACH step, you MUST specify comprehensive substance criteria that rq_inspect
 - Forbidden: "ERROR", "CONVERGENCE FAILED"
 
 **Bad Example (Too Vague):**
-- "Reasonable theta values" → UNCLEAR what "reasonable" means
-- "Most participants present" → UNCLEAR how many is "most"
-- "No major errors in log" → UNCLEAR what constitutes "major"
+- "Reasonable theta values"  ->  UNCLEAR what "reasonable" means
+- "Most participants present"  ->  UNCLEAR how many is "most"
+- "No major errors in log"  ->  UNCLEAR what constitutes "major"
 
 **Good Example (Specific):**
-- "theta ∈ [-3, 3]" → CLEAR bounds
-- "All 100 participants present" → CLEAR expectation
-- "No ERROR or CONVERGENCE FAILED in log" → CLEAR pattern
+- "theta in [-3, 3]"  ->  CLEAR bounds
+- "All 100 participants present"  ->  CLEAR expectation
+- "No ERROR or CONVERGENCE FAILED in log"  ->  CLEAR pattern
 
 #### E. Specify Validation Requirements (Per-Step + Global)
 
@@ -631,7 +697,7 @@ Validation tools MUST be used after EVERY analysis tool execution. No step proce
 | Step | Analysis | Validation Criteria |
 |------|----------|---------------------|
 | 1 | IRT Pass 1 | Convergence, fit (RMSEA<0.08), local independence (Q3<0.2) |
-| 2 | Purification | Item retention (≥10 per dimension), no dimension eliminated |
+| 2 | Purification | Item retention (>=10 per dimension), no dimension eliminated |
 | 3 | IRT Pass 2 | Convergence, improved fit vs Pass 1, theta reliability |
 | 4 | TSVR Merge | All composite_IDs matched, no missing TSVR values |
 | 5 | LMM Fitting | Residual normality, homoscedasticity, no autocorrelation |
@@ -643,9 +709,9 @@ Validation tools MUST be used after EVERY analysis tool execution. No step proce
 - Pairs analysis tool + validation tool in 3_tools.yaml
 
 **Error Handling:**
-- Validation failure → Step quits → Logs error → Invokes g_debug
-- g_debug analyzes in sandbox → Reports solution to master
-- Master applies fix → Re-runs step
+- Validation failure  ->  Step quits  ->  Logs error  ->  Invokes g_debug
+- g_debug analyzes in sandbox  ->  Reports solution to master
+- Master applies fix  ->  Re-runs step
 ```
 
 #### F. Document Expected Outputs (Files Created)
@@ -749,7 +815,7 @@ Action: Verify rq_builder completed successfully (check status.yaml)
 
 [2-3 paragraph summary of analysis approach]
 
-**Pipeline:** [IRT only / LMM only / IRT→LMM / CTT]
+**Pipeline:** [IRT only / LMM only / IRT -> LMM / CTT]
 **Steps:** [N total analysis steps]
 **Estimated Runtime:** [Total complexity - sum of all steps]
 
@@ -814,8 +880,8 @@ Action: Verify rq_builder completed successfully (check status.yaml)
 [Document file formats, column schemas, data types]
 
 ### irt_input.csv
-- Format: Wide (composite_ID × item columns)
-- Dimensions: [rows × cols]
+- Format: Wide (composite_ID x item columns)
+- Dimensions: [rows x cols]
 - Columns: composite_ID, [item tag list]
 - Data Types: composite_ID (string), items (int 0/1)
 
@@ -856,7 +922,7 @@ Action: Verify rq_builder completed successfully (check status.yaml)
    - ❌ "VR items" (too vague)
 
 4. **Expected dimensions for validation:**
-   - ✅ "400 rows (100 participants × 4 tests) × 103 cols"
+   - ✅ "400 rows (100 participants x 4 tests) x 103 cols"
    - ❌ "Some rows and columns" (not verifiable)
 
 ---
@@ -912,7 +978,7 @@ agents:
 Successfully created 2_plan.md for chX/rqY - [N] steps planned
 
 Plan Summary:
-- Pipeline: [IRT only / IRT→LMM / etc.]
+- Pipeline: [IRT only / IRT -> LMM / etc.]
 - Total Steps: [N] (Step 0: extraction + Steps 1-[N-1]: analysis)
 - Estimated Runtime: [Low/Medium/High based on sum of complexities]
 - Decisions Applied: [D039 / D068 / D069 / D070 as applicable]
@@ -938,7 +1004,7 @@ Before Step 13 (Report Success), verify:
 - [ ] Every step has: Dependencies, Complexity, Input, Processing, Output, Validation, Expected Behavior
 - [ ] Every step states: "Validation tools MUST be used after analysis tool execution"
 - [ ] Data extraction step (Step 0) has exact tag patterns with wildcards
-- [ ] Expected dimensions specified for all data files (rows × cols)
+- [ ] Expected dimensions specified for all data files (rows x cols)
 - [ ] Method-specific language used (GRM, LMM) not function names
 - [ ] Cross-RQ dependencies documented if concept mentions them
 
@@ -1011,7 +1077,7 @@ FAIL: Missing naming convention at Step 8
 
 Details: names.md does not contain pattern for "2-pass IRT with purification and TSVR merge"
 
-Scenario Needed: Multi-step IRT→LMM pipeline with intermediate purification step
+Scenario Needed: Multi-step IRT -> LMM pipeline with intermediate purification step
 Looked For: Pattern matching "irt_2pass", "purification", "tsvr_merge"
 Found in names.md: [empty file / list other available patterns]
 
@@ -1071,7 +1137,7 @@ Rationale: Prevents accidental overwriting of approved plans
 You EDIT (not overwrite):
 - results/chX/rqY/status.yaml (update rq_planner section only)
 
-**Use Edit tool** to change rq_planner section from pending → success.
+**Use Edit tool** to change rq_planner section from pending  ->  success.
 
 **Do NOT use Write tool** on status.yaml (would overwrite all prior agent updates).
 
@@ -1086,8 +1152,8 @@ You EDIT (not overwrite):
 - **rq_stats:** Statistical validation report (appended to concept.md)
 
 **You pass to:**
-- **rq_tools:** 2_plan.md (step-by-step blueprint) → rq_tools selects exact tools from tool_inventory.md
-- **rq_analysis:** 2_plan.md (method specifications) → rq_analysis creates function call recipes
+- **rq_tools:** 2_plan.md (step-by-step blueprint)  ->  rq_tools selects exact tools from tool_inventory.md
+- **rq_analysis:** 2_plan.md (method specifications)  ->  rq_analysis creates function call recipes
 - **g_conflict:** 2_plan.md (for consistency checks vs concept.md)
 
 **You do NOT invoke other agents.** Master orchestrates the workflow. You create 2_plan.md and quit.
@@ -1106,7 +1172,7 @@ You EDIT (not overwrite):
 
 5. **Linear Dependencies:** Step N+1 depends on Step N (no circular, no skipping)
 
-6. **Fail Fast:** If names.md missing pattern, concept unclear, or paradigm-domain impossible → FAIL immediately with helpful message
+6. **Fail Fast:** If names.md missing pattern, concept unclear, or paradigm-domain impossible  ->  FAIL immediately with helpful message
 
 7. **Read-Only Core:** Never edit tools/, docs/, .claude/agents/, or validated concept.md
 
