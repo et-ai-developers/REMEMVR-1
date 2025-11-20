@@ -1,0 +1,340 @@
+# RQ Configuration Schema
+# Purpose: Machine-readable parameters for analysis-executor agent
+# Format: YAML (easy parsing, no markdown ambiguity)
+# Version: 2.0 (2025-11-12)
+
+# ===================================
+# IMPORTANT: UNIVERSAL TEMPLATE
+# ===================================
+# This template shows IRT + LMM pipeline as an EXAMPLE
+# NOT ALL RQs use IRT or LMM - adapt sections based on analysis_types
+#
+# Other analysis types:
+# - "ctt": Classical Test Theory (reliability, item analysis)
+# - "correlation": Pearson/Spearman correlations
+# - "anova": Between/within-subjects ANOVA
+# - "regression": Linear/logistic regression
+# - "descriptive": Descriptive statistics only
+#
+# Only include sections relevant to your RQ's analysis_types
+# Delete irrelevant sections (e.g., if no IRT, delete irt: section)
+
+# ===================================
+# METADATA
+# ===================================
+rq_id: "5.1"  # Format: "chapter.rq_number"
+rq_title: "Domain-specific forgetting trajectories"
+last_updated: "2025-11-12 14:30:00"
+analysis_types:  # Which analyses to run (determines pipeline)
+  - "irt"  # EXAMPLE - delete if not using IRT
+  - "lmm"  # EXAMPLE - delete if not using LMM
+  # Options: "irt", "lmm", "ctt", "correlation", "anova", "regression", "descriptive"
+
+# ===================================
+# IRT PARAMETERS
+# ===================================
+irt:
+  # Model specification
+  model: "2PL-C"  # Options: "1PL", "2PL", "2PL-C", "3PL", "GRM"
+  dimensions: 3  # Number of latent dimensions
+  dimension_names:
+    - "Person"
+    - "Place"
+    - "Object"
+
+  # Item purification (2-pass IRT per Decision D039)
+  purification:
+    enabled: true
+    method: "two_pass"  # Options: "two_pass", "iterative", "none"
+    thresholds:
+      difficulty_abs: 3.0  # Flag if |b| > 3.0
+      discrimination_min: 0.4  # Flag if a < 0.4
+
+  # Estimation settings
+  estimation:
+    algorithm: "IWAVE"  # deepirtools default
+    max_iterations: 200
+    convergence_tolerance: 0.001
+
+  # Item mapping (which items belong to which dimension)
+  item_mapping:
+    Person:
+      - "i1PO"  # Item codes from glossary.md
+      - "i2PO"
+      - "i3PO"
+      - "i4PO"
+      - "i5PO"
+      - "i6PO"
+      - "i7PO"
+      - "i8PO"
+      - "i9PO"
+    Place:
+      - "i10PL"
+      - "i11PL"
+      - "i12PL"
+      - "i13PL"
+      - "i14PL"
+      - "i15PL"
+      - "i16PL"
+      - "i17PL"
+      - "i18PL"
+    Object:
+      - "i19OB"
+      - "i20OB"
+      - "i21OB"
+      - "i22OB"
+      - "i23OB"
+      - "i24OB"
+      - "i25OB"
+      - "i26OB"
+      - "i27OB"
+
+  # Validation thresholds
+  validation:
+    q3_threshold: 0.2  # Local independence
+    eigenvalue_ratio_min: 3.0  # Unidimensionality
+    rmsea_max: 0.08  # Model fit
+    cfi_min: 0.95  # Model fit
+    item_fit_alpha: 0.01  # S-X² significance (Bonferroni-corrected)
+
+# ===================================
+# LMM PARAMETERS
+# ===================================
+lmm:
+  # Model formula (statsmodels syntax)
+  formula: "Theta ~ Domain * Day + (1 + Day | UID)"
+
+  # Variable specifications
+  outcome: "Theta"  # Dependent variable
+  predictors:
+    fixed:
+      - "Domain"  # Factor: Person, Place, Object
+      - "Day"  # Continuous: 0, 0, 1, 7
+      - "Domain:Day"  # Interaction
+    random:
+      - "1"  # Random intercept
+      - "Day"  # Random slope for Day
+    grouping: "UID"  # Grouping variable for random effects
+
+  # Factor coding
+  contrasts:
+    Domain:
+      type: "treatment"  # Options: "treatment", "sum", "helmert"
+      reference: "Person"  # Reference category
+
+  # Estimation settings
+  estimation:
+    method: "REML"  # Options: "REML", "ML"
+    optimizer: "lbfgs"  # statsmodels default
+    max_iterations: 100
+    convergence_tolerance: 1e-6
+
+  # Effect size calculation
+  effect_sizes:
+    interaction: "Domain:Day"  # Which interaction to focus on
+    method: "cohens_f2"  # Options: "cohens_f2", "partial_eta2", "r2_change"
+    thresholds:  # Cohen's f² benchmarks
+      small: 0.02
+      medium: 0.15
+      large: 0.35
+
+  # Validation thresholds
+  validation:
+    shapiro_wilk_alpha: 0.05  # Residual normality
+    levene_alpha: 0.05  # Homoscedasticity
+    durbin_watson_range: [1.5, 2.5]  # Independence
+    vif_max: 10.0  # Multicollinearity
+
+# ===================================
+# DATA PREPARATION (for reshaping)
+# ===================================
+data_prep:
+  # Reshaping specifications (for Step 2: theta scores → LMM input)
+  wide_to_long:
+    id_var: "UID"
+    time_var: "Test"
+    value_vars:
+      - "Theta_Person"
+      - "Theta_Place"
+      - "Theta_Object"
+    var_name: "Domain"  # New column name for reshaped variable names
+    value_name: "Theta"  # New column name for reshaped values
+
+  # Time coding (map Test to Day)
+  time_mapping:
+    Test_1: 0
+    Test_2: 0  # Same day as Test 1
+    Test_3: 1
+    Test_4: 7
+
+# ===================================
+# PLOTTING PARAMETERS
+# ===================================
+plots:
+  # Plot 1: IRT Item Characteristic Curves
+  irt_icc:
+    filename: "irt_icc_by_domain"
+    format: "png"
+    dpi: 300
+    figure_size: [12, 4]  # Width, height in inches
+    theta_range: [-3, 3]
+    subplots:
+      layout: "horizontal"  # 3 subplots side-by-side
+      titles:
+        - "Person Domain"
+        - "Place Domain"
+        - "Object Domain"
+    color_by: "discrimination"  # Color items by 'a' parameter
+    colormap: "viridis"
+    annotate_flagged: true  # Highlight flagged items
+
+  # Plot 2: LMM Forgetting Trajectories
+  lmm_trajectories:
+    filename: "lmm_trajectories_by_domain"
+    format: "png"
+    dpi: 300
+    figure_size: [10, 6]
+    x_axis:
+      variable: "Day"
+      label: "Days Since Encoding"
+      ticks: [0, 1, 7]
+    y_axis:
+      variable: "Theta"
+      label: "Ability Estimate (Theta)"
+    lines:
+      by: "Domain"  # Separate line per domain
+      colors:
+        Person: "#1f77b4"
+        Place: "#ff7f0e"
+        Object: "#2ca02c"
+      confidence_interval: 0.95
+      show_observed: true  # Overlay observed means
+      observed_alpha: 0.3  # Transparency for observed points
+    annotations:
+      interaction_significant: true  # Mark if Domain×Day p<0.05
+      effect_size: true  # Show f² value
+
+  # Plot 3: LMM Random Effects
+  lmm_random_effects:
+    filename: "lmm_random_effects"
+    format: "png"
+    dpi: 300
+    figure_size: [8, 8]
+    scatter:
+      x: "random_intercept"
+      y: "random_slope"
+      color_by: "Domain"
+      alpha: 0.6
+    marginals:
+      show: true
+      bins: 20
+    outliers:
+      threshold: 3.0  # SD from mean
+      annotate: true  # Label outlier UIDs
+
+# ===================================
+# OUTPUT SPECIFICATIONS
+# ===================================
+outputs:
+  # Expected output files (for validation)
+  data_files:
+    - "item_parameters.csv"
+    - "theta_scores.csv"
+    - "lmm_input.csv"
+    - "lmm_coefficients.csv"
+    - "lmm_random_effects.csv"
+
+  plot_files:
+    - "irt_icc_by_domain.png"
+    - "lmm_trajectories_by_domain.png"
+    - "lmm_random_effects.png"
+
+  # Companion .md required for all CSV files
+  companion_docs: true
+
+# ===================================
+# QUALITY CONTROL
+# ===================================
+quality:
+  # Convergence checks
+  check_convergence: true
+  fail_on_nonconvergence: true  # Quit if model doesn't converge
+
+  # Missing data handling
+  max_missing_proportion: 0.3  # Fail if >30% missing in any variable
+
+  # Outlier detection
+  outlier_detection:
+    enabled: true
+    method: "iqr"  # Options: "iqr", "zscore", "mad"
+    threshold: 3.0
+
+  # Validation reporting
+  validation_report:
+    include_plots: true  # Diagnostic plots (Q-Q, residuals, etc.)
+    include_tables: true  # Assumption test results
+    save_separate_file: false  # Include in main report vs separate validation.md
+
+# ===================================
+# TOOL FUNCTION MAPPING
+# ===================================
+# Explicit mapping of analysis steps to tool functions
+# This eliminates ambiguity for analysis-executor agent
+tool_functions:
+  step_1_irt_calibration:
+    function: "tools.analysis_irt.calibrate_grm"
+    input_file: "data/irt_input.csv"
+    output_files:
+      - "data/item_parameters.csv"
+      - "data/theta_scores.csv"
+    config_section: "irt"
+
+  step_2_data_reshaping:
+    function: "tools.data.reshape_wide_to_long"
+    input_file: "data/theta_scores.csv"
+    output_files:
+      - "data/lmm_input.csv"
+    config_section: "data_prep"
+
+  step_3_lmm_analysis:
+    function: "tools.analysis_lmm.fit_lmm"
+    input_file: "data/lmm_input.csv"
+    output_files:
+      - "data/lmm_coefficients.csv"
+      - "data/lmm_random_effects.csv"
+    config_section: "lmm"
+
+  step_4_plot_irt_icc:
+    function: "tools.plotting.plot_icc"
+    input_file: "data/item_parameters.csv"
+    output_files:
+      - "plots/irt_icc_by_domain.png"
+      - "plots/irt_icc_by_domain_data.csv"
+    config_section: "plots.irt_icc"
+
+  step_5_plot_lmm_trajectories:
+    function: "tools.plotting.plot_lmm_trajectories"
+    input_files:
+      - "data/lmm_coefficients.csv"
+      - "data/lmm_input.csv"
+    output_files:
+      - "plots/lmm_trajectories_by_domain.png"
+      - "plots/lmm_trajectories_by_domain_data.csv"
+    config_section: "plots.lmm_trajectories"
+
+  step_6_plot_random_effects:
+    function: "tools.plotting.plot_random_effects"
+    input_file: "data/lmm_random_effects.csv"
+    output_files:
+      - "plots/lmm_random_effects.png"
+      - "plots/lmm_random_effects_data.csv"
+    config_section: "plots.lmm_random_effects"
+
+# ===================================
+# NOTES
+# ===================================
+# - Analysis-executor reads this file directly via yaml.safe_load()
+# - tool_functions section provides step-by-step execution plan
+# - All parameters have defaults in tool functions; config overrides defaults
+# - If parameter missing here, tool uses its default value
+# - See docs/tools_inventory.md for complete tool API reference

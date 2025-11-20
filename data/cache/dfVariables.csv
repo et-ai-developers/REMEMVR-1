@@ -1,0 +1,480 @@
+Name,Label,Function,Type,Regex
+age,Age (years),sum,dem,DEM-X-Age
+sex,Gender,sum,dem,DEM-X-Sex
+education,Education (years),sum,dem,DEM-X-Education
+vr_exp,VR Experience,sum,dem,DEM-X-VR_Exp
+typical_sleep,Typical Sleep (hours),sum,dem,DEM-X-SLEEP
+depression,Depression,sum,dem,DEM-X-DASS_Dep
+anxiety,Anxiety,sum,dem,DEM-X-DASS_Anx
+stress,Stress,sum,dem,DEM-X-DASS_Str
+tester,Jayce or Richard,sum,dem,DEM-X-Tester
+BVMT_t1,BVMT Trial 1 Score,sum,cog,COG-X-BVM-T1Sc
+BVMT_t2,BVMT Trial 2 Score,sum,cog,COG-X-BVM-T2Sc
+BVMT_t3,BVMT Trial 3 Score,sum,cog,COG-X-BVM-T3Sc
+BVMT_total_recall,BVMT Total Recall Score,sum,cog,COG-X-BVM-TotR
+BVMT_learning,BVMT Learning Score,sum,cog,COG-X-BVM-Lear
+BVMT_delayed_recall,BVMT Delayed Recall Score,sum,cog,COG-X-BVM-TDSc
+BVMT_score,BVMT Total Score,sum,cog,"COG-X-BVM-T1Sc, COG-X-BVM-T2Sc, COG-X-BVM-T3Sc, COG-X-BVM-TDSc"
+NART_score,NART Score,sum,cog,COG-X-NAR-Scor
+RAVLT_t1,RAVLT Trial 1 Score,sum,cog,COG-X-RAV-T1Sc
+RAVLT_t2,RAVLT Trial 2 Score,sum,cog,COG-X-RAV-T2Sc
+RAVLT_t3,RAVLT Trial 3 Score,sum,cog,COG-X-RAV-T3Sc
+RAVLT_t4,RAVLT Trial 4 Score,sum,cog,COG-X-RAV-T4Sc
+RAVLT_t5,RAVLT Trial 5 Score,sum,cog,COG-X-RAV-T5Sc
+RAVLT_lb,RAVLT List B Score,sum,cog,COG-X-RAV-TDSc
+RAVLT_ir,RAVLT Immediate Recall Score,sum,cog,COG-X-RAV-FRSc
+RAVLT_dr,RAVLT Delayed Recall Score,sum,cog,COG-X-RAV-DRSc
+RAVLT_score,RAVLT Total Score,sum,cog,"COG-X-RAV-T1Sc, COG-X-RAV-T2Sc, COG-X-RAV-T3Sc, COG-X-RAV-T4Sc, COG-X-RAV-T5Sc, COG-X-RAV-FRSc, COG-X-RAV-DRSc"
+RAVLT_hit,RAVLT Recognition Hits,sum,cog,COG-X-RAV-RXXA
+RAVLT_miss,RAVLT Recognition False Alarms,sum,cog,"COG-X-RAV-RXSA, COG-X-RAV-RXPA, COG-X-RAV-RSPA, COG-X-RAV-RXXB, COG-X-RAV-RXPB, COG-X-RAV-RXSB, COG-X-RAV-RSPB"
+RPM_score,RPM Score,sum,cog,COG-X-RPM-Scor
+Test1_score,Score of Test 1,mean,cog,.*-T1-.*ANS
+Test2_score,Score of Test 2,mean,cog,.*-T2-.*ANS
+Test3_score,Score of Test 3,mean,cog,.*-T3-.*ANS
+Time_Date,Date of Test,sum,vr,.*STA-X-Date
+Time_SVR,Time Since VR (hours),sum,vr,.*-TSVR
+Time_SLT,Time Since Last Test (hours),sum,vr,.*-TSLt
+Time_Test,Test Duration (seconds),sum,vr,.*TiPSadj.*
+Time_Awake,Time Awake (div 24),sum,vr,.*-AWAK-
+Time_Asleep,Previous Night Sleep (hours),sum,vr,.*-HOUR-
+Time_SleepDebt,Sleep Difference,sum,vr,.*-SDif
+Sleep_Quality,Sleep Quality,sum,vr,.*-QUAL-
+Sleep_Tiredness,Tiredness,sum,vr,.*-TIRE-
+Sleep_Caff,Caffine Intake,sum,vr,.*CAF1-
+Sleep_Tox,Intoxicants,sum,vr,.*TOX1-
+Strat_Diff,Test Difficulty,sum,vr,.*DIF1-
+Strat_Diff2,Difficulty compared to last test,sum,vr,.*DIF2-
+Strat_Think,How often did I think of the room,sum,vr,.*TNK1-
+VR_room,Room,string,vr,.*Room
+VR_total_m,Mean REMEMVR Score,mean,vr,.*ANS
+VR_totalcon_m,Mean REMEMVR Confidence,mean,vr,.*CON
+VR_what_m,Mean What Score,mean,vr,.*-N-.*ANS
+VR_where_m,Mean Where Score,mean,vr,".*-L-.*ANS, .*-U-.*ANS, .*-D-.*ANS"
+VR_when_m,Mean When Score,mean,vr,.*-O-.*ANS
+VR_port_n,Portrait What,mean,vr,.*N-PORT.*ANS
+VR_land_n,Landscape What,mean,vr,.*N-LAND.*ANS
+VR_port_l,Portrait Where,mean,vr,.*L-PORT.*ANS
+VR_land_l,Landscape Where,mean,vr,.*L-LAND.*ANS
+VR_RFR_m,Mean Room Free Recall Score,mean,vr,.*-RFR.*-ANS
+VR_IFR_m,Mean Item Free Recall Score,mean,vr,.*-IFR.*-ANS
+VR_TCR_m,Mean Task Cued Recall Score,mean,vr,.*-TCR.*-ANS
+VR_ICR_m,Mean Item Cued Recall Score,mean,vr,.*-ICR.*-ANS
+VR_RRE_m,Mean Room Recognition Score,mean,vr,.*-RRE.*-ANS
+VR_IRE_m,Mean Item Recognition Score,mean,vr,.*-IRE.*-ANS
+VR_R1,First VR Room,string,dem,.*-VR1
+VR_R2,Second VR Room,string,dem,.*-VR2
+VR_R3,Third VR Room,string,dem,.*-VR3
+VR_R4,Fourth VR Room,string,dem,.*-VR4
+VR_bat,Bathroom Mean Score,mean,vr,.*BAT-.*ANS
+VR_bed,Bedroom Mean Score,mean,vr,.*BED-.*ANS
+VR_kit,Kitchen Mean Score,mean,vr,.*KIT-.*ANS
+VR_liv,Livingroom Mean Score,mean,vr,.*LIV-.*ANS
+VR_item_common,Common Item Mean,mean,vr,.*CM-.*ANS
+VR_item_congruent,Congruent Item Mean,mean,vr,.*CG-.*ANS
+VR_item_incongruent,Incongruent Item Mean,mean,vr,.*IN-.*ANS
+VR_item_up,Item Pick Up,mean,vr,.*-U-.*ANS
+VR_item_down,Item Put Down,mean,vr,.*-D-.*ANS
+i_n_duck_1_bath_shower_bat_a,i_n_duck_1_bath_shower_bat_a,mean,vr,.*BAT.*-N-.*-n1.*-ANS
+i_n_remote_2_p2_bath_bat_a,i_n_remote_2_p2_bath_bat_a,mean,vr,.*BAT.*-N-.*-n2.*-ANS
+i_n_tbrushes_3_p3_p4_bat_a,i_n_tbrushes_3_p3_p4_bat_a,mean,vr,.*BAT.*-N-.*-n3.*-ANS
+i_n_book_4_toilet_p3_bat_a,i_n_book_4_toilet_p3_bat_a,mean,vr,.*BAT.*-N-.*-n4.*-ANS
+i_n_hammer_5_sink_toilet_bat_a,i_n_hammer_5_sink_toilet_bat_a,mean,vr,.*BAT.*-N-.*-n5.*-ANS
+i_n_glasses_6_p1_sink_bat_a,i_n_glasses_6_p1_sink_bat_a,mean,vr,.*BAT.*-N-.*-n6.*-ANS
+i_n_alarm_1_bed_p4_bed_a,i_n_alarm_1_bed_p4_bed_a,mean,vr,.*BED.*-N-.*-n1.*-ANS
+i_n_magazine_2_dresser_bed_bed_a,i_n_magazine_2_dresser_bed_bed_a,mean,vr,.*BED.*-N-.*-n2.*-ANS
+i_n_picture_3_p1_dresser_bed_a,i_n_picture_3_p1_dresser_bed_a,mean,vr,.*BED.*-N-.*-n3.*-ANS
+i_n_frypan_4_bookshelf_wardrobe_bed_a,i_n_frypan_4_bookshelf_wardrobe_bed_a,mean,vr,.*BED.*-N-.*-n4.*-ANS
+i_n_phone_5_p4_p2_bed_a,i_n_phone_5_p4_p2_bed_a,mean,vr,.*BED.*-N-.*-n5.*-ANS
+i_n_knife_6_p3_bookshelf_bed_a,i_n_knife_6_p3_bookshelf_bed_a,mean,vr,.*BED.*-N-.*-n6.*-ANS
+i_n_letters_1_p2_fridge_kit_a,i_n_letters_1_p2_fridge_kit_a,mean,vr,.*KIT.*-N-.*-n1.*-ANS
+i_n_cutlery_2_oven_p2_kit_a,i_n_cutlery_2_oven_p2_kit_a,mean,vr,.*KIT.*-N-.*-n2.*-ANS
+i_n_toaster_3_p4_oven_kit_a,i_n_toaster_3_p4_oven_kit_a,mean,vr,.*KIT.*-N-.*-n3.*-ANS
+i_n_oil_4_p1_p3_kit_a,i_n_oil_4_p1_p3_kit_a,mean,vr,.*KIT.*-N-.*-n4.*-ANS
+i_n_keys_5_bench_pantry_kit_a,i_n_keys_5_bench_pantry_kit_a,mean,vr,.*KIT.*-N-.*-n5.*-ANS
+i_n_tpaper_6_pantry_bench_kit_a,i_n_tpaper_6_pantry_bench_kit_a,mean,vr,.*KIT.*-N-.*-n6.*-ANS
+i_n_drill_1_couch_bookcase_liv_a,i_n_drill_1_couch_bookcase_liv_a,mean,vr,.*LIV.*-N-.*-n1.*-ANS
+i_n_mask_2_p4_p1_liv_a,i_n_mask_2_p4_p1_liv_a,mean,vr,.*LIV.*-N-.*-n2.*-ANS
+i_n_lamp_3_p2_couch_liv_a,i_n_lamp_3_p2_couch_liv_a,mean,vr,.*LIV.*-N-.*-n3.*-ANS
+i_n_handbag_4_tv_p2_liv_a,i_n_handbag_4_tv_p2_liv_a,mean,vr,.*LIV.*-N-.*-n4.*-ANS
+i_n_laptop_5_chair_tv_liv_a,i_n_laptop_5_chair_tv_liv_a,mean,vr,.*LIV.*-N-.*-n5.*-ANS
+i_n_newspaper_6_p3_chair_liv_a,i_n_newspaper_6_p3_chair_liv_a,mean,vr,.*LIV.*-N-.*-n6.*-ANS
+i_u_duck_1_bath_shower_bat_a,i_u_duck_1_bath_shower_bat_a,mean,vr,.*BAT.*-U-.*-n1.*-ANS
+i_u_remote_2_p2_bath_bat_a,i_u_remote_2_p2_bath_bat_a,mean,vr,.*BAT.*-U-.*-n2.*-ANS
+i_u_tbrushes_3_p3_p4_bat_a,i_u_tbrushes_3_p3_p4_bat_a,mean,vr,.*BAT.*-U-.*-n3.*-ANS
+i_u_book_4_toilet_p3_bat_a,i_u_book_4_toilet_p3_bat_a,mean,vr,.*BAT.*-U-.*-n4.*-ANS
+i_u_hammer_5_sink_toilet_bat_a,i_u_hammer_5_sink_toilet_bat_a,mean,vr,.*BAT.*-U-.*-n5.*-ANS
+i_u_glasses_6_p1_sink_bat_a,i_u_glasses_6_p1_sink_bat_a,mean,vr,.*BAT.*-U-.*-n6.*-ANS
+i_u_alarm_1_bed_p4_bed_a,i_u_alarm_1_bed_p4_bed_a,mean,vr,.*BED.*-U-.*-n1.*-ANS
+i_u_magazine_2_dresser_bed_bed_a,i_u_magazine_2_dresser_bed_bed_a,mean,vr,.*BED.*-U-.*-n2.*-ANS
+i_u_picture_3_p1_dresser_bed_a,i_u_picture_3_p1_dresser_bed_a,mean,vr,.*BED.*-U-.*-n3.*-ANS
+i_u_frypan_4_bookshelf_wardrobe_bed_a,i_u_frypan_4_bookshelf_wardrobe_bed_a,mean,vr,.*BED.*-U-.*-n4.*-ANS
+i_u_phone_5_p4_p2_bed_a,i_u_phone_5_p4_p2_bed_a,mean,vr,.*BED.*-U-.*-n5.*-ANS
+i_u_knife_6_p3_bookshelf_bed_a,i_u_knife_6_p3_bookshelf_bed_a,mean,vr,.*BED.*-U-.*-n6.*-ANS
+i_u_letters_1_p2_fridge_kit_a,i_u_letters_1_p2_fridge_kit_a,mean,vr,.*KIT.*-U-.*-n1.*-ANS
+i_u_cutlery_2_oven_p2_kit_a,i_u_cutlery_2_oven_p2_kit_a,mean,vr,.*KIT.*-U-.*-n2.*-ANS
+i_u_toaster_3_p4_oven_kit_a,i_u_toaster_3_p4_oven_kit_a,mean,vr,.*KIT.*-U-.*-n3.*-ANS
+i_u_oil_4_p1_p3_kit_a,i_u_oil_4_p1_p3_kit_a,mean,vr,.*KIT.*-U-.*-n4.*-ANS
+i_u_keys_5_bench_pantry_kit_a,i_u_keys_5_bench_pantry_kit_a,mean,vr,.*KIT.*-U-.*-n5.*-ANS
+i_u_tpaper_6_pantry_bench_kit_a,i_u_tpaper_6_pantry_bench_kit_a,mean,vr,.*KIT.*-U-.*-n6.*-ANS
+i_u_drill_1_couch_bookcase_liv_a,i_u_drill_1_couch_bookcase_liv_a,mean,vr,.*LIV.*-U-.*-n1.*-ANS
+i_u_mask_2_p4_p1_liv_a,i_u_mask_2_p4_p1_liv_a,mean,vr,.*LIV.*-U-.*-n2.*-ANS
+i_u_lamp_3_p2_couch_liv_a,i_u_lamp_3_p2_couch_liv_a,mean,vr,.*LIV.*-U-.*-n3.*-ANS
+i_u_handbag_4_tv_p2_liv_a,i_u_handbag_4_tv_p2_liv_a,mean,vr,.*LIV.*-U-.*-n4.*-ANS
+i_u_laptop_5_chair_tv_liv_a,i_u_laptop_5_chair_tv_liv_a,mean,vr,.*LIV.*-U-.*-n5.*-ANS
+i_u_newspaper_6_p3_chair_liv_a,i_u_newspaper_6_p3_chair_liv_a,mean,vr,.*LIV.*-U-.*-n6.*-ANS
+i_d_duck_1_bath_shower_bat_a,i_d_duck_1_bath_shower_bat_a,mean,vr,.*BAT.*-D-.*-n1.*-ANS
+i_d_remote_2_p2_bath_bat_a,i_d_remote_2_p2_bath_bat_a,mean,vr,.*BAT.*-D-.*-n2.*-ANS
+i_d_tbrushes_3_p3_p4_bat_a,i_d_tbrushes_3_p3_p4_bat_a,mean,vr,.*BAT.*-D-.*-n3.*-ANS
+i_d_book_4_toilet_p3_bat_a,i_d_book_4_toilet_p3_bat_a,mean,vr,.*BAT.*-D-.*-n4.*-ANS
+i_d_hammer_5_sink_toilet_bat_a,i_d_hammer_5_sink_toilet_bat_a,mean,vr,.*BAT.*-D-.*-n5.*-ANS
+i_d_glasses_6_p1_sink_bat_a,i_d_glasses_6_p1_sink_bat_a,mean,vr,.*BAT.*-D-.*-n6.*-ANS
+i_d_alarm_1_bed_p4_bed_a,i_d_alarm_1_bed_p4_bed_a,mean,vr,.*BED.*-D-.*-n1.*-ANS
+i_d_magazine_2_dresser_bed_bed_a,i_d_magazine_2_dresser_bed_bed_a,mean,vr,.*BED.*-D-.*-n2.*-ANS
+i_d_picture_3_p1_dresser_bed_a,i_d_picture_3_p1_dresser_bed_a,mean,vr,.*BED.*-D-.*-n3.*-ANS
+i_d_frypan_4_bookshelf_wardrobe_bed_a,i_d_frypan_4_bookshelf_wardrobe_bed_a,mean,vr,.*BED.*-D-.*-n4.*-ANS
+i_d_phone_5_p4_p2_bed_a,i_d_phone_5_p4_p2_bed_a,mean,vr,.*BED.*-D-.*-n5.*-ANS
+i_d_knife_6_p3_bookshelf_bed_a,i_d_knife_6_p3_bookshelf_bed_a,mean,vr,.*BED.*-D-.*-n6.*-ANS
+i_d_letters_1_p2_fridge_kit_a,i_d_letters_1_p2_fridge_kit_a,mean,vr,.*KIT.*-D-.*-n1.*-ANS
+i_d_cutlery_2_oven_p2_kit_a,i_d_cutlery_2_oven_p2_kit_a,mean,vr,.*KIT.*-D-.*-n2.*-ANS
+i_d_toaster_3_p4_oven_kit_a,i_d_toaster_3_p4_oven_kit_a,mean,vr,.*KIT.*-D-.*-n3.*-ANS
+i_d_oil_4_p1_p3_kit_a,i_d_oil_4_p1_p3_kit_a,mean,vr,.*KIT.*-D-.*-n4.*-ANS
+i_d_keys_5_bench_pantry_kit_a,i_d_keys_5_bench_pantry_kit_a,mean,vr,.*KIT.*-D-.*-n5.*-ANS
+i_d_tpaper_6_pantry_bench_kit_a,i_d_tpaper_6_pantry_bench_kit_a,mean,vr,.*KIT.*-D-.*-n6.*-ANS
+i_d_drill_1_couch_bookcase_liv_a,i_d_drill_1_couch_bookcase_liv_a,mean,vr,.*LIV.*-D-.*-n1.*-ANS
+i_d_mask_2_p4_p1_liv_a,i_d_mask_2_p4_p1_liv_a,mean,vr,.*LIV.*-D-.*-n2.*-ANS
+i_d_lamp_3_p2_couch_liv_a,i_d_lamp_3_p2_couch_liv_a,mean,vr,.*LIV.*-D-.*-n3.*-ANS
+i_d_handbag_4_tv_p2_liv_a,i_d_handbag_4_tv_p2_liv_a,mean,vr,.*LIV.*-D-.*-n4.*-ANS
+i_d_laptop_5_chair_tv_liv_a,i_d_laptop_5_chair_tv_liv_a,mean,vr,.*LIV.*-D-.*-n5.*-ANS
+i_d_newspaper_6_p3_chair_liv_a,i_d_newspaper_6_p3_chair_liv_a,mean,vr,.*LIV.*-D-.*-n6.*-ANS
+i_o_duck_1_bath_shower_bat_a,i_o_duck_1_bath_shower_bat_a,mean,vr,.*BAT.*-O-.*-n1.*-ANS
+i_o_remote_2_p2_bath_bat_a,i_o_remote_2_p2_bath_bat_a,mean,vr,.*BAT.*-O-.*-n2.*-ANS
+i_o_tbrushes_3_p3_p4_bat_a,i_o_tbrushes_3_p3_p4_bat_a,mean,vr,.*BAT.*-O-.*-n3.*-ANS
+i_o_book_4_toilet_p3_bat_a,i_o_book_4_toilet_p3_bat_a,mean,vr,.*BAT.*-O-.*-n4.*-ANS
+i_o_hammer_5_sink_toilet_bat_a,i_o_hammer_5_sink_toilet_bat_a,mean,vr,.*BAT.*-O-.*-n5.*-ANS
+i_o_glasses_6_p1_sink_bat_a,i_o_glasses_6_p1_sink_bat_a,mean,vr,.*BAT.*-O-.*-n6.*-ANS
+i_o_alarm_1_bed_p4_bed_a,i_o_alarm_1_bed_p4_bed_a,mean,vr,.*BED.*-O-.*-n1.*-ANS
+i_o_magazine_2_dresser_bed_bed_a,i_o_magazine_2_dresser_bed_bed_a,mean,vr,.*BED.*-O-.*-n2.*-ANS
+i_o_picture_3_p1_dresser_bed_a,i_o_picture_3_p1_dresser_bed_a,mean,vr,.*BED.*-O-.*-n3.*-ANS
+i_o_frypan_4_bookshelf_wardrobe_bed_a,i_o_frypan_4_bookshelf_wardrobe_bed_a,mean,vr,.*BED.*-O-.*-n4.*-ANS
+i_o_phone_5_p4_p2_bed_a,i_o_phone_5_p4_p2_bed_a,mean,vr,.*BED.*-O-.*-n5.*-ANS
+i_o_knife_6_p3_bookshelf_bed_a,i_o_knife_6_p3_bookshelf_bed_a,mean,vr,.*BED.*-O-.*-n6.*-ANS
+i_o_letters_1_p2_fridge_kit_a,i_o_letters_1_p2_fridge_kit_a,mean,vr,.*KIT.*-O-.*-n1.*-ANS
+i_o_cutlery_2_oven_p2_kit_a,i_o_cutlery_2_oven_p2_kit_a,mean,vr,.*KIT.*-O-.*-n2.*-ANS
+i_o_toaster_3_p4_oven_kit_a,i_o_toaster_3_p4_oven_kit_a,mean,vr,.*KIT.*-O-.*-n3.*-ANS
+i_o_oil_4_p1_p3_kit_a,i_o_oil_4_p1_p3_kit_a,mean,vr,.*KIT.*-O-.*-n4.*-ANS
+i_o_keys_5_bench_pantry_kit_a,i_o_keys_5_bench_pantry_kit_a,mean,vr,.*KIT.*-O-.*-n5.*-ANS
+i_o_tpaper_6_pantry_bench_kit_a,i_o_tpaper_6_pantry_bench_kit_a,mean,vr,.*KIT.*-O-.*-n6.*-ANS
+i_o_drill_1_couch_bookcase_liv_a,i_o_drill_1_couch_bookcase_liv_a,mean,vr,.*LIV.*-O-.*-n1.*-ANS
+i_o_mask_2_p4_p1_liv_a,i_o_mask_2_p4_p1_liv_a,mean,vr,.*LIV.*-O-.*-n2.*-ANS
+i_o_lamp_3_p2_couch_liv_a,i_o_lamp_3_p2_couch_liv_a,mean,vr,.*LIV.*-O-.*-n3.*-ANS
+i_o_handbag_4_tv_p2_liv_a,i_o_handbag_4_tv_p2_liv_a,mean,vr,.*LIV.*-O-.*-n4.*-ANS
+i_o_laptop_5_chair_tv_liv_a,i_o_laptop_5_chair_tv_liv_a,mean,vr,.*LIV.*-O-.*-n5.*-ANS
+i_o_newspaper_6_p3_chair_liv_a,i_o_newspaper_6_p3_chair_liv_a,mean,vr,.*LIV.*-O-.*-n6.*-ANS
+i_n_duck_1_bath_shower_bat_c,i_n_duck_1_bath_shower_bat_c,mean,vr,.*BAT.*-N-.*-n1.*-CON
+i_n_remote_2_p2_bath_bat_c,i_n_remote_2_p2_bath_bat_c,mean,vr,.*BAT.*-N-.*-n2.*-CON
+i_n_tbrushes_3_p3_p4_bat_c,i_n_tbrushes_3_p3_p4_bat_c,mean,vr,.*BAT.*-N-.*-n3.*-CON
+i_n_book_4_toilet_p3_bat_c,i_n_book_4_toilet_p3_bat_c,mean,vr,.*BAT.*-N-.*-n4.*-CON
+i_n_hammer_5_sink_toilet_bat_c,i_n_hammer_5_sink_toilet_bat_c,mean,vr,.*BAT.*-N-.*-n5.*-CON
+i_n_glasses_6_p1_sink_bat_c,i_n_glasses_6_p1_sink_bat_c,mean,vr,.*BAT.*-N-.*-n6.*-CON
+i_n_alarm_1_bed_p4_bed_c,i_n_alarm_1_bed_p4_bed_c,mean,vr,.*BED.*-N-.*-n1.*-CON
+i_n_magazine_2_dresser_bed_bed_c,i_n_magazine_2_dresser_bed_bed_c,mean,vr,.*BED.*-N-.*-n2.*-CON
+i_n_picture_3_p1_dresser_bed_c,i_n_picture_3_p1_dresser_bed_c,mean,vr,.*BED.*-N-.*-n3.*-CON
+i_n_frypan_4_bookshelf_wardrobe_bed_c,i_n_frypan_4_bookshelf_wardrobe_bed_c,mean,vr,.*BED.*-N-.*-n4.*-CON
+i_n_phone_5_p4_p2_bed_c,i_n_phone_5_p4_p2_bed_c,mean,vr,.*BED.*-N-.*-n5.*-CON
+i_n_knife_6_p3_bookshelf_bed_c,i_n_knife_6_p3_bookshelf_bed_c,mean,vr,.*BED.*-N-.*-n6.*-CON
+i_n_letters_1_p2_fridge_kit_c,i_n_letters_1_p2_fridge_kit_c,mean,vr,.*KIT.*-N-.*-n1.*-CON
+i_n_cutlery_2_oven_p2_kit_c,i_n_cutlery_2_oven_p2_kit_c,mean,vr,.*KIT.*-N-.*-n2.*-CON
+i_n_toaster_3_p4_oven_kit_c,i_n_toaster_3_p4_oven_kit_c,mean,vr,.*KIT.*-N-.*-n3.*-CON
+i_n_oil_4_p1_p3_kit_c,i_n_oil_4_p1_p3_kit_c,mean,vr,.*KIT.*-N-.*-n4.*-CON
+i_n_keys_5_bench_pantry_kit_c,i_n_keys_5_bench_pantry_kit_c,mean,vr,.*KIT.*-N-.*-n5.*-CON
+i_n_tpaper_6_pantry_bench_kit_c,i_n_tpaper_6_pantry_bench_kit_c,mean,vr,.*KIT.*-N-.*-n6.*-CON
+i_n_drill_1_couch_bookcase_liv_c,i_n_drill_1_couch_bookcase_liv_c,mean,vr,.*LIV.*-N-.*-n1.*-CON
+i_n_mask_2_p4_p1_liv_c,i_n_mask_2_p4_p1_liv_c,mean,vr,.*LIV.*-N-.*-n2.*-CON
+i_n_lamp_3_p2_couch_liv_c,i_n_lamp_3_p2_couch_liv_c,mean,vr,.*LIV.*-N-.*-n3.*-CON
+i_n_handbag_4_tv_p2_liv_c,i_n_handbag_4_tv_p2_liv_c,mean,vr,.*LIV.*-N-.*-n4.*-CON
+i_n_laptop_5_chair_tv_liv_c,i_n_laptop_5_chair_tv_liv_c,mean,vr,.*LIV.*-N-.*-n5.*-CON
+i_n_newspaper_6_p3_chair_liv_c,i_n_newspaper_6_p3_chair_liv_c,mean,vr,.*LIV.*-N-.*-n6.*-CON
+i_u_duck_1_bath_shower_bat_c,i_u_duck_1_bath_shower_bat_c,mean,vr,.*BAT.*-U-.*-n1.*-CON
+i_u_remote_2_p2_bath_bat_c,i_u_remote_2_p2_bath_bat_c,mean,vr,.*BAT.*-U-.*-n2.*-CON
+i_u_tbrushes_3_p3_p4_bat_c,i_u_tbrushes_3_p3_p4_bat_c,mean,vr,.*BAT.*-U-.*-n3.*-CON
+i_u_book_4_toilet_p3_bat_c,i_u_book_4_toilet_p3_bat_c,mean,vr,.*BAT.*-U-.*-n4.*-CON
+i_u_hammer_5_sink_toilet_bat_c,i_u_hammer_5_sink_toilet_bat_c,mean,vr,.*BAT.*-U-.*-n5.*-CON
+i_u_glasses_6_p1_sink_bat_c,i_u_glasses_6_p1_sink_bat_c,mean,vr,.*BAT.*-U-.*-n6.*-CON
+i_u_alarm_1_bed_p4_bed_c,i_u_alarm_1_bed_p4_bed_c,mean,vr,.*BED.*-U-.*-n1.*-CON
+i_u_magazine_2_dresser_bed_bed_c,i_u_magazine_2_dresser_bed_bed_c,mean,vr,.*BED.*-U-.*-n2.*-CON
+i_u_picture_3_p1_dresser_bed_c,i_u_picture_3_p1_dresser_bed_c,mean,vr,.*BED.*-U-.*-n3.*-CON
+i_u_frypan_4_bookshelf_wardrobe_bed_c,i_u_frypan_4_bookshelf_wardrobe_bed_c,mean,vr,.*BED.*-U-.*-n4.*-CON
+i_u_phone_5_p4_p2_bed_c,i_u_phone_5_p4_p2_bed_c,mean,vr,.*BED.*-U-.*-n5.*-CON
+i_u_knife_6_p3_bookshelf_bed_c,i_u_knife_6_p3_bookshelf_bed_c,mean,vr,.*BED.*-U-.*-n6.*-CON
+i_u_letters_1_p2_fridge_kit_c,i_u_letters_1_p2_fridge_kit_c,mean,vr,.*KIT.*-U-.*-n1.*-CON
+i_u_cutlery_2_oven_p2_kit_c,i_u_cutlery_2_oven_p2_kit_c,mean,vr,.*KIT.*-U-.*-n2.*-CON
+i_u_toaster_3_p4_oven_kit_c,i_u_toaster_3_p4_oven_kit_c,mean,vr,.*KIT.*-U-.*-n3.*-CON
+i_u_oil_4_p1_p3_kit_c,i_u_oil_4_p1_p3_kit_c,mean,vr,.*KIT.*-U-.*-n4.*-CON
+i_u_keys_5_bench_pantry_kit_c,i_u_keys_5_bench_pantry_kit_c,mean,vr,.*KIT.*-U-.*-n5.*-CON
+i_u_tpaper_6_pantry_bench_kit_c,i_u_tpaper_6_pantry_bench_kit_c,mean,vr,.*KIT.*-U-.*-n6.*-CON
+i_u_drill_1_couch_bookcase_liv_c,i_u_drill_1_couch_bookcase_liv_c,mean,vr,.*LIV.*-U-.*-n1.*-CON
+i_u_mask_2_p4_p1_liv_c,i_u_mask_2_p4_p1_liv_c,mean,vr,.*LIV.*-U-.*-n2.*-CON
+i_u_lamp_3_p2_couch_liv_c,i_u_lamp_3_p2_couch_liv_c,mean,vr,.*LIV.*-U-.*-n3.*-CON
+i_u_handbag_4_tv_p2_liv_c,i_u_handbag_4_tv_p2_liv_c,mean,vr,.*LIV.*-U-.*-n4.*-CON
+i_u_laptop_5_chair_tv_liv_c,i_u_laptop_5_chair_tv_liv_c,mean,vr,.*LIV.*-U-.*-n5.*-CON
+i_u_newspaper_6_p3_chair_liv_c,i_u_newspaper_6_p3_chair_liv_c,mean,vr,.*LIV.*-U-.*-n6.*-CON
+i_d_duck_1_bath_shower_bat_c,i_d_duck_1_bath_shower_bat_c,mean,vr,.*BAT.*-D-.*-n1.*-CON
+i_d_remote_2_p2_bath_bat_c,i_d_remote_2_p2_bath_bat_c,mean,vr,.*BAT.*-D-.*-n2.*-CON
+i_d_tbrushes_3_p3_p4_bat_c,i_d_tbrushes_3_p3_p4_bat_c,mean,vr,.*BAT.*-D-.*-n3.*-CON
+i_d_book_4_toilet_p3_bat_c,i_d_book_4_toilet_p3_bat_c,mean,vr,.*BAT.*-D-.*-n4.*-CON
+i_d_hammer_5_sink_toilet_bat_c,i_d_hammer_5_sink_toilet_bat_c,mean,vr,.*BAT.*-D-.*-n5.*-CON
+i_d_glasses_6_p1_sink_bat_c,i_d_glasses_6_p1_sink_bat_c,mean,vr,.*BAT.*-D-.*-n6.*-CON
+i_d_alarm_1_bed_p4_bed_c,i_d_alarm_1_bed_p4_bed_c,mean,vr,.*BED.*-D-.*-n1.*-CON
+i_d_magazine_2_dresser_bed_bed_c,i_d_magazine_2_dresser_bed_bed_c,mean,vr,.*BED.*-D-.*-n2.*-CON
+i_d_picture_3_p1_dresser_bed_c,i_d_picture_3_p1_dresser_bed_c,mean,vr,.*BED.*-D-.*-n3.*-CON
+i_d_frypan_4_bookshelf_wardrobe_bed_c,i_d_frypan_4_bookshelf_wardrobe_bed_c,mean,vr,.*BED.*-D-.*-n4.*-CON
+i_d_phone_5_p4_p2_bed_c,i_d_phone_5_p4_p2_bed_c,mean,vr,.*BED.*-D-.*-n5.*-CON
+i_d_knife_6_p3_bookshelf_bed_c,i_d_knife_6_p3_bookshelf_bed_c,mean,vr,.*BED.*-D-.*-n6.*-CON
+i_d_letters_1_p2_fridge_kit_c,i_d_letters_1_p2_fridge_kit_c,mean,vr,.*KIT.*-D-.*-n1.*-CON
+i_d_cutlery_2_oven_p2_kit_c,i_d_cutlery_2_oven_p2_kit_c,mean,vr,.*KIT.*-D-.*-n2.*-CON
+i_d_toaster_3_p4_oven_kit_c,i_d_toaster_3_p4_oven_kit_c,mean,vr,.*KIT.*-D-.*-n3.*-CON
+i_d_oil_4_p1_p3_kit_c,i_d_oil_4_p1_p3_kit_c,mean,vr,.*KIT.*-D-.*-n4.*-CON
+i_d_keys_5_bench_pantry_kit_c,i_d_keys_5_bench_pantry_kit_c,mean,vr,.*KIT.*-D-.*-n5.*-CON
+i_d_tpaper_6_pantry_bench_kit_c,i_d_tpaper_6_pantry_bench_kit_c,mean,vr,.*KIT.*-D-.*-n6.*-CON
+i_d_drill_1_couch_bookcase_liv_c,i_d_drill_1_couch_bookcase_liv_c,mean,vr,.*LIV.*-D-.*-n1.*-CON
+i_d_mask_2_p4_p1_liv_c,i_d_mask_2_p4_p1_liv_c,mean,vr,.*LIV.*-D-.*-n2.*-CON
+i_d_lamp_3_p2_couch_liv_c,i_d_lamp_3_p2_couch_liv_c,mean,vr,.*LIV.*-D-.*-n3.*-CON
+i_d_handbag_4_tv_p2_liv_c,i_d_handbag_4_tv_p2_liv_c,mean,vr,.*LIV.*-D-.*-n4.*-CON
+i_d_laptop_5_chair_tv_liv_c,i_d_laptop_5_chair_tv_liv_c,mean,vr,.*LIV.*-D-.*-n5.*-CON
+i_d_newspaper_6_p3_chair_liv_c,i_d_newspaper_6_p3_chair_liv_c,mean,vr,.*LIV.*-D-.*-n6.*-CON
+i_o_duck_1_bath_shower_bat_c,i_o_duck_1_bath_shower_bat_c,mean,vr,.*BAT.*-O-.*-n1.*-CON
+i_o_remote_2_p2_bath_bat_c,i_o_remote_2_p2_bath_bat_c,mean,vr,.*BAT.*-O-.*-n2.*-CON
+i_o_tbrushes_3_p3_p4_bat_c,i_o_tbrushes_3_p3_p4_bat_c,mean,vr,.*BAT.*-O-.*-n3.*-CON
+i_o_book_4_toilet_p3_bat_c,i_o_book_4_toilet_p3_bat_c,mean,vr,.*BAT.*-O-.*-n4.*-CON
+i_o_hammer_5_sink_toilet_bat_c,i_o_hammer_5_sink_toilet_bat_c,mean,vr,.*BAT.*-O-.*-n5.*-CON
+i_o_glasses_6_p1_sink_bat_c,i_o_glasses_6_p1_sink_bat_c,mean,vr,.*BAT.*-O-.*-n6.*-CON
+i_o_alarm_1_bed_p4_bed_c,i_o_alarm_1_bed_p4_bed_c,mean,vr,.*BED.*-O-.*-n1.*-CON
+i_o_magazine_2_dresser_bed_bed_c,i_o_magazine_2_dresser_bed_bed_c,mean,vr,.*BED.*-O-.*-n2.*-CON
+i_o_picture_3_p1_dresser_bed_c,i_o_picture_3_p1_dresser_bed_c,mean,vr,.*BED.*-O-.*-n3.*-CON
+i_o_frypan_4_bookshelf_wardrobe_bed_c,i_o_frypan_4_bookshelf_wardrobe_bed_c,mean,vr,.*BED.*-O-.*-n4.*-CON
+i_o_phone_5_p4_p2_bed_c,i_o_phone_5_p4_p2_bed_c,mean,vr,.*BED.*-O-.*-n5.*-CON
+i_o_knife_6_p3_bookshelf_bed_c,i_o_knife_6_p3_bookshelf_bed_c,mean,vr,.*BED.*-O-.*-n6.*-CON
+i_o_letters_1_p2_fridge_kit_c,i_o_letters_1_p2_fridge_kit_c,mean,vr,.*KIT.*-O-.*-n1.*-CON
+i_o_cutlery_2_oven_p2_kit_c,i_o_cutlery_2_oven_p2_kit_c,mean,vr,.*KIT.*-O-.*-n2.*-CON
+i_o_toaster_3_p4_oven_kit_c,i_o_toaster_3_p4_oven_kit_c,mean,vr,.*KIT.*-O-.*-n3.*-CON
+i_o_oil_4_p1_p3_kit_c,i_o_oil_4_p1_p3_kit_c,mean,vr,.*KIT.*-O-.*-n4.*-CON
+i_o_keys_5_bench_pantry_kit_c,i_o_keys_5_bench_pantry_kit_c,mean,vr,.*KIT.*-O-.*-n5.*-CON
+i_o_tpaper_6_pantry_bench_kit_c,i_o_tpaper_6_pantry_bench_kit_c,mean,vr,.*KIT.*-O-.*-n6.*-CON
+i_o_drill_1_couch_bookcase_liv_c,i_o_drill_1_couch_bookcase_liv_c,mean,vr,.*LIV.*-O-.*-n1.*-CON
+i_o_mask_2_p4_p1_liv_c,i_o_mask_2_p4_p1_liv_c,mean,vr,.*LIV.*-O-.*-n2.*-CON
+i_o_lamp_3_p2_couch_liv_c,i_o_lamp_3_p2_couch_liv_c,mean,vr,.*LIV.*-O-.*-n3.*-CON
+i_o_handbag_4_tv_p2_liv_c,i_o_handbag_4_tv_p2_liv_c,mean,vr,.*LIV.*-O-.*-n4.*-CON
+i_o_laptop_5_chair_tv_liv_c,i_o_laptop_5_chair_tv_liv_c,mean,vr,.*LIV.*-O-.*-n5.*-CON
+i_o_newspaper_6_p3_chair_liv_c,i_o_newspaper_6_p3_chair_liv_c,mean,vr,.*LIV.*-O-.*-n6.*-CON
+Time_Date,Date of Test,sum,vr,.*STA-X-Date
+Room,Room,string,vr,.*Room
+TQ_RFR-N-OBJ1,TQ_RFR-N-OBJ1,sum,vr,RFR-N-OBJ1-ANS
+TQ_RFR-N-OBJ2,TQ_RFR-N-OBJ2,sum,vr,RFR-N-OBJ2-ANS
+TQ_RFR-N-OBJ3,TQ_RFR-N-OBJ3,sum,vr,RFR-N-OBJ3-ANS
+TQ_RFR-N-OBJ4,TQ_RFR-N-OBJ4,sum,vr,RFR-N-OBJ4-ANS
+TQ_RFR-N-STRA,TQ_RFR-N-STRA,sum,vr,RFR-N-STRA-ANS
+TQ_RFR-N-PORT,TQ_RFR-N-PORT,sum,vr,RFR-N-PORT-ANS
+TQ_RFR-N-LAND,TQ_RFR-N-LAND,sum,vr,RFR-N-LAND-ANS
+TQ_IFR-N-i1,TQ_IFR-N-i1,sum,vr,IFR-N-i1.*ANS
+TQ_IFR-N-i2,TQ_IFR-N-i2,sum,vr,IFR-N-i2.*ANS
+TQ_IFR-N-i3,TQ_IFR-N-i3,sum,vr,IFR-N-i3.*ANS
+TQ_IFR-N-i4,TQ_IFR-N-i4,sum,vr,IFR-N-i4.*ANS
+TQ_IFR-N-i5,TQ_IFR-N-i5,sum,vr,IFR-N-i5.*ANS
+TQ_IFR-N-i6,TQ_IFR-N-i6,sum,vr,IFR-N-i6.*ANS
+TQ_RFR-O-RORD,TQ_RFR-O-RORD,sum,vr,RFR-O-RORD-ANS
+TQ_RFR-O-TMOD,TQ_RFR-O-TMOD,sum,vr,RFR-O-TMOD-ANS
+TQ_RFR-N-WEAT,TQ_RFR-N-WEAT,sum,vr,RFR-N-WEAT-ANS
+TQ_RFR-L-OBJ1,TQ_RFR-L-OBJ1,sum,vr,RFR-L-OBJ1-ANS
+TQ_RFR-L-OBJ2,TQ_RFR-L-OBJ2,sum,vr,RFR-L-OBJ2-ANS
+TQ_RFR-L-OBJ3,TQ_RFR-L-OBJ3,sum,vr,RFR-L-OBJ3-ANS
+TQ_RFR-L-OBJ4,TQ_RFR-L-OBJ4,sum,vr,RFR-L-OBJ4-ANS
+TQ_RFR-L-DOOR,TQ_RFR-L-DOOR,sum,vr,RFR-L-DOOR-ANS
+TQ_RFR-L-WIND,TQ_RFR-L-WIND,sum,vr,RFR-L-WIND-ANS
+TQ_RFR-L-PORT,TQ_RFR-L-PORT,sum,vr,RFR-L-PORT-ANS
+TQ_RFR-L-LAND,TQ_RFR-L-LAND,sum,vr,RFR-L-LAND-ANS
+TQ_RFR-L-STRA,TQ_RFR-L-STRA,sum,vr,RFR-L-STRA-ANS
+TQ_IFR-U-i1,TQ_IFR-U-i1,sum,vr,IFR-U-i1.*ANS
+TQ_IFR-U-i2,TQ_IFR-U-i2,sum,vr,IFR-U-i2.*ANS
+TQ_IFR-U-i3,TQ_IFR-U-i3,sum,vr,IFR-U-i3.*ANS
+TQ_IFR-U-i4,TQ_IFR-U-i4,sum,vr,IFR-U-i4.*ANS
+TQ_IFR-U-i5,TQ_IFR-U-i5,sum,vr,IFR-U-i5.*ANS
+TQ_IFR-U-i6,TQ_IFR-U-i6,sum,vr,IFR-U-i6.*ANS
+TQ_IFR-D-i1,TQ_IFR-D-i1,sum,vr,IFR-D-i1.*ANS
+TQ_IFR-D-i2,TQ_IFR-D-i2,sum,vr,IFR-D-i2.*ANS
+TQ_IFR-D-i3,TQ_IFR-D-i3,sum,vr,IFR-D-i3.*ANS
+TQ_IFR-D-i4,TQ_IFR-D-i4,sum,vr,IFR-D-i4.*ANS
+TQ_IFR-D-i5,TQ_IFR-D-i5,sum,vr,IFR-D-i5.*ANS
+TQ_IFR-D-i6,TQ_IFR-D-i6,sum,vr,IFR-D-i6.*ANS
+TQ_IFR-O-i1,TQ_IFR-O-i1,sum,vr,IFR-O-i1.*ANS
+TQ_IFR-O-i2,TQ_IFR-O-i2,sum,vr,IFR-O-i2.*ANS
+TQ_IFR-O-i3,TQ_IFR-O-i3,sum,vr,IFR-O-i3.*ANS
+TQ_IFR-O-i4,TQ_IFR-O-i4,sum,vr,IFR-O-i4.*ANS
+TQ_IFR-O-i5,TQ_IFR-O-i5,sum,vr,IFR-O-i5.*ANS
+TQ_IFR-O-i6,TQ_IFR-O-i6,sum,vr,IFR-O-i6.*ANS
+TQ_TCR-O-TSK1,TQ_TCR-O-TSK1,sum,vr,TCR-O-TSK1-ANS
+TQ_TCR-O-TSK2,TQ_TCR-O-TSK2,sum,vr,TCR-O-TSK2-ANS
+TQ_TCR-O-TSK3,TQ_TCR-O-TSK3,sum,vr,TCR-O-TSK3-ANS
+TQ_TCR-O-TSK4,TQ_TCR-O-TSK4,sum,vr,TCR-O-TSK4-ANS
+TQ_TCR-O-TSK5,TQ_TCR-O-TSK5,sum,vr,TCR-O-TSK5-ANS
+TQ_TCR-O-TSK6,TQ_TCR-O-TSK6,sum,vr,TCR-O-TSK6-ANS
+TQ_ICR-N-i1,TQ_ICR-N-i1,sum,vr,ICR-N-i1.*ANS
+TQ_ICR-N-i2,TQ_ICR-N-i2,sum,vr,ICR-N-i2.*ANS
+TQ_ICR-N-i3,TQ_ICR-N-i3,sum,vr,ICR-N-i3.*ANS
+TQ_ICR-N-i4,TQ_ICR-N-i4,sum,vr,ICR-N-i4.*ANS
+TQ_ICR-N-i5,TQ_ICR-N-i5,sum,vr,ICR-N-i5.*ANS
+TQ_ICR-N-i6,TQ_ICR-N-i6,sum,vr,ICR-N-i6.*ANS
+TQ_ICR-U-i1,TQ_ICR-U-i1,sum,vr,ICR-U-i1.*ANS
+TQ_ICR-U-i2,TQ_ICR-U-i2,sum,vr,ICR-U-i2.*ANS
+TQ_ICR-U-i3,TQ_ICR-U-i3,sum,vr,ICR-U-i3.*ANS
+TQ_ICR-U-i4,TQ_ICR-U-i4,sum,vr,ICR-U-i4.*ANS
+TQ_ICR-U-i5,TQ_ICR-U-i5,sum,vr,ICR-U-i5.*ANS
+TQ_ICR-U-i6,TQ_ICR-U-i6,sum,vr,ICR-U-i6.*ANS
+TQ_ICR-D-i1,TQ_ICR-D-i1,sum,vr,ICR-D-i1.*ANS
+TQ_ICR-D-i2,TQ_ICR-D-i2,sum,vr,ICR-D-i2.*ANS
+TQ_ICR-D-i3,TQ_ICR-D-i3,sum,vr,ICR-D-i3.*ANS
+TQ_ICR-D-i4,TQ_ICR-D-i4,sum,vr,ICR-D-i4.*ANS
+TQ_ICR-D-i5,TQ_ICR-D-i5,sum,vr,ICR-D-i5.*ANS
+TQ_ICR-D-i6,TQ_ICR-D-i6,sum,vr,ICR-D-i6.*ANS
+TQ_ICR-O-i1,TQ_ICR-O-i1,sum,vr,ICR-O-i1.*ANS
+TQ_ICR-O-i2,TQ_ICR-O-i2,sum,vr,ICR-O-i2.*ANS
+TQ_ICR-O-i3,TQ_ICR-O-i3,sum,vr,ICR-O-i3.*ANS
+TQ_ICR-O-i4,TQ_ICR-O-i4,sum,vr,ICR-O-i4.*ANS
+TQ_ICR-O-i5,TQ_ICR-O-i5,sum,vr,ICR-O-i5.*ANS
+TQ_ICR-O-i6,TQ_ICR-O-i6,sum,vr,ICR-O-i6.*ANS
+TQ_RRE-L-DOOR,TQ_RRE-L-DOOR,sum,vr,RRE-L-DOOR-ANS
+TQ_RRE-L-WIND,TQ_RRE-L-WIND,sum,vr,RRE-L-WIND-ANS
+TQ_RRE-N-LAND,TQ_RRE-N-LAND,sum,vr,RRE-N-LAND-ANS
+TQ_RRE-L-LAND,TQ_RRE-L-LAND,sum,vr,RRE-L-LAND-ANS
+TQ_RRE-N-PORT,TQ_RRE-N-PORT,sum,vr,RRE-N-PORT-ANS
+TQ_RRE-L-PORT,TQ_RRE-L-PORT,sum,vr,RRE-L-PORT-ANS
+TQ_RRE-N-STRA,TQ_RRE-N-STRA,sum,vr,RRE-N-STRA-ANS
+TQ_RRE-L-STRA,TQ_RRE-L-STRA,sum,vr,RRE-L-STRA-ANS
+TQ_IRE-N-i1,TQ_IRE-N-i1,sum,vr,IRE-N-i1.*ANS
+TQ_IRE-N-i2,TQ_IRE-N-i2,sum,vr,IRE-N-i2.*ANS
+TQ_IRE-N-i3,TQ_IRE-N-i3,sum,vr,IRE-N-i3.*ANS
+TQ_IRE-N-i4,TQ_IRE-N-i4,sum,vr,IRE-N-i4.*ANS
+TQ_IRE-N-i5,TQ_IRE-N-i5,sum,vr,IRE-N-i5.*ANS
+TQ_IRE-N-i6,TQ_IRE-N-i6,sum,vr,IRE-N-i6.*ANS
+TQ_IRE-U-i1,TQ_IRE-U-i1,sum,vr,IRE-U-i1.*ANS
+TQ_IRE-U-i2,TQ_IRE-U-i2,sum,vr,IRE-U-i2.*ANS
+TQ_IRE-U-i3,TQ_IRE-U-i3,sum,vr,IRE-U-i3.*ANS
+TQ_IRE-U-i4,TQ_IRE-U-i4,sum,vr,IRE-U-i4.*ANS
+TQ_IRE-U-i5,TQ_IRE-U-i5,sum,vr,IRE-U-i5.*ANS
+TQ_IRE-U-i6,TQ_IRE-U-i6,sum,vr,IRE-U-i6.*ANS
+TQ_IRE-D-i1,TQ_IRE-D-i1,sum,vr,IRE-D-i1.*ANS
+TQ_IRE-D-i2,TQ_IRE-D-i2,sum,vr,IRE-D-i2.*ANS
+TQ_IRE-D-i3,TQ_IRE-D-i3,sum,vr,IRE-D-i3.*ANS
+TQ_IRE-D-i4,TQ_IRE-D-i4,sum,vr,IRE-D-i4.*ANS
+TQ_IRE-D-i5,TQ_IRE-D-i5,sum,vr,IRE-D-i5.*ANS
+TQ_IRE-D-i6,TQ_IRE-D-i6,sum,vr,IRE-D-i6.*ANS
+TQ_IRE-O-i1,TQ_IRE-O-i1,sum,vr,IRE-O-i1.*ANS
+TQ_IRE-O-i2,TQ_IRE-O-i2,sum,vr,IRE-O-i2.*ANS
+TQ_IRE-O-i3,TQ_IRE-O-i3,sum,vr,IRE-O-i3.*ANS
+TQ_IRE-O-i4,TQ_IRE-O-i4,sum,vr,IRE-O-i4.*ANS
+TQ_IRE-O-i5,TQ_IRE-O-i5,sum,vr,IRE-O-i5.*ANS
+TQ_IRE-O-i6,TQ_IRE-O-i6,sum,vr,IRE-O-i6.*ANS
+TC_RFR-N-OBJ1,TC_RFR-N-OBJ1,sum,vr,RFR-N-OBJ1-CON
+TC_RFR-N-OBJ2,TC_RFR-N-OBJ2,sum,vr,RFR-N-OBJ2-CON
+TC_RFR-N-OBJ3,TC_RFR-N-OBJ3,sum,vr,RFR-N-OBJ3-CON
+TC_RFR-N-OBJ4,TC_RFR-N-OBJ4,sum,vr,RFR-N-OBJ4-CON
+TC_RFR-N-STRA,TC_RFR-N-STRA,sum,vr,RFR-N-STRA-CON
+TC_RFR-N-PORT,TC_RFR-N-PORT,sum,vr,RFR-N-PORT-CON
+TC_RFR-N-LAND,TC_RFR-N-LAND,sum,vr,RFR-N-LAND-CON
+TC_IFR-N-i1,TC_IFR-N-i1,sum,vr,IFR-N-i1.*CON
+TC_IFR-N-i2,TC_IFR-N-i2,sum,vr,IFR-N-i2.*CON
+TC_IFR-N-i3,TC_IFR-N-i3,sum,vr,IFR-N-i3.*CON
+TC_IFR-N-i4,TC_IFR-N-i4,sum,vr,IFR-N-i4.*CON
+TC_IFR-N-i5,TC_IFR-N-i5,sum,vr,IFR-N-i5.*CON
+TC_IFR-N-i6,TC_IFR-N-i6,sum,vr,IFR-N-i6.*CON
+TC_RFR-O-RORD,TC_RFR-O-RORD,sum,vr,RFR-O-RORD-CON
+TC_RFR-O-TMOD,TC_RFR-O-TMOD,sum,vr,RFR-O-TMOD-CON
+TC_RFR-N-WEAT,TC_RFR-N-WEAT,sum,vr,RFR-N-WEAT-CON
+TC_RFR-L-OBJ1,TC_RFR-L-OBJ1,sum,vr,RFR-L-OBJ1-CON
+TC_RFR-L-OBJ2,TC_RFR-L-OBJ2,sum,vr,RFR-L-OBJ2-CON
+TC_RFR-L-OBJ3,TC_RFR-L-OBJ3,sum,vr,RFR-L-OBJ3-CON
+TC_RFR-L-OBJ4,TC_RFR-L-OBJ4,sum,vr,RFR-L-OBJ4-CON
+TC_RFR-L-DOOR,TC_RFR-L-DOOR,sum,vr,RFR-L-DOOR-CON
+TC_RFR-L-WIND,TC_RFR-L-WIND,sum,vr,RFR-L-WIND-CON
+TC_RFR-L-PORT,TC_RFR-L-PORT,sum,vr,RFR-L-PORT-CON
+TC_RFR-L-LAND,TC_RFR-L-LAND,sum,vr,RFR-L-LAND-CON
+TC_RFR-L-STRA,TC_RFR-L-STRA,sum,vr,RFR-L-STRA-CON
+TC_IFR-U-i1,TC_IFR-U-i1,sum,vr,IFR-U-i1.*CON
+TC_IFR-U-i2,TC_IFR-U-i2,sum,vr,IFR-U-i2.*CON
+TC_IFR-U-i3,TC_IFR-U-i3,sum,vr,IFR-U-i3.*CON
+TC_IFR-U-i4,TC_IFR-U-i4,sum,vr,IFR-U-i4.*CON
+TC_IFR-U-i5,TC_IFR-U-i5,sum,vr,IFR-U-i5.*CON
+TC_IFR-U-i6,TC_IFR-U-i6,sum,vr,IFR-U-i6.*CON
+TC_IFR-D-i1,TC_IFR-D-i1,sum,vr,IFR-D-i1.*CON
+TC_IFR-D-i2,TC_IFR-D-i2,sum,vr,IFR-D-i2.*CON
+TC_IFR-D-i3,TC_IFR-D-i3,sum,vr,IFR-D-i3.*CON
+TC_IFR-D-i4,TC_IFR-D-i4,sum,vr,IFR-D-i4.*CON
+TC_IFR-D-i5,TC_IFR-D-i5,sum,vr,IFR-D-i5.*CON
+TC_IFR-D-i6,TC_IFR-D-i6,sum,vr,IFR-D-i6.*CON
+TC_IFR-O-i1,TC_IFR-O-i1,sum,vr,IFR-O-i1.*CON
+TC_IFR-O-i2,TC_IFR-O-i2,sum,vr,IFR-O-i2.*CON
+TC_IFR-O-i3,TC_IFR-O-i3,sum,vr,IFR-O-i3.*CON
+TC_IFR-O-i4,TC_IFR-O-i4,sum,vr,IFR-O-i4.*CON
+TC_IFR-O-i5,TC_IFR-O-i5,sum,vr,IFR-O-i5.*CON
+TC_IFR-O-i6,TC_IFR-O-i6,sum,vr,IFR-O-i6.*CON
+TC_TCR-O-TSK1,TC_TCR-O-TSK1,sum,vr,TCR-O-TSK1-CON
+TC_TCR-O-TSK2,TC_TCR-O-TSK2,sum,vr,TCR-O-TSK2-CON
+TC_TCR-O-TSK3,TC_TCR-O-TSK3,sum,vr,TCR-O-TSK3-CON
+TC_TCR-O-TSK4,TC_TCR-O-TSK4,sum,vr,TCR-O-TSK4-CON
+TC_TCR-O-TSK5,TC_TCR-O-TSK5,sum,vr,TCR-O-TSK5-CON
+TC_TCR-O-TSK6,TC_TCR-O-TSK6,sum,vr,TCR-O-TSK6-CON
+TC_ICR-N-i1,TC_ICR-N-i1,sum,vr,ICR-N-i1.*CON
+TC_ICR-N-i2,TC_ICR-N-i2,sum,vr,ICR-N-i2.*CON
+TC_ICR-N-i3,TC_ICR-N-i3,sum,vr,ICR-N-i3.*CON
+TC_ICR-N-i4,TC_ICR-N-i4,sum,vr,ICR-N-i4.*CON
+TC_ICR-N-i5,TC_ICR-N-i5,sum,vr,ICR-N-i5.*CON
+TC_ICR-N-i6,TC_ICR-N-i6,sum,vr,ICR-N-i6.*CON
+TC_ICR-U-i1,TC_ICR-U-i1,sum,vr,ICR-U-i1.*CON
+TC_ICR-U-i2,TC_ICR-U-i2,sum,vr,ICR-U-i2.*CON
+TC_ICR-U-i3,TC_ICR-U-i3,sum,vr,ICR-U-i3.*CON
+TC_ICR-U-i4,TC_ICR-U-i4,sum,vr,ICR-U-i4.*CON
+TC_ICR-U-i5,TC_ICR-U-i5,sum,vr,ICR-U-i5.*CON
+TC_ICR-U-i6,TC_ICR-U-i6,sum,vr,ICR-U-i6.*CON
+TC_ICR-D-i1,TC_ICR-D-i1,sum,vr,ICR-D-i1.*CON
+TC_ICR-D-i2,TC_ICR-D-i2,sum,vr,ICR-D-i2.*CON
+TC_ICR-D-i3,TC_ICR-D-i3,sum,vr,ICR-D-i3.*CON
+TC_ICR-D-i4,TC_ICR-D-i4,sum,vr,ICR-D-i4.*CON
+TC_ICR-D-i5,TC_ICR-D-i5,sum,vr,ICR-D-i5.*CON
+TC_ICR-D-i6,TC_ICR-D-i6,sum,vr,ICR-D-i6.*CON
+TC_ICR-O-i1,TC_ICR-O-i1,sum,vr,ICR-O-i1.*CON
+TC_ICR-O-i2,TC_ICR-O-i2,sum,vr,ICR-O-i2.*CON
+TC_ICR-O-i3,TC_ICR-O-i3,sum,vr,ICR-O-i3.*CON
+TC_ICR-O-i4,TC_ICR-O-i4,sum,vr,ICR-O-i4.*CON
+TC_ICR-O-i5,TC_ICR-O-i5,sum,vr,ICR-O-i5.*CON
+TC_ICR-O-i6,TC_ICR-O-i6,sum,vr,ICR-O-i6.*CON
+TC_RRE-L-DOOR,TC_RRE-L-DOOR,sum,vr,RRE-L-DOOR-CON
+TC_RRE-L-WIND,TC_RRE-L-WIND,sum,vr,RRE-L-WIND-CON
+TC_RRE-N-LAND,TC_RRE-N-LAND,sum,vr,RRE-N-LAND-CON
+TC_RRE-L-LAND,TC_RRE-L-LAND,sum,vr,RRE-L-LAND-CON
+TC_RRE-N-PORT,TC_RRE-N-PORT,sum,vr,RRE-N-PORT-CON
+TC_RRE-L-PORT,TC_RRE-L-PORT,sum,vr,RRE-L-PORT-CON
+TC_RRE-N-STRA,TC_RRE-N-STRA,sum,vr,RRE-N-STRA-CON
+TC_RRE-L-STRA,TC_RRE-L-STRA,sum,vr,RRE-L-STRA-CON
+TC_IRE-N-i1,TC_IRE-N-i1,sum,vr,IRE-N-i1.*CON
+TC_IRE-N-i2,TC_IRE-N-i2,sum,vr,IRE-N-i2.*CON
+TC_IRE-N-i3,TC_IRE-N-i3,sum,vr,IRE-N-i3.*CON
+TC_IRE-N-i4,TC_IRE-N-i4,sum,vr,IRE-N-i4.*CON
+TC_IRE-N-i5,TC_IRE-N-i5,sum,vr,IRE-N-i5.*CON
+TC_IRE-N-i6,TC_IRE-N-i6,sum,vr,IRE-N-i6.*CON
+TC_IRE-U-i1,TC_IRE-U-i1,sum,vr,IRE-U-i1.*CON
+TC_IRE-U-i2,TC_IRE-U-i2,sum,vr,IRE-U-i2.*CON
+TC_IRE-U-i3,TC_IRE-U-i3,sum,vr,IRE-U-i3.*CON
+TC_IRE-U-i4,TC_IRE-U-i4,sum,vr,IRE-U-i4.*CON
+TC_IRE-U-i5,TC_IRE-U-i5,sum,vr,IRE-U-i5.*CON
+TC_IRE-U-i6,TC_IRE-U-i6,sum,vr,IRE-U-i6.*CON
+TC_IRE-D-i1,TC_IRE-D-i1,sum,vr,IRE-D-i1.*CON
+TC_IRE-D-i2,TC_IRE-D-i2,sum,vr,IRE-D-i2.*CON
+TC_IRE-D-i3,TC_IRE-D-i3,sum,vr,IRE-D-i3.*CON
+TC_IRE-D-i4,TC_IRE-D-i4,sum,vr,IRE-D-i4.*CON
+TC_IRE-D-i5,TC_IRE-D-i5,sum,vr,IRE-D-i5.*CON
+TC_IRE-D-i6,TC_IRE-D-i6,sum,vr,IRE-D-i6.*CON
+TC_IRE-O-i1,TC_IRE-O-i1,sum,vr,IRE-O-i1.*CON
+TC_IRE-O-i2,TC_IRE-O-i2,sum,vr,IRE-O-i2.*CON
+TC_IRE-O-i3,TC_IRE-O-i3,sum,vr,IRE-O-i3.*CON
+TC_IRE-O-i4,TC_IRE-O-i4,sum,vr,IRE-O-i4.*CON
+TC_IRE-O-i5,TC_IRE-O-i5,sum,vr,IRE-O-i5.*CON
+TC_IRE-O-i6,TC_IRE-O-i6,sum,vr,IRE-O-i6.*CON

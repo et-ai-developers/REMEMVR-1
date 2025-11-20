@@ -1,0 +1,516 @@
+# V4.X AGENT TESTING TODO - STREAMLINED
+# Last Updated: 2025-11-19 (Restructured for testing phase)
+# Purpose: Testing roadmap for 12 v4.X agents (g_conflict already tested)
+# Completed Work: See docs/v4/build_history.md for Phases 0-16
+# Specification: docs/user/analysis_pipeline_solution.md
+
+# =============================================================================
+# TESTING PROTOCOL (10-STEP SEQUENCE)
+# =============================================================================
+# Each agent test follows this sequence:
+#
+# 1. Pre-flight g_conflict check
+#    - Compare ONLY: agent prompt vs related templates vs solution.md section
+#    - Do NOT include agent_best_practices.md (common to all agents)
+#    - Detect any conflicts/misalignments specific to this agent
+#
+# 2. User alignment on conflicts
+#    - Resolve discrepancies with user
+#    - Establish ground truth
+#
+# 3. Update agent frontmatter description
+#    - Document how to use agent properly
+#    - Make agent self-documenting
+#
+# 3.5. Define success criteria
+#    - Explicit PASS/FAIL/QUIT conditions
+#    - What constitutes successful test
+#
+# 4. Predict agent behavior
+#    - Given RQ 5.1, what outputs SHOULD agent produce?
+#
+# 5. Run agent on RQ 5.1 (happy path)
+#    - Execute with valid inputs
+#
+# 6. Inspect results vs expectations
+#    - Compare actual to predicted
+#
+# 6.5. Verify error handling
+#    - Test expected failure modes (bad inputs, missing files, etc.)
+#
+# 7. Verify spec compliance
+#    - Do outputs match solution.md exactly?
+#
+# 8. Update if needed
+#    - Fix agent prompt, templates, or solution.md
+#
+# 9. Re-run if updated
+#    - Return to step 3.5, iterate until PASS
+#
+# 10. Clean workspace (OPTIONAL)
+#     - Keep artifacts for integration test
+
+# =============================================================================
+# PHASE 17: TEST RQ_BUILDER
+# =============================================================================
+
+phase17_test_rq_builder:
+  description: "Test rq_builder agent (folder structure creation)"
+  priority: CRITICAL
+  status: completed
+  completed_date: 2025-11-19
+  agent: rq_builder
+  specification_section: "2.1.1"
+  test_input: "Build ch5/rq1"
+  expected_output: "results/ch5/rq1/ with 6 folders + status.yaml"
+  success_criteria:
+    pass: "6 folders created (docs, data, code, logs, plots, results) + status.yaml with 10 agent sections + .gitkeep files"
+    fail: "Missing folders, missing status.yaml, wrong agent list, no .gitkeep"
+    quit: "Non-empty folder exists (expected safety behavior)"
+  error_handling_tests:
+    - "Run on non-empty folder → Should QUIT with clear message"
+    - "Run without write permissions → Should QUIT with error"
+  test_results:
+    happy_path: "PASS - All 6 folders + .gitkeep + status.yaml created correctly"
+    error_handling: "PASS - Correctly QUIT on non-empty folder with clear message"
+    spec_compliance: "100% - All requirements met + enhanced with .gitkeep files"
+    conflicts_found: 0
+    issues_found: 0
+    frontmatter_updated: true
+  dependencies: []
+  notes: "First agent to test - no dependencies. Perfect compliance, no issues found."
+
+# =============================================================================
+# PHASE 18: TEST RQ_CONCEPT
+# =============================================================================
+
+phase18_test_rq_concept:
+  description: "Test rq_concept agent (thesis extraction)"
+  priority: CRITICAL
+  status: completed
+  completed_date: 2025-11-19
+  agent: rq_concept
+  specification_section: "2.1.2"
+  test_input: "Create 1_concept.md for ch5/rq1"
+  expected_output: "results/ch5/rq1/docs/1_concept.md with 7 sections + status.yaml updated"
+  success_criteria:
+    pass: "1_concept.md exists with all 7 sections, preserves thesis detail, status.yaml context_dump added"
+    fail: "Missing sections, over-distilled content, missing context_dump"
+  test_results:
+    happy_path: "PASS - All 7 sections created (194 lines), detail preserved, status.yaml updated"
+    error_handling: "PASS - Circuit breaker prevents overwrite when already run (EXPECTATIONS ERROR)"
+    spec_compliance: "100% - All 11 steps executed correctly, 5-line context_dump format"
+    conflicts_found: 1
+    conflicts_severity: "MINOR - Documentation clarity (solution.md context_dump format)"
+    conflicts_resolved: true
+    issues_found: 1
+    issues_severity: "CRITICAL - Template contamination with false timing information"
+    issues_description: "Template contained 'T1 and T2 same-day testing (Days 0)' in example text (lines 127, 496). Agent faithfully reproduced false information. Not pure hallucination - learned from contaminated template."
+    issues_resolved: true
+    issues_resolution: "Fixed template (corrected to Days 0,1,3,6 and TSVR note), regenerated 1_concept.md, verified clean output"
+    frontmatter_updated: true
+    solution_md_updated: true
+    template_updated: true
+    critical_lesson: "Template examples must be content-neutral or factually verified. Example text with domain facts can contaminate agent outputs if errors present."
+  dependencies: [phase17_test_rq_builder]
+  notes: "CRITICAL FINDING: Discovered template contamination vulnerability. Testing protocol successfully caught agent reproducing false information from template examples. Fixed at source, verified clean regeneration."
+
+# =============================================================================
+# PHASE 19: TEST RQ_SCHOLAR
+# =============================================================================
+
+phase19_test_rq_scholar:
+  description: "Test rq_scholar agent (scholarly validation)"
+  priority: CRITICAL
+  status: completed
+  completed_date: 2025-11-19
+  agent: rq_scholar
+  specification_section: "2.2.1"
+  test_input: "Validate 1_concept.md for ch5/rq1"
+  expected_output: "Scholar feedback appended to 1_concept.md + validation/scholar_report.md + status.yaml updated"
+  success_criteria:
+    pass: "Feedback appended (not overwritten), 10-point rubric, devil's advocate analysis, 5-10 WebSearch queries, status.yaml context_dump"
+    fail: "Overwrites concept.md, missing rubric, no devil's advocate, insufficient WebSearch"
+    quit: "Already completed, missing concept.md, template missing"
+  test_results:
+    happy_path: "PASS - Scholar Validation Report appended (194→627 lines), 9.1/10 CONDITIONAL, all 7 sections present"
+    error_handling: "PASS - Correctly QUIT with EXPECTATIONS ERROR when already completed"
+    spec_compliance: "100% - All 10 workflow steps executed, Edit append verified, context dump format correct"
+    conflicts_found: 7
+    conflicts_severity: "2 CRITICAL (Write tool removal, context dump format), 3 MODERATE, 2 MINOR"
+    conflicts_resolved: true
+    agent_performance: "Excellent - 42 papers reviewed (12 high-relevance 2020-2024), zero hallucinations, 10 concerns identified (2 CRITICAL omissions: practice effects, encoding quality)"
+    literature_grounding: "Perfect - All devil's advocate criticisms cite specific literature sources, two-pass WebSearch (validation + challenge) executed correctly"
+    prediction_accuracy: "85% - Predicted 9.0-9.3 CONDITIONAL, actual 9.1 CONDITIONAL (exact match)"
+    frontmatter_updated: true
+    solution_md_updated: true
+    critical_finding: "Edit tool append behavior verified - original content preserved, separator added, 433 lines appended. Two-pass WebSearch strategy working perfectly (validation pass finds support, challenge pass finds counterevidence)."
+  dependencies: [phase18_test_rq_concept]
+  notes: "First test of Edit append behavior. Agent correctly uses Edit (not Write) to preserve original content. Devil's advocate analysis comprehensive with 4 subsections (Commission/Omission/Alternatives/Confounds). Circuit breaker correctly prevents duplicate runs."
+
+# =============================================================================
+# PHASE 20: TEST RQ_STATS
+# =============================================================================
+
+phase20_test_rq_stats:
+  description: "Test rq_stats agent (statistical validation)"
+  priority: CRITICAL
+  status: completed
+  completed_date: 2025-11-19
+  agent: rq_stats
+  specification_section: "2.2.2"
+  test_input: "Validate statistical methods for ch5/rq1"
+  expected_output: "Stats feedback appended to 1_concept.md + validation/stats_report.md + status.yaml updated"
+  success_criteria:
+    pass: "Feedback appended, 10-point rubric, devil's advocate with literature citations, 6-10 WebSearch queries, status.yaml context_dump"
+    fail: "Overwrites concept.md, missing citations, no devil's advocate"
+    quit: "Already completed, missing concept.md, prior steps not success"
+  test_results:
+    happy_path: "PASS - Statistical Validation Report appended (627→1227 lines), 9.2/10 CONDITIONAL, all 7 sections present"
+    error_handling: "PASS - Correctly QUIT with EXPECTATIONS ERROR when already completed"
+    spec_compliance: "100% - All 10 workflow steps executed, Edit append verified, context dump format perfect"
+    conflicts_found: 8
+    conflicts_severity: "4 CRITICAL (step count, tools, workflow order, template examples), 2 MODERATE (context dump, terminology), 2 MINOR"
+    conflicts_resolved: true
+    agent_performance: "Excellent - 15 concerns identified (4 CRITICAL: Bonferroni error, IRT validation gap, LMM diagnostics gap, measurement invariance), zero hallucinations, 9 WebSearch queries (two-pass strategy)"
+    literature_grounding: "Perfect - All devil's advocate criticisms cite specific methodological literature (15+ sources 2020-2024), comprehensive coverage of IRT/LMM assumptions"
+    prediction_accuracy: "95% - Predicted 9.0-9.5 CONDITIONAL, actual 9.2 CONDITIONAL (exact match)"
+    parallel_architecture_validated: "Perfect match with rq_scholar - identical 10-step workflow, rubric structure, devil's advocate approach, Edit append behavior, context dump format"
+    frontmatter_updated: true
+    solution_md_updated: false
+    critical_finding: "Parallel architecture confirmed - rq_stats matches rq_scholar quality/structure perfectly. Both validation agents use identical workflows, devil's advocate frameworks, WebSearch strategies, Edit append behavior. 8 conflicts resolved before testing prevented implementation mismatches."
+  dependencies: [phase19_test_rq_scholar]
+  notes: "Parallel architecture to rq_scholar validated successfully. Agent found CRITICAL gaps (Bonferroni miscalculation, missing IRT local independence validation, missing LMM diagnostics, no measurement invariance testing). 64% tool reuse rate below target but core IRT/LMM tools verified. Devil's advocate analysis comprehensive with 4 subsections (Commission/Omission/Alternatives/Pitfalls). Circuit breaker correctly prevents duplicate runs."
+
+# =============================================================================
+# PHASE 20a: V4 DOCUMENTATION AUDIT (ALIGNMENT WITH SOLUTION.MD)
+# =============================================================================
+
+phase20a_v4_documentation_audit:
+  description: "Comprehensive audit of ALL docs/v4/ documentation against solution.md specification"
+  priority: CRITICAL
+  status: completed
+  completed_date: 2025-11-19
+  rationale: "Prevent template contamination before continuing agent testing. Ensure perfect alignment after g_conflict findings (thesis methods vs solution.md) revealed 5 conflicts. All v4 docs must match updated solution.md (with section 1.4 preprocessing requirements)."
+  documents_to_audit: 20
+  audit_strategy: "Sequential g_conflict checks, one category at a time"
+
+  core_documentation:
+    - file: "docs/v4/agent_best_practices.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 5.1)"
+      focus: "Circuit breakers, platform rules, error handling"
+    - file: "docs/v4/names.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.5.1)"
+      focus: "Naming registry structure, TDD approach"
+    - file: "docs/v4/automation.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.5.4)"
+      focus: "Master orchestration workflow"
+    - file: "docs/v4/orchestrator.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.5.2)"
+      focus: "Phase 2 automation specification"
+    - file: "docs/v4/build_history.md"
+      check_against: "N/A - historical record only"
+      focus: "No spec check needed (validated in Phase 19)"
+
+  templates_11_files:
+    - file: "docs/v4/templates/build_folder.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.1.1)"
+      focus: "Folder structure specification"
+    - file: "docs/v4/templates/build_status.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.1.2)"
+      focus: "status.yaml specification, context_dump format"
+    - file: "docs/v4/templates/concept.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.2.1)"
+      focus: "7-section structure, CRITICAL: preprocessing requirements (section 1.4 compliance)"
+    - file: "docs/v4/templates/scholar_report.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.3.1)"
+      focus: "10-point rubric, devil's advocate structure"
+    - file: "docs/v4/templates/stats_report.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.3.2)"
+      focus: "10-point rubric, devil's advocate structure, CRITICAL: no Likert bias correction requirement"
+    - file: "docs/v4/templates/plan.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.2.2)"
+      focus: "Per-step validation criteria, substance criteria, plot source CSV specs"
+    - file: "docs/v4/templates/tools.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.2.3)"
+      focus: "Tool catalog structure, signature enforcement"
+    - file: "docs/v4/templates/analysis.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.2.4)"
+      focus: "Analysis step specifications, validation requirements"
+    - file: "docs/v4/templates/inspect_criteria.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.3.3)"
+      focus: "4-layer validation (existence, structure, substance, execution)"
+    - file: "docs/v4/templates/plots.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.4.1)"
+      focus: "Option B architecture (visualization-only), plot source CSV approach"
+    - file: "docs/v4/templates/results.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.4.2)"
+      focus: "5-section summary, plausibility checks, CRITICAL: confidence rating response patterns (section 1.4)"
+
+  thesis_files:
+    - file: "docs/v4/thesis/ANALYSES_CH5.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.5.3)"
+      focus: "15 RQs, cross-RQ dependency tracking"
+    - file: "docs/v4/thesis/ANALYSES_CH6.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.5.3)"
+      focus: "15 RQs, cross-RQ dependency tracking"
+    - file: "docs/v4/thesis/ANALYSES_CH7.md"
+      check_against: "docs/user/analysis_pipeline_solution.md (section 4.5.3)"
+      focus: "20 RQs, cross-RQ dependency tracking"
+
+  other_documentation:
+    - file: "docs/v4/validation_audit.md"
+      check_against: "N/A - historical validation record"
+      focus: "No spec check needed (Phase 4 artifact)"
+
+  success_criteria:
+    pass: "Zero conflicts across all 18 checked documents (20 total - 2 historical records excluded)"
+    fail: "ANY conflicts found in templates or core documentation"
+    action_on_fail: "Fix conflicts immediately, update affected templates, re-check until zero conflicts"
+
+  execution_plan:
+    step1: "Check core documentation (4 files) - agent_best_practices, names, automation, orchestrator"
+    step2: "Check templates Category A (5 files) - build_folder, build_status, concept, scholar_report, stats_report"
+    step3: "Check templates Category B (6 files) - plan, tools, analysis, inspect_criteria, plots, results"
+    step4: "Check thesis files (3 files) - ANALYSES_CH5, CH6, CH7"
+    step5: "Generate audit report with findings summary"
+    step6: "If conflicts found: Fix all, document changes, re-run g_conflict"
+    step7: "Mark phase complete only when all 18 documents have zero conflicts"
+
+  expected_conflicts:
+    high_risk_areas: "concept.md (preprocessing), stats_report.md (Likert bias), results.md (response patterns), plan.md (validation criteria)"
+    critical_checks: "Section 1.4 compliance (preprocessing, GRM clarification, Likert bias decision), context_dump formats, validation requirements"
+
+  test_results:
+    step1_core_documentation: "ZERO conflicts (4 files: agent_best_practices, names, automation, orchestrator)"
+    step2_templates_category_a: "8 conflicts found (3 CRITICAL, 5 MODERATE) - ALL FIXED - Re-verified ZERO conflicts"
+    step3_templates_category_b: "9 conflicts found (6 CRITICAL, 3 MODERATE) - ALL FIXED - Re-verified ZERO conflicts"
+    step4_thesis_files: "ZERO conflicts (3 files: ANALYSES_CH5, CH6, CH7)"
+    total_conflicts_found: 17
+    total_conflicts_fixed: 17
+    final_status: "100% alignment - ZERO conflicts across all 18 documents"
+    conflicts_breakdown:
+      category_a_critical: "concept.md missing section 1.4 (3 fixes), stats_report.md Likert bias prohibition (2 fixes)"
+      category_a_moderate: "Context dump format clarifications (3 fixes), two-pass WebSearch explicit (2 fixes)"
+      category_b_critical: "results.md confidence patterns (2 fixes), plan.md validation scope + plot prep example (2 fixes), plots.md Option B prominence (1 fix)"
+      category_b_moderate: "inspect_criteria 4-layer mapping (1 fix), analysis.md cross-reference (1 fix), plots.md D069 checklist (1 fix)"
+    files_modified: 10
+    files_modified_list: "solution.md (section 1.4 added), concept.md, stats_report.md, scholar_report.md, results.md, plan.md, plots.md, inspect_criteria.md, analysis.md"
+    critical_findings: "Section 1.4 preprocessing requirements successfully propagated to all necessary templates. Option B architecture elevated to prominence. Validation scope clarification prevents rq_inspect/rq_results overlap confusion."
+    readiness_assessment: "100% ready for Phase 21 testing - all documentation internally consistent and aligned with ground truth (solution.md)"
+  dependencies: [phase20_test_rq_stats]
+  blocks: [phase21_test_rq_planner]
+  notes: "MANDATORY quality gate before continuing agent testing. Template contamination found in Phase 18 (concept.md 'T1 T2 same-day' hallucination) and thesis-solution conflicts found via g_conflict (5 conflicts including CRITICAL IRT model mismatch). This audit ensures ALL v4 documentation reflects updated solution.md with section 1.4 preprocessing requirements and g_conflict resolutions applied. COMPLETED: 17/17 conflicts resolved, 10 files modified, 100% alignment achieved."
+
+# =============================================================================
+# PHASE 21: TEST RQ_PLANNER
+# =============================================================================
+
+phase21_test_rq_planner:
+  description: "Test rq_planner agent (analysis plan creation)"
+  priority: CRITICAL
+  status: pending
+  agent: rq_planner
+  specification_section: "2.3.1"
+  test_input: "Create 2_plan.md for ch5/rq1"
+  expected_output: "results/ch5/rq1/docs/2_plan.md with per-step validation requirements + status.yaml updated"
+  success_criteria:
+    pass: "2_plan.md with exact tag patterns, per-step validation criteria, substance criteria, status.yaml analysis_steps section created (all pending)"
+    fail: "Missing validation requirements, vague tag patterns, no substance criteria"
+  dependencies: [phase20_test_rq_stats]
+  expected_failures: "names.md is empty (TDD) - agent may FAIL at names lookup, manually populate and retry"
+  notes: "FIRST use of names.md - may trigger TDD initialization"
+
+# =============================================================================
+# PHASE 22: TEST RQ_TOOLS (CRITICAL - FIRST TOOL MIGRATION)
+# =============================================================================
+
+phase22_test_rq_tools:
+  description: "Test rq_tools agent (tool specification + detection)"
+  priority: CRITICAL
+  status: pending
+  agent: rq_tools
+  specification_section: "2.3.2"
+  test_input: "Create 3_tools.yaml for ch5/rq1"
+  expected_output: "Agent WILL FAIL with missing tools list → Migrate with TDD → Re-run → 3_tools.yaml created"
+  success_criteria:
+    pass: "3_tools.yaml with analysis+validation pairs, full signatures with type hints, status.yaml context_dump"
+    fail: "Missing validation tools, incomplete signatures, tool improvisation"
+  dependencies: [phase21_test_rq_planner]
+  expected_failures: "WILL FAIL: 'Missing tools: [list]' - THIS IS WHERE TDD MIGRATION HAPPENS"
+  tool_migration_steps:
+    step_4a: "Detect missing tools (agent FAILs with list)"
+    step_4b: "Migrate analysis tools: Check v3 tools/, write test FIRST, implement, verify GREEN"
+    step_4c: "Migrate validation tools: Check docs/v4/validation_audit.md, write test FIRST, implement, verify GREEN"
+    step_4d: "Update tool_inventory.md with all new functions (full signatures, inputs, outputs)"
+    step_4e: "Re-run rq_tools agent → should PASS and create 3_tools.yaml"
+  notes: "CRITICAL PHASE - Tool migration happens HERE when agent tells us what's missing"
+
+# =============================================================================
+# PHASE 23: TEST RQ_ANALYSIS
+# =============================================================================
+
+phase23_test_rq_analysis:
+  description: "Test rq_analysis agent (analysis recipe creation)"
+  priority: CRITICAL
+  status: pending
+  agent: rq_analysis
+  specification_section: "2.3.3"
+  test_input: "Create 4_analysis.yaml for ch5/rq1"
+  expected_output: "results/ch5/rq1/docs/4_analysis.yaml with complete self-contained recipe + status.yaml analysis_steps section"
+  success_criteria:
+    pass: "4_analysis.yaml complete (merges plan+tools), full signatures with type hints, explicit validation inputs, status.yaml analysis_steps all pending"
+    fail: "Incomplete recipe, missing validation, placeholder values (TBD), inference required"
+  dependencies: [phase22_test_rq_tools]
+  notes: "Tests that 4_analysis.yaml is COMPLETE (g_code reads this ONLY, not 3_tools.yaml)"
+
+# =============================================================================
+# PHASE 24: TEST G_CODE
+# =============================================================================
+
+phase24_test_g_code:
+  description: "Test g_code agent (code generation with validation)"
+  priority: CRITICAL
+  status: pending
+  agent: g_code
+  specification_section: "2.4.1, 6.1"
+  test_input: "Generate step01_*.py for ch5/rq1"
+  expected_output: "results/ch5/rq1/code/step01_*.py with 4-layer validation passed"
+  success_criteria:
+    pass: "Python code generated, 4-layer validation passed (import/signature/input/column), UTF-8 encoding, ASCII output"
+    fail: "Validation failure, API mismatch, missing inline reasoning, non-ASCII output"
+  dependencies: [phase23_test_rq_analysis]
+  expected_failures: "Validation may fail if tool signatures wrong - fix tool_inventory.md and retry"
+  notes: "Tests 4-layer validation protocol preventing v3.0 API mismatches"
+
+# =============================================================================
+# PHASE 25: TEST G_DEBUG
+# =============================================================================
+
+phase25_test_g_debug:
+  description: "Test g_debug agent (error recovery)"
+  priority: CRITICAL
+  status: pending
+  agent: g_debug
+  specification_section: "2.6.2"
+  test_input: "Debug failing script for ch5/rq1 (if step01 has errors)"
+  expected_output: "Root cause identified + solution reported (master applies fix)"
+  success_criteria:
+    pass: "Root cause identified, 7-section report, git rollback successful, master understands fix"
+    fail: "Wrong root cause, incomplete solution, rollback failed, black-box fix"
+  dependencies: [phase24_test_g_code]
+  notes: "May not be needed if g_code produces working code - test with deliberate error if needed"
+
+# =============================================================================
+# PHASE 26: TEST RQ_INSPECT
+# =============================================================================
+
+phase26_test_rq_inspect:
+  description: "Test rq_inspect agent (output validation)"
+  priority: CRITICAL
+  status: pending
+  agent: rq_inspect
+  specification_section: "2.4.2"
+  test_input: "Validate step outputs for ch5/rq1"
+  expected_output: "Four-layer validation passed + status.yaml analysis step marked success"
+  success_criteria:
+    pass: "Existence/structure/substance/logs validated, plan.md cross-referenced, status.yaml step pending→success"
+    fail: "Missing validation layer, no plan cross-reference, status.yaml not updated"
+  dependencies: [phase25_test_g_debug]
+  notes: "Tests four-layer validation + log file reading"
+
+# =============================================================================
+# PHASE 27: TEST RQ_PLOTS (CRITICAL - PLOTTING FUNCTION DETECTION)
+# =============================================================================
+
+phase27_test_rq_plots:
+  description: "Test rq_plots agent (plotting code generation + detection)"
+  priority: CRITICAL
+  status: pending
+  agent: rq_plots
+  specification_section: "2.5.1"
+  test_input: "Generate plots.py for ch5/rq1"
+  expected_output: "Agent MAY FAIL with missing plot functions → Add to tools/plots.py with TDD → Re-run → plots.py created"
+  success_criteria:
+    pass: "plots.py calls ONLY existing functions from tools/plots.py, no data aggregation, D069 compliance (dual-scale)"
+    fail: "Creates new plot functions, aggregates data, missing D069 dual-scale"
+  dependencies: [phase26_test_rq_inspect]
+  expected_failures: "MAY FAIL: 'Missing functions: [list]' if RQ needs function not in tools/plots.py"
+  plot_migration_steps:
+    step_4a: "Detect missing plot functions (agent FAILs with list)"
+    step_4b: "Add to tools/plots.py: Write test FIRST, implement, verify GREEN, ensure D069 compliance if trajectory plot"
+    step_4c: "Update tool_inventory.md with plotting function signatures"
+    step_4d: "Re-run rq_plots agent → should PASS"
+  notes: "SECOND CRITICAL MIGRATION PHASE - Parallel to rq_tools but for plotting functions"
+
+# =============================================================================
+# PHASE 28: TEST RQ_RESULTS
+# =============================================================================
+
+phase28_test_rq_results:
+  description: "Test rq_results agent (scientific plausibility + summary)"
+  priority: CRITICAL
+  status: pending
+  agent: rq_results
+  specification_section: "2.5.2"
+  test_input: "Create summary.md for ch5/rq1"
+  expected_output: "results/ch5/rq1/results/summary.md with plausibility check + 5 sections + status.yaml updated"
+  success_criteria:
+    pass: "6 plausibility checks performed, anomalies flagged (or 'acceptable'), multimodal PNG inspection, 5-section summary, healthy skepticism tone"
+    fail: "No plausibility checks, missing anomaly flags, no PNG inspection, missing sections"
+  dependencies: [phase27_test_rq_plots]
+  notes: "Tests scientific sanity checking (primary mission) THEN summary generation"
+
+# =============================================================================
+# PHASE 29: INTEGRATION TEST (RQ 5.1 END-TO-END)
+# =============================================================================
+
+phase29_integration:
+  description: "RQ 5.1 complete end-to-end execution (all agents orchestrated)"
+  priority: CRITICAL
+  status: pending
+  test_input: "Execute full 17-step workflow for ch5/rq1"
+  expected_output: "RQ 5.1 completes successfully from folder creation through results summary"
+  success_criteria:
+    pass: "All 17 steps complete, all agents execute without errors, all outputs validated, no g_debug iterations needed"
+    fail: "Any agent fails, missing outputs, validation failures"
+  dependencies: [phase28_test_rq_results]
+  notes: "Tests ORCHESTRATION by main claude - validates workflow coordination, not individual agents"
+  post_test_tasks:
+    - "Document lessons learned in docs/v4/lessons_learned.md"
+    - "Update docs_index.md with all v4.X documentation"
+    - "Archive v3 agents to _legacy/v3/agents/"
+    - "Create v4.X quick start guide (docs/v4/README.md)"
+    - "Mark v4.X implementation complete"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+total_testing_phases: 13 (17-29: 12 individual agents + 1 integration)
+agents_already_tested: 1 (g_conflict tested 2025-11-19)
+agents_remaining: 12
+critical_migration_phases:
+  - phase22_test_rq_tools: "First tool migration (analysis + validation functions)"
+  - phase27_test_rq_plots: "Plotting function migration"
+
+expected_timeline: "7-10 days for all testing phases"
+test_approach: "10-step sequence per agent, TDD migration when agents FAIL and tell us what's missing"
+workspace_strategy: "Accumulate artifacts in results/ch5/rq1/ for integration test"
+
+# =============================================================================
+# COMPLETED WORK (REFERENCE ONLY)
+# =============================================================================
+# For detailed history of Phases 0-16, see: docs/v4/build_history.md
+#
+# Completed:
+# - Phase 0: Names.md design (2025-11-15)
+# - Phase 1: Foundation (5 tasks, 2025-11-16)
+# - Phase 2: Templates (11 templates, 9,862 lines, 2025-11-16 to 2025-11-17)
+# - Phase 3: Thesis files migration (3 files, 50 RQs, 2025-11-17)
+# - Phases 4-16: All 13 agents built using 11-step process (2025-11-18 to 2025-11-19)
+#   - rq_builder, rq_concept, rq_scholar, rq_stats, g_conflict, rq_planner,
+#   - rq_tools, rq_analysis, g_code, g_debug, rq_inspect, rq_plots, rq_results
+# - g_conflict tested 2025-11-19 (v5.1 with 8-phase systematic approach)
+#
+# Total agent code: ~13,000 lines
+# Total implementation: 5 days (2025-11-15 to 2025-11-19)
