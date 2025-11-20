@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-11-15 (Added v4.X architecture specification - VALIDATED)
+**Last Updated:** 2025-11-22 (Added v4/tool_audit.md - comprehensive statistical functions inventory)
 
 ---
 
@@ -213,6 +213,18 @@
 **Audience:** rq_stats agent when creating standalone 1_stats.md validation report
 **Status:** Current (2025-11-21, updated for standalone file approach)
 **Key Topics:** 10-point rubric system (5 categories: statistical appropriateness, tool availability, parameter specification, validation procedures, devil's advocate analysis), decision thresholds (≥9.25 APPROVED, ≥9.0 CONDITIONAL, <9.0 REJECTED), two-pass WebSearch strategy (validation + challenge), devil's advocate criticisms (4 subsections: commission errors, omission errors, alternative approaches, known pitfalls), tool availability validation tables, IRT/LMM assumption checklists, thesis/methods.md integration
+
+### v4/tool_audit.md
+**Purpose:** Comprehensive statistical tools and functions inventory across REMEMVR codebase (legacy .archive/v1 + current tools/)
+**Audience:** ALL v4.X agents (rq_planner, rq_tools, rq_analysis, g_code, g_debug), main claude when referencing tool capabilities
+**Status:** Current (2025-11-22, comprehensive audit)
+**Key Topics:** 70+ statistical functions (36 legacy + 34 current), IRT calibration (7 functions), LMM analysis (10 functions), plotting (6 functions), validation (11 functions NEW), Decision implementations (D039 purify_items, D068 post_hoc_contrasts, D069 plot_trajectory_probability, D070 fit_lmm_with_tsvr), function signatures, usage patterns, comparative analysis (v1 vs current), RQ workflow mapping, tool-by-use-case reference, quick reference appendix, migration status, known gaps, 100% coverage for core RQ workflow
+
+### v4/naming_conventions.md
+**Purpose:** Unified naming system for tools, functions, files, and documentation across 50 RQs
+**Audience:** Main claude when adding new functions, ALL agents when referencing tools, developers
+**Status:** DRAFT (2025-11-22, awaiting user approval)
+**Key Topics:** Verb taxonomy (15 verbs standardized), noun taxonomy (25 nouns standardized), module naming rules, function naming patterns (verb_noun_qualifier), hierarchy conventions (pipeline vs atomic), anti-patterns to avoid (5 categories), proposed renames (5 functions), file naming, documentation naming, decision-specific functions, consistency checklist, agent communication patterns, quick reference guide
 
 ---
 
