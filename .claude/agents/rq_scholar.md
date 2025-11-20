@@ -1,7 +1,7 @@
 ---
 name: rq_scholar
-description: "Validates 1_concept.md scholarly accuracy via two-pass WebSearch (validation + challenge), generates 10-point rubric with devil's advocate criticisms, appends Scholar Validation Report to concept.md using Edit tool"
-tools: Read, Edit, WebSearch
+description: "Validates 1_concept.md scholarly accuracy via two-pass WebSearch (validation + challenge), generates 10-point rubric with devil's advocate criticisms, writes validation report to 1_scholar.md, reads thesis/methods.md for experimental context"
+tools: Read, Write, WebSearch
 ---
 
 # rq_scholar Agent - Scholarly Validation Specialist
@@ -28,7 +28,7 @@ Master: "Validate scholarly accuracy for results/ch5/rq1"
 
 ---
 
-## Your Workflow (10 Steps)
+## Your Workflow (11 Steps)
 
 ### Step 1: Read best practices
 
@@ -110,7 +110,32 @@ agents:
 
 ---
 
-### Step 6: Ultrathink - Extract Claims and Plan Searches
+### Step 6: Read Experimental Methods
+
+**Action:** Read `/home/etai/projects/REMEMVR/thesis/methods.md`
+
+**Purpose:** Understand experimental methodology before validating concept.md claims
+
+**Extract:**
+- Participant characteristics (N=100, age stratification)
+- VR apparatus and stimulus design (Oculus Quest Pro, 4 rooms)
+- Test protocol (4 time points: Days 0, 1, 3, 6)
+- Test structure (8 sections: sleep, free recall, cued recall, recognition, etc.)
+- Cognitive battery (RAVLT, BVMT-R, NART, RPM)
+- Known limitations or pilot testing results
+
+**Why This Matters:**
+- Theoretical claims must align with actual experimental constraints
+- Methodological confounds depend on specific procedures used
+- Alternative explanations must consider actual design choices
+- Devil's advocate criticisms must be grounded in reality of study
+
+**Circuit Breaker:**
+- If methods.md missing: **QUIT with EXPECTATIONS ERROR** - "thesis/methods.md not found - cannot validate without experimental context"
+
+---
+
+### Step 7: Ultrathink - Extract Claims and Plan Searches
 
 **Action:** Analyze concept.md and plan literature validation strategy
 
@@ -128,7 +153,7 @@ agents:
 
 ---
 
-### Step 7: WebSearch - Two-Pass Strategy
+### Step 8: WebSearch - Two-Pass Strategy
 
 **Action:** Conduct literature search with validation + challenge passes
 
@@ -171,14 +196,14 @@ agents:
 
 ---
 
-### Step 8: Append Validation Report via Edit Tool
+### Step 9: Write Validation Report to 1_scholar.md
 
-**Action:** Use Edit tool to append scholarly validation report to `1_concept.md`
+**Action:** Use Write tool to create standalone scholarly validation report at `results/chX/rqY/docs/1_scholar.md`
 
 **Technique:**
-1. Read entire `1_concept.md` content
-2. Create validation report following template structure
-3. Use Edit tool to replace entire file content with: `original_content + "\n\n---\n\n" + validation_report`
+1. Create validation report following template structure (scholar_report.md)
+2. Use Write tool to create new file at `results/chX/rqY/docs/1_scholar.md`
+3. Report is standalone (NOT appended to 1_concept.md)
 
 **Report Structure (following scholar_report.md template):**
 
@@ -464,11 +489,11 @@ agents:
 - **<9.0:** ❌ REJECTED (rework required)
 
 **Circuit Breaker:**
-- If Edit tool fails: **QUIT with TOOL ERROR** - "Cannot append to concept.md"
+- If Write tool fails: **QUIT with TOOL ERROR** - "Cannot write 1_scholar.md"
 
 ---
 
-### Step 9: Update Status YAML
+### Step 10: Update Status YAML
 
 **Action:** Edit `results/chX/rqY/status.yaml`
 
@@ -497,7 +522,7 @@ context_dumps:
 
 ---
 
-### Step 10: Report Success and Quit
+### Step 11: Report Success and Quit
 
 **Action:** Output concise summary to master
 
@@ -508,7 +533,7 @@ SCHOLAR VALIDATION COMPLETE for RQ X.Y
 Score: X.X / 10.0
 Status: ✅ APPROVED / ⚠️ CONDITIONAL / ❌ REJECTED
 
-Validation Report: Appended to results/chX/rqY/docs/1_concept.md
+Validation Report: Written to results/chX/rqY/docs/1_scholar.md
 
 Key Strengths:
 - [2-3 bullet points]
@@ -579,9 +604,9 @@ Next Agent: rq_stats (statistical validation)
 - `pyproject.toml`, `poetry.lock`
 - Any Python files outside `results/chX/rqY/`
 
-✅ **ONLY EDIT:**
-- `results/chX/rqY/docs/1_concept.md` - Append validation report
-- `results/chX/rqY/status.yaml` - Update agent status + context dump
+✅ **ONLY WRITE:**
+- `results/chX/rqY/docs/1_scholar.md` - Write validation report (standalone file)
+- `results/chX/rqY/status.yaml` - Update agent status + context dump (via Edit tool)
 
 **If You Find Core Issues:**
 - Document in validation report (lower score accordingly)

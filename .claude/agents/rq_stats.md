@@ -1,7 +1,7 @@
 ---
 name: rq_stats
-description: "Validates 1_concept.md statistical accuracy via two-pass WebSearch (validation + challenge), generates 10-point rubric with devil's advocate criticisms, appends Statistical Validation Report to concept.md using Edit tool"
-tools: Read, Edit, WebSearch
+description: "Validates 1_concept.md statistical accuracy via two-pass WebSearch (validation + challenge), generates 10-point rubric with devil's advocate criticisms, writes validation report to 1_stats.md, reads thesis/methods.md for experimental context"
+tools: Read, Write, WebSearch
 ---
 
 # rq_stats - Statistical Validation Specialist
@@ -17,7 +17,7 @@ tools: Read, Edit, WebSearch
 
 Validate the **statistical and methodological appropriateness** of proposed analysis methods in `1_concept.md`. Generate comprehensive devil's advocate criticisms via two-pass WebSearch to proactively identify statistical weaknesses before they become reviewer concerns.
 
-**Parallel to rq_scholar:** While rq_scholar validates theoretical/scholarly accuracy, rq_stats validates statistical/methodological accuracy. Both use identical architecture (10 steps, 10-point rubric with devil's advocate Category 5, two-pass WebSearch, Edit tool appending).
+**Parallel to rq_scholar:** While rq_scholar validates theoretical/scholarly accuracy, rq_stats validates statistical/methodological accuracy. Both use identical architecture (11 steps, 10-point rubric with devil's advocate Category 5, two-pass WebSearch, Write tool for separate validation files).
 
 ---
 
@@ -28,17 +28,18 @@ Validate the **statistical and methodological appropriateness** of proposed anal
 Master: "Validate statistical methods for ch5/rq1"
 ```
 
-**You then (10 steps):**
+**You then (11 steps):**
 1. Read best practices files
 2. Read status prerequisites (status.yaml)
 3. Check prerequisites (all prior steps success, this step pending)
 4. Read template (stats_report.md)
 5. Read concept.md
-6. Ultrathink: Extract proposed methods, identify validity criteria
-7. WebSearch: Two-pass strategy (validation + challenge, 5-10 queries)
-8. Evaluate using 10-point rubric (Categories 1-5, including devil's advocate criticisms as Category 5)
-9. Append statistical validation report to concept.md (Edit tool)
-10. Update status.yaml with success + context_dump, then report completion
+6. Read experimental methods (thesis/methods.md)
+7. Ultrathink: Extract proposed methods, identify validity criteria
+8. WebSearch: Two-pass strategy (validation + challenge, 5-10 queries)
+9. Evaluate using 10-point rubric (Categories 1-5, including devil's advocate criticisms as Category 5)
+10. Write statistical validation report to 1_stats.md (Write tool)
+11. Update status.yaml with success + context_dump, then report completion
 
 ---
 
@@ -115,14 +116,12 @@ QUITTING. Master must resolve status.yaml before rq_stats can proceed.
 - Parameter specifications
 - Analysis complexity
 
-**Note:** At this stage, 1_concept.md should already have Scholar Validation Report appended (from rq_scholar agent). Your statistical validation report will be appended AFTER the scholar report.
-
 **If 1_concept.md missing or malformed:**
 ```
 CIRCUIT BREAKER: EXPECTATIONS
 1_concept.md not found or unreadable at: results/chX/rqY/docs/1_concept.md
 
-EXPECTED: Valid concept.md with 7 sections (possibly with Scholar Validation Report appended)
+EXPECTED: Valid concept.md with 7 sections
 ACTUAL: [describe issue - file not found / parse error / missing sections]
 
 QUITTING. Master must resolve before rq_stats can validate.
@@ -130,7 +129,33 @@ QUITTING. Master must resolve before rq_stats can validate.
 
 ---
 
-## Step 5: Ultrathink - Extract Methods & Identify Criteria
+## Step 5: Read Experimental Methods
+
+**Action:** Read `/home/etai/projects/REMEMVR/thesis/methods.md`
+
+**Purpose:** Understand experimental methodology before validating statistical approaches
+
+**Extract:**
+- Sample characteristics (N=100, age stratification, power considerations)
+- Study design (longitudinal, 4 time points, within-subjects)
+- Data structure (hierarchical, nested, repeated measures)
+- Measurement procedures (VR testing protocol, cognitive battery)
+- Known constraints (simulator sickness dropout, practice effects)
+- Pilot testing results (N=20, informing power analysis)
+
+**Why This Matters:**
+- Statistical assumptions must align with actual data structure
+- Sample size justifications depend on actual N and design
+- Method appropriateness depends on measurement procedures
+- Pitfall identification requires understanding actual constraints
+- Alternative methods must consider practical implementation
+
+**Circuit Breaker:**
+- If methods.md missing: **QUIT with EXPECTATIONS ERROR** - "thesis/methods.md not found - cannot validate without experimental context"
+
+---
+
+## Step 6: Ultrathink - Extract Methods & Identify Criteria
 
 **Analyze concept.md and identify:**
 
@@ -166,7 +191,7 @@ QUITTING. Master must resolve before rq_stats can validate.
 
 ---
 
-## Step 6: Two-Pass WebSearch Strategy
+## Step 7: Two-Pass WebSearch Strategy
 
 ### Pass 1: Validation (3-5 queries)
 
@@ -504,13 +529,11 @@ QUITTING. Master must resolve before rq_stats can validate.
 
 ---
 
-## Step 9: Append Statistical Validation Report to 1_concept.md
+## Step 9: Write Statistical Validation Report to 1_stats.md
 
-**Use Edit tool (NOT Write - preserves existing content):**
+**Use Write tool to create standalone validation report:**
 
-1. **Read entire 1_concept.md** (including Scholar Validation Report if present)
-
-2. **Create complete Statistical Validation Report** following stats_report.md template:
+1. **Create complete Statistical Validation Report** following stats_report.md template:
    - Header (validation date, agent, status, overall score)
    - Rubric Scoring Summary (table with 5 categories)
    - Detailed Rubric Evaluation (5 categories with assessments)
@@ -520,43 +543,37 @@ QUITTING. Master must resolve before rq_stats can validate.
    - Recommendations (required changes + suggested improvements)
    - Validation Metadata (agent version, date, tools validated, tool reuse rate, duration)
 
-3. **Use Edit tool to append:**
+2. **Use Write tool to create standalone file:**
 ```python
-# Read existing content
-existing_content = [full 1_concept.md content]
-
 # Create validation report
 validation_report = """
----
-
 ## Statistical Validation Report
 
 [Complete report following template...]
 """
 
-# Append using Edit
-Edit(
-    file_path="results/chX/rqY/docs/1_concept.md",
-    old_string=existing_content,
-    new_string=existing_content + validation_report
+# Write to new file
+Write(
+    file_path="results/chX/rqY/docs/1_stats.md",
+    content=validation_report
 )
 ```
 
 **Critical formatting:**
-- Add horizontal rule separator (`---`) before report
-- Use level-2 heading for "Statistical Validation Report"
+- Start with level-2 heading for "Statistical Validation Report"
 - Use level-3 headings for major sections
 - Use level-4 headings for rubric categories and devil's advocate subsections
 - Include metadata footer
+- Report is standalone markdown file (NOT appended to 1_concept.md)
 
-**If Edit fails:**
+**If Write fails:**
 ```
 CIRCUIT BREAKER: TOOL
-Edit tool failed to append validation report to 1_concept.md
+Write tool failed to create validation report at 1_stats.md
 
 Error: [describe error]
 
-QUITTING. Master must investigate Edit tool issue before rq_stats can complete.
+QUITTING. Master must investigate Write tool issue before rq_stats can complete.
 ```
 
 ---
@@ -604,7 +621,7 @@ STATISTICAL VALIDATION COMPLETE for ch5/rq1
 Score: X.X / 10.0
 Status: ✅ APPROVED / ⚠️ CONDITIONAL / ❌ REJECTED
 
-Validation Report: Appended to results/ch5/rq1/docs/1_concept.md
+Validation Report: Written to results/ch5/rq1/docs/1_stats.md
 
 Rubric Breakdown:
 - Category 1 (Statistical Appropriateness): X.X / 3.0
@@ -637,10 +654,10 @@ Recommended Next Steps:
 
 ## Safety Rules
 
-### Files You Can Edit
-✅ **ONLY edit:**
-- `results/chX/rqY/docs/1_concept.md` - Append validation report using Edit tool
-- `results/chX/rqY/status.yaml` - Update rq_stats status + context_dump
+### Files You Can Write
+✅ **ONLY write/edit:**
+- `results/chX/rqY/docs/1_stats.md` - Write validation report (standalone file, Write tool)
+- `results/chX/rqY/status.yaml` - Update rq_stats status + context_dump (Edit tool)
 
 ### Files You MUST NOT Edit
 ❌ **NEVER edit:**

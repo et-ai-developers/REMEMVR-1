@@ -416,8 +416,8 @@
 
 **Frontmatter Requirements:**
 - name: rq_scholar
-- description: Validates 1_concept.md scholarly accuracy
-- tools: Read, Edit, WebSearch
+- description: Validates 1_concept.md scholarly accuracy, writes 1_scholar.md
+- tools: Read, Write, WebSearch
 
 **Goal:** Verify concept.md claims are theoretically accurate
 
@@ -430,17 +430,18 @@
 4. Check: All prior steps = success, this step onwards = pending (else FAIL)
 5. Read: docs/v4/templates/scholar_report.md
 6. Read: results/chX/rqY/docs/1_concept.md
-7. Ultrathink: Extract claims, identify required evidence
-8. WebSearch: Two-pass strategy (Pass 1: Verify claims, Pass 2: Challenge with counterevidence)
-9. Edit: Append rq_scholar feedback to 1_concept.md
-10. Edit: status.yaml (update this step to success, write context_dump with terse summary)
-11. Report: Success and quit
+7. Read: /home/etai/projects/REMEMVR/thesis/methods.md (experimental methodology for context)
+8. Ultrathink: Extract claims, identify required evidence
+9. WebSearch: Two-pass strategy (Pass 1: Verify claims, Pass 2: Challenge with counterevidence)
+10. Write: Create results/chX/rqY/docs/1_scholar.md (standalone validation report)
+11. Edit: status.yaml (update this step to success, write context_dump with terse summary)
+12. Report: Success and quit
 
 **Context Dump Format:**
 - Single terse sentence including: score/status, key strengths, number of recommendations
 - Example: "5.1 validated: 9.5/10 APPROVED. Theory excellent, literature strong, 4 suggested improvements. Ready for stats validation."
 
-**Report Format:** "Successfully validated 1_concept.md for chX/rqY - [N] claims verified"
+**Report Format:** "Successfully validated 1_concept.md for chX/rqY - [N] claims verified, wrote 1_scholar.md"
 
 ---
 
@@ -450,8 +451,8 @@
 
 **Frontmatter Requirements:**
 - name: rq_stats
-- description: Validates 1_concept.md statistical accuracy
-- tools: Read, Edit, WebSearch
+- description: Validates 1_concept.md statistical accuracy, writes 1_stats.md
+- tools: Read, Write, WebSearch
 
 **Goal:** Verify proposed statistical methods are valid
 
@@ -464,17 +465,18 @@
 4. Check: All prior steps = success, this step onwards = pending (else FAIL)
 5. Read: docs/v4/templates/stats_report.md
 6. Read: results/chX/rqY/docs/1_concept.md
-7. Ultrathink: Extract proposed methods, identify validity criteria
-8. WebSearch: Two-pass strategy (Pass 1: Verify appropriateness, Pass 2: Challenge with limitations)
-9. Edit: Append rq_stats feedback to 1_concept.md
-10. Edit: status.yaml (update this step to success, write context_dump with terse summary)
-11. Report: Success and quit
+7. Read: /home/etai/projects/REMEMVR/thesis/methods.md (experimental methodology for context)
+8. Ultrathink: Extract proposed methods, identify validity criteria
+9. WebSearch: Two-pass strategy (Pass 1: Verify appropriateness, Pass 2: Challenge with limitations)
+10. Write: Create results/chX/rqY/docs/1_stats.md (standalone validation report)
+11. Edit: status.yaml (update this step to success, write context_dump with terse summary)
+12. Report: Success and quit
 
 **Context Dump Format:**
 - Single terse sentence including: score/status, all 5 category scores, key strength or concern
 - Example: "9.5/10 APPROVED. Cat1: 3.0/3. Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2. Cat4: 2.0/2. Cat5: 0.5/1 (3 concerns)."
 
-**Report Format:** "Successfully validated 1_concept.md for chX/rqY - methods appropriate"
+**Report Format:** "Successfully validated 1_concept.md for chX/rqY - methods appropriate, wrote 1_stats.md"
 
 ---
 
@@ -1311,7 +1313,7 @@ results/chX/rqY/
 
 **Purpose:** Specification for scholarly validation feedback format
 
-**Audience:** rq_scholar agent when appending feedback to 1_concept.md
+**Audience:** rq_scholar agent when creating standalone 1_scholar.md validation report
 
 **Required Sections:**
 - Claims extracted from concept.md (numbered list)
@@ -1319,7 +1321,7 @@ results/chX/rqY/
 - Validation results per claim (supported/unsupported)
 - Recommendations (corrections, additions, clarifications)
 
-**Implementation:** Template file provides structure for rq_scholar to append to 1_concept.md
+**Implementation:** Template file provides structure for rq_scholar to write standalone 1_scholar.md file
 
 ---
 
@@ -1329,7 +1331,7 @@ results/chX/rqY/
 
 **Purpose:** Specification for statistical validation feedback format
 
-**Audience:** rq_stats agent when appending feedback to 1_concept.md
+**Audience:** rq_stats agent when creating standalone 1_stats.md validation report
 
 **Required Sections:**
 - Proposed methods from concept.md (numbered list)
@@ -1337,7 +1339,7 @@ results/chX/rqY/
 - Alternative considerations (other methods to consider)
 - Validation results (approved/rejected with rationale)
 
-**Implementation:** Template file provides structure for rq_stats to append to 1_concept.md
+**Implementation:** Template file provides structure for rq_stats to write standalone 1_stats.md file
 
 ---
 
@@ -1884,8 +1886,8 @@ signature: "purify_items(item_params: pd.DataFrame, thresholds: dict) -> pd.Data
 |-------|---------|-------|--------|------------|
 | rq_builder | Build folder structure | agent_best_practices, build_folder, build_status | status.yaml, folders | Master: "Successfully built chX/rqY" |
 | rq_concept | Extract RQ concept | agent_best_practices, status.yaml, concept template, thesis/ANALYSES_CHX | 1_concept.md, status.yaml context_dump | Master: "Successfully created 1_concept.md" |
-| rq_scholar | Validate scholarly accuracy | agent_best_practices, status.yaml, scholar_report template, 1_concept.md | 1_concept.md (append), status.yaml context_dump | Master: "Validated - [N] claims verified" |
-| rq_stats | Validate statistical methods | agent_best_practices, status.yaml, stats_report template, 1_concept.md | 1_concept.md (append), status.yaml context_dump | Master: "Validated - methods appropriate" |
+| rq_scholar | Validate scholarly accuracy | agent_best_practices, status.yaml, scholar_report template, 1_concept.md, thesis/methods.md | 1_scholar.md, status.yaml context_dump | Master: "Validated - [N] claims verified, wrote 1_scholar.md" |
+| rq_stats | Validate statistical methods | agent_best_practices, status.yaml, stats_report template, 1_concept.md, thesis/methods.md | 1_stats.md, status.yaml context_dump | Master: "Validated - methods appropriate, wrote 1_stats.md" |
 | rq_planner | Create analysis plan | agent_best_practices, status.yaml, plan template, 1_concept, data_structure, tool_inventory, names | 2_plan.md, status.yaml context_dump | Master: "Created 2_plan.md - [N] steps" |
 | rq_tools | Specify tool usage | agent_best_practices, status.yaml, tools template, 2_plan, tool_inventory, names | 3_tools.yaml, status.yaml context_dump | Master: "Created 3_tools.yaml - [N] tools" |
 | rq_analysis | Create analysis recipe | agent_best_practices, status.yaml, analysis template, 2_plan, 3_tools, names | 4_analysis.yaml, status.yaml (add analysis_steps + context_dump) | Master: "Created 4_analysis.yaml - [N] steps" |

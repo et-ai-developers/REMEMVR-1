@@ -88,7 +88,7 @@
 ### Agent 3: rq_scholar
 **Solution.md Reference:** Section 2.2.1
 **Purpose:** Validate 1_concept.md scholarly accuracy via literature search
-**Context Budget:** ~3k tokens (before WebSearch)
+**Context Budget:** ~3.5k tokens (before WebSearch, +thesis/methods.md)
 
 **Documents Read (Execution Order):**
 1. [R] .claude/agents/rq_scholar.md - Agent prompt
@@ -97,22 +97,23 @@
 4. [R] results/chX/rqY/status.yaml - Check prior steps + read context_dumps from rq_concept
 5. [R] docs/v4/templates/scholar_report.md - Scholarly feedback format
 6. [R] results/chX/rqY/docs/1_concept.md - Extract claims for validation
+7. [R] thesis/methods.md - Experimental methodology context
 
 **External Searches:**
 - [WebSearch] Two-pass strategy (Pass 1: verify claims, Pass 2: challenge with counterevidence)
 
-**Documents Updated:**
-- [U] results/chX/rqY/docs/1_concept.md - Append rq_scholar feedback section
+**Documents Written:**
+- [W] results/chX/rqY/docs/1_scholar.md - Write standalone validation report
 - [U] results/chX/rqY/status.yaml - rq_scholar.status = success, context_dump added (1 line: score/status, strengths, recommendations count)
 
-**Report:** "Successfully validated 1_concept.md for chX/rqY - [N] claims verified"
+**Report:** "Successfully validated 1_concept.md for chX/rqY - [N] claims verified, wrote 1_scholar.md"
 
 ---
 
 ### Agent 4: rq_stats
 **Solution.md Reference:** Section 2.2.2
 **Purpose:** Validate 1_concept.md statistical accuracy
-**Context Budget:** ~3k tokens (before WebSearch)
+**Context Budget:** ~3.5k tokens (before WebSearch, +thesis/methods.md)
 
 **Documents Read (Execution Order):**
 1. [R] .claude/agents/rq_stats.md - Agent prompt
@@ -121,15 +122,16 @@
 4. [R] results/chX/rqY/status.yaml - Check prior steps + read context_dumps from rq_concept, rq_scholar
 5. [R] docs/v4/templates/stats_report.md - Statistical feedback format
 6. [R] results/chX/rqY/docs/1_concept.md - Extract proposed methods
+7. [R] thesis/methods.md - Experimental methodology context
 
 **External Searches:**
-- [WebSearch] Two-pass strategy (Pass 1: verify appropriateness, Pass 2: challenge with limitations)
+- [WebSearch] Two-pass strategy (Pass 1: verify appropriateness, Pass 2: challenge with limitations, 6-10 queries)
 
-**Documents Updated:**
-- [U] results/chX/rqY/docs/1_concept.md - Append rq_stats feedback section
+**Documents Written:**
+- [W] results/chX/rqY/docs/1_stats.md - Write standalone validation report
 - [U] results/chX/rqY/status.yaml - rq_stats.status = success, context_dump added (1 line: score, 5 category scores, key strength/concern)
 
-**Report:** "Successfully validated 1_concept.md for chX/rqY - methods appropriate"
+**Report:** "Successfully validated 1_concept.md for chX/rqY - methods appropriate, wrote 1_stats.md"
 
 ---
 

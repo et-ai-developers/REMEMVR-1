@@ -202,6 +202,18 @@
 **Status:** Current (2025-11-21)
 **Key Topics:** Execution order for 13 agents, document read/write/update annotations, Phase 1 manual setup (10 agents), Phase 2 automated execution loop (g_code + rq_inspect + g_debug), Phase 3 results (rq_plots + rq_results), validation gates (g_conflict at steps 10 & 13, 4-layer validations), context window budgets per agent (<5k tokens), document reuse patterns, TDD approach for names.md, multimodal inspection for plots, quality control audit checklist
 
+### v4/templates/scholar_report.md
+**Purpose:** Template specification for rq_scholar agent scholarly validation feedback (10-point rubric with devil's advocate analysis)
+**Audience:** rq_scholar agent when creating standalone 1_scholar.md validation report
+**Status:** Current (2025-11-21, updated for standalone file approach)
+**Key Topics:** 10-point rubric system (5 categories), decision thresholds (≥9.25 APPROVED, ≥9.0 CONDITIONAL, <9.0 REJECTED), two-pass WebSearch strategy (validation + challenge), devil's advocate criticisms (4 subsections: commission errors, omission errors, alternative frameworks, methodological confounds), literature citation table, actionable recommendations, thesis/methods.md integration
+
+### v4/templates/stats_report.md
+**Purpose:** Template specification for rq_stats agent statistical validation feedback (10-point rubric with devil's advocate analysis)
+**Audience:** rq_stats agent when creating standalone 1_stats.md validation report
+**Status:** Current (2025-11-21, updated for standalone file approach)
+**Key Topics:** 10-point rubric system (5 categories: statistical appropriateness, tool availability, parameter specification, validation procedures, devil's advocate analysis), decision thresholds (≥9.25 APPROVED, ≥9.0 CONDITIONAL, <9.0 REJECTED), two-pass WebSearch strategy (validation + challenge), devil's advocate criticisms (4 subsections: commission errors, omission errors, alternative approaches, known pitfalls), tool availability validation tables, IRT/LMM assumption checklists, thesis/methods.md integration
+
 ---
 
 **Notes:**

@@ -31,7 +31,7 @@
 
 ### Purpose
 
-This template specifies the format for **statistical validation feedback** that the `rq_stats` agent appends to `1_concept.md`. The feedback uses a **10-point rubric system** (enhanced from v3.0 for production-proven rigor + devil's advocate challenges) to systematically evaluate statistical appropriateness, tool availability, parameter specification, validation procedures, and thoroughness of statistical criticism generation.
+This template specifies the format for **statistical validation feedback** that the `rq_stats` agent writes to standalone `1_stats.md` file. The feedback uses a **10-point rubric system** (enhanced from v3.0 for production-proven rigor + devil's advocate challenges) to systematically evaluate statistical appropriateness, tool availability, parameter specification, validation procedures, and thoroughness of statistical criticism generation.
 
 ### Key Features
 
@@ -45,11 +45,12 @@ This template specifies the format for **statistical validation feedback** that 
 
 ### Workflow Integration
 
-1. **rq_stats reads this template** (step 4 of agent workflow)
+1. **rq_stats reads this template** (step 5 of agent workflow)
 2. **rq_stats evaluates 1_concept.md** against rubric criteria
-3. **rq_stats conducts methodology validation** (tool availability, parameter appropriateness, validation procedures)
-4. **rq_stats appends formatted feedback** to 1_concept.md (step 8 using Edit tool)
-5. **User reviews feedback** before proceeding to planning phase
+3. **rq_stats reads thesis/methods.md** for experimental context (step 7)
+4. **rq_stats conducts methodology validation** (tool availability, parameter appropriateness, validation procedures)
+5. **rq_stats writes formatted feedback** to standalone 1_stats.md file (step 9 using Write tool)
+6. **User reviews 1_stats.md** before proceeding to planning phase
 
 ---
 
@@ -61,20 +62,21 @@ This template specifies the format for **statistical validation feedback** that 
 **File:** `.claude/agents/rq_stats.md`
 
 **Steps:**
-1. Read: `docs/v4/agent_best_practices.md`
+1. Read: `docs/v4/best_practices/universal.md` + `workflow.md`
 2. Read: `results/chX/rqY/status.yaml` (prior context dumps)
 3. Check: All prior steps success, this step onwards pending
 4. **Read: `docs/v4/templates/stats_report.md`** ← This template
 5. Read: `results/chX/rqY/docs/1_concept.md`
-6. Ultrathink: Extract proposed methods, identify validity criteria
-7. WebSearch: Verify method appropriateness (if needed for novel methods)
-8. **Edit: Append formatted feedback to `1_concept.md`** ← Uses this template format
-9. Edit: `status.yaml` (update success + context_dump)
-10. Report: "Successfully validated 1_concept.md for chX/rqY - methods appropriate"
+6. Read: `/home/etai/projects/REMEMVR/thesis/methods.md` (experimental methodology)
+7. Ultrathink: Extract proposed methods, identify validity criteria
+8. WebSearch: Two-pass strategy (validation + challenge for 6-10 queries)
+9. **Write: Create standalone `1_stats.md` file** ← Uses this template format
+10. Edit: `status.yaml` (update success + context_dump)
+11. Report: "Successfully validated 1_concept.md for chX/rqY - methods appropriate, wrote 1_stats.md"
 
 ### Output Location
 
-**NOT a separate file** - Feedback is **appended directly to `1_concept.md`** as a new section.
+**Standalone file** - Validation report written to `results/chX/rqY/docs/1_stats.md` (separate from concept.md to prevent context bloat).
 
 ---
 

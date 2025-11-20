@@ -29,7 +29,7 @@
 
 ### Purpose
 
-This template specifies the format for **scholarly validation feedback** that the `rq_scholar` agent appends to `1_concept.md`. The feedback uses a **10-point rubric system** (preserved from v3.0 for production-proven rigor) to systematically evaluate theoretical grounding, literature support, interpretation guidelines, theoretical implications, and reviewer rebuttals.
+This template specifies the format for **scholarly validation feedback** that the `rq_scholar` agent writes to standalone `1_scholar.md` file. The feedback uses a **10-point rubric system** (preserved from v3.0 for production-proven rigor) to systematically evaluate theoretical grounding, literature support, interpretation guidelines, theoretical implications, and reviewer rebuttals.
 
 ### Key Features
 
@@ -41,11 +41,12 @@ This template specifies the format for **scholarly validation feedback** that th
 
 ### Workflow Integration
 
-1. **rq_scholar reads this template** (step 4 of agent workflow)
+1. **rq_scholar reads this template** (step 5 of agent workflow)
 2. **rq_scholar evaluates 1_concept.md** against rubric criteria
-3. **rq_scholar conducts literature search** via WebSearch tool
-4. **rq_scholar appends formatted feedback** to 1_concept.md (step 8 using Edit tool)
-5. **User reviews feedback** before proceeding to planning phase
+3. **rq_scholar reads thesis/methods.md** for experimental context (step 7)
+4. **rq_scholar conducts literature search** via WebSearch tool
+5. **rq_scholar writes formatted feedback** to standalone 1_scholar.md file (step 10 using Write tool)
+6. **User reviews 1_scholar.md** before proceeding to statistical validation
 
 ---
 
@@ -57,30 +58,31 @@ This template specifies the format for **scholarly validation feedback** that th
 **File:** `.claude/agents/rq_scholar.md`
 
 **Steps:**
-1. Read: `docs/v4/agent_best_practices.md`
+1. Read: `docs/v4/best_practices/universal.md` + `workflow.md`
 2. Read: `results/chX/rqY/status.yaml` (prior context dumps)
 3. Check: All prior steps success, this step onwards pending
 4. **Read: `docs/v4/templates/scholar_report.md`** ← This template
 5. Read: `results/chX/rqY/docs/1_concept.md`
-6. Ultrathink: Extract claims, identify required evidence
-7. WebSearch: Two-pass strategy (validation + challenge)
-   - **Pass 1:** Verify claims are accurate (5+ queries supporting evidence)
-   - **Pass 2:** Search for counterevidence, alternative theories, limitations (5+ queries challenging)
-8. **Edit: Append formatted feedback to `1_concept.md`** ← Uses this template format
-9. Edit: `status.yaml` (update success + context_dump)
-10. Report: "Successfully validated 1_concept.md for chX/rqY - [N] claims verified"
+6. Read: `/home/etai/projects/REMEMVR/thesis/methods.md` (experimental methodology)
+7. Ultrathink: Extract claims, identify required evidence
+8. WebSearch: Two-pass strategy (validation + challenge)
+   - **Pass 1:** Verify claims are accurate (3-5 queries supporting evidence)
+   - **Pass 2:** Search for counterevidence, alternative theories, limitations (3-5 queries challenging)
+9. **Write: Create standalone `1_scholar.md` file** ← Uses this template format
+10. Edit: `status.yaml` (update success + context_dump)
+11. Report: "Successfully validated 1_concept.md for chX/rqY - [N] claims verified, wrote 1_scholar.md"
 
 ### Output Location
 
-**NOT a separate file** - Feedback is **appended directly to `1_concept.md`** as a new section.
+**Standalone file** - Validation report written to `results/chX/rqY/docs/1_scholar.md` (separate from concept.md to prevent context bloat).
 
 ---
 
 ## Report Structure
 
-### Section Sequence (Appended to 1_concept.md)
+### Section Sequence (in 1_scholar.md)
 
-When `rq_scholar` appends validation feedback, it creates this structure:
+When `rq_scholar` writes validation feedback to 1_scholar.md, it creates this structure:
 
 ```markdown
 ---
