@@ -19,7 +19,7 @@ The 3_tools.yaml file specifies **analysis tool + validation tool pairs** for ea
 - **Full Type Signatures:** Functions specified with complete type hints (prevents v3.0 API mismatches)
 - **Sequential Dependency:** Validation tool inputs = analysis tool outputs (validation reads what analysis wrote)
 - **YAML Format:** Structured specification for programmatic reading
-- **Tool Inventory Integration:** rq_tools reads tool_inventory.md for available validation tools
+- **Tool Inventory Integration:** rq_tools reads tools_inventory.md for available validation tools
 
 ### Workflow Context
 
@@ -191,7 +191,7 @@ calibrate_grm:  # Tool name (key in analysis_tools dictionary)
 
   description: "Calibrate multidimensional GRM on all items (Pass 1 of 2-pass purification per Decision D039)"
 
-  source_reference: "tool_inventory.md section 'IRT Analysis Tools'"
+  source_reference: "tools_inventory.md section 'IRT Analysis Tools'"
 ```
 
 **Field Descriptions:**
@@ -204,13 +204,13 @@ calibrate_grm:  # Tool name (key in analysis_tools dictionary)
 **function (required):**
 - Function name exactly as defined in module
 - Case-sensitive (Python naming conventions)
-- rq_tools reads tool_inventory.md to get exact name
+- rq_tools reads tools_inventory.md to get exact name
 
 **signature (required):**
 - **CRITICAL:** Full function signature with type hints
 - Format: `function_name(param1: Type1, param2: Type2, ...) -> ReturnType`
 - Type hints prevent v3.0 API mismatches (agent cannot guess parameter types)
-- Must match tool_inventory.md signature exactly
+- Must match tools_inventory.md signature exactly
 
 **input_files (required):**
 - List of input files this analysis tool reads
@@ -240,8 +240,8 @@ calibrate_grm:  # Tool name (key in analysis_tools dictionary)
 - Used by rq_results agent when summarizing workflow
 
 **source_reference (optional but recommended):**
-- Cross-reference to tool_inventory.md section documenting this tool
-- Format: "tool_inventory.md section '{Section Name}'"
+- Cross-reference to tools_inventory.md section documenting this tool
+- Format: "tools_inventory.md section '{Section Name}'"
 - Helps future debugging if API changes
 
 ---
@@ -285,7 +285,7 @@ validation:
 
   description: "Validate IRT item parameters are in acceptable ranges, no estimation failures"
 
-  source_reference: "tool_inventory.md section 'IRT Validation Tools'"
+  source_reference: "tools_inventory.md section 'IRT Validation Tools'"
 ```
 
 **Field Descriptions:**
@@ -295,16 +295,16 @@ validation:
 - Can be different if validation is domain-specific (e.g., `tools.analysis_irt.validate_convergence`)
 
 **function (required):**
-- Validation function name from tool_inventory.md
+- Validation function name from tools_inventory.md
 - **Pairing Approach (Dual Strategy):**
-  1. **Explicit:** tool_inventory.md documents "Recommended Validation" per analysis function
+  1. **Explicit:** tools_inventory.md documents "Recommended Validation" per analysis function
   2. **Inference:** rq_tools infers from analysis type (IRT → validate_irt_*, LMM → validate_lmm_*, plotting → validate_file_exists)
   3. **Fallback:** If neither works → circuit breaker: VALIDATION_TOOL_UNKNOWN
 
 **signature (required):**
 - **CRITICAL:** Full signature with type hints (like analysis tool)
 - Prevents API mismatches in validation calls
-- Must match tool_inventory.md exactly
+- Must match tools_inventory.md exactly
 
 **input_files (required):**
 - **SEQUENTIAL DEPENDENCY:** Validation inputs = analysis outputs
@@ -341,7 +341,7 @@ validation:
 - Used by rq_results when summarizing validation coverage
 
 **source_reference (optional but recommended):**
-- Cross-reference to tool_inventory.md validation section
+- Cross-reference to tools_inventory.md validation section
 
 ---
 
@@ -382,7 +382,7 @@ analysis_tools:
       max_iter: "int (default: 200)"
 
     description: "Calibrate multidimensional GRM on all 102 items (Pass 1 of 2-pass purification per Decision D039)"
-    source_reference: "tool_inventory.md section 'IRT Analysis Tools' - calibrate_grm"
+    source_reference: "tools_inventory.md section 'IRT Analysis Tools' - calibrate_grm"
 
 # 3_tools.yaml - Validation Tools Section
 validation_tools:
@@ -419,7 +419,7 @@ validation_tools:
         invoke: "g_debug (master invokes)"
 
       description: "Validate IRT parameters in acceptable ranges, no estimation failures, all items present"
-      source_reference: "tool_inventory.md section 'IRT Validation Tools' - validate_irt_parameters"
+      source_reference: "tools_inventory.md section 'IRT Validation Tools' - validate_irt_parameters"
 ```
 
 ---
@@ -449,7 +449,7 @@ validation_tools:
         min_discrimination: 0.4  # Per Decision D039: a < 0.4 excluded
 
       description: "Filter items meeting quality thresholds (2-pass IRT purification per Decision D039)"
-      source_reference: "tool_inventory.md section 'IRT Analysis Tools' - purify_items"
+      source_reference: "tools_inventory.md section 'IRT Analysis Tools' - purify_items"
 
     validation:
       module: "tools.validation"
@@ -490,7 +490,7 @@ validation_tools:
         invoke: "g_debug (master invokes)"
 
       description: "Validate all retained items meet Decision D039 thresholds (no edge cases slipped through)"
-      source_reference: "tool_inventory.md section 'Data Validation Tools' - validate_numeric_range"
+      source_reference: "tools_inventory.md section 'Data Validation Tools' - validate_numeric_range"
 ```
 
 ---
@@ -530,7 +530,7 @@ validation_tools:
         method: "REML"                         # Estimation method
 
       description: "Fit LMM with TSVR (actual hours) as time variable per Decision D070, group × time interaction"
-      source_reference: "tool_inventory.md section 'LMM Analysis Tools' - fit_lmm_with_tsvr"
+      source_reference: "tools_inventory.md section 'LMM Analysis Tools' - fit_lmm_with_tsvr"
 
     validation:
       module: "tools.validation"
@@ -565,7 +565,7 @@ validation_tools:
         invoke: "g_debug (master invokes)"
 
       description: "Validate LMM converged successfully, no singular fit, all estimates finite"
-      source_reference: "tool_inventory.md section 'LMM Validation Tools' - validate_lmm_convergence"
+      source_reference: "tools_inventory.md section 'LMM Validation Tools' - validate_lmm_convergence"
 ```
 
 ---
@@ -604,7 +604,7 @@ validation_tools:
         theme: "publication"
 
       description: "Generate dual-scale trajectory plots (theta + probability) per Decision D069 for interpretability"
-      source_reference: "tool_inventory.md section 'Plotting Tools' - plot_trajectory_probability"
+      source_reference: "tools_inventory.md section 'Plotting Tools' - plot_trajectory_probability"
 
     validation:
       module: "tools.validation"
@@ -638,7 +638,7 @@ validation_tools:
         invoke: "g_debug (master invokes)"
 
       description: "Validate both plot files created successfully, not empty, readable format"
-      source_reference: "tool_inventory.md section 'File Validation Tools' - validate_file_exists"
+      source_reference: "tools_inventory.md section 'File Validation Tools' - validate_file_exists"
 ```
 
 ---
@@ -652,20 +652,20 @@ The rq_tools agent follows this process:
 1. **Read** this template (docs/v4/templates/tools.md)
 2. **Read** 2_plan.md (analysis plan with step-by-step workflow)
 3. **Read** status.yaml (rq_planner context_dump with step count)
-4. **Read** tool_inventory.md (ALL available analysis + validation tools with signatures)
+4. **Read** tools_inventory.md (ALL available analysis + validation tools with signatures)
 5. **Read** project_specific_stats_insights.md (mandatory requirements: D039, D068, D069, D070)
 6. **Read** names.md (check if naming conventions exist for step names)
 7. **Read** agent_best_practices.md (circuit breaker rules, YAML parsing rules)
 8. **Ultrathink** tool selection per step:
-   - What analysis tool matches step description? (from tool_inventory.md)
-   - What validation tool corresponds? (explicit pairing in tool_inventory.md OR infer from analysis type)
+   - What analysis tool matches step description? (from tools_inventory.md)
+   - What validation tool corresponds? (explicit pairing in tools_inventory.md OR infer from analysis type)
    - What parameters? (from 2_plan.md + project_specific_stats_insights.md)
    - What input/output files? (from 2_plan.md)
-   - Are type signatures complete? (CRITICAL - copy from tool_inventory.md exactly)
+   - Are type signatures complete? (CRITICAL - copy from tools_inventory.md exactly)
 9. **Verify** no conflicts:
-   - All analysis tools exist in tool_inventory.md
-   - All validation tools exist in tool_inventory.md
-   - Type signatures match tool_inventory.md exactly
+   - All analysis tools exist in tools_inventory.md
+   - All validation tools exist in tools_inventory.md
+   - Type signatures match tools_inventory.md exactly
    - Input/output file paths consistent with 2_plan.md
 10. **Write** 3_tools.yaml following this template structure
 11. **Update** status.yaml (rq_tools: success, context_dump)
@@ -675,7 +675,7 @@ The rq_tools agent follows this process:
 
 **Approach 1: Explicit Pairing (Preferred)**
 
-tool_inventory.md documents "Recommended Validation" per analysis function:
+tools_inventory.md documents "Recommended Validation" per analysis function:
 
 ```markdown
 ### calibrate_grm
@@ -689,7 +689,7 @@ rq_tools reads this → pairs `calibrate_grm` with `validate_irt_parameters` aut
 
 **Approach 2: Inference from Context (Fallback)**
 
-If tool_inventory.md lacks explicit pairing, rq_tools infers:
+If tools_inventory.md lacks explicit pairing, rq_tools infers:
 
 - Analysis module `tools.analysis_irt` → Validation module `tools.validation` with `validate_irt_*` functions
 - Analysis module `tools.analysis_lmm` → Validation module `tools.validation` with `validate_lmm_*` functions
@@ -699,15 +699,15 @@ If tool_inventory.md lacks explicit pairing, rq_tools infers:
 
 If NEITHER approach succeeds:
 - Quit with error: VALIDATION_TOOL_UNKNOWN
-- Report to master: "Cannot determine validation tool for {analysis_function}. Update tool_inventory.md with 'Recommended Validation' field."
-- Master must update tool_inventory.md or create validation tool
+- Report to master: "Cannot determine validation tool for {analysis_function}. Update tools_inventory.md with 'Recommended Validation' field."
+- Master must update tools_inventory.md or create validation tool
 - Retry rq_tools after fix
 
 ---
 
 ## What rq_tools Does NOT Do
 
-- **Does NOT create new tools:** Only specifies existing tools from tool_inventory.md
+- **Does NOT create new tools:** Only specifies existing tools from tools_inventory.md
 - **Does NOT execute tools:** That's bash execution in Step 14
 - **Does NOT write code:** That's g_code job in Step 14
 - **Does NOT validate analysis outputs:** That's validation tools job during execution
@@ -750,29 +750,10 @@ tool_functions:
 
 ### v4.X Approach (Current Architecture)
 
-**v4.X 3_tools.yaml:**
+**v4.X uses Tool Catalog structure (see lines 109-138 above for complete format).**
 
-```yaml
-tool_pairs:
-  - name: "step01_calibrate_irt_pass1"
-    analysis:
-      module: "tools.analysis_irt"
-      function: "calibrate_grm"
-      signature: "calibrate_grm(data: pd.DataFrame, groups: Dict[str, List[str]], config: Dict[str, Any]) -> Tuple[pd.DataFrame, pd.DataFrame]"
-      input_files: [...]
-      output_files: [...]
-      parameters: {...}
-    validation:
-      module: "tools.validation"
-      function: "validate_irt_parameters"
-      signature: "validate_irt_parameters(params_df: pd.DataFrame, disc_range: Tuple[float, float], diff_range: Tuple[float, float]) -> Dict[str, Any]"
-      input_files: [...]  # Uses analysis outputs
-      parameters: {...}
-      criteria: [...]
-```
-
-**v4.X Improvements:**
-- ✅ Validation tools mandatory per tool pair
+**v4.X Improvements over v3.0:**
+- ✅ Validation tools mandatory (paired with analysis tools via `validation_tool:` reference)
 - ✅ Type signatures prevent API guessing
 - ✅ Input/output files as lists (flexible)
 - ✅ No circular dependencies (parameters inline, not config section references)
@@ -782,7 +763,7 @@ tool_pairs:
 **v4.X Architecture Benefits:**
 - Validation catches errors at source (not 5 steps later)
 - Type hints eliminate API mismatches (g_code copies signatures exactly)
-- Tool pairs enforce 1:1 analysis→validation relationship
+- Tool catalog enforces deduplication (each tool listed ONCE)
 - Explicit criteria enable debugging (know what validation checks)
 
 ---
@@ -794,12 +775,12 @@ tool_pairs:
 **Background:** todo.yaml Phase 4 (V1-V4) migrates v3 validation tools to v4.X architecture.
 
 **Dependency:**
-- **V3 task:** Update tool_inventory.md with validation tools section
-- **Completion:** Before rq_tools can run (rq_tools reads tool_inventory.md for validation signatures)
+- **V3 task:** Update tools_inventory.md with validation tools section
+- **Completion:** Before rq_tools can run (rq_tools reads tools_inventory.md for validation signatures)
 
 **What rq_tools Needs from Phase 4:**
 
-1. **tool_inventory.md Validation Section:**
+1. **tools_inventory.md Validation Section:**
    - All validation functions listed with full signatures
    - "Recommended Validation" field per analysis function (explicit pairing)
    - Input/output formats documented
@@ -810,7 +791,7 @@ tool_pairs:
    - Type hints complete (no `Any` for critical parameters)
    - All validation functions tested (100% coverage per Phase 4 V4 task)
 
-**Example tool_inventory.md Entry:**
+**Example tools_inventory.md Entry:**
 
 ```markdown
 ### calibrate_grm
@@ -847,11 +828,11 @@ The rq_tools agent MUST quit immediately (no guessing) on these errors:
 
 ### CB1: TOOL_NOT_FOUND
 
-**Trigger:** 2_plan.md describes analysis step, but no matching tool in tool_inventory.md
+**Trigger:** 2_plan.md describes analysis step, but no matching tool in tools_inventory.md
 
 **Example:**
 - Plan says: "Step 3: Perform factor analysis on theta scores"
-- tool_inventory.md has no `perform_factor_analysis` function
+- tools_inventory.md has no `perform_factor_analysis` function
 - Circuit breaker triggers
 
 **Error Message:**
@@ -860,7 +841,7 @@ CIRCUIT BREAKER: TOOL_NOT_FOUND
 
 Step: step03_factor_analysis
 Required: Factor analysis tool
-Available: [list of tool_inventory.md analysis tools]
+Available: [list of tools_inventory.md analysis tools]
 
 The plan requires a tool that does not exist. Either:
 1. Add the tool to tools/ (following TDD: write test first)
@@ -880,7 +861,7 @@ Quitting now. Master must resolve before rq_tools can proceed.
 
 **Example:**
 - Analysis tool: `calibrate_grm`
-- tool_inventory.md has NO "Recommended Validation" field for `calibrate_grm`
+- tools_inventory.md has NO "Recommended Validation" field for `calibrate_grm`
 - Inference fails (no `validate_irt_*` functions in tools.validation)
 - Circuit breaker triggers
 
@@ -890,23 +871,23 @@ CIRCUIT BREAKER: VALIDATION_TOOL_UNKNOWN
 
 Analysis Tool: calibrate_grm (module: tools.analysis_irt)
 Required: Validation tool for IRT calibration
-Available Validation Tools: [list from tool_inventory.md]
+Available Validation Tools: [list from tools_inventory.md]
 
 Cannot determine which validation tool to pair with this analysis tool. Either:
-1. Add "Recommended Validation: {function_name}" to tool_inventory.md for calibrate_grm
+1. Add "Recommended Validation: {function_name}" to tools_inventory.md for calibrate_grm
 2. Create validation tool (e.g., validate_irt_calibration) in tools.validation
 3. Update agent inference rules if validation tool exists but naming doesn't match pattern
 
-Quitting now. Master must update tool_inventory.md before rq_tools can proceed.
+Quitting now. Master must update tools_inventory.md before rq_tools can proceed.
 ```
 
-**Resolution:** Master updates tool_inventory.md with explicit pairing
+**Resolution:** Master updates tools_inventory.md with explicit pairing
 
 ---
 
 ### CB3: SIGNATURE_INCOMPLETE
 
-**Trigger:** tool_inventory.md function signature lacks type hints
+**Trigger:** tools_inventory.md function signature lacks type hints
 
 **Example:**
 - Function: `calibrate_grm(data, groups, config)` (no type hints)
@@ -921,14 +902,14 @@ Function: calibrate_grm
 Current Signature: calibrate_grm(data, groups, config)
 Required: Type hints for ALL parameters and return value
 
-Type hints are CRITICAL for v4.X architecture (prevent v3.0 API mismatches). Update tool_inventory.md with complete signature including:
+Type hints are CRITICAL for v4.X architecture (prevent v3.0 API mismatches). Update tools_inventory.md with complete signature including:
 - Parameter types (e.g., data: pd.DataFrame)
 - Return type (e.g., -> Tuple[pd.DataFrame, pd.DataFrame])
 
-Quitting now. Master must update tool_inventory.md before rq_tools can proceed.
+Quitting now. Master must update tools_inventory.md before rq_tools can proceed.
 ```
 
-**Resolution:** Master updates tool_inventory.md with type hints
+**Resolution:** Master updates tools_inventory.md with type hints
 
 ---
 
@@ -940,7 +921,7 @@ Quitting now. Master must update tool_inventory.md before rq_tools can proceed.
 - Analysis tool requires `convergence_threshold` parameter
 - 2_plan.md does not specify value
 - project_specific_stats_insights.md does not specify value
-- No default value in tool_inventory.md
+- No default value in tools_inventory.md
 - Circuit breaker triggers
 
 **Error Message:**
@@ -952,12 +933,12 @@ Parameter: convergence_threshold (type: float)
 Sources Checked:
 - 2_plan.md: Not specified
 - project_specific_stats_insights.md: Not specified
-- tool_inventory.md: No default documented
+- tools_inventory.md: No default documented
 
 Cannot infer parameter value. Either:
 1. Add to 2_plan.md (if RQ-specific)
 2. Add to project_specific_stats_insights.md (if project-wide requirement)
-3. Add default to tool_inventory.md function documentation
+3. Add default to tools_inventory.md function documentation
 
 Quitting now. Master must provide parameter value before rq_tools can proceed.
 ```
@@ -1020,7 +1001,7 @@ When template is complete, verify:
 - [ ] Integration with Phase 4 Validation Migration documented
 - [ ] Circuit breaker triggers documented (5 types: TOOL_NOT_FOUND, VALIDATION_TOOL_UNKNOWN, SIGNATURE_INCOMPLETE, PARAMETER_UNKNOWN, INPUT_OUTPUT_MISMATCH)
 - [ ] Template is very comprehensive (700-900 lines per user requirement)
-- [ ] tool_inventory.md referenced but not duplicated (per user requirement)
+- [ ] tools_inventory.md referenced but not duplicated (per user requirement)
 - [ ] Type signatures emphasized (prevents v3.0 API mismatches)
 - [ ] Sequential dependency explained (validation inputs = analysis outputs)
 
@@ -1032,7 +1013,7 @@ When template is complete, verify:
   - Very comprehensive structure (700-900 lines per user requirement)
   - Nested YAML structure (tool_pairs per step)
   - Dual pairing approach (explicit + inference)
-  - tool_inventory.md integration (reference only, no duplication)
+  - tools_inventory.md integration (reference only, no duplication)
   - Complete examples (IRT, LMM, plotting)
   - Circuit breaker documentation (5 triggers)
   - Aligned with specification section 4.2.3

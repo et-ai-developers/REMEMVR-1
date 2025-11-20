@@ -44,7 +44,7 @@ This analysis examines domain-specific forgetting trajectories for three episodi
 **Processing:**
 1. Load dfData.csv (columns: UID, TEST, TSVR, TQ_*)
 2. Dichotomize TQ_* values: <1  0 (incorrect), e1  1 (correct) per 1_concept.md Step 2
-3. Reshape to long format using irt_data_prep tool with:
+3. Reshape to long format using standard pandas operations with:
  - composite = ["UID", "TEST"] (creates composite_ID = UID_test)
  - time = "TSVR" (preserve time variable for later merge)
  - items = ["TQ_*"] (all VR items)
@@ -65,7 +65,7 @@ This analysis examines domain-specific forgetting trajectories for three episodi
  - Purpose: Merge with theta scores in Step 4 per Decision D070
 
 **Validation Requirement:**
-Validation tools MUST be used after data extraction tool execution. Specific validation tools will be determined by rq_tools based on extraction type (master.xlsx via dfData.csv validation).
+Validation tools MUST be used after data extraction tool execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -135,7 +135,7 @@ Successfully extract all VR item responses in wide format for IRT calibration + 
  - Purpose: Diagnostic only, verify model convergence
 
 **Validation Requirement:**
-Validation tools MUST be used after IRT Pass 1 calibration tool execution. Specific validation tools determined by rq_tools (likely tools.validation.validate_irt_calibration for convergence, fit indices, Q3 statistic per 1_concept.md Step 4).
+Validation tools MUST be used after IRT Pass 1 calibration tool execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -204,7 +204,7 @@ IRT model converges, produces item parameters for all items. Some items expected
  - Content: Lists excluded items, reasons (extreme difficulty vs. low discrimination), retention rate per dimension
 
 **Validation Requirement:**
-Validation tools MUST be used after item purification tool execution. Specific validation tools determined by rq_tools (likely tools.validation.validate_purification for dimension retention, threshold application).
+Validation tools MUST be used after item purification tool execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -355,7 +355,7 @@ P001 T2 When 0.55 0.26 1.01
 ```
 
 **Validation Requirement:**
-Validation tools MUST be used after TSVR merge and reshape tool execution. Specific validation tools determined by rq_tools (likely tools.validation.validate_data_merge for composite_ID matching, TSVR completeness).
+Validation tools MUST be used after TSVR merge and reshape tool execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -432,7 +432,7 @@ Successfully merge theta scores with actual time variable (TSVR) and reshape to 
  - Purpose: Model predictions for plotting in Step 7
 
 **Validation Requirement:**
-Validation tools MUST be used after LMM fitting tool execution. Specific validation tools determined by rq_tools (likely tools.validation.validate_lmm_convergence, tools.validation.validate_lmm_residuals for assumption diagnostics per 1_concept.md).
+Validation tools MUST be used after LMM fitting tool execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -505,7 +505,7 @@ Best model selected via AIC, Domain x Time interaction significant (supports hyp
  - Columns: effect (object: contrast name or interaction term), value (float64: Cohen's d or *²), interpretation (object: "small", "medium", "large"), threshold (object: Cohen's d e0.2, *² e0.01)
 
 **Validation Requirement:**
-Validation tools MUST be used after post-hoc contrast tool execution. Specific validation tools determined by rq_tools (likely tools.validation.validate_contrasts for p-value bounds, effect size ranges).
+Validation tools MUST be used after post-hoc contrast tool execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -767,8 +767,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ### Validation Requirements By Step
 
 #### Step 0: Extract VR Data
-**Analysis Tool:** (determined by rq_tools - likely direct pandas loading from dfData.csv)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_data_extraction)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - Output files exist (step00_irt_input.csv, step00_tsvr_mapping.csv)
@@ -788,8 +788,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 1: IRT Calibration Pass 1
-**Analysis Tool:** (determined by rq_tools - likely tools.analysis_irt.calibrate_irt with GRM)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_irt_calibration)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - Model convergence achieved (log-likelihood improved, not NaN)
@@ -809,8 +809,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 2: Item Purification
-**Analysis Tool:** (determined by rq_tools - likely tools.analysis_irt.purify_items)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_purification)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - Output file exists (step02_purified_items.csv)
@@ -829,8 +829,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 3: IRT Calibration Pass 2
-**Analysis Tool:** (determined by rq_tools - same as Step 1)
-**Validation Tool:** (determined by rq_tools - same as Step 1)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - Same as Step 1 PLUS:
@@ -847,8 +847,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 4: TSVR Merge and Reshape
-**Analysis Tool:** (determined by rq_tools - likely pandas merge + melt operations)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_data_merge)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - All composite_IDs from theta scores matched with TSVR (no missing TSVR values)
@@ -866,8 +866,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 5: LMM Fitting
-**Analysis Tool:** (determined by rq_tools - likely tools.analysis_lmm.fit_lmm_with_tsvr)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_lmm_convergence + validate_lmm_residuals)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - At least 2 of 5 candidate models converged
@@ -886,8 +886,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 6: Post-Hoc Contrasts
-**Analysis Tool:** (determined by rq_tools - likely tools.analysis_lmm.post_hoc_contrasts)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_contrasts)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - Exactly 3 contrasts (Where-What, When-What, When-Where)
@@ -905,8 +905,8 @@ This is not optional. This is the core architectural principle preventing cascad
 ---
 
 #### Step 7: Plot Data Preparation
-**Analysis Tool:** (determined by rq_tools - likely pandas aggregation + IRT transformation functions)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_plot_data)
+**Analysis Tool:** TBD (determined by rq_tools)
+**Validation Tool:** TBD (determined by rq_tools)
 
 **What Validation Checks:**
 - Both output files exist (step07_trajectory_theta_data.csv, step07_trajectory_probability_data.csv)

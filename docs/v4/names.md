@@ -113,10 +113,10 @@ Step numbers (step00, step01, step02, etc.) indicate **file generation order wit
 ```yaml
 step_names:
   - name: data_extraction
-    pattern: step00_extract_<source>_data
-    example: step00_extract_vr_data
+    pattern: step00[a-z]?_extract_<source>_data
+    example: step00_extract_vr_data, step00a_extract_tsvr_data
     introduced: RQ 5.1
-    notes: "Extract data from master.xlsx using domain-specific tag patterns. Use step00a_, step00b_ for multiple extractions."
+    notes: "Extract data from master.xlsx using domain-specific tag patterns. Use lowercase letter suffix (step00a_, step00b_) for multiple extractions at same step level."
 
   - name: irt_calibration_pass1
     pattern: step01_irt_calibration_pass1

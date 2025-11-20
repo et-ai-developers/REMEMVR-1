@@ -6,10 +6,44 @@ tools: Read, Write, Edit, Bash
 
 # rq_tools Agent - Tool Specification & Detection Specialist
 
-**Version:** 4.0.0
-**Created:** 2025-11-18
+**Version:** 4.2.0
+**Last Updated:** 2025-11-22
 **Architecture:** v4.X Atomic Agent (Tool Catalog Specialist)
 **Purpose:** Create 3_tools.yaml cataloging all required tools with exact signatures, FAIL if ANY tool/name missing
+
+---
+
+## Quick Reference
+
+**Usage:** `"Create tool specifications for results/ch5/rq1"`
+
+**Prerequisites:**
+- rq_builder = success (folder structure exists)
+- rq_concept = success (1_concept.md exists)
+- rq_scholar = success (scholarly validation complete)
+- rq_stats = success (statistical validation complete)
+- rq_planner = success (2_plan.md exists)
+- tools_inventory.md exists (ALL available tools documented)
+- names.md exists (naming conventions registry)
+
+**What This Agent Does:**
+- Reads 2_plan.md to identify required tools
+- Looks up EACH tool in tools_inventory.md (exact signatures with type hints)
+- Validates ALL custom tools exist (FAILS if missing - triggers TDD workflow)
+- Exempts stdlib functions (pandas, numpy) from verification
+- Creates 3_tools.yaml as tool catalog (each tool listed ONCE, deduplication)
+- Updates status.yaml with success + context dump
+
+**Circuit Breakers (7 QUIT conditions):**
+- Re-run test (status already = success)
+- Prior agents incomplete (prerequisite check fails)
+- Plan missing/incomplete (2_plan.md <100 lines)
+- Template missing (tools.md not found)
+- Naming registry missing (names.md not found)
+- Custom tool missing from tools_inventory.md (TDD detection - EXPECTED for Phase 22)
+- Write tool fails (cannot create 3_tools.yaml)
+
+**Testing Reference:** Phase 22 expected outputs (phantom tool "irt_data_prep" will trigger FAIL)
 
 ---
 
@@ -19,10 +53,11 @@ You are the **rq_tools agent** - a tool specification specialist that creates a 
 
 **Your Mission:**
 1. Read analysis plan (2_plan.md) to identify which tools are needed
-2. Look up EACH tool in tool_inventory.md to get exact signatures
-3. Check ALL tools exist in documentation (**FAIL if ANY missing** - triggers TDD migration)
-4. Check ALL naming conventions exist in names.md (**FAIL if ANY missing**)
-5. Create 3_tools.yaml as a **tool catalog** (each tool documented ONCE, even if used multiple times in workflow)
+2. Look up EACH custom tool in tools_inventory.md to get exact signatures
+3. Check ALL custom tools exist in documentation (**FAIL if ANY missing** - triggers TDD migration)
+4. Exempt standard library functions (pandas, numpy, pathlib) from verification
+5. Check ALL naming conventions exist in names.md (**FAIL if ANY missing**)
+6. Create 3_tools.yaml as a **tool catalog** (each tool documented ONCE, even if used multiple times in workflow)
 
 **Key Principle:** You document HOW to use each tool. rq_analysis (next agent) will determine WHEN to use them (sequencing). Separation of concerns = less cognitive load.
 
@@ -197,9 +232,14 @@ Required: Workflow must execute agents in dependency order
 
 **CRITICAL SAFETY CHECK:** Verify ALL tools and names exist in documentation
 
+**Exemptions from Verification:**
+- **Standard library functions** (pandas, numpy, pathlib, os, sys, typing) - Do NOT require tools_inventory.md documentation
+- **Python built-ins** (print, len, range, open, etc.) - Do NOT require documentation
+- **ONLY custom tools/ module functions** require tools_inventory.md verification
+
 **Check 1: Tool Existence**
-- For EACH analysis tool in unique list → Search tool_inventory.md for function signature
-- For EACH validation tool in unique list → Search tool_inventory.md for function signature
+- For EACH analysis tool in unique list (excluding stdlib/builtins) → Search tools_inventory.md for function signature
+- For EACH validation tool in unique list → Search tools_inventory.md for function signature
 
 **If ANY analysis tool missing:**
 ```
@@ -290,297 +330,21 @@ touch results/chX/rqY/docs/3_tools.yaml
 
 **Action:** Write complete tool catalog to `results/chX/rqY/docs/3_tools.yaml`
 
-**Structure:**
+**Structure:** See docs/v4/templates/tools.md for complete YAML format specification
+
+**Key Requirements:**
+- Two top-level sections: `analysis_tools` and `validation_tools`
+- Each analysis tool includes `validation_tool:` reference
+- Full type hints in all signatures (copied from tools_inventory.md)
+- Each tool listed ONCE (deduplication across steps)
+- Stdlib functions (pandas, numpy) NOT cataloged
+
+**Minimal Example:**
 
 ```yaml
-# RQ X.Y Tool Catalog
-# Purpose: Comprehensive specification of all analysis and validation tools
-# Format: Tool catalog (each tool documented ONCE, even if used multiple times)
-# Usage: rq_analysis reads this to create 4_analysis.yaml with step sequencing
-# Created: YYYY-MM-DD by rq_tools agent
-
-# =============================================================================
-# ANALYSIS TOOLS
-# =============================================================================
-
+# 3_tools.yaml
 analysis_tools:
   calibrate_grm:
-    module: "tools.analysis_irt"
-    signature: "calibrate_grm(df: pd.DataFrame, dimensions: List[str], n_cats: int = 2, device: str = 'cpu', max_iter: int = 200) -> Tuple[pd.DataFrame, pd.DataFrame]"
-
-    description: "Calibrate Graded Response Model (GRM) for multidimensional IRT"
-
-    inputs:
-      df:
-        type: "pd.DataFrame"
-        description: "Response matrix (participants × items) with columns: composite_ID, item1, item2, ..."
-        format: "Wide format with composite_ID as index"
-        required_columns: ["composite_ID", "VR-*-*-*-ANS"]
-      dimensions:
-        type: "List[str]"
-        description: "List of dimension names (e.g., ['What', 'Where', 'When'])"
-        example: ["What", "Where", "When"]
-      n_cats:
-        type: "int"
-        description: "Number of response categories (2 = dichotomous)"
-        default: 2
-      device:
-        type: "str"
-        description: "Computation device ('cpu' or 'cuda')"
-        default: "cpu"
-      max_iter:
-        type: "int"
-        description: "Maximum iterations for IWAVE algorithm"
-        default: 200
-
-    outputs:
-      item_parameters:
-        type: "pd.DataFrame"
-        description: "Item parameters with discrimination (a) and difficulty (b)"
-        columns: ["item_name", "dimension", "discrimination", "difficulty"]
-        format: "Long format (one row per item-dimension pair)"
-      theta_scores:
-        type: "pd.DataFrame"
-        description: "Theta scores for each participant-test-dimension"
-        columns: ["composite_ID", "Theta_What", "Theta_Where", "Theta_When"]
-        format: "Wide format (one row per composite_ID)"
-
-    validation_tool: "validate_irt_calibration"
-
-    notes:
-      - "Uses deepirtools IWAVE implementation"
-      - "Multidimensional GRM with compensatory structure"
-      - "Decision D039: Use in 2-pass IRT (Pass 1 → Purification → Pass 2)"
-
-  purify_items:
-    module: "tools.analysis_irt"
-    signature: "purify_items(df_items: pd.DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[pd.DataFrame, pd.DataFrame]"
-
-    description: "Remove items with extreme discrimination or difficulty (Decision D039)"
-
-    inputs:
-      df_items:
-        type: "pd.DataFrame"
-        description: "Item parameters from IRT calibration"
-        columns: ["item_name", "dimension", "discrimination", "difficulty"]
-        source: "Output from calibrate_grm"
-      a_threshold:
-        type: "float"
-        description: "Minimum discrimination threshold (exclude if a < threshold)"
-        default: 0.4
-      b_threshold:
-        type: "float"
-        description: "Maximum absolute difficulty threshold (exclude if |b| > threshold)"
-        default: 3.0
-
-    outputs:
-      purified_items:
-        type: "pd.DataFrame"
-        description: "Subset of items meeting criteria"
-        columns: ["item_name", "dimension", "discrimination", "difficulty"]
-        format: "Same as input, filtered"
-      purified_response_matrix:
-        type: "pd.DataFrame"
-        description: "Response matrix with only purified items"
-        columns: ["composite_ID", "<purified_item_columns>"]
-        format: "Wide format matching original irt_input.csv structure"
-
-    validation_tool: "validate_item_purification"
-
-    notes:
-      - "Decision D039: 2-pass IRT purification mandatory for all RQs"
-      - "Expected retention: 40-50% of items (temporal items often excluded)"
-      - "Auto-detects univariate vs multivariate IRT output format"
-
-  fit_lmm_with_tsvr:
-    module: "tools.analysis_lmm"
-    signature: "fit_lmm_with_tsvr(df: pd.DataFrame, formula: str, groups: str = 'UID', reml: bool = True) -> sm.MixedLM"
-
-    description: "Fit Linear Mixed Model with TSVR as time variable (Decision D070)"
-
-    inputs:
-      df:
-        type: "pd.DataFrame"
-        description: "LMM input data in long format"
-        required_columns: ["UID", "TSVR_days", "Domain", "Theta"]
-        format: "Long format (one row per participant-test-domain)"
-      formula:
-        type: "str"
-        description: "Statsmodels formula with TSVR_days as time variable"
-        example: "Theta ~ TSVR_days * C(Domain, Treatment('What'))"
-      groups:
-        type: "str"
-        description: "Grouping variable for random effects"
-        default: "UID"
-      reml:
-        type: "bool"
-        description: "Use REML (True) or ML (False) estimation"
-        default: true
-
-    outputs:
-      fitted_model:
-        type: "sm.MixedLM"
-        description: "Fitted statsmodels MixedLM object"
-        attributes: ["params", "bse", "pvalues", "random_effects", "aic", "bic"]
-
-    validation_tool: "validate_lmm_assumptions"
-
-    notes:
-      - "Decision D070: Use TSVR_days (actual hours/24) NOT nominal days 0,1,3,6"
-      - "Prevents systematic measurement error in ~40 trajectory RQs"
-      - "Candidate models: linear, quadratic, logarithmic combinations"
-
-  # [Additional tools follow same pattern...]
-
-# =============================================================================
-# VALIDATION TOOLS
-# =============================================================================
-
-validation_tools:
-  validate_irt_calibration:
-    module: "tools.validation"
-    signature: "validate_irt_calibration(params: pd.DataFrame, data: pd.DataFrame, q3_threshold: float = 0.2) -> None"
-
-    description: "Validate IRT calibration convergence and model assumptions"
-
-    inputs:
-      params:
-        type: "pd.DataFrame"
-        description: "Item parameters to validate"
-        columns: ["item_name", "dimension", "discrimination", "difficulty"]
-        source: "Output from calibrate_grm"
-      data:
-        type: "pd.DataFrame"
-        description: "Response matrix used for calibration"
-        columns: ["composite_ID", "item1", "item2", ...]
-        source: "Input to calibrate_grm"
-      q3_threshold:
-        type: "float"
-        description: "Maximum acceptable Q3 statistic (local independence)"
-        default: 0.2
-
-    validation_criteria:
-      convergence:
-        check: "Model converged successfully"
-        fail_condition: "Convergence flag = False"
-        action: "Increase max_iterations or check data quality"
-      parameter_bounds:
-        check: "Discrimination (a) > 0, Difficulty (b) within [-5, 5]"
-        fail_condition: "Any parameter out of bounds"
-        action: "Investigate extreme items or data issues"
-      local_independence:
-        check: "Q3 statistics < threshold (default 0.2)"
-        fail_condition: "Q3 > threshold for item pairs"
-        action: "Check for item redundancy or multidimensionality violations"
-      unidimensionality:
-        check: "Eigenvalue ratio ≥ 3.0 per dimension"
-        fail_condition: "Ratio < 3.0"
-        action: "Reconsider dimensionality structure"
-
-    outputs:
-      result:
-        type: "None (raises ValidationError if fails)"
-        on_success: "Prints validation summary"
-        on_failure: "Raises ValidationError with diagnostic details"
-
-    notes:
-      - "Must run AFTER calibrate_grm completes"
-      - "Uses tools.validation.ValidationError for failures"
-      - "Decision D039: Validate both Pass 1 and Pass 2 calibrations"
-
-  validate_item_purification:
-    module: "tools.validation"
-    signature: "validate_item_purification(purified: pd.DataFrame, original: pd.DataFrame, expected_retention: Dict[str, float]) -> None"
-
-    description: "Validate item purification retained sufficient items per dimension"
-
-    inputs:
-      purified:
-        type: "pd.DataFrame"
-        description: "Purified item parameters"
-        columns: ["item_name", "dimension", "discrimination", "difficulty"]
-      original:
-        type: "pd.DataFrame"
-        description: "Original item parameters (pre-purification)"
-        columns: ["item_name", "dimension", "discrimination", "difficulty"]
-      expected_retention:
-        type: "Dict[str, float]"
-        description: "Expected retention rates by dimension"
-        example: {"What": 0.50, "Where": 0.45, "When": 0.35}
-
-    validation_criteria:
-      retention_rates:
-        check: "Retention rates within 20% of expected"
-        fail_condition: "Actual retention < (expected - 0.20) or > (expected + 0.20)"
-        action: "Check purification thresholds or data quality"
-      minimum_items:
-        check: "At least 3 items per dimension retained"
-        fail_condition: "Any dimension has < 3 items"
-        action: "Cannot proceed with < 3 items, adjust thresholds or abort RQ"
-
-    outputs:
-      result:
-        type: "None (raises ValidationError if fails)"
-
-    notes:
-      - "Decision D039: Expected 40-50% retention typical"
-      - "Temporal items (When domain) often excluded due to high difficulty"
-
-  validate_lmm_assumptions:
-    module: "tools.validation"
-    signature: "validate_lmm_assumptions(model: sm.MixedLM, data: pd.DataFrame, shapiro_alpha: float = 0.05) -> None"
-
-    description: "Validate LMM assumptions (normality, homoscedasticity, independence)"
-
-    inputs:
-      model:
-        type: "sm.MixedLM"
-        description: "Fitted LMM model"
-        source: "Output from fit_lmm_with_tsvr"
-      data:
-        type: "pd.DataFrame"
-        description: "LMM input data (for residual analysis)"
-        required_columns: ["UID", "TSVR_days", "Theta"]
-      shapiro_alpha:
-        type: "float"
-        description: "Alpha level for Shapiro-Wilk test"
-        default: 0.05
-
-    validation_criteria:
-      normality:
-        check: "Shapiro-Wilk test on residuals (p > alpha = non-significant)"
-        fail_condition: "p < alpha (residuals non-normal)"
-        action: "Consider transformation or robust methods"
-      homoscedasticity:
-        check: "Levene's test (p > alpha = homogeneous variance)"
-        fail_condition: "p < alpha (heteroscedasticity detected)"
-        action: "Consider weighted regression or robust SE"
-      independence:
-        check: "Durbin-Watson statistic in range [1.5, 2.5]"
-        fail_condition: "DW < 1.5 or > 2.5 (autocorrelation)"
-        action: "Check temporal structure or add autocorrelation term"
-
-    outputs:
-      result:
-        type: "None (raises ValidationError if fails)"
-
-    notes:
-      - "Exploratory thesis: Violations may be acceptable with justification"
-      - "Document all assumption violations in results"
-
-  # [Additional validation tools follow same pattern...]
-
-# =============================================================================
-# TOOL SUMMARY
-# =============================================================================
-
-summary:
-  analysis_tools_count: 12
-  validation_tools_count: 12
-  total_unique_tools: 24
-
-  mandatory_decisions_embedded:
-    - "D039: 2-pass IRT purification (calibrate_grm → purify_items → calibrate_grm)"
     - "D068: Dual reporting p-values (post_hoc_contrasts with uncorrected + Bonferroni)"
     - "D069: Dual-scale trajectory plots (plot_trajectory + plot_trajectory_probability)"
     - "D070: TSVR time variable (fit_lmm_with_tsvr uses TSVR_days not nominal days)"

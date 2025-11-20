@@ -35,8 +35,12 @@ rq_planner:
     Validation: 100% coverage (all 8 steps have 4-layer substance criteria for rq_inspect)
 
 rq_tools:
-  status: pending
+  status: failed
   context_dump: |
+    TOOL ERROR: Missing 3 analysis tools + 5 validation tools in tool_inventory.md
+    Missing analysis: calibrate_grm, purify_items, irt_data_prep
+    Missing validation: validate_irt_calibration, validate_purification, validate_data_extraction, validate_data_merge, validate_plot_data
+    Action: Update tool_inventory.md with signatures, then re-run rq_tools
 
 rq_analysis:
   status: pending
