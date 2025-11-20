@@ -41,6 +41,11 @@ The following 6 folders MUST be created inside `results/chX/rqY/`:
 
 ## Creation Order
 
+**Tool Approach:**
+- Use Bash tool for `mkdir` commands (efficient for multiple folders)
+- Use Write tool for `.gitkeep` files (ensures git tracking)
+- Hybrid approach prevents path issues with nested Write operations
+
 **Step 1: Create Root Folder**
 - Create `results/chX/rqY/` directory
 - If directory already exists, verify it is EMPTY (see Verification Steps below)

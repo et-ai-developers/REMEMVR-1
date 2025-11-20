@@ -177,8 +177,9 @@ rq_results:
 ```
 
 **CRITICAL NOTES:**
-- **10 agents ONLY** (rq_builder through rq_results)
-- **NO g_code, g_conflict, or g_debug** (general-purpose agents excluded per specification)
+- **Agent List:** 10 RQ-specific agents ONLY (rq_builder through rq_results)
+- **Excluded from status.yaml:** g_code, g_conflict, g_debug (3 general-purpose agents - tracked separately)
+- **Total v4.X agents:** 13 (10 RQ-specific + 3 general-purpose)
 - **NO analysis_steps section** (rq_analysis creates this later)
 - **All statuses: pending** (no agents have run yet)
 - **All context_dumps: empty** (pipe notation `|` with no content)
@@ -210,7 +211,7 @@ rq_builder:
 ```
 
 **Context Dump Requirements:**
-- **Max 5 lines** (per universal.md)
+- **Max 5 lines** (upper limit - can be fewer if information fits in less)
 - **Line 1:** What was created (RQ folder path, folder count)
 - **Line 2:** Folder names (6 folders listed)
 - **Line 3:** Verification status (all empty, ready)
