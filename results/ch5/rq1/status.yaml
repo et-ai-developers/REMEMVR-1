@@ -17,8 +17,9 @@ rq_concept:
     Critical: TSVR time variable (actual hours), dual-scale reporting (theta + probability)
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    9.1/10 CONDITIONAL - Strong theory, needs recent cites + practice effects ack, ready for stats
 
 rq_stats:
   status: pending

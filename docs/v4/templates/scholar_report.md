@@ -8,23 +8,6 @@
 
 ---
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [How rq_scholar Uses This Template](#how-rq_scholar-uses-this-template)
-3. [Report Structure](#report-structure)
-4. [Section Specifications](#section-specifications)
-5. [10-Point Rubric System](#10-point-rubric-system)
-6. [Literature Search Table Format](#literature-search-table-format)
-7. [Recommendations Structure](#recommendations-structure)
-8. [Decision Thresholds](#decision-thresholds)
-9. [Complete Example](#complete-example)
-10. [v3.0 vs v4.X Differences](#v30-vs-v4x-differences)
-11. [Implementation Notes](#implementation-notes)
-12. [Version History](#version-history)
-
----
-
 ## Overview
 
 ### Purpose
@@ -47,34 +30,6 @@ This template specifies the format for **scholarly validation feedback** that th
 4. **rq_scholar conducts literature search** via WebSearch tool
 5. **rq_scholar writes formatted feedback** to standalone 1_scholar.md file (step 10 using Write tool)
 6. **User reviews 1_scholar.md** before proceeding to statistical validation
-
----
-
-## How rq_scholar Uses This Template
-
-### Agent Workflow (Section 2.2.1)
-
-**Agent:** `rq_scholar`
-**File:** `.claude/agents/rq_scholar.md`
-
-**Steps:**
-1. Read: `docs/v4/best_practices/universal.md` + `workflow.md`
-2. Read: `results/chX/rqY/status.yaml` (prior context dumps)
-3. Check: All prior steps success, this step onwards pending
-4. **Read: `docs/v4/templates/scholar_report.md`** ← This template
-5. Read: `results/chX/rqY/docs/1_concept.md`
-6. Read: `/home/etai/projects/REMEMVR/thesis/methods.md` (experimental methodology)
-7. Ultrathink: Extract claims, identify required evidence
-8. WebSearch: Two-pass strategy (validation + challenge)
-   - **Pass 1:** Verify claims are accurate (3-5 queries supporting evidence)
-   - **Pass 2:** Search for counterevidence, alternative theories, limitations (3-5 queries challenging)
-9. **Write: Create standalone `1_scholar.md` file** ← Uses this template format
-10. Edit: `status.yaml` (update success + context_dump)
-11. Report: "Successfully validated 1_concept.md for chX/rqY - [N] claims verified, wrote 1_scholar.md"
-
-### Output Location
-
-**Standalone file** - Validation report written to `results/chX/rqY/docs/1_scholar.md` (separate from concept.md to prevent context bloat).
 
 ---
 
@@ -464,7 +419,7 @@ See "Literature Search Results" section above for prioritized citation list.
 
 ---
 
-### Section 6: Validation Metadata
+### Section 7: Validation Metadata
 
 **Purpose:** Audit trail and accountability.
 
@@ -747,96 +702,15 @@ See "Literature Search Results" section above for prioritized citation list.
 
 ---
 
-## Complete Example
-
-### Example: RQ 5.1 Scholarly Validation (APPROVED Status, 9.5/10.0)
-
-This example shows how rq_scholar applies this template when appending feedback to 1_concept.md. This would be added after the original concept content with a horizontal rule separator.
-
-```
-[Original 1_concept.md content ends here...]
-
----
-
-## Scholar Validation Report
-
-**Validation Date:** 2025-11-16 14:30
-**Agent:** rq_scholar v4.0
-**Status:** ✅ APPROVED
-**Overall Score:** 9.5 / 10.0
-
----
-
-### Rubric Scoring Summary
-
-| Category | Score | Max | Status |
-|----------|-------|-----|--------|
-| Theoretical Grounding | 2.9 | 3.0 | ✅ |
-| Literature Support | 1.9 | 2.0 | ✅ |
-| Interpretation Guidelines | 2.0 | 2.0 | ✅ |
-| Theoretical Implications | 2.0 | 2.0 | ✅ |
-| Devil's Advocate Analysis | 0.7 | 1.0 | ⚠️ |
-| **TOTAL** | **9.5** | **10.0** | **✅ APPROVED** |
-
----
-
-### Detailed Rubric Evaluation
-
-[Continue with detailed sections... See full example in v3 scholar_report template for complete rubric evaluations]
-
----
-
-### Literature Search Results
-
-[Systematic table with 8 high-relevance papers, prioritized citations to add]
-
----
-
-### Recommendations
-
-#### Required Changes (Must Address for Approval)
-
-[None - Status is APPROVED]
-
----
-
-#### Suggested Improvements (Optional but Recommended)
-
-1. **Add Mechanistic Neuroscience Citation**
-   - **Location:** 1_concept.md - Section 2: Theoretical Background
-   - **Current:** Basic consolidation theory cited
-   - **Suggested:** Add Josselyn & Tonegawa (2020) for mechanistic support
-   - **Benefit:** Raises Theoretical Grounding to perfect 3.0/3.0
-
-[Additional suggestions...]
-
----
-
-### Validation Metadata
-
-- **Agent Version:** rq_scholar v4.0
-- **Rubric Version:** 10-point system (v4.0)
-- **Validation Date:** 2025-11-16 14:30
-- **Search Tools Used:** WebSearch (Claude Code)
-- **Total Papers Reviewed:** 35
-- **High-Relevance Papers:** 8
-- **Validation Duration:** ~28 minutes
-- **Context Dump:** "5.1 validated: 9.5/10 APPROVED. Theoretical grounding excellent. Literature strong. Interpretation comprehensive. 4 suggested improvements. Ready for planning."
-
----
-```
-
----
-
 ## v3.0 vs v4.X Differences
 
 ### Key Changes from v3.0
 
 | Aspect | v3.0 Scholar | v4.X rq_scholar |
 |--------|-------------|-----------------|
-| **Output Location** | Separate file: `validation/scholar_report.md` | Appended to: `results/chX/rqY/docs/1_concept.md` |
+| **Output Location** | Separate file: `validation/scholar_report.md` | Standalone file: `results/chX/rqY/docs/1_scholar.md` |
 | **Agent Scope** | Monolithic scholar agent (reads info.md, writes validation report, updates status.md) | Atomic rq_scholar agent (focused on claim validation only) |
-| **File Editing** | READ-ONLY (never edits core files) | Uses Edit tool to append feedback to 1_concept.md |
+| **File Editing** | READ-ONLY (never edits core files) | Uses Write tool to create standalone validation report |
 | **Input Document** | info.md (universal 10-section RQ specification) | 1_concept.md (extracted thesis section via rq_concept agent) |
 | **Rubric System** | ✅ 10-point rubric (5 categories) | ✅ 10-point rubric (PRESERVED for rigor) |
 | **Decision Thresholds** | ✅ APPROVED ≥9.25 / CONDITIONAL ≥9.0 / REJECTED <9.0 | ✅ Same thresholds (PRESERVED) |
@@ -849,16 +723,13 @@ This example shows how rq_scholar applies this template when appending feedback 
 **Why Preserve v3.0 Rubric System?**
 - **Production-proven:** RQ 5.1 achieved 9.5/10 (gold standard) using v3.0 rubric
 - **Thesis-appropriate rigor:** 10-point system provides systematic scholarly evaluation expected in PhD research
-- **Actionable feedback:** Rubric breakdown identifies specific gaps (e.g., "Reviewer Rebuttals: 0.7/1.0") guiding improvements
+- **Actionable feedback:** Rubric breakdown identifies specific gaps (e.g., "Devil's Advocate Analysis: 0.7/1.0") guiding improvements
 
-**Why Append Instead of Separate File?**
-- **v4.X atomic philosophy:** Feedback lives with the document it validates
-- **Single source of truth:** 1_concept.md contains both original concept and scholarly validation
-- **Reduced file proliferation:** Fewer files to track (no separate validation/ directory needed)
-
-**Why Edit Tool Instead of Write Tool?**
-- **Preserves original content:** Appending (not overwriting) maintains rq_concept output
-- **Audit trail:** Full validation history in document (if re-validated, both reports preserved with timestamps)
+**Why Standalone File Instead of Appending?**
+- **Prevents context bloat:** Validation reports can be 10-20k tokens; keeping separate prevents 1_concept.md from bloating
+- **Modular review:** User can review concept and validation independently
+- **Clean separation of concerns:** Concept creation (rq_concept) vs validation (rq_scholar) outputs remain distinct
+- **Downstream efficiency:** rq_planner reads lean 1_concept.md (~5-7k tokens) instead of bloated merged file (~20k+ tokens)
 
 ---
 
@@ -867,26 +738,28 @@ This example shows how rq_scholar applies this template when appending feedback 
 ### For rq_scholar Agent Developers
 
 **Agent Prompt Must:**
-1. Read this template at step 4 (structure reference)
+1. Read this template at step 5 (structure reference)
 2. Evaluate 1_concept.md against 10-point rubric (5 categories)
-3. Conduct literature search via WebSearch (5+ queries, prioritize 2020-2024)
-4. Calculate final score (sum of 5 categories)
-5. Determine status (APPROVED ≥9.25, CONDITIONAL ≥9.0, REJECTED <9.0)
-6. Format feedback following this template structure
-7. **Use Edit tool to append** (NOT Write tool which would overwrite)
-8. Update status.yaml context_dump with terse summary (condensed 1-line format - exception to general 5-line rule, rationale: score/status convey all critical info)
+3. Read thesis/methods.md at step 7 (experimental context for validation)
+4. Conduct literature search via WebSearch at step 9 (two-pass: validation + challenge, 6-10 queries total, prioritize 2020-2024)
+5. Calculate final score (sum of 5 categories)
+6. Determine status (APPROVED ≥9.25, CONDITIONAL ≥9.0, REJECTED <9.0)
+7. Format feedback following this template structure
+8. **Use Write tool to create standalone 1_scholar.md file** at step 10
+9. Update status.yaml context_dump with terse summary at step 11 (condensed 1-line format, score/status convey all critical info)
 
 ### Critical Formatting Rules
 
-**When Appending to 1_concept.md:**
-- Add horizontal rule separator (three dashes) before Scholar Validation Report section
-- Use level-2 heading for "Scholar Validation Report" (matches concept section level)
+**When Creating Standalone 1_scholar.md:**
+- Start with horizontal rule separator (three dashes)
+- Use level-2 heading for "Scholar Validation Report" (main document title)
 - Use level-3 headings for major sections (Rubric Scoring, Detailed Evaluation, etc.)
 - Use level-4 headings for rubric categories (1. Theoretical Grounding, 2. Literature Support, etc.)
 - Include metadata footer at end (agent version, date, papers reviewed, duration)
+- End with horizontal rule separator
 
-**Example Append Operation:**
-The agent should read the entire 1_concept.md file, then use Edit tool to append the Scholar Validation Report section at the end. The agent should locate the final line of the original content and append after it with proper separator.
+**Example Write Operation:**
+The agent creates a new standalone file at `results/chX/rqY/docs/1_scholar.md` using Write tool. The file contains ONLY the Scholar Validation Report (not a copy of 1_concept.md). User reviews 1_concept.md and 1_scholar.md separately.
 
 ### Quality Assurance Checklist
 
@@ -900,11 +773,18 @@ Before rq_scholar reports success, verify:
 - [ ] Suggested improvements provided regardless of status (always optional enhancements)
 - [ ] Metadata footer complete (agent version, date, papers reviewed, duration)
 - [ ] Context dump created for status.yaml (1 sentence terse summary)
-- [ ] Edit tool used successfully (appended to 1_concept.md without overwriting)
+- [ ] Write tool used successfully (created standalone 1_scholar.md file)
 
 ---
 
 ## Version History
+
+### v4.2 (2025-11-21)
+- **Architecture Change:** Switched from appending to 1_concept.md (Edit tool) to standalone file 1_scholar.md (Write tool)
+- **Rationale:** Prevents context bloat (validation reports 10-20k tokens kept separate from 5-7k concept.md)
+- **Benefit:** Downstream agents (rq_planner) read lean concept.md, validation available for user review/thesis writeup
+- **Updated:** Output Location, v3.0 vs v4.X table, Design Rationale, Implementation Notes, Critical Formatting Rules, Quality Assurance Checklist
+- **Integration:** Added thesis/methods.md reading at step 7 for experimental context grounding
 
 ### v4.1 (2025-11-18)
 - **Enhanced:** Added Section 5 "Scholarly Criticisms & Rebuttals (Devil's Advocate Analysis)"
