@@ -9,12 +9,12 @@
 
 ## What We're Doing
 
-**Current Task:** V4.X Agent Testing - Phase 21 Ready (1_concept.md Perfected for rq_planner)
+**Current Task:** V4.X Agent Testing - Phase 21 In Progress (Steps 0-2 Complete, rq_planner Bloat Cleanup + g_conflict Pre-Flight)
 
-**Context:** Completed Phases 19-20 (rq_scholar 9.1/10 CONDITIONAL, rq_stats 8.2/10 REJECTED). Used both validation reports to systematically enhance 1_concept.md, addressing all 6 critical issues: recent VR citations, encoding quality alternative, IRT Q3/unidimensionality validation, LMM convergence strategy, LMM diagnostics, and practice effects (CRITICAL omission flagged by BOTH agents). Concept enhanced from 160→189 lines (18% growth, lean and focused). Expected new scores: rq_scholar ~9.4-9.6, rq_stats ~9.2-9.5. Ready for Phase 21 rq_planner testing with perfected concept.md.
+**Context:** Completed bloat audit (20% reduction, 591 lines removed across rq_planner.md + plan.md), g_conflict pre-flight check (4 conflicts resolved), and user alignment. Ready to continue Phase 21 testing with Steps 3-10 (frontmatter enhancement through final execution).
 
 **Started:** 2025-11-15 14:00 (architecture realignment after v3.0 RQ 5.1 failures)
-**Current Status:** Phases 0-20 COMPLETE, Phase 21 Preparation COMPLETE, Ready for rq_planner Testing
+**Current Status:** Phases 0-20 COMPLETE, Phase 21 Steps 0-2 COMPLETE, Steps 3-10 PENDING
 
 **Related Documents:**
 - `docs/v4/chronology.md` - Complete audit trail of all agent document reads (800 lines)
@@ -22,10 +22,9 @@
 - `docs/v4/best_practices/workflow.md` - 10/13 workflow agents (228→165 lines, cleaned Phase 18)
 - `docs/v4/best_practices/code.md` - 5/13 code-aware agents (154 lines)
 - `docs/user/analysis_pipeline_solution.md` - All 13 agent specs (updated Phase 19-20)
-- `.claude/agents/rq_scholar.md` - v4.2.0 standalone file approach (624→326 lines, cleaned Phase 19)
-- `.claude/agents/rq_stats.md` - v4.2.0 standalone file approach (707→722 lines, 0% bloat Phase 20)
-- `results/ch5/rq1/docs/1_scholar.md` - Scholarly validation report (458 lines, 9.1/10 CONDITIONAL)
-- `results/ch5/rq1/docs/1_stats.md` - Statistical validation report (463 lines, 8.2/10 REJECTED)
+- `.claude/agents/rq_planner.md` - v4.X planning agent (1,637→1,130 lines, cleaned Phase 21)
+- `docs/v4/templates/plan.md` - 2_plan.md specification (986→903 lines, cleaned Phase 21)
+- `results/ch5/rq1/docs/1_concept.md` - Perfected concept (189 lines, all validation feedback integrated)
 
 ---
 
@@ -43,16 +42,16 @@
 - **Phase 19: Test rq_scholar** - 100% complete (PASS, 40% bloat cleanup, 6 conflicts resolved, 9.1/10 CONDITIONAL, standalone 1_scholar.md)
 - **Phase 20: Test rq_stats** - 100% complete (PASS, 16% bloat cleanup, 7 conflicts resolved, 8.2/10 REJECTED, standalone 1_stats.md)
 - **Phase 20a: V4 Documentation Audit** - 100% complete (100% alignment)
-- **Phase 21: Test rq_planner** - 100% complete (PASS, names.md populated)
 - **Quality Control Infrastructure** - 100% complete (chronology.md + best practices split + systematic bloat audit methodology)
 - **Validation Architecture Enhancement** - 100% complete (standalone reports + experimental context integration)
 
 ### In Progress
 
-- None (ready for Phase 22)
+- **Phase 21: Test rq_planner** - Steps 0-2 complete (bloat audit, g_conflict, alignment), Steps 3-10 pending
 
 ### Next
 
+- **Phase 21:** Complete Steps 3-10 (frontmatter, success criteria, prediction, execution, inspection, error handling, spec compliance, updates, re-run if needed, workspace cleanup)
 - **Phase 22:** Test rq_tools (TDD tool migration)
 - **Phase 23:** Test rq_analysis
 - **Phases 24-27:** Test g_code execution loop
@@ -63,10 +62,20 @@
 
 ## Next Actions
 
-1. **Run /clear** to reset context window (currently low after curation)
-2. **Run /refresh** to reload lean state.md (~10k tokens post-curation)
-3. **Begin Phase 21** - Test rq_planner with lean 1_concept.md reading
-4. **Continue Phases 22-29** - Remaining agent testing + integration
+**Immediate (After /save + /clear + /refresh):**
+1. **Step 3:** Update rq_planner.md frontmatter (Usage, Prerequisites, What This Agent Does, Circuit Breakers)
+2. **Step 3.5:** Define success criteria (explicit PASS/FAIL/QUIT conditions)
+3. **Step 4:** Predict agent behavior on RQ 5.1 (expected outputs)
+4. **Step 5:** Run agent: "Create analysis plan for results/ch5/rq1"
+5. **Step 6:** Inspect results vs expectations (2_plan.md validation)
+6. **Step 6.5:** Verify error handling (re-run test)
+7. **Step 7:** Verify spec compliance (solution.md Section 2.3.1)
+8. **Step 8:** Update if needed (agent/template fixes)
+9. **Step 9:** Re-run if updated
+10. **Step 10:** Clean workspace (optional - likely keep for integration test)
+
+**Testing Continuation:**
+- Continue Phases 22-29 using validated 11-step protocol
 
 ---
 
@@ -1024,3 +1033,170 @@ Reviewed both validation reports to identify all critical and required changes:
 ---
 
 **End of Session (2025-11-22 01:00)**
+
+## Session (2025-11-22 [current time - HH:MM format])
+
+**Task:** Phase 21 Testing - rq_planner Agent Steps 0-2 Complete (Bloat Audit + g_conflict + Alignment)
+
+**Objective:** Execute Phase 21 testing using validated 11-step protocol. Complete Steps 0-2 (bloat audit, g_conflict pre-flight check, user alignment) before proceeding to Steps 3-10 (frontmatter enhancement through final execution).
+
+**Key Accomplishments:**
+
+**1. 11-Step Testing Protocol - Steps 0-2 Complete**
+
+**Step 0: Bloat Audit - 20% Reduction (591 lines removed)**
+
+Audited 3 input files for rq_planner:
+
+**rq_planner.md (1,637→1,130 lines, 31% reduction, 507 lines removed):**
+- **Bloat Type 1:** Embedded example steps (lines 441-695, ~254 lines) - Two massive worked examples (IRT Pass 1 calibration, Item Purification) showing EVERY field filled out in extreme detail
+- **Bloat Type 2:** Complete Examples section (lines 1228-1585, ~357 lines) - Example 1: Simple IRT-Only Analysis (117 lines), Example 2: IRT→LMM Trajectory Analysis (240 lines)
+- **Rationale:** Agent doesn't need to see fully worked examples to understand structure - instruction is sufficient
+- **Result:** 1,637→1,130 lines (31% bloat removed)
+
+**plan.md template (986→903 lines, 8% reduction, 83 lines removed):**
+- **Bloat Type:** v3.0 vs v4.X Differences section (lines 863-945, ~83 lines) - Historical context about why v4.X changed from v3.0, architectural rationale, comparison table
+- **Rationale:** Agent doesn't need to know WHY architecture changed, only HOW to use current architecture
+- **Result:** 986→903 lines (8% bloat removed)
+
+**names.md (357→356 lines, 0% reduction):**
+- **Status:** Already populated with RQ 5.1 conventions (33 total: 8 step_names, 14 file_names, 11 variable_names)
+- **No bloat detected** - File is live registry with concrete naming conventions
+- **Result:** Keep as-is
+
+**Total bloat removed:** 591 lines (20% across all 3 files)
+
+**Context window savings:** ~15-20k tokens saved for rq_planner agent execution
+
+**Step 1: g_conflict Pre-Flight Check - 4 Conflicts Found (2 HIGH, 2 MODERATE)**
+
+Checked ALL 10 files in rq_planner's context window:
+1. `.claude/agents/rq_planner.md` (1,130 lines after cleanup)
+2. `docs/v4/best_practices/universal.md` (214 lines, cleaned Phase 18)
+3. `docs/v4/best_practices/workflow.md` (165 lines, cleaned Phase 18)
+4. `docs/v4/best_practices/code.md` (154 lines)
+5. `results/ch5/rq1/status.yaml` (51 lines, dynamic file)
+6. `docs/v4/templates/plan.md` (903 lines after cleanup)
+7. `results/ch5/rq1/docs/1_concept.md` (189 lines, perfected)
+8. `docs/data_structure.md` (899 lines, authoritative reference)
+9. `docs/v4/names.md` (356 lines, populated)
+10. `docs/user/analysis_pipeline_solution.md` Section 2.3.1 (2,060 lines total file)
+
+**Files NOT in context (confirmed by user):**
+- `docs/project_specific_stats_insights.md` - v3.0 artifact (removed reference from agent)
+
+**Conflicts Identified:**
+
+1. **HIGH - Context Dump Line Count Discrepancy:**
+   - **rq_planner.md** says "3 pieces per spec" (implies 3 lines)
+   - **workflow.md** says "Max 5 lines per agent" (strict limit)
+   - **Impact:** Agents unclear whether context_dump should be exactly 3 lines or up to 5 lines max
+   - **Resolution:** Updated rq_planner.md to "3 key pieces, max 5 lines per workflow.md" ✅
+
+2. **HIGH - Missing project_specific_stats_insights.md Reference File:**
+   - **rq_planner.md** instructs agent to "Read docs/project_specific_stats_insights.md during ultrathink"
+   - **Actual:** File does not exist (v3.0 artifact)
+   - **User Clarification:** "project_specific_insights is a v3 idea. Instead, I will adjust ANALYSIS_CHX.md content to reflect project-wide decisions"
+   - **Resolution:** Updated rq_planner.md Step 9B to reference decisions already in 1_concept.md and thesis/ANALYSES_CHX.md (not separate file) ✅
+
+3. **MODERATE - names.md Status Header Outdated:**
+   - **Header** (line 5) says "Status: EMPTY (TDD initialization - awaiting RQ 5.1 population)"
+   - **Actual Content** (lines 113-328) contains 33 populated naming conventions from RQ 5.1
+   - **Impact:** Header metadata outdated, agents reading only header will believe registry is empty when it contains 33 conventions
+   - **Resolution:** Updated header to "Status: POPULATED (33 conventions from RQ 5.1 - 8 step_names, 14 file_names, 11 variable_names)" + date to 2025-11-20 ✅
+
+4. **MODERATE - Step Numbering Format Ambiguity:**
+   - **names.md** uses `step00`, `step01`, `step02` (zero-padded filenames)
+   - **plan.md** uses "Step 1", "Step 2" (human-readable docs)
+   - **rq_planner.md** uses "Step 0", "Step 1" (single zero, no padding)
+   - **Impact:** Inconsistency between DOCUMENTATION format (Step 1, Step 2) and FILE NAMING format (step01, step02) not explicitly documented
+   - **Resolution:** Added clarification note to plan.md template explaining distinction (docs vs filenames) ✅
+
+**Step 2: User Alignment - All 4 Conflicts Resolved**
+
+**User Confirmation:** User approved all 4 conflict resolutions (v3.0 file removal clarified, other fixes applied)
+
+**Changes Applied:**
+- `rq_planner.md`: Removed project_specific_stats_insights.md reference, updated context_dump wording (3 key pieces, max 5 lines)
+- `names.md`: Updated status header (EMPTY→POPULATED), updated date (2025-11-16→2025-11-20)
+- `plan.md`: Added step numbering format clarification note
+
+**2. Files Modified (3 Total)**
+
+1. `.claude/agents/rq_planner.md` (1,637→1,130 lines, 31% bloat removed + conflict fixes)
+   - Removed 507 lines bloat (embedded examples + standalone Examples section)
+   - Updated Step 9B: Removed project_specific_stats_insights.md reference, updated to reference decisions in 1_concept.md and thesis/ANALYSES_CHX.md
+   - Updated Step 12: Clarified context_dump format "3 key pieces, max 5 lines per workflow.md"
+
+2. `docs/v4/templates/plan.md` (986→903 lines, 8% bloat removed + conflict fix)
+   - Removed 83 lines bloat (v3.0 vs v4.X Differences section)
+   - Added step numbering format clarification (documentation vs filenames distinction)
+
+3. `docs/v4/names.md` (357→356 lines, header metadata updated)
+   - Updated status: "EMPTY" → "POPULATED (33 conventions from RQ 5.1)"
+   - Updated date: 2025-11-16 → 2025-11-20
+
+**3. Phase 21 Progress Summary**
+
+**Completed Steps:**
+- ✅ Step 0: Bloat audit (20% reduction, 591 lines)
+- ✅ Step 1: g_conflict pre-flight check (4 conflicts found)
+- ✅ Step 2: User alignment (all 4 conflicts resolved)
+
+**Pending Steps:**
+- **Step 3:** Update rq_planner.md frontmatter (Usage, Prerequisites, What This Agent Does, Circuit Breakers)
+- **Step 3.5:** Define success criteria (explicit PASS/FAIL/QUIT conditions for rq_planner test)
+- **Step 4:** Predict agent behavior on RQ 5.1 (expected 2_plan.md outputs)
+- **Step 5:** Run agent: "Create analysis plan for results/ch5/rq1"
+- **Step 6:** Inspect results vs expectations (2_plan.md validation)
+- **Step 6.5:** Verify error handling (re-run test circuit breaker)
+- **Step 7:** Verify spec compliance (solution.md Section 2.3.1 match)
+- **Step 8:** Update if needed (agent/template fixes)
+- **Step 9:** Re-run if updated (iterate until PASS)
+- **Step 10:** Clean workspace (optional - likely keep for integration test)
+
+**4. Critical Insights**
+
+**Bloat Cleanup Effectiveness:**
+- **rq_planner.md:** 31% reduction (507 lines) - largest cleanup so far
+- **plan.md:** 8% reduction (83 lines) - historical context removed
+- **Total:** 20% across all input files (vs Phase 19: 40%, Phase 20: 16%)
+- **Trend:** Later agent testing phases have less bloat (documents improving over time)
+
+**g_conflict Pre-Flight Success:**
+- 4 conflicts found across 10 files (2 HIGH, 2 MODERATE)
+- Most critical: Missing v3.0 file reference (would cause agent READ failure)
+- User clarification on v3.0 architecture enabled clean resolution
+- **Result:** Zero potential runtime errors prevented
+
+**User Clarification on V3.0 vs V4.X:**
+- project_specific_stats_insights.md is v3.0 concept
+- V4.X approach: Project-wide decisions documented in thesis/ANALYSES_CHX.md (not separate file)
+- This architectural difference now reflected in agent prompt
+
+**Naming Registry Now Accurate:**
+- names.md status corrected (EMPTY→POPULATED)
+- Agents will correctly detect 33 available conventions
+- Prevents false "FAIL on missing names" when conventions exist
+
+**5. Next Actions (After /save + /clear + /refresh)**
+
+**Immediate:**
+1. Run /save command (this session appended, git commits created)
+2. Run /clear to reset context window
+3. Run /refresh to reload lean state.md
+
+**Testing Continuation:**
+1. Begin Step 3: Frontmatter enhancement for rq_planner.md
+2. Continue Steps 3.5-10: Complete rq_planner testing protocol
+3. Expected duration: ~2-3 hours for full Phase 21 completion (Steps 3-10)
+
+**Active Topics (For context-manager):**
+- v4x_phase17_21_testing_and_quality_control (ongoing - Phase 21 Steps 0-2 complete)
+- phase21_rq_planner_testing (in progress - Steps 3-10 pending)
+
+---
+
+**End of Session (2025-11-22 [current time])**
+
+**CRITICAL REMINDER:** Phase 21 Steps 3-10 are PENDING. After /refresh, continue with Step 3 (frontmatter enhancement) immediately.

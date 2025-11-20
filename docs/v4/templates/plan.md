@@ -153,6 +153,11 @@ The 2_plan.md file MUST contain the following 6 sections:
 - **Step dependencies** (which steps must complete before this one)
 - **Estimated complexity** (optional - helps user gauge runtime)
 
+**Note on Step Numbering:**
+- **Documentation format:** "Step 0", "Step 1", "Step 2" (human-readable, no zero-padding)
+- **File naming format:** "step00", "step01", "step02" (machine-readable, zero-padded for sorting per names.md)
+- This distinction separates human-readable documentation from machine-readable filenames
+
 **Example Structure:**
 
 ```markdown
@@ -860,88 +865,6 @@ The rq_planner agent follows this process:
 - **Does NOT execute analysis** (that's bash execution in Step 14)
 
 rq_planner creates the **plan** (specification), downstream agents execute it.
-
----
-
-## Differences from v3.0 plan_template.md
-
-### v3.0 Approach (For Historical Context Only - DO NOT REPLICATE)
-
-**v3.0 plan_template.md was:**
-- User-facing report with questions
-- Interactive (human-in-the-loop)
-- Created info.md + config.yaml (agent-generated RQ specification)
-- Included circuit breaker results, domain tag mapping, questions section
-- User answered questions, agent proceeded to drafting mode
-
-**v3.0 Workflow:**
-```
-rq_specification Planning Mode:
-  ├─ Read concept.md (user-written)
-  ├─ Generate questions (CRITICAL/CLARIFICATION/OPTIONAL)
-  ├─ Write plan.md with questions
-  └─ Wait for user answers
-           ↓
-User fills "YOUR ANSWERS" section in plan.md
-           ↓
-rq_specification Drafting Mode:
-  ├─ Read plan.md with user answers
-  ├─ Write info.md (RQ specification)
-  ├─ Write config.yaml (tool parameters)
-  └─ Report completion
-```
-
-### v4.X Approach (Current Architecture)
-
-**v4.X plan.md is:**
-- Agent-to-agent specification (not user-facing)
-- Automated (no user interaction at planning stage)
-- Creates 2_plan.md (consumed by rq_tools, rq_analysis, g_code, rq_inspect)
-- Includes step structure, input/output specs, validation requirements, dependencies
-- No questions section (planning is deterministic based on 1_concept.md + reference docs)
-
-**v4.X Workflow:**
-```
-rq_planner (Step 9):
-  ├─ Read 1_concept.md (user-approved concept)
-  ├─ Read reference docs (data_structure, tool_inventory, project_specific_stats_insights, names.md)
-  ├─ Ultrathink analysis approach (deterministic - no user input needed)
-  ├─ Write 2_plan.md (specification for downstream agents)
-  └─ Report completion
-           ↓
-rq_tools (Step 11):
-  ├─ Read 2_plan.md
-  ├─ Write 3_tools.yaml (analysis + validation tool pairs)
-  └─ Report completion
-           ↓
-rq_analysis (Step 12):
-  ├─ Read 2_plan.md + 3_tools.yaml
-  ├─ Write 4_analysis.yaml (analysis + validation calls per step)
-  └─ Report completion
-           ↓
-[Continue workflow - no user interaction until plots/results review]
-```
-
-### Key Architectural Differences
-
-| Aspect | v3.0 | v4.X |
-|--------|------|------|
-| **Audience** | User (human-in-the-loop) | Downstream agents (automated) |
-| **Interaction** | Interactive (questions/answers) | Deterministic (no questions) |
-| **Outputs Created** | info.md + config.yaml | 2_plan.md only |
-| **Validation** | Implied (circuit breakers check concept) | Explicit (MUST state per step) |
-| **User Gate** | Step 5 (approve plan) + Step 7 (approve spec) | Step 7 only (approve concept) |
-| **Questions** | CRITICAL/CLARIFICATION/OPTIONAL | None (all info in 1_concept.md + reference docs) |
-| **Dependencies** | Embedded in questions | Dedicated section in plan |
-| **Complexity** | 558 lines (RQ 5.1 v3.0 example) | 500-700 lines (comprehensive template) |
-
-**Why v4.X Changed This:**
-- **Context bloat:** v3.0 rq_specification agent had 1,533 lines, read 8+ docs, asked questions, wrote specs - too many responsibilities
-- **Atomic agents:** v4.X splits responsibilities (rq_planner = plan, rq_tools = tools, rq_analysis = calls)
-- **Validation architecture:** v4.X embeds validation per step (v3.0 implied validation via circuit breakers only)
-- **Deterministic workflow:** v4.X eliminates human-in-the-loop at planning stage (user approves concept at Step 7, rest automated)
-
-**Result:** Leaner agent prompts, clearer separation of concerns, explicit validation requirements, faster workflow.
 
 ---
 
