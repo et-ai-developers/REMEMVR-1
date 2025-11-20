@@ -24,9 +24,14 @@
 #    - REFERENCE: rq_builder audit found 56% bloat (1,303→576 lines)
 #
 # 1. Pre-flight g_conflict check
-#    - Compare ONLY: agent prompt vs related templates vs solution.md section
-#    - Do NOT include best_practices files (common to agent groups)
-#    - Detect any conflicts/misalignments specific to this agent
+#    - Compare ALL files that will be in agent's context window:
+#      * Agent prompt (.claude/agents/AGENT_NAME.md)
+#      * Solution.md specification (section X.X.X for this agent)
+#      * Templates (docs/v4/templates/*.md files agent reads)
+#      * Best practices (docs/v4/best_practices/*.md files agent reads)
+#    - Use chronology.md to identify exact input files for this agent
+#    - Detect any conflicts/misalignments between these documents
+#    - RATIONALE: Agent will read ALL these files - conflicts must be caught BEFORE agent runs
 #
 # 2. User alignment on conflicts
 #    - Resolve discrepancies with user
