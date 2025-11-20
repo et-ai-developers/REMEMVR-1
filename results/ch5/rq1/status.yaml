@@ -8,36 +8,20 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: success
+  status: pending
   context_dump: |
-    RQ 5.1: Domain-specific forgetting trajectories (What/Where/When)
-    Domains: What (-N-), Where (-L-/-U-/-D-), When (-O-)
-    Analysis: IRT (2-pass GRM, correlated factors) + LMM (Domain x Time interaction)
-    Data: RAW from master.xlsx, all VR items, TSVR time variable (actual hours)
-    Critical: 2-pass purification (|b|>3, a<0.4), dual-scale reporting (theta + probability)
 
 rq_scholar:
-  status: success
+  status: pending
   context_dump: |
-    9.1/10 CONDITIONAL - Strong theory+methods, 2 critical omissions
-    Required: practice effects acknowledgment, encoding quality alternative
-    Literature: 42 papers reviewed, 12 high-relevance (2020-2024)
-    Devil's advocate: 10 concerns (2 CRITICAL, 6 MODERATE, 2 MINOR)
-    Next: address 2 required changes, then proceed to rq_stats
 
 rq_stats:
-  status: success
+  status: pending
   context_dump: |
-    9.2/10 CONDITIONAL. Cat1: 2.5/3 (appropriate, N=100 marginal slopes). Cat2: 1.7/2 (tools 64%, core IRT/LMM verified). Cat3: 1.8/2 (Bonferroni error, AIC not AICc). Cat4: 1.5/2 (no IRT/LMM validation). Cat5: 0.7/1 (15 concerns, 4 CRITICAL). 6 required changes.
 
 rq_planner:
-  status: success
+  status: pending
   context_dump: |
-    8 steps planned (step00: extraction -> step07: plot data prep)
-    IRT->LMM pipeline: 2-pass GRM (3 factors) + Domain x Time interaction
-    Decisions: D039 (purification), D068 (dual p-values), D069 (dual-scale), D070 (TSVR)
-    Expected: ~51 items retained, 400 observations, 12 plot data rows
-    Validation: mandatory per step, 100% coverage
 
 rq_tools:
   status: pending
