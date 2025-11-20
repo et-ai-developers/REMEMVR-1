@@ -32,39 +32,42 @@
 
 **Hypothesis:** Object identity (What) may be more resilient than spatial (Where) or temporal (When) memory, consistent with dual-process theories suggesting familiarity-based information is less hippocampus-dependent than contextual details.
 
-**Data Required:**
-- **Analysis Set:** *-N-*ANS (What) vs. *-L-*ANS, *-U-*ANS, *-D-*ANS (Where) vs. *-O-*ANS (When)
-- **IRT Configuration:** Correlated factors, 2 passes (purify items between passes (difficulty < -3 or > 3, discimination < 0.4))
-- **IRT Factors:** What, Where, When
-- **Output:** Theta scores (Theta_What, Theta_Where, Theta_When) for each UID × Test combination
-- **Structure:** 400 observations (100 participants × 4 time points)
+**Steps**
 
-**Analysis Specification:**
+1. Load our data from data\cache\dfData.csv
 
-1. Collect data.
-From master.xlsx you'll need:
-Time - This is TSVR (Time since VR). This will be our time variable. Don't just use day 0, 1, 3, 6
-What - This will be our *-N-*-ANS regexes
-Where - This is our *-L-*-ANS | *-U-*-ANS | *-D-*-ANS regex flags. These ALL relate to where
-When - This is our *-O-*-ANS flag
+2. Only keep columns ['UID', 'TEST', 'TSVR', 'TQ_*']
 
-2. Prepare data
-We are pretending that 400 people took 1 test.
-So we will need the data that's fed into the IRT to look like there are 400 people.
-This is where we use composite ids.
+3. Dichotomoise the TQ_* values. Less than 1 becomes 0, greater than 1 becomes 1.
 
-3. Run IRT Analysis
+4. Send this to irt_data_prep tool
+
+source = {our data},
+composite = ["UID", "TEST"],
+time = "TSVR",
+items = ["TQ_*"],
+factors = {
+   "what": ["*-N-*"],
+   "where": ["*-L-*", "*-U-*", "*-D-*"],
+   "when": ["*-O-*"]
+}
+
+This will respond with the data we need for the irt.
+Save those files into data\ folder
+
+5. Run IRT Analysis
 Use correlated factors, 2-category GRM.
 Extract theta scores from output as well as difficulty and discimination
 
-4. Purify the IRT items
+6. Purify the IRT items
 Some items are extremely easy/hard, or don't discriminate.
 We will filter those out using a within domain filter.
 Remove items that have difficulty less than -3 or more than 3, and items that have discrimination below 0.4
 
-5. Run the irt again on the prufied items
+7. Run the irt again on the prufied items
 
-6. Run the results through LMM
+8. Run the results through LMM
+   - We use our TSVR data as the time variable.
    - Fit 5 candidate LMMs with Domain × Time interactions:
      - Linear: Time × Domain
      - Quadratic: (Time + Time²) × Domain
@@ -74,20 +77,19 @@ Remove items that have difficulty less than -3 or more than 3, and items that ha
    - All models use Treatment coding (What as reference), random intercepts and slopes
    - Fit with REML=False for AIC comparison
    - Select best model via AIC, compute Akaike weights
-   Remmeber, time comes from the TSVR data, not just raw day 0,1,3,6
 
-7. Translate the best model back into probability using a reverse logit tool. Somthing like ```probability = 1 / (1 + np.exp(-(discrimination * (row.Data - difficulty))))```
+9. Translate the best model back into probability using a reverse logit tool. Somthing like ```probability = 1 / (1 + np.exp(-(discrimination * (row.Data - difficulty))))```
 
-4. **Post-hoc Contrasts** Do these for both ability and probability
+10. **Post-hoc Contrasts** Do these for both ability and probability
    - Extract Time×Domain interaction terms from best model
    - Test differences in forgetting slopes: Where-What, When-What
    - Bonferroni correction: α = 0.0033/3 = 0.0011 for 3 pairwise tests (I want results without bonferroni too)
 
-5. **Effect Size Computation** Same as above, with and without bonferroni, and for ability and probability
+11. **Effect Size Computation** Same as above, with and without bonferroni, and for ability and probability
    - Calculate Cohen's d for domain differences at each time point (Days 0, 1, 3, 6) (we can use days here now that the model has been fitted)
    - Report: d_What_Where, d_What_When, d_Where_When
 
-6. **Visualization**
+12. **Visualization**
    - Generate trajectory plot: 3 lines (What/Where/When) over time
    - Include observed means with 95% CIs and model-predicted lines
    

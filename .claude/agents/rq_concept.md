@@ -14,7 +14,7 @@ description: |
   - Creates results/chX/rqY/docs/1_concept.md with formatted content
   - Updates status.yaml with success status and 5-line context dump
 
-  Circuit breakers: Quits on missing thesis sections, ambiguous data sources, or missing prerequisites
+  Circuit breakers: Quits on completely missing RQ content, ambiguous data sources, or missing prerequisites. Handles incomplete sections gracefully by creating minimal content.
 
   Testing: Phase 18 - Expected output: 1_concept.md (7 sections, ~500-1000 lines) + status.yaml updated
 tools: Read, Write, Edit, Bash
@@ -234,6 +234,51 @@ Read(file, offset=start_line, limit=end_line - start_line)
 **Circuit Breakers:**
 - **CLARITY ERROR:** Critical thesis section missing (Research Question, Hypothesis, Data Required) → Quit with error
 - **CLARITY ERROR:** Data source ambiguous (RAW vs DERIVED unclear) → Quit with error
+
+---
+
+### Step 8.5: Handling Incomplete Thesis Sections
+
+**Action:** If thesis content lacks specific template sections, create minimal content from available information
+
+**Philosophy:** rq_concept reformats thesis content, downstream agents enhance with expertise
+- rq_scholar adds literature review (WebSearch capability)
+- rq_stats adds methodological detail (statistical expertise)
+- Incomplete sections are EXPECTED, not errors
+
+**Handling Strategies:**
+
+**1. Scientific Background (Section 2):**
+- **If thesis has explicit background:** Extract from thesis
+- **If thesis lacks background:** Create minimal 1-paragraph summary from hypothesis theoretical mentions + note in context_dump
+- **Example:** "Object identity may be more resilient...dual-process theories" → "Dual-process theories suggest familiarity-based information (object identity) is less hippocampus-dependent than contextual details (spatial/temporal memory)."
+
+**2. Expected Challenges (Section 6):**
+- **If thesis has explicit challenges:** Extract from thesis
+- **If thesis lacks challenges:** Create minimal list from analysis specification caveats (purification warnings, convergence notes) + note in context_dump
+- **Example:** From step "Remove items difficulty < -3 or > 3..." → "Item purification expected to exclude extreme difficulty items (|b|>3) and low discrimination items (a<0.4). Temporal items historically show extreme difficulty."
+
+**3. Success Criteria (if in template):**
+- **If thesis has explicit criteria:** Extract from "Success Criteria:" or "Expected Output:" sections
+- **If thesis lacks criteria:** Extract from analysis approach implied validation (model convergence, plot generation, results files)
+
+**Context Dump Notation:**
+
+If sections are minimal, note in context_dump Line 5:
+```
+Critical: Sections 2 & 6 minimal - thesis lacks literature review. Enhance during rq_scholar validation.
+```
+
+**Do NOT QUIT for incomplete sections.** Only QUIT if:
+- Research question completely missing
+- No hypothesis or analysis approach specified
+- Data source completely ambiguous (cannot determine RAW vs DERIVED)
+- Completely empty RQ section in thesis
+
+**Rationale:** Atomic agent design - each agent does its job
+- rq_concept: Reformat thesis content (preserve what exists)
+- rq_scholar: Add scholarly depth (literature, citations, theoretical grounding)
+- rq_stats: Add statistical rigor (methodology validation, challenges, assumptions)
 
 ---
 
