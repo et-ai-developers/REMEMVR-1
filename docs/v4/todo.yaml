@@ -5,13 +5,27 @@
 # Specification: docs/user/analysis_pipeline_solution.md
 
 # =============================================================================
-# TESTING PROTOCOL (10-STEP SEQUENCE)
+# TESTING PROTOCOL (11-STEP SEQUENCE WITH BLOAT AUDIT)
 # =============================================================================
 # Each agent test follows this sequence:
 #
+# 0. BLOAT AUDIT & CLEANUP (NEW - Quality Control)
+#    - Use context-finder to read ONLY this agent's input files (from chronology.md)
+#    - Identify bloat categories:
+#      * Future-state information (what files WILL contain)
+#      * Design philosophy (why v4.X exists, rationale, version history)
+#      * Irrelevant technical details (e.g., YAML parsing for write-only operations)
+#      * Redundant information (duplicate instructions, meta-commentary)
+#    - Apply cleanup with zero information loss
+#    - Document reduction % achieved
+#    - RATIONALE: Prevent "small errors in concept/plan stages growing into
+#      massive issues in code stages" - proactive bloat prevention before
+#      agent consumes bloated context
+#    - REFERENCE: rq_builder audit found 56% bloat (1,303→576 lines)
+#
 # 1. Pre-flight g_conflict check
 #    - Compare ONLY: agent prompt vs related templates vs solution.md section
-#    - Do NOT include agent_best_practices.md (common to all agents)
+#    - Do NOT include best_practices files (common to agent groups)
 #    - Detect any conflicts/misalignments specific to this agent
 #
 # 2. User alignment on conflicts
@@ -62,6 +76,17 @@ phase17_test_rq_builder:
   specification_section: "2.1.1"
   test_input: "Build ch5/rq1"
   expected_output: "results/ch5/rq1/ with 6 folders + status.yaml"
+  bloat_audit:
+    status: "COMPLETE (Session 2025-11-21 17:45)"
+    input_files: 4
+    files_audited: ["rq_builder.md", "universal.md", "build_folder.md", "build_status.md"]
+    total_reduction: "56% (1,303→576 lines)"
+    breakdown:
+      rq_builder_md: "24% reduction (410→310 lines)"
+      build_folder_md: "67% reduction (350→117 lines)"
+      build_status_md: "73% reduction (543→149 lines)"
+      universal_md: "no changes (shared across all agents)"
+    bloat_categories_removed: "Future-state info, design philosophy, irrelevant technical details, redundant information"
   success_criteria:
     pass: "6 folders created (docs, data, code, logs, plots, results) + status.yaml with 10 agent sections + .gitkeep files"
     fail: "Missing folders, missing status.yaml, wrong agent list, no .gitkeep"
@@ -91,6 +116,12 @@ phase18_test_rq_concept:
   specification_section: "2.1.2"
   test_input: "Create 1_concept.md for ch5/rq1"
   expected_output: "results/ch5/rq1/docs/1_concept.md with 7 sections + status.yaml updated"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 7
+    files_to_audit: ["rq_concept.md", "universal.md", "workflow.md", "concept.md (template)", "ANALYSES_CH5.md", "build_status.md", "scholar_report.md (template)", "stats_report.md (template)"]
+    reference: "See docs/v4/chronology.md lines 100-175 for complete input list"
+    expected_bloat_areas: "Template examples, workflow redundancy, design rationale"
   success_criteria:
     pass: "1_concept.md exists with all 7 sections, preserves thesis detail, status.yaml context_dump added"
     fail: "Missing sections, over-distilled content, missing context_dump"
@@ -125,6 +156,11 @@ phase19_test_rq_scholar:
   specification_section: "2.2.1"
   test_input: "Validate 1_concept.md for ch5/rq1"
   expected_output: "Scholar feedback appended to 1_concept.md + validation/scholar_report.md + status.yaml updated"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 5
+    reference: "See docs/v4/chronology.md lines 180-245 for complete input list"
+    expected_bloat_areas: "WebSearch methodology, validation criteria redundancy"
   success_criteria:
     pass: "Feedback appended (not overwritten), 10-point rubric, devil's advocate analysis, 5-10 WebSearch queries, status.yaml context_dump"
     fail: "Overwrites concept.md, missing rubric, no devil's advocate, insufficient WebSearch"
@@ -157,6 +193,11 @@ phase20_test_rq_stats:
   specification_section: "2.2.2"
   test_input: "Validate statistical methods for ch5/rq1"
   expected_output: "Stats feedback appended to 1_concept.md + validation/stats_report.md + status.yaml updated"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 7
+    reference: "See docs/v4/chronology.md lines 250-325 for complete input list"
+    expected_bloat_areas: "Parallel structure to rq_scholar, methodology redundancy"
   success_criteria:
     pass: "Feedback appended, 10-point rubric, devil's advocate with literature citations, 6-10 WebSearch queries, status.yaml context_dump"
     fail: "Overwrites concept.md, missing citations, no devil's advocate"
@@ -309,6 +350,11 @@ phase21_test_rq_planner:
   specification_section: "2.3.1"
   test_input: "Create 2_plan.md for ch5/rq1"
   expected_output: "results/ch5/rq1/docs/2_plan.md with per-step validation requirements + status.yaml updated"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 10
+    reference: "See docs/v4/chronology.md lines 330-410 for complete input list"
+    expected_bloat_areas: "Planning methodology, validation criteria examples, names.md TDD documentation"
   success_criteria:
     pass: "2_plan.md with exact tag patterns, per-step validation criteria, substance criteria, status.yaml analysis_steps section created (all pending)"
     fail: "Missing validation requirements, vague tag patterns, no substance criteria"
@@ -328,6 +374,11 @@ phase22_test_rq_tools:
   specification_section: "2.3.2"
   test_input: "Create 3_tools.yaml for ch5/rq1"
   expected_output: "Agent WILL FAIL with missing tools list → Migrate with TDD → Re-run → 3_tools.yaml created"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 7
+    reference: "See docs/v4/chronology.md lines 415-480 for complete input list"
+    expected_bloat_areas: "Tool catalog examples, validation tool documentation, TDD migration instructions"
   success_criteria:
     pass: "3_tools.yaml with analysis+validation pairs, full signatures with type hints, status.yaml context_dump"
     fail: "Missing validation tools, incomplete signatures, tool improvisation"
@@ -353,6 +404,11 @@ phase23_test_rq_analysis:
   specification_section: "2.3.3"
   test_input: "Create 4_analysis.yaml for ch5/rq1"
   expected_output: "results/ch5/rq1/docs/4_analysis.yaml with complete self-contained recipe + status.yaml analysis_steps section"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 8
+    reference: "See docs/v4/chronology.md lines 485-555 for complete input list"
+    expected_bloat_areas: "Recipe completeness examples, validation requirements redundancy"
   success_criteria:
     pass: "4_analysis.yaml complete (merges plan+tools), full signatures with type hints, explicit validation inputs, status.yaml analysis_steps all pending"
     fail: "Incomplete recipe, missing validation, placeholder values (TBD), inference required"
@@ -371,6 +427,11 @@ phase24_test_g_code:
   specification_section: "2.4.1, 6.1"
   test_input: "Generate step01_*.py for ch5/rq1"
   expected_output: "results/ch5/rq1/code/step01_*.py with 4-layer validation passed"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 6
+    reference: "See docs/v4/chronology.md lines 560-620 for complete input list"
+    expected_bloat_areas: "4-layer validation examples, inline reasoning methodology, API mismatch prevention"
   success_criteria:
     pass: "Python code generated, 4-layer validation passed (import/signature/input/column), UTF-8 encoding, ASCII output"
     fail: "Validation failure, API mismatch, missing inline reasoning, non-ASCII output"
@@ -390,6 +451,11 @@ phase25_test_g_debug:
   specification_section: "2.6.2"
   test_input: "Debug failing script for ch5/rq1 (if step01 has errors)"
   expected_output: "Root cause identified + solution reported (master applies fix)"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 5
+    reference: "See docs/v4/chronology.md lines 625-680 for complete input list"
+    expected_bloat_areas: "Error classification taxonomy, git safety procedures, 6-type error examples"
   success_criteria:
     pass: "Root cause identified, 7-section report, git rollback successful, master understands fix"
     fail: "Wrong root cause, incomplete solution, rollback failed, black-box fix"
@@ -408,6 +474,11 @@ phase26_test_rq_inspect:
   specification_section: "2.4.2"
   test_input: "Validate step outputs for ch5/rq1"
   expected_output: "Four-layer validation passed + status.yaml analysis step marked success"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 7
+    reference: "See docs/v4/chronology.md lines 685-750 for complete input list"
+    expected_bloat_areas: "4-layer validation criteria, plan.md cross-reference methodology, substance criteria examples"
   success_criteria:
     pass: "Existence/structure/substance/logs validated, plan.md cross-referenced, status.yaml step pending→success"
     fail: "Missing validation layer, no plan cross-reference, status.yaml not updated"
@@ -426,6 +497,11 @@ phase27_test_rq_plots:
   specification_section: "2.5.1"
   test_input: "Generate plots.py for ch5/rq1"
   expected_output: "Agent MAY FAIL with missing plot functions → Add to tools/plots.py with TDD → Re-run → plots.py created"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 7
+    reference: "See docs/v4/chronology.md lines 755-815 for complete input list"
+    expected_bloat_areas: "Option B architecture rationale, D069 dual-scale compliance, plot source CSV methodology"
   success_criteria:
     pass: "plots.py calls ONLY existing functions from tools/plots.py, no data aggregation, D069 compliance (dual-scale)"
     fail: "Creates new plot functions, aggregates data, missing D069 dual-scale"
@@ -450,6 +526,11 @@ phase28_test_rq_results:
   specification_section: "2.5.2"
   test_input: "Create summary.md for ch5/rq1"
   expected_output: "results/ch5/rq1/results/summary.md with plausibility check + 5 sections + status.yaml updated"
+  bloat_audit:
+    status: "pending"
+    input_files_estimate: 7
+    reference: "See docs/v4/chronology.md lines 820-880 for complete input list"
+    expected_bloat_areas: "Plausibility check taxonomy, multimodal inspection methodology, healthy skepticism examples"
   success_criteria:
     pass: "6 plausibility checks performed, anomalies flagged (or 'acceptable'), multimodal PNG inspection, 5-section summary, healthy skepticism tone"
     fail: "No plausibility checks, missing anomaly flags, no PNG inspection, missing sections"
