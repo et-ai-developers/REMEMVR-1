@@ -9,20 +9,6 @@
 
 ---
 
-## CRITICAL: When to Read This File
-
-**RQ-Specific Agents:** Read this file AFTER universal.md
-- You use status.yaml for continuity
-- You write context_dumps
-- You follow file path conventions
-
-**General-Purpose Agents:** DO NOT read this file
-- g_conflict: Minimal circuit breakers only
-- g_code: General-purpose, master provides all context
-- g_debug: Debugging-specific workflow
-
----
-
 ## 1. YAML PARSING & STATUS CHECKING
 
 ### 1.1 Reading status.yaml
@@ -49,29 +35,6 @@ rq_concept:
 **If Parsing Unclear:**
 - Trigger CLARITY ERROR
 - Report to master with specific parsing issue
-
----
-
-### 1.2 Pseudo-Statefulness
-
-**Reading Prior Context:**
-1. Read status.yaml at agent invocation start
-2. Check all prior agents' statuses
-3. Read all prior agents' context_dumps
-4. Use context_dumps for continuity
-
-**Benefits:**
-- Stateful behavior without context window bloat
-- Each agent stays <5k tokens
-- Maintains workflow continuity
-
-**Example Usage:**
-```
-Agent rq_planner reads status.yaml:
-- Sees rq_concept.status = success
-- Reads rq_concept.context_dump: "Memory domains: What (object identity)"
-- Uses this info to plan analysis steps
-```
 
 ---
 
@@ -109,7 +72,7 @@ agent_name:
 - Verbose explanations
 - Redundant information
 
-**Example - Good Context Dump:**
+**Example:**
 ```yaml
 rq_planner:
   status: success
@@ -118,21 +81,6 @@ rq_planner:
     IRT calibration -> purification -> LMM trajectory
     Validation tools specified for each step
 ```
-
-**Example - Bad Context Dump (Too Verbose):**
-```yaml
-rq_planner:
-  status: success
-  context_dump: |
-    Created detailed analysis plan for RQ 5.1 examining trajectory of forgetting
-    Step 1 performs IRT calibration using GRM on what-domain items
-    Step 2 purifies items using thresholds a >= 0.4 and |b| <= 3.0
-    Step 3 runs Pass 2 IRT on purified items
-    Step 4 extracts theta scores and merges with TSVR
-    Step 5 fits LMM with random intercepts and slopes
-    Validation tools will check outputs at each step
-```
-(7 lines, too verbose - VIOLATES 5-line limit)
 
 ---
 
@@ -214,15 +162,4 @@ results/chX/rqY/
 
 ---
 
-## END OF WORKFLOW BEST PRACTICES
-
-**Remember:**
-1. Read universal.md FIRST, then this file
-2. ONLY RQ-specific agents read this (10/13 agents)
-3. Use status.yaml for continuity (pseudo-statefulness)
-4. Write terse context dumps (max 5 lines)
-5. Follow file path conventions (relative to results/chX/rqY/)
-6. Validate prior steps before proceeding
-
-**Version History:**
-- v4.0.1: Extracted from agent_best_practices.md for targeted loading (2025-11-21)
+**End of Workflow Best Practices**

@@ -7,21 +7,11 @@
 
 ---
 
-## CRITICAL: Read This Before Any Task
-
-This file establishes universal operating principles that apply to ALL agents. Every agent MUST:
-1. Read this file as step 1 (or step 2 after agent prompt)
-2. Follow circuit breaker protocols (quit on uncertainty, never guess)
-3. Adhere to platform compatibility rules
-4. Report clearly to master
-
-**Philosophy:** Task-sniper agents with lean context (<5k tokens), fail-fast validation, explicit everything.
-
----
-
 ## 1. CIRCUIT BREAKERS (5 Types)
 
 **Philosophy:** Quit on uncertainty, never guess. ALWAYS use appropriate circuit breaker when encountering ANY issue.
+
+**Format Note:** The templates below are guidance. Agents may adapt message format for clarity while preserving the circuit breaker TYPE (EXPECTATIONS ERROR, STEP ERROR, etc.).
 
 ### 1.1 EXPECTATIONS ERROR
 
@@ -223,73 +213,4 @@ SCOPE ERROR: Trying to fix code bugs, want to modify original files, but not in 
 
 ---
 
-## 4. GENERAL PRINCIPLES
-
-### 4.1 Task-Sniper Philosophy
-
-**Single Task Per Agent:**
-- Read exactly what's needed
-- Execute task
-- Report to master
-- Quit
-
-**Lean Context:**
-- Max <5k tokens per agent
-- Only load required files
-- No unnecessary context
-
----
-
-### 4.2 Stateless Architecture
-
-**Each Invocation Independent:**
-- No memory between invocations
-- Only status.yaml provides continuity (for RQ-specific agents)
-- Each agent starts fresh
-
----
-
-### 4.3 Fail-Fast Validation
-
-**Validate Before Proceeding:**
-- Check prior steps = success (from status.yaml, if RQ-specific agent)
-- Verify expected files exist
-- Confirm required information present
-
-**If ANY Check Fails:**
-- Use appropriate circuit breaker
-- QUIT immediately
-- Report specific error to master
-
-**NEVER:**
-- Proceed with uncertainty
-- Guess missing information
-- Skip validation checks
-
----
-
-## 5. INTEGRATION NOTES
-
-### 5.1 Git Workflow
-
-**NOT Agent Responsibility:**
-- Git commits handled by /save command
-- Do NOT commit from within agents
-- Master handles all git operations
-
-**Exception:** g_debug agent uses git for safety protocol (commit + push before debugging, rollback after)
-
----
-
-## END OF UNIVERSAL BEST PRACTICES
-
-**Remember:**
-1. Read this file FIRST in every agent workflow
-2. Use circuit breakers (quit on uncertainty, never guess)
-3. Follow platform rules (ASCII output, UTF-8 files)
-4. Report clearly to master (success or error with circuit breaker type)
-5. Validate everything (fail-fast, explicit checks)
-
-**Version History:**
-- v4.0: Initial version for atomic agent architecture (2025-11-16)
-- v4.0.1: Split into 3 files (universal, workflow, code) for targeted loading (2025-11-21)
+**End of Universal Best Practices**

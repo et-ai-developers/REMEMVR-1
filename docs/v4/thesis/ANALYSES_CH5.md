@@ -8,21 +8,21 @@
 
 | RQ | Title | Line |
 |----|-------|------|
-| **5.1** | Do What, Where, and When domains exhibit different forgetting trajectories? | 29 |
-| **5.2** | Is there evidence for differential consolidation across domains? | 157 |
-| **5.3** | Do Free Recall, Cued Recall, and Recognition exhibit different forgetting trajectories? | 247 |
-| **5.4** | Is there a linear trend in forgetting rate across paradigms? | 354 |
-| **5.5** | Do congruent and incongruent items show different forgetting rates? | 434 |
-| **5.6** | Do congruent items benefit more from early consolidation than incongruent items? | 527 |
-| **5.7** | Which functional form best describes forgetting trajectories? | 624 |
-| **5.8** | Is there evidence for two-phase forgetting (rapid then slow)? | 728 |
-| **5.9** | Does age affect baseline memory ability or forgetting rate? | 828 |
-| **5.10** | Do age effects differ across memory domains? | 927 |
-| **5.11** | Do IRT and CTT approaches converge on the same conclusions? | 1022 |
-| **5.12** | Does purified IRT item set change CTT conclusions? | 1121 |
-| **5.13** | How much between-person variance exists in forgetting rates? | 1221 |
-| **5.14** | Are there distinct forgetting profiles (fast vs slow forgetters)? | 1328 |
-| **5.15** | Does item difficulty interact with time (easier items forgotten faster)? | 1430 |
+| **5.1** | Do What, Where, and When domains exhibit different forgetting trajectories?
+| **5.2** | Is there evidence for differential consolidation across domains?
+| **5.3** | Do Free Recall, Cued Recall, and Recognition exhibit different forgetting trajectories?
+| **5.4** | Is there a linear trend in forgetting rate across paradigms?
+| **5.5** | Do congruent and incongruent items show different forgetting rates?
+| **5.6** | Do congruent items benefit more from early consolidation than incongruent items?
+| **5.7** | Which functional form best describes forgetting trajectories?
+| **5.8** | Is there evidence for two-phase forgetting (rapid then slow)?
+| **5.9** | Does age affect baseline memory ability or forgetting rate?
+| **5.10** | Do age effects differ across memory domains?
+| **5.11** | Do IRT and CTT approaches converge on the same conclusions?
+| **5.12** | Does purified IRT item set change CTT conclusions?
+| **5.13** | How much between-person variance exists in forgetting rates?
+| **5.14** | Are there distinct forgetting profiles (fast vs slow forgetters)?
+| **5.15** | Does item difficulty interact with time (easier items forgotten faster)?
 
 ---
 
