@@ -82,7 +82,7 @@ def create_lineage_metadata(
     return metadata
 
 
-def save_lineage(metadata: Dict[str, Any], lineage_file: str) -> None:
+def save_lineage_to_file(metadata: Dict[str, Any], lineage_file: str) -> None:
     """
     Save lineage metadata to JSON file.
 
@@ -104,7 +104,7 @@ def save_lineage(metadata: Dict[str, Any], lineage_file: str) -> None:
         json.dump(metadata, f, indent=2)
 
 
-def load_lineage(lineage_file: str) -> Dict[str, Any]:
+def load_lineage_from_file(lineage_file: str) -> Dict[str, Any]:
     """
     Load lineage metadata from JSON file.
 
@@ -475,7 +475,7 @@ def validate_data_columns(
     }
 
 
-def validate_file_exists(file_path: str) -> Dict[str, Any]:
+def check_file_exists(file_path: str) -> Dict[str, Any]:
     """
     Validate that file exists.
 

@@ -26,7 +26,7 @@ import deepirtools
 from typing import Dict, List, Tuple, Optional, Union
 
 
-def prepare_irt_data(
+def prepare_irt_input_from_wide(
     df_long: pd.DataFrame,
     groups: Dict[str, List[str]]
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, List[str], List[str]]:
@@ -185,7 +185,7 @@ def configure_irt_model(
     return model
 
 
-def fit_irt_model(
+def fit_irt_grm(
     model: deepirtools.IWAVE,
     response_matrix: torch.Tensor,
     missing_mask: torch.Tensor,
@@ -234,7 +234,7 @@ def fit_irt_model(
     return model
 
 
-def extract_theta_scores(
+def extract_theta_from_irt(
     model: deepirtools.IWAVE,
     response_matrix: torch.Tensor,
     missing_mask: torch.Tensor,
@@ -314,7 +314,7 @@ def extract_theta_scores(
     return df_thetas
 
 
-def extract_item_parameters(
+def extract_parameters_from_irt(
     model: deepirtools.IWAVE,
     item_list: List[str],
     factor_names: List[str],
@@ -552,7 +552,7 @@ def calibrate_irt(
     return df_thetas, df_items
 
 
-def purify_items(
+def filter_items_by_quality(
     df_items: pd.DataFrame,
     a_threshold: float = 0.4,
     b_threshold: float = 3.0

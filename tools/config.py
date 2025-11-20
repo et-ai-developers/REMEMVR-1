@@ -8,17 +8,23 @@ Centralized loading and access to YAML configuration files:
 - config/lmm.yaml - LMM formulas and fitting parameters
 
 Usage:
-    from tools.config import get_config, get_path, get_plot_config, get_irt_config, get_lmm_config
+    from tools.config import (
+        load_config_from_yaml,
+        resolve_path_from_config,
+        load_plot_config_from_yaml,
+        load_irt_config_from_yaml,
+        load_lmm_config_from_yaml
+    )
 
     # Get full config
-    config = get_config('paths')
+    config = load_config_from_yaml('paths')
 
     # Get nested value with dot notation
-    master_path = get_path('data.master')
-    dpi = get_plot_config('global.dpi')
+    master_path = resolve_path_from_config('data.master')
+    dpi = load_plot_config_from_yaml('global.dpi')
 
     # Get section
-    colors = get_plot_config('colors.factors')
+    colors = load_plot_config_from_yaml('colors.factors')
 
 Design Principles:
 - Single source of truth for all configuration
@@ -56,7 +62,7 @@ _CONFIG_CACHE: Dict[str, Dict] = {}
 
 # ─── CORE LOADING FUNCTION ───────────────────────────────────────────────────
 
-def load_config(config_name: str) -> Dict[str, Any]:
+def load_config_from_file(config_name: str) -> Dict[str, Any]:
     """
     Load YAML configuration file.
 
@@ -71,7 +77,7 @@ def load_config(config_name: str) -> Dict[str, Any]:
         yaml.YAMLError: If config file is invalid
 
     Example:
-        config = load_config('paths')
+        config = load_config_from_file('paths')
         master_path = config['data']['master']
     """
     # 1. Check cache first
@@ -102,7 +108,7 @@ def load_config(config_name: str) -> Dict[str, Any]:
     return config
 
 
-def get_config(config_name: str, key_path: Optional[str] = None) -> Any:
+def load_config_from_yaml(config_name: str, key_path: Optional[str] = None) -> Any:
     """
     Get configuration value by key path.
 
@@ -118,11 +124,11 @@ def get_config(config_name: str, key_path: Optional[str] = None) -> Any:
         KeyError: If key_path doesn't exist
 
     Example:
-        master = get_config('paths', 'data.master')
-        colors = get_config('plotting', 'colors.factors')
+        master = load_config_from_yaml('paths', 'data.master')
+        colors = load_config_from_yaml('plotting', 'colors.factors')
     """
     # 1. Load config (uses cache)
-    config = load_config(config_name)
+    config = load_config_from_file(config_name)
 
     # 2. If key_path is None, return full config
     if key_path is None:
@@ -146,7 +152,7 @@ def get_config(config_name: str, key_path: Optional[str] = None) -> Any:
 
 # ─── CONVENIENCE FUNCTIONS ───────────────────────────────────────────────────
 
-def get_path(key_path: str, **kwargs) -> Path:
+def resolve_path_from_config(key_path: str, **kwargs) -> Path:
     """
     Get path from paths.yaml.
 
@@ -158,11 +164,11 @@ def get_path(key_path: str, **kwargs) -> Path:
         Path object (absolute)
 
     Example:
-        master = get_path('data.master')
-        rq_path = get_path('results.ch5.rq_template', n=1)  # results/ch5/rq1/
+        master = resolve_path_from_config('data.master')
+        rq_path = resolve_path_from_config('results.ch5.rq_template', n=1)  # results/ch5/rq1/
     """
     # 1. Get path string from config
-    path_str = get_config('paths', key_path)
+    path_str = load_config_from_yaml('paths', key_path)
 
     if not isinstance(path_str, str):
         raise ValueError(f"Path value at '{key_path}' must be a string, got {type(path_str)}")
@@ -184,24 +190,24 @@ def get_path(key_path: str, **kwargs) -> Path:
     return path
 
 
-def get_plot_config(key_path: Optional[str] = None) -> Any:
+def load_plot_config_from_yaml(key_path: Optional[str] = None) -> Any:
     """Get value from plotting.yaml."""
-    return get_config('plotting', key_path)
+    return load_config_from_yaml('plotting', key_path)
 
 
-def get_irt_config(key_path: Optional[str] = None) -> Any:
+def load_irt_config_from_yaml(key_path: Optional[str] = None) -> Any:
     """Get value from irt.yaml."""
-    return get_config('irt', key_path)
+    return load_config_from_yaml('irt', key_path)
 
 
-def get_lmm_config(key_path: Optional[str] = None) -> Any:
+def load_lmm_config_from_yaml(key_path: Optional[str] = None) -> Any:
     """Get value from lmm.yaml."""
-    return get_config('lmm', key_path)
+    return load_config_from_yaml('lmm', key_path)
 
 
 # ─── VALIDATION FUNCTIONS ────────────────────────────────────────────────────
 
-def validate_paths(config: Dict[str, Any]) -> None:
+def validate_paths_exist(config: Dict[str, Any]) -> None:
     """
     Validate that critical paths exist.
 
@@ -218,7 +224,7 @@ def validate_paths(config: Dict[str, Any]) -> None:
     raise NotImplementedError("To be implemented in Phase 1")
 
 
-def validate_irt_config(config: Dict[str, Any]) -> None:
+def validate_irt_params(config: Dict[str, Any]) -> None:
     """
     Validate IRT configuration.
 
@@ -237,7 +243,7 @@ def validate_irt_config(config: Dict[str, Any]) -> None:
 
 # ─── RQ-SPECIFIC OVERRIDES ───────────────────────────────────────────────────
 
-def deep_merge(base: Dict, override: Dict) -> Dict:
+def merge_config_dicts(base: Dict, override: Dict) -> Dict:
     """
     Deep merge two dictionaries (override takes precedence).
 
@@ -251,7 +257,7 @@ def deep_merge(base: Dict, override: Dict) -> Dict:
     Example:
         >>> base = {'a': 1, 'b': {'c': 2, 'd': 3}}
         >>> override = {'b': {'d': 4, 'e': 5}}
-        >>> deep_merge(base, override)
+        >>> merge_config_dicts(base, override)
         {'a': 1, 'b': {'c': 2, 'd': 4, 'e': 5}}
     """
     result = base.copy()
@@ -259,7 +265,7 @@ def deep_merge(base: Dict, override: Dict) -> Dict:
     for key, value in override.items():
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             # Recursively merge nested dicts
-            result[key] = deep_merge(result[key], value)
+            result[key] = merge_config_dicts(result[key], value)
         else:
             # Override takes precedence
             result[key] = value
@@ -267,7 +273,7 @@ def deep_merge(base: Dict, override: Dict) -> Dict:
     return result
 
 
-def load_rq_config(chapter: int, rq: int) -> Dict[str, Any]:
+def load_rq_config_merged(chapter: int, rq: int) -> Dict[str, Any]:
     """
     Load RQ-specific configuration with overrides.
 
@@ -284,7 +290,7 @@ def load_rq_config(chapter: int, rq: int) -> Dict[str, Any]:
         Merged configuration dictionary
 
     Example:
-        config = load_rq_config(5, 1)  # Loads config for RQ 5.1
+        config = load_rq_config_merged(5, 1)  # Loads config for RQ 5.1
     """
     # 1. Load global configs
     global_config = {}
@@ -293,7 +299,7 @@ def load_rq_config(chapter: int, rq: int) -> Dict[str, Any]:
     config_names = ['paths', 'plotting', 'irt', 'lmm', 'logging', 'models']
     for config_name in config_names:
         try:
-            cfg = load_config(config_name)
+            cfg = load_config_from_file(config_name)
             global_config[config_name] = cfg
         except FileNotFoundError:
             # Config file doesn't exist, skip
@@ -324,9 +330,9 @@ def load_rq_config(chapter: int, rq: int) -> Dict[str, Any]:
     merged = global_config
 
     if chapter_config:
-        merged = deep_merge(merged, chapter_config)
+        merged = merge_config_dicts(merged, chapter_config)
 
-    merged = deep_merge(merged, rq_config)
+    merged = merge_config_dicts(merged, rq_config)
 
     # 5. Return merged config
     return merged
@@ -334,7 +340,7 @@ def load_rq_config(chapter: int, rq: int) -> Dict[str, Any]:
 
 # ─── ENVIRONMENT VARIABLE SUBSTITUTION ───────────────────────────────────────
 
-def expand_env_vars(path_str: str) -> str:
+def expand_env_vars_in_path(path_str: str) -> str:
     """
     Expand environment variables in path string.
 
@@ -345,7 +351,7 @@ def expand_env_vars(path_str: str) -> str:
         Path with variables expanded
 
     Example:
-        expand_env_vars("${REMEMVR_ROOT}/data/master.xlsx")
+        expand_env_vars_in_path("${REMEMVR_ROOT}/data/master.xlsx")
     """
     # TODO: Implement
     # Use os.path.expandvars or custom implementation
@@ -354,7 +360,7 @@ def expand_env_vars(path_str: str) -> str:
 
 # ─── TESTING HELPERS ─────────────────────────────────────────────────────────
 
-def reset_cache() -> None:
+def reset_config_cache() -> None:
     """
     Reset configuration cache.
 
@@ -374,23 +380,23 @@ if __name__ == "__main__":
     print()
 
     # Load full config
-    # paths_config = get_config('paths')
+    # paths_config = load_config_from_yaml('paths')
     # print(f"Paths config: {paths_config}")
 
     # Get specific values
-    # master_path = get_path('data.master')
+    # master_path = resolve_path_from_config('data.master')
     # print(f"Master data: {master_path}")
 
     # Get plotting settings
-    # colors = get_plot_config('colors.factors')
+    # colors = load_plot_config_from_yaml('colors.factors')
     # print(f"Factor colors: {colors}")
 
     # Get IRT settings
-    # batch_size = get_irt_config('calibration.model_fit.batch_size')
+    # batch_size = load_irt_config_from_yaml('calibration.model_fit.batch_size')
     # print(f"Batch size: {batch_size}")
 
     # Load RQ-specific config
-    # rq_config = load_rq_config(5, 1)
+    # rq_config = load_rq_config_merged(5, 1)
     # print(f"RQ 5.1 config: {rq_config}")
 
     print("(Not yet implemented - Phase 1)")

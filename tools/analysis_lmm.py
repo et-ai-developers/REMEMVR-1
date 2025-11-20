@@ -21,7 +21,7 @@ import warnings
 # DATA PREPARATION
 # ============================================================================
 
-def prepare_lmm_data(
+def prepare_lmm_input_from_theta(
     theta_scores: pd.DataFrame,
     factors: Optional[list] = None
 ) -> pd.DataFrame:
@@ -60,7 +60,7 @@ def prepare_lmm_data(
     ...     'Theta_Where': [0.2, 0.1],
     ...     'Theta_When': [0.8, 0.6]
     ... })
-    >>> df_long = prepare_lmm_data(df_wide)
+    >>> df_long = prepare_lmm_input_from_theta(df_wide)
     >>> df_long.shape
     (6, 7)  # 2 obs × 3 factors = 6 rows
     """
@@ -197,7 +197,7 @@ def configure_candidate_models(
 # SINGLE MODEL FITTING
 # ============================================================================
 
-def fit_lmm_model(
+def fit_lmm_trajectory(
     data: pd.DataFrame,
     formula: str,
     groups: str,
@@ -236,7 +236,7 @@ def fit_lmm_model(
 
     Examples
     --------
-    >>> result = fit_lmm_model(
+    >>> result = fit_lmm_trajectory(
     ...     data=df_long,
     ...     formula='Ability ~ Days',
     ...     groups='UID',
@@ -273,7 +273,7 @@ def fit_lmm_model(
 # MODEL COMPARISON
 # ============================================================================
 
-def compare_models(
+def compare_lmm_models_by_aic(
     data: pd.DataFrame,
     n_factors: int,
     reference_group: Optional[str] = None,
@@ -311,7 +311,7 @@ def compare_models(
 
     Examples
     --------
-    >>> results = compare_models(
+    >>> results = compare_lmm_models_by_aic(
     ...     data=df_long,
     ...     n_factors=3,
     ...     reference_group='What'
@@ -341,7 +341,7 @@ def compare_models(
 
         # Fit model
         try:
-            result = fit_lmm_model(
+            result = fit_lmm_trajectory(
                 data=data,
                 formula=config['formula'],
                 groups=groups,
@@ -391,7 +391,7 @@ def compare_models(
 # EXTRACT RESULTS
 # ============================================================================
 
-def extract_fixed_effects(result: MixedLMResults) -> pd.DataFrame:
+def extract_fixed_effects_from_lmm(result: MixedLMResults) -> pd.DataFrame:
     """
     Extract fixed effects table from fitted model.
 
@@ -407,7 +407,7 @@ def extract_fixed_effects(result: MixedLMResults) -> pd.DataFrame:
 
     Examples
     --------
-    >>> fe_table = extract_fixed_effects(fitted_model)
+    >>> fe_table = extract_fixed_effects_from_lmm(fitted_model)
     >>> print(fe_table)
     """
     # Get fixed effects summary table
@@ -432,7 +432,7 @@ def extract_fixed_effects(result: MixedLMResults) -> pd.DataFrame:
     return fe_df
 
 
-def extract_random_effects(result: MixedLMResults) -> Dict:
+def extract_random_effects_from_lmm(result: MixedLMResults) -> Dict:
     """
     Extract random effects variances and ICC.
 
@@ -451,7 +451,7 @@ def extract_random_effects(result: MixedLMResults) -> Dict:
 
     Examples
     --------
-    >>> re_summary = extract_random_effects(fitted_model)
+    >>> re_summary = extract_random_effects_from_lmm(fitted_model)
     >>> print(re_summary['icc'])
     """
     # Random effects variance-covariance matrix
@@ -542,7 +542,7 @@ def run_lmm_analysis(
 
     # Step 1: Prepare data
     print("\n[1/5] Preparing data (wide to long format)...")
-    df_long = prepare_lmm_data(theta_scores)
+    df_long = prepare_lmm_input_from_theta(theta_scores)
     print(f"  Data shape: {df_long.shape}")
     print(f"  Factors: {df_long['Factor'].unique().tolist()}")
 
@@ -553,7 +553,7 @@ def run_lmm_analysis(
     # Step 2-3: Fit and compare models
     print("\n[2/5] Fitting candidate models and comparing via AIC...")
     save_dir = output_dir if save_models else None
-    comparison_results = compare_models(
+    comparison_results = compare_lmm_models_by_aic(
         data=df_long,
         n_factors=n_factors,
         reference_group=reference_group,
@@ -573,13 +573,13 @@ def run_lmm_analysis(
 
     # Step 4: Extract fixed effects
     print("\n[3/5] Extracting fixed effects...")
-    fe_table = extract_fixed_effects(best_model)
+    fe_table = extract_fixed_effects_from_lmm(best_model)
     fe_table.to_csv(output_dir / 'fixed_effects.csv', index=False)
     print(f"  Saved: {output_dir / 'fixed_effects.csv'}")
 
     # Step 5: Extract random effects
     print("\n[4/5] Extracting random effects...")
-    re_summary = extract_random_effects(best_model)
+    re_summary = extract_random_effects_from_lmm(best_model)
     print(f"  ICC = {re_summary['icc']:.3f}")
 
     # Save random effects summary
@@ -619,7 +619,7 @@ def run_lmm_analysis(
     }
 
 
-def post_hoc_contrasts(
+def compute_contrasts_pairwise(
     lmm_result,
     comparisons: List[str],
     family_alpha: float = 0.05
@@ -653,7 +653,7 @@ def post_hoc_contrasts(
     Example:
         ```python
         comparisons = ["Where-What", "When-What", "When-Where"]
-        df_contrasts = post_hoc_contrasts(result, comparisons, family_alpha=0.05)
+        df_contrasts = compute_contrasts_pairwise(result, comparisons, family_alpha=0.05)
         ```
 
     Decision D068 Context:
@@ -738,7 +738,7 @@ def post_hoc_contrasts(
     return df_contrasts
 
 
-def compute_effect_sizes(
+def compute_effect_sizes_cohens(
     lmm_result,
     include_interactions: bool = False
 ) -> pd.DataFrame:
@@ -762,7 +762,7 @@ def compute_effect_sizes(
 
     Example:
         ```python
-        df_effect_sizes = compute_effect_sizes(result, include_interactions=True)
+        df_effect_sizes = compute_effect_sizes_cohens(result, include_interactions=True)
         ```
 
     Note:
@@ -830,7 +830,7 @@ def compute_effect_sizes(
 # MODULE EXPORTS
 # ============================================================================
 
-def fit_lmm_with_tsvr(
+def fit_lmm_trajectory_tsvr(
     theta_scores: pd.DataFrame,
     tsvr_data: pd.DataFrame,
     formula: str,
@@ -868,7 +868,7 @@ def fit_lmm_with_tsvr(
         tsvr_data = pd.read_csv("data/tsvr_data.csv")
 
         # Fit model
-        result = fit_lmm_with_tsvr(
+        result = fit_lmm_trajectory_tsvr(
             theta_scores=theta_scores,
             tsvr_data=tsvr_data,
             formula="Theta ~ Days + C(Domain) + Days:C(Domain)",
@@ -973,7 +973,7 @@ def fit_lmm_with_tsvr(
     print(f"  Random effects: {re_formula}")
     print(f"  Grouping: {groups}")
 
-    result = fit_lmm_model(
+    result = fit_lmm_trajectory(
         data=lmm_data,
         formula=formula,
         groups=groups,
@@ -993,14 +993,14 @@ def fit_lmm_with_tsvr(
 
 
 __all__ = [
-    'prepare_lmm_data',
+    'prepare_lmm_input_from_theta',
     'configure_candidate_models',
-    'fit_lmm_model',
-    'compare_models',
-    'extract_fixed_effects',
-    'extract_random_effects',
+    'fit_lmm_trajectory',
+    'compare_lmm_models_by_aic',
+    'extract_fixed_effects_from_lmm',
+    'extract_random_effects_from_lmm',
     'run_lmm_analysis',
-    'post_hoc_contrasts',
-    'compute_effect_sizes',
-    'fit_lmm_with_tsvr'
+    'compute_contrasts_pairwise',
+    'compute_effect_sizes_cohens',
+    'fit_lmm_trajectory_tsvr'
 ]

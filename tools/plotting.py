@@ -11,11 +11,11 @@ Key Features:
 - Supports grouped visualizations by domain/factor
 
 Functions:
-    setup_plot_style() - Apply consistent matplotlib/seaborn styling
+    set_plot_style_defaults() - Apply consistent matplotlib/seaborn styling
     plot_trajectory() - Trajectory with fitted curves + observed errorhars
     plot_diagnostics() - 2x2 diagnostic grid for regression validation
     plot_histogram_by_group() - Grouped histograms
-    theta_to_probability() - IRT response function
+    convert_theta_to_probability() - IRT response function
     save_plot_with_data() - Save PNG + CSV simultaneously
 
 Author: Claude (REMEMVR Project)
@@ -30,14 +30,14 @@ from pathlib import Path
 from scipy import stats
 from typing import List, Optional, Dict, Tuple, Any
 
-from tools.config import load_config
+from tools.config import load_config_from_file
 
 
 # =============================================================================
 # Style Setup
 # =============================================================================
 
-def setup_plot_style(config_path: Optional[Path] = None) -> None:
+def set_plot_style_defaults(config_path: Optional[Path] = None) -> None:
     """
     Apply consistent matplotlib and seaborn styling from config.
 
@@ -51,7 +51,7 @@ def setup_plot_style(config_path: Optional[Path] = None) -> None:
         None - gracefully falls back to defaults if config missing
 
     Example:
-        >>> setup_plot_style()  # Uses config/plotting.yaml
+        >>> set_plot_style_defaults()  # Uses config/plotting.yaml
         >>> plt.plot([0, 1], [0, 1])  # Will use configured style
     """
     # Set seaborn style first (base style)
@@ -60,7 +60,7 @@ def setup_plot_style(config_path: Optional[Path] = None) -> None:
     # Try to load config
     try:
         if config_path is None:
-            config = load_config('plotting')
+            config = load_config_from_file('plotting')
         else:
             import yaml
             with open(config_path, 'r') as f:
@@ -148,7 +148,7 @@ def plot_trajectory(
     # Get default colors if not provided
     if colors is None:
         try:
-            config = load_config('plotting')
+            config = load_config_from_file('plotting')
             colors = config.get('colors', {
                 'What': '#E74C3C',
                 'Where': '#3498DB',
@@ -301,7 +301,7 @@ def plot_diagnostics(
     if group_col and group_col in df.columns:
         # Get colors
         try:
-            config = load_config('plotting')
+            config = load_config_from_file('plotting')
             colors = config.get('colors', {})
         except:
             colors = {}
@@ -378,7 +378,7 @@ def plot_histogram_by_group(
     # Get default colors if not provided
     if colors is None:
         try:
-            config = load_config('plotting')
+            config = load_config_from_file('plotting')
             colors = config.get('colors', {})
         except:
             colors = {}
@@ -421,7 +421,7 @@ def plot_histogram_by_group(
 # IRT Utilities
 # =============================================================================
 
-def theta_to_probability(
+def convert_theta_to_probability(
     theta: np.ndarray,
     discrimination: float,
     difficulty: float
@@ -447,7 +447,7 @@ def theta_to_probability(
 
     Example:
         >>> theta = np.array([-2, -1, 0, 1, 2])
-        >>> prob = theta_to_probability(theta, discrimination=1.5, difficulty=0.0)
+        >>> prob = convert_theta_to_probability(theta, discrimination=1.5, difficulty=0.0)
         >>> print(prob)  # [0.047, 0.18, 0.5, 0.82, 0.953]
 
     Note:
