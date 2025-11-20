@@ -29,12 +29,18 @@ This question matters for understanding episodic memory architecture. Dual-proce
 - Tulving (1972): Episodic memory as "mental time travel" requiring binding of What/Where/When
 - Yonelinas (2002): Dual-process theory distinguishing familiarity and recollection processes
 - Rasch & Born (2013): Sleep-dependent consolidation preferentially benefits hippocampal memories
+- Kisker et al. (2021): Immersive VR promotes recollection-based memory (supports dual-process predictions in VR contexts)
+- Stark et al. (2018): Hippocampal activation greater for temporal order vs. spatial location retrieval (neural evidence for domain dissociation)
+- Deuker et al. (2016): Spatial and temporal episodic memory recruit dissociable functional networks
 
 **Theoretical Predictions:**
 Dual-process theory predicts What will show slowest forgetting (familiarity-based), Where intermediate, and When fastest (recollection-dependent). Object identity (What) may be more resilient than spatial (Where) or temporal (When) memory, consistent with dual-process theories suggesting familiarity-based information is less hippocampus-dependent than contextual details.
 
 **Literature Gaps:**
 Most episodic memory studies examine What and Where separately. Few studies test all three WWW domains together in immersive VR with longitudinal trajectories across 6 days. This RQ provides comprehensive assessment of domain-specific forgetting using psychometrically validated IRT ability estimates.
+
+**Alternative Explanation:**
+Domain differences could reflect initial encoding quality variations (e.g., spatial information encoded more richly; Bonnici et al., 2018) rather than differential decay rates. However, Day 0 baseline captures initial encoding state, and longitudinal trajectory slopes (not intercepts) test forgetting dynamics. If encoding quality alone drives differences, domains would differ at T1 but show parallel trajectories; if forgetting rates differ, Domain × Time interaction should emerge.
 
 ---
 
@@ -94,13 +100,13 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 
 **Step 3:** IRT Data Prep - Send to irt_data_prep tool with composite=["UID", "TEST"], time="TSVR", items=["TQ_*"], factors={what: ["*-N-*"], where: ["*-L-*", "*-U-*", "*-D-*"], when: ["*-O-*"]}
 
-**Step 4:** IRT Pass 1 - Calibrate correlated factors, 2-category GRM. Extract theta scores, difficulty (b), discrimination (a)
+**Step 4:** IRT Pass 1 - Calibrate correlated factors, 2-category GRM. Extract theta scores, difficulty (b), discrimination (a). **IRT Assumption Validation:** (1) Check unidimensionality via eigenvalue ratio (first/second eigenvalue >3.0), (2) Compute Q3 statistic for all item pairs within each domain to detect local dependence (Q3 <0.2 threshold per Christensen et al. 2017). If >10% of item pairs show Q3 >0.2, consider bifactor IRT model. Report Q3 statistics in validation logs.
 
-**Step 5:** Item Purification - Remove items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4), apply within-domain filter
+**Step 5:** Item Purification - Remove items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4) to ensure psychometric quality. This also controls for room-level memorability variance by excluding outlier items. Apply within-domain filter to ensure balanced representation across What/Where/When.
 
 **Step 6:** IRT Pass 2 - Re-calibrate GRM on purified items only
 
-**Step 7:** LMM Trajectory Modeling - Fit 5 candidate models with Domain × Time interactions: Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log. Use Treatment coding (What as reference), random intercepts and slopes by UID. Fit with REML=False for AIC comparison. Select best model via AIC, compute Akaike weights.
+**Step 7:** LMM Trajectory Modeling - Fit 5 candidate models with Domain × Time interactions: Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log. Use Treatment coding (What as reference), random intercepts and slopes by UID. Fit with REML=False for AIC/AICc comparison. **Convergence Strategy:** If random slopes fail to converge (singular fit warnings), compare random intercept-only model via likelihood ratio test. Only retain random slopes if: (1) they significantly improve fit (LRT p<0.05) AND (2) model converges without warnings. Report convergence status. Select best model via AIC and AICc (small-sample corrected); if they disagree, favor AICc (N=100).
 
 **Step 8:** Theta to Probability Conversion - Translate best model predictions back to probability scale using reverse logit: `probability = 1 / (1 + np.exp(-(discrimination * (theta - difficulty))))`
 
@@ -156,5 +162,28 @@ Load data from data/cache/dfData.csv (preprocessed from master.xlsx). Select col
 **Tests:**
 - [x] All 4 tests (T1, T2, T3, T4 - nominal Days 0, 1, 3, 6)
 - Note: Time variable uses TSVR (actual hours since encoding), not nominal days
+
+---
+
+## Validation Procedures & Limitations
+
+**LMM Assumption Diagnostics:**
+
+After selecting best model via AIC/AICc, validate core assumptions:
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (p>0.05 threshold). If violated, use robust standard errors (Huber-White).
+2. **Homoscedasticity:** Residual vs fitted plot (visual inspection for constant variance).
+3. **Outliers:** Cook's distance (D > 4/100 = 0.04 flags influential observations). Report with/without outliers if detected.
+4. **Autocorrelation:** ACF plot (lag-1 ACF < 0.1 for independence). If violated, consider GEE with AR(1) structure.
+
+Report all diagnostic results in validation logs. Remedial actions specified above guide handling of assumption violations (Schielzeth et al. 2020).
+
+**Practice Effects Limitation:**
+
+Repeated testing across T1-T4 introduces practice effects (performance improvements due to task familiarity) that may partially offset forgetting (Calamia et al. 2013, d = 0.25 typical effect size; Jutten et al. 2020). We assume practice effects are domain-general (affect What/Where/When equally), preserving validity of Domain×Time interaction for testing differential forgetting. However, main effect of time confounds practice and forgetting, so absolute forgetting rates should be interpreted cautiously. IRT theta estimates partially account for task familiarity by separating item difficulty from person ability. Non-linear trajectory models can capture initial practice-driven improvements vs. later decay-driven decline.
+
+**Methodological Notes:**
+
+- **Sample Size:** N=100 adequate for fixed effects but marginal for random slopes (Ryoo 2011 recommends N≥200). Convergence strategy (Step 7) addresses this limitation.
+- **Local Dependence:** Episodic memory items may violate IRT local independence due to serial position effects and contextual binding (Bock et al. 2021). Q3 validation (Step 4) detects violations.
 
 ---
