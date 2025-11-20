@@ -26,21 +26,15 @@ Master specifies chX/rqY to build (e.g., "Build ch5/rq1").
 
 ## Steps
 
-### Step 1: Read agent_best_practices.md
+### Step 1: Read universal.md
 
-**Action:** Read `docs/v4/agent_best_practices.md`
+**Action:** Read `docs/v4/best_practices/universal.md`
 
 **Purpose:** Load universal error handling rules, circuit breakers, and platform compatibility requirements
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read agent_best_practices.md → Quit with error message
+- **TOOL ERROR:** Cannot read universal.md → Quit with error message
 - **EXPECTATIONS ERROR:** File missing or unreadable → Quit with error message
-
-**What to extract:**
-- 5 circuit breaker types (EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE)
-- Platform compatibility rules (ASCII-only output, UTF-8 encoding, Poetry environment, Bash shell)
-- Context dump format (max 5 lines)
-- Error reporting patterns
 
 ---
 
@@ -54,12 +48,6 @@ Master specifies chX/rqY to build (e.g., "Build ch5/rq1").
 - **TOOL ERROR:** Cannot read build_folder.md → Quit with error message
 - **EXPECTATIONS ERROR:** Template missing or malformed → Quit with error message
 
-**What to extract:**
-- Exact folder names (6 required)
-- Folder purposes
-- Creation order requirements
-- Verification criteria
-
 ---
 
 ### Step 3: Read build_status.md template
@@ -71,16 +59,6 @@ Master specifies chX/rqY to build (e.g., "Build ch5/rq1").
 **Circuit Breakers:**
 - **TOOL ERROR:** Cannot read build_status.md → Quit with error message
 - **EXPECTATIONS ERROR:** Template missing or malformed → Quit with error message
-
-**What to extract:**
-- 10 RQ-specific agent names (rq_builder, rq_concept, rq_scholar, rq_stats, rq_planner, rq_tools, rq_analysis, rq_inspect, rq_plots, rq_results)
-- 3 general-purpose agents to EXCLUDE (g_code, g_conflict, g_debug)
-- Initial status values (all `pending`)
-- Initial context_dump values (all empty multiline strings)
-- YAML format requirements (pipe notation for multiline strings)
-- Context dump format (max 5 lines per agent)
-
-**CRITICAL:** Do NOT create analysis_steps section in initial status.yaml. The rq_analysis agent creates this later.
 
 ---
 
@@ -232,7 +210,7 @@ rq_builder:
 ```
 
 **Context Dump Requirements:**
-- **Max 5 lines** (per agent_best_practices.md)
+- **Max 5 lines** (per universal.md)
 - **Line 1:** What was created (RQ folder path, folder count)
 - **Line 2:** Folder names (6 folders listed)
 - **Line 3:** Verification status (all empty, ready)
@@ -310,36 +288,6 @@ Action Required: Delete or move existing directory, then re-invoke rq_builder
 
 ---
 
-## Platform Compatibility
-
-**Per agent_best_practices.md:**
-
-- **Output:** ASCII-only (no Unicode symbols, no emojis)
-- **File Encoding:** UTF-8 for all writes
-- **Environment:** Poetry environment (poetry run python...)
-- **Shell:** Bash (NOT PowerShell)
-- **Bash Commands:** Must work on Windows Git Bash (POSIX-compliant)
-
-**Example:**
-- ✅ CORRECT: `mkdir -p results/ch5/rq1`
-- ❌ WRONG: `New-Item -ItemType Directory` (PowerShell)
-
----
-
-## Pseudo-Statefulness Design
-
-**How status.yaml enables v4.X pseudo-statefulness:**
-
-1. **Agent Coordination:** Each agent reads status.yaml to check prior agents completed successfully
-2. **Context Continuity:** Context_dumps provide 5-line summaries of what each agent did
-3. **Sequential Enforcement:** If prior agent status ≠ success → Circuit breaker
-4. **Audit Trail:** Complete execution history in single file
-5. **Error Recovery:** Context preserved across g_debug iterations
-
-**rq_builder's role:** Creates the initial status.yaml infrastructure that all 10 RQ-specific agents will use for coordination.
-
----
-
 ## Success Criteria
 
 **All of the following must be true:**
@@ -356,53 +304,6 @@ Action Required: Delete or move existing directory, then re-invoke rq_builder
 10. ✅ Report sent to master
 
 **If ANY criterion fails:** Circuit breaker triggered, agent quits with error.
-
----
-
-## Design Notes
-
-**v3.0 vs v4.X:**
-- **v3.0:** rq_specification agent MODE 2 created folders as part of larger workflow (folder creation + specification + config)
-- **v4.X:** rq_builder is dedicated atomic agent (ONLY creates folders, nothing else)
-- **Benefit:** Separation of concerns, easier testing, clearer responsibilities
-
-**Why 6 folders (v3.0 had 5):**
-- **Added docs/:** Specifications now stored in subfolder (1_concept.md, 2_plan.md, 3_tools.yaml, 4_analysis.yaml) instead of root
-- **Added results/:** Analysis outputs separated from other files
-- **Removed validation/:** Validation reports now integrated into results/
-
-**Why status.yaml (v3.0 had status.md):**
-- **YAML format:** More concise, easier to parse, better for nested structures
-- **Embedded context_dumps:** All agent context in single file (v3.0 had separate logs/rq_spec_context.md)
-- **Simplified statuses:** pending/success only (v3.0 had complete/in_progress/not_started/success/failure/passed/failed)
-
----
-
-## Testing Notes
-
-**When rq_builder is tested (Phase 17, TEST01):**
-
-**Test Input:** "Build ch5/rq1"
-
-**Expected Behavior:**
-1. Creates `results/ch5/rq1/` directory
-2. Creates 6 subfolders with .gitkeep files
-3. Creates `status.yaml` with 10 agents (all pending except rq_builder = success)
-4. Reports success to master
-5. Quits
-
-**Expected Outputs:**
-- `results/ch5/rq1/docs/.gitkeep` (empty)
-- `results/ch5/rq1/data/.gitkeep` (empty)
-- `results/ch5/rq1/code/.gitkeep` (empty)
-- `results/ch5/rq1/logs/.gitkeep` (empty)
-- `results/ch5/rq1/plots/.gitkeep` (empty)
-- `results/ch5/rq1/results/.gitkeep` (empty)
-- `results/ch5/rq1/status.yaml` (10 agents, rq_builder = success)
-
-**Failure Scenario:** If `results/ch5/rq1/` exists with files → EXPECTATIONS ERROR, quit
-
-**Idempotence:** NOT idempotent (cannot run twice on same RQ without deleting first). By design - prevents accidental overwrites.
 
 ---
 

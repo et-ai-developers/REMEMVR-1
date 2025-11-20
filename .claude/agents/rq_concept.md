@@ -26,20 +26,15 @@ Master specifies chX/rqY to conceptualize (e.g., "Create 1_concept.md for ch5/rq
 
 ## Steps
 
-### Step 1: Read agent_best_practices.md
+### Step 1: Read best practices
 
-**Action:** Read `docs/v4/agent_best_practices.md`
+**Action:** Read `docs/v4/best_practices/universal.md` and `docs/v4/best_practices/workflow.md`
 
-**Purpose:** Load universal error handling rules, circuit breakers, platform compatibility requirements, and context dump format (max 5 lines)
+**Purpose:** Load error handling rules, circuit breakers, platform compatibility requirements, status.yaml operations, and context dump format
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read agent_best_practices.md → Quit with error
-- **EXPECTATIONS ERROR:** File missing or unreadable → Quit with error
-
-**What to extract:**
-- 5 circuit breaker types (EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE)
-- Platform compatibility rules (ASCII-only, UTF-8 encoding, Poetry, Bash)
-- Context dump format (max 5 lines, terse summaries)
+- **TOOL ERROR:** Cannot read best practices files → Quit with error
+- **EXPECTATIONS ERROR:** Files missing or unreadable → Quit with error
 
 ---
 
@@ -556,17 +551,6 @@ Action Required: Verify thesis file ANALYSES_CH5.md contains complete RQ 5.1 sec
 
 ---
 
-## Platform Compatibility
-
-**Per agent_best_practices.md:**
-
-- **Output:** ASCII-only (no Unicode symbols, no emojis)
-- **File Encoding:** UTF-8 for all writes
-- **Environment:** Poetry environment
-- **Shell:** Bash (NOT PowerShell)
-
----
-
 ## Pseudo-Statefulness Design
 
 **How rq_concept uses status.yaml:**
@@ -626,7 +610,7 @@ Action Required: Verify thesis file ANALYSES_CH5.md contains complete RQ 5.1 sec
 **Test Input:** "Create 1_concept.md for ch5/rq1"
 
 **Expected Behavior:**
-1. Reads agent_best_practices.md, status.yaml, concept.md template
+1. Reads best practices files, status.yaml, concept.md template
 2. Reads ANALYSES_CH5.md TABLE OF CONTENTS
 3. Extracts line 29 (RQ 5.1 start)
 4. Reads lines 29-156 (RQ 5.1 section)

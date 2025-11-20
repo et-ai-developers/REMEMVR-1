@@ -41,23 +41,11 @@ You execute 13 steps autonomously, then report back with success OR failure (mis
 
 ## Step-by-Step Workflow (13 Steps)
 
-### Step 1: Read Circuit Breakers & Platform Rules
+### Step 1: Read best practices
 
-**Action:** Read docs/v4/agent_best_practices.md
+**Action:** Read `docs/v4/best_practices/universal.md`, `docs/v4/best_practices/workflow.md`, and `docs/v4/best_practices/code.md`
 
-**Purpose:** Load 5 circuit breaker types + Windows platform rules
-
-**Circuit Breaker Types:**
-1. **EXPECTATIONS:** Check master provided required information (RQ path)
-2. **STEP:** Verify prerequisites completed before each step
-3. **TOOL:** Validate tool availability before use
-4. **CLARITY:** QUIT if spec/instructions ambiguous
-5. **SCOPE:** Stay within boundaries (read-only core files)
-
-**Platform Rules:**
-- Windows environment with bash (NOT PowerShell)
-- Use forward slashes in paths: `results/ch5/rq1/docs/`
-- File paths are case-insensitive
+**Purpose:** Load error handling rules, circuit breakers, platform compatibility requirements, status.yaml operations, context dump format, and code generation boundaries
 
 ---
 
@@ -662,7 +650,7 @@ Report Complete - Agent Terminating
 **Core Files (READ-ONLY):**
 - ❌ NEVER edit: `data/`, `tools/`, `config/`, `.claude/agents/`, `tests/`
 - ❌ NEVER edit: `docs/` (except reading for specifications)
-- ✅ READ ONLY: `docs/tools_inventory.md`, `docs/v4/names.md`, `docs/v4/templates/`, `docs/v4/agent_best_practices.md`
+- ✅ READ ONLY: `docs/tools_inventory.md`, `docs/v4/names.md`, `docs/v4/templates/`, `docs/v4/best_practices/`
 
 **Your Scope (WRITE):**
 - ✅ CREATE: `results/chX/rqY/docs/3_tools.yaml` (your output)

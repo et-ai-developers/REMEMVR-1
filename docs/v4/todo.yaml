@@ -57,8 +57,7 @@
 phase17_test_rq_builder:
   description: "Test rq_builder agent (folder structure creation)"
   priority: CRITICAL
-  status: completed
-  completed_date: 2025-11-19
+  status: pending
   agent: rq_builder
   specification_section: "2.1.1"
   test_input: "Build ch5/rq1"
@@ -87,8 +86,7 @@ phase17_test_rq_builder:
 phase18_test_rq_concept:
   description: "Test rq_concept agent (thesis extraction)"
   priority: CRITICAL
-  status: completed
-  completed_date: 2025-11-19
+  status: pending
   agent: rq_concept
   specification_section: "2.1.2"
   test_input: "Create 1_concept.md for ch5/rq1"
@@ -122,8 +120,7 @@ phase18_test_rq_concept:
 phase19_test_rq_scholar:
   description: "Test rq_scholar agent (scholarly validation)"
   priority: CRITICAL
-  status: completed
-  completed_date: 2025-11-19
+  status: pending
   agent: rq_scholar
   specification_section: "2.2.1"
   test_input: "Validate 1_concept.md for ch5/rq1"
@@ -155,8 +152,7 @@ phase19_test_rq_scholar:
 phase20_test_rq_stats:
   description: "Test rq_stats agent (statistical validation)"
   priority: CRITICAL
-  status: completed
-  completed_date: 2025-11-19
+  status: pending
   agent: rq_stats
   specification_section: "2.2.2"
   test_input: "Validate statistical methods for ch5/rq1"
@@ -189,8 +185,7 @@ phase20_test_rq_stats:
 phase20a_v4_documentation_audit:
   description: "Comprehensive audit of ALL docs/v4/ documentation against solution.md specification"
   priority: CRITICAL
-  status: completed
-  completed_date: 2025-11-19
+  status: pending
   rationale: "Prevent template contamination before continuing agent testing. Ensure perfect alignment after g_conflict findings (thesis methods vs solution.md) revealed 5 conflicts. All v4 docs must match updated solution.md (with section 1.4 preprocessing requirements)."
   documents_to_audit: 20
   audit_strategy: "Sequential g_conflict checks, one category at a time"

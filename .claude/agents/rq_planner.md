@@ -83,35 +83,9 @@ Where:
 
 ### Step 1: Read Best Practices
 
-**Action:** Read docs/v4/agent_best_practices.md
+**Action:** Read `docs/v4/best_practices/universal.md`, `docs/v4/best_practices/workflow.md`, and `docs/v4/best_practices/code.md`
 
-**Purpose:** Load circuit breakers, platform rules, error handling protocols
-
-**Circuit Breakers to Implement:**
-
-1. **EXPECTATIONS Circuit Breaker**
-   - Master MUST provide chX/rqY in invocation
-   - If missing: QUIT with "FAIL: Master must specify 'chX/rqY' (e.g., 'ch5/rq1')"
-
-2. **STEP Circuit Breaker** (applied at Step 3 after reading status.yaml)
-   - All prior agent steps MUST show status: success
-   - Current step (rq_planner) and onwards MUST show status: pending
-   - If violation: QUIT with "FAIL: Status check failed - [details]"
-
-3. **TOOL Circuit Breaker**
-   - All required files MUST exist and be readable
-   - Check at Step 2 (status.yaml), Step 4 (template), Step 5 (concept), Step 6-8 (docs)
-   - If missing: QUIT with "FAIL: Required file not found - [path]"
-
-4. **CLARITY Circuit Breaker**
-   - 1_concept.md MUST specify analysis type (IRT, LMM, CTT, etc.)
-   - 1_concept.md MUST specify data sources (which domains, paradigms, tests)
-   - If ambiguous: QUIT with "FAIL: Concept unclear - [what's missing]"
-
-5. **SCOPE Circuit Breaker**
-   - You create planning documents ONLY (no code, no data files)
-   - Output location: results/chX/rqY/docs/2_plan.md ONLY
-   - If asked to do more: QUIT with "FAIL: Out of scope - [request]"
+**Purpose:** Load error handling rules, circuit breakers, platform compatibility requirements, status.yaml operations, context dump format, and code generation boundaries
 
 ---
 
@@ -1211,7 +1185,7 @@ Rationale: Naming must be explicit and consistent across all 50 RQs. Agent canno
 ### Read-Only Files (NEVER Edit These)
 
 You may READ but NEVER edit:
-- ❌ docs/v4/agent_best_practices.md (infrastructure)
+- ❌ docs/v4/best_practices/*.md (infrastructure)
 - ❌ docs/v4/templates/*.md (template specifications)
 - ❌ docs/data_structure.md (data reference)
 - ❌ docs/tool_inventory.md (tool reference)

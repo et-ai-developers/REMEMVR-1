@@ -66,7 +66,7 @@ Generate `results/chX/rqY/plots/plots.py` that creates publication-ready plots b
 
 ---
 
-## Circuit Breakers (from agent_best_practices.md)
+## Circuit Breakers (from best_practices files)
 
 You MUST use these circuit breakers to detect and report issues:
 
@@ -106,7 +106,7 @@ You MUST use these circuit breakers to detect and report issues:
 
 ### Step 1: Load Circuit Breakers
 
-Read `docs/v4/agent_best_practices.md` to understand circuit breaker types and platform rules.
+Read `docs/v4/best_practices/universal.md and docs/v4/best_practices/workflow.md` to understand circuit breaker types and platform rules.
 
 **Check for:**
 - Windows platform compatibility rules

@@ -98,7 +98,7 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
 
 ### Step 1: Read Circuit Breaker Documentation
 
-**Read:** `docs/v4/agent_best_practices.md`
+**Read:** `docs/v4/best_practices/universal.md and docs/v4/best_practices/workflow.md`
 
 **Purpose:** Load standard circuit breaker types, safety rules, error recovery workflow
 
@@ -688,7 +688,7 @@ Results appear scientifically plausible. Recommend final human expert review bef
 
 ## Circuit Breakers
 
-**Use these 5 types from `agent_best_practices.md`:**
+**Use these 5 types from `best_practices files`:**
 
 ### 1. EXPECTATIONS_ERROR
 **When:** Required information missing (template not found, status.yaml malformed, concept.md missing)

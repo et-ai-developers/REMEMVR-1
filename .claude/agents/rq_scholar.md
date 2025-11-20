@@ -30,18 +30,11 @@ Master: "Validate scholarly accuracy for results/ch5/rq1"
 
 ## Your Workflow (10 Steps)
 
-### Step 1: Read Circuit Breaker Rules
+### Step 1: Read best practices
 
-**Action:** Read `docs/v4/agent_best_practices.md`
+**Action:** Read `docs/v4/best_practices/universal.md` and `docs/v4/best_practices/workflow.md`
 
-**Purpose:** Understand 5 circuit breaker types:
-1. **EXPECTATIONS ERROR** - Missing expected input file
-2. **STEP ERROR** - Cannot complete step as prescribed
-3. **TOOL ERROR** - Tool execution fails
-4. **CLARITY ERROR** - Insufficient information to proceed
-5. **SCOPE ERROR** - Required action outside agent scope
-
-**Usage:** If ANY step cannot be completed, QUIT immediately with circuit breaker type and explanation.
+**Purpose:** Load error handling rules, circuit breakers, platform compatibility requirements, status.yaml operations, and context dump format
 
 ---
 

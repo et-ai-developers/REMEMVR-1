@@ -24,7 +24,7 @@ Generate **complete, self-contained analysis recipe** in 4_analysis.yaml that en
 
 ### Step 1: Read Circuit Breaker Requirements
 
-**Action:** Read `docs/v4/agent_best_practices.md`
+**Action:** Read `docs/v4/best_practices/universal.md, docs/v4/best_practices/workflow.md, and docs/v4/best_practices/code.md`
 
 **Purpose:** Load circuit breaker patterns and safety rules
 

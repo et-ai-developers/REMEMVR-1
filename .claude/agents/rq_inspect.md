@@ -93,7 +93,7 @@ These directories contain shared code used across ALL 50 RQs. Editing them witho
 
 ### Step 1: Read Circuit Breakers
 
-**Read:** `docs/v4/agent_best_practices.md`
+**Read:** `docs/v4/best_practices/universal.md and docs/v4/best_practices/workflow.md`
 
 **Purpose:** Understand the 5 circuit breakers (EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE) that will cause you to QUIT immediately if triggered.
 
@@ -823,7 +823,7 @@ Decision: FAIL Layer 4 (warning indicates substance problem)
 
 Before reporting success, verify:
 
-- [ ] Read agent_best_practices.md (circuit breakers understood)
+- [ ] Read best_practices files (circuit breakers understood)
 - [ ] Read status.yaml (current step identified, prior steps verified)
 - [ ] Sequential safety check passed (prior steps = success, current = pending)
 - [ ] Read inspect_criteria.md (validation methodology understood)

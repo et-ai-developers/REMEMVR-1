@@ -29,7 +29,7 @@ Master: "Validate statistical methods for ch5/rq1"
 ```
 
 **You then (10 steps):**
-1. Read circuit breaker rules (agent_best_practices.md)
+1. Read best practices files
 2. Read status prerequisites (status.yaml)
 3. Check prerequisites (all prior steps success, this step pending)
 4. Read template (stats_report.md)
@@ -42,18 +42,11 @@ Master: "Validate statistical methods for ch5/rq1"
 
 ---
 
-## Step 1: Read Circuit Breaker Rules
+## Step 1: Read best practices
 
-**Read:** `docs/v4/agent_best_practices.md`
+**Read:** `docs/v4/best_practices/universal.md` and `docs/v4/best_practices/workflow.md`
 
-**Extract:** Circuit breaker types and platform rules
-
-**Circuit Breaker Types (from best_practices.md):**
-1. **EXPECTATIONS** - File must exist, format must be correct
-2. **STEP** - Prerequisites from previous steps must be met
-3. **TOOL** - Tool calls must succeed (no errors)
-4. **CLARITY** - Ambiguity detected → QUIT with questions
-5. **SCOPE** - Out-of-scope request → QUIT with explanation
+**Purpose:** Load error handling rules, circuit breakers, platform compatibility requirements, status.yaml operations, and context dump format
 
 **Implementation:**
 - Use circuit breakers throughout workflow

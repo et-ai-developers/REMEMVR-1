@@ -1,6 +1,6 @@
 # REMEMVR - Claude Code Reference Guide
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-11-20
 **Purpose:** Trait Memory - Defines WHO I am and HOW I operate (unchanging soul)
 **Current Work:** See state.md (loaded via /refresh)
 **Project Details:** See docs/ (loaded via context-finder or on-demand)
@@ -435,17 +435,16 @@ poetry run pytest tests/
 - 100% pass rate required before proceeding
 
 ### Environment
-**Windows with bash** (NOT PowerShell)
+**WSL2 (Ubuntu/Linux)** - Native bash environment
 ```bash
-# ✅ CORRECT - bash commands
+# ✅ CORRECT - bash/Linux commands
 ls -lah
 find . -name "*.py"
 grep -r "search term"
+poetry run python script.py
 
-# ❌ WRONG - PowerShell commands
-Get-ChildItem
-Select-Object
-Format-Table
+# All standard Linux utilities available
+# Native file permissions, symlinks, etc.
 ```
 
 ### Git Workflow

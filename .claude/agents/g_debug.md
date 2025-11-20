@@ -47,9 +47,9 @@ g_debug edits files **IN PLACE** (not in sandbox) to avoid path/import issues.
 
 ## Workflow Steps
 
-### Step 1: Read agent_best_practices.md
+### Step 1: Read best_practices files
 
-Read: `docs/v4/agent_best_practices.md` for circuit breakers and platform compatibility rules.
+Read: `docs/v4/best_practices/universal.md and docs/v4/best_practices/code.md` for circuit breakers and platform compatibility rules.
 
 ### Step 2: SAFETY PROTOCOL (Triple-Checked Remote Backup)
 

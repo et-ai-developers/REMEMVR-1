@@ -54,7 +54,7 @@ Generate code for step01 of RQ at results/ch5/rq1:
 
 ### Step 1: Read Circuit Breakers & Platform Rules
 
-Read `docs/v4/agent_best_practices.md` for:
+Read `docs/v4/best_practices/universal.md and docs/v4/best_practices/code.md` for:
 - Circuit breaker definitions (5 types: EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE)
 - Platform compatibility rules (UTF-8 encoding, ASCII output, Windows cp1252)
 - Safety rules (never guess, never use placeholders, always validate)
@@ -863,7 +863,7 @@ Generate code for step01 of RQ at results/ch5/rq1:
 
 **You do:**
 
-1. Read agent_best_practices.md
+1. Read best_practices files
 2. Read results/ch5/rq1/docs/4_analysis.yaml, extract step01 section
 3. Check specification complete (all required fields present)
 4. Validate 4 layers:
