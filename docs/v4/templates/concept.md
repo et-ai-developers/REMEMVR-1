@@ -327,7 +327,7 @@ Where domain requires explicit -L-/-U-/-D- clarification to prevent ambiguity. I
 - **Likert Response Bias:** Document response style patterns (% using full range vs extremes), do NOT correct
 
 **Special Methods:**
-[Any unusual or project-specific methods? E.g., 2-pass IRT purification (Decision D039), TSVR time variable (Decision D070), dual reporting (Decision D068)]
+[Any unusual or project-specific methods mentioned in thesis? E.g., 2-pass IRT purification, TSVR time variable, dual reporting]
 ```
 
 **Example:**
@@ -340,10 +340,10 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 **High-Level Workflow:**
 
 **Step 1:** IRT Pass 1 - Calibrate GRM on all VR items (What/Where/When combined)
-**Step 2:** Item Purification - Remove items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4) per Decision D039
+**Step 2:** Item Purification - Remove items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4)
 **Step 3:** IRT Pass 2 - Re-calibrate GRM on purified items
 **Step 4:** Theta Extraction - Extract ability estimates per participant × test × domain
-**Step 5:** TSVR Merge - Merge theta scores with Time Since VR (actual hours, not nominal days) per Decision D070
+**Step 5:** TSVR Merge - Merge theta scores with Time Since VR (actual hours, not nominal days)
 **Step 6:** LMM Trajectory Modeling - Fit Domain × Time interaction with random slopes
 
 **Data Preprocessing (Per Solution Section 1.4):**
@@ -353,9 +353,9 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 - **Likert Response Bias:** Document % participants using full 1-5 range vs extremes only, do NOT correct
 
 **Special Methods:**
-- **2-Pass IRT Purification** (Decision D039): Mandatory for all IRT analyses to remove psychometrically problematic items
-- **TSVR Time Variable** (Decision D070): Use actual hours since encoding, not nominal days (0, 1, 3, 6)
-- **Dual-Scale Trajectory Plots** (Decision D069): Plot theta + probability scales for interpretability
+- **2-Pass IRT Purification:** Mandatory for all IRT analyses to remove psychometrically problematic items
+- **TSVR Time Variable:** Use actual hours since encoding, not nominal days (0, 1, 3, 6)
+- **Dual-Scale Trajectory Plots:** Plot theta + probability scales for interpretability
 - **GRM Model Clarification:** GRM (Graded Response Model) handles BOTH dichotomous (2 categories: 0, 1) and polytomous (5 categories: 1-5) items. For dichotomized accuracy, GRM reduces to 2PL dichotomous IRT mathematically. No conflict with thesis "dichotomous IRT" terminology - same model.
 ```
 
@@ -363,7 +363,7 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 - Read RQ section from ANALYSES_CHX.md for analysis approach
 - Extract analysis type (IRT, LMM, etc.)
 - Identify step-by-step workflow
-- Note any Decision numbers mentioned (D039, D068, D069, D070)
+- Extract any special methods or project-wide requirements mentioned in thesis
 - Format according to template
 
 **WARNING: Avoid Template Contamination**

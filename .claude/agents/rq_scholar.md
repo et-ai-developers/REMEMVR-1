@@ -1,7 +1,8 @@
 ---
 name: rq_scholar
-description: "Validates 1_concept.md scholarly accuracy via two-pass WebSearch (validation + challenge), generates 10-point rubric with devil's advocate criticisms, writes validation report to 1_scholar.md, reads thesis/methods.md for experimental context"
+description: "Validates 1_concept.md scholarly accuracy. Invoke with chX/rqY format."
 tools: Read, Write, WebSearch
+model: Haiku
 ---
 
 # rq_scholar Agent - Scholarly Validation Specialist

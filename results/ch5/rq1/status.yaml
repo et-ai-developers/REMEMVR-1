@@ -10,37 +10,40 @@ rq_builder:
 rq_concept:
   status: success
   context_dump: |
-    RQ 5.1: Domain-specific forgetting trajectories (What/Where/When)
+    RQ 5.1: Domain-Specific Forgetting Trajectories (What/Where/When)
     Domains: What (-N-), Where (-L-/-U-/-D-), When (-O-)
-    Analysis: IRT (2-pass GRM purification) + LMM (5 candidate models, AIC selection)
-    Data: RAW from master.xlsx via dfData.csv, TQ_* items dichotomized
-    Critical: TSVR time variable (actual hours), dual-scale reporting (theta + probability)
+    Analysis: IRT (2-pass GRM purification) + LMM (5 trajectory models, Domain x Time interaction)
+    Data: RAW from dfData.csv (TQ_* columns), dichotomized accuracy, TSVR time variable
+    Critical: 2-pass purification (|b|>3 or a<0.4 removed), dual-scale reporting (theta + probability)
 
 rq_scholar:
   status: success
   context_dump: |
-    9.1/10 CONDITIONAL - Strong theory, needs recent cites + practice effects ack, ready for stats
+    9.3/10 APPROVED. Theory excellent (2.8/3), literature good (1.7/2 - add 3-5 recent cites), interpretation perfect (2.0/2), implications strong (1.9/2). 4 omission errors (practice effects, encoding quality), 2 alternative frameworks (schema theory, cue quality). Ready for stats.
 
 rq_stats:
   status: success
-  context_dump: "8.2/10 REJECTED. Cat1: 2.4/3 (appropriate, N=100 marginal for slopes). Cat2: 2.0/2 (100% reuse). Cat3: 1.6/2 (params specified, validation incomplete). Cat4: 1.3/2 (purification good, Q3/LMM diagnostics missing). Cat5: 0.9/1 (9 concerns, 4 CRITICAL). Must add: Q3 validation, convergence strategy, LMM diagnostics, practice effects."
+  context_dump: |
+    9.4/10 APPROVED. Category 1: 3.0/3 (optimal methods). Category 2: 2.0/2 (100% tool reuse). Category 3: 1.8/2 (parameters clear, missing citations). Category 4: 1.8/2 (implicit validation via purification/AIC). Category 5: 0.8/1 (4 concerns, literature-cited, below 5-concern target).
 
 rq_planner:
   status: success
   context_dump: |
-    8 analysis steps planned (Step 0: extraction + Steps 1-7: analysis)
-    Pipeline: IRT (2-pass purification: Pass1->Purify->Pass2) + LMM (5 candidate models) + post-hoc contrasts
-    Tools needed: IRT calibration (GRM 3 factors), purification (D039), LMM with TSVR (D070), post-hoc (D068), plot data prep (D069 dual-scale)
-    Outputs: theta scores, LMM model summary, contrasts, effect sizes, 2 plot source CSVs (theta + probability scales)
-    Validation: 100% coverage (all 8 steps have 4-layer substance criteria for rq_inspect)
+    8 analysis steps planned (Step 0: extraction + Steps 1-7: analysis/viz)
+    Pipeline: IRT (2-pass purification) -> LMM (5 models) -> post-hoc contrasts -> dual-scale plots
+    Tools needed: IRT calibration (GRM, 3 dimensions), purification (D039), LMM trajectory (TSVR D070), contrasts (D068), plot data prep (D069)
+    Outputs: theta_scores (3 dims), item_params (purified), LMM summary (best model), contrasts (dual p-values), plot CSVs (theta + probability)
+    Validation: 100% coverage (all 8 steps have embedded validation requirements)
 
 rq_tools:
   status: failed
+  completed: 2025-11-21 23:59
   context_dump: |
-    TOOL ERROR: Missing 3 analysis tools + 5 validation tools in tool_inventory.md
-    Missing analysis: calibrate_grm, purify_items, irt_data_prep
-    Missing validation: validate_irt_calibration, validate_purification, validate_data_extraction, validate_data_merge, validate_plot_data
-    Action: Update tool_inventory.md with signatures, then re-run rq_tools
+    FAILED: Incomplete tool documentation in tools_inventory.md
+    Missing: filter_items_by_quality (exists in code but not documented with signature)
+    Ambiguous: Step 0 data extraction, Step 7 plot data prep (no specific tools named in 2_plan.md)
+    Required: Add filter_items_by_quality to tools_inventory.md Module:tools.analysis_irt section
+    TDD Detection: Documentation gap triggers user+master review -> update docs -> re-run
 
 rq_analysis:
   status: pending

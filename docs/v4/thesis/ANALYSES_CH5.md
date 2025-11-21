@@ -40,10 +40,9 @@
 
 3. Dichotomoise the TQ_* values. Less than 1 becomes 0, greater than 1 becomes 1.
 
-4. Send this to irt_data_prep tool
+4. Prepare this data for irt analysis.
 
-source = {our data},
-composite = ["UID", "TEST"],
+composite_id = ["UID", "TEST"],
 time = "TSVR",
 items = ["TQ_*"],
 factors = {
@@ -78,7 +77,7 @@ Remove items that have difficulty less than -3 or more than 3, and items that ha
    - Fit with REML=False for AIC comparison
    - Select best model via AIC, compute Akaike weights
 
-9. Translate the best model back into probability using a reverse logit tool. Somthing like ```probability = 1 / (1 + np.exp(-(discrimination * (row.Data - difficulty))))```
+9. Translate the best model back into probability.
 
 10. **Post-hoc Contrasts** Do these for both ability and probability
    - Extract Time×Domain interaction terms from best model

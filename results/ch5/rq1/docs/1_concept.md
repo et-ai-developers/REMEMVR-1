@@ -12,35 +12,28 @@
 Are there domain-specific differences in the rate and pattern of episodic forgetting over 6 days?
 
 **Scope:**
-This RQ examines forgetting rates for three episodic memory components (What, Where, When) using IRT-derived ability estimates across four test sessions (T1, T2, T3, T4). Time variable uses TSVR (actual hours since encoding), not nominal days (0, 1, 3, 6). Focuses on VR-based memory test items requiring binding of object identity, spatial location, and temporal order. All 100 participants included across all 4 tests.
+This RQ examines forgetting trajectories for three episodic memory components (What, Where, When) using IRT-derived theta ability estimates across four test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6). Time variable uses TSVR (Time Since VR, actual hours since encoding), not nominal days. Analysis focuses on VR-based memory test items requiring binding of object identity, spatial location, and temporal order.
 
 **Theoretical Framing:**
-This question matters for understanding episodic memory architecture. Dual-process theories predict differential forgetting patterns due to domain-specific reliance on familiarity vs. recollection processes. Identifying domain-specific trajectories informs theoretical models of episodic memory consolidation and retrieval dynamics.
+Episodic memory consists of integrated What/Where/When components (Tulving's "mental time travel"). Understanding domain-specific forgetting patterns reveals whether these components decay independently or show coordinated trajectories, informing theories of episodic memory consolidation and retrieval.
 
 ---
 
 ## Theoretical Background
 
 **Relevant Theories:**
-- **Dual-Process Theory** (Yonelinas, 2002): Memory retrieval relies on familiarity (fast, automatic) and recollection (slow, effortful). What domain can rely on familiarity, while Where/When require recollection. Familiarity-based information is less hippocampus-dependent than contextual details.
-- **Consolidation Theory** (Rasch & Born, 2013): Hippocampal-dependent memories (Where, When) consolidate more slowly and show greater vulnerability during consolidation compared to perirhinal-dependent memories (What).
+- **Dual-Process Theory**: Suggests familiarity-based information (What - object identity) is less hippocampus-dependent than contextual details (Where - spatial, When - temporal). Predicts differential forgetting rates across domains based on retrieval process differences.
+- **Episodic Memory Theory (Tulving)**: Episodic memory requires binding of What/Where/When components. Domain-specific forgetting patterns test whether binding integrity is maintained or degrades differentially over time.
 
 **Key Citations:**
-- Tulving (1972): Episodic memory as "mental time travel" requiring binding of What/Where/When
-- Yonelinas (2002): Dual-process theory distinguishing familiarity and recollection processes
-- Rasch & Born (2013): Sleep-dependent consolidation preferentially benefits hippocampal memories
-- Kisker et al. (2021): Immersive VR promotes recollection-based memory (supports dual-process predictions in VR contexts)
-- Stark et al. (2018): Hippocampal activation greater for temporal order vs. spatial location retrieval (neural evidence for domain dissociation)
-- Deuker et al. (2016): Spatial and temporal episodic memory recruit dissociable functional networks
+- Tulving (1972): Episodic memory as "mental time travel" requiring What/Where/When binding
+- Dual-process theories suggesting familiarity vs. recollection differences in hippocampal dependence
 
 **Theoretical Predictions:**
-Dual-process theory predicts What will show slowest forgetting (familiarity-based), Where intermediate, and When fastest (recollection-dependent). Object identity (What) may be more resilient than spatial (Where) or temporal (When) memory, consistent with dual-process theories suggesting familiarity-based information is less hippocampus-dependent than contextual details.
+Dual-process theory predicts object identity (What) may be more resilient than spatial (Where) or temporal (When) memory, as familiarity-based information is less hippocampus-dependent than contextual details requiring recollection.
 
 **Literature Gaps:**
-Most episodic memory studies examine What and Where separately. Few studies test all three WWW domains together in immersive VR with longitudinal trajectories across 6 days. This RQ provides comprehensive assessment of domain-specific forgetting using psychometrically validated IRT ability estimates.
-
-**Alternative Explanation:**
-Domain differences could reflect initial encoding quality variations (e.g., spatial information encoded more richly; Bonnici et al., 2018) rather than differential decay rates. However, Day 0 baseline captures initial encoding state, and longitudinal trajectory slopes (not intercepts) test forgetting dynamics. If encoding quality alone drives differences, domains would differ at T1 but show parallel trajectories; if forgetting rates differ, Domain × Time interaction should emerge.
+Most episodic memory studies examine domains separately. This RQ tests all three What/Where/When components together in immersive VR with longitudinal trajectories across 6 days, providing integrated assessment of domain-specific forgetting.
 
 ---
 
@@ -50,14 +43,13 @@ Domain differences could reflect initial encoding quality variations (e.g., spat
 Object identity (What) may be more resilient than spatial (Where) or temporal (When) memory, consistent with dual-process theories suggesting familiarity-based information is less hippocampus-dependent than contextual details.
 
 **Secondary Hypotheses:**
-1. Memory domains will show differential forgetting trajectories with What showing slowest forgetting, Where intermediate, and When fastest forgetting
-2. Non-linear forgetting (logarithmic or quadratic better than linear) will better describe trajectories across domains
+Not explicitly stated in thesis. Analysis will test whether domain differences emerge through Domain × Time interaction in LMM analysis.
 
 **Theoretical Rationale:**
-Dual-process theory suggests What can rely on familiarity (perirhinal cortex), while Where and When require hippocampal binding. Familiarity-based retrieval is more resilient to forgetting than recollection-based retrieval. Consolidation theory predicts hippocampal-dependent memories are more vulnerable during early consolidation. Non-linear forgetting reflects consolidation and retrieval dynamics operating on different timescales.
+Dual-process theory suggests What can rely on familiarity (less hippocampus-dependent), while Where and When require hippocampal binding and recollection processes. This predicts What will show slower forgetting (shallower slope) compared to Where/When.
 
 **Expected Effect Pattern:**
-Significant Domain × Time interaction in LMM analysis. Post-hoc contrasts should show: What ≠ When (p < 0.001), Where intermediate. Non-linear time terms (log, quadratic) should improve model fit (ΔAIC > 2) compared to linear-only model.
+Significant Domain × Time interaction in LMM analysis. Post-hoc contrasts should show differential forgetting slopes across domains (Where-What, When-What comparisons with Bonferroni correction α = 0.0033/3 = 0.0011).
 
 ---
 
@@ -73,14 +65,14 @@ Significant Domain × Time interaction in LMM analysis. Post-hoc contrasts shoul
   - [x] `-L-` tags (general location, legacy)
   - [x] `-U-` tags (pick-up location)
   - [x] `-D-` tags (put-down location)
-  - Disambiguation: **ALL Where tags included** (`*-L-*`, `*-U-*`, `*-D-*`). Complete spatial coverage needed for comprehensive assessment of spatial memory domain.
+  - Disambiguation: **ALL Where tags included** (*-L-*, *-U-*, *-D-*) to capture complete spatial memory coverage
 
 - [x] **When** (Temporal Order)
   - Tag Code: `-O-`
   - Description: Temporal order / sequence
 
 **Inclusion Rationale:**
-This RQ examines all three WWW episodic memory components to test differential forgetting trajectories. Complete coverage of What/Where/When binding is theoretically necessary per Tulving's episodic memory definition. All three domains required to test dual-process predictions about familiarity (What) vs. recollection (Where/When) differences.
+All three What/Where/When episodic memory components examined to test differential forgetting trajectories. Complete coverage of episodic memory binding per Tulving's definition.
 
 **Exclusion Rationale:**
 None - all WWW domains included for comprehensive episodic memory assessment.
@@ -94,96 +86,88 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 
 **High-Level Workflow:**
 
-**Step 1:** Data Preparation - Load data from data/cache/dfData.csv, keep columns ['UID', 'TEST', 'TSVR', 'TQ_*']
+**Step 1:** Load data from data/cache/dfData.csv, keep columns ['UID', 'TEST', 'TSVR', 'TQ_*']
 
-**Step 2:** Dichotomization - Convert TQ_* values: <1 becomes 0, >=1 becomes 1 (binary accuracy scoring)
+**Step 2:** Dichotomize TQ_* values (less than 1 becomes 0, greater than or equal to 1 becomes 1)
 
-**Step 3:** IRT Data Prep - Send to irt_data_prep tool with composite=["UID", "TEST"], time="TSVR", items=["TQ_*"], factors={what: ["*-N-*"], where: ["*-L-*", "*-U-*", "*-D-*"], when: ["*-O-*"]}
+**Step 3:** Prepare data for IRT analysis with composite = ["UID", "TEST"], time = "TSVR", items = ["TQ_*"], factors: what = ["*-N-*"], where = ["*-L-*", "*-U-*", "*-D-*"], when = ["*-O-*"]. Save to data/ folder.
 
-**Step 4:** IRT Pass 1 - Calibrate correlated factors, 2-category GRM. Extract theta scores, difficulty (b), discrimination (a). **IRT Assumption Validation:** (1) Check unidimensionality via eigenvalue ratio (first/second eigenvalue >3.0), (2) Compute Q3 statistic for all item pairs within each domain to detect local dependence (Q3 <0.2 threshold per Christensen et al. 2017). If >10% of item pairs show Q3 >0.2, consider bifactor IRT model. Report Q3 statistics in validation logs.
+**Step 4:** Run IRT Analysis using correlated factors, 2-category GRM. Extract theta scores, difficulty (b), and discrimination (a) parameters.
 
-**Step 5:** Item Purification - Remove items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4) to ensure psychometric quality. This also controls for room-level memorability variance by excluding outlier items. Apply within-domain filter to ensure balanced representation across What/Where/When.
+**Step 5:** Purify IRT items - remove items with difficulty < -3 or > 3, and discrimination < 0.4 (within-domain filter)
 
-**Step 6:** IRT Pass 2 - Re-calibrate GRM on purified items only
+**Step 6:** Re-run IRT on purified items (2-pass IRT purification)
 
-**Step 7:** LMM Trajectory Modeling - Fit 5 candidate models with Domain × Time interactions: Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log. Use Treatment coding (What as reference), random intercepts and slopes by UID. Fit with REML=False for AIC/AICc comparison. **Convergence Strategy:** If random slopes fail to converge (singular fit warnings), compare random intercept-only model via likelihood ratio test. Only retain random slopes if: (1) they significantly improve fit (LRT p<0.05) AND (2) model converges without warnings. Report convergence status. Select best model via AIC and AICc (small-sample corrected); if they disagree, favor AICc (N=100).
+**Step 7:** Fit 5 candidate LMMs with Domain × Time interactions using TSVR as time variable:
+  - Linear: Time × Domain
+  - Quadratic: (Time + Time²) × Domain
+  - Logarithmic: log(Time+1) × Domain
+  - Lin+Log: (Time + log(Time+1)) × Domain
+  - Quad+Log: (Time + Time² + log(Time+1)) × Domain
+  - All models use Treatment coding (What as reference), random intercepts and slopes
+  - Fit with REML=False for AIC comparison
+  - Select best model via AIC, compute Akaike weights
 
-**Step 8:** Theta to Probability Conversion - Translate best model predictions back to probability scale using reverse logit: `probability = 1 / (1 + np.exp(-(discrimination * (theta - difficulty))))`
+**Step 8:** Translate best model theta predictions back into probability using reverse logit: probability = 1 / (1 + exp(-(discrimination * (theta - difficulty))))
 
-**Step 9:** Post-hoc Contrasts - Extract Time×Domain interaction terms from best model. Test differences in forgetting slopes: Where-What, When-What. Report with and without Bonferroni correction (α = 0.0033/3 = 0.0011 for 3 pairwise tests). Perform for both ability (theta) and probability scales.
+**Step 9:** Post-hoc contrasts - Extract Time×Domain interaction terms from best model, test differences in forgetting slopes: Where-What, When-What. Bonferroni correction: α = 0.0033/3 = 0.0011 for 3 pairwise tests. Report both corrected and uncorrected results.
 
-**Step 10:** Effect Size Computation - Calculate Cohen's d for domain differences at each nominal time point (Days 0, 1, 3, 6). Report: d_What_Where, d_What_When, d_Where_When. Compute with and without Bonferroni, for both ability and probability scales.
+**Step 10:** Effect size computation - Calculate Cohen's d for domain differences at each time point (Days 0, 1, 3, 6) after model fitted. Report: d_What_Where, d_What_When, d_Where_When. Both with and without Bonferroni correction, for both ability (theta) and probability scales.
 
-**Step 11:** Visualization - Generate trajectory plot: 3 lines (What/Where/When) over time. Include observed means with 95% CIs and model-predicted lines.
+**Step 11:** Visualization - Generate trajectory plot with 3 lines (What/Where/When) over time. Include observed means with 95% CIs and model-predicted lines.
 
-**Data Preprocessing (Per Solution Section 1.4):**
-- **Accuracy Scores (-ANS tags):** Dichotomize before IRT: >=1 = 1, <1 = 0 (no partial credit)
-- **Confidence Ratings:** Not applicable to this RQ (accuracy only)
-- **IRT Model:** GRM (Graded Response Model) - handles dichotomous items (2 categories)
-- **Time Variable:** TSVR (Time Since VR, actual hours since encoding) NOT nominal days
+**Data Preprocessing:**
+- **Accuracy Scores:** Dichotomize TQ_* values before IRT (less than 1 → 0, greater than or equal to 1 → 1)
+- **IRT Model:** 2-category GRM (Graded Response Model) with correlated factors
+- **Time Variable:** TSVR (Time Since VR, actual hours since encoding), not nominal days
 
 **Special Methods:**
-- **2-Pass IRT Purification** (Decision D039): Mandatory for all IRT analyses to remove psychometrically problematic items (|b| > 3.0 or a < 0.4)
-- **TSVR Time Variable** (Decision D070): Use actual hours since encoding, not nominal days (0, 1, 3, 6) for LMM fitting
-- **Dual-Scale Reporting** (Decision D068): Report results on both theta (ability) and probability scales for interpretability
-- **Dual-Scale Trajectory Plots** (Decision D069): Plot theta + probability scales for interpretability
-- **Correlated Factors IRT:** What, Where, When domains modeled as correlated factors (not independent) to account for episodic binding
-- **GRM Model Clarification:** GRM (Graded Response Model) handles dichotomous (2 categories: 0, 1) items. For dichotomized accuracy, GRM reduces to 2PL dichotomous IRT mathematically.
+- **2-Pass IRT Purification:** First IRT calibration identifies problematic items (|b| > 3 or a < 0.4), second IRT re-calibrates on purified item set
+- **TSVR Time Variable:** Use actual hours since encoding, not nominal days (0, 1, 3, 6)
+- **Dual-Scale Reporting:** Report results in both theta (ability) and probability scales for interpretability
+- **Model Selection:** AIC comparison across 5 functional forms (Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log) to determine best-fitting trajectory shape
+
+**Expected Tools:**
+- IRT calibration tools (correlated factors GRM)
+- Item purification tools (difficulty/discrimination filters)
+- LMM trajectory modeling tools (Domain × Time interactions, random slopes)
+- Reverse logit transformation (theta → probability)
+- Post-hoc contrast tools (pairwise domain comparisons)
+- Effect size computation tools (Cohen's d)
+- Trajectory plotting tools (observed + predicted lines, 95% CIs)
 
 ---
 
 ## Data Source
 
 **Data Type:**
-RAW (extracted from master.xlsx via data/cache/dfData.csv)
+RAW (extracted from data/cache/dfData.csv, which is derived from master.xlsx)
 
 ### RAW Data Extraction:
 
 **Tag Patterns:**
 - Domain tags: `-N-` (What), `-L-/-U-/-D-` (Where), `-O-` (When)
-- Item pattern: `TQ_*` (all VR task items in master.xlsx)
+- Item pattern: `TQ_*` (all VR test questions)
 - Complete patterns:
-  - What: `*-N-*` (matches TQ_RVR-*-N-*-*)
-  - Where: `*-L-*`, `*-U-*`, `*-D-*` (matches TQ_RVR-*-L/U/D-*-*)
-  - When: `*-O-*` (matches TQ_RVR-*-O-*-*)
+  - What: `*-N-*` in TQ_* columns
+  - Where: `*-L-*`, `*-U-*`, `*-D-*` in TQ_* columns
+  - When: `*-O-*` in TQ_* columns
 
 **Extraction Method:**
-Load data from data/cache/dfData.csv (preprocessed from master.xlsx). Select columns: ['UID', 'TEST', 'TSVR', 'TQ_*']. Dichotomize TQ_* values (<1 → 0, >=1 → 1). Send to irt_data_prep tool with composite=["UID", "TEST"], time="TSVR", items=["TQ_*"], factors={what, where, when}. Tool yields long-format CSV with columns: composite_ID, item_code, response (0-1).
+Load data/cache/dfData.csv, keep columns ['UID', 'TEST', 'TSVR', 'TQ_*']. Dichotomize TQ_* values. Prepare for IRT analysis with factor assignments: what = ["*-N-*"], where = ["*-L-*", "*-U-*", "*-D-*"], when = ["*-O-*"].
 
 ### Inclusion/Exclusion Criteria:
 
 **Participants:**
-- [x] All 100 participants (no exclusions)
+- [x] All 100 participants (no exclusions mentioned in thesis)
 
 **Items:**
 - [x] All VR items matching TQ_* pattern
-- Note: Item purification in Step 5 removes psychometrically problematic items (|b| > 3.0 or a < 0.4) AFTER initial calibration
+- [x] All paradigms included (thesis uses TQ_* pattern, which includes all VR paradigms)
+- Note: Item purification step (Step 5) will filter out psychometrically problematic items (|b| > 3 or a < 0.4) after initial IRT calibration
 
 **Tests:**
-- [x] All 4 tests (T1, T2, T3, T4 - nominal Days 0, 1, 3, 6)
+- [x] All 4 tests (T1, T2, T3, T4; nominal Days 0, 1, 3, 6)
 - Note: Time variable uses TSVR (actual hours since encoding), not nominal days
-
----
-
-## Validation Procedures & Limitations
-
-**LMM Assumption Diagnostics:**
-
-After selecting best model via AIC/AICc, validate core assumptions:
-1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (p>0.05 threshold). If violated, use robust standard errors (Huber-White).
-2. **Homoscedasticity:** Residual vs fitted plot (visual inspection for constant variance).
-3. **Outliers:** Cook's distance (D > 4/100 = 0.04 flags influential observations). Report with/without outliers if detected.
-4. **Autocorrelation:** ACF plot (lag-1 ACF < 0.1 for independence). If violated, consider GEE with AR(1) structure.
-
-Report all diagnostic results in validation logs. Remedial actions specified above guide handling of assumption violations (Schielzeth et al. 2020).
-
-**Practice Effects Limitation:**
-
-Repeated testing across T1-T4 introduces practice effects (performance improvements due to task familiarity) that may partially offset forgetting (Calamia et al. 2013, d = 0.25 typical effect size; Jutten et al. 2020). We assume practice effects are domain-general (affect What/Where/When equally), preserving validity of Domain×Time interaction for testing differential forgetting. However, main effect of time confounds practice and forgetting, so absolute forgetting rates should be interpreted cautiously. IRT theta estimates partially account for task familiarity by separating item difficulty from person ability. Non-linear trajectory models can capture initial practice-driven improvements vs. later decay-driven decline.
-
-**Methodological Notes:**
-
-- **Sample Size:** N=100 adequate for fixed effects but marginal for random slopes (Ryoo 2011 recommends N≥200). Convergence strategy (Step 7) addresses this limitation.
-- **Local Dependence:** Episodic memory items may violate IRT local independence due to serial position effects and contextual binding (Bock et al. 2021). Q3 validation (Step 4) detects violations.
 
 ---

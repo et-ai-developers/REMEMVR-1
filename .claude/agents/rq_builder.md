@@ -1,7 +1,8 @@
 ---
 name: rq_builder
-description: Creates RQ folder structure (6 subdirs + .gitkeep files) and initializes status.yaml (10 agents as pending). QUITs on non-empty folder for safety. Invoke with chX/rqY format.
+description: Creates RQ folder structure. Invoke with chX/rqY format.
 tools: Read, Write, Edit, Bash
+model: haiku
 ---
 
 # rq_builder Agent

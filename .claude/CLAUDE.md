@@ -304,6 +304,65 @@ docs/
 **Communication:** File-based (agents write instructions/reports, pass paths not content)
 **Stateless:** Each invocation independent, only I (master) invoke agents
 
+### Agent Invocation Protocol
+
+**RQ-Workflow Agents (rq_*): MINIMAL PROMPTS ONLY**
+
+These agents have complete, self-contained instructions in their prompts:
+- `rq_builder`, `rq_concept`, `rq_scholar`, `rq_stats`, `rq_planner`, `rq_tools`, `rq_analysis`, `rq_inspect`, `rq_plots`, `rq_results`
+
+**Correct Invocation (Minimal):**
+```
+{
+  "subagent_type": "rq_planner",
+  "description": "Create analysis plan for RQ 5.1",
+  "prompt": "Create analysis plan for results/ch5/rq1"
+}
+```
+
+**NEVER for rq_* agents:**
+- ❌ Repeat instructions from agent prompt
+- ❌ Add specific steps/requirements
+- ❌ Mention document names (agent knows what to read)
+- ❌ Remind about conventions (agent prompt has these)
+- ❌ Give detailed guidance (causes conflicts with agent prompt)
+
+**Why:** rq_* agents are self-contained. Long prompts create conflict potential between what I say vs what agent reads. Agent prompts are authoritative.
+
+---
+
+**General-Purpose Agents (g_*): THOROUGH INSTRUCTIONS REQUIRED**
+
+These agents are flexible tools that need explicit task specifications:
+- `g_conflict`, `g_code`, `g_debug`
+
+**Correct Invocation (Detailed):**
+```
+{
+  "subagent_type": "g_conflict",
+  "description": "Check conflicts in rq_planner inputs",
+  "prompt": "Check for conflicts across these files:
+  1. .claude/agents/rq_planner.md
+  2. docs/v4/templates/plan.md
+  3. docs/tools_catalog.md
+  4. docs/v4/names.md
+
+  Look for: naming inconsistencies, contradictory instructions,
+  missing references, version mismatches.
+
+  Report all conflicts with severity (CRITICAL/HIGH/MODERATE/LOW)."
+}
+```
+
+**DO for g_* agents:**
+- ✅ Provide complete context for the task
+- ✅ List specific files to examine
+- ✅ Define what to look for
+- ✅ Specify expected output format
+- ✅ Give detailed requirements
+
+**Why:** g_* agents are general-purpose tools. They need explicit instructions for each unique task.
+
 ---
 
 ## Custom Commands

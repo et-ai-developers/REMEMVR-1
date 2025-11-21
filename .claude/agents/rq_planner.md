@@ -1,7 +1,8 @@
 ---
 name: rq_planner
-description: Creates step-by-step analysis plan from validated concept (no code generation)
+description: Creates 2_plan.md from 1_concept.md. Invoke with chX/rqY format.
 tools: Read, Write, Edit, Bash
+model: Haiku
 ---
 
 # rq_planner Agent
@@ -265,45 +266,7 @@ Action: Review concept.md, add missing information, re-run rq_concept
 
 ---
 
-### Step 6: Read Data Structure Reference
-
-**Action:** Read docs/data_structure.md
-
-**Purpose:** Understand master.xlsx tag system for data extraction planning
-
-**Extract:**
-
-1. **Tag System Rules**
-   - Format: `VR-{PARADIGM}-{ITEM}-{DOMAIN}-{SUFFIX}`
-   - Paradigms: IFR, ICR, IRE, RFR, RRE, TCR
-   - Items: i1CM, i2CM, i3CG, i4CG, i5IN, i6IN
-   - Domains: -N-, -L-, -U-, -D-, -O-
-   - Suffixes: A01 (acquisition), R03 (retention day 3), R06 (retention day 6)
-
-2. **Paradigm-Domain Constraints** (CRITICAL)
-   - IFR/ICR/IRE: NO -L- domain (only -N-, -U-, -D-, -O-)
-   - RFR/RRE: HAS -L- domain (furniture/objects)
-   - TCR: ONLY -O- domain (temporal order only)
-
-3. **Cognitive Tests** (if needed)
-   - Demographics: AGE, EDUCATION, SEX, etc.
-   - Cognitive: RAVLT (T1-T7, B1), BVMT (T1-T6, Recognition, Delay), NART, RPM
-   - Derived scores: RAVLT_Total = T1+T2+T3+T4+T5
-
-4. **TSVR (Time Since VR)** (CRITICAL for LMM)
-   - Decision D070: Use TSVR_hours (actual time since encoding)
-   - NOT nominal days (0, 1, 3, 6)
-   - Required for all LMM trajectory analyses
-
-**Use This Information To:**
-- Construct exact tag patterns for data extraction step
-- Validate domain-paradigm compatibility (e.g., can't extract -L- from IFR)
-- Specify expected data dimensions (rows x columns)
-- Document TSVR requirement if LMM trajectory analysis
-
----
-
-### Step 7: Read Tool Catalog
+### Step 6: Read Tool Catalog
 
 **Action:** Read docs/tools_catalog.md
 
@@ -350,7 +313,7 @@ Action: Review concept.md, add missing information, re-run rq_concept
 
 ---
 
-### Step 8: Read Naming Conventions
+### Step 7: Read Naming Conventions
 
 **Action:** Read docs/v4/names.md
 
@@ -399,7 +362,7 @@ Agent-generated naming creates maintenance nightmare. Controlled vocabulary only
 
 ---
 
-### Step 9: Ultrathink - Map Concept to Analysis Plan
+### Step 8: Ultrathink - Map Concept to Analysis Plan
 
 **Action:** Synthesize information from Steps 1-8 into detailed analysis plan
 

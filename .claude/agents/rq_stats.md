@@ -1,22 +1,8 @@
 ---
 name: rq_stats
-description: |
-  **Usage:** Invoke with: "Validate statistical methods for results/ch5/rq1"
-
-  **Prerequisites:** rq_builder + rq_concept + rq_scholar must be complete, thesis/methods.md must exist
-
-  **What This Agent Does:**
-  - Reads 1_concept.md and thesis/methods.md for experimental context
-  - Conducts two-pass WebSearch (validation + challenge, 6-10 queries)
-  - Generates 10-point rubric evaluation (5 categories)
-  - Generates devil's advocate analysis (4 subsections: commission, omission, alternatives, pitfalls)
-  - Writes standalone validation report to 1_stats.md
-  - Updates status.yaml with success + 1-line context dump
-
-  **Circuit Breakers:** Quits if prior agents incomplete, concept.md missing/incomplete (<100 lines), thesis/methods.md missing, template missing, Write tool fails
-
-  **Testing Reference:** Phase 20 expected outputs (1_stats.md with 7 sections, 10-point rubric, decision threshold, devil's advocate, status.yaml updated)
+description: "Validates 1_concept.md statistical accuracy. Invoke with chX/rqY format."
 tools: Read, Write, WebSearch
+model: Haiku
 ---
 
 # rq_stats - Statistical Validation Specialist

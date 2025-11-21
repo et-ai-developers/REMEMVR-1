@@ -1,0 +1,52 @@
+module	component	status	description	inputs	outputs
+tools.analysis_irt	calibrate_grm	RED	Wrapper for calibrate_irt() backwards compatibility	df_long, groups, config	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	calibrate_irt	RED	Full IRT pipeline: prepare→configure→fit→extract	df_long, groups, config	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	configure_irt_model	RED	Build IWAVE GRM model	n_items, n_factors, n_cats, Q_matrix, correlated_factors, device, seed	IWAVE model
+tools.analysis_irt	extract_parameters_from_irt	RED	Extract item parameters (a, b)	model, item_list, factor_names, n_cats	DataFrame
+tools.analysis_irt	extract_theta_from_irt	RED	Extract theta scores	model, response_matrix, missing_mask, composite_ids, factor_names, scoring_batch_size, mc_samples, iw_samples, invert_scale	DataFrame
+tools.analysis_irt	filter_items_by_quality	RED	D039: Purify items (a>=0.4, |b|<=3.0)	df_items, a_threshold, b_threshold	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	fit_irt_grm	RED	Fit IWAVE via variational inference	model, response_matrix, missing_mask, batch_size, iw_samples, mc_samples	IWAVE model
+tools.analysis_irt	prepare_irt_input_from_wide	RED	Convert long→IRT tensors	df_long, groups	Tuple[Tensor, Tensor, Tensor, List, List]
+tools.analysis_lmm	compare_lmm_models_by_aic	RED	Fit 5 models, compare AIC	data, n_factors, reference_group, groups, save_dir	Dict
+tools.analysis_lmm	compute_contrasts_pairwise	RED	D068: Post-hoc contrasts (dual p-values)	lmm_result, comparisons, family_alpha	DataFrame
+tools.analysis_lmm	compute_effect_sizes_cohens	RED	Cohen's f² effect sizes	lmm_result, include_interactions	DataFrame
+tools.analysis_lmm	configure_candidate_models	RED	Generate 5 LMM formulas	n_factors, reference_group	Dict[str, Dict]
+tools.analysis_lmm	extract_fixed_effects_from_lmm	RED	Extract fixed effects table	result	DataFrame
+tools.analysis_lmm	extract_random_effects_from_lmm	RED	Extract random effects + ICC	result	Dict
+tools.analysis_lmm	fit_lmm_trajectory	RED	Fit single LMM	data, formula, groups, re_formula, reml	MixedLMResults
+tools.analysis_lmm	fit_lmm_trajectory_tsvr	RED	D070: Fit LMM with TSVR time	theta_scores, tsvr_data, formula, groups, re_formula, reml	MixedLMResults
+tools.analysis_lmm	prepare_lmm_input_from_theta	RED	Convert theta wide→long + time vars	theta_scores, factors	DataFrame
+tools.analysis_lmm	run_lmm_analysis	RED	Complete LMM pipeline	theta_scores, output_dir, n_factors, reference_group, save_models	Dict
+tools.config	expand_env_vars_in_path	RED	NOT IMPLEMENTED	path_str	str
+tools.config	load_config_from_file	RED	Load YAML config	config_name	Dict
+tools.config	load_config_from_yaml	RED	Get config by dot path	config_name, key_path	Any
+tools.config	load_irt_config_from_yaml	RED	Get from irt.yaml	key_path	Any
+tools.config	load_lmm_config_from_yaml	RED	Get from lmm.yaml	key_path	Any
+tools.config	load_plot_config_from_yaml	RED	Get from plotting.yaml	key_path	Any
+tools.config	load_rq_config_merged	RED	Load RQ config with overrides	chapter, rq	Dict
+tools.config	merge_config_dicts	RED	Deep merge dicts	base, override	Dict
+tools.config	reset_config_cache	RED	Reset cache (testing)	None	None
+tools.config	resolve_path_from_config	RED	Get path with substitution	key_path, **kwargs	Path
+tools.config	validate_irt_params	RED	NOT IMPLEMENTED	config	None
+tools.config	validate_paths_exist	RED	NOT IMPLEMENTED	config	None
+tools.plotting	convert_theta_to_probability	RED	Theta→probability via 2PL	theta, discrimination, difficulty	ndarray
+tools.plotting	plot_diagnostics	RED	2x2 diagnostic grid	df, fitted_col, residuals_col, group_col, figsize, output_path	Tuple[Figure, ndarray]
+tools.plotting	plot_histogram_by_group	RED	Grouped histogram	df, value_col, group_col, xlabel, ylabel, title, bins, colors, figsize, output_path, vline, vline_label	Tuple[Figure, Axes]
+tools.plotting	plot_trajectory	RED	Trajectory with fitted curves	time_pred, fitted_curves, observed_data, time_col, value_col, group_col, xlabel, ylabel, title, colors, figsize, output_path, show_errorbar, annotation	Tuple[Figure, Axes]
+tools.plotting	plot_trajectory_probability	RED	D069: Trajectory on probability scale	df_thetas, item_parameters_path, time_var, factors, title, **kwargs	Tuple[Figure, Axes, DataFrame]
+tools.plotting	save_plot_with_data	RED	Save PNG + CSV	fig, output_path, data, dpi	None
+tools.plotting	set_plot_style_defaults	RED	Apply matplotlib styling	config_path	None
+tools.validation	check_file_exists	RED	Validate file exists	file_path	Dict
+tools.validation	check_missing_data	RED	Check missing data	df	Dict
+tools.validation	create_lineage_metadata	RED	Create lineage metadata	source_file, output_file, operation, parameters, description	Dict
+tools.validation	generate_validation_report	RED	Generate validation report	validation_checks, report_title	Dict
+tools.validation	load_lineage_from_file	RED	Load lineage JSON	lineage_file	Dict
+tools.validation	save_lineage_to_file	RED	Save lineage JSON	metadata, lineage_file	None
+tools.validation	save_validation_report	RED	Save validation JSON	report, report_file	None
+tools.validation	validate_data_columns	RED	Validate required columns	df, required_columns	Dict
+tools.validation	validate_irt_convergence	RED	Validate IRT convergence	results	Dict
+tools.validation	validate_irt_parameters	RED	Validate item quality	df_items, a_min, b_max, a_col, b_col	Dict
+tools.validation	validate_lineage	RED	Validate data source	lineage_file, expected_source, expected_pass	Dict
+tools.validation	validate_lmm_convergence	RED	Validate LMM convergence	lmm_result	Dict
+tools.validation	validate_lmm_residuals	RED	Validate residuals normality	residuals, alpha	Dict
+tools.validation	validate_numeric_range	RED	Validate numeric range	data, min_val, max_val, column_name	Dict
