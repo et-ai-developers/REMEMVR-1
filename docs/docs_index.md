@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-11-22 (Tools naming v2.0 complete - 33 function renames applied)
+**Last Updated:** 2025-11-22 (Tools catalog created - lightweight tool discovery for rq_planner)
 
 ---
 
@@ -225,6 +225,12 @@
 **Audience:** Main claude when adding new functions, ALL agents when referencing tools, developers
 **Status:** Current (2025-11-22, v2.0 - 33 functions renamed)
 **Key Topics:** 8 formulaic patterns (convert_X_to_Y, load_X_from_Y, resolve_X_from_Y, set_X_Y, compute_X_Y, fit_X_Y, prepare_X_from_Y, compare_X_by_Y), source/target/method explicitness, self-documenting function names, pattern distribution (LOAD=8, EXTRACT=4, FIT=3, COMPUTE=2), quick reference guide, agent communication patterns (rq_planner uses pipelines, rq_analysis uses atomics)
+
+### tools_catalog.md
+**Purpose:** Lightweight tool discovery catalog for rq_planner (TIER 1: "What exists?") - 96% lighter than tools_inventory.md
+**Audience:** rq_planner agent (planning phase), main claude browsing available tools
+**Status:** Current (2025-11-22, created)
+**Key Topics:** 51 functions across 5 modules (analysis_irt, analysis_lmm, plotting, validation, config), one-line descriptions (name + purpose + basic I/O), organized by workflow (IRT calibration, LMM trajectory, plotting, validation), Decision cross-reference (D039/D068/D069/D070), stdlib exemption list (pandas/numpy/pathlib), missing tools (CTT), ~300 lines total
 
 ---
 
