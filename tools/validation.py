@@ -411,7 +411,9 @@ def validate_lmm_residuals(
         test_name = "Shapiro-Wilk"
     else:
         # For large samples, use Kolmogorov-Smirnov
-        stat, p_value = stats.kstest(residuals, 'norm')
+        # Standardize residuals before testing against standard normal
+        residuals_standardized = (residuals - np.mean(residuals)) / np.std(residuals)
+        stat, p_value = stats.kstest(residuals_standardized, 'norm')
         test_name = "Kolmogorov-Smirnov"
 
     passed = bool(p_value > alpha)

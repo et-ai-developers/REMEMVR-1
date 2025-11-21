@@ -1,21 +1,21 @@
 module	component	status	description	inputs	outputs
 tools.analysis_irt	calibrate_grm	ORANGE	Wrapper for calibrate_irt() backwards compatibility	df_long, groups, config	Tuple[DataFrame, DataFrame]
-tools.analysis_irt	calibrate_irt	YELLOW	Full IRT pipeline: prepare→configure→fit→extract (FIXED: function names corrected)	df_long, groups, config	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	calibrate_irt	ORANGE	Full IRT pipeline: prepare→configure→fit→extract	df_long, groups, config	Tuple[DataFrame, DataFrame]
 tools.analysis_irt	configure_irt_model	ORANGE	Build IWAVE GRM model	n_items, n_factors, n_cats, Q_matrix, correlated_factors, device, seed	IWAVE model
 tools.analysis_irt	extract_parameters_from_irt	ORANGE	Extract item parameters (a, b)	model, item_list, factor_names, n_cats	DataFrame
 tools.analysis_irt	extract_theta_from_irt	ORANGE	Extract theta scores	model, response_matrix, missing_mask, composite_ids, factor_names, scoring_batch_size, mc_samples, iw_samples, invert_scale	DataFrame
 tools.analysis_irt	filter_items_by_quality	ORANGE	D039: Purify items (a>=0.4, |b|<=3.0)	df_items, a_threshold, b_threshold	Tuple[DataFrame, DataFrame]
 tools.analysis_irt	fit_irt_grm	ORANGE	Fit IWAVE via variational inference	model, response_matrix, missing_mask, batch_size, iw_samples, mc_samples	IWAVE model
-tools.analysis_irt	prepare_irt_input_from_wide	ORANGE	Convert long→IRT tensors	df_long, groups	Tuple[Tensor, Tensor, Tensor, List, List]
+tools.analysis_irt	prepare_irt_input_from_long	ORANGE	Convert long→IRT tensors	df_long, groups	Tuple[Tensor, Tensor, Tensor, List, List]
 tools.analysis_lmm	compare_lmm_models_by_aic	ORANGE	Fit 5 models, compare AIC	data, n_factors, reference_group, groups, save_dir	Dict
-tools.analysis_lmm	compute_contrasts_pairwise	YELLOW	D068: Post-hoc contrasts (dual p-values) (FIXED: Factor/Domain backward compat)	lmm_result, comparisons, family_alpha	DataFrame
+tools.analysis_lmm	compute_contrasts_pairwise	ORANGE	D068: Post-hoc contrasts (dual p-values)	lmm_result, comparisons, family_alpha	DataFrame
 tools.analysis_lmm	compute_effect_sizes_cohens	ORANGE	Cohen's f² effect sizes	lmm_result, include_interactions	DataFrame
 tools.analysis_lmm	configure_candidate_models	ORANGE	Generate 5 LMM formulas	n_factors, reference_group	Dict[str, Dict]
 tools.analysis_lmm	extract_fixed_effects_from_lmm	ORANGE	Extract fixed effects table	result	DataFrame
 tools.analysis_lmm	extract_random_effects_from_lmm	ORANGE	Extract random effects + ICC	result	Dict
 tools.analysis_lmm	fit_lmm_trajectory	RED	Fit single LMM	data, formula, groups, re_formula, reml	MixedLMResults
 tools.analysis_lmm	fit_lmm_trajectory_tsvr	ORANGE	D070: Fit LMM with TSVR time	theta_scores, tsvr_data, formula, groups, re_formula, reml	MixedLMResults
-tools.analysis_lmm	prepare_lmm_input_from_theta	YELLOW	Convert theta wide→long + time vars (DEPRECATED: violates D070, use fit_lmm_trajectory_tsvr)	theta_scores, factors	DataFrame
+tools.analysis_lmm	prepare_lmm_input_from_theta	ORANGE	Convert theta wide→long + time vars	theta_scores, factors	DataFrame
 tools.analysis_lmm	run_lmm_analysis	RED	Complete LMM pipeline	theta_scores, output_dir, n_factors, reference_group, save_models	Dict
 tools.config	expand_env_vars_in_path	RED	NOT IMPLEMENTED	path_str	str
 tools.config	load_config_from_file	RED	Load YAML config	config_name	Dict

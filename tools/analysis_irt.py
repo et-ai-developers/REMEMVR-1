@@ -26,7 +26,7 @@ import deepirtools
 from typing import Dict, List, Tuple, Optional, Union
 
 
-def prepare_irt_input_from_wide(
+def prepare_irt_input_from_long(
     df_long: pd.DataFrame,
     groups: Dict[str, List[str]]
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, List[str], List[str]]:
@@ -454,7 +454,7 @@ def calibrate_irt(
 
     # ─── Step 1: Prepare Data ────────────────────────────────────────────────
     print("\nStep 1: Preparing IRT data...")
-    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_input_from_wide(
+    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_input_from_long(
         df_long, groups
     )
 
