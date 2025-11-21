@@ -303,11 +303,11 @@ Action: Review concept.md, add missing information, re-run rq_concept
 
 ---
 
-### Step 7: Read Tool Inventory
+### Step 7: Read Tool Catalog
 
-**Action:** Read docs/tool_inventory.md
+**Action:** Read docs/tools_catalog.md
 
-**Purpose:** Understand available analysis tools for method specification
+**Purpose:** Understand available analysis tools for method specification (lightweight catalog - 96% lighter than tools_inventory.md)
 
 **Extract:**
 
@@ -339,7 +339,12 @@ Action: Review concept.md, add missing information, re-run rq_concept
 - Ensure requested analyses have available tools (don't plan impossible analyses)
 - Identify validation requirements per step (what can be validated?)
 
-**Note:** You specify METHODS (GRM, LMM with TSVR), NOT function names (that's rq_tools' job). Example:
+**Note:**
+- tools_catalog.md is LIGHTWEIGHT (300 lines) - lists what tools exist (not detailed APIs)
+- For detailed API specs, rq_tools reads tools_inventory.md (767 lines)
+- You specify METHODS (GRM, LMM with TSVR), NOT function names (that's rq_tools' job)
+
+**Example:**
 - ✅ "Calibrate IRT model using Graded Response Model (GRM) with 3 dimensions"
 - ❌ "Call tools.analysis_irt.calibrate_grm(dimensions=3)"
 
@@ -1106,7 +1111,8 @@ You may READ but NEVER edit:
 - ❌ docs/v4/best_practices/*.md (infrastructure)
 - ❌ docs/v4/templates/*.md (template specifications)
 - ❌ docs/data_structure.md (data reference)
-- ❌ docs/tool_inventory.md (tool reference)
+- ❌ docs/tools_catalog.md (lightweight tool reference for rq_planner)
+- ❌ docs/tools_inventory.md (detailed tool reference for rq_tools)
 - ❌ docs/project_specific_stats_insights.md (decision reference)
 - ❌ results/chX/rqY/docs/1_concept.md (validated concept - read only)
 - ❌ tools/*.py (analysis code - read only)
