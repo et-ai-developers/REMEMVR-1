@@ -454,7 +454,7 @@ def calibrate_irt(
 
     # ─── Step 1: Prepare Data ────────────────────────────────────────────────
     print("\nStep 1: Preparing IRT data...")
-    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_data(
+    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_input_from_wide(
         df_long, groups
     )
 
@@ -507,7 +507,7 @@ def calibrate_irt(
     # ─── Step 4: Fit Model ───────────────────────────────────────────────────
     print("\nStep 4: Fitting IRT model...")
 
-    model = fit_irt_model(
+    model = fit_irt_grm(
         model=model,
         response_matrix=response_matrix,
         missing_mask=missing_mask,
@@ -517,7 +517,7 @@ def calibrate_irt(
     # ─── Step 5: Extract Theta Scores ────────────────────────────────────────
     print("\nStep 5: Extracting theta scores...")
 
-    df_thetas = extract_theta_scores(
+    df_thetas = extract_theta_from_irt(
         model=model,
         response_matrix=response_matrix,
         missing_mask=missing_mask,
@@ -532,7 +532,7 @@ def calibrate_irt(
     # ─── Step 6: Extract Item Parameters ─────────────────────────────────────
     print("\nStep 6: Extracting item parameters...")
 
-    df_items = extract_item_parameters(
+    df_items = extract_parameters_from_irt(
         model=model,
         item_list=item_list,
         factor_names=config['factors'],

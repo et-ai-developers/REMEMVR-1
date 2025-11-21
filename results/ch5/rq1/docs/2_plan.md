@@ -16,12 +16,6 @@ This RQ examines domain-specific forgetting trajectories across three episodic m
 
 **Estimated Runtime:** High (120+ minutes total - IRT calibration is computationally intensive)
 
-**Key Decisions Applied:**
-- Decision D039: 2-pass IRT purification (|b| > 3.0 OR a < 0.4 excluded)
-- Decision D068: Dual p-value reporting (uncorrected + Bonferroni-corrected)
-- Decision D069: Dual-scale trajectory plots (theta + probability scales)
-- Decision D070: TSVR as time variable (actual hours since encoding, not nominal days)
-
 ---
 
 ## Analysis Plan
@@ -623,7 +617,7 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 1. **Where vs What:** Test Domain x Time interaction coefficient for Where
 2. **When vs What:** Test Domain x Time interaction coefficient for When
 
-**Bonferroni Correction:** ± = 0.05 / 2 = 0.025 (two pairwise tests)
+**Bonferroni Correction:** ï¿½ = 0.05 / 2 = 0.025 (two pairwise tests)
 
 **Processing:**
 
@@ -631,11 +625,11 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 1. Extract Domain x Time interaction terms from best model fixed effects
 2. Compute pairwise contrasts (Where-What, When-What)
 3. Report BOTH:
-   - Uncorrected p-values (± = 0.05)
-   - Bonferroni-corrected p-values (± = 0.025)
+   - Uncorrected p-values (ï¿½ = 0.05)
+   - Bonferroni-corrected p-values (ï¿½ = 0.025)
 4. Compute effect sizes:
    - Cohen's d for domain differences at each timepoint (Days 0, 1, 3, 6)
-   - Partial ·² for fixed effects
+   - Partial ï¿½ï¿½ for fixed effects
 
 **Output:**
 
@@ -689,7 +683,7 @@ Validation tools MUST be used after post-hoc contrast tool execution. Specific v
 
 *Log Validation:*
 - Required pattern: "Post-hoc contrasts complete: 2 comparisons computed"
-- Required pattern: "Bonferroni correction applied: ± = 0.025 (2 tests)"
+- Required pattern: "Bonferroni correction applied: ï¿½ = 0.025 (2 tests)"
 - Forbidden patterns: "ERROR", "Contrast computation failed"
 - Acceptable warnings: None expected
 

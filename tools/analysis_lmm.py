@@ -28,6 +28,13 @@ def prepare_lmm_input_from_theta(
     """
     Convert theta scores from wide to long format and add time variables.
 
+    ⚠️ **DEPRECATED for REMEMVR RQs:** This function uses NOMINAL days (0, 1, 3, 6)
+    instead of TSVR (actual hours since encoding). Violates Decision D070.
+
+    **USE fit_lmm_trajectory_tsvr() INSTEAD** for analyses requiring accurate temporal modeling.
+
+    This function remains for backward compatibility with non-REMEMVR analyses only.
+
     Parameters
     ----------
     theta_scores : pd.DataFrame
@@ -45,6 +52,8 @@ def prepare_lmm_input_from_theta(
         Long-format dataframe with columns:
         - UID, test, Factor, Ability
         - Days, Days_sq, log_Days (time variables)
+
+    WARNING: Uses NOMINAL days {1:0, 2:1, 3:3, 4:6}, NOT actual TSVR hours.
 
     Raises
     ------
@@ -64,6 +73,13 @@ def prepare_lmm_input_from_theta(
     >>> df_long.shape
     (6, 7)  # 2 obs × 3 factors = 6 rows
     """
+    import warnings
+    warnings.warn(
+        "prepare_lmm_input_from_theta() uses NOMINAL days, not TSVR (Decision D070). "
+        "Use fit_lmm_trajectory_tsvr() for REMEMVR analyses.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     # Detect theta columns
     if factors is None:
         factors = [col for col in theta_scores.columns if col.startswith('Theta_')]
@@ -685,8 +701,11 @@ def compute_contrasts_pairwise(
 
         # Try to extract coefficient from model
         # Treatment coding: level1 coefficient represents level1 - reference
-        # So Where-What means C(Domain, Treatment)[T.Where]
+        # Try both 'Factor' and 'Domain' variable names (backward compatibility)
         coef_name_options = [
+            f'C(Factor, Treatment)[T.{level1}]',
+            f'C(Factor)[T.{level1}]',
+            f'Factor[T.{level1}]',
             f'C(Domain, Treatment)[T.{level1}]',
             f'C(Domain)[T.{level1}]',
             f'Domain[T.{level1}]',
