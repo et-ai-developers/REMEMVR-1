@@ -273,7 +273,7 @@ Fits candidate models from config.yaml using actual TSVR_days (continuous variab
 
 **Example:**
 ```python
-from tools.analysis_lmm import fit_lmm_with_tsvr
+from tools.analysis_lmm import fit_lmm_trajectory_tsvr
 
 # Load long-format data with TSVR_days (from data reshaping step)
 lmm_input = pd.read_csv('data/lmm_input.csv')
@@ -723,7 +723,7 @@ Based on analysis of 50 RQ specifications, the following tools are used across R
 **Analysis Types:** IRT (3-dimensional GRM with 2-pass purification) + LMM (trajectory analysis with TSVR time variable)
 
 **Tools Used:**
-- `tools.analysis_irt.calibrate_grm` - IRT Pass 1 and Pass 2 (3 correlated factors: What, Where, When)
+- `tools.analysis_irt.calibrate_irt` - IRT Pass 1 and Pass 2 (3 correlated factors: What, Where, When) - also accessible as `calibrate_grm` for backwards compatibility
 - `tools.analysis_irt.filter_items_by_quality` - Item purification (|b|>3.0 OR a<0.4 thresholds)
 - `pandas.read_csv` - TSVR data verification (data-prep creates tsvr_data.csv)
 - `pandas.DataFrame.melt + merge` - Data reshaping (theta scores + TSVR → LMM input, wide→long)

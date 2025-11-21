@@ -18,12 +18,6 @@
 - **No examples:** Use tools_inventory.md for usage patterns
 - **No implementation notes:** Use tools_inventory.md for caveats
 
-**Usage Pattern:**
-1. **rq_planner** scans catalog → identifies tools needed per analysis step
-2. **rq_tools** reads tools_inventory.md → creates exact 3_tools.yaml specifications
-3. **rq_analysis** reads 3_tools.yaml + 2_plan.md → creates 4_analysis.yaml code instructions
-4. **g_code** reads 4_analysis.yaml → generates analysis_script.py
-
 ---
 
 ## Analysis Tools: IRT Calibration
@@ -257,7 +251,7 @@ Path.read_text, Path.write_text: File I/O
 
 **tools.plotting (7 functions):** set_plot_style_defaults, plot_trajectory, plot_trajectory_probability, plot_diagnostics, plot_histogram_by_group, save_plot_with_data, convert_theta_to_probability
 
-**tools.validation (13 functions):** check_missing_data, validate_data_columns, validate_numeric_range, check_file_exists, validate_irt_convergence, validate_irt_parameters, validate_lmm_convergence, validate_lmm_residuals, create_lineage_metadata, save_lineage_to_file, load_lineage_from_file, validate_lineage, generate_validation_report, save_validation_report
+**tools.validation (14 functions):** check_missing_data, validate_data_columns, validate_numeric_range, check_file_exists, validate_irt_convergence, validate_irt_parameters, validate_lmm_convergence, validate_lmm_residuals, create_lineage_metadata, save_lineage_to_file, load_lineage_from_file, validate_lineage, generate_validation_report, save_validation_report
 
 **tools.config (12 functions):** load_config_from_file, load_config_from_yaml, load_rq_config_merged, load_irt_config_from_yaml, load_lmm_config_from_yaml, load_plot_config_from_yaml, resolve_path_from_config, merge_config_dicts, expand_env_vars_in_path, validate_irt_params, validate_paths_exist, reset_config_cache
 
