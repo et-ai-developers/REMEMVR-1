@@ -156,7 +156,7 @@ analysis_steps:
       IRT calibration Pass 1 complete
       Output: theta_scores.csv (100 rows), item_parameters.csv (102 rows)
 
-  step02_purify_items:
+  step02_filter_items_by_quality:
     status: success
     context_dump: |
       Item purification complete per D039

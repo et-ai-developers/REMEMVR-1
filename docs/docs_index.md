@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-11-22 (Added v4/tool_audit.md - comprehensive statistical functions inventory)
+**Last Updated:** 2025-11-22 (Tools naming v2.0 complete - 33 function renames applied)
 
 ---
 
@@ -220,11 +220,11 @@
 **Status:** Current (2025-11-22, comprehensive audit)
 **Key Topics:** 70+ statistical functions (36 legacy + 34 current), IRT calibration (7 functions), LMM analysis (10 functions), plotting (6 functions), validation (11 functions NEW), Decision implementations (D039 purify_items, D068 post_hoc_contrasts, D069 plot_trajectory_probability, D070 fit_lmm_with_tsvr), function signatures, usage patterns, comparative analysis (v1 vs current), RQ workflow mapping, tool-by-use-case reference, quick reference appendix, migration status, known gaps, 100% coverage for core RQ workflow
 
-### v4/naming_conventions.md
-**Purpose:** Unified naming system for tools, functions, files, and documentation across 50 RQs
+### v4/tools_naming.md
+**Purpose:** Formulaic naming patterns for tools and functions (8 core patterns: CONVERT, LOAD, RESOLVE, SET, COMPUTE, FIT, PREPARE, COMPARE)
 **Audience:** Main claude when adding new functions, ALL agents when referencing tools, developers
-**Status:** DRAFT (2025-11-22, awaiting user approval)
-**Key Topics:** Verb taxonomy (15 verbs standardized), noun taxonomy (25 nouns standardized), module naming rules, function naming patterns (verb_noun_qualifier), hierarchy conventions (pipeline vs atomic), anti-patterns to avoid (5 categories), proposed renames (5 functions), file naming, documentation naming, decision-specific functions, consistency checklist, agent communication patterns, quick reference guide
+**Status:** Current (2025-11-22, v2.0 - 33 functions renamed)
+**Key Topics:** 8 formulaic patterns (convert_X_to_Y, load_X_from_Y, resolve_X_from_Y, set_X_Y, compute_X_Y, fit_X_Y, prepare_X_from_Y, compare_X_by_Y), source/target/method explicitness, self-documenting function names, pattern distribution (LOAD=8, EXTRACT=4, FIT=3, COMPUTE=2), quick reference guide, agent communication patterns (rq_planner uses pipelines, rq_analysis uses atomics)
 
 ---
 

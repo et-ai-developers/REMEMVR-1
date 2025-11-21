@@ -435,13 +435,13 @@ steps:
   # --------------------------------------------------------------------------
   # STEP 2: Item Purification (Decision D039)
   # --------------------------------------------------------------------------
-  step_2_purify_items:
+  step_2_filter_items_by_quality:
     description: "Remove items with extreme difficulty (|b|>3.0) or low discrimination (a<0.4)"
 
     tool:
       module: "tools.analysis_irt"
-      function: "purify_items"
-      signature: "purify_items(item_params: pd.DataFrame, a_threshold: float, b_threshold: float) -> Tuple[pd.DataFrame, List[str]]"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(item_params: pd.DataFrame, a_threshold: float, b_threshold: float) -> Tuple[pd.DataFrame, List[str]]"
 
     inputs:
       item_params:
@@ -503,7 +503,7 @@ steps:
   # - step_3_irt_pass2
   # - step_4_reshape_data
   # - step_5_fit_lmm
-  # - step_6_post_hoc_contrasts
+  # - step_6_compute_contrasts_pairwise
   # - step_7_effect_sizes
   # - step_8_plot_theta_scale
   # - step_9_plot_probability_scale
@@ -550,11 +550,11 @@ agents:
 ```yaml
 analysis_steps:
   step_1_irt_pass1: pending
-  step_2_purify_items: pending
+  step_2_filter_items_by_quality: pending
   step_3_irt_pass2: pending
   step_4_reshape_data: pending
   step_5_fit_lmm: pending
-  step_6_post_hoc_contrasts: pending
+  step_6_compute_contrasts_pairwise: pending
   step_7_effect_sizes: pending
   step_8_plot_theta_scale: pending
   step_9_plot_probability_scale: pending

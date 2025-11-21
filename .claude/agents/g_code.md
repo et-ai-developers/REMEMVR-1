@@ -177,7 +177,7 @@ TOOL ERROR: Import check failed
   Module: tools.analysis_irt
   Function: calibrate_grm
   Problem: Function 'calibrate_grm' not found in module
-  Available functions: calibrate_irt, prepare_irt_data, configure_irt_model, fit_irt_model
+  Available functions: calibrate_irt, prepare_irt_input_from_wide, configure_irt_model, fit_irt_grm
   Recommendation: Check 4_analysis.yaml spelling or ask master to implement calibrate_grm
 Action: QUIT (did not generate code)
 ```

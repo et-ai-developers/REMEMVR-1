@@ -238,7 +238,7 @@ Document: build_history.md
 Scan for ALL entity references:
 - Agent names: rq_builder, rq_concept, g_conflict, etc.
 - File names: concept.md, plan.md, tools.yaml
-- Function names: calibrate_grm, fit_lmm_with_tsvr
+- Function names: calibrate_grm, fit_lmm_trajectory_tsvr
 - Phase names: Phase 0, Phase 4, Phase 17
 
 For each entity, track ALL attributes mentioned:

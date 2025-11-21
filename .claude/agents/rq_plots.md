@@ -225,12 +225,12 @@ Read `tools/plotting.py` completely to extract:
 7. **Usage context** (when to use this function vs others)
 
 **Functions to learn (from plots.md template):**
-- `setup_plot_style()` - Call once at start
+- `set_plot_style_defaults()` - Call once at start
 - `plot_trajectory()` - Theta-scale trajectories
 - `plot_trajectory_probability()` - Probability-scale trajectories (Decision D069)
 - `plot_diagnostics()` - 2×2 diagnostic grid for LMM validation
 - `plot_histogram_by_group()` - Grouped histograms
-- `theta_to_probability()` - IRT transformation utility
+- `convert_theta_to_probability()` - IRT transformation utility
 - `save_plot_with_data()` - Save PNG + CSV (NOTE: in Option B, CSVs already exist, may not need this)
 
 **Store function knowledge for Step 8 (Ultrathink)**
@@ -393,12 +393,12 @@ Required plotting functions NOT FOUND in tools/plotting.py:
   - plot_effect_sizes (needed for effect size forest plot per plan.md)
 
 Available functions in tools/plotting.py:
-  - setup_plot_style
+  - set_plot_style_defaults
   - plot_trajectory
   - plot_trajectory_probability
   - plot_diagnostics
   - plot_histogram_by_group
-  - theta_to_probability
+  - convert_theta_to_probability
   - save_plot_with_data
 
 Action Required:
@@ -457,7 +457,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from tools.plotting import (
-    setup_plot_style,
+    set_plot_style_defaults,
     plot_trajectory,
     plot_trajectory_probability,
     plot_diagnostics
@@ -471,7 +471,7 @@ from tools.plotting import (
 RQ_ROOT = Path(__file__).parent.parent
 
 # Apply consistent plotting theme from config/plotting.yaml
-setup_plot_style()
+set_plot_style_defaults()
 
 print("Starting plotting for RQ X.Y...")
 print(f"RQ root: {RQ_ROOT}")
@@ -572,7 +572,7 @@ print("="*70)
 2. **Absolute paths:** Use `Path(__file__).parent.parent` to get RQ root
 3. **No data manipulation:** ONLY read CSVs and call plotting functions
 4. **Print statements:** Progress messages for debugging
-5. **Consistent theme:** Call `setup_plot_style()` once at start
+5. **Consistent theme:** Call `set_plot_style_defaults()` once at start
 6. **Decision D069:** If trajectory RQ, BOTH theta + probability plots
 7. **Comments:** Explain each plot section
 8. **Column name documentation:** Print loaded columns for transparency
@@ -704,7 +704,7 @@ Successfully generated plots.py for chX/rqY with **3 plots** specified in 2_plan
 - [ ] Reads tools/plotting.py SOURCE CODE to learn function APIs
 - [ ] Checks all required functions exist (FAIL if missing)
 - [ ] Generates plots.py with UTF-8 encoding + absolute paths
-- [ ] Calls setup_plot_style() once at start
+- [ ] Calls set_plot_style_defaults() once at start
 - [ ] NO data aggregation logic (only reads CSVs + calls functions)
 - [ ] Decision D069 compliance (BOTH theta + probability if trajectory RQ)
 - [ ] Updates status.yaml with terse context_dump

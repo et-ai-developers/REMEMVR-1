@@ -76,7 +76,7 @@ params_df.to_csv('data/item_parameters.csv', index=False)
 ### Component Functions
 
 ```python
-prepare_irt_data(df_long, groups)
+prepare_irt_input_from_wide(df_long, groups)
     → (response_matrix, Q_matrix, missing_mask, item_list, composite_ids)
 ```
 Converts long format to IRT tensors.
@@ -88,19 +88,19 @@ configure_irt_model(Q_matrix, n_cats, config)
 Builds deepirtools IWAVE GRM model.
 
 ```python
-fit_irt_model(model, response_matrix, missing_mask, config)
+fit_irt_grm(model, response_matrix, missing_mask, config)
     → fitted_model
 ```
 Fits model to data (handles convergence).
 
 ```python
-extract_theta_scores(model, response_matrix, composite_ids, groups)
+extract_theta_from_irt(model, response_matrix, composite_ids, groups)
     → theta_df
 ```
 Extracts ability estimates, separates Composite_ID → (UID, test).
 
 ```python
-extract_item_parameters(model, item_list)
+extract_parameters_from_irt(model, item_list)
     → params_df
 ```
 Extracts discrimination (a) and difficulty (b) parameters.
@@ -161,7 +161,7 @@ print(comparison)
 ### Component Functions
 
 ```python
-prepare_lmm_data(theta_scores, factors=None)
+prepare_lmm_input_from_theta(theta_scores, factors=None)
     → df_long
 ```
 Reshapes wide → long, adds time variables (Days, Days_sq, log_Days).
@@ -180,31 +180,31 @@ Returns 5 candidate model formulas:
 All use random intercepts + slopes: `1 + Days | UID`
 
 ```python
-fit_lmm_model(formula, df, re_formula='1 + Days | UID')
+fit_lmm_trajectory(formula, df, re_formula='1 + Days | UID')
     → MixedLMResults
 ```
 Fits single LMM using statsmodels.
 
 ```python
-compare_models(model_results: Dict[str, MixedLMResults])
+compare_lmm_models_by_aic(model_results: Dict[str, MixedLMResults])
     → pd.DataFrame
 ```
 Compares models via AIC, computes ΔAIC and Akaike weights.
 
 ```python
-extract_fixed_effects(result: MixedLMResults)
+extract_fixed_effects_from_lmm(result: MixedLMResults)
     → pd.DataFrame
 ```
 Extracts β, SE, z, p-values from fitted model.
 
 ```python
-extract_random_effects(result: MixedLMResults)
+extract_random_effects_from_lmm(result: MixedLMResults)
     → Dict
 ```
 Extracts random effect variances and correlations.
 
 ```python
-post_hoc_contrasts(
+compute_contrasts_pairwise(
     lmm_result: MixedLMResults,
     contrasts: List[str],
     family_alpha: float = 0.05
@@ -214,7 +214,7 @@ post_hoc_contrasts(
 
 **Example:**
 ```python
-contrasts_df = post_hoc_contrasts(
+contrasts_df = compute_contrasts_pairwise(
     lmm_result=best_model,
     contrasts=['Where-What', 'When-What', 'When-Where'],
     family_alpha=0.05
@@ -223,7 +223,7 @@ contrasts_df = post_hoc_contrasts(
 ```
 
 ```python
-compute_effect_sizes(
+compute_effect_sizes_cohens(
     lmm_result: MixedLMResults,
     effect_type: str = 'fixed'
 ) -> pd.DataFrame
@@ -232,12 +232,12 @@ Computes Cohen's f² for fixed effects.
 
 **Example:**
 ```python
-effect_sizes = compute_effect_sizes(lmm_result=best_model, effect_type='fixed')
+effect_sizes = compute_effect_sizes_cohens(lmm_result=best_model, effect_type='fixed')
 # Returns: effect, cohens_f2, interpretation (negligible/small/medium/large)
 ```
 
 ```python
-fit_lmm_with_tsvr(
+fit_lmm_trajectory_tsvr(
     data: pd.DataFrame,
     candidate_models: Dict[str, Dict[str, str]],
     output_dir: Path,
@@ -303,7 +303,7 @@ candidate_models = {
 }
 
 # Fit models
-results = fit_lmm_with_tsvr(
+results = fit_lmm_trajectory_tsvr(
     data=lmm_input,
     candidate_models=candidate_models,
     output_dir=Path('results/ch5/rq1/logs/')
@@ -336,14 +336,14 @@ Converts R/lme4 syntax `"fixed + (random | group)"` to statsmodels syntax:
 ### Style Setup
 
 ```python
-setup_plot_style(config_path=None)
+set_plot_style_defaults(config_path=None)
 ```
 Applies consistent matplotlib/seaborn styling from `config/plotting.yaml`.
 
 **Call once at start of script:**
 ```python
-from tools.plotting import setup_plot_style
-setup_plot_style()  # Loads from config/plotting.yaml
+from tools.plotting import set_plot_style_defaults
+set_plot_style_defaults()  # Loads from config/plotting.yaml
 ```
 
 ### Trajectory Plotting
@@ -409,7 +409,7 @@ plot_histogram_by_group(data, value_col, group_col, bins, ...)
 Grouped histograms.
 
 ```python
-theta_to_probability(theta, discrimination=1.0, difficulty=0.0)
+convert_theta_to_probability(theta, discrimination=1.0, difficulty=0.0)
     → np.ndarray
 ```
 IRT response function (converts theta to probability).
@@ -451,7 +451,7 @@ metadata = create_lineage_metadata(
     description="IRT Pass 2 calibration with purified items"
 )
 
-save_lineage(metadata, "data/theta_scores_pass2_lineage.json")
+save_lineage_to_file(metadata, "data/theta_scores_pass2_lineage.json")
 ```
 
 ### IRT Validation
@@ -497,7 +497,7 @@ validate_data_columns(df, required_columns: List[str])
 Checks all required columns present.
 
 ```python
-validate_file_exists(file_path)
+check_file_exists(file_path)
     → Dict[str, Any]
 ```
 Checks file exists before loading.
@@ -530,49 +530,49 @@ Saves validation report to JSON.
 ### Loading Configs
 
 ```python
-load_config(config_name: str) → Dict[str, Any]
+load_config_from_file(config_name: str) → Dict[str, Any]
 ```
 Loads YAML config by name: `'paths'`, `'plotting'`, `'irt'`, `'lmm'`
 
 ```python
-get_config(config_name, key_path=None) → Any
+load_config_from_yaml(config_name, key_path=None) → Any
 ```
 Gets config value by dot-notation path.
 
 **Example:**
 ```python
-from tools.config import get_config
+from tools.config import load_config_from_yaml
 
-dpi = get_config('plotting', 'dpi')  # Returns 300
-data_path = get_config('paths', 'data.master')  # Returns Path to master.xlsx
+dpi = load_config_from_yaml('plotting', 'dpi')  # Returns 300
+data_path = load_config_from_yaml('paths', 'data.master')  # Returns Path to master.xlsx
 ```
 
 ### Specialized Getters
 
 ```python
-get_path(key_path, **kwargs) → Path
+resolve_path_from_config(key_path, **kwargs) → Path
 ```
 Gets path from `config/paths.yaml`, expands environment variables.
 
 ```python
-get_irt_config(key_path=None)
-get_lmm_config(key_path=None)
-get_plot_config(key_path=None)
+load_irt_config_from_yaml(key_path=None)
+load_lmm_config_from_yaml(key_path=None)
+load_plot_config_from_yaml(key_path=None)
 ```
 Shortcuts for specific configs.
 
 ### RQ-Specific Configs
 
 ```python
-load_rq_config(chapter: int, rq: int) → Dict[str, Any]
+load_rq_config_merged(chapter: int, rq: int) → Dict[str, Any]
 ```
 Loads `results/ch{chapter}/rq{rq}/config.yaml`
 
 **Example:**
 ```python
-from tools.config import load_rq_config
+from tools.config import load_rq_config_merged
 
-rq_config = load_rq_config(chapter=5, rq=1)
+rq_config = load_rq_config_merged(chapter=5, rq=1)
 groups = rq_config['irt']['factor_groups']
 ```
 
@@ -593,9 +593,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from tools.analysis_irt import calibrate_irt
 from tools.analysis_lmm import run_lmm_analysis
-from tools.plotting import setup_plot_style, plot_trajectory
-from tools.validation import create_lineage_metadata, save_lineage
-from tools.config import load_rq_config
+from tools.plotting import set_plot_style_defaults, plot_trajectory
+from tools.validation import create_lineage_metadata, save_lineage_to_file
+from tools.config import load_rq_config_merged
 ```
 
 ### 2. Load RQ-Specific Config
@@ -607,7 +607,7 @@ chapter = int(rq_dir.parent.name.replace('ch', ''))
 rq_num = int(rq_dir.name.replace('rq', ''))
 
 # Load config
-config = load_rq_config(chapter, rq_num)
+config = load_rq_config_merged(chapter, rq_num)
 ```
 
 ### 3. Use Lineage Tracking
@@ -621,7 +621,7 @@ metadata = create_lineage_metadata(
     parameters={"key": "value"},
     description="Human-readable description"
 )
-save_lineage(metadata, str(output_file).replace('.csv', '_lineage.json'))
+save_lineage_to_file(metadata, str(output_file).replace('.csv', '_lineage.json'))
 ```
 
 ### 4. Validate at Every Step
@@ -724,12 +724,12 @@ Based on analysis of 50 RQ specifications, the following tools are used across R
 
 **Tools Used:**
 - `tools.analysis_irt.calibrate_grm` - IRT Pass 1 and Pass 2 (3 correlated factors: What, Where, When)
-- `tools.analysis_irt.purify_items` - Item purification (|b|>3.0 OR a<0.4 thresholds)
+- `tools.analysis_irt.filter_items_by_quality` - Item purification (|b|>3.0 OR a<0.4 thresholds)
 - `pandas.read_csv` - TSVR data verification (data-prep creates tsvr_data.csv)
 - `pandas.DataFrame.melt + merge` - Data reshaping (theta scores + TSVR → LMM input, wide→long)
 - `tools.analysis_lmm.run_lmm_analysis` - LMM with 5 candidate models (linear, quadratic, log, linear+log, quadratic+log)
-- `tools.analysis_lmm.post_hoc_contrasts` - Pairwise contrasts with dual reporting (uncorrected + Bonferroni)
-- `tools.analysis_lmm.compute_effect_sizes` - Cohen's f² for interaction, Cohen's d for pairwise comparisons
+- `tools.analysis_lmm.compute_contrasts_pairwise` - Pairwise contrasts with dual reporting (uncorrected + Bonferroni)
+- `tools.analysis_lmm.compute_effect_sizes_cohens` - Cohen's f² for interaction, Cohen's d for pairwise comparisons
 - `tools.plotting.plot_trajectory` - Theta-scale trajectory plot with 95% CI ribbons
 - `tools.plotting.plot_trajectory_probability` - Probability-scale trajectory plot (IRT transformation)
 

@@ -152,7 +152,7 @@ Required: Workflow must execute agents in dependency order
 
 **Extract:**
 - Number of analysis steps (e.g., 9 steps for IRT→LMM trajectory)
-- Which tools required per step (e.g., step 1: calibrate_grm, step 2: purify_items)
+- Which tools required per step (e.g., step 1: calibrate_grm, step 2: filter_items_by_quality)
 - Input/output files per step (for mapping to tool catalog)
 - Validation requirements per step (what to validate after each analysis)
 - Special considerations (e.g., Decision D039/D068/D069/D070 requirements)
@@ -203,7 +203,7 @@ Required: Workflow must execute agents in dependency order
 **Process:**
 
 1. **Build unique tool list** from 2_plan.md
-   - List every analysis function mentioned (e.g., calibrate_grm, purify_items, fit_lmm_with_tsvr)
+   - List every analysis function mentioned (e.g., calibrate_grm, filter_items_by_quality, fit_lmm_trajectory_tsvr)
    - List every validation function mentioned or implied (e.g., validate_irt_calibration)
    - Deduplicate (if calibrate_grm appears in step 1 and step 3, list ONCE)
 
@@ -247,11 +247,11 @@ QUIT: FAIL - Missing Analysis Tools
 
 Required Analysis Tools (from 2_plan.md):
 - calibrate_grm (tools.analysis_irt.calibrate_grm)
-- purify_items (tools.analysis_irt.purify_items)
-- fit_lmm_with_tsvr (tools.analysis_lmm.fit_lmm_with_tsvr)
+- filter_items_by_quality (tools.analysis_irt.filter_items_by_quality)
+- fit_lmm_trajectory_tsvr (tools.analysis_lmm.fit_lmm_trajectory_tsvr)
 
 Missing from tool_inventory.md:
-- fit_lmm_with_tsvr (NOT FOUND)
+- fit_lmm_trajectory_tsvr (NOT FOUND)
 
 Action Required:
 1. User + Claude migrate missing tool from v3.0 with TDD
@@ -345,9 +345,9 @@ touch results/chX/rqY/docs/3_tools.yaml
 # 3_tools.yaml
 analysis_tools:
   calibrate_grm:
-    - "D068: Dual reporting p-values (post_hoc_contrasts with uncorrected + Bonferroni)"
+    - "D068: Dual reporting p-values (compute_contrasts_pairwise with uncorrected + Bonferroni)"
     - "D069: Dual-scale trajectory plots (plot_trajectory + plot_trajectory_probability)"
-    - "D070: TSVR time variable (fit_lmm_with_tsvr uses TSVR_days not nominal days)"
+    - "D070: TSVR time variable (fit_lmm_trajectory_tsvr uses TSVR_days not nominal days)"
 
   notes:
     - "Each tool documented ONCE (even if used multiple times in workflow)"
@@ -397,8 +397,8 @@ SUCCESS: rq_tools agent completed for RQ X.Y
 ✅ Status updated: rq_tools = success
 
 Tool Summary:
-- IRT tools: calibrate_grm, purify_items, extract_theta_scores
-- LMM tools: fit_lmm_with_tsvr, compare_models, post_hoc_contrasts
+- IRT tools: calibrate_grm, filter_items_by_quality, extract_theta_from_irt
+- LMM tools: fit_lmm_trajectory_tsvr, compare_lmm_models_by_aic, compute_contrasts_pairwise
 - Plotting tools: plot_trajectory, plot_trajectory_probability
 - Validation: Complete validation tool pairing for all analysis tools
 

@@ -729,7 +729,7 @@ Validation tools MUST be used after EVERY analysis tool execution. No step proce
 
 ### Results Files (Final)
 - results/lmm_model_summary.txt (from Step 5: LMM fit)
-- results/post_hoc_contrasts.csv (from Step 6: group comparisons)
+- results/compute_contrasts_pairwise.csv (from Step 6: group comparisons)
 - results/effect_sizes.csv (from Step 6: Cohen's d, η²)
 
 ### Plots
@@ -1083,7 +1083,7 @@ Found in names.md: [empty file / list other available patterns]
 
 Action:
 1. User and Claude discuss naming conventions for this pipeline
-2. Decide on patterns (e.g., "step01_irt_pass1.py", "step02_purify_items.py", etc.)
+2. Decide on patterns (e.g., "step01_irt_pass1.py", "step02_filter_items_by_quality.py", etc.)
 3. Add to docs/v4/names.md with rationale
 4. Re-run rq_planner
 
