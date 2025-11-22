@@ -13,38 +13,35 @@
   when: a=1.378, b=1.862
   where: a=0.833, b=0.112
 
-[AGGREGATE] Computing mean theta by domain x test...
-[DONE] Aggregation complete: 12 groups
+[FIT] Fitting LMM model for predictions...
+  Model fitted: AIC = 3187.96
+
+[PREDICT] Generating predictions for each observation...
+[DONE] Predictions generated for 1200 observations
+
+[PREPARE] Creating theta scale plot data (individual-level)...
+[DONE] Theta plot data prepared: 1200 rows
   Domains: ['what', 'when', 'where']
-  Tests: [0, 1, 3, 6]
-
-[PREDICT] Generating LMM model predictions...
-  Model re-fitted: AIC = 3187.96
-[DONE] LMM predictions generated for 12 groups
-
-[PREPARE] Creating theta scale plot data...
-[DONE] Theta plot data prepared: 12 rows
+  TSVR range: 1.0 - 246.2 hours
 
 [CONVERT] Transforming to probability scale (Decision D069)...
 [DONE] Probability conversion complete
-  Probability range: 0.061 - 0.882
+  Probability range: 0.003 - 0.991
 
 [SAVE] Saving plot data files...
 [SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_theta_data.csv
-  Rows: 12, Columns: ['time', 'test', 'domain', 'mean_theta', 'CI_lower', 'CI_upper', 'predicted_theta', 'n_obs']
+  Rows: 1200, Columns: ['TSVR_hours', 'domain', 'theta', 'predicted_theta', 'UID']
 [SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_probability_data.csv
-  Rows: 12, Columns: ['time', 'test', 'domain', 'mean_probability', 'CI_lower', 'CI_upper', 'predicted_probability', 'n_obs']
+  Rows: 1200, Columns: ['TSVR_hours', 'domain', 'probability', 'predicted_probability', 'UID']
 
 [VALIDATION] Running validation checks...
   [PASS] Both output files exist
-  [PASS] Each file has exactly 12 rows
+  [PASS] Individual-level data: 1200 rows
   [PASS] All 3 domains present
-  [PASS] All 4 tests present (nominal days 0, 1, 3, 6)
-  [PASS] Domain x test combinations are unique
-  [PASS] No NaN values in any column
+  [PASS] TSVR range valid: 1.0 - 246.2 hours
+  [PASS] No NaN values in critical columns
   [PASS] Probability values in [0, 1] range
-  [PASS] CI_upper > CI_lower for all rows
-  [PASS] n_obs >= 80 per group
+  [PASS] Prediction columns present
 
 [PASS] All validation checks passed
 
@@ -60,32 +57,11 @@ Decision D069 implemented: Dual-scale trajectory data
   - Theta scale: IRT ability units for technical audience
   - Probability scale: 0-1 range for general audience
 
-[SUMMARY] Theta scale data:
-  time  test domain  mean_theta  CI_lower  CI_upper  predicted_theta  n_obs
-  1.00     0   what    0.685435  0.486475  0.884396         0.591449    100
- 26.37     1   what    0.089402 -0.112397  0.291200         0.221567    100
- 74.53     3   what   -0.229147 -0.422139 -0.036154        -0.132709    100
-147.13     6   what   -0.339661 -0.517859 -0.161464        -0.424204    100
-  1.00     0   when    0.204005 -0.006380  0.414391         0.190435    100
- 26.37     1   when    0.029739 -0.127524  0.187002         0.060923    100
- 74.53     3   when   -0.118456 -0.288366  0.051454        -0.063126    100
-147.13     6   when   -0.111116 -0.354048  0.131816        -0.165191    100
-  1.00     0  where    0.672127  0.494175  0.850078         0.627362    100
- 26.37     1  where    0.121843 -0.056975  0.300661         0.236519    100
- 74.53     3  where   -0.088925 -0.257229  0.079379        -0.137835    100
-147.13     6  where   -0.477642 -0.651809 -0.303476        -0.445849    100
+Continuous TSVR: Individual-level data preserves real time variability
+  - 1200 individual observations
+  - TSVR range: 1.0 - 246.2 hours
 
-[SUMMARY] Probability scale data:
-  time  test domain  mean_probability  CI_lower  CI_upper  predicted_probability  n_obs
-  1.00     0   what          0.882248  0.858751  0.902280               0.871601    100
- 26.37     1   what          0.800271  0.764242  0.832004               0.821534    100
- 74.53     3   what          0.741442  0.700738  0.778361               0.760377    100
-147.13     6   what          0.718579  0.679243  0.754832               0.700283    100
-  1.00     0   when          0.092368  0.070767  0.119714               0.090812    100
- 26.37     1   when          0.074110  0.060545  0.090423               0.077114    100
- 74.53     3   when          0.061260  0.049100  0.076190               0.065794    100
-147.13     6   when          0.061844  0.045042  0.084360               0.057659    100
-  1.00     0  where          0.614614  0.578970  0.649071               0.605747    100
- 26.37     1  where          0.502113  0.464939  0.539264               0.525966    100
- 74.53     3  where          0.458326  0.423785  0.493272               0.448231    100
-147.13     6  where          0.379699  0.346179  0.414408               0.385955    100
+[SUMMARY] Theta by domain:
+  what: n=400, theta mean=0.052, std=1.060
+  when: n=400, theta mean=0.001, std=1.015
+  where: n=400, theta mean=0.057, std=0.981

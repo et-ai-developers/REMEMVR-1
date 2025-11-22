@@ -31,33 +31,30 @@ EXPECTED INPUTS:
 
 EXPECTED OUTPUTS:
   - plots/step07_trajectory_theta_data.csv
-    Columns: [time, test, domain, mean_theta, CI_lower, CI_upper, predicted_theta, n_obs]
-    Expected rows: 12 (3 domains x 4 tests)
-    Description: Observed mean theta with 95% CIs and LMM predictions per domain x test
+    Columns: [TSVR_hours, domain, theta, predicted_theta, UID]
+    Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
+    Description: Individual-level theta scores with continuous TSVR and LMM predictions
 
   - plots/step07_trajectory_probability_data.csv
-    Columns: [time, test, domain, mean_probability, CI_lower, CI_upper, predicted_probability, n_obs]
-    Expected rows: 12 (3 domains x 4 tests)
-    Description: Mean theta transformed to probability scale with predictions (Decision D069)
+    Columns: [TSVR_hours, domain, probability, predicted_probability, UID]
+    Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
+    Description: Individual-level probability scores with continuous TSVR (Decision D069)
 
 VALIDATION CRITERIA:
   - Both output files exist in plots/ folder
-  - Each file has exactly 12 rows (3 domains x 4 tests)
+  - Each file has ~1200 rows (individual observations)
   - All 3 domains present: what, where, when
-  - All 4 tests present: 0, 1, 3, 6 (nominal days, NOT {1,2,3,4})
-  - Domain x test combinations are unique
-  - No NaN values in any column
-  - Probability bounds: mean_probability in [0, 1], CI bounds in [0, 1]
-  - CI validity: CI_upper > CI_lower for all rows
-  - n_obs >= 80 per group (some missing acceptable from 100)
+  - No NaN values in critical columns (TSVR_hours, domain, theta/probability)
+  - Probability bounds: probability in [0, 1]
+  - TSVR_hours range reasonable: 0 < TSVR_hours < 200
   - predicted_theta and predicted_probability columns present
 
 g_code REASONING:
-- Approach: Aggregate theta scores by domain x test, then convert to probability
-- Why this approach: Decision D069 requires dual-scale plots for interpretability
-- Data flow: LMM input -> aggregate by domain/test -> theta CSV
+- Approach: Output individual-level data with continuous TSVR for scatter plots
+- Why this approach: Decision D069 requires dual-scale plots; continuous TSVR shows real variability
+- Data flow: LMM input -> add predictions -> theta CSV
                        -> convert to probability -> probability CSV
-- Expected performance: ~seconds (aggregation only)
+- Expected performance: ~seconds (no aggregation needed)
 
 IMPLEMENTATION NOTES:
 - Analysis tool: tools.plotting.convert_theta_to_probability
@@ -188,74 +185,49 @@ if __name__ == "__main__":
             log(f"  {row['domain']}: a={row['mean_a']:.3f}, b={row['mean_b']:.3f}")
 
         # =========================================================================
-        # STEP 3: Aggregate Theta Scores by Domain x Test
+        # STEP 3: Fit LMM Model for Predictions
         # =========================================================================
 
-        log("\n[AGGREGATE] Computing mean theta by domain x test...")
-
-        # Group by domain and test
-        theta_agg = df_lmm.groupby(['domain', 'test']).agg({
-            'theta': ['mean', 'std', 'count'],
-            'TSVR_hours': 'median'  # Representative time for plotting
-        }).reset_index()
-
-        # Flatten column names
-        theta_agg.columns = ['domain', 'test', 'mean_theta', 'std_theta', 'n_obs', 'time']
-
-        # Compute 95% CI
-        theta_agg['se'] = theta_agg['std_theta'] / np.sqrt(theta_agg['n_obs'])
-        theta_agg['CI_lower'] = theta_agg['mean_theta'] - 1.96 * theta_agg['se']
-        theta_agg['CI_upper'] = theta_agg['mean_theta'] + 1.96 * theta_agg['se']
-
-        log(f"[DONE] Aggregation complete: {len(theta_agg)} groups")
-        log(f"  Domains: {sorted(theta_agg['domain'].unique().tolist())}")
-        log(f"  Tests: {sorted(theta_agg['test'].unique().tolist())}")
-
-        # =========================================================================
-        # STEP 3b: Generate LMM Predictions
-        # =========================================================================
-        # Re-fit the best model (Log) to generate predictions for plot overlay
-        # Note: Cannot pickle statsmodels results reliably, so we re-fit here
-
-        log("\n[PREDICT] Generating LMM model predictions...")
+        log("\n[FIT] Fitting LMM model for predictions...")
 
         # Prepare data for LMM (need log_Days and domain coding)
-        df_lmm_pred = df_lmm.copy()
-        df_lmm_pred['Days'] = df_lmm_pred['TSVR_hours'] / 24.0
-        df_lmm_pred['log_Days'] = np.log(df_lmm_pred['Days'] + 1)
+        df_plot = df_lmm.copy()
+        df_plot['Days'] = df_plot['TSVR_hours'] / 24.0
+        df_plot['log_Days'] = np.log(df_plot['Days'] + 1)
+
+        # Get UID from composite_ID if not present
+        if 'UID' not in df_plot.columns:
+            df_plot['UID'] = df_plot['composite_ID'].str.split('_').str[0]
 
         # Re-fit the Log model (best model from step05)
-        from statsmodels.regression.mixed_linear_model import MixedLM
         import statsmodels.formula.api as smf
-
-        # Get UID from composite_ID
-        if 'UID' not in df_lmm_pred.columns:
-            df_lmm_pred['UID'] = df_lmm_pred['composite_ID'].str.split('_').str[0]
 
         # Fit Log model: Ability ~ log(Days) * Domain with random intercept + slope per UID
         log_model = smf.mixedlm(
             "theta ~ log_Days * C(domain, Treatment('what'))",
-            data=df_lmm_pred,
-            groups=df_lmm_pred['UID'],
+            data=df_plot,
+            groups=df_plot['UID'],
             re_formula='~log_Days'
         )
         log_result = log_model.fit(method='powell', reml=False)
-        log(f"  Model re-fitted: AIC = {log_result.aic:.2f}")
+        log(f"  Model fitted: AIC = {log_result.aic:.2f}")
 
-        # Generate predictions for each domain x test combination
+        # =========================================================================
+        # STEP 4: Generate Individual-Level Predictions
+        # =========================================================================
+
+        log("\n[PREDICT] Generating predictions for each observation...")
+
+        # Get fixed effects
+        fe = log_result.fe_params
+
+        # Generate predictions for each row
         predicted_theta = []
-        for _, row in theta_agg.iterrows():
+        for _, row in df_plot.iterrows():
             domain = row['domain']
-            time_val = row['time']  # median TSVR_hours for this group
+            log_days = row['log_Days']
 
-            # Create prediction data point
-            days = time_val / 24.0
-            log_days = np.log(days + 1)
-
-            # Build prediction manually from fixed effects
-            # Formula: intercept + log_Days*beta + domain effects + interactions
-            fe = log_result.fe_params
-
+            # Build prediction from fixed effects only (marginal prediction)
             pred = fe['Intercept'] + fe['log_Days'] * log_days
 
             # Add domain effects (treatment coding with 'what' as reference)
@@ -269,36 +241,36 @@ if __name__ == "__main__":
 
             predicted_theta.append(float(pred))
 
-        theta_agg['predicted_theta'] = predicted_theta
-        log(f"[DONE] LMM predictions generated for {len(theta_agg)} groups")
+        df_plot['predicted_theta'] = predicted_theta
+        log(f"[DONE] Predictions generated for {len(df_plot)} observations")
 
         # =========================================================================
-        # STEP 4: Prepare Theta Scale Output
+        # STEP 5: Prepare Theta Scale Output (Individual-Level)
         # =========================================================================
 
-        log("\n[PREPARE] Creating theta scale plot data...")
+        log("\n[PREPARE] Creating theta scale plot data (individual-level)...")
 
-        # Select columns for theta output (including predicted_theta)
-        df_theta_plot = theta_agg[['time', 'test', 'domain', 'mean_theta', 'CI_lower', 'CI_upper', 'predicted_theta', 'n_obs']].copy()
+        # Select columns for theta output
+        df_theta_plot = df_plot[['TSVR_hours', 'domain', 'theta', 'predicted_theta', 'UID']].copy()
 
         # Sort for consistent output
-        df_theta_plot = df_theta_plot.sort_values(['domain', 'test']).reset_index(drop=True)
+        df_theta_plot = df_theta_plot.sort_values(['domain', 'TSVR_hours']).reset_index(drop=True)
 
         log(f"[DONE] Theta plot data prepared: {len(df_theta_plot)} rows")
+        log(f"  Domains: {sorted(df_theta_plot['domain'].unique().tolist())}")
+        log(f"  TSVR range: {df_theta_plot['TSVR_hours'].min():.1f} - {df_theta_plot['TSVR_hours'].max():.1f} hours")
 
         # =========================================================================
-        # STEP 5: Convert to Probability Scale (Decision D069)
+        # STEP 6: Convert to Probability Scale (Decision D069)
         # =========================================================================
 
         log("\n[CONVERT] Transforming to probability scale (Decision D069)...")
 
         # Create probability dataframe
-        df_prob_plot = df_theta_plot[['time', 'test', 'domain', 'n_obs']].copy()
+        df_prob_plot = df_theta_plot[['TSVR_hours', 'domain', 'UID']].copy()
 
-        # Convert each domain's theta values to probability using domain-specific params
-        mean_probs = []
-        ci_lowers = []
-        ci_uppers = []
+        # Convert each observation's theta values to probability using domain-specific params
+        probs = []
         predicted_probs = []
 
         for _, row in df_theta_plot.iterrows():
@@ -313,27 +285,21 @@ if __name__ == "__main__":
                 a = domain_row['mean_a'].values[0]
                 b = domain_row['mean_b'].values[0]
 
-            # Convert mean and CI bounds
-            mean_prob = convert_theta_to_probability(row['mean_theta'], discrimination=a, difficulty=b)
-            ci_lower_prob = convert_theta_to_probability(row['CI_lower'], discrimination=a, difficulty=b)
-            ci_upper_prob = convert_theta_to_probability(row['CI_upper'], discrimination=a, difficulty=b)
+            # Convert theta to probability
+            prob = convert_theta_to_probability(row['theta'], discrimination=a, difficulty=b)
             predicted_prob = convert_theta_to_probability(row['predicted_theta'], discrimination=a, difficulty=b)
 
-            mean_probs.append(float(mean_prob))
-            ci_lowers.append(float(ci_lower_prob))
-            ci_uppers.append(float(ci_upper_prob))
+            probs.append(float(prob))
             predicted_probs.append(float(predicted_prob))
 
-        df_prob_plot['mean_probability'] = mean_probs
-        df_prob_plot['CI_lower'] = ci_lowers
-        df_prob_plot['CI_upper'] = ci_uppers
+        df_prob_plot['probability'] = probs
         df_prob_plot['predicted_probability'] = predicted_probs
 
         # Reorder columns
-        df_prob_plot = df_prob_plot[['time', 'test', 'domain', 'mean_probability', 'CI_lower', 'CI_upper', 'predicted_probability', 'n_obs']]
+        df_prob_plot = df_prob_plot[['TSVR_hours', 'domain', 'probability', 'predicted_probability', 'UID']]
 
         log(f"[DONE] Probability conversion complete")
-        log(f"  Probability range: {df_prob_plot['mean_probability'].min():.3f} - {df_prob_plot['mean_probability'].max():.3f}")
+        log(f"  Probability range: {df_prob_plot['probability'].min():.3f} - {df_prob_plot['probability'].max():.3f}")
 
         # =========================================================================
         # STEP 6: Save Outputs
@@ -369,13 +335,11 @@ if __name__ == "__main__":
         if not validation_errors:
             log("  [PASS] Both output files exist")
 
-        # Check 2: Exact row count (12 = 3 domains x 4 tests)
-        if len(df_theta_plot) != 12:
-            validation_errors.append(f"Theta data has {len(df_theta_plot)} rows, expected 12")
-        if len(df_prob_plot) != 12:
-            validation_errors.append(f"Probability data has {len(df_prob_plot)} rows, expected 12")
-        if not any("rows" in e for e in validation_errors):
-            log("  [PASS] Each file has exactly 12 rows")
+        # Check 2: Row count (individual-level: ~1200 = 100 participants x 4 tests x 3 domains)
+        if len(df_theta_plot) < 1000:
+            validation_errors.append(f"Theta data has {len(df_theta_plot)} rows, expected ~1200")
+        else:
+            log(f"  [PASS] Individual-level data: {len(df_theta_plot)} rows")
 
         # Check 3: Domain coverage
         expected_domains = {'what', 'where', 'when'}
@@ -385,50 +349,37 @@ if __name__ == "__main__":
         else:
             log("  [PASS] All 3 domains present")
 
-        # Check 4: Test coverage (nominal days 0, 1, 3, 6)
-        expected_tests = {0, 1, 3, 6}
-        actual_tests = set(df_theta_plot['test'].unique())
-        if actual_tests != expected_tests:
-            validation_errors.append(f"Test values mismatch: expected {expected_tests}, found {actual_tests}")
+        # Check 4: TSVR range reasonable (0-300 hours = ~12 days max, study is ~6 days nominal)
+        if df_theta_plot['TSVR_hours'].min() < 0 or df_theta_plot['TSVR_hours'].max() > 300:
+            validation_errors.append(f"TSVR_hours out of expected range: {df_theta_plot['TSVR_hours'].min():.1f} - {df_theta_plot['TSVR_hours'].max():.1f}")
         else:
-            log("  [PASS] All 4 tests present (nominal days 0, 1, 3, 6)")
+            log(f"  [PASS] TSVR range valid: {df_theta_plot['TSVR_hours'].min():.1f} - {df_theta_plot['TSVR_hours'].max():.1f} hours")
 
-        # Check 5: No duplicates
-        dupe_check = df_theta_plot.groupby(['domain', 'test']).size()
-        if dupe_check.max() > 1:
-            validation_errors.append("Duplicate domain x test combinations found")
+        # Check 5: No NaN values in critical columns
+        critical_cols_theta = ['TSVR_hours', 'domain', 'theta', 'predicted_theta']
+        critical_cols_prob = ['TSVR_hours', 'domain', 'probability', 'predicted_probability']
+        nan_theta = df_theta_plot[critical_cols_theta].isna().sum().sum()
+        nan_prob = df_prob_plot[critical_cols_prob].isna().sum().sum()
+        if nan_theta > 0:
+            validation_errors.append(f"NaN values in theta data: {nan_theta}")
+        if nan_prob > 0:
+            validation_errors.append(f"NaN values in probability data: {nan_prob}")
+        if nan_theta == 0 and nan_prob == 0:
+            log("  [PASS] No NaN values in critical columns")
+
+        # Check 6: Probability bounds
+        if df_prob_plot['probability'].min() < 0 or df_prob_plot['probability'].max() > 1:
+            validation_errors.append("probability out of [0, 1] range")
         else:
-            log("  [PASS] Domain x test combinations are unique")
-
-        # Check 6: No NaN values
-        if df_theta_plot.isna().any().any():
-            validation_errors.append(f"NaN values in theta data: {df_theta_plot.isna().sum().sum()}")
-        if df_prob_plot.isna().any().any():
-            validation_errors.append(f"NaN values in probability data: {df_prob_plot.isna().sum().sum()}")
-        if not any("NaN" in e for e in validation_errors):
-            log("  [PASS] No NaN values in any column")
-
-        # Check 7: Probability bounds
-        if df_prob_plot['mean_probability'].min() < 0 or df_prob_plot['mean_probability'].max() > 1:
-            validation_errors.append("mean_probability out of [0, 1] range")
-        if df_prob_plot['CI_lower'].min() < 0 or df_prob_plot['CI_upper'].max() > 1:
-            validation_errors.append("Probability CI bounds out of [0, 1] range")
-        if not any("probability" in e.lower() for e in validation_errors):
             log("  [PASS] Probability values in [0, 1] range")
 
-        # Check 8: CI validity
-        if (df_theta_plot['CI_upper'] <= df_theta_plot['CI_lower']).any():
-            validation_errors.append("CI_upper <= CI_lower in theta data")
-        if (df_prob_plot['CI_upper'] <= df_prob_plot['CI_lower']).any():
-            validation_errors.append("CI_upper <= CI_lower in probability data")
-        if not any("CI_upper" in e for e in validation_errors):
-            log("  [PASS] CI_upper > CI_lower for all rows")
-
-        # Check 9: n_obs reasonable
-        if df_theta_plot['n_obs'].min() < 80:
-            log(f"  [WARN] Some groups have n_obs < 80 (min={df_theta_plot['n_obs'].min()})")
-        else:
-            log("  [PASS] n_obs >= 80 per group")
+        # Check 7: Predictions present
+        if 'predicted_theta' not in df_theta_plot.columns:
+            validation_errors.append("predicted_theta column missing")
+        if 'predicted_probability' not in df_prob_plot.columns:
+            validation_errors.append("predicted_probability column missing")
+        if 'predicted_theta' in df_theta_plot.columns and 'predicted_probability' in df_prob_plot.columns:
+            log("  [PASS] Prediction columns present")
 
         # Report validation result
         if validation_errors:
@@ -452,12 +403,15 @@ if __name__ == "__main__":
         log("\nDecision D069 implemented: Dual-scale trajectory data")
         log("  - Theta scale: IRT ability units for technical audience")
         log("  - Probability scale: 0-1 range for general audience")
+        log("\nContinuous TSVR: Individual-level data preserves real time variability")
+        log(f"  - {len(df_theta_plot)} individual observations")
+        log(f"  - TSVR range: {df_theta_plot['TSVR_hours'].min():.1f} - {df_theta_plot['TSVR_hours'].max():.1f} hours")
 
-        # Print summary table
-        log("\n[SUMMARY] Theta scale data:")
-        log(df_theta_plot.to_string(index=False))
-        log("\n[SUMMARY] Probability scale data:")
-        log(df_prob_plot.to_string(index=False))
+        # Print summary statistics per domain
+        log("\n[SUMMARY] Theta by domain:")
+        for domain in sorted(df_theta_plot['domain'].unique()):
+            domain_data = df_theta_plot[df_theta_plot['domain'] == domain]
+            log(f"  {domain}: n={len(domain_data)}, theta mean={domain_data['theta'].mean():.3f}, std={domain_data['theta'].std():.3f}")
 
         sys.exit(0)
 

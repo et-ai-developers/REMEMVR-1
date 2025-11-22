@@ -283,10 +283,135 @@ Re-ran agent on already-completed RQ -> Correctly returned STEP ERROR with guida
 
 ---
 
+---
+
+## Session (2025-11-23 05:00)
+
+**Task:** Trajectory Plot Enhancement - Continuous TSVR + Publication Style
+
+**Objective:** User noticed step07 plot data only had 4 time points (aggregated by test session). Requested continuous TSVR data and publication-style plots matching legacy `.archive/v1/plots.py`.
+
+**Key Accomplishments:**
+
+**1. Step07 Redesign: Aggregated -> Individual-Level Data**
+
+**User Question:** "Why does step07_trajectory_theta_data.csv only have 4 time-points for each value? We have continuous TSVR data."
+
+**Root Cause:** Original step07 aggregated theta scores by domain × test session, collapsing 400 observations per domain into 4 mean points.
+
+**Solution:** Rewrote step07 to output individual-level data:
+- **Before:** 12 rows (3 domains × 4 test sessions, aggregated means with CI)
+- **After:** 1,200 rows (100 participants × 4 tests × 3 domains, individual observations)
+
+**Column Changes:**
+- Before: `[time, test, domain, mean_theta, CI_lower, CI_upper, predicted_theta, n_obs]`
+- After: `[TSVR_hours, domain, theta, predicted_theta, UID]`
+
+**Files Modified:**
+- `results/ch5/rq1/code/step07_prepare_trajectory_plot_data.py` - Complete rewrite of aggregation logic
+- Validation criteria updated (row count ~1200 vs 12, TSVR range 0-300 hours)
+
+**2. Plots.py Rewrite: Publication Style (Matching Legacy)**
+
+**User Reference:** Provided `.archive/v1/plots.py` and example image showing:
+- Faded scatter points (individual observations)
+- Dashed fitted curves
+- Shaded 95% CI bands from LMM covariance matrix
+
+**Implementation (3 iterations):**
+
+**Iteration 1:** Used `plot_trajectory()` from tools/plotting.py - No scatter, just error bars
+**Iteration 2:** Custom bootstrap CI - Worked but not matching legacy style
+**Iteration 3:** Proper LMM-based CI using `patsy.dmatrix` (matching legacy code)
+
+**Final plots.py Features:**
+- Re-fits LMM model in plots.py to get covariance matrix
+- Uses `patsy.dmatrix()` to create design matrix for CI calculation
+- Proper delta method: `pred_var = np.sum((X @ fe_cov) * X, axis=1)`
+- 95% CI = mean ± 1.96 × SE
+- Probability scale converts theta CI through logistic function
+
+**Style Constants (matching legacy):**
+```python
+RESIDUAL_SCATTER_POINT_ALPHA = 0.15
+MEAN_CI_ALPHA = 0.2
+IRT_LINE_STYLE = 'dashed'
+```
+
+**Color Scheme Updated:**
+- What: Blue (#3498DB)
+- Where: Green (#2ECC71)
+- When: Orange (#E67E22)
+
+**3. Files Modified This Session**
+
+**Analysis Pipeline:**
+- `results/ch5/rq1/code/step07_prepare_trajectory_plot_data.py` - Rewritten for individual-level output
+- `results/ch5/rq1/plots/plots.py` - Rewritten with LMM-based CI (matching legacy)
+
+**Generated Data:**
+- `results/ch5/rq1/plots/step07_trajectory_theta_data.csv` - 1,200 rows (was 12)
+- `results/ch5/rq1/plots/step07_trajectory_probability_data.csv` - 1,200 rows (was 12)
+
+**Generated Plots:**
+- `results/ch5/rq1/plots/trajectory_theta.png` - Publication style with CI bands
+- `results/ch5/rq1/plots/trajectory_probability.png` - Publication style with CI bands
+
+**4. Technical Details**
+
+**LMM CI Calculation (from legacy):**
+```python
+# Create design matrix
+formula_rhs = lmm_results.model.formula.split('~')[1].strip()
+design_matrix = patsy.dmatrix(formula_rhs, pred_grid, return_type='dataframe')
+
+# Calculate CI from fixed effects covariance
+fe_cov = lmm_results.cov_params().loc[lmm_results.fe_params.index, lmm_results.fe_params.index]
+design_matrix = design_matrix[fe_cov.columns]
+
+pred_var = np.sum((design_matrix @ fe_cov) * design_matrix, axis=1)
+pred_se = np.sqrt(pred_var)
+
+pred_grid['theta_ci_lower'] = pred_grid['mean_theta'] - 1.96 * pred_se
+pred_grid['theta_ci_upper'] = pred_grid['mean_theta'] + 1.96 * pred_se
+```
+
+**TSVR Data Range:** 1.0 - 246.2 hours (showing real variability in test timing)
+
+**5. Validation Results**
+
+**step07 Output:**
+- [PASS] Both output files exist
+- [PASS] Individual-level data: 1200 rows
+- [PASS] All 3 domains present
+- [PASS] TSVR range valid: 1.0 - 246.2 hours
+- [PASS] No NaN values in critical columns
+- [PASS] Probability values in [0, 1] range
+- [PASS] Prediction columns present
+
+**plots.py Output:**
+- Model fitted: AIC = 3187.96
+- Both plots generated with 300 DPI publication quality
+
+---
+
+**End of Session (2025-11-23 05:00)**
+
+**Session Duration:** ~45 minutes
+**Token Usage:** ~130k tokens
+**Changes Made:** step07 + plots.py complete rewrite
+**Data Format:** Aggregated (12 rows) -> Individual (1,200 rows)
+**Plot Style:** Publication-ready with LMM-based CI bands (matching legacy)
+**Key Insight:** User's legacy code uses patsy + LMM covariance for proper CI calculation
+
+**Status:** Trajectory plots now show continuous TSVR with individual observations and proper CI bands. Ready for /save + /clear.
+
+---
+
 ## Active Topics (For context-manager)
 
-- v4x_phase28_complete (rq_results fully tested, summary.md created)
-- rq51_fully_complete (all 13 agents executed on ch5/rq1)
-- when_domain_anomaly (floor effect 6-9%, 77% item attrition - requires investigation)
-- summary_md_quality (436 lines, 5 sections, 2 anomalies flagged)
-- prior_agent_count_fixed (10->9 in rq_results.md and results.md template)
+- continuous_tsvr_plots (step07 redesigned for individual-level data, 12->1200 rows)
+- publication_style_plots (plots.py rewritten with LMM-based CI matching legacy)
+- legacy_code_reference (.archive/v1/plots.py - patsy + covariance matrix approach)
+- plot_data_format_change (aggregated means -> individual observations with UID)
+- lmm_ci_calculation (design matrix @ covariance matrix for proper standard errors)
