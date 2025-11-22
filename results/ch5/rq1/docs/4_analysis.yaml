@@ -1,0 +1,764 @@
+# =============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# =============================================================================
+# Generated: 2025-11-22
+# RQ: ch5/rq1
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# Pipeline: IRT (2-pass GRM purification) -> LMM (5 candidate trajectory models)
+# Decisions: D039 (2-pass purification), D068 (dual p-values), D069 (dual-scale), D070 (TSVR time)
+# =============================================================================
+
+metadata:
+  rq_id: "ch5/rq1"
+  total_steps: 8
+  analysis_type: "IRT 2-pass -> LMM trajectory (Domain x Time interaction)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-22"
+  estimated_runtime: "2-3 hours (IRT calibration ~60min per pass)"
+
+# =============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# =============================================================================
+
+steps:
+  # ---------------------------------------------------------------------------
+  # STEP 0: Extract VR Data for IRT Analysis
+  # ---------------------------------------------------------------------------
+  - name: "step00_extract_vr_data"
+    step_number: "00"
+    description: "Extract VR item responses, create IRT input, TSVR mapping, and Q-matrix"
+
+    analysis_call:
+      module: "tools.data_extraction"
+      function: "extract_vr_data_for_irt"
+      signature: "extract_vr_data_for_irt(source_path: str, domain_patterns: Dict[str, List[str]], output_dir: str) -> Tuple[DataFrame, DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "TEST", "TSVR"]
+          variable_name: "df_source"
+          description: "Source data from master.xlsx derivative"
+
+      output_files:
+        - path: "data/step00_irt_input.csv"
+          variable_name: "df_irt_input"
+          description: "Wide-format IRT input (composite_ID x item columns, values 0/1/NaN)"
+        - path: "data/step00_tsvr_mapping.csv"
+          variable_name: "df_tsvr"
+          description: "TSVR time mapping (composite_ID, UID, test, TSVR_hours)"
+        - path: "data/step00_q_matrix.csv"
+          variable_name: "df_qmatrix"
+          description: "Q-matrix for multidimensional IRT (item x factor loadings)"
+
+      parameters:
+        source_path: "data/cache/dfData.csv"
+        domain_patterns:
+          what: ["*-N-*"]
+          where: ["*-L-*", "*-U-*", "*-D-*"]
+          when: ["*-O-*"]
+        output_dir: "data/"
+        dichotomize_threshold: 1.0
+        composite_id_format: "{UID}_{TEST}"
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame, DataFrame]"
+        unpacking: "df_irt_input, df_tsvr, df_qmatrix"
+
+      description: "Extract VR items from dfData.csv, dichotomize (>=1 -> 1, <1 -> 0), create Q-matrix with 3 factors"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_extraction_outputs"
+      signature: "validate_extraction_outputs(irt_input: DataFrame, tsvr_mapping: DataFrame, q_matrix: DataFrame, expected_participants: int, min_items_per_domain: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          variable_name: "df_irt_input"
+          source: "analysis call output"
+        - path: "data/step00_tsvr_mapping.csv"
+          variable_name: "df_tsvr"
+          source: "analysis call output"
+        - path: "data/step00_q_matrix.csv"
+          variable_name: "df_qmatrix"
+          source: "analysis call output"
+
+      parameters:
+        irt_input: "df_irt_input"
+        tsvr_mapping: "df_tsvr"
+        q_matrix: "df_qmatrix"
+        expected_participants: 100
+        min_items_per_domain: 10
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "~400 rows in IRT input (100 participants x 4 tests)"
+        - "Item values in {0, 1, NaN} only (binary after dichotomization)"
+        - "TSVR_hours in [0, 200] (reasonable hours range)"
+        - "Q-matrix: each item loads on exactly 1 domain (row sum = 1)"
+        - "At least 10 items per domain"
+        - "test values in {0, 1, 3, 6}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_vr_data.log"
+
+      description: "Validate extraction completeness, item assignment, value ranges"
+
+    log_file: "logs/step00_extract_vr_data.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 1: IRT Calibration Pass 1 (All Items)
+  # ---------------------------------------------------------------------------
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
+    description: "Calibrate 3-dimensional GRM on ALL items (baseline for purification)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID"]
+          variable_name: "df_irt_input"
+          description: "Wide-format IRT input from Step 0"
+        - path: "data/step00_q_matrix.csv"
+          required_columns: ["item_name", "what", "where", "when"]
+          variable_name: "df_qmatrix"
+          description: "Q-matrix specifying factor loadings"
+
+      output_files:
+        - path: "logs/step01_pass1_item_params.csv"
+          variable_name: "item_params_pass1"
+          description: "Pass 1 item parameters (a, b) - saved to logs/ (diagnostic only)"
+        - path: "logs/step01_pass1_theta.csv"
+          variable_name: "theta_pass1"
+          description: "Pass 1 theta estimates (diagnostic only)"
+        - path: "logs/step01_pass1_convergence.txt"
+          variable_name: "convergence_log"
+          description: "Convergence diagnostics (loss history, final status)"
+
+      parameters:
+        df_long: "df_irt_input"
+        groups:
+          what: ["items from Q-matrix where what=1"]
+          where: ["items from Q-matrix where where=1"]
+          when: ["items from Q-matrix where when=1"]
+        config:
+          n_cats: 2
+          device: "cpu"
+          batch_size: 64
+          iw_samples: 5
+          mc_samples: 1
+          correlated_factors: true
+          seed: 42
+          invert_scale: true
+          factor_names: ["what", "where", "when"]
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_pass1, item_params_pass1"
+
+      description: "Calibrate 3-factor GRM via IWAVE variational inference (Decision D039 Pass 1)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "logs/step01_pass1_item_params.csv"
+          variable_name: "item_params_pass1"
+          source: "analysis call output"
+        - path: "logs/step01_pass1_convergence.txt"
+          variable_name: "convergence_log"
+          source: "analysis call output"
+
+      parameters:
+        results:
+          item_params: "item_params_pass1"
+          convergence_log: "convergence_log"
+          a_range: [0.01, 10.0]
+          b_range: [-6.0, 6.0]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (loss stabilized)"
+        - "a (discrimination) in [0.01, 10.0]"
+        - "b (difficulty) in [-6.0, 6.0]"
+        - "No NaN in item parameters"
+        - "All composite_IDs present in theta output"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_irt_calibration_pass1.log"
+
+      description: "Validate Pass 1 convergence and parameter bounds"
+
+    log_file: "logs/step01_irt_calibration_pass1.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 2: Purify Items (Decision D039)
+  # ---------------------------------------------------------------------------
+  - name: "step02_purify_items"
+    step_number: "02"
+    description: "Apply Decision D039 thresholds: |b| <= 3.0, a >= 0.4"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "logs/step01_pass1_item_params.csv"
+          required_columns: ["item", "domain", "Discrimination", "Difficulty_1"]
+          variable_name: "item_params_pass1"
+          description: "Pass 1 item parameters from Step 1"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          variable_name: "retained_items"
+          description: "Items meeting quality thresholds"
+        - path: "logs/step02_purification_report.txt"
+          variable_name: "removed_items"
+          description: "List of excluded items with reasons"
+
+      parameters:
+        df_items: "item_params_pass1"
+        a_threshold: 0.4
+        b_threshold: 3.0
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "retained_items, removed_items"
+
+      description: "Filter items by Decision D039 thresholds (2-pass purification)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_parameters"
+      signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_purified_items.csv"
+          variable_name: "retained_items"
+          source: "analysis call output"
+
+      parameters:
+        df_items: "retained_items"
+        a_min: 0.4
+        b_max: 3.0
+        a_col: "Discrimination"
+        b_col: "Difficulty_1"
+        min_items_per_domain: 10
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All retained items have a >= 0.4"
+        - "All retained items have |b| <= 3.0"
+        - "At least 10 items retained per domain (CRITICAL)"
+        - "Retention rate between 20% and 95%"
+        - "No duplicate item names"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_purify_items.log"
+
+      description: "Validate purification thresholds met, sufficient items per domain"
+
+    log_file: "logs/step02_purify_items.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 3: IRT Calibration Pass 2 (Purified Items)
+  # ---------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Calibrate 3-dimensional GRM on PURIFIED items (final estimates)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID"]
+          variable_name: "df_irt_input"
+          description: "Original IRT input (will be filtered to purified items)"
+        - path: "data/step02_purified_items.csv"
+          required_columns: ["item", "domain"]
+          variable_name: "purified_items"
+          description: "List of items retained after purification"
+
+      output_files:
+        - path: "data/step03_item_parameters.csv"
+          variable_name: "item_params_final"
+          description: "FINAL item parameters from purified calibration"
+        - path: "data/step03_theta_scores.csv"
+          variable_name: "theta_final"
+          description: "FINAL theta scores for LMM analysis"
+        - path: "logs/step03_pass2_convergence.txt"
+          variable_name: "convergence_log"
+          description: "Pass 2 convergence diagnostics"
+
+      parameters:
+        df_long: "df_irt_input (filtered to purified items only)"
+        groups:
+          what: ["purified items where domain='what'"]
+          where: ["purified items where domain='where'"]
+          when: ["purified items where domain='when'"]
+        config:
+          n_cats: 2
+          device: "cpu"
+          batch_size: 64
+          iw_samples: 5
+          mc_samples: 1
+          correlated_factors: true
+          seed: 42
+          invert_scale: true
+          factor_names: ["what", "where", "when"]
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_final, item_params_final"
+
+      description: "Calibrate 3-factor GRM on purified items (Decision D039 Pass 2)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_item_parameters.csv"
+          variable_name: "item_params_final"
+          source: "analysis call output"
+        - path: "data/step03_theta_scores.csv"
+          variable_name: "theta_final"
+          source: "analysis call output"
+        - path: "logs/step03_pass2_convergence.txt"
+          variable_name: "convergence_log"
+          source: "analysis call output"
+
+      parameters:
+        results:
+          item_params: "item_params_final"
+          theta_scores: "theta_final"
+          convergence_log: "convergence_log"
+          a_range: [0.4, 10.0]
+          b_range: [-3.0, 3.0]
+          theta_range: [-3.0, 3.0]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged"
+        - "a (discrimination) in [0.4, 10.0] (minimum from purification)"
+        - "b (difficulty) in [-3.0, 3.0] (bounded by purification)"
+        - "theta in [-3.0, 3.0] (typical ability range)"
+        - "No NaN in parameters or theta scores"
+        - "All composite_IDs present in theta output"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_irt_calibration_pass2.log"
+
+      description: "Validate Pass 2 convergence, tighter parameter bounds after purification"
+
+    log_file: "logs/step03_irt_calibration_pass2.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 4: Merge Theta Scores with TSVR (Decision D070)
+  # ---------------------------------------------------------------------------
+  - name: "step04_merge_theta_tsvr"
+    step_number: "04"
+    description: "Merge theta scores with TSVR time variable, reshape to long format for LMM"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      # Note: This step is data preparation, not LMM fitting
+      # Using a custom merge function or pandas operations
+      module: "tools.data_preparation"
+      function: "merge_theta_with_tsvr"
+      signature: "merge_theta_with_tsvr(theta_scores: DataFrame, tsvr_mapping: DataFrame, factor_names: List[str]) -> DataFrame"
+
+      input_files:
+        - path: "data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "what", "where", "when"]
+          variable_name: "theta_final"
+          description: "Final theta scores from Pass 2"
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+          variable_name: "df_tsvr"
+          description: "TSVR time mapping from Step 0"
+
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "df_lmm_input"
+          description: "Long-format LMM input (one row per observation = composite_ID x domain)"
+
+      parameters:
+        theta_scores: "theta_final"
+        tsvr_mapping: "df_tsvr"
+        factor_names: ["what", "where", "when"]
+        output_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se"]
+
+      returns:
+        type: "DataFrame"
+        variable_name: "df_lmm_input"
+
+      description: "Merge theta with TSVR, melt wide to long format (Decision D070)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_input"
+      signature: "validate_lmm_input(df: DataFrame, required_columns: List[str], expected_rows: int, domain_values: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "df_lmm_input"
+          source: "analysis call output"
+
+      parameters:
+        df: "df_lmm_input"
+        required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se"]
+        expected_rows: 1200
+        domain_values: ["what", "where", "when"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "~1200 rows (400 composite_IDs x 3 domains)"
+        - "All 7 required columns present"
+        - "TSVR_hours in [0, 200]"
+        - "theta in [-3.0, 3.0]"
+        - "domain values in {what, where, when}"
+        - "Each composite_ID appears exactly 3 times"
+        - "No NaN in TSVR_hours, theta, or se"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_merge_theta_tsvr.log"
+
+      description: "Validate merge completeness, long format structure"
+
+    log_file: "logs/step04_merge_theta_tsvr.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 5: Fit LMM Trajectory Models
+  # ---------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit 5 candidate LMM models, select best by AIC, save best model"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compare_lmm_models_by_aic"
+      signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["UID", "TSVR_hours", "domain", "theta"]
+          variable_name: "df_lmm_input"
+          description: "Long-format LMM input from Step 4"
+
+      output_files:
+        - path: "results/step05_lmm_model_comparison.csv"
+          variable_name: "model_comparison"
+          description: "AIC comparison across 5 candidate models"
+        - path: "results/step05_lmm_model_summary.txt"
+          variable_name: "best_model_summary"
+          description: "Full summary of best model (fixed + random effects)"
+        - path: "data/step05_lmm_fitted_model.pkl"
+          variable_name: "best_model"
+          description: "Pickled best model object for downstream use"
+
+      parameters:
+        data: "df_lmm_input"
+        n_factors: 3
+        reference_group: "what"
+        groups: "UID"
+        save_dir: "results/"
+        candidate_models:
+          Linear: "theta ~ TSVR_hours * C(domain, Treatment(reference='what'))"
+          Quadratic: "theta ~ (TSVR_hours + I(TSVR_hours**2)) * C(domain, Treatment(reference='what'))"
+          Log: "theta ~ np.log(TSVR_hours + 1) * C(domain, Treatment(reference='what'))"
+          Lin_Log: "theta ~ (TSVR_hours + np.log(TSVR_hours + 1)) * C(domain, Treatment(reference='what'))"
+          Quad_Log: "theta ~ (TSVR_hours + I(TSVR_hours**2) + np.log(TSVR_hours + 1)) * C(domain, Treatment(reference='what'))"
+        re_formula: "~TSVR_hours"
+        reml_for_comparison: false
+        reml_for_final: true
+
+      returns:
+        type: "Dict"
+        variable_name: "comparison_results"
+        keys: ["models", "aic_comparison", "best_model", "best_result"]
+
+      description: "Fit 5 trajectory models (Linear, Quad, Log, Lin+Log, Quad+Log), select best by AIC"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step05_lmm_model_comparison.csv"
+          variable_name: "model_comparison"
+          source: "analysis call output"
+        - path: "data/step05_lmm_fitted_model.pkl"
+          variable_name: "best_model"
+          source: "analysis call output"
+
+      parameters:
+        lmm_result: "best_model"
+        model_comparison: "model_comparison"
+        min_converged_models: 3
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Best model converged successfully"
+        - "At least 3 of 5 models converged"
+        - "AIC values are finite (no NaN/Inf)"
+        - "delta_AIC >= 0 for all models (best = 0)"
+        - "Akaike weights sum to 1.0"
+        - "No singular fit (random effects variance > 0)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_fit_lmm.log"
+
+      description: "Validate LMM convergence, model comparison validity"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 6: Post-Hoc Contrasts and Effect Sizes (Decision D068)
+  # ---------------------------------------------------------------------------
+  - name: "step06_compute_post_hoc_contrasts"
+    step_number: "06"
+    description: "Compute pairwise domain contrasts with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+
+      input_files:
+        - path: "data/step05_lmm_fitted_model.pkl"
+          required_columns: []
+          variable_name: "best_model"
+          description: "Best LMM model from Step 5"
+
+      output_files:
+        - path: "results/step06_post_hoc_contrasts.csv"
+          variable_name: "contrasts"
+          description: "Pairwise contrasts with uncorrected AND Bonferroni p-values"
+        - path: "results/step06_effect_sizes.csv"
+          variable_name: "effect_sizes"
+          description: "Cohen's d effect sizes for domain differences"
+
+      parameters:
+        lmm_result: "best_model"
+        comparisons: ["where-what", "when-what", "when-where"]
+        family_alpha: 0.05
+        n_comparisons: 3
+        bonferroni_alpha: 0.0167
+
+      returns:
+        type: "DataFrame"
+        variable_name: "contrasts"
+
+      description: "Post-hoc pairwise contrasts for Domain x Time interaction slopes"
+
+    analysis_call_2:
+      module: "tools.analysis_lmm"
+      function: "compute_effect_sizes_cohens"
+      signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+
+      parameters:
+        lmm_result: "best_model"
+        include_interactions: true
+
+      returns:
+        type: "DataFrame"
+        variable_name: "effect_sizes"
+
+      description: "Cohen's f-squared effect sizes for fixed effects"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts"
+      signature: "validate_contrasts(contrasts: DataFrame, effect_sizes: DataFrame, expected_comparisons: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step06_post_hoc_contrasts.csv"
+          variable_name: "contrasts"
+          source: "analysis call output"
+        - path: "results/step06_effect_sizes.csv"
+          variable_name: "effect_sizes"
+          source: "analysis call output"
+
+      parameters:
+        contrasts: "contrasts"
+        effect_sizes: "effect_sizes"
+        expected_comparisons: 3
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 3 pairwise contrasts present"
+        - "p_uncorrected in [0, 1]"
+        - "p_bonferroni in [0, 1] and >= p_uncorrected"
+        - "Bonferroni alpha = 0.05/3 = 0.0167"
+        - "Both uncorrected AND corrected p-values present (Decision D068)"
+        - "Effect size CI contains point estimate"
+        - "Cohen's d in [-3, 3] (reasonable range)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compute_post_hoc_contrasts.log"
+
+      description: "Validate dual p-values (D068), effect sizes"
+
+    log_file: "logs/step06_compute_post_hoc_contrasts.log"
+
+  # ---------------------------------------------------------------------------
+  # STEP 7: Prepare Trajectory Plot Data (Decision D069 Dual-Scale)
+  # ---------------------------------------------------------------------------
+  - name: "step07_prepare_trajectory_plot_data"
+    step_number: "07"
+    description: "Create plot source CSVs for dual-scale trajectory plots (Decision D069)"
+
+    analysis_call:
+      module: "tools.plotting"
+      function: "prepare_trajectory_plot_data"
+      signature: "prepare_trajectory_plot_data(lmm_input: DataFrame, best_model: MixedLMResults, item_params: DataFrame, factor_names: List[str]) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["test", "TSVR_hours", "domain", "theta"]
+          variable_name: "df_lmm_input"
+          description: "Long-format data for aggregation"
+        - path: "data/step05_lmm_fitted_model.pkl"
+          required_columns: []
+          variable_name: "best_model"
+          description: "Fitted LMM for predictions"
+        - path: "data/step03_item_parameters.csv"
+          required_columns: ["domain", "Discrimination", "Difficulty_1"]
+          variable_name: "item_params"
+          description: "Item parameters for theta-to-probability conversion"
+
+      output_files:
+        - path: "plots/step07_trajectory_theta_data.csv"
+          variable_name: "theta_plot_data"
+          description: "Plot-ready data for theta scale trajectory"
+        - path: "plots/step07_trajectory_probability_data.csv"
+          variable_name: "prob_plot_data"
+          description: "Plot-ready data for probability scale trajectory (D069)"
+
+      parameters:
+        lmm_input: "df_lmm_input"
+        best_model: "best_model"
+        item_params: "item_params"
+        factor_names: ["what", "where", "when"]
+        test_values: [0, 1, 3, 6]
+        ci_level: 0.95
+        output_columns_theta: ["time", "test", "domain", "mean_theta", "CI_lower", "CI_upper", "predicted_theta", "n_obs"]
+        output_columns_prob: ["time", "test", "domain", "mean_probability", "CI_lower", "CI_upper", "predicted_probability", "n_obs"]
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_plot_data, prob_plot_data"
+
+      description: "Aggregate observed means + model predictions, convert to probability scale"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data"
+      signature: "validate_plot_data(theta_data: DataFrame, prob_data: DataFrame, expected_rows: int, domains: List[str], tests: List[int]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "plots/step07_trajectory_theta_data.csv"
+          variable_name: "theta_plot_data"
+          source: "analysis call output"
+        - path: "plots/step07_trajectory_probability_data.csv"
+          variable_name: "prob_plot_data"
+          source: "analysis call output"
+
+      parameters:
+        theta_data: "theta_plot_data"
+        prob_data: "prob_plot_data"
+        expected_rows: 12
+        domains: ["what", "where", "when"]
+        tests: [0, 1, 3, 6]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 12 rows per file (3 domains x 4 tests)"
+        - "All 3 domains present (what, where, when)"
+        - "All 4 tests present (0, 1, 3, 6)"
+        - "theta values in [-3, 3]"
+        - "probability values in [0, 1]"
+        - "CI_upper > CI_lower for all rows"
+        - "n_obs >= 80 per group"
+        - "No NaN values"
+        - "Domain x test combinations unique"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step07_prepare_trajectory_plot_data.log"
+
+      description: "Validate dual-scale plot data structure (Decision D069)"
+
+    log_file: "logs/step07_prepare_trajectory_plot_data.log"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  total_steps: 8
+  analysis_pipeline: "IRT 2-pass (D039) -> TSVR merge (D070) -> LMM 5-candidate -> contrasts (D068) -> plot data (D069)"
+  primary_outputs:
+    - "data/step03_theta_scores.csv - Final IRT ability estimates"
+    - "data/step05_lmm_fitted_model.pkl - Best trajectory model"
+    - "results/step06_post_hoc_contrasts.csv - Domain contrasts with dual p-values"
+    - "results/step06_effect_sizes.csv - Cohen's d effect sizes"
+    - "plots/step07_trajectory_theta_data.csv - Plot source (theta scale)"
+    - "plots/step07_trajectory_probability_data.csv - Plot source (probability scale)"
+  validation_coverage: "100% (all 8 steps have validation calls)"
+  decisions_embedded:
+    - "D039: 2-pass IRT purification (|b|<=3.0, a>=0.4)"
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
+    - "D069: Dual-scale trajectory plots (theta + probability)"
+    - "D070: TSVR time variable (actual hours, not nominal days)"
+
+# =============================================================================
+# END OF ANALYSIS RECIPE
+# =============================================================================

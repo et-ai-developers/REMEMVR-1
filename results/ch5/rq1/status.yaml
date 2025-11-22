@@ -43,8 +43,24 @@ rq_tools:
     Plotting: convert_theta_to_probability. Decisions embedded: D039, D068, D069, D070.
 
 rq_analysis:
-  status: pending
+  status: success
+  completed: 2025-11-22
   context_dump: |
+    8 steps specified with validation (IRT 2-pass -> LMM 5-candidate -> contrasts -> plot data).
+    Created 4_analysis.yaml with complete tool signatures for g_code pre-generation validation.
+    Decisions embedded: D039 (purification), D068 (dual p-values), D069 (dual-scale), D070 (TSVR).
+    All 8 analysis steps have paired validation calls. Ready for g_code.
+
+# Analysis Steps (for g_code execution tracking)
+analysis_steps:
+  step00_extract_vr_data: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_merge_theta_tsvr: pending
+  step05_fit_lmm: pending
+  step06_compute_post_hoc_contrasts: pending
+  step07_prepare_trajectory_plot_data: pending
 
 rq_inspect:
   status: pending

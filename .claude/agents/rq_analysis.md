@@ -333,7 +333,8 @@ steps:
   # --------------------------------------------------------------------------
   # STEP 1: IRT Calibration Pass 1
   # --------------------------------------------------------------------------
-  step_1_irt_pass1:
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
     description: "Calibrate 3-dimensional GRM on all 102 items (baseline)"
 
     # Analysis tool specification
@@ -435,7 +436,8 @@ steps:
   # --------------------------------------------------------------------------
   # STEP 2: Item Purification (Decision D039)
   # --------------------------------------------------------------------------
-  step_2_filter_items_by_quality:
+  - name: "step02_purify_items"
+    step_number: "02"
     description: "Remove items with extreme difficulty (|b|>3.0) or low discrimination (a<0.4)"
 
     tool:
@@ -500,13 +502,11 @@ steps:
         message: "Purification retention rate outside expected range - review logs/excluded_items.txt"
 
   # [Additional steps follow same pattern...]
-  # - step_3_irt_pass2
-  # - step_4_reshape_data
-  # - step_5_fit_lmm
-  # - step_6_compute_contrasts_pairwise
-  # - step_7_effect_sizes
-  # - step_8_plot_theta_scale
-  # - step_9_plot_probability_scale
+  # - step03_irt_calibration_pass2
+  # - step04_merge_theta_tsvr
+  # - step05_fit_lmm
+  # - step06_compute_post_hoc_contrasts
+  # - step07_prepare_trajectory_plot_data
 
 # ============================================================================
 # END OF ANALYSIS RECIPE
@@ -549,15 +549,13 @@ agents:
 
 ```yaml
 analysis_steps:
-  step_1_irt_pass1: pending
-  step_2_filter_items_by_quality: pending
-  step_3_irt_pass2: pending
-  step_4_reshape_data: pending
-  step_5_fit_lmm: pending
-  step_6_compute_contrasts_pairwise: pending
-  step_7_effect_sizes: pending
-  step_8_plot_theta_scale: pending
-  step_9_plot_probability_scale: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_merge_theta_tsvr: pending
+  step05_fit_lmm: pending
+  step06_compute_post_hoc_contrasts: pending
+  step07_prepare_trajectory_plot_data: pending
 ```
 
 **Purpose:**
