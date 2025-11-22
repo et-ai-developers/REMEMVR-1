@@ -98,7 +98,9 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
 
 ### Step 1: Read Circuit Breaker Documentation
 
-**Read:** `docs/v4/best_practices/universal.md and docs/v4/best_practices/workflow.md`
+**Read:**
+- `docs/v4/best_practices/universal.md` (circuit breakers, platform rules)
+- `docs/v4/best_practices/workflow.md` (status.yaml handling, context dumps)
 
 **Purpose:** Load standard circuit breaker types, safety rules, error recovery workflow
 
@@ -118,7 +120,7 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
 **Extract:**
 - Agent statuses (which agents completed successfully)
 - Analysis steps section (which analysis steps completed)
-- Context dumps from 10 prior agents:
+- Context dumps from 9 prior RQ-specific agents:
   1. rq_builder (folder created)
   2. rq_concept (RQ description)
   3. rq_scholar (scholarly validation feedback)
@@ -128,6 +130,7 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
   7. rq_analysis (analysis recipe)
   8. rq_inspect (step-by-step validation results)
   9. rq_plots (plotting specifications)
+  Note: g_conflict, g_code, g_debug are general-purpose agents (no context_dumps)
 
 **These context dumps are GOLD** - terse summaries of agent wisdom. Use them heavily in synthesis.
 
@@ -137,8 +140,8 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
 
 **Check:** All prior agent steps = `success`, this step (`rq_results`) onwards = `pending`
 
-**Circuit Breaker:** If any prior step ≠ success OR this step ≠ pending:
-- Type: STEP_ERROR
+**Circuit Breaker:** If any prior step != success OR this step != pending:
+- Type: STEP ERROR
 - Message: "Workflow incomplete - cannot create summary until all prior steps successful"
 - Details: List which steps are not success
 - QUIT
@@ -149,9 +152,9 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
 
 ### Step 4: Read Results Template
 
-**Read:** `docs/v4/templates/results.md` (FULL FILE - 1,409 lines)
+**Read:** `docs/v4/templates/results.md` (FULL FILE)
 
-**Purpose:** Load comprehensive guidance for summary structure, examples, Decision D069 dual-scale interpretation
+**Purpose:** Load comprehensive guidance for summary structure, examples, dual-scale trajectory interpretation
 
 **Extract:**
 - 5 required sections (Statistical Findings, Plot Descriptions, Interpretation, Limitations, Next Steps)
@@ -160,7 +163,7 @@ Master provides: `chX/rqY` identifier (e.g., "ch5/rq1")
 - Multi-source synthesis instructions (6 inputs documented in template)
 - Plausibility vs validation distinction (template Section 1.3)
 
-**Note:** Template is 1,409 lines for a reason - comprehensive guidance ensures publication-ready quality. Read it all.
+**Note:** Template is comprehensive - read it all for publication-ready quality guidance.
 
 ---
 
@@ -686,110 +689,14 @@ Results appear scientifically plausible. Recommend final human expert review bef
 
 ---
 
-## Circuit Breakers
-
-**Use these 5 types from `best_practices files`:**
-
-### 1. EXPECTATIONS_ERROR
-**When:** Required information missing (template not found, status.yaml malformed, concept.md missing)
-
-**Example:**
-```
-Type: EXPECTATIONS_ERROR
-Message: "Cannot find docs/v4/templates/results.md template"
-Details: "Template required for summary structure. Verify template exists at expected path."
-Recommendation: "Master should verify docs/v4/templates/results.md exists before invoking rq_results"
-```
-
-**Action:** QUIT immediately
-
----
-
-### 2. STEP_ERROR
-**When:** Prior workflow steps incomplete or this step already completed
-
-**Example:**
-```
-Type: STEP_ERROR
-Message: "Workflow incomplete - rq_plots status = pending (not success)"
-Details: "Cannot create summary until all prior agents complete successfully. rq_plots must finish before rq_results."
-Recommendation: "Master should complete rq_plots step before invoking rq_results"
-```
-
-**Action:** QUIT immediately
-
----
-
-### 3. TOOL_ERROR
-**When:** File operations fail (cannot create summary.md, cannot edit status.yaml, PNG files missing)
-
-**Example:**
-```
-Type: TOOL_ERROR
-Message: "plots.py not executed successfully, missing: plots/trajectory_theta.png, plots/trajectory_probability.png"
-Details: "rq_plots agent completed but plots.py execution (workflow Step 16) failed. Expected 5 PNG files from plan.md, found 3."
-Recommendation: "Master should re-run bash 'poetry run python results/chX/rqY/plots/plots.py' and verify success before invoking rq_results"
-```
-
-**Action:** QUIT immediately
-
----
-
-### 4. CLARITY_ERROR
-**When:** Specifications ambiguous (plan.md unclear about expected outputs, concept.md hypothesis vague)
-
-**Example:**
-```
-Type: CLARITY_ERROR
-Message: "plan.md plot specifications unclear - cannot determine expected PNG files"
-Details: "plan.md Section 7 (Plotting) does not specify plot filenames or count. Cannot verify plots.py execution success without knowing expected outputs."
-Recommendation: "Master should enhance plan.md with explicit plot specifications (filenames, descriptions) and re-invoke rq_planner"
-```
-
-**Action:** QUIT immediately
-
----
-
-### 5. SCOPE_ERROR
-**When:** Request outside rq_results responsibility (asked to debug code, edit core files, re-run analysis)
-
-**Example:**
-```
-Type: SCOPE_ERROR
-Message: "Code bug detected in results/chX/rqY/code/step03_lmm.py - outside rq_results scope"
-Details: "LMM script uses wrong contrast coding (treatment instead of sum). Results implausible due to coding error, not scientific issue."
-Recommendation: "Master should investigate code bug with user approval. rq_results cannot fix code, only document concerns."
-```
-
-**Action:** QUIT immediately, let master claude handle
-
----
-
-## Error Recovery
-
-**If you encounter errors during execution:**
-
-1. **Determine circuit breaker type** (1-5 above)
-2. **Construct error message** with Type, Message, Details, Recommendation
-3. **Report to master** via error format
-4. **QUIT immediately** - Do NOT attempt workarounds
-
-**Master claude will:**
-- Verify error with user
-- Fix underlying issue (missing files, incomplete workflow, unclear specs)
-- Re-invoke rq_results with issue resolved
-
-**Never:**
-- Edit core files to fix bugs
-- Generate mock data to fill gaps
-- Skip validation steps to "make it work"
-- Proceed with incomplete information
-
-**When in doubt, QUIT and report.** Safety over speed.
-
----
-
 ## Key Reminders
+
+**Circuit Breakers:** See `docs/v4/best_practices/universal.md` for 5 circuit breaker types (EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE). Use appropriate type when encountering issues. QUIT immediately, report to master.
+
+**RQ-specific examples:**
+- STEP ERROR: "rq_plots status = pending" (prior workflow incomplete)
+- TOOL ERROR: "Missing PNG files" (plots.py not executed)
+- SCOPE ERROR: "Code bug detected" (outside rq_results scope, only flag concerns)
 
 1. **Healthy skepticism** - Results from automated pipeline, validate before acceptance
 2. **Flag, don't fail** - Document anomalies transparently, don't reject results

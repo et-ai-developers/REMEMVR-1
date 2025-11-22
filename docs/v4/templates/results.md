@@ -1247,7 +1247,7 @@ Below is a skeleton showing the full summary.md structure (sections only, not fu
 
 **rq_results agent reads:**
 1. `docs/v4/templates/results.md` ← This template (structure guidance)
-2. `status.yaml` (all 10 prior agents' context_dumps)
+2. `status.yaml` (all 9 prior RQ-specific agents' context_dumps)
 3. `results/chX/rqY/docs/1_concept.md` (original hypothesis, theory)
 4. `results/chX/rqY/docs/2_plan.md` (expected outputs, analysis steps)
 5. `results/chX/rqY/data/*.csv` (statistical outputs)
