@@ -14,7 +14,10 @@ class TestComputeEffectSizesCohens:
 
     @pytest.fixture
     def mock_lmm_result(self):
-        """Create mock LMM result object."""
+        """Create mock LMM result object.
+
+        Function requires: params, bse, nobs
+        """
         mock = MagicMock()
 
         mock.params = pd.Series({
@@ -54,9 +57,8 @@ class TestComputeEffectSizesCohens:
 
         result = compute_effect_sizes_cohens(mock_lmm_result)
 
-        columns = result.columns.tolist()
-        effect_cols = [c for c in columns if 'f2' in c.lower() or 'effect' in c.lower() or 'cohen' in c.lower()]
-        assert len(effect_cols) > 0
+        # Column should be f_squared
+        assert 'f_squared' in result.columns
 
     def test_has_interpretation_column(self, mock_lmm_result):
         """Test output has effect size interpretation."""
@@ -64,26 +66,17 @@ class TestComputeEffectSizesCohens:
 
         result = compute_effect_sizes_cohens(mock_lmm_result)
 
-        columns = result.columns.tolist()
-        # Should have interpretation (small/medium/large)
-        interp_cols = [c for c in columns if 'interp' in c.lower() or 'size' in c.lower() or 'magnitude' in c.lower()]
-        # Note: This might not be present in all implementations
+        # Should have interpretation column
+        assert 'interpretation' in result.columns
 
     def test_effect_sizes_non_negative(self, mock_lmm_result):
         """Test effect sizes are non-negative."""
         from tools.analysis_lmm import compute_effect_sizes_cohens
 
-        result = compute_effect_sizes_cohens(mock_lmm_result)
+        result = compute_effect_sizes_cohens(mock_lmm_result, include_interactions=True)
 
-        # Find effect size column
-        effect_col = None
-        for col in result.columns:
-            if 'f2' in col.lower() or 'effect' in col.lower():
-                effect_col = col
-                break
-
-        if effect_col:
-            assert all(result[effect_col] >= 0)
+        # All f_squared values should be >= 0
+        assert all(result['f_squared'] >= 0)
 
     def test_include_interactions_parameter(self, mock_lmm_result):
         """Test include_interactions parameter."""
@@ -99,8 +92,27 @@ class TestComputeEffectSizesCohens:
             include_interactions=False
         )
 
-        # With interactions should have more or equal rows
-        assert len(result_with) >= len(result_without)
+        # With interactions should have more rows (Days:Factor included)
+        assert len(result_with) > len(result_without)
+
+    def test_excludes_intercept(self, mock_lmm_result):
+        """Test Intercept is excluded from results."""
+        from tools.analysis_lmm import compute_effect_sizes_cohens
+
+        result = compute_effect_sizes_cohens(mock_lmm_result, include_interactions=True)
+
+        # Intercept should not be in effect column
+        assert 'Intercept' not in result['effect'].values
+
+    def test_interpretation_values(self, mock_lmm_result):
+        """Test interpretation values are valid."""
+        from tools.analysis_lmm import compute_effect_sizes_cohens
+
+        result = compute_effect_sizes_cohens(mock_lmm_result, include_interactions=True)
+
+        # All interpretations should be one of expected values
+        valid_interpretations = {'negligible', 'small', 'medium', 'large'}
+        assert all(i in valid_interpretations for i in result['interpretation'])
 
 
 if __name__ == '__main__':

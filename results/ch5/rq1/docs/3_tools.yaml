@@ -1,0 +1,568 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.1
+# Created by: rq_tools agent
+# Date: 2025-11-22
+# Architecture: Tool Catalog (each tool listed ONCE, deduplication)
+# Source: docs/v4/tools_inventory.md (validated)
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+
+  # ---------------------------------------------------------------------------
+  # IRT Analysis Tools (tools.analysis_irt)
+  # ---------------------------------------------------------------------------
+
+  prepare_irt_input_from_long:
+    module: "tools.analysis_irt"
+    function: "prepare_irt_input_from_long"
+    signature: "prepare_irt_input_from_long(df_long: DataFrame, groups: Dict[str, List[str]]) -> Tuple[Tensor, Tensor, Tensor, List, List]"
+    validation_tool: "validate_irt_convergence"
+    description: "Convert long-format DataFrame to IRT tensors for IWAVE model fitting"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "df_long"
+        type: "DataFrame"
+        description: "Long format with composite_ID, item, response columns"
+      - name: "groups"
+        type: "Dict[str, List[str]]"
+        description: "Factor -> item mapping (e.g., {'what': ['item1', 'item2'], ...})"
+    outputs:
+      - name: "response_matrix"
+        type: "Tensor"
+        description: "Response matrix for IRT fitting"
+      - name: "missing_mask"
+        type: "Tensor"
+        description: "Mask indicating missing responses"
+      - name: "Q_matrix"
+        type: "Tensor"
+        description: "Factor loading matrix"
+      - name: "composite_ids"
+        type: "List"
+        description: "List of participant IDs"
+      - name: "item_list"
+        type: "List"
+        description: "List of item names"
+
+  configure_irt_model:
+    module: "tools.analysis_irt"
+    function: "configure_irt_model"
+    signature: "configure_irt_model(n_items: int, n_factors: int, n_cats: int, Q_matrix: Tensor, correlated_factors: bool, device: str, seed: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+    description: "Build IWAVE Graded Response Model with specified architecture"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "n_items"
+        type: "int"
+        description: "Number of items in the test"
+      - name: "n_factors"
+        type: "int"
+        description: "Number of latent factors (3 for what/where/when)"
+      - name: "n_cats"
+        type: "int"
+        description: "Number of response categories (2 for dichotomous)"
+      - name: "Q_matrix"
+        type: "Tensor"
+        description: "Factor loading matrix specifying item-factor relationships"
+      - name: "correlated_factors"
+        type: "bool"
+        description: "Whether factors are correlated (True for RQ 5.1)"
+      - name: "device"
+        type: "str"
+        description: "Computation device ('cpu' or 'cuda')"
+      - name: "seed"
+        type: "int"
+        description: "Random seed for reproducibility"
+    outputs:
+      - name: "model"
+        type: "IWAVE"
+        description: "Configured IWAVE model object"
+
+  fit_irt_grm:
+    module: "tools.analysis_irt"
+    function: "fit_irt_grm"
+    signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+    description: "Fit IRT model via variational inference (IWAVE algorithm)"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "model"
+        type: "IWAVE"
+        description: "Configured IWAVE model"
+      - name: "response_matrix"
+        type: "Tensor"
+        description: "Response data tensor"
+      - name: "missing_mask"
+        type: "Tensor"
+        description: "Missing data mask"
+      - name: "batch_size"
+        type: "int"
+        description: "Batch size for training"
+      - name: "iw_samples"
+        type: "int"
+        description: "Number of importance-weighted samples"
+      - name: "mc_samples"
+        type: "int"
+        description: "Number of Monte Carlo samples"
+    outputs:
+      - name: "model"
+        type: "IWAVE"
+        description: "Fitted IWAVE model"
+
+  extract_theta_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_theta_from_irt"
+    signature: "extract_theta_from_irt(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, composite_ids: List, factor_names: List, scoring_batch_size: int, mc_samples: int, iw_samples: int, invert_scale: bool) -> DataFrame"
+    validation_tool: "validate_irt_parameters"
+    description: "Extract participant ability estimates (theta scores) from fitted model"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "model"
+        type: "IWAVE"
+        description: "Fitted IWAVE model"
+      - name: "response_matrix"
+        type: "Tensor"
+        description: "Response data tensor"
+      - name: "missing_mask"
+        type: "Tensor"
+        description: "Missing data mask"
+      - name: "composite_ids"
+        type: "List"
+        description: "List of participant IDs"
+      - name: "factor_names"
+        type: "List"
+        description: "Names of factors (e.g., ['what', 'where', 'when'])"
+      - name: "scoring_batch_size"
+        type: "int"
+        description: "Batch size for scoring"
+      - name: "mc_samples"
+        type: "int"
+        description: "Monte Carlo samples for scoring"
+      - name: "iw_samples"
+        type: "int"
+        description: "Importance-weighted samples for scoring"
+      - name: "invert_scale"
+        type: "bool"
+        description: "Whether to invert theta scale"
+    outputs:
+      - name: "theta_df"
+        type: "DataFrame"
+        description: "DataFrame with columns: composite_ID, domain_name, theta"
+
+  extract_parameters_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_parameters_from_irt"
+    signature: "extract_parameters_from_irt(model: IWAVE, item_list: List, factor_names: List, n_cats: int) -> DataFrame"
+    validation_tool: "validate_irt_parameters"
+    description: "Extract item parameters (discrimination a, difficulty b) from fitted model"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "model"
+        type: "IWAVE"
+        description: "Fitted IWAVE model"
+      - name: "item_list"
+        type: "List"
+        description: "List of item names"
+      - name: "factor_names"
+        type: "List"
+        description: "Names of factors"
+      - name: "n_cats"
+        type: "int"
+        description: "Number of response categories"
+    outputs:
+      - name: "params_df"
+        type: "DataFrame"
+        description: "DataFrame with columns: item, domain, Discrimination, Difficulty_1...Difficulty_k"
+
+  calibrate_irt:
+    module: "tools.analysis_irt"
+    function: "calibrate_irt"
+    signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_convergence"
+    description: "Full IRT pipeline: prepare -> configure -> fit -> extract (convenience wrapper)"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "df_long"
+        type: "DataFrame"
+        description: "Long-format response data"
+      - name: "groups"
+        type: "Dict[str, List[str]]"
+        description: "Factor -> item mapping"
+      - name: "config"
+        type: "dict"
+        description: "IRT configuration (n_cats, device, batch_size, etc.)"
+    outputs:
+      - name: "theta_scores"
+        type: "DataFrame"
+        description: "Participant ability estimates"
+      - name: "item_parameters"
+        type: "DataFrame"
+        description: "Item discrimination and difficulty parameters"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_parameters"
+    description: "D039: Purify items by quality thresholds for 2-pass IRT calibration"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "df_items"
+        type: "DataFrame"
+        description: "Item parameters from Pass 1 calibration"
+      - name: "a_threshold"
+        type: "float"
+        description: "Minimum discrimination threshold (default 0.4 per D039)"
+      - name: "b_threshold"
+        type: "float"
+        description: "Maximum |difficulty| threshold (default 3.0 per D039)"
+    outputs:
+      - name: "retained_items"
+        type: "DataFrame"
+        description: "Items meeting quality thresholds"
+      - name: "removed_items"
+        type: "DataFrame"
+        description: "Items failing quality thresholds"
+    decision_reference: "D039 - 2-pass IRT purification"
+
+  calibrate_grm:
+    module: "tools.analysis_irt"
+    function: "calibrate_grm"
+    signature: "calibrate_grm(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_convergence"
+    description: "Backwards-compatible wrapper for calibrate_irt()"
+    source_reference: "tools_inventory.md - tools.analysis_irt"
+    inputs:
+      - name: "df_long"
+        type: "DataFrame"
+        description: "Long-format response data"
+      - name: "groups"
+        type: "Dict[str, List[str]]"
+        description: "Factor -> item mapping"
+      - name: "config"
+        type: "dict"
+        description: "IRT configuration"
+    outputs:
+      - name: "theta_scores"
+        type: "DataFrame"
+        description: "Participant ability estimates"
+      - name: "item_parameters"
+        type: "DataFrame"
+        description: "Item discrimination and difficulty parameters"
+
+  # ---------------------------------------------------------------------------
+  # LMM Analysis Tools (tools.analysis_lmm)
+  # ---------------------------------------------------------------------------
+
+  configure_candidate_models:
+    module: "tools.analysis_lmm"
+    function: "configure_candidate_models"
+    signature: "configure_candidate_models(n_factors: int, reference_group: str) -> Dict[str, Dict[str, str]]"
+    validation_tool: "validate_lmm_convergence"
+    description: "Generate formulas for 5 candidate LMM models"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "n_factors"
+        type: "int"
+        description: "Number of factors (1=single domain, >1=multiple)"
+      - name: "reference_group"
+        type: "str"
+        description: "Reference group for treatment coding (e.g., 'what')"
+    outputs:
+      - name: "models"
+        type: "Dict[str, Dict[str, str]]"
+        description: "Model configurations with keys: Linear, Quadratic, Log, Lin+Log, Quad+Log"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+    description: "D070: Fit LMM using TSVR (actual hours since encoding) as time variable"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "theta_scores"
+        type: "DataFrame"
+        description: "Theta scores with composite_ID, domain_name, theta"
+      - name: "tsvr_data"
+        type: "DataFrame"
+        description: "TSVR mapping with UID, Test, TSVR_hours"
+      - name: "formula"
+        type: "str"
+        description: "LMM fixed effects formula"
+      - name: "groups"
+        type: "str"
+        description: "Grouping variable (default 'UID')"
+      - name: "re_formula"
+        type: "str"
+        description: "Random effects formula"
+      - name: "reml"
+        type: "bool"
+        description: "Use REML estimation (False for AIC comparison)"
+    outputs:
+      - name: "result"
+        type: "MixedLMResults"
+        description: "Fitted LMM results object"
+    decision_reference: "D070 - TSVR time variable"
+
+  compare_lmm_models_by_aic:
+    module: "tools.analysis_lmm"
+    function: "compare_lmm_models_by_aic"
+    signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+    validation_tool: "validate_lmm_convergence"
+    description: "Fit all 5 candidate models, compare by AIC, return best model"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "data"
+        type: "DataFrame"
+        description: "LMM input data (long format)"
+      - name: "n_factors"
+        type: "int"
+        description: "Number of factors"
+      - name: "reference_group"
+        type: "str"
+        description: "Reference group for contrasts"
+      - name: "groups"
+        type: "str"
+        description: "Grouping variable"
+      - name: "save_dir"
+        type: "Path"
+        description: "Directory to save model comparison results"
+    outputs:
+      - name: "comparison_results"
+        type: "Dict"
+        description: "Dictionary with: models, aic_comparison, best_model, best_result"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_lmm_convergence"
+    description: "Extract fixed effects table from fitted LMM"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "result"
+        type: "MixedLMResults"
+        description: "Fitted LMM results object"
+    outputs:
+      - name: "fixed_effects"
+        type: "DataFrame"
+        description: "DataFrame with: effect, coefficient, std_error, z_value, p_value"
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_lmm_convergence"
+    description: "Extract random effects variance components and ICC"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "result"
+        type: "MixedLMResults"
+        description: "Fitted LMM results object"
+    outputs:
+      - name: "random_effects"
+        type: "Dict"
+        description: "Dictionary with: variance_components, icc"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_lmm_convergence"
+    description: "D068: Post-hoc pairwise contrasts with dual p-value reporting"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted LMM results object"
+      - name: "comparisons"
+        type: "List[str]"
+        description: "List of comparisons (e.g., ['Where-What', 'When-What'])"
+      - name: "family_alpha"
+        type: "float"
+        description: "Family-wise alpha for Bonferroni correction (default 0.05)"
+    outputs:
+      - name: "contrasts"
+        type: "DataFrame"
+        description: "DataFrame with: comparison, beta, se, z, p_uncorrected, alpha_corrected, p_corrected, sig_uncorrected, sig_corrected"
+    decision_reference: "D068 - Dual p-value reporting"
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+    validation_tool: "validate_lmm_convergence"
+    description: "Compute Cohen's f-squared effect sizes for LMM fixed effects"
+    source_reference: "tools_inventory.md - tools.analysis_lmm"
+    inputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted LMM results object"
+      - name: "include_interactions"
+        type: "bool"
+        description: "Include interaction effects (default False)"
+    outputs:
+      - name: "effect_sizes"
+        type: "DataFrame"
+        description: "DataFrame with: effect, f_squared, interpretation"
+
+  # ---------------------------------------------------------------------------
+  # Plotting Tools (tools.plotting)
+  # ---------------------------------------------------------------------------
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
+    validation_tool: null  # No validation needed for pure transformation
+    description: "Transform theta scores to probability scale via IRT 2PL formula"
+    source_reference: "tools_inventory.md - tools.plotting"
+    inputs:
+      - name: "theta"
+        type: "ndarray"
+        description: "Array of theta scores"
+      - name: "discrimination"
+        type: "float"
+        description: "Discrimination parameter (default 1.0)"
+      - name: "difficulty"
+        type: "float"
+        description: "Difficulty parameter (default 0.0)"
+    outputs:
+      - name: "probabilities"
+        type: "ndarray"
+        description: "Array of probabilities in range [0, 1]"
+    decision_reference: "D069 - Dual-scale trajectory plots"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+
+  validate_irt_convergence:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+    description: "Check IRT model convergence based on loss stability and parameter bounds"
+    source_reference: "tools_inventory.md - tools.validation"
+    inputs:
+      - name: "results"
+        type: "Dict[str, Any]"
+        description: "Dictionary containing loss_history and model parameters"
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        description: "Dictionary with: converged (bool), checks (list), message (str)"
+    criteria:
+      - "Loss history shows decreasing trend (convergence)"
+      - "Final loss is finite (no NaN/Inf)"
+      - "Parameter bounds are within acceptable ranges"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+    description: "Validate item parameters against quality thresholds"
+    source_reference: "tools_inventory.md - tools.validation"
+    inputs:
+      - name: "df_items"
+        type: "DataFrame"
+        description: "Item parameters DataFrame"
+      - name: "a_min"
+        type: "float"
+        description: "Minimum discrimination threshold (default 0.4)"
+      - name: "b_max"
+        type: "float"
+        description: "Maximum |difficulty| threshold (default 3.0)"
+      - name: "a_col"
+        type: "str"
+        description: "Column name for discrimination"
+      - name: "b_col"
+        type: "str"
+        description: "Column name for difficulty"
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        description: "Dictionary with: valid (bool), n_items, n_valid, n_invalid, invalid_items (list), message (str)"
+    criteria:
+      - "All items have discrimination >= a_min (default 0.4)"
+      - "All items have |difficulty| <= b_max (default 3.0)"
+      - "No NaN values in parameters"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+    description: "Check LMM model convergence status and warnings"
+    source_reference: "tools_inventory.md - tools.validation"
+    inputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted LMM results object"
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        description: "Dictionary with: converged (bool), message (str), warnings (list)"
+    criteria:
+      - "Model optimizer converged successfully"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug"
+
+  validate_lmm_residuals:
+    module: "tools.validation"
+    function: "validate_lmm_residuals"
+    signature: "validate_lmm_residuals(residuals: ndarray, alpha: float = 0.05) -> Dict[str, Any]"
+    description: "Test LMM residuals for normality using Kolmogorov-Smirnov test"
+    source_reference: "tools_inventory.md - tools.validation"
+    inputs:
+      - name: "residuals"
+        type: "ndarray"
+        description: "Array of model residuals"
+      - name: "alpha"
+        type: "float"
+        description: "Significance level (default 0.05)"
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        description: "Dictionary with: normal (bool), ks_statistic (float), p_value (float), message (str)"
+    criteria:
+      - "Residuals approximately normally distributed (p > alpha)"
+      - "No extreme outliers (|z| > 4)"
+    behavior_on_failure:
+      action: "log warning"  # Residual non-normality is informational, not fatal
+      log_to: "logs/stepNN_*.log"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 16
+  validation_tools_count: 4
+  total_unique_tools: 20
+  mandatory_decisions_embedded:
+    - "D039: 2-pass IRT purification (filter_items_by_quality)"
+    - "D068: Dual p-value reporting (compute_contrasts_pairwise)"
+    - "D069: Dual-scale trajectory plots (convert_theta_to_probability)"
+    - "D070: TSVR time variable (fit_lmm_trajectory_tsvr)"
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All analysis tools paired with validation tools (except convert_theta_to_probability)"
+    - "Stdlib functions (pandas, numpy) not cataloged - exempt from verification"

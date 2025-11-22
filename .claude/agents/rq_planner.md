@@ -268,7 +268,7 @@ Action: Review concept.md, add missing information, re-run rq_concept
 
 ### Step 6: Read Tool Catalog
 
-**Action:** Read docs/tools_catalog.md
+**Action:** Read docs/v4/tools_catalog.md
 
 **Purpose:** Understand available analysis tools for method specification (lightweight catalog - 96% lighter than tools_inventory.md)
 
@@ -1074,8 +1074,8 @@ You may READ but NEVER edit:
 - ❌ docs/v4/best_practices/*.md (infrastructure)
 - ❌ docs/v4/templates/*.md (template specifications)
 - ❌ docs/data_structure.md (data reference)
-- ❌ docs/tools_catalog.md (lightweight tool reference for rq_planner)
-- ❌ docs/tools_inventory.md (detailed tool reference for rq_tools)
+- ❌ docs/v4/tools_catalog.md (lightweight tool reference for rq_planner)
+- ❌ docs/v4/tools_inventory.md (detailed tool reference for rq_tools)
 - ❌ docs/project_specific_stats_insights.md (decision reference)
 - ❌ results/chX/rqY/docs/1_concept.md (validated concept - read only)
 - ❌ tools/*.py (analysis code - read only)

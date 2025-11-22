@@ -17,15 +17,18 @@ class TestPrepareLmmInputFromTheta:
 
     @pytest.fixture
     def sample_theta_scores(self):
-        """Create sample theta scores DataFrame (wide format)."""
+        """Create sample theta scores DataFrame (wide format).
+
+        Function expects columns: UID, test, Theta_* (e.g., Theta_What, Theta_Where)
+        """
         data = []
         for uid in ['P001', 'P002', 'P003']:
-            for test in ['T1', 'T2', 'T3', 'T4']:
-                composite_id = f"{uid}_{test}"
+            for test in [1, 2, 3, 4]:  # Function expects integer test
                 data.append({
-                    'composite_ID': composite_id,
-                    'Factor1_Theta': np.random.randn(),
-                    'Factor2_Theta': np.random.randn()
+                    'UID': uid,
+                    'test': test,
+                    'Theta_What': np.random.randn(),
+                    'Theta_Where': np.random.randn()
                 })
         return pd.DataFrame(data)
 
@@ -39,7 +42,7 @@ class TestPrepareLmmInputFromTheta:
 
     def test_emits_deprecation_warning(self, sample_theta_scores):
         """Test function emits DeprecationWarning per D070."""
-        with pytest.warns(DeprecationWarning):
+        with pytest.warns(DeprecationWarning, match="TSVR"):
             prepare_lmm_input_from_theta(sample_theta_scores)
 
     def test_output_is_long_format(self, sample_theta_scores):
@@ -48,19 +51,21 @@ class TestPrepareLmmInputFromTheta:
             warnings.simplefilter("ignore", DeprecationWarning)
             result = prepare_lmm_input_from_theta(sample_theta_scores)
 
-        # Long format should have Factor and Theta columns
-        assert 'Factor' in result.columns or 'Domain' in result.columns
-        assert 'Theta' in result.columns
+        # Long format should have Factor and Ability columns
+        assert 'Factor' in result.columns
+        assert 'Ability' in result.columns
 
     def test_output_has_time_variable(self, sample_theta_scores):
-        """Test output has time variable (Days or similar)."""
+        """Test output has time variable (Days)."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
             result = prepare_lmm_input_from_theta(sample_theta_scores)
 
-        # Should have some time variable
-        time_cols = [c for c in result.columns if 'Day' in c or 'Time' in c or 'Test' in c]
-        assert len(time_cols) > 0 or 'test' in result.columns.str.lower().tolist()
+        # Should have Days variable
+        assert 'Days' in result.columns
+        # Should also have Days_sq and log_Days
+        assert 'Days_sq' in result.columns
+        assert 'log_Days' in result.columns
 
     def test_preserves_uid_info(self, sample_theta_scores):
         """Test UID information is preserved."""
@@ -68,8 +73,10 @@ class TestPrepareLmmInputFromTheta:
             warnings.simplefilter("ignore", DeprecationWarning)
             result = prepare_lmm_input_from_theta(sample_theta_scores)
 
-        # Should have UID or be derivable from composite_ID
-        assert 'UID' in result.columns or 'composite_ID' in result.columns
+        # Should have UID column
+        assert 'UID' in result.columns
+        # Check UIDs are preserved
+        assert set(result['UID'].unique()) == {'P001', 'P002', 'P003'}
 
     def test_factors_parameter(self, sample_theta_scores):
         """Test factors parameter filters output."""
@@ -77,12 +84,22 @@ class TestPrepareLmmInputFromTheta:
             warnings.simplefilter("ignore", DeprecationWarning)
             result = prepare_lmm_input_from_theta(
                 sample_theta_scores,
-                factors=['Factor1']
+                factors=['Theta_What']
             )
 
-        # Should only have Factor1 data
-        if 'Factor' in result.columns:
-            assert set(result['Factor'].unique()) == {'Factor1'}
+        # Should only have What factor (prefix removed)
+        assert set(result['Factor'].unique()) == {'What'}
+
+    def test_correct_day_mapping(self, sample_theta_scores):
+        """Test days are mapped correctly from test number."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            result = prepare_lmm_input_from_theta(sample_theta_scores)
+
+        # Day mapping: {1: 0, 2: 1, 3: 3, 4: 6}
+        day_values = set(result['Days'].unique())
+        expected_days = {0, 1, 3, 6}
+        assert day_values == expected_days
 
 
 if __name__ == '__main__':

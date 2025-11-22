@@ -1,934 +1,820 @@
 # Analysis Plan for RQ 5.1: Domain-Specific Forgetting Trajectories (What/Where/When)
 
 **Created by:** rq_planner agent
-**Date:** 2025-11-21
+**Date:** 2025-11-22
 **Status:** Ready for rq_tools (Step 11 workflow)
 
 ---
 
 ## Overview
 
-This RQ examines domain-specific forgetting trajectories across three episodic memory components (What, Where, When) using IRT-derived theta ability estimates across four test sessions (Days 0, 1, 3, 6). The analysis tests whether object identity (What) is more resilient than spatial (Where) or temporal (When) memory, consistent with dual-process theories predicting differential hippocampal dependence.
+This plan specifies the complete analysis workflow for RQ 5.1, which examines domain-specific forgetting trajectories for three episodic memory components (What, Where, When) using IRT-derived theta ability estimates across four test sessions. The analysis uses 2-pass IRT purification (Decision D039) to obtain reliable ability estimates, followed by Linear Mixed Models with TSVR time variable (Decision D070) to model forgetting trajectories with Domain x Time interactions.
 
-**Analysis Pipeline:** IRT (2-pass GRM purification) -> LMM (5 candidate trajectory models with Domain x Time interaction)
+**Pipeline:** IRT (2-pass GRM purification) -> LMM (5 candidate trajectory models with model selection)
 
-**Total Steps:** 8 analysis steps (Step 0: data extraction + Steps 1-7: analysis and visualization)
+**Total Steps:** 8 steps (Step 0: data extraction + Steps 1-7: analysis and plot preparation)
 
-**Estimated Runtime:** High (120+ minutes total - IRT calibration is computationally intensive)
+**Estimated Runtime:** High (IRT calibration ~60 min per pass, LMM fitting ~5-10 min per model)
+
+**Key Decisions Applied:**
+- Decision D039: 2-pass IRT purification (|b| <= 3.0, a >= 0.4 thresholds)
+- Decision D068: Dual p-value reporting (uncorrected + Bonferroni) for post-hoc contrasts
+- Decision D069: Dual-scale trajectory plots (theta + probability)
+- Decision D070: TSVR (actual hours) as LMM time variable, not nominal days
 
 ---
 
 ## Analysis Plan
 
-### Step 0: Extract VR Item Data and TSVR
+### Step 0: Extract VR Data for IRT Analysis
 
 **Dependencies:** None (first step)
-**Complexity:** Low (data extraction only, <5 minutes)
-
-**Purpose:** Load data from dfData.csv, extract TQ_* columns matching What/Where/When domain patterns, dichotomize accuracy scores, and prepare wide-format IRT input.
+**Complexity:** Low (data extraction and dichotomization only, ~2 min)
 
 **Input:**
 
-**File:** data/cache/dfData.csv (project-level cached data derived from master.xlsx)
+**File:** data/cache/dfData.csv (project-level data source derived from master.xlsx)
 
 **Required Columns:**
-- `UID` (string, participant identifier)
-- `TEST` (string, test session: T1, T2, T3, T4)
-- `TSVR` (float, Time Since VR in hours)
-- `TQ_*` (float, test question accuracy scores for VR items)
+- `UID` (string): Participant unique identifier
+- `TEST` (int): Test session (T1=0, T2=1, T3=3, T4=6)
+- `TSVR` (float): Time Since VR in hours (actual elapsed time)
+- `TQ_*` columns (float): All VR test question responses
 
-**Tag Patterns for Domain Extraction:**
-- **What domain:** TQ_* columns matching `*-N-*` pattern (object identity)
-- **Where domain:** TQ_* columns matching `*-L-*`, `*-U-*`, `*-D-*` patterns (spatial location - static, pick-up, put-down)
-- **When domain:** TQ_* columns matching `*-O-*` pattern (temporal order)
-
-**Expected Data Volume:**
-- Rows: ~400 (100 participants x 4 test sessions)
-- Columns: ~400+ (UID, TEST, TSVR + TQ_* columns for all VR items)
+**Domain Tag Patterns:**
+- What: `*-N-*` in TQ_* column names (object identity)
+- Where: `*-L-*`, `*-U-*`, `*-D-*` in TQ_* column names (spatial location)
+- When: `*-O-*` in TQ_* column names (temporal order)
 
 **Processing:**
 
-1. **Load dfData.csv:** Read CSV file preserving all columns
-2. **Select relevant columns:** Keep ['UID', 'TEST', 'TSVR', 'TQ_*']
-3. **Dichotomize accuracy:** Transform TQ_* values: `value < 1 -> 0`, `value >= 1 -> 1`
-4. **Filter by domain patterns:**
-   - What: Extract TQ_* where column name contains `-N-`
-   - Where: Extract TQ_* where column name contains `-L-`, `-U-`, or `-D-`
-   - When: Extract TQ_* where column name contains `-O-`
-5. **Create composite_ID:** Combine UID and TEST (format: `{UID}_{TEST}`)
-6. **Pivot to wide format:** One row per composite_ID, one column per item
-7. **Save TSVR mapping separately:** composite_ID, TSVR_hours (for Step 4 merge)
+1. Load data/cache/dfData.csv
+2. Keep columns: UID, TEST, TSVR, and all TQ_* columns
+3. Create composite_ID = UID + "_" + TEST (format: UID_test, e.g., "P001_0")
+4. Dichotomize TQ_* values: values < 1 become 0, values >= 1 become 1
+5. Assign items to domains based on tag patterns:
+   - what_items = columns matching `*-N-*`
+   - where_items = columns matching `*-L-*`, `*-U-*`, or `*-D-*`
+   - when_items = columns matching `*-O-*`
+6. Reshape to wide format: rows = composite_ID, columns = item tags
+7. Create Q-matrix for multidimensional IRT (3 factors: what, where, when)
+8. Save extraction outputs
 
 **Output:**
 
 **File 1:** data/step00_irt_input.csv
 **Format:** CSV, wide format (one row per composite_ID)
 **Columns:**
-  - `composite_ID` (string, format: {UID}_{TEST}, e.g., "A010_T1")
-  - One column per item code (e.g., TQ_RVR-T1-IFR-N-i1CM-...-ANS)
-  - Values: {0, 1, NaN} (0=incorrect, 1=correct, NaN=missing/not administered)
+- `composite_ID` (string, format: UID_test)
+- One column per item tag (values: 0, 1, or NaN for missing)
 **Expected Rows:** ~400 (100 participants x 4 tests)
-**Expected Columns:** ~103+ (composite_ID + item columns for What/Where/When domains)
+**Expected Columns:** ~100-200 item columns + 1 composite_ID column (exact count depends on TQ_* tag coverage)
 
 **File 2:** data/step00_tsvr_mapping.csv
-**Format:** CSV, long format
+**Format:** CSV (one row per composite_ID)
 **Columns:**
-  - `composite_ID` (string, matches step00_irt_input.csv)
-  - `TSVR_hours` (float, actual hours since encoding)
-  - `test` (string, T1/T2/T3/T4 for joining)
-**Expected Rows:** ~400 (one per composite_ID)
+- `composite_ID` (string)
+- `UID` (string)
+- `test` (int: 0, 1, 3, 6)
+- `TSVR_hours` (float: actual hours since encoding)
+**Expected Rows:** ~400
+
+**File 3:** data/step00_q_matrix.csv
+**Format:** CSV (one row per item)
+**Columns:**
+- `item_name` (string: item tag)
+- `what` (int: 1 if item loads on what, 0 otherwise)
+- `where` (int: 1 if item loads on where, 0 otherwise)
+- `when` (int: 1 if item loads on when, 0 otherwise)
+**Expected Rows:** Same as number of items in step00_irt_input.csv
 
 **Validation Requirement:**
-
-Validation tools MUST be used after data extraction tool execution. Specific validation tools will be determined by rq_tools based on extraction type.
+Validation tools MUST be used after data extraction tool execution. Specific validation tools will be determined by rq_tools based on data extraction requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_irt_input.csv: 400 rows x 103+ columns (composite_ID + items)
-- data/step00_tsvr_mapping.csv: 400 rows x 3 columns (composite_ID, TSVR_hours, test)
-- Data types: composite_ID (object), items (float64), TSVR_hours (float64), test (object)
+- data/step00_irt_input.csv exists: ~400 rows x 100-200 columns (composite_ID + items)
+- data/step00_tsvr_mapping.csv exists: ~400 rows x 4 columns
+- data/step00_q_matrix.csv exists: ~100-200 rows x 4 columns
 
 *Value Ranges:*
-- Item scores in {0, 1, NaN} (dichotomized accuracy)
-- TSVR_hours in [0, 200] hours (reasonable upper bound: ~8 days maximum delay)
-- test in {T1, T2, T3, T4}
+- Item values in {0, 1, NaN} only (binary after dichotomization)
+- TSVR_hours in [0, 200] (reasonable range: 0 = encoding, ~168 = 1 week)
+- test in {0, 1, 3, 6} (nominal test sessions)
+- Q-matrix values in {0, 1} only
 
 *Data Quality:*
-- All 100 participants present (400 composite_IDs total: 100 x 4 tests)
-- No duplicate composite_IDs (each UID_test combination unique)
-- NaN acceptable in item columns (not all items administered to all participants)
-- No NaN in composite_ID, TSVR_hours, test columns (required fields)
+- All 100 UIDs present (no participant loss during extraction)
+- No unexpected NaN patterns (>80% NaN per item suggests extraction error)
+- composite_ID format correct (UID_test pattern, e.g., "P001_0")
+- Q-matrix: Each item loads on exactly 1 domain (row sum = 1)
 
 *Log Validation:*
-- Required pattern: "Data extraction complete: 400 rows, 103+ columns"
-- Required pattern: "TSVR mapping created: 400 rows"
-- Forbidden patterns: "ERROR", "Duplicate composite_ID detected"
-- Acceptable warnings: "Some items have >50% missing data" (expected for temporal domain)
+- Required pattern: "Extracted X items (what: W, where: S, when: T)"
+- Required pattern: "Dichotomized values: 0/1 only"
+- Forbidden patterns: "ERROR", "No items found", "Empty DataFrame"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure message (e.g., "Expected 400 rows, found 387")
+- Raise error with specific failure message
 - Log failure to logs/step00_extract_vr_data.log
 - Quit script immediately (do NOT proceed to Step 1)
+- g_debug invoked to diagnose root cause
 
 ---
 
 ### Step 1: IRT Calibration Pass 1 (All Items)
 
-**Dependencies:** Step 0 (requires step00_irt_input.csv)
-**Complexity:** High (60-90 minutes - variational inference on 400 observations x 100+ items x 3 dimensions)
-
-**Purpose:** Calibrate multidimensional IRT model (Graded Response Model with correlated factors) on ALL items to estimate initial item parameters. This is the first pass of 2-pass purification (Decision D039).
+**Dependencies:** Step 0 (requires step00_irt_input.csv and step00_q_matrix.csv)
+**Complexity:** High (IRT model calibration, ~30-60 min depending on convergence)
 
 **Input:**
 
-**File:** data/step00_irt_input.csv
-**Source:** Generated by Step 0
-**Format:** Wide format (composite_ID x items)
-**Expected Rows:** ~400 (100 participants x 4 tests)
-**Expected Columns:** ~103+ (composite_ID + items)
+**File 1:** data/step00_irt_input.csv
+**Format:** CSV, wide format (composite_ID x item columns)
+**Columns:** composite_ID + item response columns (0/1/NaN)
+**Expected Rows:** ~400
 
-**Factor Assignments:**
-- Dimension 1 (What): All items matching `*-N-*` pattern
-- Dimension 2 (Where): All items matching `*-L-*`, `*-U-*`, `*-D-*` patterns
-- Dimension 3 (When): All items matching `*-O-*` pattern
+**File 2:** data/step00_q_matrix.csv
+**Format:** CSV (item x dimension loading matrix)
+**Columns:** item_name, what, where, when
+**Expected Rows:** ~100-200 items
 
 **Processing:**
 
-**IRT Model Specification:**
-- **Model:** Graded Response Model (GRM)
-- **Response Categories:** 2 (binary: 0=incorrect, 1=correct)
-- **Dimensions:** 3 (What, Where, When)
-- **Factor Correlation:** Correlated factors (estimate inter-dimensional correlations)
-- **Estimation:** Variational inference (deepirtools backend)
-
-**Method:** Call IRT calibration tool with:
-1. Input data: step00_irt_input.csv (wide format)
-2. Factor structure: 3 correlated dimensions
-3. Response categories: 2 (dichotomous)
-4. Convergence criteria: Default deepirtools settings
+1. Load IRT input data and Q-matrix
+2. Configure 3-dimensional IRT model (GRM - Graded Response Model):
+   - 3 correlated factors: what, where, when
+   - Q-matrix specifies factor loadings (each item loads on one factor)
+   - 2 response categories (0/1) -> 1 threshold parameter per item
+3. Fit model using variational inference (IWAVE algorithm)
+4. Extract Pass 1 item parameters (discrimination a, difficulty b)
+5. Extract Pass 1 theta estimates (diagnostic only)
+6. Save Pass 1 outputs to logs/ (not final outputs)
 
 **Output:**
 
 **File 1:** logs/step01_pass1_item_params.csv
-**Format:** CSV, one row per item
+**Format:** CSV (one row per item)
 **Columns:**
-  - `item_code` (string, original TQ_* column name)
-  - `dimension` (string, What/Where/When)
-  - `a` (float, discrimination parameter, typically 0.0 to 4.0)
-  - `b` (float, difficulty parameter, unrestricted range)
-**Expected Rows:** ~103+ items (all items from input data)
+- `item_name` (string): Item tag identifier
+- `dimension` (string): Factor (what/where/when)
+- `a` (float): Discrimination parameter (slope)
+- `b` (float): Difficulty parameter (location) - single threshold for 2-category
+**Expected Rows:** ~100-200 items
 
 **File 2:** logs/step01_pass1_theta.csv
-**Format:** CSV, one row per composite_ID
+**Format:** CSV (one row per composite_ID)
 **Columns:**
-  - `composite_ID` (string)
-  - `theta_What` (float, ability estimate for What dimension)
-  - `theta_Where` (float, ability estimate for Where dimension)
-  - `theta_When` (float, ability estimate for When dimension)
-  - `se_What` (float, standard error for What theta)
-  - `se_Where` (float, standard error for Where theta)
-  - `se_When` (float, standard error for When theta)
-**Expected Rows:** ~400 (one per composite_ID)
+- `composite_ID` (string)
+- `theta_what` (float): Ability estimate for what domain
+- `theta_where` (float): Ability estimate for where domain
+- `theta_when` (float): Ability estimate for when domain
+- `se_what`, `se_where`, `se_when` (float): Standard errors
+**Expected Rows:** ~400
 
-**Note:** Pass 1 theta estimates are diagnostic only (saved to logs/ folder). Final theta estimates from Pass 2 (Step 3) will be used for analysis.
+**File 3:** logs/step01_pass1_convergence.txt
+**Format:** Text file with convergence diagnostics
+**Content:** Final loss, loss history, convergence status
 
 **Validation Requirement:**
-
-Validation tools MUST be used after IRT calibration tool execution. Specific validation tools will be determined by rq_tools based on IRT calibration requirements (convergence checks, parameter bounds, dimensionality validation).
+Validation tools MUST be used after IRT calibration tool execution. Specific validation tools will be determined by rq_tools based on IRT convergence and parameter validity requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- logs/step01_pass1_item_params.csv: 103+ rows x 4 columns (item_code, dimension, a, b)
-- logs/step01_pass1_theta.csv: 400 rows x 7 columns (composite_ID, 3 theta, 3 SE)
-- Data types: item_code (object), dimension (object), a (float64), b (float64), theta (float64), SE (float64)
+- logs/step01_pass1_item_params.csv: ~100-200 rows x 4 columns
+- logs/step01_pass1_theta.csv: ~400 rows x 7 columns
+- logs/step01_pass1_convergence.txt: exists with content
 
 *Value Ranges:*
-- Discrimination (a) in [0.0, 10.0] (above 10.0 suggests estimation error)
-- Difficulty (b) unrestricted (temporal items may have |b| > 3.0 - that's why we purify)
-- Theta in [-4.0, 4.0] (extreme values acceptable if SE high)
-- SE in [0.1, 2.0] (below 0.1 unrealistically precise, above 2.0 unreliable)
+- a (discrimination) in [0.01, 10.0] (negative impossible, >10 suspicious)
+- b (difficulty) in [-6.0, 6.0] (extreme but possible for temporal items)
+- theta in [-4.0, 4.0] (typical IRT ability range)
+- se in [0.1, 2.0] (below 0.1 suspicious, above 2.0 unreliable)
 
 *Data Quality:*
-- All 103+ items present in item_params (no missing items)
-- All 400 composite_IDs present in theta (no participant loss)
-- No NaN in a, b, theta, SE columns (model MUST estimate for all)
-- dimension in {What, Where, When} (no other values)
+- No NaN in item parameters (all items must estimate)
+- All composite_IDs present in theta output (no participant loss)
+- Dimension column values in {what, where, when} only
 
 *Log Validation:*
-- Required pattern: "IRT calibration converged: True"
-- Required pattern: "ELBO improvement achieved"
-- Forbidden patterns: "ERROR", "CONVERGENCE FAILED", "NaN parameters detected"
-- Acceptable warnings: "Some items have low discrimination (a < 0.4)" (expected - that's what purification addresses)
+- Required pattern: "Model converged" or "Convergence achieved"
+- Required pattern: "Final loss:" followed by numeric value
+- Forbidden patterns: "ERROR", "CONVERGENCE FAILED", "NaN loss"
+- Acceptable warnings: "Some items near boundary" (expected for difficult temporal items)
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Model did not converge after 5000 iterations")
+- Raise error with specific failure message
 - Log failure to logs/step01_irt_calibration_pass1.log
 - Quit script immediately (do NOT proceed to Step 2)
-- g_debug invoked to diagnose (common causes: insufficient data, model misspecification, numerical instability)
+- g_debug invoked to diagnose (common causes: insufficient data, model misspecification)
 
 ---
 
-### Step 2: Purify Items (2-Pass Methodology)
+### Step 2: Purify Items (Decision D039)
 
 **Dependencies:** Step 1 (requires logs/step01_pass1_item_params.csv)
-**Complexity:** Low (<5 minutes - filtering based on thresholds)
-
-**Purpose:** Apply Decision D039 purification thresholds to exclude psychometrically problematic items. Items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4) are removed to improve measurement quality in Pass 2.
+**Complexity:** Low (filtering based on thresholds, ~1 min)
 
 **Input:**
 
 **File:** logs/step01_pass1_item_params.csv
-**Source:** Generated by Step 1 (Pass 1 calibration)
-**Format:** CSV with item parameters
-**Columns:** item_code, dimension, a, b
-**Expected Rows:** ~103+ items
-
-**Purification Thresholds (Decision D039):**
-- **Maximum absolute difficulty:** |b| <= 3.0 (items with |b| > 3.0 excluded)
-- **Minimum discrimination:** a >= 0.4 (items with a < 0.4 excluded)
-
-**Exclusion Logic:** Item RETAINED if (|b| <= 3.0) AND (a >= 0.4). Item EXCLUDED otherwise.
+**Format:** CSV with columns: item_name, dimension, a, b
+**Expected Rows:** ~100-200 items
 
 **Processing:**
 
-**Method:** Call item purification tool with:
-1. Input: step01_pass1_item_params.csv
-2. Thresholds: max_abs_difficulty=3.0, min_discrimination=0.4
-3. Apply within-dimension filtering (retain at least 10 items per dimension)
-
-**Steps:**
 1. Load Pass 1 item parameters
-2. For each item, check: (|b| <= 3.0) AND (a >= 0.4)
-3. Mark items failing either criterion for exclusion
-4. Ensure at least 10 items retained per dimension (if dimension drops below 10, flag error)
+2. Apply Decision D039 purification thresholds:
+   - Retain if: |b| <= 3.0 (difficulty not extreme)
+   - Retain if: a >= 0.4 (adequate discrimination)
+   - Item retained only if BOTH conditions met
+3. Perform WITHIN-DOMAIN filtering:
+   - Apply thresholds separately for what, where, when items
+   - Ensure at least 10 items retained per domain (circuit breaker if violated)
+4. Generate purification report listing excluded items with reasons
 5. Save purified item list
-
-**Expected Retention Rate:** 40-60% per concept notes (temporal items particularly difficult, high exclusion rate expected)
 
 **Output:**
 
 **File 1:** data/step02_purified_items.csv
-**Format:** CSV, one row per RETAINED item
+**Format:** CSV (one row per retained item)
 **Columns:**
-  - `item_code` (string, TQ_* column name)
-  - `dimension` (string, What/Where/When)
-  - `a` (float, discrimination from Pass 1)
-  - `b` (float, difficulty from Pass 1)
-  - `retained` (bool, always True in this file)
-**Expected Rows:** 40-60 items (40-60% retention of ~103 input items)
+- `item_name` (string): Item tag identifier
+- `dimension` (string): Factor (what/where/when)
+- `a` (float): Discrimination parameter
+- `b` (float): Difficulty parameter
+**Expected Rows:** 40-80% of original items (purification typically removes 20-60%)
 
 **File 2:** logs/step02_purification_report.txt
-**Format:** Plain text report
+**Format:** Text report
 **Content:**
-  - Total items evaluated: 103+
-  - Items retained: XX (XX%)
-  - Items excluded: XX (XX%)
-  - Exclusion reasons breakdown:
-    - Extreme difficulty (|b| > 3.0): XX items
-    - Low discrimination (a < 0.4): XX items
-    - Both criteria violated: XX items
-  - Retention by dimension:
-    - What: XX/YY retained (ZZ%)
-    - Where: XX/YY retained (ZZ%)
-    - When: XX/YY retained (ZZ%)
+- Total items before: N
+- Items excluded for |b| > 3.0: list
+- Items excluded for a < 0.4: list
+- Items retained per domain: what=W, where=S, when=T
+- Total retained: M (P% retention)
 
 **Validation Requirement:**
-
-Validation tools MUST be used after item purification tool execution. Specific validation tools will be determined by rq_tools based on purification requirements.
+Validation tools MUST be used after item purification tool execution. Specific validation tools will be determined by rq_tools based on purification thresholds and domain coverage requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step02_purified_items.csv: 40-60 rows x 5 columns (item_code, dimension, a, b, retained)
-- logs/step02_purification_report.txt: text file with exclusion statistics
-- Data types: item_code (object), dimension (object), a (float64), b (float64), retained (bool)
+- data/step02_purified_items.csv: 40-160 rows x 4 columns (expect 40-80% retention)
+- logs/step02_purification_report.txt: exists with content
 
 *Value Ranges:*
-- Retained items: a >= 0.4 (all items must meet threshold)
-- Retained items: |b| <= 3.0 (all items must meet threshold)
-- Retention rate: 30-70% (below 30% or above 70% suggests threshold issue)
+- All retained items have |b| <= 3.0 (strict threshold)
+- All retained items have a >= 0.4 (strict threshold)
+- Dimension values in {what, where, when} only
 
 *Data Quality:*
-- At least 10 items retained per dimension (minimum for stable calibration)
-- No NaN values in purified_items.csv
-- No duplicate item_codes
-- All retained items satisfy BOTH thresholds
+- At least 10 items retained per domain (CRITICAL - circuit breaker if violated)
+- No duplicate item_names
+- Retention rate between 20% and 95% (too low = model problem, too high = threshold too lenient)
 
 *Log Validation:*
-- Required pattern: "Purification complete: XX items retained, YY items excluded"
-- Required pattern: "All dimensions have >= 10 items (minimum threshold met)"
-- Forbidden patterns: "ERROR", "Dimension eliminated (< 10 items)", "No items retained"
-- Acceptable warnings: "When dimension: low retention (35%)" (temporal items expected to be difficult)
+- Required pattern: "Items retained per domain: what=W, where=S, when=T" (all >= 10)
+- Required pattern: "Purification complete: M of N items retained"
+- Forbidden patterns: "ERROR", "No items retained", "Domain eliminated"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "When dimension only 8 items retained, minimum 10 required")
+- If any domain has < 10 items: CRITICAL ERROR (analysis cannot proceed)
 - Log failure to logs/step02_purify_items.log
 - Quit script immediately (do NOT proceed to Step 3)
-- If dimension eliminated: Report to master, may require threshold adjustment or dimension exclusion from analysis
+- g_debug invoked to diagnose (likely D039 thresholds too strict for this data)
 
 ---
 
 ### Step 3: IRT Calibration Pass 2 (Purified Items)
 
-**Dependencies:** Steps 0, 2 (requires step00_irt_input.csv and step02_purified_items.csv)
-**Complexity:** High (60-90 minutes - re-calibration on purified item set)
-
-**Purpose:** Re-calibrate IRT model using only psychometrically sound items (retained from Step 2). This produces final theta estimates and item parameters for downstream LMM analysis.
+**Dependencies:** Step 2 (requires data/step02_purified_items.csv), Step 0 (requires step00_irt_input.csv)
+**Complexity:** High (IRT model calibration, ~30-60 min)
 
 **Input:**
 
-**File 1:** data/step00_irt_input.csv (original wide-format data)
-**File 2:** data/step02_purified_items.csv (list of retained items)
+**File 1:** data/step00_irt_input.csv
+**Format:** CSV, wide format (composite_ID x item columns)
+**Columns:** composite_ID + all item response columns
+
+**File 2:** data/step02_purified_items.csv
+**Format:** CSV (retained items after purification)
+**Columns:** item_name, dimension, a, b
 
 **Processing:**
 
-**Method:**
-1. Load step00_irt_input.csv (all items)
-2. Load step02_purified_items.csv (purified item list)
-3. Filter step00_irt_input.csv to include ONLY columns in purified item list
-4. Call IRT calibration tool with same settings as Step 1:
-   - Model: GRM, 2 categories, 3 correlated dimensions
-   - Factor assignments: What/Where/When based on item codes
-   - Estimation: Variational inference
-
-**Expected Improvement:** Pass 2 should show better model fit (lower RMSEA, higher reliability) compared to Pass 1 due to exclusion of misfitting items.
+1. Load IRT input data
+2. Load purified item list
+3. Filter IRT input to include ONLY purified items (drop excluded columns)
+4. Reconstruct Q-matrix from purified item list
+5. Configure 3-dimensional IRT model (same as Pass 1)
+6. Fit model using variational inference
+7. Extract FINAL item parameters (a, b)
+8. Extract FINAL theta estimates (ability scores for LMM)
+9. Save to data/ folder (final outputs, not logs/)
 
 **Output:**
 
-**File 1:** data/step03_item_parameters.csv (FINAL item parameters)
-**Format:** CSV, one row per RETAINED item
+**File 1:** data/step03_item_parameters.csv
+**Format:** CSV (one row per purified item)
 **Columns:**
-  - `item_code` (string, TQ_* column name)
-  - `dimension` (string, What/Where/When)
-  - `a` (float, discrimination parameter)
-  - `b` (float, difficulty parameter)
-**Expected Rows:** 40-60 items (same as step02_purified_items.csv)
+- `item_name` (string): Item tag identifier
+- `dimension` (string): Factor (what/where/when)
+- `a` (float): Final discrimination parameter
+- `b` (float): Final difficulty parameter
+**Expected Rows:** Same as step02_purified_items.csv
 
-**File 2:** data/step03_theta_scores.csv (FINAL theta estimates)
-**Format:** CSV, one row per composite_ID
+**File 2:** data/step03_theta_scores.csv
+**Format:** CSV (one row per composite_ID)
 **Columns:**
-  - `composite_ID` (string, {UID}_{TEST})
-  - `theta_What` (float, ability estimate for What dimension)
-  - `theta_Where` (float, ability estimate for Where dimension)
-  - `theta_When` (float, ability estimate for When dimension)
-  - `se_What` (float, standard error for What theta)
-  - `se_Where` (float, standard error for Where theta)
-  - `se_When` (float, standard error for When theta)
-**Expected Rows:** ~400 (one per composite_ID)
+- `composite_ID` (string)
+- `theta_what` (float): Final ability estimate for what domain
+- `theta_where` (float): Final ability estimate for where domain
+- `theta_when` (float): Final ability estimate for when domain
+- `se_what`, `se_where`, `se_when` (float): Standard errors
+**Expected Rows:** ~400
 
-**Note:** These are the FINAL theta estimates used for LMM analysis (not diagnostic like Pass 1).
+**File 3:** logs/step03_pass2_convergence.txt
+**Format:** Text file with convergence diagnostics
 
 **Validation Requirement:**
-
-Validation tools MUST be used after IRT calibration tool execution. Specific validation tools will be determined by rq_tools (same as Step 1, but with comparison to Pass 1 fit indices).
+Validation tools MUST be used after IRT calibration tool execution. Specific validation tools will be determined by rq_tools based on IRT convergence, parameter validity, and theta reliability requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step03_item_parameters.csv: 40-60 rows x 4 columns (item_code, dimension, a, b)
-- data/step03_theta_scores.csv: 400 rows x 7 columns (composite_ID, 3 theta, 3 SE)
-- Data types: Same as Step 1 output
+- data/step03_item_parameters.csv: Same row count as step02_purified_items.csv x 4 columns
+- data/step03_theta_scores.csv: ~400 rows x 7 columns
+- logs/step03_pass2_convergence.txt: exists with content
 
 *Value Ranges:*
-- Discrimination (a) in [0.4, 10.0] (should all meet purification threshold)
-- Difficulty (b) in [-3.0, 3.0] (should all meet purification threshold)
-- Theta in [-3.0, 3.0] (typical IRT ability range - outliers reduced vs Pass 1)
-- SE in [0.1, 1.5] (should be lower than Pass 1 due to better item quality)
+- a (discrimination) in [0.4, 10.0] (0.4 is minimum from purification)
+- b (difficulty) in [-3.0, 3.0] (bounded by purification)
+- theta in [-3.0, 3.0] (typical ability range, tighter than Pass 1)
+- se in [0.1, 1.5] (should improve vs Pass 1 with purified items)
 
 *Data Quality:*
-- Item count matches step02_purified_items.csv (no item loss during recalibration)
-- All 400 composite_IDs present (no participant loss)
-- No NaN in a, b, theta, SE columns
-- Pass 2 fit better than Pass 1 (check model comparison metrics)
+- No NaN in item parameters
+- All composite_IDs present in theta output (no participant loss)
+- Theta SE values should be LOWER on average than Pass 1 (purification improves precision)
+- Dimension column values in {what, where, when} only
 
 *Log Validation:*
-- Required pattern: "IRT calibration converged: True"
-- Required pattern: "Pass 2 fit improved vs Pass 1" (or comparison metrics)
-- Forbidden patterns: "ERROR", "CONVERGENCE FAILED", "Pass 2 fit WORSE than Pass 1"
-- Acceptable warnings: None expected (purified items should calibrate cleanly)
+- Required pattern: "Model converged" or "Convergence achieved"
+- Required pattern: "Using N purified items"
+- Forbidden patterns: "ERROR", "CONVERGENCE FAILED", "NaN loss"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure
+- Raise error with specific failure message
 - Log failure to logs/step03_irt_calibration_pass2.log
-- Quit script immediately
-- If Pass 2 fit worse than Pass 1: Report to master (suggests purification threshold issue)
+- Quit script immediately (do NOT proceed to Step 4)
+- g_debug invoked to diagnose
 
 ---
 
-### Step 4: Merge Theta Scores with TSVR Time Variable
+### Step 4: Merge Theta Scores with TSVR (Decision D070)
 
-**Dependencies:** Steps 0, 3 (requires step00_tsvr_mapping.csv and step03_theta_scores.csv)
-**Complexity:** Low (<5 minutes - data merging only)
-
-**Purpose:** Merge final theta estimates with TSVR (Time Since VR) time variable per Decision D070. TSVR represents actual hours since encoding (not nominal days 0, 1, 3, 6), enabling precise temporal modeling in LMM.
+**Dependencies:** Step 3 (requires data/step03_theta_scores.csv), Step 0 (requires data/step00_tsvr_mapping.csv)
+**Complexity:** Low (data merge and reshape, ~1 min)
 
 **Input:**
 
 **File 1:** data/step03_theta_scores.csv
-**Columns:** composite_ID, theta_What, theta_Where, theta_When, se_What, se_Where, se_When
-**Expected Rows:** ~400
+**Format:** CSV (wide format, one row per composite_ID)
+**Columns:** composite_ID, theta_what, theta_where, theta_when, se_what, se_where, se_when
 
 **File 2:** data/step00_tsvr_mapping.csv
-**Columns:** composite_ID, TSVR_hours, test
-**Expected Rows:** ~400
+**Format:** CSV (one row per composite_ID)
+**Columns:** composite_ID, UID, test, TSVR_hours
 
 **Processing:**
 
-**Method:**
-1. Load step03_theta_scores.csv
-2. Load step00_tsvr_mapping.csv
-3. Merge on composite_ID (left join - keep all theta scores, add TSVR)
-4. Validate: No missing TSVR_hours after merge (all composite_IDs must match)
-5. Add derived time variables for LMM candidate models:
-   - `TSVR_hours` (already present from mapping)
-   - `TSVR_hours_sq` (TSVR_hours squared for quadratic models)
-   - `log_TSVR_hours` (log(TSVR_hours + 1) for log models - add 1 to handle TSVR=0)
+1. Load theta scores (wide format: 3 theta columns for 3 domains)
+2. Load TSVR mapping
+3. Merge on composite_ID (inner join - both must have data)
+4. Reshape wide to long format:
+   - Melt theta columns (theta_what, theta_where, theta_when) into single theta column
+   - Create domain column (what, where, when)
+   - Similarly melt SE columns
+5. Result: One row per composite_ID x domain combination
+6. Save LMM input with TSVR_hours as time variable (Decision D070)
 
 **Output:**
 
 **File:** data/step04_lmm_input.csv
-**Format:** CSV, one row per composite_ID (wide format)
+**Format:** CSV, long format (one row per observation = composite_ID x domain)
 **Columns:**
-  - `composite_ID` (string)
-  - `theta_What` (float)
-  - `theta_Where` (float)
-  - `theta_When` (float)
-  - `se_What` (float)
-  - `se_Where` (float)
-  - `se_When` (float)
-  - `TSVR_hours` (float, actual hours since encoding)
-  - `TSVR_hours_sq` (float, TSVR_hours^2)
-  - `log_TSVR_hours` (float, log(TSVR_hours + 1))
-  - `test` (string, T1/T2/T3/T4)
-**Expected Rows:** ~400 (one per composite_ID)
+- `composite_ID` (string)
+- `UID` (string): Participant identifier
+- `test` (int): Nominal test session (0, 1, 3, 6)
+- `TSVR_hours` (float): Actual time since encoding in hours (Decision D070)
+- `domain` (string): Memory domain (what, where, when)
+- `theta` (float): IRT ability estimate for this domain
+- `se` (float): Standard error of theta estimate
+**Expected Rows:** ~1200 (400 composite_IDs x 3 domains)
+**Expected Columns:** 7
 
 **Validation Requirement:**
-
-Validation tools MUST be used after merge tool execution. Specific validation tools will be determined by rq_tools based on merge requirements.
+Validation tools MUST be used after TSVR merge tool execution. Specific validation tools will be determined by rq_tools based on merge completeness and data format requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step04_lmm_input.csv: 400 rows x 11 columns
-- Data types: composite_ID (object), theta (float64), SE (float64), TSVR (float64), test (object)
+- data/step04_lmm_input.csv: ~1200 rows x 7 columns
 
 *Value Ranges:*
-- TSVR_hours in [0, 200] (reasonable upper bound)
-- TSVR_hours_sq in [0, 40000] (200^2)
-- log_TSVR_hours in [0, 5.3] (log(200+1))
-- Theta in [-3.0, 3.0]
-- SE in [0.1, 1.5]
+- TSVR_hours in [0, 200] (reasonable range for 6-day study)
+- theta in [-3.0, 3.0] (bounded by IRT ability scale)
+- se in [0.1, 1.5] (reasonable standard errors)
+- test in {0, 1, 3, 6} (nominal test sessions)
+- domain in {what, where, when} (categorical)
 
 *Data Quality:*
-- All 400 rows present (no data loss during merge)
-- No NaN in TSVR_hours (ALL composite_IDs must have time variable)
-- No NaN in theta, SE columns
-- No duplicate composite_IDs
+- All composite_IDs from theta file present (no merge loss)
+- Each composite_ID appears exactly 3 times (once per domain)
+- No NaN in TSVR_hours (merge must succeed for all)
+- No NaN in theta or se (IRT must have estimated all)
+- ~100 unique UIDs present
 
 *Log Validation:*
-- Required pattern: "Merge complete: 400 rows, all composite_IDs matched"
-- Required pattern: "TSVR variables created: TSVR_hours, TSVR_hours_sq, log_TSVR_hours"
-- Forbidden patterns: "ERROR", "Missing TSVR for composite_ID", "Merge produced NaN values"
-- Acceptable warnings: None expected
+- Required pattern: "Merged X rows with TSVR"
+- Required pattern: "Long format: Y rows (X composite_IDs x 3 domains)"
+- Forbidden patterns: "ERROR", "Merge failed", "Missing TSVR"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "15 composite_IDs missing TSVR_hours")
+- Raise error with specific failure message
 - Log failure to logs/step04_merge_theta_tsvr.log
-- Quit script immediately
+- Quit script immediately (do NOT proceed to Step 5)
+- g_debug invoked to diagnose
 
 ---
 
-### Step 5: Fit LMM Trajectory Models (5 Candidate Models)
+### Step 5: Fit LMM Trajectory Models
 
-**Dependencies:** Step 4 (requires step04_lmm_input.csv)
-**Complexity:** Medium (30-60 minutes - 5 model fits with random effects estimation)
-
-**Purpose:** Fit 5 candidate Linear Mixed Models with Domain x Time interactions to determine best-fitting trajectory functional form. Models compare linear, quadratic, logarithmic, and combined time transformations.
+**Dependencies:** Step 4 (requires data/step04_lmm_input.csv)
+**Complexity:** Medium-High (5 candidate models, ~5-10 min per model)
 
 **Input:**
 
 **File:** data/step04_lmm_input.csv
-**Format:** Wide format (one row per composite_ID)
-**Expected Rows:** ~400
-
-**Data Transformation:**
-1. Reshape wide to long: One row per observation (composite_ID x dimension)
-2. Create domain factor: What/Where/When (from theta_What, theta_Where, theta_When columns)
-3. Result: ~1200 rows (400 composite_IDs x 3 dimensions)
-
-**Long Format Columns:**
-- `composite_ID` (for random effects grouping)
-- `UID` (parsed from composite_ID, participant identifier)
-- `theta` (ability estimate, DV)
-- `domain` (factor: What/Where/When)
-- `TSVR_hours` (time variable)
-- `TSVR_hours_sq` (time squared)
-- `log_TSVR_hours` (log time)
+**Format:** CSV, long format
+**Columns:** composite_ID, UID, test, TSVR_hours, domain, theta, se
 
 **Processing:**
 
-**5 Candidate Models (Domain x Time interaction in all):**
-
-**Reference Level:** What domain (Treatment coding - Where and When compared to What)
-
-1. **Linear:** `theta ~ domain * TSVR_hours + (1 + TSVR_hours | UID)`
-2. **Quadratic:** `theta ~ domain * (TSVR_hours + TSVR_hours_sq) + (1 + TSVR_hours | UID)`
-3. **Logarithmic:** `theta ~ domain * log_TSVR_hours + (1 + log_TSVR_hours | UID)`
-4. **Linear + Log:** `theta ~ domain * (TSVR_hours + log_TSVR_hours) + (1 + TSVR_hours | UID)`
-5. **Quadratic + Log:** `theta ~ domain * (TSVR_hours + TSVR_hours_sq + log_TSVR_hours) + (1 + TSVR_hours | UID)`
-
-**Random Effects:** Random intercepts and slopes per participant (UID)
-
-**Estimation:** REML=False (use ML estimation for AIC comparison)
-
-**Model Selection:**
-1. Fit all 5 models
-2. Compute AIC for each
-3. Calculate Akaike weights
-4. Select best model (lowest AIC)
-5. Report comparison table
+1. Load LMM input data
+2. Configure 5 candidate trajectory models with Domain x Time interaction:
+   - **Linear:** theta ~ TSVR_hours * domain + (TSVR_hours | UID)
+   - **Quadratic:** theta ~ (TSVR_hours + TSVR_hours^2) * domain + (TSVR_hours | UID)
+   - **Logarithmic:** theta ~ log(TSVR_hours + 1) * domain + (TSVR_hours | UID)
+   - **Lin+Log:** theta ~ (TSVR_hours + log(TSVR_hours + 1)) * domain + (TSVR_hours | UID)
+   - **Quad+Log:** theta ~ (TSVR_hours + TSVR_hours^2 + log(TSVR_hours + 1)) * domain + (TSVR_hours | UID)
+3. Treatment coding: What domain as reference (Domain = what/where/when with what as baseline)
+4. Fit all 5 models with REML=False (for valid AIC comparison)
+5. Compare models by AIC, compute Akaike weights
+6. Select best model (lowest AIC)
+7. Refit best model with REML=True for final parameter estimates
+8. Save model comparison and best model results
 
 **Output:**
 
-**File 1:** results/step05_lmm_model_summary.txt
-**Format:** Plain text summary
-**Content:**
-  - Best model formula
-  - Fixed effects table (coefficient, SE, z, p-value, 95% CI)
-  - Random effects variances
-  - ICC (intraclass correlation)
-  - Model fit indices (AIC, BIC, log-likelihood)
-
-**File 2:** results/step05_model_comparison.csv
-**Format:** CSV, one row per candidate model
+**File 1:** results/step05_lmm_model_comparison.csv
+**Format:** CSV (one row per candidate model)
 **Columns:**
-  - `model_name` (string: Linear, Quadratic, Log, Linear+Log, Quadratic+Log)
-  - `AIC` (float)
-  - `delta_AIC` (float, difference from best model)
-  - `AIC_weight` (float, Akaike weight)
-  - `formula` (string, model formula)
-**Expected Rows:** 5 (one per candidate model)
+- `model_name` (string): Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log
+- `AIC` (float): Akaike Information Criterion
+- `delta_AIC` (float): Difference from best model
+- `akaike_weight` (float): Relative model probability
+- `converged` (bool): Whether model converged
+**Expected Rows:** 5
 
-**File 3:** data/step05_best_model_predictions.csv
-**Format:** CSV, one row per observation
-**Columns:**
-  - `composite_ID` (string)
-  - `domain` (string)
-  - `TSVR_hours` (float)
-  - `theta_observed` (float, actual theta)
-  - `theta_predicted` (float, fitted value from best model)
-  - `residual` (float, observed - predicted)
-**Expected Rows:** ~1200 (400 composite_IDs x 3 dimensions)
+**File 2:** results/step05_lmm_model_summary.txt
+**Format:** Text file
+**Content:** Full summary of best model (fixed effects, random effects, fit statistics)
+
+**File 3:** data/step05_lmm_fitted_model.pkl
+**Format:** Python pickle (statsmodels fitted model object)
+**Purpose:** Store fitted model for downstream extraction and prediction
 
 **Validation Requirement:**
-
-Validation tools MUST be used after LMM fitting tool execution. Specific validation tools will be determined by rq_tools based on LMM requirements (convergence, residual normality, homoscedasticity).
+Validation tools MUST be used after LMM fitting tool execution. Specific validation tools will be determined by rq_tools based on LMM convergence, model comparison, and residual diagnostic requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step05_lmm_model_summary.txt: text file with model summary
-- results/step05_model_comparison.csv: 5 rows x 5 columns
-- data/step05_best_model_predictions.csv: 1200 rows x 6 columns
-- Data types: AIC (float64), delta_AIC (float64), AIC_weight (float64), theta (float64), residual (float64)
+- results/step05_lmm_model_comparison.csv: 5 rows x 5 columns
+- results/step05_lmm_model_summary.txt: exists with content (>1KB)
+- data/step05_lmm_fitted_model.pkl: exists (binary pickle file)
 
 *Value Ranges:*
-- AIC: positive values, reasonable range (lower is better)
-- delta_AIC in [0, infinity] (best model has delta_AIC = 0)
-- AIC_weight in [0, 1], sum to 1.0 across all models
-- theta_observed in [-3.0, 3.0]
-- theta_predicted in [-3.0, 3.0]
-- residual in [-4.0, 4.0] (larger residuals acceptable if rare)
+- AIC values reasonable (typically 500-3000 for this data size)
+- delta_AIC >= 0 for all models (best model has delta_AIC = 0)
+- akaike_weight in [0, 1], sum to 1.0 across models
+- converged = True for at least 3 of 5 models (some may fail)
 
 *Data Quality:*
-- All 5 models converged (no convergence failures)
-- All 1200 observations have predictions (no missing fitted values)
-- No NaN in fixed effects, random effects, or predictions
-- Residuals approximately normal (Shapiro-Wilk or QQ plot check)
+- Best model MUST have converged = True
+- At least one model has akaike_weight > 0.5 (clear winner) OR top 2 have combined weight > 0.8
+- Model summary contains fixed effects table with coefficients, SE, z, p-values
 
 *Log Validation:*
-- Required pattern: "All 5 models converged successfully"
-- Required pattern: "Best model selected: [model_name] (AIC = [value])"
-- Forbidden patterns: "ERROR", "Model convergence failed", "Singular matrix"
-- Acceptable warnings: "Random effects variance near boundary" (can occur with small random slopes)
+- Required pattern: "Best model: {model_name} (AIC = {value})"
+- Required pattern: "Model converged" for best model
+- Forbidden patterns: "ERROR", "All models failed", "Singular matrix"
+- Acceptable warnings: "Model X did not converge" (for some candidates)
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Quadratic model failed to converge")
+- Raise error with specific failure message
 - Log failure to logs/step05_fit_lmm.log
-- Quit script immediately
-- g_debug invoked to diagnose (common causes: random effects overspecification, numerical instability)
+- Quit script immediately (do NOT proceed to Step 6)
+- g_debug invoked to diagnose (common causes: random effects specification, data structure)
 
 ---
 
-### Step 6: Post-Hoc Contrasts and Effect Sizes
+### Step 6: Post-Hoc Contrasts and Effect Sizes (Decision D068)
 
-**Dependencies:** Step 5 (requires best LMM model from step05_lmm_model_summary.txt)
-**Complexity:** Low (<5 minutes - contrast computation from fitted model)
-
-**Purpose:** Compute post-hoc pairwise contrasts testing differential forgetting slopes across domains (Where-What, When-What). Apply Decision D068 dual p-value reporting (uncorrected + Bonferroni-corrected).
+**Dependencies:** Step 5 (requires data/step05_lmm_fitted_model.pkl and results/step05_lmm_model_summary.txt)
+**Complexity:** Low-Medium (contrast extraction and computation, ~2-5 min)
 
 **Input:**
 
-**File:** Best model object from Step 5 (MixedLMResults)
+**File 1:** data/step05_lmm_fitted_model.pkl
+**Format:** Python pickle (statsmodels fitted model object)
 
-**Contrasts to Test:**
-1. **Where vs What:** Test Domain x Time interaction coefficient for Where
-2. **When vs What:** Test Domain x Time interaction coefficient for When
-
-**Bonferroni Correction:** � = 0.05 / 2 = 0.025 (two pairwise tests)
+**File 2:** data/step04_lmm_input.csv
+**Format:** CSV, long format (for effect size computation)
 
 **Processing:**
 
-**Method:**
-1. Extract Domain x Time interaction terms from best model fixed effects
-2. Compute pairwise contrasts (Where-What, When-What)
-3. Report BOTH:
-   - Uncorrected p-values (� = 0.05)
-   - Bonferroni-corrected p-values (� = 0.025)
-4. Compute effect sizes:
-   - Cohen's d for domain differences at each timepoint (Days 0, 1, 3, 6)
-   - Partial �� for fixed effects
+1. Load fitted LMM model
+2. Extract Domain x Time interaction terms (slope differences between domains)
+3. Compute pairwise contrasts for forgetting slopes:
+   - Where vs What (reference)
+   - When vs What (reference)
+   - When vs Where
+4. Apply Bonferroni correction: alpha = 0.05 / 3 = 0.0167 (3 pairwise tests)
+5. Report BOTH uncorrected AND corrected p-values (Decision D068)
+6. Compute effect sizes:
+   - Cohen's d for domain differences at each time point (T0, T1, T3, T6)
+   - Partial eta-squared for Domain x Time interaction
+7. Save contrast and effect size results
 
 **Output:**
 
 **File 1:** results/step06_post_hoc_contrasts.csv
-**Format:** CSV, one row per contrast
+**Format:** CSV (one row per contrast)
 **Columns:**
-  - `contrast` (string: "Where-What", "When-What")
-  - `estimate` (float, difference in slopes)
-  - `SE` (float, standard error)
-  - `z` (float, z-statistic)
-  - `p_uncorrected` (float, p-value without correction)
-  - `p_bonferroni` (float, p-value with Bonferroni correction)
-  - `CI_lower` (float, 95% CI lower bound)
-  - `CI_upper` (float, 95% CI upper bound)
-**Expected Rows:** 2 (Where-What, When-What)
+- `contrast` (string): Comparison name (e.g., "where - what")
+- `estimate` (float): Coefficient difference (slope difference)
+- `se` (float): Standard error of estimate
+- `z` (float): Z-statistic
+- `p_uncorrected` (float): Raw p-value
+- `p_bonferroni` (float): Bonferroni-corrected p-value (Decision D068)
+- `significant_uncorrected` (bool): p < 0.05
+- `significant_bonferroni` (bool): p < 0.0167
+**Expected Rows:** 3 (three pairwise contrasts)
 
 **File 2:** results/step06_effect_sizes.csv
-**Format:** CSV, one row per domain comparison x timepoint
+**Format:** CSV
 **Columns:**
-  - `contrast` (string: "Where-What", "When-What")
-  - `timepoint` (string: Day0, Day1, Day3, Day6)
-  - `cohens_d` (float, standardized mean difference)
-  - `cohens_d_CI_lower` (float, 95% CI)
-  - `cohens_d_CI_upper` (float, 95% CI)
-**Expected Rows:** 8 (2 contrasts x 4 timepoints)
+- `comparison` (string): Effect description
+- `cohens_d` (float): Standardized effect size
+- `ci_lower` (float): 95% CI lower bound
+- `ci_upper` (float): 95% CI upper bound
+- `interpretation` (string): Small/Medium/Large per Cohen's guidelines
+**Expected Rows:** Variable (contrasts + per-timepoint comparisons)
 
 **Validation Requirement:**
-
-Validation tools MUST be used after post-hoc contrast tool execution. Specific validation tools will be determined by rq_tools.
+Validation tools MUST be used after contrast computation tool execution. Specific validation tools will be determined by rq_tools based on statistical validity and effect size computation requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step06_post_hoc_contrasts.csv: 2 rows x 8 columns
-- results/step06_effect_sizes.csv: 8 rows x 5 columns
-- Data types: estimate (float64), SE (float64), z (float64), p (float64), CI (float64), cohens_d (float64)
+- results/step06_post_hoc_contrasts.csv: 3 rows x 8 columns
+- results/step06_effect_sizes.csv: >3 rows x 5 columns
 
 *Value Ranges:*
-- estimate (slope difference) in [-2.0, 2.0] (reasonable effect size range)
-- SE in [0.01, 0.5] (depends on sample size and variance)
-- z in [-10, 10] (extreme z values possible if SE very small)
-- p_uncorrected in [0, 1]
-- p_bonferroni in [0, 1], p_bonferroni >= p_uncorrected (correction increases p-value)
-- cohens_d in [-3.0, 3.0] (extreme effect sizes rare but possible)
+- p_uncorrected in [0, 1] (valid probability)
+- p_bonferroni in [0, 1] (valid probability, >= p_uncorrected)
+- z in [-10, 10] (reasonable z-statistic range)
+- cohens_d in [-3, 3] (typical effect size range, |d| > 2 is very large)
 
 *Data Quality:*
-- All 2 contrasts present
-- All 8 effect size rows present (2 contrasts x 4 timepoints)
-- No NaN values (all contrasts computable)
-- p_bonferroni = min(p_uncorrected * 2, 1.0) (correct Bonferroni formula)
+- Exactly 3 pairwise contrasts present (where-what, when-what, when-where)
+- p_bonferroni = min(1.0, p_uncorrected * 3) for each row
+- Both uncorrected and Bonferroni p-values present (Decision D068)
+- Effect size CI contains point estimate (ci_lower <= cohens_d <= ci_upper)
 
 *Log Validation:*
-- Required pattern: "Post-hoc contrasts complete: 2 comparisons computed"
-- Required pattern: "Bonferroni correction applied: � = 0.025 (2 tests)"
-- Forbidden patterns: "ERROR", "Contrast computation failed"
-- Acceptable warnings: None expected
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure
-- Log failure to logs/step06_compute_post_hoc_contrasts.log
-- Quit script immediately
-
----
-
-### Step 7: Prepare Trajectory Plot Data (Dual-Scale per Decision D069)
-
-**Dependencies:** Steps 3, 4, 5 (requires theta scores, TSVR, and LMM predictions)
-**Complexity:** Low (<5 minutes - data aggregation for plotting)
-
-**Purpose:** Create plot source CSVs for trajectory visualization per Option B architecture (Decision D069 requires BOTH theta-scale AND probability-scale plots). This step aggregates analysis outputs into plot-ready format.
-
-**NOTE:** This is an ANALYSIS step (executed during Step 14 CODE EXECUTION LOOP), NOT a plotting step. rq_plots (Step 18) will READ these CSVs to generate plots.
-
-**Input:**
-
-**File 1:** data/step03_theta_scores.csv (theta estimates per composite_ID)
-**File 2:** data/step04_lmm_input.csv (theta + TSVR merged)
-**File 3:** data/step05_best_model_predictions.csv (fitted values from LMM)
-**File 4:** data/step03_item_parameters.csv (for theta->probability conversion)
-
-**Processing:**
-
-**Method:**
-1. **Aggregate observed data:**
-   - Group step04_lmm_input.csv by domain + TSVR_hours
-   - Compute mean theta, 95% CI per domain per timepoint
-   - Result: Observed trajectory data
-
-2. **Aggregate model predictions:**
-   - Group step05_best_model_predictions.csv by domain + TSVR_hours
-   - Compute mean predicted theta per domain per timepoint
-   - Result: Fitted trajectory data
-
-3. **Merge observed + fitted:**
-   - Join on domain + TSVR_hours
-   - Create unified plot source CSV with both observed and fitted values
-
-4. **Convert theta to probability (Decision D069):**
-   - Use mean discrimination and difficulty per domain from step03_item_parameters.csv
-   - Apply IRT response function: `probability = 1 / (1 + exp(-(a * (theta - b))))`
-   - Create probability-scale plot source CSV
-
-**Output:**
-
-**File 1:** plots/step07_trajectory_theta_data.csv (theta scale)
-**Format:** CSV, one row per domain x timepoint combination
-**Columns:**
-  - `domain` (string: What, Where, When)
-  - `TSVR_hours` (float: actual time values)
-  - `theta_observed` (float: mean observed theta)
-  - `theta_predicted` (float: mean fitted theta from LMM)
-  - `CI_lower` (float: 95% CI lower bound for observed)
-  - `CI_upper` (float: 95% CI upper bound for observed)
-  - `N` (int: number of observations per point)
-**Expected Rows:** 12-20 (3 domains x 4-6 unique TSVR timepoints, depending on actual data distribution)
-
-**File 2:** plots/step07_trajectory_probability_data.csv (probability scale)
-**Format:** CSV, same structure as File 1 but with probability-transformed values
-**Columns:**
-  - `domain` (string: What, Where, When)
-  - `TSVR_hours` (float)
-  - `prob_observed` (float: theta_observed transformed to probability)
-  - `prob_predicted` (float: theta_predicted transformed to probability)
-  - `CI_lower` (float: probability scale)
-  - `CI_upper` (float: probability scale)
-  - `N` (int)
-**Expected Rows:** 12-20 (same as theta scale)
-
-**Validation Requirement:**
-
-Validation tools MUST be used after plot data preparation tool execution. Specific validation tools determined by rq_tools.
-
-**Substance Validation Criteria (for rq_inspect post-execution validation):**
-
-*Output Files:*
-- plots/step07_trajectory_theta_data.csv: 12-20 rows x 7 columns
-- plots/step07_trajectory_probability_data.csv: 12-20 rows x 7 columns
-- Data types: domain (object), TSVR_hours (float64), theta (float64), prob (float64), CI (float64), N (int64)
-
-*Value Ranges:*
-- TSVR_hours in [0, 200]
-- theta_observed, theta_predicted in [-3.0, 3.0]
-- prob_observed, prob_predicted in [0.0, 1.0]
-- CI_lower < CI_upper for all rows
-- N >= 10 per timepoint (sufficient observations for stable means)
-
-*Data Quality:*
-- All 3 domains present (What, Where, When)
-- At least 4 timepoints represented (nominal Days 0, 1, 3, 6)
-- No NaN in theta or probability columns
-- No duplicate domain x TSVR combinations
-- Distribution check: CI_upper > CI_lower for all rows
-
-*Log Validation:*
-- Required pattern: "Plot data preparation complete: 2 files created (theta + probability scales)"
-- Required pattern: "All domains represented: What, Where, When"
-- Required pattern: "Theta->probability conversion successful"
-- Forbidden patterns: "ERROR", "NaN values detected", "Missing domain", "Probability outside [0,1]"
-- Acceptable warnings: None expected
+- Required pattern: "Computed 3 pairwise contrasts"
+- Required pattern: "Bonferroni correction applied (alpha = 0.0167)"
+- Forbidden patterns: "ERROR", "Invalid contrast", "Effect size NaN"
 
 **Expected Behavior on Validation Failure:**
 - Raise error with specific failure message
-- Log failure to logs/step07_prepare_trajectory_plot_data.log
-- Quit script immediately (do NOT proceed to rq_plots)
+- Log failure to logs/step06_compute_post_hoc_contrasts.log
+- Quit script immediately (do NOT proceed to Step 7)
 - g_debug invoked to diagnose
 
-**Plot Description (for rq_plots agent):**
-- **Plot Type:** Trajectory plot with confidence bands
-- **X-axis:** TSVR_hours (actual time since encoding)
-- **Y-axis (theta scale):** Theta ability (-3 to +3)
-- **Y-axis (probability scale):** Probability correct (0 to 1)
-- **Groups:** 3 lines (What, Where, When domains)
-- **Data points:** Observed means with 95% CI error bars
-- **Lines:** Fitted trajectories from best LMM model
-- **Plotting function:** Trajectory plot (rq_plots maps to plot_trajectory for theta, plot_trajectory_probability for probability)
+---
+
+### Step 7: Prepare Trajectory Plot Data (Decision D069 Dual-Scale)
+
+**CRITICAL NOTE:** Plot data preparation IS an analysis step. It:
+- Gets executed in Step 14 CODE EXECUTION LOOP (g_code -> bash -> rq_inspect)
+- MUST have validation requirements (same as any analysis step)
+- Outputs to plots/*.csv (not data/*.csv) but still validated by rq_inspect
+- Created by g_code during analysis (NOT by rq_plots during visualization)
+
+**Dependencies:** Step 3 (theta scores), Step 4 (TSVR mapping), Step 5 (LMM predictions)
+**Complexity:** Low (data aggregation, ~1-2 min)
+
+**Purpose:** Aggregate analysis outputs for trajectory visualization (Option B: g_code creates plot source CSVs)
+
+**Plot Description:** Forgetting trajectory over time with 3 lines (What/Where/When domains) showing theta decline, including observed means with 95% confidence intervals and model-predicted trajectories.
+
+**Required Data Sources:**
+- data/step03_theta_scores.csv (individual theta estimates)
+- data/step04_lmm_input.csv (long format with TSVR, domain)
+- data/step05_lmm_fitted_model.pkl (for model predictions)
+- data/step03_item_parameters.csv (for theta-to-probability conversion)
+
+**Processing (Theta Scale Plot Data):**
+
+1. Load LMM input data (long format with theta, domain, TSVR_hours)
+2. Group by domain and test (nominal time points: T0, T1, T3, T6)
+3. Compute observed statistics per group:
+   - mean_theta = mean(theta) per domain x test
+   - CI_lower = mean - 1.96 * (sd / sqrt(n))
+   - CI_upper = mean + 1.96 * (sd / sqrt(n))
+4. Add representative TSVR_hours per test (median or typical value)
+5. Generate model predictions from fitted LMM (smooth trajectory)
+6. Combine observed means + model predictions
+7. Save theta-scale plot data
+
+**Processing (Probability Scale Plot Data - Decision D069):**
+
+1. Load theta-scale plot data (from previous sub-step)
+2. Load item parameters (mean discrimination a, mean difficulty b per domain)
+3. Apply reverse logit transformation: P = 1 / (1 + exp(-(a * (theta - b))))
+4. Use domain-specific average a and b for transformation
+5. Transform CI bounds similarly (transform theta bounds to probability bounds)
+6. Save probability-scale plot data
+
+**Output (Plot Source CSVs):**
+
+**File 1:** plots/step07_trajectory_theta_data.csv
+**Format:** CSV (plot-ready data for theta scale)
+**Columns:**
+- `time` (float): TSVR_hours (representative time per test)
+- `test` (int): Nominal test session (0, 1, 3, 6)
+- `domain` (string): Memory domain (what, where, when)
+- `mean_theta` (float): Observed mean theta per domain x test
+- `CI_lower` (float): Lower 95% CI bound (theta scale)
+- `CI_upper` (float): Upper 95% CI bound (theta scale)
+- `predicted_theta` (float): LMM model prediction at this time point
+- `n_obs` (int): Number of observations in group
+**Expected Rows:** 12 (3 domains x 4 time points)
+
+**File 2:** plots/step07_trajectory_probability_data.csv
+**Format:** CSV (plot-ready data for probability scale - Decision D069)
+**Columns:**
+- `time` (float): TSVR_hours
+- `test` (int): Nominal test session
+- `domain` (string): Memory domain
+- `mean_probability` (float): Mean theta transformed to probability scale
+- `CI_lower` (float): Lower 95% CI bound (probability scale)
+- `CI_upper` (float): Upper 95% CI bound (probability scale)
+- `predicted_probability` (float): Model prediction on probability scale
+- `n_obs` (int): Number of observations
+**Expected Rows:** 12 (3 domains x 4 time points)
+
+**Validation Requirement:**
+Validation tools MUST be used after plot data preparation tool execution. Specific validation tools will be determined by rq_tools based on plot data format requirements.
+
+**Substance Validation Criteria (for rq_inspect post-execution validation):**
+
+*Output Files:*
+- plots/step07_trajectory_theta_data.csv: 12 rows x 8 columns
+- plots/step07_trajectory_probability_data.csv: 12 rows x 8 columns
+
+*Value Ranges:*
+- time in [0, 200] hours (reasonable TSVR range)
+- test in {0, 1, 3, 6} (nominal sessions)
+- domain in {what, where, when} (categorical)
+- mean_theta in [-3, 3] (IRT ability scale)
+- mean_probability in [0, 1] (probability scale)
+- CI_upper > CI_lower for all rows (valid intervals)
+- n_obs >= 80 per group (100 participants, some missing acceptable)
+
+*Data Quality:*
+- Exactly 12 rows per file (3 domains x 4 tests, no more, no less)
+- All 3 domains present (what, where, when)
+- All 4 tests present (0, 1, 3, 6)
+- No NaN values in any column
+- Domain x test combinations unique (no duplicates)
+
+*Log Validation:*
+- Required pattern: "Plot data preparation complete: 12 rows created"
+- Required pattern: "All domains represented: what, where, when"
+- Required pattern: "Dual-scale conversion applied (Decision D069)"
+- Forbidden patterns: "ERROR", "NaN values detected", "Missing domain"
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure message (e.g., "Expected 12 rows, found 9")
+- Log failure to logs/step07_prepare_trajectory_plot_data.log
+- Quit script immediately (do NOT proceed to rq_plots)
+- g_debug invoked to diagnose root cause
+
+**Plotting Function (rq_plots will call):** Trajectory plot with confidence bands
+- rq_plots agent maps this description to specific tools/plots.py function
+- Plot reads plots/step07_trajectory_theta_data.csv and plots/step07_trajectory_probability_data.csv
+- No data aggregation in rq_plots (visualization only per Option B)
+- Decision D069: Generate BOTH theta-scale and probability-scale plots
 
 ---
 
 ## Expected Data Formats
 
-### Composite ID Structure
+### Step-to-Step Transformations
 
-**Format:** `{UID}_{TEST}`
+**Step 0 -> Step 1:** Wide IRT input (composite_ID x items) + Q-matrix -> IRT model fitting
+**Step 1 -> Step 2:** Pass 1 item parameters -> Apply purification thresholds -> Retained items list
+**Step 2 -> Step 3:** Purified items list + original IRT input -> Filter columns -> Pass 2 IRT fitting
+**Step 3 -> Step 4:** Wide theta scores -> Merge with TSVR -> Melt to long format
+**Step 4 -> Step 5:** Long format LMM input -> Fit 5 candidate models -> Best model selection
+**Step 5 -> Step 6:** Fitted model -> Extract contrasts and effect sizes
+**Step 3-5 -> Step 7:** Multiple sources -> Aggregate for plotting -> Plot source CSVs
 
-**Example:** `A010_T1` (Participant A010, Test 1)
+### Column Naming Conventions (from names.md)
 
-**Components:**
-- UID: Participant identifier (A### format)
-- TEST: Test session (T1, T2, T3, T4)
+| Variable | Pattern | Example | Notes |
+|----------|---------|---------|-------|
+| Participant ID | composite_ID | P001_0 | UID + "_" + test |
+| Raw UID | UID | P001 | Participant identifier |
+| Test session | test | 0, 1, 3, 6 | Nominal days |
+| Time variable | TSVR_hours | 24.5 | Decision D070 - actual hours |
+| Domain factor | domain | what, where, when | Categorical |
+| Theta estimate | theta_<dim> | theta_what | Per-dimension ability |
+| Standard error | se_<dim> | se_what | Per-dimension SE |
+| Discrimination | a | 1.2 | IRT slope parameter |
+| Difficulty | b | -0.5 | IRT location parameter |
+| CI bounds | CI_lower, CI_upper | -0.3, 0.5 | 95% confidence interval |
 
-**Usage:** Primary key for merging theta scores with TSVR and LMM predictions. Parsed to extract UID for random effects grouping.
+### Data Type Constraints
 
----
-
-### Wide to Long Transformation (Step 5)
-
-**Input Format (Step 4 output):**
-- File: data/step04_lmm_input.csv
-- Format: Wide (one row per composite_ID)
-- Columns: composite_ID, theta_What, theta_Where, theta_When, se_What, se_Where, se_When, TSVR_hours, TSVR_hours_sq, log_TSVR_hours, test
-
-**Transformation:**
-1. Reshape: One row per observation (composite_ID x dimension)
-2. Create domain column: Melt theta_What, theta_Where, theta_When into single theta column with domain indicator
-3. Add UID column: Parse from composite_ID (extract UID portion before underscore)
-
-**Output Format (LMM input):**
-- Format: Long (one row per composite_ID x dimension)
-- Columns: composite_ID, UID, theta, se, domain, TSVR_hours, TSVR_hours_sq, log_TSVR_hours, test
-- Expected Rows: ~1200 (400 composite_IDs x 3 dimensions)
-
-**Transformation Code Pattern:**
-```python
-# Melt theta columns
-df_long = pd.melt(
-    df_wide,
-    id_vars=['composite_ID', 'TSVR_hours', 'TSVR_hours_sq', 'log_TSVR_hours', 'test'],
-    value_vars=['theta_What', 'theta_Where', 'theta_When'],
-    var_name='dimension',
-    value_name='theta'
-)
-
-# Create domain column (strip "theta_" prefix)
-df_long['domain'] = df_long['dimension'].str.replace('theta_', '')
-
-# Parse UID from composite_ID
-df_long['UID'] = df_long['composite_ID'].str.split('_').str[0]
-```
-
----
-
-### Column Naming Conventions
-
-Per names.md (RQ 5.1 conventions):
-
-**Identifiers:**
-- `composite_ID`: UID_test format (e.g., A010_T1)
-- `UID`: Participant identifier (e.g., A010)
-- `test`: Test session (T1, T2, T3, T4)
-
-**Time Variables:**
-- `TSVR_hours`: Actual hours since encoding (float)
-- `TSVR_hours_sq`: TSVR_hours squared (for quadratic models)
-- `log_TSVR_hours`: log(TSVR_hours + 1) (for log models)
-
-**IRT Outputs:**
-- `theta_<dimension>`: Ability estimate (e.g., theta_What)
-- `se_<dimension>`: Standard error (e.g., se_What)
-- `a`: Item discrimination
-- `b`: Item difficulty
-
-**LMM/Plotting:**
-- `domain`: Factor (What, Where, When)
-- `CI_lower`: 95% confidence interval lower bound
-- `CI_upper`: 95% confidence interval upper bound
+| Column | Type | Nullable | Valid Range |
+|--------|------|----------|-------------|
+| composite_ID | string | No | Format: UID_test |
+| UID | string | No | Format: P### |
+| test | int | No | {0, 1, 3, 6} |
+| TSVR_hours | float | No | [0, 200] |
+| domain | string | No | {what, where, when} |
+| theta | float | No | [-4, 4] typical |
+| se | float | No | [0.05, 3.0] |
+| a | float | No | [0.01, 10.0] |
+| b | float | No | [-6, 6] |
 
 ---
 
 ## Cross-RQ Dependencies
 
-**Dependency Type:** RAW Data Only (No Dependencies)
+**Dependency Type: RAW Data Only (No Dependencies)**
 
-**This RQ uses:** Only data/cache/dfData.csv (project-level cached data derived from master.xlsx)
-
+**This RQ uses:** Only data/cache/dfData.csv (derived from master.xlsx)
 **No dependencies on other RQs:** Can be executed independently
-
-**Execution order:** Flexible (first RQ in chapter, no prerequisites)
+**Execution order:** Flexible (first RQ in Chapter 5)
 
 **Data Sources:**
-- dfData.csv: TQ_* columns (VR item accuracy), TSVR (time variable)
-- All extraction uses direct column selection from dfData.csv
-- No intermediate outputs from other RQs required
+- data/cache/dfData.csv - VR item responses, TSVR timing
+- All data extraction uses standard pandas operations reading CSV directly
 
-**Note:** dfData.csv is a PROJECT-LEVEL cached file, not an RQ-specific output. It is pre-processed from master.xlsx and available to all RQs.
+**Note:** RQ 5.1 is the baseline IRT analysis. Other RQs in Chapter 5 may depend on RQ 5.1 outputs (e.g., item parameters, theta scores), but RQ 5.1 itself has no dependencies.
 
 ---
 
 ## Validation Requirements
 
-### CRITICAL MANDATE
+**CRITICAL MANDATE:**
 
 Every analysis step in this plan MUST use validation tools after analysis tool execution.
 
 This is not optional. This is the core architectural principle preventing cascading failures observed in v3.0 (where analysis errors propagated undetected through 5+ downstream steps before discovery).
 
-### Exact Specification Requirement
+**Exact Specification Requirement:**
 
-> **"Validation tools MUST be used after analysis tool execution"**
+> "Validation tools MUST be used after analysis tool execution"
 
-### Implementation
+**Implementation:**
+- rq_tools (Step 11 workflow) will read tool_inventory.md validation tools section
+- rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
+- rq_analysis (Step 12 workflow) will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
+- g_code (Step 14 workflow) will generate stepN_name.py scripts with validation function calls
+- bash execution (Step 14 workflow) will run analysis -> validation -> error on validation failure
 
-- **rq_tools (Step 11 workflow)** will read tools_inventory.md validation tools section
-- **rq_tools** will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
-- **rq_analysis (Step 12 workflow)** will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
-- **g_code (Step 14 workflow)** will generate stepN_name.py scripts with validation function calls
-- **bash execution (Step 14 workflow)** will run analysis -> validation -> error on validation failure
-
-### Downstream Agent Requirements
-
+**Downstream Agent Requirements:**
 - **rq_tools:** MUST specify validation tool for EVERY analysis step (no exceptions)
 - **rq_analysis:** MUST embed validation tool call for EVERY analysis step (no exceptions)
 - **g_code:** MUST generate code with validation function calls (no exceptions)
@@ -936,136 +822,41 @@ This is not optional. This is the core architectural principle preventing cascad
 
 ### Validation Requirements By Step
 
-**Step 0: Extract VR Item Data and TSVR**
-- **Analysis Tool:** (determined by rq_tools - likely data extraction function)
-- **Validation Tool:** (determined by rq_tools - likely data quality validation)
-- **What Validation Checks:**
-  - Output files exist (step00_irt_input.csv, step00_tsvr_mapping.csv)
-  - Expected row count (~400)
-  - Expected column count (~103+)
-  - No unexpected NaN patterns (>80% NaN per item suggests extraction error)
-  - composite_ID format correct ({UID}_{TEST} pattern)
-  - Item scores in {0, 1, NaN} (dichotomized)
-  - TSVR_hours in reasonable range [0, 200]
-
-**Step 1: IRT Calibration Pass 1**
-- **Analysis Tool:** (determined by rq_tools - likely calibrate_irt or calibrate_grm)
-- **Validation Tool:** (determined by rq_tools - likely validate_irt_convergence + validate_irt_parameters)
-- **What Validation Checks:**
-  - Model converged (ELBO improved, no divergence)
-  - Item parameters in valid ranges (a in [0, 10], b unrestricted)
-  - No NaN parameters (estimation failure indicator)
-  - Expected row counts (103+ items, 400 composite_IDs)
-  - Factor structure correct (3 dimensions)
-
-**Step 2: Purify Items**
-- **Analysis Tool:** (determined by rq_tools - likely filter_items_by_quality)
-- **Validation Tool:** (determined by rq_tools - likely item retention validation)
-- **What Validation Checks:**
-  - Thresholds applied correctly (|b| <= 3.0, a >= 0.4)
-  - Retention rate reasonable (30-70%)
-  - At least 10 items retained per dimension (minimum for calibration)
-  - Purification report created with exclusion statistics
-
-**Step 3: IRT Calibration Pass 2**
-- **Analysis Tool:** (same as Step 1)
-- **Validation Tool:** (same as Step 1, plus Pass 1 vs Pass 2 comparison)
-- **What Validation Checks:**
-  - Same as Step 1, plus:
-  - Pass 2 fit improved vs Pass 1 (or equivalent quality)
-  - Item count matches purified list (no item loss)
-  - Theta SE reduced vs Pass 1 (better precision expected)
-
-**Step 4: Merge Theta Scores with TSVR**
-- **Analysis Tool:** (determined by rq_tools - likely pandas merge or custom merge function)
-- **Validation Tool:** (determined by rq_tools - likely merge validation)
-- **What Validation Checks:**
-  - All composite_IDs matched (no missing TSVR)
-  - No NaN in merged TSVR_hours
-  - Derived time variables created correctly (TSVR_hours_sq, log_TSVR_hours)
-  - Expected row count (400)
-
-**Step 5: Fit LMM Trajectory Models**
-- **Analysis Tool:** (determined by rq_tools - likely fit_lmm_trajectory_tsvr or run_lmm_analysis)
-- **Validation Tool:** (determined by rq_tools - likely validate_lmm_convergence + validate_lmm_residuals)
-- **What Validation Checks:**
-  - All 5 models converged
-  - Residuals normally distributed (Shapiro-Wilk or QQ plot)
-  - Homoscedasticity (residuals vs fitted plot)
-  - No autocorrelation (Durbin-Watson test)
-  - AIC comparison valid (all models fit to same data)
-
-**Step 6: Post-Hoc Contrasts**
-- **Analysis Tool:** (determined by rq_tools - likely compute_contrasts_pairwise)
-- **Validation Tool:** (determined by rq_tools - likely contrast validation)
-- **What Validation Checks:**
-  - Both contrasts computed (Where-What, When-What)
-  - Bonferroni correction applied correctly (p_bonf = min(p_uncorr * 2, 1.0))
-  - Effect sizes in reasonable range
-  - No NaN in contrast estimates or p-values
-
-**Step 7: Prepare Trajectory Plot Data**
-- **Analysis Tool:** (determined by rq_tools - likely custom aggregation function)
-- **Validation Tool:** (determined by rq_tools - likely plot data validation)
-- **What Validation Checks:**
-  - Both files created (theta + probability scales)
-  - All 3 domains present
-  - At least 4 timepoints represented
-  - Probability values in [0, 1]
-  - CI_upper > CI_lower for all rows
-  - No NaN in theta or probability columns
-
-**NOTE:** Technical validation (files exist, formats correct, values in bounds) checked by rq_inspect DURING analysis. Scientific plausibility (effect directions, theoretical coherence) checked by rq_results AFTER all analysis complete.
-
-### Expected Behavior on Validation Failure
-
-- **Methodological failure:** Validation tool quits, logs error, master invokes g_debug
-- **Substance failure:** rq_inspect quits with detailed report, master investigates
+| Step | Analysis Type | Key Validation Criteria |
+|------|---------------|-------------------------|
+| 0 | Data Extraction | File exists, row counts, item assignment to domains, Q-matrix validity |
+| 1 | IRT Calibration (Pass 1) | Convergence achieved, parameter bounds, no NaN |
+| 2 | Item Purification | Retention thresholds met, >= 10 items per domain |
+| 3 | IRT Calibration (Pass 2) | Convergence achieved, improved precision vs Pass 1 |
+| 4 | TSVR Merge | All IDs matched, no missing TSVR, long format correct |
+| 5 | LMM Fitting | Best model converged, AIC comparison valid |
+| 6 | Post-hoc Contrasts | 3 contrasts computed, dual p-values present, effect sizes valid |
+| 7 | Plot Data Prep | 12 rows exactly, all domains/tests present, no NaN |
 
 ---
 
 ## Summary
 
-**Total Steps:** 8 (Step 0: extraction + Steps 1-7: analysis/visualization)
-
-**Estimated Runtime:** High (150-180 minutes total)
-- Step 0: <5 min (data extraction)
-- Step 1: 60-90 min (IRT Pass 1)
-- Step 2: <5 min (purification)
-- Step 3: 60-90 min (IRT Pass 2)
-- Step 4: <5 min (TSVR merge)
-- Step 5: 30-60 min (LMM fitting)
-- Step 6: <5 min (post-hoc)
-- Step 7: <5 min (plot data prep)
-
+**Total Steps:** 8 (Step 0 extraction + Steps 1-7 analysis)
+**Estimated Runtime:** High (2-3 hours total, primarily IRT calibration)
 **Cross-RQ Dependencies:** None (RAW data only from dfData.csv)
-
 **Primary Outputs:**
-- data/step03_theta_scores.csv (final theta estimates, 3 dimensions)
-- data/step03_item_parameters.csv (final item parameters, purified)
-- results/step05_lmm_model_summary.txt (best trajectory model)
-- results/step06_post_hoc_contrasts.csv (domain comparisons, dual p-values)
-- plots/step07_trajectory_theta_data.csv (theta-scale plot source)
-- plots/step07_trajectory_probability_data.csv (probability-scale plot source)
-
-**Validation Coverage:** 100% (all 8 steps have validation requirements embedded)
-
-**Decisions Applied:**
-- D039: 2-pass IRT purification (Steps 1-3)
-- D068: Dual p-value reporting (Step 6)
-- D069: Dual-scale trajectory plots (Step 7)
-- D070: TSVR time variable (Steps 0, 4, 5)
+- Final theta scores: data/step03_theta_scores.csv
+- LMM model: data/step05_lmm_fitted_model.pkl
+- Post-hoc contrasts: results/step06_post_hoc_contrasts.csv
+- Effect sizes: results/step06_effect_sizes.csv
+- Plot data: plots/step07_trajectory_theta_data.csv, plots/step07_trajectory_probability_data.csv
+**Validation Coverage:** 100% (all 8 steps have validation requirements)
 
 ---
 
-## Next Steps (Workflow)
-
-1. **User reviews and approves this plan** (Step 7 user gate)
-2. **Workflow continues to Step 11:** rq_tools reads this plan -> creates 3_tools.yaml
-3. **Workflow continues to Step 12:** rq_analysis reads this plan + 3_tools.yaml -> creates 4_analysis.yaml
-4. **Workflow continues to Step 14:** g_code reads 4_analysis.yaml -> generates stepN_name.py scripts
+**Next Steps (Workflow):**
+1. User reviews and approves this plan (Step 7 user gate)
+2. Workflow continues to Step 11: rq_tools reads this plan -> creates 3_tools.yaml
+3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml -> creates 4_analysis.yaml
+4. Workflow continues to Step 14: g_code reads 4_analysis.yaml -> generates stepN_name.py scripts
 
 ---
 
 **Version History:**
-- v1.0 (2025-11-21): Initial plan created by rq_planner agent
+- v1.0 (2025-11-22): Initial plan created by rq_planner agent

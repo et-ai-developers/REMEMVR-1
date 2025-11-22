@@ -165,7 +165,7 @@ Required: Workflow must execute agents in dependency order
 
 ### Step 7: Read Tool Inventory
 
-**Action:** Read `docs/tools_inventory.md`
+**Action:** Read `docs/v4/tools_inventory.md`
 
 **Purpose:** Get exact function signatures, inputs, outputs, validation pairings for ALL available tools
 
@@ -414,7 +414,7 @@ Report Complete - Agent Terminating
 **Core Files (READ-ONLY):**
 - ❌ NEVER edit: `data/`, `tools/`, `config/`, `.claude/agents/`, `tests/`
 - ❌ NEVER edit: `docs/` (except reading for specifications)
-- ✅ READ ONLY: `docs/tools_inventory.md`, `docs/v4/names.md`, `docs/v4/templates/`, `docs/v4/best_practices/`
+- ✅ READ ONLY: `docs/v4/tools_inventory.md`, `docs/v4/names.md`, `docs/v4/templates/`, `docs/v4/best_practices/`
 
 **Your Scope (WRITE):**
 - ✅ CREATE: `results/chX/rqY/docs/3_tools.yaml` (your output)

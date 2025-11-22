@@ -25,48 +25,59 @@ class TestConfigureCandidateModels:
         """Test expected model names are present."""
         result = configure_candidate_models(n_factors=1)
 
+        # Actual model names from implementation
         expected_models = [
-            'intercept_only',
-            'random_intercept',
-            'random_slope',
-            'random_intercept_slope',
-            'full'
+            'Linear',
+            'Quadratic',
+            'Log',
+            'Lin+Log',
+            'Quad+Log'
         ]
 
         for model_name in expected_models:
-            assert model_name in result
+            assert model_name in result, f"Missing model: {model_name}"
 
     def test_each_model_has_formula(self):
         """Test each model has formula and re_formula."""
         result = configure_candidate_models(n_factors=1)
 
         for model_name, model_spec in result.items():
-            assert 'formula' in model_spec
+            assert 'formula' in model_spec, f"{model_name} missing formula"
             assert isinstance(model_spec['formula'], str)
+            assert 're_formula' in model_spec, f"{model_name} missing re_formula"
 
     def test_single_factor_formulas(self):
         """Test formulas for single-factor model."""
         result = configure_candidate_models(n_factors=1)
 
-        # Intercept only should be simple
-        assert 'Theta' in result['intercept_only']['formula']
-        assert 'Days' in result['random_slope']['formula']
+        # Single-factor models should reference Ability and Days
+        assert 'Ability' in result['Linear']['formula']
+        assert 'Days' in result['Linear']['formula']
+        assert 'Days' in result['Quadratic']['formula']
+        assert 'Days_sq' in result['Quadratic']['formula']
 
     def test_multi_factor_formulas(self):
         """Test formulas for multi-factor model."""
-        result = configure_candidate_models(n_factors=3, reference_group='Factor1')
+        result = configure_candidate_models(n_factors=3, reference_group='What')
 
-        # Should include Factor interactions
-        full_formula = result['full']['formula']
+        # Should include Factor interactions with treatment coding
+        full_formula = result['Linear']['formula']
         assert 'Factor' in full_formula or 'C(' in full_formula
+        assert 'What' in full_formula  # Reference group
 
     def test_reference_group_required_for_multi(self):
-        """Test reference_group is used for multi-factor."""
+        """Test reference_group is required for multi-factor."""
+        # Should raise ValueError without reference_group
+        with pytest.raises(ValueError):
+            configure_candidate_models(n_factors=2, reference_group=None)
+
+    def test_reference_group_in_formula(self):
+        """Test reference group appears in formula."""
         result = configure_candidate_models(n_factors=2, reference_group='FactorA')
 
         # Check reference group appears in formula (as treatment contrast)
-        full_formula = result['full']['formula']
-        assert 'Factor' in full_formula or 'C(' in full_formula
+        full_formula = result['Linear']['formula']
+        assert "Treatment('FactorA')" in full_formula
 
 
 if __name__ == '__main__':

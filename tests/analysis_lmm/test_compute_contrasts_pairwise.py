@@ -14,37 +14,47 @@ class TestComputeContrastsPairwise:
 
     @pytest.fixture
     def mock_lmm_result(self):
-        """Create mock LMM result object."""
+        """Create mock LMM result object.
+
+        The function looks for coefficient names in these patterns:
+        - C(Factor, Treatment)[T.{level}]
+        - C(Factor)[T.{level}]
+        - Factor[T.{level}]
+        - C(Domain, Treatment)[T.{level}]
+        - C(Domain)[T.{level}]
+        - Domain[T.{level}]
+        - {level} (bare level name)
+        """
         mock = MagicMock()
 
-        # Create params with Factor coefficients
+        # Create params with Factor coefficients using patterns the function expects
         mock.params = pd.Series({
             'Intercept': 0.5,
             'Days': -0.1,
-            'C(Factor, Treatment("Factor1"))[T.Factor2]': 0.2,
-            'C(Factor, Treatment("Factor1"))[T.Factor3]': -0.1,
-            'Days:C(Factor, Treatment("Factor1"))[T.Factor2]': 0.05,
-            'Days:C(Factor, Treatment("Factor1"))[T.Factor3]': -0.03
+            'Factor[T.Factor2]': 0.2,
+            'Factor[T.Factor3]': -0.1,
+            'Days:Factor[T.Factor2]': 0.05,
+            'Days:Factor[T.Factor3]': -0.03
         })
 
         # Create standard errors
         mock.bse = pd.Series({
             'Intercept': 0.05,
             'Days': 0.02,
-            'C(Factor, Treatment("Factor1"))[T.Factor2]': 0.08,
-            'C(Factor, Treatment("Factor1"))[T.Factor3]': 0.07,
-            'Days:C(Factor, Treatment("Factor1"))[T.Factor2]': 0.01,
-            'Days:C(Factor, Treatment("Factor1"))[T.Factor3]': 0.01
+            'Factor[T.Factor2]': 0.08,
+            'Factor[T.Factor3]': 0.07,
+            'Days:Factor[T.Factor2]': 0.01,
+            'Days:Factor[T.Factor3]': 0.01
         })
 
         # Create p-values
         mock.pvalues = pd.Series({
             'Intercept': 0.001,
             'Days': 0.001,
-            'C(Factor, Treatment("Factor1"))[T.Factor2]': 0.015,
-            'C(Factor, Treatment("Factor1"))[T.Factor3]': 0.180,
-            'Days:C(Factor, Treatment("Factor1"))[T.Factor2]': 0.001,
-            'Days:C(Factor, Treatment("Factor1"))[T.Factor3]': 0.002
+            'Factor[T.Factor2]': 0.015,
+            'Factor[T.Factor3]': 0.180,
+            'Days:Factor[T.Factor2]': 0.001,
+            'Days:Factor[T.Factor3]': 0.002
         })
 
         return mock
@@ -60,7 +70,7 @@ class TestComputeContrastsPairwise:
 
         result = compute_contrasts_pairwise(
             mock_lmm_result,
-            comparisons=['Factor2 - Factor1', 'Factor3 - Factor1']
+            comparisons=['Factor2-Factor1', 'Factor3-Factor1']
         )
 
         assert isinstance(result, pd.DataFrame)
@@ -71,13 +81,12 @@ class TestComputeContrastsPairwise:
 
         result = compute_contrasts_pairwise(
             mock_lmm_result,
-            comparisons=['Factor2 - Factor1']
+            comparisons=['Factor2-Factor1']
         )
 
         # Check for dual p-value columns
-        columns = result.columns.tolist()
-        assert 'p_uncorrected' in columns or 'p' in columns
-        assert 'p_corrected' in columns or 'p_bonferroni' in columns or 'p_adj' in columns
+        assert 'p_uncorrected' in result.columns
+        assert 'p_corrected' in result.columns
 
     def test_has_significance_flags(self, mock_lmm_result):
         """Test output has significance indicator columns."""
@@ -85,13 +94,12 @@ class TestComputeContrastsPairwise:
 
         result = compute_contrasts_pairwise(
             mock_lmm_result,
-            comparisons=['Factor2 - Factor1']
+            comparisons=['Factor2-Factor1']
         )
 
-        columns = result.columns.tolist()
-        # Should have some significance indicator
-        sig_cols = [c for c in columns if 'sig' in c.lower()]
-        assert len(sig_cols) > 0
+        # Should have significance indicator columns
+        assert 'sig_uncorrected' in result.columns
+        assert 'sig_corrected' in result.columns
 
     def test_bonferroni_correction_applied(self, mock_lmm_result):
         """Test Bonferroni correction is properly applied."""
@@ -99,15 +107,14 @@ class TestComputeContrastsPairwise:
 
         result = compute_contrasts_pairwise(
             mock_lmm_result,
-            comparisons=['Factor2 - Factor1', 'Factor3 - Factor1'],
+            comparisons=['Factor2-Factor1', 'Factor3-Factor1'],
             family_alpha=0.05
         )
 
         # With 2 comparisons, corrected alpha = 0.05/2 = 0.025
-        # Corrected p-values should be >= uncorrected p-values
-        if 'p_uncorrected' in result.columns and 'p_corrected' in result.columns:
-            # Corrected threshold is stricter
-            pass  # Logic is correct if function runs
+        # alpha_corrected column should reflect this
+        assert 'alpha_corrected' in result.columns
+        assert all(result['alpha_corrected'] == 0.025)
 
     def test_custom_family_alpha(self, mock_lmm_result):
         """Test custom family_alpha parameter."""
@@ -115,11 +122,24 @@ class TestComputeContrastsPairwise:
 
         result = compute_contrasts_pairwise(
             mock_lmm_result,
-            comparisons=['Factor2 - Factor1'],
+            comparisons=['Factor2-Factor1'],
             family_alpha=0.10
         )
 
-        assert isinstance(result, pd.DataFrame)
+        # With 1 comparison and alpha=0.10, corrected alpha = 0.10
+        assert result['alpha_corrected'].iloc[0] == 0.10
+
+    def test_corrected_p_capped_at_one(self, mock_lmm_result):
+        """Test corrected p-value is capped at 1.0."""
+        from tools.analysis_lmm import compute_contrasts_pairwise
+
+        result = compute_contrasts_pairwise(
+            mock_lmm_result,
+            comparisons=['Factor2-Factor1', 'Factor3-Factor1']
+        )
+
+        # All corrected p-values should be <= 1.0
+        assert all(result['p_corrected'] <= 1.0)
 
 
 if __name__ == '__main__':

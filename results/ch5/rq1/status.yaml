@@ -29,21 +29,18 @@ rq_stats:
 rq_planner:
   status: success
   context_dump: |
-    8 analysis steps planned (Step 0: extraction + Steps 1-7: analysis/viz)
-    Pipeline: IRT (2-pass purification) -> LMM (5 models) -> post-hoc contrasts -> dual-scale plots
-    Tools needed: IRT calibration (GRM, 3 dimensions), purification (D039), LMM trajectory (TSVR D070), contrasts (D068), plot data prep (D069)
-    Outputs: theta_scores (3 dims), item_params (purified), LMM summary (best model), contrasts (dual p-values), plot CSVs (theta + probability)
-    Validation: 100% coverage (all 8 steps have embedded validation requirements)
+    8 steps planned (Step 0 extraction + Steps 1-7 analysis).
+    Pipeline: IRT 2-pass (D039) -> TSVR merge (D070) -> LMM (5 candidates) -> contrasts (D068) -> plot data (D069).
+    Outputs: 3 data files, 4 results files, 2 plot CSVs. Validation required at every step.
 
 rq_tools:
-  status: failed
-  completed: 2025-11-21 23:59
+  status: success
+  completed: 2025-11-22 14:15
   context_dump: |
-    FAILED: Incomplete tool documentation in tools_inventory.md
-    Missing: filter_items_by_quality (exists in code but not documented with signature)
-    Ambiguous: Step 0 data extraction, Step 7 plot data prep (no specific tools named in 2_plan.md)
-    Required: Add filter_items_by_quality to tools_inventory.md Module:tools.analysis_irt section
-    TDD Detection: Documentation gap triggers user+master review -> update docs -> re-run
+    16 analysis + 4 validation tools cataloged for IRT->LMM trajectory analysis.
+    IRT: prepare_irt_input, configure_irt, fit_irt, extract_theta/params, calibrate_irt, filter_items, calibrate_grm.
+    LMM: configure_candidates, fit_lmm_tsvr, compare_by_aic, extract_effects, contrasts, effect_sizes.
+    Plotting: convert_theta_to_probability. Decisions embedded: D039, D068, D069, D070.
 
 rq_analysis:
   status: pending
