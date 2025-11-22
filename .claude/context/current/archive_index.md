@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-23 (context-manager curation)
+**Last Updated:** 2025-11-23 05:00 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -201,7 +201,7 @@
 **Description:** Complete history of Phases 19-21 testing (rq_scholar 9.1/10 CONDITIONAL, rq_stats 8.2/10 REJECTED, 1_concept.md perfection with 6 critical fixes, rq_planner 100% PASS with Unicode encoding fixes). Phase 19: 40% bloat cleanup (419 lines), 6 conflicts resolved, standalone 1_scholar.md (458 lines). Phase 20: 16% bloat cleanup (310 lines), 7 conflicts resolved, standalone 1_stats.md (463 lines), agent exceeded predictions with MORE rigorous validation. Concept perfection session: addressed all validation feedback (recent VR citations, encoding quality alternative, Q3 local independence validation, purification rationale, LMM convergence strategy, comprehensive validation procedures & limitations section), 100% critical issue coverage. Phase 21: 20% bloat cleanup (591 lines), 4 conflicts resolved, validation workflow clarification (status="success" means "report created" not "concept approved"), 2_plan.md created (953 lines, 8 steps), comprehensive Unicode encoding fix (ASCII-only enforcement across all agent prompts and templates). Validation architecture working: standalone reports, experimental context integration, quality control preventing cascading errors.
 
 ### v4x_phase23_27_testing_complete
-**Description:** Complete history of v4.X pipeline testing Phases 23-27 (2025-11-22 to 2025-11-23). Phase 23 rq_analysis (765-line 4_analysis.yaml), Phase 24 g_code (full 8-step IRT/LMM pipeline execution, compute_contrasts_pairwise fix, folder reorganization, g_code.md enhancements), Phase 26 rq_inspect (70% bloat reduction, 4-layer validation, step07 fixes). Key technical achievements: treatment coding fix for statsmodels, delta method for non-reference comparisons, test value mapping (1,2,3,4 to 0,1,3,6), folder discipline rules. All 8 pipeline steps executed and validated successfully.
+**Description:** Complete history of v4.X pipeline testing Phases 23-27 (2025-11-22 to 2025-11-23). Phase 23 rq_analysis (765-line 4_analysis.yaml), Phase 24 g_code (full 8-step IRT/LMM pipeline execution, compute_contrasts_pairwise fix, folder reorganization, g_code.md enhancements), Phase 26 rq_inspect (70% bloat reduction, 4-layer validation, step07 fixes), Phase 27 rq_plots (74% bloat reduction, 8 conflicts fixed, dual-scale trajectory plots generated). Key technical achievements: treatment coding fix for statsmodels, delta method for non-reference comparisons, test value mapping (1,2,3,4 to 0,1,3,6), folder discipline rules, Option B visualization architecture validated. All 8 pipeline steps executed and validated successfully.
 
 ---
 

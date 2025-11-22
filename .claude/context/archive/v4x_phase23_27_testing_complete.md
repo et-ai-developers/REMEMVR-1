@@ -499,10 +499,72 @@ SE = sqrt(Var(When) + Var(Where) - 2*Cov(When,Where))
 
 ---
 
+## Session (2025-11-23 03:00) - Phase 27 rq_plots
+
+**Archived from:** state.md
+**Original Date:** 2025-11-23 03:00
+**Reason:** Phase 27 complete, archived as part of v4.X testing history
+
+**Task:** Phase 27 - Test rq_plots Agent
+
+**Key Accomplishments:**
+
+**1. rq_plots Agent Testing (11-step process)**
+
+**Bloat Cleanup:**
+- Before: 742 lines
+- After: 193 lines
+- Reduction: 74%
+- Removed: Redundant function signatures, verbose examples, design philosophy, extended circuit breaker examples
+
+**g_conflict Pre-flight:**
+- Found: 8 conflicts (1 CRITICAL, 4 HIGH, 3 MODERATE)
+- Fixed all 8:
+  - CRITICAL: Function name mismatch (setup_plot_style vs set_plot_style_defaults) - fixed 8 references in plots.md
+  - HIGH: Best practices file references updated
+  - HIGH: Circuit breaker DATA_FILE_MISSING changed to EXPECTATIONS
+  - MODERATE: dual-scale pattern fix ({prefix}_theta.png), context dump format alignment
+
+**Agent Execution:**
+- Agent ran successfully on ch5/rq1
+- Generated plots.py (187 lines)
+- Executed plots.py successfully
+- Both PNG files generated:
+  - trajectory_theta.png (324KB)
+  - trajectory_probability.png (271KB)
+
+**Validation Results:**
+- Option B architecture: VALIDATED (visualization-only, reads CSVs)
+- dual-scale compliance: YES (both theta + probability plots)
+- Function usage: set_plot_style_defaults, plot_trajectory
+- status.yaml updated correctly
+
+**Test Status:**
+- 107 passed, 14 failed
+- 14 failures are PRE-EXISTING (verified by git stash test)
+
+**Files Modified:**
+- .claude/agents/rq_plots.md (bloat cleanup 742->193 lines)
+- docs/v4/templates/plots.md (function name fixes, 8 references)
+- docs/v4/todo.yaml (phase 27 results)
+- results/ch5/rq1/plots/plots.py (generated)
+- results/ch5/rq1/status.yaml (rq_plots = success)
+
+**End of Session (2025-11-23 03:00)**
+
+**Session Duration:** ~45 minutes
+**Token Usage:** ~143k tokens
+**Agent Tested:** rq_plots (Phase 27 COMPLETE)
+**Bloat Reduction:** 74% (742->193 lines)
+**Conflicts Fixed:** 8 (in rq_plots.md + plots.md)
+**Plots Generated:** 2 (trajectory_theta.png, trajectory_probability.png)
+
+---
+
 ## Summary
 
-**Phases Completed:** 23, 24, 25 (skipped - g_debug not needed), 26, (27 in next session)
-**Total Duration:** ~4 hours across 6 sessions
+**Phases Completed:** 23, 24, 25 (skipped - g_debug not needed), 26, 27
+**Total Duration:** ~5 hours across 7 sessions
 **Key Achievements:**
 - Full 8-step IRT/LMM pipeline executed successfully
 - compute_contrasts_pairwise tool fixed (treatment coding)
@@ -510,6 +572,7 @@ SE = sqrt(Var(When) + Var(Where) - 2*Cov(When,Where))
 - rq_inspect validated all 8 steps
 - step07 bugs fixed (missing columns, test mapping)
 - RQ folder structure standardized
+- rq_plots generated dual-scale trajectory plots
 
 **Technical Learnings:**
 - statsmodels treatment coding requires careful coefficient name handling
@@ -517,5 +580,6 @@ SE = sqrt(Var(When) + Var(Where) - 2*Cov(When,Where))
 - Model pickling unreliable, re-fit preferred
 - g_code needs explicit folder/naming examples
 - rq_inspect sequential safety prevents incomplete validations
+- rq_plots Option B architecture (visualization-only) validated
 
 ---
