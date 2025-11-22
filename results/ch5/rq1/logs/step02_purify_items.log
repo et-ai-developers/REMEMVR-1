@@ -1,0 +1,39 @@
+[START] Step 02: Purify Items (Decision D039)
+[CONFIG] a_threshold >= 0.4
+[CONFIG] |b_threshold| <= 3.0
+[LOAD] Loading Pass 1 item parameters...
+[LOADED] step01_pass1_item_params.csv (105 rows, 4 cols)
+[INFO] Columns: ['item_name', 'factor', 'a', 'b']
+[ANALYSIS] Running filter_items_by_quality...
+[PARAMS] df_items shape: (105, 4)
+[PARAMS] a_threshold: 0.4
+[PARAMS] b_threshold: 3.0
+[DONE] Analysis complete
+[RESULT] Retained: 70 items
+[RESULT] Removed: 35 items
+[RESULT] Retention rate: 66.7%
+[SAVE] Saving purified items...
+[SAVED] step02_purified_items.csv (70 rows, 4 cols)
+[SAVE] Saving removed items...
+[SAVED] step02_removed_items.csv (35 rows)
+[INFO] Exclusion reasons summary:
+  - a < 0.4 on when: 20 items
+  - a < 0.4 on where: 5 items
+  - a < 0.4 on what: 2 items
+  - |b| > 3.0 on what (b=-3.37): 1 items
+  - |b| > 3.0 on what (b=-5.95): 1 items
+  - |b| > 3.0 on what (b=-3.18): 1 items
+  - |b| > 3.0 on what (b=-4.24): 1 items
+  - |b| > 3.0 on what (b=-5.33): 1 items
+  - |b| > 3.0 on what (b=-3.68): 1 items
+  - |b| > 3.0 on what (b=-4.48): 1 items
+  - |b| > 3.0 on what (b=-3.05): 1 items
+[VALIDATION] Running validate_irt_parameters...
+[PARAMS] Validation using a_col='a', b_col='b'
+[VALIDATION] valid: True
+[VALIDATION] n_flagged: 0
+[VALIDATION] total_items: 70
+[VALIDATION] Checking domain coverage...
+[INFO] Domain coverage check skipped (no Discrim_* columns)
+[PASS] Retention rate (66.7%) within expected range [20%, 95%]
+[SUCCESS] Step 02 complete

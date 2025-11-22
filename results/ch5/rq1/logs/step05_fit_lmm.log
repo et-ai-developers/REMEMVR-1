@@ -1,0 +1,58 @@
+[START] Step 05: Fit LMM Trajectory Models
+============================================================
+
+[LOAD] Loading LMM input data from step04...
+[LOADED] step04_lmm_input.csv (1200 rows, 6 cols)
+  Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+  Unique UIDs: 100
+  Domains: ['what', 'when', 'where']
+  TSVR_hours range: 1.0 - 246.2
+
+[TRANSFORM] Preparing data for LMM tool...
+  Created time variables: Days, Days_sq, log_Days
+  Days range: 0.04 - 10.26
+  Factor levels: ['What', 'When', 'Where']
+
+[ANALYSIS] Running compare_lmm_models_by_aic...
+  n_factors: 3 (what, where, when)
+  reference_group: 'What' (treatment coding)
+  groups: 'UID' (random effects grouping)
+[DONE] Model comparison complete
+
+[RESULTS] Best model: Log
+  AIC: 3187.96
+  BIC: 3238.86
+  Log-Likelihood: -1583.98
+
+[SAVE] Saved AIC comparison: /home/etai/projects/REMEMVR/results/ch5/rq1/results/step05_lmm_model_comparison.csv
+  5 models compared
+  AIC Comparison Table:
+    Log: AIC=3187.96, delta=0.00, weight=0.619
+    Lin+Log: AIC=3189.18, delta=1.22, weight=0.336
+    Quadratic: AIC=3194.21, delta=6.25, weight=0.027
+    Quad+Log: AIC=3195.13, delta=7.16, weight=0.017
+    Linear: AIC=3219.40, delta=31.44, weight=0.000
+[SAVE] Saved model summary: /home/etai/projects/REMEMVR/results/ch5/rq1/results/step05_lmm_model_summary.txt
+[SAVE] Saved fitted model: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step05_lmm_fitted_model.pkl
+
+[VALIDATION] Running validate_lmm_convergence...
+  converged: True
+  message: LMM converged successfully
+
+[VALIDATION] Additional checks:
+  Converged models: 5/5
+  Random effects variance: 0.2644
+  Fixed effects: All 9 estimates are finite
+
+============================================================
+[SUCCESS] Step 05 complete
+============================================================
+
+Outputs:
+  - /home/etai/projects/REMEMVR/results/ch5/rq1/results/step05_lmm_model_comparison.csv
+  - /home/etai/projects/REMEMVR/results/ch5/rq1/results/step05_lmm_model_summary.txt
+  - /home/etai/projects/REMEMVR/results/ch5/rq1/data/step05_lmm_fitted_model.pkl
+
+Best Model: Log
+  Formula: Ability ~ Days * C(Factor, Treatment('What'))
+  AIC: 3187.96

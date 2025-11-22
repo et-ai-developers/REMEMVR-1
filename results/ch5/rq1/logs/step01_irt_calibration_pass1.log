@@ -1,0 +1,49 @@
+============================================================
+Step 01: IRT Calibration Pass 1
+============================================================
+
+[START] Step 01: IRT Calibration Pass 1 (All Items)
+[LOAD] Loading input data from Step 0...
+[LOADED] step00_irt_input.csv (400 rows, 106 cols)
+[LOADED] step00_q_matrix.csv (105 rows, 4 cols)
+[PREP] Converting wide format to long format for IRT...
+[PREP] Long format created: 42000 rows
+[PREP] Unique UIDs: 100
+[PREP] Unique tests: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[PREP] Unique items: 105
+[PREP] Deriving factor groups from Q-matrix...
+[PREP]   What: ['-N-'] -> 29 items
+[PREP]   Where: ['-L-', '-U-', '-D-'] -> 50 items
+[PREP]   When: ['-O-'] -> 26 items
+[ANALYSIS] Running calibrate_irt (Pass 1 - all items)...
+[ANALYSIS] Config: factors=['What', 'Where', 'When'], correlated=True
+[ANALYSIS] Device: cpu, seed: 42
+[DONE] IRT calibration complete
+[DONE] Theta scores shape: (400, 5)
+[DONE] Item parameters shape: (105, 6)
+[SAVE] Formatting and saving item parameters...
+[SAVED] step01_pass1_item_params.csv (105 items)
+[SUMMARY] Item parameters (Pass 1):
+[SUMMARY]   Discrimination range: 0.073 - 2.163
+[SUMMARY]   Difficulty range: -20.790 - 16.477
+[SUMMARY]   what items: 29
+[SUMMARY]   where items: 50
+[SUMMARY]   when items: 26
+[SAVE] Formatting and saving theta scores...
+[SAVED] step01_pass1_theta.csv (400 observations)
+[SUMMARY] Theta scores (Pass 1):
+[SUMMARY]   theta_what: mean=0.066, std=1.024
+[SUMMARY]   theta_where: mean=-0.033, std=0.968
+[SUMMARY]   theta_when: mean=-0.021, std=0.990
+[VALIDATION] Running validate_irt_convergence...
+[VALIDATION] Converged: True
+[VALIDATION] Message: Model converged successfully
+[VALIDATION] Additional parameter checks:
+[VALIDATION]   Discrimination in [0.01, 10.0]: True (actual: [0.073, 2.163])
+[VALIDATION]   Difficulty in [-6.0, 6.0]: False (actual: [-20.790, 16.477])
+[VALIDATION]   No NaN in parameters: True (0 items with NaN)
+[VALIDATION]   No NaN in theta scores: True (0 observations with NaN)
+[WARN] Some validation checks failed - review item parameters
+[SUCCESS] Step 01: IRT Calibration Pass 1 complete
+
+Next: Step 02 will use logs/step01_pass1_item_params.csv to purify items

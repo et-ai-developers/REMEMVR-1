@@ -1,0 +1,40 @@
+[START] Step 06: Compute Post-Hoc Contrasts (Decision D068)
+============================================================
+
+[LOAD] Loading LMM input data and re-fitting best model...
+[LOADED] step04_lmm_input.csv (1200 rows)
+[FIT] Re-fitting Log model (best by AIC)...
+[FITTED] Log model
+  - AIC: nan
+  - BIC: nan
+  - Log-Likelihood: -1600.70
+  - Number of observations: 1200
+  - Converged: True
+
+[VALIDATION] Running validate_lmm_convergence...
+  - Converged: True
+  - Message: LMM converged successfully
+
+[ANALYSIS] Running compute_contrasts_pairwise...
+  Implementing Decision D068: Dual p-value reporting
+  - Comparisons: ['where-what', 'when-what', 'when-where']
+  - Family-wise alpha: 0.05
+  - Number of comparisons: 3
+  - Bonferroni-corrected alpha: 0.0167
+
+[ERROR] 'sig_uncorrected'
+
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq1/code/step06_compute_post_hoc_contrasts.py", line 190, in <module>
+    contrasts_df = compute_contrasts_pairwise(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_lmm.py", line 752, in compute_contrasts_pairwise
+    print(f"  Significant (uncorrected α=0.05): {df_contrasts['sig_uncorrected'].sum()}/{k}")
+                                                 ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/range.py", line 417, in get_loc
+    raise KeyError(key)
+KeyError: 'sig_uncorrected'
