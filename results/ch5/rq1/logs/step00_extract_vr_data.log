@@ -1,0 +1,60 @@
+================================================================================
+Step 00: Extract VR Data for IRT Analysis
+================================================================================
+
+[START] Step 00: Extract VR Data for IRT Analysis
+[LOAD] Loading input data from dfData.csv...
+[LOADED] dfData.csv (400 rows, 213 cols)
+[PROCESS] Identifying columns...
+[INFO] Found 105 item columns (TQ_*)
+[INFO] Domain breakdown:
+       - what: 29 items
+       - where: 50 items
+       - when: 26 items
+       - unknown: 0 items
+[PROCESS] Creating composite_ID...
+[INFO] Created 400 unique composite_IDs
+[PROCESS] Dichotomizing item responses (threshold=1.0)...
+[INFO] Dichotomization results:
+       - Total valid responses: 42000
+       - Correct (1): 22288 (53.1%)
+       - Incorrect (0): 19712 (46.9%)
+       - Missing (NaN): 0
+[PROCESS] Creating IRT input file (wide format)...
+[INFO] IRT input shape: (400, 106)
+[PROCESS] Creating TSVR mapping file...
+[INFO] TSVR mapping shape: (400, 4)
+[INFO] TSVR_hours range: [1.00, 246.24]
+[PROCESS] Creating Q-matrix...
+[INFO] Q-matrix shape: (105, 4)
+[INFO] Q-matrix domain counts:
+       - what: 29
+       - where: 50
+       - when: 26
+[VALIDATION] Running validation checks...
+[VALIDATION] Row counts: IRT input=400, TSVR mapping=400, Q-matrix=105
+[VALIDATION] Checking item values are binary...
+[VALIDATION] Checking TSVR_hours range...
+[VALIDATION] TSVR_hours range: [1.00, 246.24]
+[VALIDATION] Checking Q-matrix row sums...
+[VALIDATION] Checking unique UIDs...
+[VALIDATION] Unique UIDs: 100
+[VALIDATION] Checking composite_ID format...
+[VALIDATION] All validation checks PASSED
+[SAVE] Saving output files...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/data/step00_irt_input.csv (400 rows, 106 cols)
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/data/step00_tsvr_mapping.csv (400 rows, 4 cols)
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/data/step00_q_matrix.csv (105 rows, 4 cols)
+
+================================================================================
+[SUCCESS] Step 00 complete
+================================================================================
+Outputs created:
+  1. IRT input: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step00_irt_input.csv
+     -> 400 observations, 105 items
+  2. TSVR mapping: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step00_tsvr_mapping.csv
+     -> 400 observations, TSVR_hours for Decision D070
+  3. Q-matrix: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step00_q_matrix.csv
+     -> 105 items, 3 domains (what/where/when)
+
+Ready for Step 01: IRT Calibration Pass 1

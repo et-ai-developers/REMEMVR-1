@@ -1,11 +1,7 @@
 ---
 name: g_code
-version: 4.0.0
 description: Code generation agent with 4-layer pre-generation validation
-tools: [Read, Write, Bash]
-status: active
-created: 2025-11-18
-specification: docs/user/analysis_pipeline_solution.md sections 2.4.1, 6.1
+tools: Read, Write, Bash
 ---
 
 # g_code - Code Generation Agent

@@ -280,8 +280,144 @@ phase23_test_rq_analysis:
 
 ---
 
+## Session (2025-11-22 18:30)
+
+**Task:** Phase 24 - Test g_code Agent + Fix rq_analysis stdlib bug
+
+**Objective:** Test g_code agent on RQ 5.1, discovered and fixed critical rq_analysis bug
+
+**Key Accomplishments:**
+
+**1. Discovered rq_analysis Bug - Invented Fake Tools for Stdlib Operations**
+
+**Problem:** When running g_conflict on g_code inputs, found 4 CRITICAL conflicts:
+- `tools.data_extraction.extract_vr_data_for_irt` - MODULE DOESN'T EXIST
+- `tools.data_preparation.merge_theta_with_tsvr` - MODULE DOESN'T EXIST
+- `validate_extraction_outputs`, `validate_lmm_input` - FUNCTIONS DON'T EXIST
+
+**Root Cause:** rq_analysis invented fake module/function names for pandas/numpy operations instead of using `type: "stdlib"`
+
+**Solution:** Updated rq_analysis.md to distinguish:
+- `type: "catalogued"` - tools from 3_tools.yaml (module/function/signature)
+- `type: "stdlib"` - pandas/numpy operations (operations list, NO module/function)
+
+**2. Fixed rq_analysis.md**
+
+**Sections Updated:**
+- Step 5 (Read Tool Catalog) - Added "CRITICAL: Distinguish Two Types of Operations"
+- Step 7 (Ultrathink) - Added Case A (catalogued) vs Case B (stdlib) handling
+- Step 8 (Verify Completeness) - Updated checklist for both types
+- Safety Rules - Added "NEVER INVENT FAKE MODULE/FUNCTION NAMES"
+
+**Key Addition:**
+```markdown
+**How to Identify Stdlib Operations:**
+- Step describes pandas operations (read_csv, merge, melt, pivot, to_csv)
+- Step describes numpy operations (array manipulation, dichotomization)
+- No matching tool exists in 3_tools.yaml for the described operation
+```
+
+**3. Regenerated 4_analysis.yaml - Now Correct**
+
+- Re-ran rq_analysis after fix
+- Step 00 and Step 04 now correctly use `type: "stdlib"` with operations list
+- No fake module/function names
+- Validation uses inline criteria (not fake validation functions)
+
+**4. Tested g_code on step00 (stdlib) - SUCCESS**
+
+**Generated:** `results/ch5/rq1/code/step00_extract_vr_data.py`
+
+**Script Features:**
+- Loads dfData.csv, creates composite_ID
+- Dichotomizes TQ_* item responses (threshold = 1.0)
+- Classifies items by domain (-N-, -L-/-U-/-D-, -O-)
+- Creates 3 outputs: IRT input, TSVR mapping, Q-matrix
+- Comprehensive validation with inline criteria
+
+**Execution Result:**
+- Initial fail: TSVR_hours range [0, 200] too narrow (actual max = 246.24)
+- Fixed range to [0, 300] and re-ran
+- SUCCESS: All 3 output files created correctly
+
+**Output Files:**
+| File | Rows | Columns |
+|------|------|---------|
+| step00_irt_input.csv | 400 | 106 (105 items + composite_ID) |
+| step00_tsvr_mapping.csv | 400 | 4 |
+| step00_q_matrix.csv | 105 | 4 |
+
+**5. Tested g_code on step01 (catalogued) - Code Generated, Path Bug Found**
+
+**Generated:** `results/ch5/rq1/code/step01_irt_calibration_pass1.py`
+
+**Path Bug Found:**
+- g_code used `parents[3]` for project root
+- Correct is `parents[4]` (code → rq1 → ch5 → results → REMEMVR)
+- Fixed manually in generated script
+
+**Execution Blocked:**
+- PyTorch not installed in poetry environment
+- `tools/analysis_irt.py` imports `torch`
+- Need to add torch to pyproject.toml before IRT steps can run
+
+**6. Files Modified This Session**
+
+**Agent Prompts:**
+- `.claude/agents/rq_analysis.md` - Major update for stdlib handling (Steps 5, 7, 8, Safety Rules)
+
+**RQ 5.1 Outputs:**
+- `results/ch5/rq1/docs/4_analysis.yaml` - Regenerated with stdlib types
+- `results/ch5/rq1/status.yaml` - rq_analysis = success
+- `results/ch5/rq1/code/step00_extract_vr_data.py` - Generated, executed
+- `results/ch5/rq1/code/step01_irt_calibration_pass1.py` - Generated, path fixed
+- `results/ch5/rq1/data/step00_irt_input.csv` - Created
+- `results/ch5/rq1/data/step00_tsvr_mapping.csv` - Created
+- `results/ch5/rq1/data/step00_q_matrix.csv` - Created
+
+**7. Key Learnings**
+
+**rq_analysis Bug Pattern:**
+- Agent didn't know how to handle operations not in 3_tools.yaml
+- Instead of quitting or using stdlib, it invented fake tool names
+- Fix: Explicit instructions for stdlib operations with `type: "stdlib"`
+
+**g_code Path Bug:**
+- RQ scripts are in results/chX/rqY/code/ (5 levels deep from project root)
+- Need `parents[4]` not `parents[3]` for correct import path
+- Should add to g_code template or best_practices/code.md
+
+**8. Remaining Work**
+
+**Phase 24 (g_code) - Partially Complete:**
+- [x] step00 stdlib - SUCCESS
+- [x] step01 catalogued - Code generated, blocked on PyTorch
+- [ ] step04 stdlib - Not yet tested
+- [ ] Execute full pipeline once PyTorch installed
+
+**Blocking Issue:**
+- PyTorch not in pyproject.toml
+- IRT calibration requires torch for deepirtools/IWAVE
+
+---
+
+**End of Session (2025-11-22 18:30)**
+
+**Session Duration:** ~1.5 hours
+**Token Usage:** ~140k tokens
+**Bugs Fixed:** 1 CRITICAL (rq_analysis stdlib handling)
+**Bugs Found:** 1 (g_code path calculation - parents[3] should be parents[4])
+**Code Generated:** 2 scripts (step00, step01)
+**Code Executed:** 1 script (step00 - SUCCESS)
+**Output Files Created:** 3 data files
+
+**Status:** g_code testing partially complete. step00 (stdlib) works perfectly. step01 (catalogued) generated but blocked on PyTorch dependency. rq_analysis stdlib bug fixed and documented.
+
+---
+
 ## Active Topics (For context-manager)
 
-- rq51_workflow_progress (rq_planner + rq_tools + rq_analysis complete, g_code next)
-- v4x_phase23_complete (rq_analysis testing passed, 4_analysis.yaml created)
-- v4x_phase24_pending (g_code testing ready to start)
+- rq51_workflow_progress (step00 complete, step01 blocked on PyTorch)
+- v4x_phase24_in_progress (g_code tested on step00 stdlib, step01 catalogued)
+- rq_analysis_stdlib_fix (major bug fix - distinguish catalogued vs stdlib operations)
+- g_code_path_bug (parents[3] should be parents[4] for RQ scripts)

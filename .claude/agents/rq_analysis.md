@@ -167,29 +167,46 @@ agents:
 3. **Input/output specifications:** What each tool expects/produces
 4. **Module paths:** Where tools are imported from
 
-**Example Information from 3_tools.yaml:**
+**CRITICAL: Distinguish Two Types of Operations:**
+
+1. **Catalogued Tools** (from 3_tools.yaml):
+   - Have `module: "tools.analysis_irt"` or similar
+   - Require exact signature matching
+   - Examples: `calibrate_irt`, `filter_items_by_quality`, `fit_lmm_trajectory_tsvr`
+
+2. **Stdlib Operations** (pandas/numpy/pathlib - NOT in 3_tools.yaml):
+   - Use `analysis_call.type: "stdlib"` in 4_analysis.yaml
+   - Describe operations inline (load, filter, merge, reshape, save)
+   - Do NOT invent fake module/function names
+   - Examples: data extraction, CSV loading, DataFrame merging, column filtering
+   - Per 3_tools.yaml: "Stdlib functions (pandas, numpy) not cataloged - exempt from verification"
+
+**How to Identify Stdlib Operations:**
+- Step describes pandas operations (read_csv, merge, melt, pivot, to_csv)
+- Step describes numpy operations (array manipulation, dichotomization)
+- Step describes file I/O without calling a catalogued tool
+- No matching tool exists in 3_tools.yaml for the described operation
+
+**Example Catalogued Tool from 3_tools.yaml:**
 
 ```yaml
 analysis_tools:
-  calibrate_grm:
+  calibrate_irt:
     module: "tools.analysis_irt"
-    signature: "calibrate_grm(df: pd.DataFrame, dimensions: List[str], dimension_names: List[str], item_mapping: Dict[str, List[str]], ...) -> Tuple[pd.DataFrame, pd.DataFrame]"
-    inputs:
-      df: {type: "pd.DataFrame", columns: ["UID", "test", "item_name", "score"], description: "Long-format IRT input"}
-      dimensions: {type: "List[str]", description: "Dimension tags for Q-matrix"}
-      dimension_names: {type: "List[str]", description: "Human-readable dimension names"}
-      item_mapping: {type: "Dict[str, List[str]]", description: "Dimension → tag patterns mapping"}
-    outputs:
-      item_parameters: {type: "pd.DataFrame", columns: ["item_name", "dimension", "a", "b"], description: "IRT item parameters"}
-      theta_scores: {type: "pd.DataFrame", columns: ["composite_ID", ...dimension_names], description: "Person ability estimates"}
-    validation_tool: "validate_irt_calibration"
-    notes:
-      - "Uses deepirtools IWAVE estimator"
-      - "Decision D039: 2-pass IRT with purification"
+    signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_convergence"
 ```
 
+**Example Stdlib Operation (NOT in 3_tools.yaml):**
+
+When 2_plan.md says: "Load CSV, create composite_ID, dichotomize values, reshape to wide format"
+- This is pandas/numpy operations
+- Do NOT look for a tool in 3_tools.yaml
+- Use `type: "stdlib"` in 4_analysis.yaml
+
 **Circuit Breaker:**
-- If 3_tools.yaml missing tool needed by 2_plan.md → QUIT: "Tool catalog incomplete - Step X requires tool '{tool_name}' not found in 3_tools.yaml"
+- If step requires catalogued tool AND 3_tools.yaml missing it → QUIT: "Tool catalog incomplete - Step X requires tool '{tool_name}' not found in 3_tools.yaml"
+- If step describes stdlib operations → Do NOT quit, use `type: "stdlib"` instead
 
 ---
 
@@ -222,27 +239,64 @@ analysis_tools:
 
 **For Each Step in 2_plan.md:**
 
+**FIRST: Determine if step uses catalogued tool OR stdlib operations:**
+
+**Case A: Catalogued Tool (from 3_tools.yaml)**
+
 1. **Match tool specification from 3_tools.yaml:**
    - Plan says: "Calibrate 3-dimensional GRM"
-   - Tools says: `calibrate_grm(df, dimensions, dimension_names, item_mapping, ...)`
+   - Tools says: `calibrate_irt(df_long, groups, config) -> Tuple[DataFrame, DataFrame]`
    - Match confirmed
 
 2. **Extract parameter values from 2_plan.md:**
-   - dimensions = 3
-   - dimension_names = ["What", "Where", "When"]
-   - item_mapping = {What: ["VR-*-*-N-ANS"], Where: ["VR-*-*-U-ANS", "VR-*-*-D-ANS"], When: ["VR-*-*-T-ANS"]}
-   - model = "GRM"
-   - device = "cpu"
-   - max_epochs = 1000
+   - config.n_cats = 2
+   - config.device = "cpu"
+   - groups = {what: [...], where: [...], when: [...]}
 
 3. **Combine into complete specification:**
-   - Tool: `tools.analysis_irt.calibrate_grm`
-   - Signature: [full signature from 3_tools.yaml]
-   - Inputs: [from 3_tools.yaml + 2_plan.md file paths]
-   - Outputs: [from 3_tools.yaml + 2_plan.md file paths]
-   - Parameters: [from 2_plan.md values]
-   - Formats: [from 2_plan.md column specifications]
+   - `analysis_call.type: "catalogued"`
+   - `analysis_call.module: "tools.analysis_irt"`
+   - `analysis_call.function: "calibrate_irt"`
+   - `analysis_call.signature:` [from 3_tools.yaml]
+   - Inputs, Outputs, Parameters: [from 2_plan.md + 3_tools.yaml]
    - Validation: [from 3_tools.yaml validation_tool]
+
+**Case B: Stdlib Operations (pandas/numpy - NOT in 3_tools.yaml)**
+
+1. **Recognize stdlib operations in 2_plan.md:**
+   - Plan says: "Load CSV, create composite_ID, dichotomize, reshape, save"
+   - This is pandas/numpy, NOT a catalogued tool
+   - Do NOT search 3_tools.yaml for this
+
+2. **Extract operations from 2_plan.md Processing section:**
+   - Step-by-step pandas/numpy operations
+   - Input file paths and expected columns
+   - Output file paths and expected columns
+   - Transformation logic (dichotomization thresholds, merge keys, etc.)
+
+3. **Generate stdlib specification:**
+   - `analysis_call.type: "stdlib"`
+   - `analysis_call.operations:` [list of pandas/numpy operations from 2_plan.md]
+   - Do NOT include `module:` or `function:` (these don't exist)
+   - Inputs, Outputs: [from 2_plan.md]
+   - Validation: inline checks (file exists, row counts, value ranges)
+
+**Example Stdlib Specification:**
+
+```yaml
+- name: "step00_extract_vr_data"
+  analysis_call:
+    type: "stdlib"  # NOT a catalogued tool - pure pandas/numpy
+    operations:
+      - "pd.read_csv('data/cache/dfData.csv')"
+      - "Create composite_ID = UID + '_' + TEST"
+      - "Dichotomize: values >= 1 -> 1, values < 1 -> 0"
+      - "Filter columns by tag patterns (*-N-*, *-L-*, etc.)"
+      - "Reshape to wide format (composite_ID x items)"
+      - "Create Q-matrix (item x factor loading)"
+      - "Save outputs to CSV"
+    # NO module/function - g_code generates pandas code inline
+```
 
 4. **Enforce naming conventions from names.md:**
    - Step name: Apply pattern from names.md
@@ -251,15 +305,18 @@ analysis_tools:
 
 **Validation Checks:**
 
-- ✅ Every analysis step has paired validation tool
+- ✅ Every catalogued tool step has paired validation tool from 3_tools.yaml
+- ✅ Every stdlib step has inline validation criteria (file exists, row counts, value ranges)
 - ✅ All parameter values present (no "TBD" or placeholders)
 - ✅ All input/output file paths specified
 - ✅ All data formats documented (columns, types)
-- ✅ All tool signatures complete with type hints
+- ✅ All catalogued tool signatures complete with type hints
 - ✅ All naming conventions enforced
 
 **Circuit Breaker:**
-- If ANY information missing → QUIT with detailed report of what's missing
+- If catalogued tool missing from 3_tools.yaml → QUIT with error
+- If stdlib operations unclear in 2_plan.md → QUIT asking for clarification
+- NEVER invent fake module/function names for stdlib operations
 - NEVER use placeholders like "TBD" or "see config"
 - NEVER leave g_code to guess anything
 
@@ -271,16 +328,18 @@ analysis_tools:
 
 **Checklist (MUST answer YES to all):**
 
-1. ✅ Every step has full tool signature with type hints?
-2. ✅ Every step has complete parameter values (not pointers)?
-3. ✅ Every step has explicit input file paths with format specifications?
-4. ✅ Every step has explicit output file paths with format specifications?
-5. ✅ Every step has paired validation tool with signature?
-6. ✅ Every validation has explicit input specifications?
-7. ✅ All data formats documented (column names, types)?
-8. ✅ All naming conventions from names.md enforced?
-9. ✅ Zero placeholders, zero "TBD", zero "see other file"?
-10. ✅ g_code can generate perfect Python reading ONLY 4_analysis.yaml?
+1. ✅ Every CATALOGUED step has full tool signature with type hints?
+2. ✅ Every STDLIB step has complete operations list from 2_plan.md?
+3. ✅ Every step has complete parameter values (not pointers)?
+4. ✅ Every step has explicit input file paths with format specifications?
+5. ✅ Every step has explicit output file paths with format specifications?
+6. ✅ Every CATALOGUED step has paired validation tool from 3_tools.yaml?
+7. ✅ Every STDLIB step has inline validation criteria (row counts, value ranges)?
+8. ✅ All data formats documented (column names, types)?
+9. ✅ All naming conventions from names.md enforced?
+10. ✅ Zero placeholders, zero "TBD", zero "see other file"?
+11. ✅ Zero invented module/function names (stdlib uses `type: "stdlib"` not fake tools)?
+12. ✅ g_code can generate perfect Python reading ONLY 4_analysis.yaml?
 
 **If ANY answer is NO:**
 - QUIT with detailed error report
@@ -695,13 +754,17 @@ Before writing 4_analysis.yaml, verify:
 - ❌ Write partial 4_analysis.yaml (all-or-nothing approach)
 - ❌ Edit core files: data/, tools/, config/, .claude/agents/, docs/ (except status.yaml)
 - ❌ Generate Python code (that's g_code's responsibility)
-- ❌ Skip validation tool specification (MANDATORY for every step)
+- ❌ Skip validation specification (catalogued tools need validation_tool, stdlib needs inline criteria)
 - ❌ Use config.yaml (v3.0 legacy - does not exist in v4.X)
+- ❌ **INVENT FAKE MODULE/FUNCTION NAMES** for stdlib operations (use `type: "stdlib"` instead)
 
 **ALWAYS:**
 - ✅ Read BOTH 2_plan.md AND 3_tools.yaml (merge into 4_analysis.yaml)
+- ✅ **Distinguish catalogued tools (from 3_tools.yaml) from stdlib operations (pandas/numpy)**
+- ✅ Use `analysis_call.type: "catalogued"` for tools from 3_tools.yaml
+- ✅ Use `analysis_call.type: "stdlib"` for pandas/numpy operations (NO module/function)
 - ✅ Include FULL specifications (inputs, outputs, formats, parameters, validation)
-- ✅ Use type hints in all tool signatures
+- ✅ Use type hints in all catalogued tool signatures
 - ✅ Specify explicit validation inputs (no inference)
 - ✅ Enforce names.md patterns (FAIL if missing)
 - ✅ Make 4_analysis.yaml self-contained (g_code reads ONLY this file)
