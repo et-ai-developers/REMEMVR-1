@@ -514,7 +514,10 @@ def plot_trajectory_probability(
     time_var: str = 'test',
     factors: List[str] = None,
     title: str = "Memory Trajectory (Probability Scale)",
-    **kwargs
+    figsize: Tuple[int, int] = (10, 6),
+    colors: Optional[Dict[str, str]] = None,
+    output_path: Optional[Path] = None,
+    show_errorbar: bool = True
 ) -> Tuple[plt.Figure, plt.Axes, pd.DataFrame]:
     """
     Plot trajectory with theta transformed to probability scale (Decision D069).
@@ -523,20 +526,23 @@ def plot_trajectory_probability(
     - Theta scale: Statistical rigor, psychometrician-interpretable
     - Probability scale: General audience interpretable, reviewer-friendly
 
-    Uses IRT 2PL transformation: P = 1 / (1 + exp(-(a * (θ - b))))
+    Uses IRT 2PL transformation: P = 1 / (1 + exp(-(a * (theta - b))))
     where:
     - a = mean discrimination from Pass 2 item parameters
     - b = 0 (reference difficulty)
-    - θ = theta scores
+    - theta = theta scores
 
     Args:
-        df_thetas: DataFrame with theta scores (long format)
+        df_thetas: DataFrame with theta scores (wide format with UID rows)
                    Must contain: UID, {time_var}, {factor}_Theta columns
         item_parameters_path: Path to item_parameters.csv (Pass 2 output)
         time_var: Time variable column name (default: 'test')
         factors: List of factor names to plot (default: infer from columns)
         title: Plot title
-        **kwargs: Additional arguments passed to plot_trajectory()
+        figsize: Figure size (width, height) in inches
+        colors: Optional dict mapping factors to colors
+        output_path: Optional path to save plot
+        show_errorbar: Whether to show error bars (default True)
 
     Returns:
         Tuple of:
@@ -545,14 +551,12 @@ def plot_trajectory_probability(
         - prob_data: DataFrame with probability-transformed scores
 
     Example:
-        ```python
         fig, ax, prob_data = plot_trajectory_probability(
             df_thetas=df_thetas,
             item_parameters_path=Path("data/item_parameters.csv"),
             time_var='Days',
             factors=['What', 'Where', 'When']
         )
-        ```
 
     Decision D069 Context:
         Dual-scale reporting enhances interpretability without sacrificing rigor.
@@ -564,7 +568,7 @@ def plot_trajectory_probability(
     print("=" * 60)
 
     # Read item parameters to get mean discrimination
-    df_items = pd.DataFrame(pd.read_csv(item_parameters_path))
+    df_items = pd.read_csv(item_parameters_path)
 
     # Calculate mean discrimination across all items
     mean_a = df_items['a'].mean()
@@ -587,7 +591,7 @@ def plot_trajectory_probability(
             print(f"  Warning: {theta_col} not found in data. Skipping.")
             continue
 
-        # IRT 2PL transformation: P = 1 / (1 + exp(-(a * (θ - b))))
+        # IRT 2PL transformation: P = 1 / (1 + exp(-(a * (theta - b))))
         # Using b=0 (reference difficulty)
         theta = df_thetas[theta_col]
         probability = 1 / (1 + np.exp(-(mean_a * theta)))
@@ -595,27 +599,62 @@ def plot_trajectory_probability(
         # Convert to percentage scale (0-100%)
         prob_data[prob_col] = probability * 100
 
-        print(f"  {factor}: θ range [{theta.min():.2f}, {theta.max():.2f}] → P% range [{prob_data[prob_col].min():.1f}%, {prob_data[prob_col].max():.1f}%]")
+        print(f"  {factor}: theta range [{theta.min():.2f}, {theta.max():.2f}] -> P% range [{prob_data[prob_col].min():.1f}%, {prob_data[prob_col].max():.1f}%]")
 
-    # Rename Probability columns to match plot_trajectory expectations
-    # plot_trajectory expects columns like {factor}_Theta
-    prob_data_renamed = prob_data.copy()
+    # Get default colors if not provided
+    if colors is None:
+        try:
+            config = load_config_from_file('plotting')
+            colors = config.get('colors', {})
+        except Exception:
+            colors = {}
+
+    # Default color cycle if no config colors
+    default_colors = plt.cm.tab10.colors
+    factor_colors = {}
+    for i, factor in enumerate(factors):
+        factor_colors[factor] = colors.get(factor, default_colors[i % len(default_colors)])
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # Plot each factor
     for factor in factors:
         prob_col = f'{factor}_Probability'
-        theta_col = f'{factor}_Theta'
-        if prob_col in prob_data.columns:
-            prob_data_renamed[theta_col] = prob_data[prob_col]
 
-    # Call plot_trajectory with probability-transformed data
-    fig, ax = plot_trajectory(
-        df_long=prob_data_renamed,
-        time_var=time_var,
-        factors=factors,
-        title=title,
-        ylabel="Probability Correct (%)",
-        ylim=(0, 100),
-        **kwargs
-    )
+        if prob_col not in prob_data.columns:
+            continue
+
+        # Calculate mean and SEM per time point
+        grouped = prob_data.groupby(time_var)[prob_col].agg(['mean', 'sem', 'count']).reset_index()
+
+        time_points = grouped[time_var].values
+        means = grouped['mean'].values
+        sems = grouped['sem'].values
+
+        color = factor_colors.get(factor, None)
+
+        # Plot line with markers
+        ax.plot(time_points, means, 'o-', label=factor, color=color, linewidth=2.5, markersize=8)
+
+        # Add error bars if requested
+        if show_errorbar:
+            ax.errorbar(time_points, means, yerr=sems, fmt='none', color=color, capsize=4, alpha=0.7)
+
+    # Formatting
+    ax.set_xlabel(time_var.replace('_', ' ').title())
+    ax.set_ylabel("Probability Correct (%)")
+    ax.set_title(title)
+    ax.set_ylim(0, 100)
+    ax.legend(title="Factor")
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+
+    # Save if output path provided
+    if output_path:
+        fig.savefig(output_path, dpi=300, bbox_inches='tight')
+        print(f"Plot saved to: {output_path}")
 
     print("=" * 60 + "\n")
 

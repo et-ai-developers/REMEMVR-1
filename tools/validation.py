@@ -158,7 +158,7 @@ def validate_lineage(
     >>> assert result['valid'], result['message']
     """
     try:
-        metadata = load_lineage(lineage_file)
+        metadata = load_lineage_from_file(lineage_file)
     except FileNotFoundError:
         return {
             "valid": False,
