@@ -9,7 +9,15 @@ readme = "README.md"
 python = "^3.12"
 pandas = "^2.3.3"
 numpy = "^2.3.5"
+statsmodels = "^0.14.5"
+scipy = "^1.16.3"
+matplotlib = "^3.10.7"
+seaborn = "^0.13.2"
+pyyaml = "^6.0.3"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.1"
 
 [build-system]
 requires = ["poetry-core"]
