@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-17 (context-manager curation)
+**Last Updated:** 2025-11-22 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
