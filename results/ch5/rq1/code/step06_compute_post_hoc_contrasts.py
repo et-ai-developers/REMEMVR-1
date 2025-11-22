@@ -131,16 +131,19 @@ if __name__ == "__main__":
         log(f"[LOADED] step04_lmm_input.csv ({len(df)} rows)")
 
         # Transform columns to match tool expectations
+        # IMPORTANT: Use same transformations as step05 (log_Days = log(Days + 1))
         df['Days'] = df['TSVR_hours'] / 24.0
-        df['log_Days'] = np.log(df['Days'] + 0.01)
+        df['log_Days'] = np.log(df['Days'] + 1)  # Match step05: +1 not +0.01
         df['Factor'] = df['domain'].str.capitalize()
         df['Ability'] = df['theta']
 
         # Fit Log model (best by AIC from Step 5)
+        # IMPORTANT: Include random slope on log_Days to match step05
         log("[FIT] Re-fitting Log model (best by AIC)...")
         formula = "Ability ~ log_Days * C(Factor, Treatment('What'))"
-        model = smf.mixedlm(formula, df, groups=df['UID'])
-        best_result = model.fit(method='powell', reml=True)
+        re_formula = "~log_Days"  # Random intercept + random slope on log_Days
+        model = smf.mixedlm(formula, df, groups=df['UID'], re_formula=re_formula)
+        best_result = model.fit(method='powell', reml=False)  # Use ML not REML to match AIC comparison
 
         log(f"[FITTED] Log model")
         log(f"  - AIC: {best_result.aic:.2f}")
@@ -179,7 +182,8 @@ if __name__ == "__main__":
         # Define pairwise comparisons
         # Note: The function expects comparisons in format "A-B" where A and B are factor levels
         # Treatment coding means level coefficient represents (level - reference)
-        comparisons = ["where-what", "when-what", "when-where"]
+        # IMPORTANT: Factor levels must be Capitalized to match model (What, When, Where)
+        comparisons = ["Where-What", "When-What", "When-Where"]
         family_alpha = 0.05
 
         log(f"  - Comparisons: {comparisons}")

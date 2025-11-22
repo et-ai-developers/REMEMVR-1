@@ -1,0 +1,86 @@
+[START] Step 07: Prepare Trajectory Plot Data (Decision D069)
+============================================================
+
+[LOAD] Loading input data...
+[LOADED] step04_lmm_input.csv (1200 rows)
+[LOADED] step03_item_parameters.csv (70 items)
+
+[COMPUTE] Computing domain-specific IRT parameters...
+  Using columns: factor=factor, disc=a, diff=b
+[DONE] Domain parameters computed:
+  what: a=1.050, b=-1.232
+  when: a=1.378, b=1.862
+  where: a=0.833, b=0.112
+
+[AGGREGATE] Computing mean theta by domain x test...
+[DONE] Aggregation complete: 12 groups
+  Domains: ['what', 'when', 'where']
+  Tests: [1, 2, 3, 4]
+
+[PREPARE] Creating theta scale plot data...
+[DONE] Theta plot data prepared: 12 rows
+
+[CONVERT] Transforming to probability scale (Decision D069)...
+[DONE] Probability conversion complete
+  Probability range: 0.061 - 0.882
+
+[SAVE] Saving plot data files...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_theta_data.csv
+  Rows: 12, Columns: ['time', 'test', 'domain', 'mean_theta', 'CI_lower', 'CI_upper', 'n_obs']
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_probability_data.csv
+  Rows: 12, Columns: ['time', 'test', 'domain', 'mean_probability', 'CI_lower', 'CI_upper', 'n_obs']
+
+[VALIDATION] Running validation checks...
+  [PASS] Both output files exist
+  [PASS] Each file has exactly 12 rows
+  [PASS] All 3 domains present
+  [PASS] All 4 tests present (sessions 1, 2, 3, 4)
+  [PASS] Domain x test combinations are unique
+  [PASS] No NaN values in any column
+  [PASS] Probability values in [0, 1] range
+  [PASS] CI_upper > CI_lower for all rows
+  [PASS] n_obs >= 80 per group
+
+[PASS] All validation checks passed
+
+============================================================
+[SUCCESS] Step 07 complete: Trajectory plot data prepared
+============================================================
+
+Outputs created:
+  1. /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_theta_data.csv
+  2. /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_probability_data.csv
+
+Decision D069 implemented: Dual-scale trajectory data
+  - Theta scale: IRT ability units for technical audience
+  - Probability scale: 0-1 range for general audience
+
+[SUMMARY] Theta scale data:
+  time  test domain  mean_theta  CI_lower  CI_upper  n_obs
+  1.00     1   what    0.685435  0.486475  0.884396    100
+ 26.37     2   what    0.089402 -0.112397  0.291200    100
+ 74.53     3   what   -0.229147 -0.422139 -0.036154    100
+147.13     4   what   -0.339661 -0.517859 -0.161464    100
+  1.00     1   when    0.204005 -0.006380  0.414391    100
+ 26.37     2   when    0.029739 -0.127524  0.187002    100
+ 74.53     3   when   -0.118456 -0.288366  0.051454    100
+147.13     4   when   -0.111116 -0.354048  0.131816    100
+  1.00     1  where    0.672127  0.494175  0.850078    100
+ 26.37     2  where    0.121843 -0.056975  0.300661    100
+ 74.53     3  where   -0.088925 -0.257229  0.079379    100
+147.13     4  where   -0.477642 -0.651809 -0.303476    100
+
+[SUMMARY] Probability scale data:
+  time  test domain  mean_probability  CI_lower  CI_upper  n_obs
+  1.00     1   what          0.882248  0.858751  0.902280    100
+ 26.37     2   what          0.800271  0.764242  0.832004    100
+ 74.53     3   what          0.741442  0.700738  0.778361    100
+147.13     4   what          0.718579  0.679243  0.754832    100
+  1.00     1   when          0.092368  0.070767  0.119714    100
+ 26.37     2   when          0.074110  0.060545  0.090423    100
+ 74.53     3   when          0.061260  0.049100  0.076190    100
+147.13     4   when          0.061844  0.045042  0.084360    100
+  1.00     1  where          0.614614  0.578970  0.649071    100
+ 26.37     2  where          0.502113  0.464939  0.539264    100
+ 74.53     3  where          0.458326  0.423785  0.493272    100
+147.13     4  where          0.379699  0.346179  0.414408    100

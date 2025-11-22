@@ -1,20 +1,20 @@
 # Current State
 
-**Last Updated:** 2025-11-22 21:40 (Phase 24 mostly complete - g_code tested through step05)
+**Last Updated:** 2025-11-23 00:15 (Phase 24 COMPLETE - all 8 steps executed)
 **Last /clear:** 2025-11-22 23:45
-**Last /save:** 2025-11-22 21:40
-**Token Count:** ~12k tokens (40% under 20k limit)
+**Last /save:** 2025-11-23 00:15
+**Token Count:** ~15k tokens
 
 ---
 
 ## What We're Doing
 
-**Current Task:** V4.X Agent Testing - Phase 24 MOSTLY COMPLETE (g_code)
+**Current Task:** V4.X Agent Testing - Phase 24 COMPLETE (g_code)
 
-**Context:** Phase 24 (g_code) testing mostly complete. Successfully executed steps 00-05 of RQ 5.1 pipeline (IRT 2-pass + LMM fitting). Step06 blocked by tool bug (compute_contrasts_pairwise coefficient naming). g_code.md updated with path setup and folder conventions.
+**Context:** Phase 24 (g_code) testing COMPLETE. Successfully executed ALL 8 steps of RQ 5.1 pipeline (IRT 2-pass + LMM fitting + post-hoc contrasts + trajectory plot data). Fixed compute_contrasts_pairwise tool bug. Reorganized RQ folder structure. Updated g_code.md with mandatory folder/naming rules.
 
 **Started:** 2025-11-15 14:00 (architecture realignment after v3.0 RQ 5.1 failures)
-**Current Status:** Phases 0-24 MOSTLY COMPLETE, Steps 06-07 have tool bugs
+**Current Status:** Phase 24 COMPLETE, Ready for Phase 25 (g_debug testing)
 
 **Related Documents:**
 - `docs/v4/tools_catalog.md` - Lightweight tool discovery (21 YELLOW tools)
@@ -30,16 +30,18 @@
 ### Completed
 
 - **Phases 0-24:** All complete (13 agents built and tested, g_code pipeline tested)
-- **RQ 5.1 Pipeline Executed:** Steps 00-05 run successfully
+- **RQ 5.1 Pipeline Executed:** ALL 8 steps (00-07) run successfully
 - **Test Suite:** 97 passing, 2 skipped (torch), 0 failing
-- **g_code.md Updated:** Path setup + folder conventions added
+- **g_code.md Updated:** Path setup + folder conventions + variable RQ path rules
+- **compute_contrasts_pairwise FIXED:** Now handles statsmodels treatment coding
+- **RQ Folder Structure REORGANIZED:** All files in correct locations with step prefixes
 
 ### Next
 
-- **Fix step06:** compute_contrasts_pairwise coefficient naming bug in tools/analysis_lmm.py
-- **Generate/Run step07:** Trajectory plot data preparation
-- **Phase 25-27:** Test g_debug, rq_inspect, rq_plots
-- **Phase 28:** Test rq_results
+- **Phase 25:** Test g_debug agent
+- **Phase 26:** Test rq_inspect agent
+- **Phase 27:** Test rq_plots agent
+- **Phase 28:** Test rq_results agent
 - **Phase 29:** Full RQ 5.1 end-to-end integration test
 
 ---
@@ -47,9 +49,9 @@
 ## Next Actions
 
 **Immediate (After /save + /clear + /refresh):**
-1. Fix compute_contrasts_pairwise tool (coefficient naming issue)
-2. Re-run step06 post-hoc contrasts
-3. Generate and run step07 plotting data
+1. Begin Phase 25: Test g_debug agent
+2. Create a deliberate bug in one step, invoke g_debug
+3. Verify g_debug finds and reports the issue correctly
 
 ---
 
@@ -228,9 +230,199 @@
 
 ---
 
+## Session (2025-11-23 00:15)
+
+**Task:** Complete Phase 24 - Fix Tool Bugs + Run Steps 06-07 + Reorganize Folders + Update g_code.md
+
+**Objective:** Finish g_code testing by fixing remaining bugs and running all pipeline steps
+
+**Key Accomplishments:**
+
+**1. Fixed compute_contrasts_pairwise Tool (CRITICAL BUG)**
+
+**Problem:** Function couldn't find coefficients because:
+- Looked for simple names like `When`, `Where`
+- statsmodels uses treatment coding: `C(Factor, Treatment('What'))[T.When]`
+
+**Solution (tools/analysis_lmm.py):**
+- Added coefficient name detection for treatment coding format
+- Added reference level auto-detection
+- Added delta method for non-reference comparisons (e.g., When-Where)
+- Properly computes SE using covariance matrix
+
+**Key Code Change:**
+```python
+# Now handles three cases:
+# Case 1: level2 is reference (e.g., When-What) → use level1 coefficient directly
+# Case 2: level1 is reference (e.g., What-When) → use negative of level2 coefficient
+# Case 3: Neither is reference (e.g., When-Where) → compute difference with delta method SE
+```
+
+**Tests:** 7/7 passing for compute_contrasts_pairwise
+
+**2. Fixed step06 Model Specification Bug**
+
+**Problem:** step06 re-fit produced different results than step05 because:
+- Used `log_Days = log(Days + 0.01)` instead of `log(Days + 1)`
+- Missing random slope `re_formula='~log_Days'`
+- Used REML instead of ML
+
+**Fix:** Updated step06 to match step05 exactly:
+```python
+df['log_Days'] = np.log(df['Days'] + 1)  # Match step05
+re_formula = "~log_Days"  # Random slope
+best_result = model.fit(method='powell', reml=False)  # ML not REML
+```
+
+**Result:** AIC now matches exactly (3187.96)
+
+**3. Executed Step 06 Successfully**
+
+**Post-Hoc Contrasts Results:**
+| Comparison | Beta | z | p (uncorr) | p (Bonf) | Sig |
+|------------|------|---|------------|----------|-----|
+| Where-What | 0.037 | 0.356 | 0.722 | 1.000 | ns |
+| When-What | -0.415 | -3.978 | <0.001 | 0.0002 | *** |
+| When-Where | -0.452 | -4.334 | <0.001 | <0.0001 | *** |
+
+**Interpretation:** When memory decays significantly more than both What and Where. What and Where don't differ significantly.
+
+**Effect Sizes (Cohen's f²):**
+- log_Days: 0.0624 (small) - Time has measurable effect
+- Factor effects: <0.02 (negligible) - Domain main effects small
+- Interactions: <0.02 (negligible)
+
+**4. Generated and Executed Step 07 Successfully**
+
+**Created:** `results/ch5/rq1/code/step07_prepare_trajectory_plot_data.py`
+
+**Outputs:**
+- `data/step07_trajectory_theta_data.csv` (12 rows - 3 domains × 4 tests)
+- `data/step07_trajectory_probability_data.csv` (12 rows)
+
+**Key Results (Probability Scale):**
+| Domain | Test 1 | Test 4 | Change |
+|--------|--------|--------|--------|
+| What | 88.2% | 71.9% | -16.3% |
+| Where | 61.5% | 38.0% | -23.5% |
+| When | 9.2% | 6.2% | -3.0% |
+
+**Interpretation:**
+- "What" memory (semantic) starts high, modest decay
+- "Where" memory (spatial) starts moderate, steeper decay
+- "When" memory (temporal) starts very low, stays low (hardest items)
+
+**5. Reorganized RQ Folder Structure**
+
+**Problem:** Files scattered across wrong folders:
+- CSV files in logs/ (wrong)
+- CSV files in results/ (wrong)
+- PKL files without step prefix (wrong)
+
+**Reorganization:**
+```
+BEFORE:
+  logs/step01_pass1_item_params.csv ← WRONG
+  logs/step02_removed_items.csv ← WRONG
+  plots/step07_*.csv ← WRONG
+  results/lmm_*.pkl ← WRONG (no prefix)
+  results/step05_*.csv ← WRONG
+
+AFTER:
+  data/step01_pass1_item_params.csv ← CORRECT
+  data/step02_removed_items.csv ← CORRECT
+  data/step07_*.csv ← CORRECT
+  data/step05_lmm_*.pkl ← CORRECT (with prefix)
+  data/step05_*.csv ← CORRECT
+```
+
+**Final Structure:**
+| Folder | Contents | Count |
+|--------|----------|-------|
+| code/ | .py scripts only | 8 |
+| data/ | ALL outputs (CSV, PKL, TXT) | 21 |
+| logs/ | .log files only | 8 |
+| plots/ | Empty (for images) | 0 |
+| results/ | Empty (for reports) | 0 |
+
+**6. Updated g_code.md with Mandatory Rules**
+
+**Added "CRITICAL: Folder Structure & Naming Rules" section:**
+- Clear folder structure diagram
+- Mandatory `stepXX_` prefix rule
+- Examples table (CORRECT vs WRONG with explanations)
+- Bold warning: "NEVER put CSV/PKL/TXT files in logs/, plots/, or results/"
+
+**Updated "What Master Provides" section:**
+- Simplified to: RQ path + step identifier
+- Added: "IMPORTANT: The RQ path is VARIABLE - it could be any results/chX/rqY. Never hardcode ch5/rq1."
+- Shows derived paths formula
+- Multiple examples (ch5/rq1 AND ch7/rq15)
+
+**7. Files Modified This Session**
+
+**Tool Fixes:**
+- `tools/analysis_lmm.py` - compute_contrasts_pairwise fixed (treatment coding + delta method)
+
+**Code Fixes:**
+- `results/ch5/rq1/code/step06_compute_post_hoc_contrasts.py` - Model spec fix
+- `results/ch5/rq1/code/step07_prepare_trajectory_plot_data.py` - Generated new
+
+**Data Reorganization (moved to data/):**
+- step01_pass1_item_params.csv (from logs/)
+- step01_pass1_theta.csv (from logs/)
+- step02_removed_items.csv (from logs/)
+- step07_trajectory_theta_data.csv (from plots/)
+- step07_trajectory_probability_data.csv (from plots/)
+- step05_lmm_model_comparison.csv (from results/)
+- step05_lmm_model_summary.txt (from results/)
+- step06_effect_sizes.csv (from results/)
+- step06_post_hoc_contrasts.csv (from results/)
+- step05_lmm_*.pkl (renamed with prefix, from results/)
+
+**Agent Updates:**
+- `.claude/agents/g_code.md` - Folder rules + variable RQ path
+
+**8. Key Learnings**
+
+**Treatment Coding in statsmodels:**
+- Reference level implicit in coefficient names
+- Format: `C(Factor, Treatment('Reference'))[T.Level]`
+- Non-reference comparisons need delta method SE
+
+**Delta Method for Non-Reference Comparisons:**
+```python
+# For When-Where (neither is reference):
+beta = beta_When - beta_Where
+SE = sqrt(Var(When) + Var(Where) - 2*Cov(When,Where))
+```
+
+**Folder Discipline:**
+- g_code needs explicit, prominent rules
+- Examples of WRONG patterns are essential
+- Multiple RQ path examples prevent hardcoding
+
+---
+
+**End of Session (2025-11-23 00:15)**
+
+**Session Duration:** ~35 minutes
+**Token Usage:** ~96k tokens
+**Tool Bugs Fixed:** 1 (compute_contrasts_pairwise)
+**Code Bugs Fixed:** 1 (step06 model spec)
+**Scripts Generated:** 1 (step07)
+**Scripts Executed:** 2 (step06, step07)
+**Files Reorganized:** 11
+**Agent Docs Updated:** 1 (g_code.md)
+
+**Status:** Phase 24 (g_code) COMPLETE. All 8 pipeline steps executed successfully. RQ folder structure clean. g_code.md has mandatory folder/naming rules. Ready for Phase 25 (g_debug testing).
+
+---
+
 ## Active Topics (For context-manager)
 
-- rq51_pipeline_execution (steps 00-05 complete, step06 blocked on tool bug)
-- v4x_phase24_mostly_complete (g_code validated through LMM fitting)
-- g_code_template_updated (path setup + folder conventions in g_code.md)
-- tool_bug_compute_contrasts (coefficient naming mismatch with treatment coding)
+- rq51_pipeline_complete (all 8 steps executed successfully)
+- v4x_phase24_complete (g_code fully validated)
+- g_code_folder_rules (mandatory structure + naming in g_code.md)
+- compute_contrasts_fixed (treatment coding + delta method working)
+- rq_folder_reorganized (21 data files in data/, 8 logs in logs/)

@@ -644,10 +644,14 @@ def compute_contrasts_pairwise(
     Compute post-hoc pairwise contrasts with dual reporting (Decision D068).
 
     Implements dual reporting of p-values:
-    - Uncorrected (α = 0.05)
-    - Bonferroni-corrected (α_corrected = family_alpha / k)
+    - Uncorrected (alpha = 0.05)
+    - Bonferroni-corrected (alpha_corrected = family_alpha / k)
 
     where k = number of comparisons in this RQ.
+
+    Handles both reference and non-reference comparisons:
+    - Reference comparison (e.g., When-What): Extract coefficient directly
+    - Non-reference comparison (e.g., When-Where): Compute difference with delta method SE
 
     Args:
         lmm_result: Fitted MixedLM result object
@@ -663,14 +667,12 @@ def compute_contrasts_pairwise(
         - p_uncorrected: Uncorrected p-value
         - alpha_corrected: Bonferroni-corrected alpha threshold
         - p_corrected: Corrected p-value (p * k)
-        - sig_uncorrected: Significant at α=0.05 (bool)
-        - sig_corrected: Significant at α_corrected (bool)
+        - sig_uncorrected: Significant at alpha=0.05 (bool)
+        - sig_corrected: Significant at alpha_corrected (bool)
 
     Example:
-        ```python
         comparisons = ["Where-What", "When-What", "When-Where"]
         df_contrasts = compute_contrasts_pairwise(result, comparisons, family_alpha=0.05)
-        ```
 
     Decision D068 Context:
         Exploratory thesis requires reporting BOTH uncorrected and corrected results.
@@ -678,6 +680,8 @@ def compute_contrasts_pairwise(
         - Corrected: Controls Type I error (rigor)
         Reviewers can assess robustness across both thresholds.
     """
+    from scipy import stats
+
     print("\n" + "=" * 60)
     print("POST-HOC PAIRWISE CONTRASTS (Decision D068)")
     print("=" * 60)
@@ -689,44 +693,116 @@ def compute_contrasts_pairwise(
     print(f"Number of comparisons: {k}")
     print(f"Bonferroni-corrected alpha: {alpha_corrected:.4f}")
 
+    # Helper function to find coefficient name for a given level
+    def find_coef_name(level: str) -> str:
+        """Find the coefficient name for a factor level in the model."""
+        reference_levels = ['What', 'Where', 'When']
+        factor_names = ['Factor', 'Domain']
+
+        for factor in factor_names:
+            for ref in reference_levels:
+                # Full treatment coding: C(Factor, Treatment('What'))[T.When]
+                coef_option = f"C({factor}, Treatment('{ref}'))[T.{level}]"
+                if coef_option in lmm_result.params.index:
+                    return coef_option
+            # Simpler patterns (backward compatibility)
+            for pattern in [f'C({factor}, Treatment)[T.{level}]',
+                           f'C({factor})[T.{level}]',
+                           f'{factor}[T.{level}]']:
+                if pattern in lmm_result.params.index:
+                    return pattern
+        # Bare level name as last resort
+        if level in lmm_result.params.index:
+            return level
+        return None
+
+    # Detect reference level (the level NOT in the model coefficients)
+    all_levels = set()
+    for comparison in comparisons:
+        parts = comparison.split('-')
+        all_levels.add(parts[0].strip())
+        all_levels.add(parts[1].strip())
+
+    reference_level = None
+    for level in all_levels:
+        if find_coef_name(level) is None:
+            reference_level = level
+            break
+
+    print(f"Detected reference level: {reference_level}")
+
     results = []
 
     for comparison in comparisons:
-        # Parse comparison string (e.g., "Where-What" → Where - What)
+        # Parse comparison string (e.g., "Where-What" -> Where - What)
         parts = comparison.split('-')
         if len(parts) != 2:
             raise ValueError(f"Invalid comparison format: {comparison}. Expected 'A-B'")
 
         level1, level2 = parts[0].strip(), parts[1].strip()
 
-        # Try to extract coefficient from model
-        # Treatment coding: level1 coefficient represents level1 - reference
-        # Try both 'Factor' and 'Domain' variable names (backward compatibility)
-        coef_name_options = [
-            f'C(Factor, Treatment)[T.{level1}]',
-            f'C(Factor)[T.{level1}]',
-            f'Factor[T.{level1}]',
-            f'C(Domain, Treatment)[T.{level1}]',
-            f'C(Domain)[T.{level1}]',
-            f'Domain[T.{level1}]',
-            level1
-        ]
+        # Case 1: level2 is the reference level (e.g., When-What, Where-What)
+        # -> Use level1 coefficient directly
+        if level2 == reference_level:
+            coef_name = find_coef_name(level1)
+            if coef_name is None:
+                print(f"  Warning: Coefficient for '{level1}' not found. Skipping {comparison}.")
+                continue
 
-        coef_name = None
-        for option in coef_name_options:
-            if option in lmm_result.params.index:
-                coef_name = option
-                break
+            beta = lmm_result.params[coef_name]
+            se = lmm_result.bse[coef_name]
+            z = beta / se
+            p_uncorrected = lmm_result.pvalues[coef_name]
 
-        if coef_name is None:
-            print(f"  Warning: Coefficient for '{level1}' not found. Skipping {comparison}.")
-            continue
+        # Case 2: level1 is the reference level (e.g., What-When)
+        # -> Use negative of level2 coefficient
+        elif level1 == reference_level:
+            coef_name = find_coef_name(level2)
+            if coef_name is None:
+                print(f"  Warning: Coefficient for '{level2}' not found. Skipping {comparison}.")
+                continue
 
-        # Extract parameters
-        beta = lmm_result.params[coef_name]
-        se = lmm_result.bse[coef_name]
-        z = beta / se
-        p_uncorrected = lmm_result.pvalues[coef_name]
+            beta = -lmm_result.params[coef_name]
+            se = lmm_result.bse[coef_name]  # SE is symmetric
+            z = beta / se
+            p_uncorrected = lmm_result.pvalues[coef_name]  # Same p-value (two-tailed)
+
+        # Case 3: Neither is the reference level (e.g., When-Where)
+        # -> Compute difference: beta1 - beta2 with delta method SE
+        else:
+            coef_name1 = find_coef_name(level1)
+            coef_name2 = find_coef_name(level2)
+
+            if coef_name1 is None:
+                print(f"  Warning: Coefficient for '{level1}' not found. Skipping {comparison}.")
+                continue
+            if coef_name2 is None:
+                print(f"  Warning: Coefficient for '{level2}' not found. Skipping {comparison}.")
+                continue
+
+            beta1 = lmm_result.params[coef_name1]
+            beta2 = lmm_result.params[coef_name2]
+            beta = beta1 - beta2
+
+            # Delta method SE: sqrt(Var(b1) + Var(b2) - 2*Cov(b1,b2))
+            # Get covariance matrix
+            try:
+                cov_matrix = lmm_result.cov_params()
+                var1 = cov_matrix.loc[coef_name1, coef_name1]
+                var2 = cov_matrix.loc[coef_name2, coef_name2]
+                cov12 = cov_matrix.loc[coef_name1, coef_name2]
+                se = np.sqrt(var1 + var2 - 2 * cov12)
+            except Exception as e:
+                # Fallback: approximate SE as sqrt(se1^2 + se2^2) assuming independence
+                se1 = lmm_result.bse[coef_name1]
+                se2 = lmm_result.bse[coef_name2]
+                se = np.sqrt(se1**2 + se2**2)
+                print(f"  Note: Using approximate SE for {comparison} (cov extraction failed)")
+
+            z = beta / se
+            # Two-tailed p-value from z
+            p_uncorrected = 2 * (1 - stats.norm.cdf(abs(z)))
+
         p_corrected = min(p_uncorrected * k, 1.0)  # Cap at 1.0
 
         # Significance flags
@@ -749,8 +825,8 @@ def compute_contrasts_pairwise(
 
     # Summary
     print(f"\nResults:")
-    print(f"  Significant (uncorrected α=0.05): {df_contrasts['sig_uncorrected'].sum()}/{k}")
-    print(f"  Significant (corrected α={alpha_corrected:.4f}): {df_contrasts['sig_corrected'].sum()}/{k}")
+    print(f"  Significant (uncorrected alpha=0.05): {df_contrasts['sig_uncorrected'].sum()}/{k}")
+    print(f"  Significant (corrected alpha={alpha_corrected:.4f}): {df_contrasts['sig_corrected'].sum()}/{k}")
 
     print("=" * 60 + "\n")
 
