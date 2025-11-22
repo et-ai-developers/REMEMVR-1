@@ -25,27 +25,32 @@ EXPECTED INPUTS:
     Required columns: [domain, Discrimination, Difficulty_1]
     Description: Item parameters for domain-specific theta-to-probability conversion
 
+  - data/step05_lmm_fitted_model.pkl
+    Format: Pickle file
+    Description: Fitted LMM model for generating predictions
+
 EXPECTED OUTPUTS:
   - plots/step07_trajectory_theta_data.csv
-    Columns: [time, test, domain, mean_theta, CI_lower, CI_upper, n_obs]
+    Columns: [time, test, domain, mean_theta, CI_lower, CI_upper, predicted_theta, n_obs]
     Expected rows: 12 (3 domains x 4 tests)
-    Description: Observed mean theta with 95% CIs per domain x test
+    Description: Observed mean theta with 95% CIs and LMM predictions per domain x test
 
   - plots/step07_trajectory_probability_data.csv
-    Columns: [time, test, domain, mean_probability, CI_lower, CI_upper, n_obs]
+    Columns: [time, test, domain, mean_probability, CI_lower, CI_upper, predicted_probability, n_obs]
     Expected rows: 12 (3 domains x 4 tests)
-    Description: Mean theta transformed to probability scale (Decision D069)
+    Description: Mean theta transformed to probability scale with predictions (Decision D069)
 
 VALIDATION CRITERIA:
-  - Both output files exist
+  - Both output files exist in plots/ folder
   - Each file has exactly 12 rows (3 domains x 4 tests)
   - All 3 domains present: what, where, when
-  - All 4 tests present: 0, 1, 3, 6
+  - All 4 tests present: 0, 1, 3, 6 (nominal days, NOT {1,2,3,4})
   - Domain x test combinations are unique
   - No NaN values in any column
   - Probability bounds: mean_probability in [0, 1], CI bounds in [0, 1]
   - CI validity: CI_upper > CI_lower for all rows
   - n_obs >= 80 per group (some missing acceptable from 100)
+  - predicted_theta and predicted_probability columns present
 
 g_code REASONING:
 - Approach: Aggregate theta scores by domain x test, then convert to probability
@@ -68,6 +73,8 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any
 import traceback
+import pickle
+import statsmodels.api as sm
 
 # Add project root to path for imports
 # parents[4] = REMEMVR/ (code -> rq1 -> ch5 -> results -> REMEMVR)
@@ -130,6 +137,13 @@ if __name__ == "__main__":
             raise FileNotFoundError(f"Input file not found: {item_params_path}")
         df_items = pd.read_csv(item_params_path, encoding='utf-8')
         log(f"[LOADED] step03_item_parameters.csv ({len(df_items)} items)")
+
+        # Map test values from {1,2,3,4} to nominal days {0,1,3,6}
+        # Test 1 = Day 0 (immediate), Test 2 = Day 1, Test 3 = Day 3, Test 4 = Day 6
+        TEST_TO_DAYS = {1: 0, 2: 1, 3: 3, 4: 6}
+        if df_lmm['test'].isin([1, 2, 3, 4]).all():
+            df_lmm['test'] = df_lmm['test'].map(TEST_TO_DAYS)
+            log(f"[MAPPED] Test values mapped: {{1,2,3,4}} -> {{0,1,3,6}}")
 
         # =========================================================================
         # STEP 2: Compute Domain-Specific IRT Parameters
@@ -198,13 +212,74 @@ if __name__ == "__main__":
         log(f"  Tests: {sorted(theta_agg['test'].unique().tolist())}")
 
         # =========================================================================
+        # STEP 3b: Generate LMM Predictions
+        # =========================================================================
+        # Re-fit the best model (Log) to generate predictions for plot overlay
+        # Note: Cannot pickle statsmodels results reliably, so we re-fit here
+
+        log("\n[PREDICT] Generating LMM model predictions...")
+
+        # Prepare data for LMM (need log_Days and domain coding)
+        df_lmm_pred = df_lmm.copy()
+        df_lmm_pred['Days'] = df_lmm_pred['TSVR_hours'] / 24.0
+        df_lmm_pred['log_Days'] = np.log(df_lmm_pred['Days'] + 1)
+
+        # Re-fit the Log model (best model from step05)
+        from statsmodels.regression.mixed_linear_model import MixedLM
+        import statsmodels.formula.api as smf
+
+        # Get UID from composite_ID
+        if 'UID' not in df_lmm_pred.columns:
+            df_lmm_pred['UID'] = df_lmm_pred['composite_ID'].str.split('_').str[0]
+
+        # Fit Log model: Ability ~ log(Days) * Domain with random intercept + slope per UID
+        log_model = smf.mixedlm(
+            "theta ~ log_Days * C(domain, Treatment('what'))",
+            data=df_lmm_pred,
+            groups=df_lmm_pred['UID'],
+            re_formula='~log_Days'
+        )
+        log_result = log_model.fit(method='powell', reml=False)
+        log(f"  Model re-fitted: AIC = {log_result.aic:.2f}")
+
+        # Generate predictions for each domain x test combination
+        predicted_theta = []
+        for _, row in theta_agg.iterrows():
+            domain = row['domain']
+            time_val = row['time']  # median TSVR_hours for this group
+
+            # Create prediction data point
+            days = time_val / 24.0
+            log_days = np.log(days + 1)
+
+            # Build prediction manually from fixed effects
+            # Formula: intercept + log_Days*beta + domain effects + interactions
+            fe = log_result.fe_params
+
+            pred = fe['Intercept'] + fe['log_Days'] * log_days
+
+            # Add domain effects (treatment coding with 'what' as reference)
+            if domain == 'when':
+                pred += fe["C(domain, Treatment('what'))[T.when]"]
+                pred += fe["log_Days:C(domain, Treatment('what'))[T.when]"] * log_days
+            elif domain == 'where':
+                pred += fe["C(domain, Treatment('what'))[T.where]"]
+                pred += fe["log_Days:C(domain, Treatment('what'))[T.where]"] * log_days
+            # 'what' is reference, no additional terms
+
+            predicted_theta.append(float(pred))
+
+        theta_agg['predicted_theta'] = predicted_theta
+        log(f"[DONE] LMM predictions generated for {len(theta_agg)} groups")
+
+        # =========================================================================
         # STEP 4: Prepare Theta Scale Output
         # =========================================================================
 
         log("\n[PREPARE] Creating theta scale plot data...")
 
-        # Select columns for theta output
-        df_theta_plot = theta_agg[['time', 'test', 'domain', 'mean_theta', 'CI_lower', 'CI_upper', 'n_obs']].copy()
+        # Select columns for theta output (including predicted_theta)
+        df_theta_plot = theta_agg[['time', 'test', 'domain', 'mean_theta', 'CI_lower', 'CI_upper', 'predicted_theta', 'n_obs']].copy()
 
         # Sort for consistent output
         df_theta_plot = df_theta_plot.sort_values(['domain', 'test']).reset_index(drop=True)
@@ -224,6 +299,7 @@ if __name__ == "__main__":
         mean_probs = []
         ci_lowers = []
         ci_uppers = []
+        predicted_probs = []
 
         for _, row in df_theta_plot.iterrows():
             domain = row['domain']
@@ -241,17 +317,20 @@ if __name__ == "__main__":
             mean_prob = convert_theta_to_probability(row['mean_theta'], discrimination=a, difficulty=b)
             ci_lower_prob = convert_theta_to_probability(row['CI_lower'], discrimination=a, difficulty=b)
             ci_upper_prob = convert_theta_to_probability(row['CI_upper'], discrimination=a, difficulty=b)
+            predicted_prob = convert_theta_to_probability(row['predicted_theta'], discrimination=a, difficulty=b)
 
             mean_probs.append(float(mean_prob))
             ci_lowers.append(float(ci_lower_prob))
             ci_uppers.append(float(ci_upper_prob))
+            predicted_probs.append(float(predicted_prob))
 
         df_prob_plot['mean_probability'] = mean_probs
         df_prob_plot['CI_lower'] = ci_lowers
         df_prob_plot['CI_upper'] = ci_uppers
+        df_prob_plot['predicted_probability'] = predicted_probs
 
         # Reorder columns
-        df_prob_plot = df_prob_plot[['time', 'test', 'domain', 'mean_probability', 'CI_lower', 'CI_upper', 'n_obs']]
+        df_prob_plot = df_prob_plot[['time', 'test', 'domain', 'mean_probability', 'CI_lower', 'CI_upper', 'predicted_probability', 'n_obs']]
 
         log(f"[DONE] Probability conversion complete")
         log(f"  Probability range: {df_prob_plot['mean_probability'].min():.3f} - {df_prob_plot['mean_probability'].max():.3f}")
@@ -306,14 +385,13 @@ if __name__ == "__main__":
         else:
             log("  [PASS] All 3 domains present")
 
-        # Check 4: Test coverage
-        # Note: Tests are labeled as sessions 1, 2, 3, 4 (not Days 0, 1, 3, 6)
-        expected_tests = {1, 2, 3, 4}
+        # Check 4: Test coverage (nominal days 0, 1, 3, 6)
+        expected_tests = {0, 1, 3, 6}
         actual_tests = set(df_theta_plot['test'].unique())
         if actual_tests != expected_tests:
-            validation_errors.append(f"Missing tests: {expected_tests - actual_tests}")
+            validation_errors.append(f"Test values mismatch: expected {expected_tests}, found {actual_tests}")
         else:
-            log("  [PASS] All 4 tests present (sessions 1, 2, 3, 4)")
+            log("  [PASS] All 4 tests present (nominal days 0, 1, 3, 6)")
 
         # Check 5: No duplicates
         dupe_check = df_theta_plot.groupby(['domain', 'test']).size()

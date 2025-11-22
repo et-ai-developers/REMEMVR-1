@@ -70,7 +70,7 @@ This template organizes by verification type (4 sections) but ensures all 4 laye
 **rq_inspect agent performs these steps:**
 
 ```
-Step 1: Read: docs/v4/agent_best_practices.md
+Step 1: Read: docs/v4/best_practices/universal.md and docs/v4/best_practices/workflow.md
 Step 2: Read: results/chX/rqY/status.yaml
 Step 3: Check: Prior analysis steps success, current step pending
 Step 4: Read: docs/v4/templates/inspect_criteria.md (THIS FILE)
@@ -114,9 +114,14 @@ Step 9: Report: Success message
 ```markdown
 VALIDATION FAILED: stepN for chX/rqY
 
+Failed Layer: [1-Existence / 2-Structure / 3-Substance / 4-Execution Log]
+
 Failed Checks:
 - [ ] Check description (EXPECTED: X, FOUND: Y)
 - [ ] Check description (EXPECTED: X, FOUND: Y)
+
+Details:
+[What went wrong - specific error details]
 
 Action Required: Fix errors and re-run stepN
 ```
@@ -606,10 +611,10 @@ else:
 VALIDATION PASSED: stepN for chX/rqY
 
 All checks passed:
-- ✓ Input files verified
-- ✓ Output files created
-- ✓ Formats match expectations
-- ✓ Plan.md criteria satisfied
+- [OK] Input files verified
+- [OK] Output files created
+- [OK] Formats match expectations
+- [OK] Plan.md criteria satisfied
 
 Action: rq_inspect updates status.yaml (analysis stepN = success)
 ```
@@ -626,11 +631,16 @@ Action: rq_inspect updates status.yaml (analysis stepN = success)
 ```markdown
 VALIDATION FAILED: stepN for chX/rqY
 
+Failed Layer: [1-Existence / 2-Structure / 3-Substance / 4-Execution Log]
+
 Failed checks:
 - [ ] Input file missing: {filename} (EXPECTED: path/to/file, FOUND: not exists)
 - [ ] Output column mismatch: {filename} (EXPECTED: [col1, col2], FOUND: [col1, col3])
 - [ ] Format violation: {filename} column {colname} (EXPECTED: int64, FOUND: object)
 - [ ] Plan.md criterion not met: {description} (EXPECTED: X, FOUND: Y)
+
+Details:
+[Specific error details - what went wrong and why]
 
 Action Required:
 1. Review failed checks above
@@ -942,7 +952,7 @@ Step 14 CODE EXECUTION LOOP (automation.md):
 ### For rq_inspect Agent
 
 **Read these files in order:**
-1. agent_best_practices.md (circuit breakers, platform rules)
+1. docs/v4/best_practices/universal.md and workflow.md (circuit breakers, platform rules)
 2. status.yaml (check prior steps success, current step pending)
 3. inspect_criteria.md (THIS FILE - checklist framework)
 4. 2_plan.md (step-specific validation criteria)
