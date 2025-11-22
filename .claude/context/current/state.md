@@ -1,20 +1,20 @@
 # Current State
 
-**Last Updated:** 2025-11-23 02:00 (session save)
+**Last Updated:** 2025-11-23 03:00 (session save)
 **Last /clear:** 2025-11-22 23:45
-**Last /save:** 2025-11-23 02:00
-**Token Count:** ~5k tokens (well under limit, no archival needed)
+**Last /save:** 2025-11-23 03:00
+**Token Count:** ~18k tokens (approaching limit)
 
 ---
 
 ## What We're Doing
 
-**Current Task:** V4.X Agent Testing - Phase 26 COMPLETE (rq_inspect)
+**Current Task:** V4.X Agent Testing - Phase 27 COMPLETE (rq_plots), D0XX Removal COMPLETE
 
-**Context:** Phase 26 (rq_inspect) testing COMPLETE. Validated ALL 8 steps of RQ 5.1 pipeline. Found and fixed step07 issues (missing predictions, wrong test values). rq_inspect agent has 70% bloat reduction (866→261 lines). Fixed 5 conflicts in inspect_criteria.md.
+**Context:** Phase 27 (rq_plots) testing COMPLETE. Generated trajectory plots for RQ 5.1. Also completed MASSIVE cleanup: removed ALL Decision D0XX references (D039, D068, D069, D070) from ~50+ files across the codebase per user request. Ready for Phase 28 (rq_results).
 
 **Started:** 2025-11-15 14:00 (architecture realignment after v3.0 RQ 5.1 failures)
-**Current Status:** Phase 26 COMPLETE, Ready for Phase 27 (rq_plots) or Phase 28 (rq_results)
+**Current Status:** Phase 27 COMPLETE, D0XX Removal COMPLETE, Ready for Phase 28 (rq_results)
 
 **Related Documents:**
 - `docs/v4/tools_catalog.md` - Lightweight tool discovery (21 YELLOW tools)
@@ -533,10 +533,137 @@ SE = sqrt(Var(When) + Var(Where) - 2*Cov(When,Where))
 
 ---
 
+## Session (2025-11-23 03:00)
+
+**Task:** Phase 27 (rq_plots) + Complete Decision D0XX Removal
+
+**Objective:** Test rq_plots agent on RQ 5.1, then remove ALL Decision D0XX references per user request
+
+**Key Accomplishments:**
+
+**1. Phase 27 - Test rq_plots Agent (COMPLETE)**
+
+**Bloat Cleanup:**
+- Before: 742 lines
+- After: 193 lines
+- Reduction: 74%
+- Removed: Redundant function signatures, verbose examples, design philosophy, extended circuit breaker examples
+
+**g_conflict Pre-flight:**
+- Found: 8 conflicts (1 CRITICAL, 4 HIGH, 3 MODERATE)
+- Fixed all 8:
+  - CRITICAL: Function name mismatch (setup_plot_style vs set_plot_style_defaults) - fixed 8 references in plots.md
+  - HIGH: Best practices file references updated
+  - HIGH: Circuit breaker DATA_FILE_MISSING changed to EXPECTATIONS
+  - MODERATE: D069 pattern fix ({prefix}_theta.png), context dump format alignment
+
+**Agent Execution:**
+- Agent ran successfully on ch5/rq1
+- Generated plots.py (187 lines)
+- Executed plots.py successfully
+- Both PNG files generated:
+  - trajectory_theta.png (324KB)
+  - trajectory_probability.png (271KB)
+
+**Validation Results:**
+- Option B architecture: VALIDATED (visualization-only, reads CSVs)
+- D069 compliance: YES (both theta + probability plots)
+- Function usage: set_plot_style_defaults, plot_trajectory
+- status.yaml updated correctly
+
+**2. Complete Decision D0XX Removal (User Request)**
+
+**User Frustration:** "I am sick of these Decision D069, D070, and others permeating everything"
+**User Choice:** Option A - Complete removal from entire codebase
+
+**Files Cleaned (~50+ files):**
+
+**Agent Prompts (7 files):**
+- rq_planner.md (~30 replacements)
+- rq_analysis.md (2 replacements)
+- rq_tools.md (4 replacements)
+- rq_plots.md (6 replacements)
+- rq_specification.md (2 replacements)
+- rq_results.md (3 replacements)
+- rq_concept.md (checked, cleaned)
+
+**Templates (7 files):**
+- plan.md, tools.md, analysis.md, results.md, plots.md, stats_report.md, inspect_criteria.md
+
+**Tool Code (3 files):**
+- analysis_irt.py, analysis_lmm.py, plotting.py
+
+**Generated Code (9 files):**
+- step00-step07.py + plots.py
+
+**Generated Docs (6 files):**
+- 1_concept.md, 1_scholar.md, 1_stats.md, 2_plan.md, 3_tools.yaml, 4_analysis.yaml
+
+**Other Docs (15+ files):**
+- tools_catalog.md, tools_inventory.md, names.md, validation_audit.md, todo.yaml, etc.
+
+**Tests (4 files):**
+- test_filter_items_by_quality.py, test_compute_contrasts_pairwise.py, etc.
+
+**Replacement Mapping:**
+| Before | After |
+|--------|-------|
+| Decision D039 | 2-pass IRT purification |
+| D039 | 2-pass purification |
+| Decision D068 | dual p-value reporting |
+| D068 | dual p-values |
+| Decision D069 | dual-scale trajectory plots |
+| D069 | dual-scale |
+| Decision D070 | TSVR time variable |
+| D070 | TSVR |
+
+**Preserved:**
+- .claude/context/archive/ (historical records - untouched)
+- archive_index.md (historical references kept)
+- .venv/ and .archive/ (third party/legacy - ignored)
+
+**Test Status:**
+- 107 passed, 14 failed
+- 14 failures are PRE-EXISTING (verified by git stash test)
+- D0XX removal did NOT cause any new test failures
+
+**3. Updated Documentation**
+
+**docs/v4/todo.yaml:**
+- Phase 27 marked COMPLETE
+- phases_complete: 11 (was 10)
+- phase27 status updated with test results
+- phase_status updated
+
+**Files Modified This Session:**
+- 50+ files with D0XX replacements
+- .claude/agents/rq_plots.md (bloat cleanup)
+- docs/v4/templates/plots.md (function name fixes)
+- docs/v4/todo.yaml (phase 27 results)
+- results/ch5/rq1/plots/plots.py (generated)
+- results/ch5/rq1/status.yaml (rq_plots = success)
+
+---
+
+**End of Session (2025-11-23 03:00)**
+
+**Session Duration:** ~45 minutes
+**Token Usage:** ~143k tokens
+**Agent Tested:** rq_plots (Phase 27 COMPLETE)
+**Bloat Reduction:** 74% (742→193 lines)
+**Conflicts Fixed:** 8 (in rq_plots.md + plots.md)
+**Plots Generated:** 2 (trajectory_theta.png, trajectory_probability.png)
+**D0XX References Removed:** ~210+ across 50+ files
+**Test Status:** 107 pass, 14 fail (pre-existing)
+
+**Status:** Phase 27 (rq_plots) COMPLETE. D0XX cleanup COMPLETE. Ready for Phase 28 (rq_results).
+
+---
+
 ## Active Topics (For context-manager)
 
-- v4x_phase26_complete (rq_inspect fully validated)
-- rq_inspect_bloat_cleanup (866→261 lines, 70% reduction)
-- inspect_criteria_conflicts_fixed (5 fixes in template)
-- step07_issues_fixed (predictions + test mapping + output path)
-- rq51_all_steps_validated (steps 00-07 all PASS)
+- v4x_phase27_complete (rq_plots fully tested)
+- rq_plots_bloat_cleanup (742→193 lines, 74% reduction)
+- d0xx_complete_removal (210+ references removed from 50+ files)
+- plots_generated (trajectory_theta.png, trajectory_probability.png)
+- function_name_conflict_fixed (setup_plot_style → set_plot_style_defaults)
