@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2025-11-24 12:30 (context-manager curated)
+**Last Updated:** 2025-11-24 14:30 (context-manager curated)
 **Last /clear:** 2025-11-23 03:00
-**Last /save:** 2025-11-24 12:30
-**Token Count:** ~8k tokens (post-curation)
+**Last /save:** 2025-11-24 14:30
+**Token Count:** ~6k tokens (post-curation)
 
 ---
 
@@ -56,129 +56,6 @@
 ---
 
 ## Session History
-
-## Session (2025-11-24 10:00)
-
-**Task:** RQ 5.2 Full Pipeline Execution
-
-**Objective:** Process RQ 5.2 (Differential Consolidation Across Domains) through complete v4.X pipeline
-
-**Key Accomplishments:**
-
-**1. Full RQ 5.2 Pipeline Execution (All 13 Agents)**
-
-**Agent Execution Sequence:**
-- rq_builder: Created folder structure (6 subfolders + status.yaml)
-- rq_concept: Created 1_concept.md (piecewise LMM, 3-way interaction)
-- rq_scholar: 9.5/10 APPROVED (sleep consolidation theory excellent)
-- rq_stats: 9.0/10 CONDITIONAL (fixed Bonferroni alpha: 0.05/6=0.0083)
-- rq_planner: 6 steps planned (data prep + LMM + slopes + contrasts + benefit + plots)
-- rq_tools: 11 tools cataloged (6 analysis + 5 validation)
-- rq_analysis: 4_analysis.yaml created (100% validation coverage)
-- g_code: 6 Python scripts generated and executed
-- rq_inspect: 4-layer validation PASS
-- rq_plots: 2 dual-scale trajectory plots generated
-- rq_results: summary.md created with 2 anomalies flagged
-
-**2. g_code Bug Fixes (4 bugs discovered and fixed)**
-
-**Bug 1: Test Value Mapping**
-- Problem: Code used 0,1,3,6 (nominal days) instead of 1,2,3,4 (test session numbers)
-- Fix: Updated SEGMENT_MAPPING in step00
-- Added to g_code.md: "REMEMVR Data Conventions" section with test mapping
-
-**Bug 2: TSVR Validation Too Strict**
-- Problem: Validation rejected real data (late=7.71 days > expected 6)
-- Fix: Relaxed validation margins (allow up to 10 days for Late segment)
-- Added to g_code.md: TSVR validation guidance
-
-**Bug 3: statsmodels n_groups Attribute**
-- Problem: `lmm_result.n_groups` doesn't exist
-- Fix: Use `len(lmm_result.model.group_labels)` instead
-- Added to g_code.md: statsmodels LMM attributes section
-
-**Bug 4: statsmodels Model Loading**
-- Problem: `pickle.load()` causes patsy/eval errors
-- Fix: Use `MixedLMResults.load(str(path))` instead
-- Added to g_code.md: statsmodels model loading section
-
-**3. rq_analysis Folder Convention Fix**
-
-**Problem:** Intermediate CSV outputs going to `results/` instead of `data/`
-- Wrong: `results/step02_slopes.csv`
-- Correct: `data/step02_slopes.csv`
-
-**Fix:** Added "CRITICAL: Output Folder Conventions" section to rq_analysis.md:
-```
-data/     ALL data outputs (.csv, .pkl, .txt)
-results/  ONLY final summary reports (.md, .html)
-plots/    ONLY images (.png) AND their source data CSVs
-logs/     ONLY execution logs (.log)
-```
-
-**Moved 6 misplaced files from results/ to data/ for ch5/rq2**
-
-**4. RQ 5.2 Scientific Results**
-
-**Piecewise LMM Analysis:**
-- Model: theta ~ Days_within * Segment * Domain
-- AIC: 3192.05, converged successfully
-- 12 fixed effects, random intercepts + slopes per UID
-
-**Early Segment Slopes (consolidation window Day 0-1):**
-- What: -0.507/day (steepest decline)
-- Where: -0.456/day
-- When: -0.208/day (flattest - least forgetting)
-
-**Late Segment Slopes (decay phase Day 1-6):**
-- What: -0.031/day (nearly flat)
-- Where: -0.107/day (continued decline)
-- When: -0.013/day (nearly flat)
-
-**Consolidation Benefit Ranking:**
-1. When (best) - least early forgetting
-2. Where
-3. What (worst) - most early forgetting
-
-**Hypothesis Outcome: NOT SUPPORTED**
-- Predicted: Where (spatial) benefits most from sleep consolidation
-- Actual: When showed least consolidation cost, What showed most
-- No contrasts significant after Bonferroni correction (alpha=0.0083)
-- 2 anomalies flagged: wrong direction effect + Where continued late decay
-
-**5. Files Created/Modified**
-
-**New Files (RQ 5.2):**
-- `results/ch5/rq2/` - Complete RQ folder with all outputs
-- `results/ch5/rq2/docs/1_concept.md` - RQ concept document
-- `results/ch5/rq2/docs/1_scholar.md` - Scholarly validation (9.5/10)
-- `results/ch5/rq2/docs/1_stats.md` - Statistical validation (9.0/10)
-- `results/ch5/rq2/docs/2_plan.md` - Analysis plan (6 steps)
-- `results/ch5/rq2/docs/3_tools.yaml` - Tool specifications
-- `results/ch5/rq2/docs/4_analysis.yaml` - Complete analysis recipe
-- `results/ch5/rq2/code/step00-05*.py` - 6 Python scripts
-- `results/ch5/rq2/data/step00-04*.csv` - Analysis outputs
-- `results/ch5/rq2/plots/*.png` - 2 trajectory plots
-- `results/ch5/rq2/results/summary.md` - Publication-ready summary
-
-**Agent Prompt Enhancements:**
-- `.claude/agents/g_code.md` - Added "REMEMVR Data Conventions" section (~40 lines)
-- `.claude/agents/rq_analysis.md` - Added "CRITICAL: Output Folder Conventions" section (~20 lines)
-
----
-
-**End of Session (2025-11-24 10:00)**
-
-**Session Duration:** ~60 minutes
-**Token Usage:** ~100k tokens
-**RQ Processed:** ch5/rq2 (Differential Consolidation)
-**Bugs Fixed:** 4 (test mapping, TSVR validation, n_groups, model loading)
-**Agent Prompts Enhanced:** 2 (g_code, rq_analysis)
-**Hypothesis Outcome:** NOT SUPPORTED (2 anomalies flagged)
-
-**Status:** RQ 5.2 COMPLETE. Pipeline fully operational. Ready for RQ 5.3.
-
----
 
 ## Session (2025-11-24 12:30)
 

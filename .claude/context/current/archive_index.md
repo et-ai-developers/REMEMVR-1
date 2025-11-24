@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-24 12:30 (context-manager curation)
+**Last Updated:** 2025-11-24 14:30 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -204,7 +204,7 @@
 **Description:** Complete history of v4.X pipeline testing Phases 23-27 (2025-11-22 to 2025-11-23). Phase 23 rq_analysis (765-line 4_analysis.yaml), Phase 24 g_code (full 8-step IRT/LMM pipeline execution, compute_contrasts_pairwise fix, folder reorganization, g_code.md enhancements), Phase 26 rq_inspect (70% bloat reduction, 4-layer validation, step07 fixes), Phase 27 rq_plots (74% bloat reduction, 8 conflicts fixed, dual-scale trajectory plots generated). Key technical achievements: treatment coding fix for statsmodels, delta method for non-reference comparisons, test value mapping (1,2,3,4 to 0,1,3,6), folder discipline rules, Option B visualization architecture validated. All 8 pipeline steps executed and validated successfully.
 
 ### pipeline_stability
-**Description:** v4.X pipeline stability documentation including D0XX reference removal (2025-11-23), Phase 28 rq_results testing completion, and trajectory plot enhancement (continuous TSVR + publication style). Documents pipeline reaching stable state with zero bugs in RQ 5.3 execution, validating g_code.md REMEMVR Data Conventions and rq_analysis.md folder conventions.
+**Description:** v4.X pipeline stability documentation including RQ 5.2 execution (4 bug fixes, agent prompt enhancements), D0XX reference removal (2025-11-23), Phase 28 rq_results testing completion, and trajectory plot enhancement (continuous TSVR + publication style). Documents pipeline reaching stable state: 4 bugs fixed in RQ 5.2, zero bugs in RQ 5.3, 1 bug fix in RQ 5.4. Validates g_code.md REMEMVR Data Conventions and rq_analysis.md folder conventions.
 
 ### when_domain_anomalies
 **Description:** Documentation of floor effects and item attrition in When (temporal) domain across RQ analyses. Includes RQ 5.1 floor effect (probability 6-9%, 20/26 items excluded), RQ 5.2 consolidation analysis anomalies (When appearing to show least forgetting may be floor artifact), and confirmation that RQ 5.3 paradigm analysis does NOT exhibit these anomalies (domain-specific, not paradigm-specific issue).

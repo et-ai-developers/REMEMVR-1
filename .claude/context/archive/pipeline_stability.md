@@ -5,6 +5,68 @@
 
 ---
 
+## RQ 5.2 Full Pipeline Execution - 4 Bug Fixes Applied (2025-11-24 10:00)
+
+**Task:** Process RQ 5.2 (Differential Consolidation Across Domains) through complete v4.X pipeline
+
+**Pipeline Execution Summary:**
+- All 13 agents executed successfully
+- 4 bugs discovered and fixed during execution
+- Agent prompts enhanced with project-specific knowledge
+
+**Agent Execution Sequence:**
+1. rq_builder: Created folder structure (6 subfolders + status.yaml)
+2. rq_concept: Created 1_concept.md (piecewise LMM, 3-way interaction)
+3. rq_scholar: 9.5/10 APPROVED (sleep consolidation theory excellent)
+4. rq_stats: 9.0/10 CONDITIONAL (fixed Bonferroni alpha: 0.05/6=0.0083)
+5. rq_planner: 6 steps planned (data prep + LMM + slopes + contrasts + benefit + plots)
+6. rq_tools: 11 tools cataloged (6 analysis + 5 validation)
+7. rq_analysis: 4_analysis.yaml created (100% validation coverage)
+8. g_code: 6 Python scripts generated and executed
+9. rq_inspect: 4-layer validation PASS
+10. rq_plots: 2 dual-scale trajectory plots generated
+11. rq_results: summary.md created with 2 anomalies flagged
+
+**4 Bugs Fixed (Pipeline Improvements):**
+
+| Bug | Problem | Fix | Documentation Added |
+|-----|---------|-----|---------------------|
+| Test Value Mapping | Code used 0,1,3,6 (nominal days) instead of 1,2,3,4 (test session numbers) | Updated SEGMENT_MAPPING in step00 | g_code.md: "REMEMVR Data Conventions" section |
+| TSVR Validation Too Strict | Validation rejected real data (late=7.71 days > expected 6) | Relaxed validation margins (allow up to 10 days for Late segment) | g_code.md: TSVR validation guidance |
+| statsmodels n_groups Attribute | `lmm_result.n_groups` doesn't exist | Use `len(lmm_result.model.group_labels)` instead | g_code.md: statsmodels LMM attributes section |
+| statsmodels Model Loading | `pickle.load()` causes patsy/eval errors | Use `MixedLMResults.load(str(path))` instead | g_code.md: statsmodels model loading section |
+
+**rq_analysis Folder Convention Fix:**
+- Problem: Intermediate CSV outputs going to `results/` instead of `data/`
+- Fix: Added "CRITICAL: Output Folder Conventions" section to rq_analysis.md
+- Rule: `data/` for ALL data outputs (.csv, .pkl, .txt); `results/` for ONLY final summary reports
+
+**Agent Prompts Enhanced:**
+- `.claude/agents/g_code.md` - Added "REMEMVR Data Conventions" section (~40 lines)
+- `.claude/agents/rq_analysis.md` - Added "CRITICAL: Output Folder Conventions" section (~20 lines)
+
+**RQ 5.2 Scientific Results:**
+- Model: Piecewise LMM (theta ~ Days_within * Segment * Domain)
+- AIC: 3192.05, converged successfully
+- Hypothesis Outcome: NOT SUPPORTED (predicted Where benefits most, actual: When showed least forgetting)
+- No contrasts significant after Bonferroni correction (alpha=0.0083)
+- 2 anomalies flagged: wrong direction effect + Where continued late decay
+
+**Files Created:**
+- `results/ch5/rq2/` - Complete RQ folder with all outputs (docs, code, data, plots, results)
+- 6 Python scripts (step00-05), 6 data CSVs, 2 trajectory plots, 1 summary.md
+
+**Session Duration:** ~60 minutes
+**Token Usage:** ~100k tokens
+**Bugs Fixed:** 4 (all documented in agent prompts)
+**Pipeline Status:** Fully operational after RQ 5.2
+
+**Archived from:** state.md
+**Original Date:** 2025-11-24 10:00
+**Reason:** RQ 5.2 complete, bug fixes applied, pipeline stability evidence
+
+---
+
 ## D0XX Reference Removal (2025-11-23 03:00)
 
 **Task:** Codebase cleanup - Remove D0XX decision references
