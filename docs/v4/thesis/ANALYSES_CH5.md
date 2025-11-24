@@ -262,12 +262,21 @@ Use TSVR data to see the actual hours since VR for each px's scores
 **Data Required:**
 - **Analysis Set:** *IFR-*ANS (Item Free Recall) vs. *ICR-*ANS (Item Cued Recall) vs. *IRE-*ANS (Item Recognition)
    Note: We only use 'item' questions as there are the most directly comparable. I.e., Task Queued Recall (TCR) was only When questions and showed both floor and ceiling effects.
-- **IRT Configuration:** Correlated factors, p1_med, 2 categories
+- **IRT Configuration:** Correlated factors, 2 categories
 - **IRT Factors:** Item Free Recall, Item Cued Recall, Item Recognition
 - **Output:** Theta scores (Theta_Free, Theta_Cued, Theta_Recognition) for each UID × Test
-- **Structure:** 400 observations (100 participants × 4 time points)
+- **Structure:** 400 observations (100 participants × contiunuous time (TSVR))
 
 **Analysis Specification:**
+
+0. **Get Data**
+   - Get raw scores from ./results/ch5/rq1/data/step00_irt_input.csv
+   - Remove TQ_* columns that don't inlcude IFR, ICR, or IRE
+   - Get TSVR mapping from ./results/ch5/rq1/data/step00_tsvr_mapping.csv
+   - Create Q-matrix similar to ./results/ch5/rq1/data/step00_q_matrix.csv but map groups as:
+      free_recall = *IFR*
+      cued_recall = *ICR*
+      recognition = *IRE*
 
 1. **Run IRT Analysis**
    - Execute IRT pipeline for analysis set
@@ -276,7 +285,7 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 2. **Data Preparation**
    - Reshape theta scores from wide to long format (Paradigm as factor variable)
-   - Create time transformations: Days, Days², log(Days+1)
+   - Create time transformations: Days, Days², log(Days+1) (Note, we use the continuous TSVR variable)
    - Validate factor structure
 
 3. **Model Fitting and Selection**
@@ -288,14 +297,14 @@ Use TSVR data to see the actual hours since VR for each px's scores
 4. **Post-hoc Contrasts**
    - Extract Time×Paradigm interaction terms
    - Test differences in forgetting slopes: Cued-Free, Recognition-Free
-   - Bonferroni correction: α = 0.0033/3 = 0.0011
+   - Bonferroni correction: α = 0.0033/3 = 0.0011 (With and without)
 
 5. **Effect Size Computation**
    - Calculate Cohen's d for paradigm differences at Day 6 (maximal divergence expected)
    - Report: d_Free_Cued, d_Free_Recognition, d_Cued_Recognition
 
 6. **Visualization**
-   - Generate trajectory plot: 3 lines (Free/Cued/Recognition) over Days 0-6
+   - Generate trajectory plot: 3 lines (Free/Cued/Recognition) over TSVR 0 > 200 hours
    - Include observed means with 95% CIs and model predictions
 
 **Statistical Justification:**

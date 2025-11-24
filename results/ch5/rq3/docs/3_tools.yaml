@@ -1,0 +1,455 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.3
+# Created by: rq_tools agent
+# Date: 2025-11-24
+# Architecture: Tool Catalog (v4.X) - Each tool listed once, deduplication
+
+# Purpose: Catalog all analysis and validation tools required for RQ 5.3
+# Analysis: Paradigm-specific forgetting trajectories (Free Recall, Cued Recall, Recognition)
+# Pipeline: IRT -> LMM (8 steps, 2-pass purification per D039)
+
+---
+
+analysis_tools:
+
+  # ============================================================================
+  # IRT ANALYSIS TOOLS
+  # ============================================================================
+
+  calibrate_irt:
+    module: "tools.analysis_irt"
+    function: "calibrate_irt"
+    signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_convergence"
+
+    description: "Full IRT pipeline: prepare -> configure -> fit -> extract (convenience wrapper)"
+
+    inputs:
+      - name: "df_long"
+        type: "DataFrame"
+        description: "Long format with composite_ID, item, response columns"
+      - name: "groups"
+        type: "Dict[str, List[str]]"
+        description: "Factor -> item mapping (paradigm: [item1, item2, ...])"
+      - name: "config"
+        type: "dict"
+        description: "IRT configuration (n_cats, correlated_factors, device, etc.)"
+
+    outputs:
+      - name: "theta_scores"
+        type: "DataFrame"
+        columns: ["composite_ID", "domain_name", "theta"]
+        description: "Participant ability estimates per factor"
+      - name: "item_parameters"
+        type: "DataFrame"
+        columns: ["item", "domain", "Discrimination", "Difficulty_1"]
+        description: "Item parameters (a, b) per factor"
+
+    source_reference: "tools_inventory.md - calibrate_irt"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_parameters"
+
+    description: "D039: Purify items by quality thresholds for 2-pass IRT calibration"
+
+    inputs:
+      - name: "df_items"
+        type: "DataFrame"
+        description: "Item parameters from Pass 1 calibration"
+      - name: "a_threshold"
+        type: "float"
+        default: 0.4
+        description: "Minimum discrimination threshold (items below excluded)"
+      - name: "b_threshold"
+        type: "float"
+        default: 3.0
+        description: "Maximum absolute difficulty threshold (items outside excluded)"
+
+    outputs:
+      - name: "retained_items"
+        type: "DataFrame"
+        description: "Items meeting quality thresholds"
+      - name: "removed_items"
+        type: "DataFrame"
+        description: "Items excluded with reason codes"
+
+    decision_reference: "D039 (2-pass IRT purification)"
+    source_reference: "tools_inventory.md - filter_items_by_quality"
+
+  # ============================================================================
+  # LMM ANALYSIS TOOLS
+  # ============================================================================
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "D070: Fit LMM using TSVR (actual hours since encoding) as time variable"
+
+    inputs:
+      - name: "theta_scores"
+        type: "DataFrame"
+        description: "Theta scores with composite_ID, domain_name, theta columns"
+      - name: "tsvr_data"
+        type: "DataFrame"
+        description: "TSVR mapping with UID, Test, TSVR_hours columns"
+      - name: "formula"
+        type: "str"
+        description: "LMM fixed effects formula (e.g., 'theta ~ TSVR_hours * paradigm')"
+      - name: "groups"
+        type: "str"
+        default: "UID"
+        description: "Grouping variable for random effects"
+      - name: "re_formula"
+        type: "str"
+        default: "~Days"
+        description: "Random effects formula"
+      - name: "reml"
+        type: "bool"
+        default: false
+        description: "Use REML (True) or ML (False) for estimation"
+
+    outputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted statsmodels MixedLM result object"
+
+    decision_reference: "D070 (TSVR time variable)"
+    source_reference: "tools_inventory.md - fit_lmm_trajectory_tsvr"
+
+  compare_lmm_models_by_aic:
+    module: "tools.analysis_lmm"
+    function: "compare_lmm_models_by_aic"
+    signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit all 5 candidate models, compare by AIC, return best model"
+
+    inputs:
+      - name: "data"
+        type: "DataFrame"
+        description: "Long-format LMM input data"
+      - name: "n_factors"
+        type: "int"
+        description: "Number of factors (1=single, >1=multiple with interactions)"
+      - name: "reference_group"
+        type: "str"
+        description: "Reference level for treatment coding (e.g., 'free_recall')"
+      - name: "groups"
+        type: "str"
+        description: "Grouping variable for random effects"
+      - name: "save_dir"
+        type: "Path"
+        description: "Directory to save model comparison outputs"
+
+    outputs:
+      - name: "results"
+        type: "Dict"
+        keys: ["models", "aic_comparison", "best_model", "best_result"]
+        description: "All fitted models, AIC comparison table, best model name and result"
+
+    source_reference: "tools_inventory.md - compare_lmm_models_by_aic"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Extract fixed effects table from fitted LMM"
+
+    inputs:
+      - name: "result"
+        type: "MixedLMResults"
+        description: "Fitted LMM result object"
+
+    outputs:
+      - name: "fixed_effects"
+        type: "DataFrame"
+        columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+        description: "Fixed effects table with estimates and significance"
+
+    source_reference: "tools_inventory.md - extract_fixed_effects_from_lmm"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "D068: Post-hoc pairwise contrasts with dual p-value reporting"
+
+    inputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted LMM result object"
+      - name: "comparisons"
+        type: "List[str]"
+        description: "Pairwise comparisons (e.g., ['cued_recall-free_recall', 'recognition-free_recall'])"
+      - name: "family_alpha"
+        type: "float"
+        default: 0.05
+        description: "Family-wise error rate for Bonferroni correction"
+
+    outputs:
+      - name: "contrasts"
+        type: "DataFrame"
+        columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+        description: "Pairwise contrasts with dual p-values (Decision D068)"
+
+    decision_reference: "D068 (dual p-value reporting)"
+    source_reference: "tools_inventory.md - compute_contrasts_pairwise"
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Compute Cohen's f-squared effect sizes for LMM fixed effects"
+
+    inputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted LMM result object"
+      - name: "include_interactions"
+        type: "bool"
+        default: false
+        description: "Include interaction terms in effect size calculations"
+
+    outputs:
+      - name: "effect_sizes"
+        type: "DataFrame"
+        columns: ["effect", "f_squared", "interpretation"]
+        description: "Effect sizes with categorical interpretation (negligible/small/medium/large)"
+
+    source_reference: "tools_inventory.md - compute_effect_sizes_cohens"
+
+  # ============================================================================
+  # PLOTTING/TRANSFORMATION TOOLS
+  # ============================================================================
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
+    validation_tool: null  # No dedicated validation - output validated by file existence checks
+
+    description: "Transform theta scores to probability scale via IRT 2PL formula"
+
+    inputs:
+      - name: "theta"
+        type: "ndarray"
+        description: "Array of theta (ability) values"
+      - name: "discrimination"
+        type: "float"
+        default: 1.0
+        description: "Item discrimination parameter (a)"
+      - name: "difficulty"
+        type: "float"
+        default: 0.0
+        description: "Item difficulty parameter (b)"
+
+    outputs:
+      - name: "probabilities"
+        type: "ndarray"
+        description: "Probability values in range [0, 1]"
+
+    decision_reference: "D069 (dual-scale trajectory plots)"
+    source_reference: "tools_inventory.md - convert_theta_to_probability"
+
+---
+
+validation_tools:
+
+  # ============================================================================
+  # IRT VALIDATION TOOLS
+  # ============================================================================
+
+  validate_irt_convergence:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+    description: "Check IRT model convergence based on loss stability and parameter bounds"
+
+    inputs:
+      - name: "results"
+        type: "Dict[str, Any]"
+        description: "Dict containing loss_history and model parameters"
+
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        keys: ["converged", "checks", "message"]
+        description: "Convergence status with detailed check results"
+
+    criteria:
+      - "Loss stabilized within tolerance threshold"
+      - "No NaN or Inf values in final parameters"
+      - "All discrimination parameters > 0"
+      - "Difficulty parameters within reasonable bounds"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_key: "message"
+
+    source_reference: "tools_inventory.md - validate_irt_convergence"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+    description: "Validate item parameters against quality thresholds"
+
+    inputs:
+      - name: "df_items"
+        type: "DataFrame"
+        description: "Item parameters DataFrame"
+      - name: "a_min"
+        type: "float"
+        default: 0.4
+        description: "Minimum discrimination threshold"
+      - name: "b_max"
+        type: "float"
+        default: 3.0
+        description: "Maximum absolute difficulty threshold"
+      - name: "a_col"
+        type: "str"
+        default: "Discrimination"
+        description: "Column name for discrimination parameter"
+      - name: "b_col"
+        type: "str"
+        default: "Difficulty"
+        description: "Column name for difficulty parameter"
+
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        keys: ["valid", "n_items", "n_valid", "n_invalid", "invalid_items", "message"]
+        description: "Validation status with counts and flagged items"
+
+    criteria:
+      - "All discrimination values >= a_min threshold"
+      - "All |difficulty| values <= b_max threshold"
+      - "No NaN values in parameter columns"
+      - "All items accounted for in output"
+
+    behavior_on_failure:
+      action: "return Dict with valid=False"
+      message_key: "message"
+
+    source_reference: "tools_inventory.md - validate_irt_parameters"
+
+  # ============================================================================
+  # LMM VALIDATION TOOLS
+  # ============================================================================
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    description: "Check LMM model convergence status and warnings"
+
+    inputs:
+      - name: "lmm_result"
+        type: "MixedLMResults"
+        description: "Fitted statsmodels MixedLM result object"
+
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        keys: ["converged", "message", "warnings"]
+        description: "Convergence status with any warnings"
+
+    criteria:
+      - "Model optimization converged successfully"
+      - "No singular fit warnings"
+      - "All fixed effect estimates finite (no NaN/Inf)"
+      - "Random effects variance > 0"
+
+    behavior_on_failure:
+      action: "return Dict with converged=False"
+      message_key: "message"
+
+    source_reference: "tools_inventory.md - validate_lmm_convergence"
+
+  validate_lmm_residuals:
+    module: "tools.validation"
+    function: "validate_lmm_residuals"
+    signature: "validate_lmm_residuals(residuals: ndarray, alpha: float = 0.05) -> Dict[str, Any]"
+
+    description: "Test LMM residuals for normality using Kolmogorov-Smirnov test"
+
+    inputs:
+      - name: "residuals"
+        type: "ndarray"
+        description: "Array of model residuals"
+      - name: "alpha"
+        type: "float"
+        default: 0.05
+        description: "Significance level for KS test"
+
+    outputs:
+      - name: "validation_result"
+        type: "Dict[str, Any]"
+        keys: ["normal", "ks_statistic", "p_value", "message"]
+        description: "Normality test results"
+
+    criteria:
+      - "KS test p-value > alpha (fail to reject normality)"
+      - "No extreme outliers in residual distribution"
+
+    behavior_on_failure:
+      action: "return Dict with normal=False"
+      message_key: "message"
+      note: "Non-normality is warning, not hard failure for LMM with large N"
+
+    source_reference: "tools_inventory.md - validate_lmm_residuals"
+
+---
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 4
+  total_unique_tools: 12
+
+  mandatory_decisions_embedded:
+    - "D039: 2-pass IRT purification (filter_items_by_quality thresholds)"
+    - "D068: Dual p-value reporting (compute_contrasts_pairwise output columns)"
+    - "D069: Dual-scale trajectory plots (convert_theta_to_probability for probability scale)"
+    - "D070: TSVR as time variable (fit_lmm_trajectory_tsvr function)"
+
+  analysis_tool_list:
+    - "calibrate_irt"
+    - "filter_items_by_quality"
+    - "fit_lmm_trajectory_tsvr"
+    - "compare_lmm_models_by_aic"
+    - "extract_fixed_effects_from_lmm"
+    - "compute_contrasts_pairwise"
+    - "compute_effect_sizes_cohens"
+    - "convert_theta_to_probability"
+
+  validation_tool_list:
+    - "validate_irt_convergence"
+    - "validate_irt_parameters"
+    - "validate_lmm_convergence"
+    - "validate_lmm_residuals"
+
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints from tools_inventory.md"
+    - "All validation tools paired with analysis tools where applicable"
+    - "Standard library functions (pandas, numpy) NOT cataloged - exempt from verification"
+
+---
+
+# End of Tool Catalog

@@ -1,0 +1,81 @@
+[START] Step 03: IRT Calibration Pass 2 (Purified Items)
+[INFO] RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq3
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step02_purified_items.csv (43 rows)
+[INFO] Purified items: 43 items retained
+[LOADED] step00_q_matrix.csv (72 rows)
+[FILTER] Filtering to purified items only...
+[INFO] Purified item count: 43
+[FILTERED] IRT input: 43 item columns retained
+[FILTERED] Q-matrix: 43 items retained
+[CONVERT] Converting wide format to long format...
+[ERROR] cannot convert float NaN to integer
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq3/code/step03_irt_calibration_pass2.py", line 198, in <module>
+    df_long['test'] = df_long['composite_ID'].str.extract(r'_T(\d+)$')[0].astype(int)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 6665, in astype
+    new_data = self._mgr.astype(dtype=dtype, copy=copy, errors=errors)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 449, in astype
+    return self.apply(
+           ^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 363, in apply
+    applied = getattr(b, f)(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py", line 784, in astype
+    new_values = astype_array_safe(values, dtype, copy=copy, errors=errors)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/dtypes/astype.py", line 237, in astype_array_safe
+    new_values = astype_array(values, dtype, copy=copy)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/dtypes/astype.py", line 182, in astype_array
+    values = _astype_nansafe(values, dtype, copy=copy)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/dtypes/astype.py", line 133, in _astype_nansafe
+    return arr.astype(dtype, copy=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: cannot convert float NaN to integer
+[START] Step 03: IRT Calibration Pass 2 (Purified Items)
+[INFO] RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq3
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step02_purified_items.csv (43 rows)
+[INFO] Purified items: 43 items retained
+[LOADED] step00_q_matrix.csv (72 rows)
+[FILTER] Filtering to purified items only...
+[INFO] Purified item count: 43
+[FILTERED] IRT input: 43 item columns retained
+[FILTERED] Q-matrix: 43 items retained
+[CONVERT] Converting wide format to long format...
+[CONVERTED] Long format: 17200 rows (400 obs x 43 items)
+[INFO] Unique UIDs: 100
+[INFO] Test sessions: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[BUILD] Building groups dictionary from Q-matrix...
+[INFO] Factor 'free_recall': 12 items
+[INFO] Factor 'cued_recall': 18 items
+[INFO] Factor 'recognition': 13 items
+[INFO] Groups patterns: {'free_recall': ['IFR'], 'cued_recall': ['ICR'], 'recognition': ['IRE']}
+[CONFIG] IRT config: n_factors=3, correlated_factors=True, device=cpu
+[ANALYSIS] Running calibrate_irt (Pass 2 - Purified Items)...
+[DONE] IRT calibration complete
+[INFO] Theta scores shape: (400, 5)
+[INFO] Item parameters shape: (43, 6)
+[TRANSFORM] Transforming outputs to required format...
+[TRANSFORMED] Theta scores: 1200 rows
+[INFO] Unique composite_IDs: 400
+[INFO] Domain names: ['free_recall', 'cued_recall', 'recognition']
+[TRANSFORMED] Item parameters: 43 rows
+[SAVE] Saving analysis outputs...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq3/data/step03_theta_scores.csv (1200 rows, 3 cols)
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq3/data/step03_item_parameters.csv (43 rows, 4 cols)
+[VALIDATION] Running validation checks...
+[VALIDATION] Theta range [-2.48, 2.95]: [PASS]
+[VALIDATION] Composite IDs (400/400): [PASS]
+[VALIDATION] Domains (3/3): [PASS]
+[VALIDATION] Row count (1200/1200): [PASS]
+[VALIDATION] Item count (43/43): [PASS]
+[VALIDATION] Discrimination > 0: [PASS]
+[SUCCESS] Step 03 complete - All validation checks passed

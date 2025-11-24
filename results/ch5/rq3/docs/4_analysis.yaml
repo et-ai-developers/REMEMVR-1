@@ -1,0 +1,819 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-24
+# RQ: ch5/rq3
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq3"
+  total_steps: 8
+  analysis_type: "IRT -> LMM paradigm trajectory analysis (Free Recall, Cued Recall, Recognition)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-24T12:00:00Z"
+
+  decisions_applied:
+    - "D039: 2-pass IRT purification (a >= 0.4, |b| <= 3.0)"
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
+    - "D069: Dual-scale trajectory plots (theta + probability scale)"
+    - "D070: TSVR as continuous time variable (actual hours since encoding)"
+
+  cross_rq_dependencies:
+    - source_rq: "ch5/rq1"
+      files:
+        - "results/ch5/rq1/data/step00_irt_input.csv"
+        - "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+      reason: "Reuse extracted VR data with new paradigm-based Q-matrix"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Filter and Prepare Data for Paradigm-Based IRT
+  # --------------------------------------------------------------------------
+  - name: "step00_prepare_paradigm_data"
+    step_number: "00"
+    description: "Filter RQ 5.1 data to IFR/ICR/IRE paradigms, create paradigm-based Q-matrix"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load RQ 5.1 IRT input: pd.read_csv('results/ch5/rq1/data/step00_irt_input.csv')"
+        - "Filter columns: Keep composite_ID + columns matching *IFR-*ANS, *ICR-*ANS, *IRE-*ANS patterns"
+        - "Exclude columns: *RFR-* (Room Free Recall), *TCR-* (Task Cued Recall)"
+        - "Create Q-matrix DataFrame with columns: item_name, free_recall, cued_recall, recognition"
+        - "For each item: set factor column to 1 based on pattern (*IFR*->free_recall, *ICR*->cued_recall, *IRE*->recognition)"
+        - "Copy TSVR mapping: shutil.copy from results/ch5/rq1/data/step00_tsvr_mapping.csv"
+        - "Save filtered IRT input to data/step00_irt_input.csv"
+        - "Save Q-matrix to data/step00_q_matrix.csv"
+        - "Save TSVR mapping copy to data/step00_tsvr_mapping.csv"
+
+    input_files:
+      - path: "results/ch5/rq1/data/step00_irt_input.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+          - {name: "TQ_*", type: "int", description: "VR item columns (0 or 1)"}
+        row_count: 400
+        variable_name: "df_rq1_input"
+        description: "Source IRT input from RQ 5.1 (all paradigms, all domains)"
+
+      - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+          - {name: "TSVR_hours", type: "float", description: "Hours since VR encoding"}
+          - {name: "test", type: "str", description: "Test session T1/T2/T3/T4"}
+        row_count: 400
+        variable_name: "df_tsvr"
+        description: "TSVR time variable mapping from RQ 5.1"
+
+    output_files:
+      - path: "data/step00_irt_input.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+          - {name: "*IFR*", type: "int", description: "Item Free Recall columns"}
+          - {name: "*ICR*", type: "int", description: "Item Cued Recall columns"}
+          - {name: "*IRE*", type: "int", description: "Item Recognition columns"}
+        row_count: 400
+        variable_name: "df_filtered"
+        description: "Filtered IRT input (IFR, ICR, IRE paradigms only)"
+
+      - path: "data/step00_q_matrix.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "item_name", type: "str", description: "Item column name"}
+          - {name: "free_recall", type: "int", description: "1 if IFR item, else 0"}
+          - {name: "cued_recall", type: "int", description: "1 if ICR item, else 0"}
+          - {name: "recognition", type: "int", description: "1 if IRE item, else 0"}
+        row_count: ~102
+        variable_name: "df_qmatrix"
+        description: "Paradigm-based Q-matrix (each item loads on exactly one factor)"
+
+      - path: "data/step00_tsvr_mapping.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+          - {name: "TSVR_hours", type: "float", description: "Hours since VR encoding"}
+          - {name: "test", type: "str", description: "Test session T1/T2/T3/T4"}
+        row_count: 400
+        variable_name: "df_tsvr_local"
+        description: "Local copy of TSVR mapping"
+
+    parameters:
+      paradigm_patterns:
+        free_recall: "*IFR-*ANS"
+        cued_recall: "*ICR-*ANS"
+        recognition: "*IRE-*ANS"
+      exclude_patterns:
+        - "*RFR-*"
+        - "*TCR-*"
+      source_rq: "ch5/rq1"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Row count preserved"
+          check: "len(df_filtered) == 400"
+          severity: "CRITICAL"
+        - name: "Q-matrix structure valid"
+          check: "Q-matrix factor columns sum to 1 per row (each item in exactly one factor)"
+          severity: "CRITICAL"
+        - name: "No RFR/TCR columns"
+          check: "No columns contain 'RFR' or 'TCR' patterns"
+          severity: "CRITICAL"
+        - name: "Minimum items per paradigm"
+          check: "At least 10 items per paradigm factor"
+          severity: "CRITICAL"
+        - name: "Q-matrix matches IRT columns"
+          check: "All Q-matrix item_names present in df_filtered columns"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError(f'Step 00 validation failed: {failure_message}')"
+        log_to: "logs/step00_prepare_paradigm_data.log"
+
+    log_file: "logs/step00_prepare_paradigm_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: IRT Calibration Pass 1 (All Items)
+  # --------------------------------------------------------------------------
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
+    description: "Calibrate 3-factor correlated GRM on all paradigm items (baseline before purification)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["composite_ID"]
+          variable_name: "df_irt_input"
+          description: "Wide-format IRT input (composite_ID x item columns)"
+
+        - path: "data/step00_q_matrix.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["item_name", "free_recall", "cued_recall", "recognition"]
+          variable_name: "df_qmatrix"
+          description: "Q-matrix defining factor structure"
+
+      output_files:
+        - path: "logs/step01_pass1_item_params.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item", type: "str", description: "Item name"}
+            - {name: "domain", type: "str", description: "Factor (free_recall/cued_recall/recognition)"}
+            - {name: "Discrimination", type: "float", description: "Discrimination (a) parameter"}
+            - {name: "Difficulty_1", type: "float", description: "Difficulty (b) parameter"}
+          row_count: ~102
+          variable_name: "item_params"
+          description: "Pass 1 item parameters (diagnostic, used for purification)"
+
+        - path: "logs/step01_pass1_theta.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+            - {name: "domain_name", type: "str", description: "Factor name"}
+            - {name: "theta", type: "float", description: "Ability estimate"}
+          row_count: 1200
+          variable_name: "theta_scores"
+          description: "Pass 1 theta scores (diagnostic, long format)"
+
+      parameters:
+        groups:
+          description: "Factor -> item mapping derived from Q-matrix at runtime"
+          note: "g_code reads Q-matrix and constructs groups dict dynamically"
+        config:
+          n_cats: 2
+          correlated_factors: true
+          device: "cpu"
+          max_epochs: 2000
+          learning_rate: 0.01
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_scores, item_params"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "logs/step01_pass1_item_params.csv"
+          variable_name: "item_params"
+          source: "analysis call output"
+
+      parameters:
+        results:
+          description: "Dict with loss_history and parameters from calibrate_irt"
+          note: "g_code constructs this dict from calibration outputs"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (loss stabilized)"
+        - "All discrimination (a) > 0"
+        - "No NaN in parameters"
+        - "Difficulty (b) in reasonable range [-6, 6]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_irt_calibration_pass1.log"
+
+    log_file: "logs/step01_irt_calibration_pass1.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Item Purification
+  # --------------------------------------------------------------------------
+  - name: "step02_purify_items"
+    step_number: "02"
+    description: "Filter items by quality thresholds per Decision D039 (a >= 0.4, |b| <= 3.0)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "logs/step01_pass1_item_params.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["item", "domain", "Discrimination", "Difficulty_1"]
+          variable_name: "pass1_params"
+          description: "Pass 1 item parameters for purification"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item", type: "str", description: "Item name"}
+            - {name: "domain", type: "str", description: "Factor assignment"}
+            - {name: "Discrimination", type: "float", description: "Discrimination (a) >= 0.4"}
+            - {name: "Difficulty_1", type: "float", description: "Difficulty |b| <= 3.0"}
+          row_count: "40-80 (expected 40-80% retention)"
+          variable_name: "retained_items"
+          description: "Items meeting quality thresholds"
+
+        - path: "logs/step02_removed_items.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item", type: "str", description: "Item name"}
+            - {name: "domain", type: "str", description: "Factor assignment"}
+            - {name: "Discrimination", type: "float", description: "Discrimination value"}
+            - {name: "Difficulty_1", type: "float", description: "Difficulty value"}
+            - {name: "removal_reason", type: "str", description: "Why excluded"}
+          variable_name: "removed_items"
+          description: "Items excluded with reason codes"
+
+      parameters:
+        df_items: "pass1_params"
+        a_threshold: 0.4
+        b_threshold: 3.0
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "retained_items, removed_items"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_irt_parameters"
+      signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_purified_items.csv"
+          variable_name: "retained_items"
+          source: "analysis call output (filter_items_by_quality return value[0])"
+
+      parameters:
+        df_items: "retained_items"
+        a_min: 0.4
+        b_max: 3.0
+        a_col: "Discrimination"
+        b_col: "Difficulty_1"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All retained items have Discrimination >= 0.4"
+        - "All retained items have |Difficulty_1| <= 3.0"
+        - "At least 10 items retained per paradigm factor"
+        - "No paradigm completely eliminated"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_purify_items.log"
+
+    log_file: "logs/step02_purify_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: IRT Calibration Pass 2 (Purified Items)
+  # --------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Final IRT calibration on purified items (Decision D039 - 2-pass purification)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["composite_ID"]
+          variable_name: "df_irt_input"
+          description: "Original IRT input (will be filtered to purified items)"
+
+        - path: "data/step02_purified_items.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["item", "domain"]
+          variable_name: "purified_items"
+          description: "List of items retained after purification"
+
+        - path: "data/step00_q_matrix.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["item_name", "free_recall", "cued_recall", "recognition"]
+          variable_name: "df_qmatrix"
+          description: "Q-matrix (will be filtered to purified items)"
+
+      output_files:
+        - path: "data/step03_item_parameters.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item", type: "str", description: "Item name"}
+            - {name: "domain", type: "str", description: "Factor (free_recall/cued_recall/recognition)"}
+            - {name: "Discrimination", type: "float", description: "Final discrimination (a)"}
+            - {name: "Difficulty_1", type: "float", description: "Final difficulty (b)"}
+          row_count: "Same as step02_purified_items.csv"
+          variable_name: "item_params"
+          description: "Final item parameters from Pass 2"
+
+        - path: "data/step03_theta_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+            - {name: "domain_name", type: "str", description: "Factor name"}
+            - {name: "theta", type: "float", description: "Final ability estimate"}
+          row_count: 1200
+          variable_name: "theta_scores"
+          description: "Final theta scores (long format, used in LMM)"
+
+      parameters:
+        groups:
+          description: "Factor -> item mapping from purified items at runtime"
+          note: "g_code filters Q-matrix to purified items and constructs groups dict"
+        config:
+          n_cats: 2
+          correlated_factors: true
+          device: "cpu"
+          max_epochs: 2000
+          learning_rate: 0.01
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_scores, item_params"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_theta_scores.csv"
+          variable_name: "theta_scores"
+          source: "analysis call output"
+
+      parameters:
+        results:
+          description: "Dict with loss_history and parameters from calibrate_irt"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged"
+        - "Theta values in [-3, 3] (tighter range expected after purification)"
+        - "Standard errors reasonable (< 1.0 for most)"
+        - "All 400 composite_IDs present"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_irt_calibration_pass2.log"
+
+    log_file: "logs/step03_irt_calibration_pass2.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Merge Theta with TSVR for LMM Input
+  # --------------------------------------------------------------------------
+  - name: "step04_merge_theta_tsvr"
+    step_number: "04"
+    description: "Merge theta scores with TSVR time variable, reshape for LMM (Decision D070)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load theta scores: pd.read_csv('data/step03_theta_scores.csv')"
+        - "Load TSVR mapping: pd.read_csv('data/step00_tsvr_mapping.csv')"
+        - "Merge on composite_ID"
+        - "Rename domain_name column to 'paradigm'"
+        - "Extract UID from composite_ID: df['UID'] = df['composite_ID'].str.split('_').str[0]"
+        - "Create time transformations: TSVR_hours_sq = TSVR_hours ** 2"
+        - "Create time transformations: TSVR_hours_log = np.log(TSVR_hours + 1)"
+        - "Validate: 1200 rows (400 composite_IDs x 3 paradigms)"
+        - "Save to data/step04_lmm_input.csv"
+
+      input_files:
+        - path: "data/step03_theta_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["composite_ID", "domain_name", "theta"]
+          variable_name: "df_theta"
+          description: "Final theta scores from Pass 2 (long format)"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+          variable_name: "df_tsvr"
+          description: "TSVR time variable mapping"
+
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
+            - {name: "UID", type: "str", description: "Participant ID (extracted)"}
+            - {name: "test", type: "str", description: "Test session T1/T2/T3/T4"}
+            - {name: "TSVR_hours", type: "float", description: "Continuous time since encoding"}
+            - {name: "TSVR_hours_sq", type: "float", description: "Squared time term"}
+            - {name: "TSVR_hours_log", type: "float", description: "Log-transformed time"}
+            - {name: "paradigm", type: "str", description: "Factor: free_recall/cued_recall/recognition"}
+            - {name: "theta", type: "float", description: "IRT ability estimate"}
+          row_count: 1200
+          variable_name: "df_lmm_input"
+          description: "Long-format LMM input (one row per observation)"
+
+      parameters:
+        merge_key: "composite_ID"
+        paradigm_column: "paradigm"
+        time_transformations:
+          squared: "TSVR_hours_sq = TSVR_hours ** 2"
+          log: "TSVR_hours_log = np.log(TSVR_hours + 1)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Row count correct"
+          check: "len(df_lmm_input) == 1200"
+          severity: "CRITICAL"
+        - name: "No missing TSVR"
+          check: "df_lmm_input['TSVR_hours'].notna().all()"
+          severity: "CRITICAL"
+        - name: "Three paradigms present"
+          check: "set(df_lmm_input['paradigm'].unique()) == {'free_recall', 'cued_recall', 'recognition'}"
+          severity: "CRITICAL"
+        - name: "100 unique UIDs"
+          check: "df_lmm_input['UID'].nunique() == 100"
+          severity: "CRITICAL"
+        - name: "TSVR range valid"
+          check: "df_lmm_input['TSVR_hours'].between(0, 200).all()"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "raise ValueError(f'Step 04 validation failed: {failure_message}')"
+        log_to: "logs/step04_merge_theta_tsvr.log"
+
+    log_file: "logs/step04_merge_theta_tsvr.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Fit LMM and Select Best Model
+  # --------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit 5 candidate LMM models, select best by AIC, extract fixed effects"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compare_lmm_models_by_aic"
+      signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "TSVR_hours", "TSVR_hours_sq", "TSVR_hours_log", "paradigm", "theta"]
+          variable_name: "df_lmm_input"
+          description: "Long-format LMM input data"
+
+      output_files:
+        - path: "data/step05_model_comparison.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "model", type: "str", description: "Model name (Linear, Quadratic, etc.)"}
+            - {name: "AIC", type: "float", description: "Akaike Information Criterion"}
+            - {name: "BIC", type: "float", description: "Bayesian Information Criterion"}
+            - {name: "LogLik", type: "float", description: "Log-likelihood"}
+            - {name: "n_params", type: "int", description: "Number of parameters"}
+            - {name: "delta_AIC", type: "float", description: "Difference from best model"}
+            - {name: "akaike_weight", type: "float", description: "Akaike weight"}
+          row_count: 5
+          variable_name: "model_comparison"
+          description: "AIC comparison of 5 candidate models"
+
+        - path: "results/step05_lmm_model_summary.txt"
+          format: "Plain text"
+          variable_name: "model_summary"
+          description: "Best model summary (fixed effects, random effects, fit statistics)"
+
+        - path: "data/step05_fixed_effects.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "effect", type: "str", description: "Fixed effect term name"}
+            - {name: "coefficient", type: "float", description: "Coefficient estimate"}
+            - {name: "std_error", type: "float", description: "Standard error"}
+            - {name: "z_value", type: "float", description: "Z-statistic"}
+            - {name: "p_value", type: "float", description: "P-value"}
+          variable_name: "fixed_effects"
+          description: "Fixed effects from best model"
+
+      parameters:
+        data: "df_lmm_input"
+        n_factors: 3
+        reference_group: "free_recall"
+        groups: "UID"
+        save_dir: "Path('.')"
+        candidate_models:
+          - name: "Linear"
+            formula: "theta ~ TSVR_hours * paradigm"
+          - name: "Quadratic"
+            formula: "theta ~ (TSVR_hours + TSVR_hours_sq) * paradigm"
+          - name: "Logarithmic"
+            formula: "theta ~ TSVR_hours_log * paradigm"
+          - name: "Lin+Log"
+            formula: "theta ~ (TSVR_hours + TSVR_hours_log) * paradigm"
+          - name: "Quad+Log"
+            formula: "theta ~ (TSVR_hours + TSVR_hours_sq + TSVR_hours_log) * paradigm"
+        random_effects: "~TSVR_hours"
+        reml: false
+
+      returns:
+        type: "Dict"
+        keys: ["models", "aic_comparison", "best_model", "best_result"]
+        variable_name: "lmm_results"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - variable_name: "lmm_results['best_result']"
+          source: "analysis call output (compare_lmm_models_by_aic return value['best_result'])"
+
+      parameters:
+        lmm_result: "lmm_results['best_result']"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Best model converged successfully"
+        - "No singular fit warnings"
+        - "All fixed effect estimates finite (no NaN/Inf)"
+        - "Random effects variance > 0"
+        - "All 5 models have valid AIC values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_fit_lmm.log"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Post-hoc Contrasts and Effect Sizes
+  # --------------------------------------------------------------------------
+  - name: "step06_compute_post_hoc_contrasts"
+    step_number: "06"
+    description: "Compute pairwise paradigm contrasts with dual p-values (D068) and effect sizes"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+
+      input_files:
+        - path: "data/step05_fixed_effects.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+          variable_name: "fixed_effects"
+          description: "Fixed effects from best model (Step 5)"
+          note: "g_code reloads best_result from Step 5 for contrast computation"
+
+      output_files:
+        - path: "results/step06_post_hoc_contrasts.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "comparison", type: "str", description: "Pairwise comparison label"}
+            - {name: "beta", type: "float", description: "Slope difference estimate"}
+            - {name: "se", type: "float", description: "Standard error"}
+            - {name: "z", type: "float", description: "Z-statistic"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "alpha_corrected", type: "float", description: "Bonferroni-corrected alpha"}
+            - {name: "p_corrected", type: "float", description: "Bonferroni-corrected p-value"}
+            - {name: "sig_uncorrected", type: "bool", description: "Significant at alpha=0.05"}
+            - {name: "sig_corrected", type: "bool", description: "Significant after Bonferroni"}
+          row_count: "3+ (depends on model complexity)"
+          variable_name: "contrasts"
+          description: "Pairwise contrasts with dual p-values (Decision D068)"
+
+      parameters:
+        lmm_result:
+          description: "Best LMM result from Step 5"
+          note: "g_code passes best_result object directly"
+        comparisons:
+          - "cued_recall - free_recall"
+          - "recognition - free_recall"
+          - "recognition - cued_recall"
+        family_alpha: 0.05
+
+      returns:
+        type: "DataFrame"
+        variable_name: "contrasts"
+
+    analysis_call_2:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_effect_sizes_cohens"
+      signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+
+      description: "Compute Cohen's f-squared effect sizes for paradigm comparisons"
+
+      output_files:
+        - path: "results/step06_effect_sizes.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "effect", type: "str", description: "Effect name"}
+            - {name: "f_squared", type: "float", description: "Cohen's f-squared"}
+            - {name: "interpretation", type: "str", description: "Effect size category"}
+          row_count: 3
+          variable_name: "effect_sizes"
+          description: "Effect sizes for paradigm contrasts"
+
+      parameters:
+        lmm_result: "best_result from Step 5"
+        include_interactions: true
+
+      returns:
+        type: "DataFrame"
+        variable_name: "effect_sizes"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      parameters:
+        lmm_result: "best_result"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 pairwise comparisons computed"
+        - "p_uncorrected in [0, 1]"
+        - "p_corrected >= p_uncorrected"
+        - "Bonferroni alpha = 0.0167 applied correctly"
+        - "Effect sizes in reasonable range"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compute_post_hoc_contrasts.log"
+
+    log_file: "logs/step06_compute_post_hoc_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Prepare Trajectory Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_trajectory_plot_data"
+    step_number: "07"
+    description: "Create plot source CSVs for dual-scale trajectory visualization (Decision D069)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load LMM input: pd.read_csv('data/step04_lmm_input.csv')"
+        - "Load fixed effects: pd.read_csv('data/step05_fixed_effects.csv')"
+        - "Compute observed means per paradigm x test: group by (paradigm, test), calculate mean(theta), std, n, 95% CI"
+        - "Generate prediction grid: TSVR_hours from 0 to 200 (e.g., 50 points)"
+        - "Compute model predictions using fixed effects coefficients"
+        - "Create theta-scale DataFrame with: TSVR_hours, theta_observed, theta_predicted, CI_lower, CI_upper, paradigm"
+        - "Apply IRT 2PL formula: probability = 1 / (1 + exp(-theta))"
+        - "Create probability-scale DataFrame with same structure (probability instead of theta)"
+        - "Save theta-scale to plots/step07_trajectory_theta_data.csv"
+        - "Save probability-scale to plots/step07_trajectory_probability_data.csv"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["TSVR_hours", "paradigm", "theta", "test"]
+          variable_name: "df_lmm_input"
+          description: "LMM input with observed theta values"
+
+        - path: "data/step05_fixed_effects.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["effect", "coefficient"]
+          variable_name: "fixed_effects"
+          description: "Fixed effects for computing predictions"
+
+      output_files:
+        - path: "plots/step07_trajectory_theta_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "TSVR_hours", type: "float", description: "Time since encoding"}
+            - {name: "theta_observed", type: "float", description: "Mean observed theta (NaN for prediction grid)"}
+            - {name: "theta_predicted", type: "float", description: "Model-predicted theta"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% CI bound"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% CI bound"}
+            - {name: "paradigm", type: "str", description: "free_recall/cued_recall/recognition"}
+          row_count: "60-200 (observed + prediction grid)"
+          variable_name: "df_theta_plot"
+          description: "Theta-scale trajectory plot source (Decision D069)"
+
+        - path: "plots/step07_trajectory_probability_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "TSVR_hours", type: "float", description: "Time since encoding"}
+            - {name: "probability_observed", type: "float", description: "Mean observed probability"}
+            - {name: "probability_predicted", type: "float", description: "Model-predicted probability"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% CI bound (probability)"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% CI bound (probability)"}
+            - {name: "paradigm", type: "str", description: "free_recall/cued_recall/recognition"}
+          row_count: "60-200 (same as theta data)"
+          variable_name: "df_prob_plot"
+          description: "Probability-scale trajectory plot source (Decision D069)"
+
+      parameters:
+        theta_to_probability_formula: "P = 1 / (1 + exp(-theta))"
+        prediction_grid:
+          min_hours: 0
+          max_hours: 200
+          n_points: 50
+        confidence_level: 0.95
+        paradigm_levels: ["free_recall", "cued_recall", "recognition"]
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Theta plot file exists"
+          check: "Path('plots/step07_trajectory_theta_data.csv').exists()"
+          severity: "CRITICAL"
+        - name: "Probability plot file exists"
+          check: "Path('plots/step07_trajectory_probability_data.csv').exists()"
+          severity: "CRITICAL"
+        - name: "All paradigms represented"
+          check: "set(df_theta_plot['paradigm'].unique()) == {'free_recall', 'cued_recall', 'recognition'}"
+          severity: "CRITICAL"
+        - name: "Theta in valid range"
+          check: "df_theta_plot['theta_predicted'].between(-3, 3).all()"
+          severity: "MODERATE"
+        - name: "Probability in [0, 1]"
+          check: "df_prob_plot['probability_predicted'].between(0, 1).all()"
+          severity: "CRITICAL"
+        - name: "CI bounds valid"
+          check: "(df_theta_plot['CI_lower'] <= df_theta_plot['theta_predicted']).all() and (df_theta_plot['theta_predicted'] <= df_theta_plot['CI_upper']).all()"
+          severity: "MODERATE"
+        - name: "Minimum rows"
+          check: "len(df_theta_plot) >= 12"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError(f'Step 07 validation failed: {failure_message}')"
+        log_to: "logs/step07_prepare_trajectory_plot_data.log"
+
+    log_file: "logs/step07_prepare_trajectory_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

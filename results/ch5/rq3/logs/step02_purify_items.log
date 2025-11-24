@@ -1,0 +1,30 @@
+[START] Step 02: Item Purification
+============================================================
+[LOAD] Loading Pass 1 item parameters...
+[LOADED] step01_pass1_item_params.csv (72 rows, 4 cols)
+[INFO] Columns: ['item', 'domain', 'Discrimination', 'Difficulty_1']
+[INFO] Discrimination range: 0.050 - 1.780
+[INFO] Difficulty range: -4.437 - 21.650
+[INFO] Items by paradigm (before): {'cued_recall': 24, 'free_recall': 24, 'recognition': 24}
+[ANALYSIS] Running filter_items_by_quality...
+[PARAMS] a_threshold=0.4, b_threshold=3.0 (Decision D039)
+[INFO] Reformatted columns for univariate path: ['item_name', 'factor', 'a', 'b']
+[DONE] Analysis complete
+[RESULT] Retained: 43 items, Removed: 29 items
+[SAVE] Saving step02_purified_items.csv...
+[SAVED] step02_purified_items.csv (43 rows, 4 cols)
+[SAVE] Saving step02_removed_items.csv...
+[SAVED] step02_removed_items.csv (29 rows)
+[VALIDATION] Running validate_irt_parameters...
+[VALIDATION] Valid: True
+[VALIDATION] Total items: 43
+[VALIDATION] Flagged items: 0
+[VALIDATION] Items by paradigm (after): {'cued_recall': 18, 'recognition': 13, 'free_recall': 12}
+============================================================
+[SUMMARY] Item Purification Results:
+  - Original items: 72
+  - Retained items: 43
+  - Removed items: 29
+  - Retention rate: 59.7%
+============================================================
+[SUCCESS] Step 02 complete

@@ -1,0 +1,44 @@
+[START] Step 04: Merge Theta with TSVR for LMM Input
+[INFO] RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq3
+[LOAD] Loading input data...
+[LOADED] step03_theta_scores.csv (1200 rows, 3 cols)
+[INFO] Theta columns: ['composite_ID', 'domain_name', 'theta']
+[INFO] Unique composite_IDs in theta: 400
+[INFO] Unique paradigms (domain_name): ['free_recall', 'cued_recall', 'recognition']
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] TSVR columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
+[INFO] TSVR range: 1.00 - 246.24 hours
+[ANALYSIS] Merging theta scores with TSVR mapping...
+[MERGED] Result: 1200 rows
+[INFO] All rows have valid TSVR_hours
+[TRANSFORM] Renaming columns and creating time transformations...
+[INFO] Renamed 'domain_name' -> 'paradigm'
+[INFO] Created TSVR_hours_sq = TSVR_hours ** 2
+[INFO] Created TSVR_hours_log = log(TSVR_hours + 1)
+[INFO] UID column already present from TSVR mapping
+[INFO] Unique UIDs: 100
+[INFO] Final columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'TSVR_hours_sq', 'TSVR_hours_log', 'paradigm', 'theta']
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq3/data/step04_lmm_input.csv (1200 rows, 8 cols)
+[VALIDATION] Running inline validation checks...
+[PASS] Row count == 1200
+[PASS] No missing TSVR values
+[PASS] Three paradigms present: {'recognition', 'cued_recall', 'free_recall'}
+[PASS] 100 unique UIDs
+[WARN] TSVR range: 6 values outside 0-200 hours (min=1.00, max=246.24). This is expected with real participant data.
+[VALIDATION] All CRITICAL checks passed
+
+[SUMMARY] LMM Input Data Summary:
+  Total rows: 1200
+  Unique participants (UID): 100
+  Unique composite_IDs: 400
+  Test sessions: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+  Paradigms: ['free_recall', 'cued_recall', 'recognition']
+  TSVR_hours: min=1.00, max=246.24, mean=64.95
+  Theta: min=-2.477, max=2.948, mean=0.044
+
+[SUMMARY] By Paradigm:
+  free_recall: n=400, theta_mean=0.030, theta_std=0.908
+  cued_recall: n=400, theta_mean=-0.001, theta_std=0.902
+  recognition: n=400, theta_mean=0.104, theta_std=0.983
+
+[SUCCESS] Step 04 complete
