@@ -1,0 +1,97 @@
+[START] Step 00: Prepare Piecewise LMM Input from RQ 5.1
+[CONFIG] RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq2
+[CONFIG] Input: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+[CONFIG] Output: /home/etai/projects/REMEMVR/results/ch5/rq2/data/step00_piecewise_lmm_input.csv
+[VALIDATE] Checking RQ 5.1 dependency...
+[PASS] RQ 5.1 dependency exists: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+[LOAD] Loading RQ 5.1 LMM input data...
+[LOADED] step04_lmm_input.csv (1200 rows, 6 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[PASS] All required columns present: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[TRANSFORM] Creating Segment variable...
+[INFO] Segment assignment by test:
+       test=1 -> Segment=Early (n=300)
+       test=3 -> Segment=Late (n=300)
+[ERROR] CRITICAL: 600 rows have NaN Segment values. Unexpected test values found: [2 4]
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq2/code/step00_prepare_piecewise_input.py", line 203, in <module>
+    raise ValueError(
+ValueError: CRITICAL: 600 rows have NaN Segment values. Unexpected test values found: [2 4]
+[START] Step 00: Prepare Piecewise LMM Input from RQ 5.1
+[CONFIG] RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq2
+[CONFIG] Input: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+[CONFIG] Output: /home/etai/projects/REMEMVR/results/ch5/rq2/data/step00_piecewise_lmm_input.csv
+[VALIDATE] Checking RQ 5.1 dependency...
+[PASS] RQ 5.1 dependency exists: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+[LOAD] Loading RQ 5.1 LMM input data...
+[LOADED] step04_lmm_input.csv (1200 rows, 6 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[PASS] All required columns present: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[TRANSFORM] Creating Segment variable...
+[INFO] Segment assignment by test:
+       test=1 -> Segment=Early (n=300)
+       test=2 -> Segment=Early (n=300)
+       test=3 -> Segment=Late (n=300)
+       test=4 -> Segment=Late (n=300)
+[PASS] Segment assignment complete: no NaN values
+[TRANSFORM] Creating Days_within variable...
+[INFO] Min TSVR for Late segment: 61.28 hours
+[INFO] Days_within statistics by segment:
+       Early: min=0.04, max=2.99, mean=0.62
+       Late: min=0.00, max=7.71, mean=2.24
+[VALIDATE] Running validation checks...
+[PASS] Row count preserved: 1200
+[PASS] Segment assignment correct: test 0,1 -> Early; test 3,6 -> Late
+[PASS] No NaN values in Segment or Days_within
+[ERROR] CRITICAL: Late Days_within max=7.71 exceeds expected ~6 days
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq2/code/step00_prepare_piecewise_input.py", line 289, in <module>
+    raise ValueError(f"CRITICAL: Late Days_within max={late_max:.2f} exceeds expected ~6 days")
+ValueError: CRITICAL: Late Days_within max=7.71 exceeds expected ~6 days
+[START] Step 00: Prepare Piecewise LMM Input from RQ 5.1
+[CONFIG] RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq2
+[CONFIG] Input: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+[CONFIG] Output: /home/etai/projects/REMEMVR/results/ch5/rq2/data/step00_piecewise_lmm_input.csv
+[VALIDATE] Checking RQ 5.1 dependency...
+[PASS] RQ 5.1 dependency exists: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+[LOAD] Loading RQ 5.1 LMM input data...
+[LOADED] step04_lmm_input.csv (1200 rows, 6 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[PASS] All required columns present: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[TRANSFORM] Creating Segment variable...
+[INFO] Segment assignment by test:
+       test=1 -> Segment=Early (n=300)
+       test=2 -> Segment=Early (n=300)
+       test=3 -> Segment=Late (n=300)
+       test=4 -> Segment=Late (n=300)
+[PASS] Segment assignment complete: no NaN values
+[TRANSFORM] Creating Days_within variable...
+[INFO] Min TSVR for Late segment: 61.28 hours
+[INFO] Days_within statistics by segment:
+       Early: min=0.04, max=2.99, mean=0.62
+       Late: min=0.00, max=7.71, mean=2.24
+[VALIDATE] Running validation checks...
+[PASS] Row count preserved: 1200
+[PASS] Segment assignment correct: test 0,1 -> Early; test 3,6 -> Late
+[PASS] No NaN values in Segment or Days_within
+[PASS] Days_within range valid: Early max=2.99, Late max=7.71
+[PASS] All domains present: {'where', 'when', 'what'}
+[SAVE] Saving piecewise LMM input...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq2/data/step00_piecewise_lmm_input.csv (1200 rows, 8 cols)
+[INFO] Output columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta', 'Segment', 'Days_within']
+
+======================================================================
+[SUCCESS] Step 00 complete: Piecewise LMM Input Prepared
+======================================================================
+  Input:  /home/etai/projects/REMEMVR/results/ch5/rq1/data/step04_lmm_input.csv
+  Output: /home/etai/projects/REMEMVR/results/ch5/rq2/data/step00_piecewise_lmm_input.csv
+  Rows:   1200
+
+  Segment distribution:
+    - Early: 600 rows (50.0%)
+    - Late: 600 rows (50.0%)
+
+  Next step: step01_fit_piecewise_lmm.py
+======================================================================

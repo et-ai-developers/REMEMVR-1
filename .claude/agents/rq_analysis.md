@@ -313,6 +313,22 @@ When 2_plan.md says: "Load CSV, create composite_ID, dichotomize values, reshape
 - ✅ All catalogued tool signatures complete with type hints
 - ✅ All naming conventions enforced
 
+**CRITICAL: Output Folder Conventions:**
+
+```
+data/     ALL data outputs (.csv, .pkl, .txt) - ANY file produced by analysis steps
+results/  ONLY final summary reports (.md, .html) - created by rq_results ONLY
+plots/    ONLY rendered images (.png, .pdf, .svg) AND their source data CSVs
+logs/     ONLY execution logs (.log)
+```
+
+**Common Mistake:** Putting intermediate CSV outputs in `results/` folder. This is WRONG.
+- `results/step02_slopes.csv` ← WRONG (CSV data goes in data/)
+- `data/step02_slopes.csv` ← CORRECT
+- `results/summary.md` ← CORRECT (final report)
+
+**Rule:** If file extension is `.csv`, `.pkl`, or `.txt`, it goes in `data/` (or `plots/` if plot source data)
+
 **Circuit Breaker:**
 - If catalogued tool missing from 3_tools.yaml → QUIT with error
 - If stdlib operations unclear in 2_plan.md → QUIT asking for clarification
@@ -695,7 +711,7 @@ Missing Tools:
 - Step 6 requires 'validate_lmm_assumptions' - not found in 3_tools.yaml
 
 Resolution:
-1. Check if tools exist in tools_inventory.md
+1. Check if tools exist in docs\v4\tools_inventory.md
 2. If yes: Re-run rq_tools to include missing tools
 3. If no: Migrate tools with TDD, update tools_inventory.md, re-run rq_tools
 4. Then re-run rq_analysis

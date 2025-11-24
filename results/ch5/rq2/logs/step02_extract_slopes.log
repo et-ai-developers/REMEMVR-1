@@ -1,0 +1,63 @@
+[START] Step 02: Extract Segment-by-Domain Slopes
+============================================================
+[LOAD] Loading piecewise LMM model from step01...
+[LOADED] Model loaded successfully
+  Converged: True
+  Observations: 1200
+  Fixed effects: 12
+
+[ANALYSIS] Extracting fixed effects from LMM...
+[DONE] Fixed effects extracted: 15 terms
+
+Fixed Effects:
+  Intercept: 0.7010 (SE=0.0950, p=0.0000)*
+  C(Segment, Treatment('Early'))[T.Late]: -0.9170 (SE=0.1310, p=0.0000)*
+  C(domain, Treatment('what'))[T.when]: -0.4560 (SE=0.1170, p=0.0000)*
+  C(domain, Treatment('what'))[T.where]: -0.0220 (SE=0.1170, p=0.8480)
+  C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: 0.5850 (SE=0.1840, p=0.0010)*
+  C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: 0.1930 (SE=0.1840, p=0.2940)
+  Days_within: -0.5070 (SE=0.0950, p=0.0000)*
+  Days_within:C(Segment, Treatment('Early'))[T.Late]: 0.4760 (SE=0.1010, p=0.0000)*
+  Days_within:C(domain, Treatment('what'))[T.when]: 0.2990 (SE=0.1330, p=0.0240)*
+  Days_within:C(domain, Treatment('what'))[T.where]: 0.0520 (SE=0.1330, p=0.6970)
+  Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: -0.2810 (SE=0.1420, p=0.0480)*
+  Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: -0.1270 (SE=0.1420, p=0.3700)
+  Group Var: 0.2040 (SE=0.0570, p=nan)
+  Group x Days_within Cov: -0.0090 (SE=0.0150, p=nan)
+  Days_within Var: 0.0110 (SE=0.0080, p=nan)
+
+[ANALYSIS] Computing segment-domain slopes via linear combinations...
+[DEBUG] days_within: Days_within
+[DEBUG] days_segment_late: Days_within:C(Segment, Treatment('Early'))[T.Late]
+[DEBUG] days_domain_where: Days_within:C(domain, Treatment('what'))[T.where]
+[DEBUG] days_domain_when: Days_within:C(domain, Treatment('what'))[T.when]
+[DEBUG] days_seg_dom_where: Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]
+[DEBUG] days_seg_dom_when: Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]
+[DONE] Slopes computed: 6 segment-domain combinations
+
+Segment-Domain Slopes (theta change per day):
+  Early-what: -0.5072 (SE=0.0950, 95% CI [-0.6935, -0.3209])
+  Early-where: -0.4555 (SE=0.0950, 95% CI [-0.6418, -0.2693])
+  Early-when: -0.2084 (SE=0.0950, 95% CI [-0.3946, -0.0221])
+  Late-what: -0.0312 (SE=0.0382, 95% CI [-0.1061, 0.0438])
+  Late-where: -0.1068 (SE=0.0382, 95% CI [-0.1817, -0.0318])
+  Late-when: -0.0132 (SE=0.0382, 95% CI [-0.0881, 0.0617])
+
+[SAVE] Saving fixed effects table...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq2/results/step02_fixed_effects.csv (15 rows)
+[SAVE] Saving segment-domain slopes...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq2/results/step02_segment_domain_slopes.csv (6 rows)
+
+[VALIDATION] Running inline validation checks...
+  [PASS] Fixed effects table has 15 rows (>= 7 required)
+  [PASS] Slope table has 6 rows (6 required)
+  [PASS] All segments present: {'Early', 'Late'}
+  [PASS] All domains present: {'where', 'when', 'what'}
+  [PASS] All SE values > 0 (min=0.0382)
+  [PASS] CI structure valid (CI_lower < slope < CI_upper) for all rows
+
+[VALIDATION PASSED] All checks passed
+
+============================================================
+[SUCCESS] Step 02 complete
+============================================================

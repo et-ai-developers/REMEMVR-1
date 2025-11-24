@@ -665,6 +665,50 @@ validation_result = validate_irt_convergence(df_items, threshold=0.01)
 
 ---
 
+## REMEMVR Data Conventions (Prevent Common Bugs)
+
+**TEST SESSION vs NOMINAL DAY MAPPING:**
+```
+test column values: 1, 2, 3, 4 (session numbers T1-T4)
+NOT: 0, 1, 3, 6 (nominal days)
+
+Mapping:
+  test=1 (T1) -> Day 0 (immediate)
+  test=2 (T2) -> Day 1 (~24 hours)
+  test=3 (T3) -> Day 3 (~72 hours)
+  test=4 (T4) -> Day 6 (~144 hours)
+```
+
+**WHY THIS MATTERS:** Specs may refer to "Day 0-1" or "Day 3-6" but actual data uses test=1,2,3,4. Always check actual data column values before hardcoding mappings.
+
+**TSVR VALIDATION:** Real TSVR data has natural variation (participants tested late). Allow generous margins:
+- Day 0-1 window: TSVR can extend to ~72 hours (some late Day 1 tests)
+- Day 3-6 window: TSVR can extend to ~200+ hours
+- Never use strict day boundaries like "TSVR < 24" for Day 0
+
+**STATSMODELS LMM ATTRIBUTES:**
+```python
+# CORRECT way to get number of groups:
+n_groups = len(lmm_result.model.group_labels)  # Works
+
+# WRONG (will raise AttributeError):
+n_groups = lmm_result.n_groups  # Does NOT exist on MixedLMResults
+```
+
+**STATSMODELS MODEL LOADING:**
+```python
+# CORRECT - use MixedLMResults.load() method:
+from statsmodels.regression.mixed_linear_model import MixedLMResults
+lmm_model = MixedLMResults.load(str(model_path))
+
+# WRONG - pickle.load() causes patsy/eval errors:
+import pickle
+with open(model_path, 'rb') as f:
+    lmm_model = pickle.load(f)  # AttributeError: 'NoneType' object has no attribute 'f_locals'
+```
+
+---
+
 ### Step 6: Verify Log File Path in Generated Code
 
 Read the generated script and verify:

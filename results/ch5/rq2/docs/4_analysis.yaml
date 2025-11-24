@@ -1,0 +1,547 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-23
+# RQ: ch5/rq2
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq2"
+  total_steps: 6
+  analysis_type: "Piecewise LMM consolidation analysis (3-way interaction)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-23T12:00:00"
+  dependencies:
+    - "results/ch5/rq1 (RQ 5.1 must be complete)"
+  key_decisions:
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
+    - "D069: Dual-scale trajectory plots (theta + probability)"
+    - "D070: TSVR (actual hours) as time variable"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Prepare Piecewise LMM Input from RQ 5.1
+  # --------------------------------------------------------------------------
+  - name: "step00_prepare_piecewise_input"
+    step_number: "00"
+    description: "Prepare piecewise LMM input by adding Segment and Days_within variables to RQ 5.1 theta data"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load results/ch5/rq1/data/step04_lmm_input.csv (RQ 5.1 LMM input)"
+        - "Create Segment variable: test in {0,1} -> 'Early', test in {3,6} -> 'Late'"
+        - "Create Days_within variable: For Early: TSVR_hours/24, For Late: (TSVR_hours - min_Late_TSVR)/24"
+        - "Verify segment assignments: test 0,1 -> Early only; test 3,6 -> Late only"
+        - "Save piecewise LMM input to data/step00_piecewise_lmm_input.csv"
+
+    input_files:
+      - path: "results/ch5/rq1/data/step04_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se"]
+        variable_name: "df_rq51"
+        description: "RQ 5.1 LMM input data with theta scores and TSVR"
+        expected_rows: 1200
+
+    output_files:
+      - path: "data/step00_piecewise_lmm_input.csv"
+        variable_name: "df_piecewise"
+        description: "Piecewise LMM input with Segment and Days_within columns"
+        expected_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se", "Segment", "Days_within"]
+        expected_rows: 1200
+
+    parameters:
+      segment_mapping:
+        Early: [0, 1]
+        Late: [3, 6]
+      days_within_calculation:
+        Early: "TSVR_hours / 24"
+        Late: "(TSVR_hours - min_Late_TSVR_hours) / 24"
+      critical_note: "Day 1 (test=1) assigned to Early segment ONLY (no overlap)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "RQ 5.1 dependency exists"
+          check: "File results/ch5/rq1/data/step04_lmm_input.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count preserved"
+          check: "Output has same row count as input (~1200)"
+          severity: "CRITICAL"
+        - name: "Segment assignment correct"
+          check: "test in {0,1} -> Segment='Early' (100%); test in {3,6} -> Segment='Late' (100%)"
+          severity: "CRITICAL"
+        - name: "No NaN in new columns"
+          check: "Segment and Days_within have no NaN values"
+          severity: "CRITICAL"
+        - name: "Days_within range valid"
+          check: "Early: Days_within in [0, 2]; Late: Days_within in [0, 6]"
+          severity: "CRITICAL"
+        - name: "All domains present"
+          check: "domain contains {what, where, when}"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step00_prepare_piecewise_input.log"
+
+    log_file: "logs/step00_prepare_piecewise_input.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Fit Piecewise LMM with 3-Way Interaction
+  # --------------------------------------------------------------------------
+  - name: "step01_fit_piecewise_lmm"
+    step_number: "01"
+    description: "Fit piecewise LMM with Days_within * Segment * domain 3-way interaction"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory"
+      signature: "fit_lmm_trajectory(data: pd.DataFrame, formula: str, groups: str, re_formula: str, reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step00_piecewise_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se", "Segment", "Days_within"]
+          variable_name: "df_lmm"
+          description: "Piecewise LMM input from Step 0"
+
+      output_files:
+        - path: "data/step01_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model object (pickle)"
+        - path: "results/step01_piecewise_lmm_summary.txt"
+          variable_name: "lmm_summary"
+          description: "Full model summary text (fixed effects, random effects, fit stats)"
+
+      parameters:
+        data: "df_lmm"
+        formula: "theta ~ Days_within * C(Segment, Treatment('Early')) * C(domain, Treatment('what'))"
+        groups: "UID"
+        re_formula: "~Days_within"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit piecewise LMM testing 3-way interaction: Does forgetting slope differ by Segment and Domain?"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effect terms present (7 terms: intercept + 6 interactions)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_fit_piecewise_lmm.log"
+
+      description: "Validate LMM convergence and model structure"
+
+    log_file: "logs/step01_fit_piecewise_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Extract Segment-by-Domain Slopes
+  # --------------------------------------------------------------------------
+  - name: "step02_extract_slopes"
+    step_number: "02"
+    description: "Extract 6 segment-domain specific forgetting slopes via linear combinations"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model from Step 1"
+
+      output_files:
+        - path: "results/step02_fixed_effects.csv"
+          variable_name: "df_fixed_effects"
+          description: "Fixed effects table from LMM"
+        - path: "results/step02_segment_domain_slopes.csv"
+          variable_name: "df_slopes"
+          description: "Computed slopes for each segment x domain combination"
+
+      parameters:
+        result: "lmm_model"
+        slope_computation_note: |
+          Slopes computed via linear combinations of fixed effects:
+          - What (Early): beta[Days_within]
+          - Where (Early): beta[Days_within] + beta[Days_within:domain[T.where]]
+          - When (Early): beta[Days_within] + beta[Days_within:domain[T.when]]
+          - What (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]]
+          - Where (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]] + beta[Days_within:domain[T.where]] + beta[Days_within:Segment[T.Late]:domain[T.where]]
+          - When (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]] + beta[Days_within:domain[T.when]] + beta[Days_within:Segment[T.Late]:domain[T.when]]
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "df_fixed_effects"
+
+      description: "Extract fixed effects and compute 6 segment-domain slopes"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Fixed effects table complete"
+          check: "df_fixed_effects has 7 rows (intercept + 6 terms)"
+          severity: "CRITICAL"
+        - name: "Slope table complete"
+          check: "df_slopes has 6 rows (2 segments x 3 domains)"
+          severity: "CRITICAL"
+        - name: "All segment-domain combinations present"
+          check: "segment in {Early, Late}; domain in {what, where, when}"
+          severity: "CRITICAL"
+        - name: "Slopes have valid values"
+          check: "slope values are numeric, SE > 0, CI_lower < slope < CI_upper"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step02_extract_slopes.log"
+
+    log_file: "logs/step02_extract_slopes.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Planned Contrasts with Bonferroni Correction (Decision D068)
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_contrasts"
+    step_number: "03"
+    description: "Compute 6 planned contrasts with dual p-value reporting (D068)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result, comparisons: List[str], family_alpha: float = 0.05) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model from Step 1"
+
+      output_files:
+        - path: "results/step03_planned_contrasts.csv"
+          variable_name: "df_contrasts"
+          description: "6 planned contrasts with dual p-values (D068)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        comparisons:
+          - "where-what_early"
+          - "when-what_early"
+          - "where-what_late"
+          - "when-what_late"
+          - "where_slope_change-what_slope_change"
+          - "when_slope_change-what_slope_change"
+        family_alpha: 0.05
+        bonferroni_alpha: 0.0083
+        contrast_definitions: |
+          C1: Where vs What slope in Early segment (spatial consolidation advantage)
+          C2: When vs What slope in Early segment (temporal consolidation)
+          C3: Where vs What slope in Late segment (decay comparison)
+          C4: When vs What slope in Late segment (decay comparison)
+          C5: Where slope change (Late-Early) vs What slope change (consolidation benefit)
+          C6: When slope change (Late-Early) vs What slope change (consolidation benefit)
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "df_contrasts"
+
+      description: "Compute 6 planned contrasts per rq_stats feedback, Bonferroni alpha=0.0083"
+
+    effect_sizes_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_effect_sizes_cohens"
+      signature: "compute_effect_sizes_cohens(lmm_result, include_interactions: bool = False) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+
+      output_files:
+        - path: "results/step03_effect_sizes.csv"
+          variable_name: "df_effect_sizes"
+          description: "Cohen's f-squared effect sizes for contrasts"
+
+      parameters:
+        lmm_result: "lmm_model"
+        include_interactions: true
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "df_effect_sizes"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Contrast count correct"
+          check: "df_contrasts has 6 rows (6 planned contrasts)"
+          severity: "CRITICAL"
+        - name: "Dual p-values present"
+          check: "Both p_uncorrected and p_bonferroni columns exist (D068)"
+          severity: "CRITICAL"
+        - name: "Bonferroni alpha correct"
+          check: "alpha_corrected = 0.0083 (0.05/6)"
+          severity: "CRITICAL"
+        - name: "p-values valid"
+          check: "p_uncorrected in [0, 1]; p_bonferroni >= p_uncorrected"
+          severity: "CRITICAL"
+        - name: "Effect sizes computed"
+          check: "df_effect_sizes has rows with f_squared and interpretation"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step03_compute_contrasts.log"
+
+    log_file: "logs/step03_compute_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Consolidation Benefit Indices
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_consolidation_benefit"
+    step_number: "04"
+    description: "Compute consolidation benefit index per domain (Early slope - Late slope)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load results/step02_segment_domain_slopes.csv"
+        - "For each domain: consolidation_benefit = Early_slope - Late_slope"
+        - "Positive benefit = less forgetting in Early (consolidation protected memory)"
+        - "Compute benefit SE via delta method: SE = sqrt(SE_early^2 + SE_late^2)"
+        - "Compute 95% CI for benefit"
+        - "Rank domains by consolidation benefit (1 = most protected)"
+        - "Save to results/step04_consolidation_benefit.csv"
+
+      input_files:
+        - path: "results/step02_segment_domain_slopes.csv"
+          required_columns: ["segment", "domain", "slope", "se", "CI_lower", "CI_upper"]
+          variable_name: "df_slopes"
+          description: "Segment-domain slopes from Step 2"
+
+      output_files:
+        - path: "results/step04_consolidation_benefit.csv"
+          variable_name: "df_benefit"
+          description: "Consolidation benefit index per domain"
+          expected_columns: ["domain", "early_slope", "late_slope", "consolidation_benefit", "benefit_se", "benefit_CI_lower", "benefit_CI_upper", "rank"]
+          expected_rows: 3
+
+      parameters:
+        benefit_formula: "consolidation_benefit = early_slope - late_slope"
+        se_formula: "benefit_se = sqrt(se_early^2 + se_late^2)"
+        interpretation: |
+          Positive benefit = less forgetting in Early segment (consolidation protected memory)
+          Negative benefit = more forgetting in Early segment (no consolidation benefit)
+          Larger positive values indicate greater consolidation benefit
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "All domains computed"
+          check: "df_benefit has 3 rows (what, where, when)"
+          severity: "CRITICAL"
+        - name: "Ranks unique"
+          check: "rank values are {1, 2, 3}"
+          severity: "CRITICAL"
+        - name: "Benefit values valid"
+          check: "consolidation_benefit and benefit_se are numeric"
+          severity: "CRITICAL"
+        - name: "CI structure valid"
+          check: "benefit_CI_lower < consolidation_benefit < benefit_CI_upper"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step04_compute_consolidation_benefit.log"
+
+    log_file: "logs/step04_compute_consolidation_benefit.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Piecewise Trajectory Plot Data (Decision D069)
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_piecewise_plot_data"
+    step_number: "05"
+    description: "Prepare plot data for piecewise trajectory visualization (theta + probability scales)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_piecewise_lmm_input.csv"
+        - "Group by domain, Segment, test"
+        - "Compute mean_theta, CI_lower, CI_upper per group"
+        - "Add representative TSVR_hours per test (median)"
+        - "Load model predictions from step01_piecewise_lmm_model.pkl"
+        - "Generate predicted_theta for smooth trajectory lines"
+        - "Save theta-scale plot data to plots/step05_piecewise_theta_data.csv"
+
+      input_files:
+        - path: "data/step00_piecewise_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "Segment"]
+          variable_name: "df_piecewise"
+          description: "Piecewise LMM input data"
+        - path: "data/step01_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted LMM for predictions"
+        - path: "results/ch5/rq1/data/step03_item_parameters.csv"
+          required_columns: ["item_name", "dimension", "a", "b"]
+          variable_name: "df_items"
+          description: "RQ 5.1 item parameters for theta-to-probability conversion"
+
+      output_files:
+        - path: "plots/step05_piecewise_theta_data.csv"
+          variable_name: "df_theta_plot"
+          description: "Theta-scale plot data (Decision D069)"
+          expected_columns: ["time", "test", "domain", "Segment", "mean_theta", "CI_lower", "CI_upper", "predicted_theta", "n_obs"]
+          expected_rows: 12
+
+    probability_transform_call:
+      type: "catalogued"
+      module: "tools.plotting"
+      function: "convert_theta_to_probability"
+      signature: "convert_theta_to_probability(theta: np.ndarray, discrimination: float, difficulty: float) -> np.ndarray"
+
+      input_files:
+        - path: "plots/step05_piecewise_theta_data.csv"
+          variable_name: "df_theta_plot"
+        - path: "results/ch5/rq1/data/step03_item_parameters.csv"
+          variable_name: "df_items"
+
+      output_files:
+        - path: "plots/step05_piecewise_probability_data.csv"
+          variable_name: "df_prob_plot"
+          description: "Probability-scale plot data (Decision D069)"
+          expected_columns: ["time", "test", "domain", "Segment", "mean_probability", "CI_lower", "CI_upper", "predicted_probability", "n_obs"]
+          expected_rows: 12
+
+      parameters:
+        theta: "df_theta_plot['mean_theta'].values"
+        discrimination: "df_items['a'].mean()"
+        difficulty: 0.0
+        transformation: "P = 1 / (1 + exp(-(a * (theta - b))))"
+
+      returns:
+        type: "np.ndarray"
+        variable_name: "probabilities"
+
+      description: "Transform theta to probability scale using IRT 2PL formula (D069)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Theta plot data row count"
+          check: "df_theta_plot has exactly 12 rows (3 domains x 4 tests)"
+          severity: "CRITICAL"
+        - name: "Probability plot data row count"
+          check: "df_prob_plot has exactly 12 rows (3 domains x 4 tests)"
+          severity: "CRITICAL"
+        - name: "All domains present"
+          check: "domain contains {what, where, when}"
+          severity: "CRITICAL"
+        - name: "All tests present"
+          check: "test contains {0, 1, 3, 6}"
+          severity: "CRITICAL"
+        - name: "Segment assignment correct"
+          check: "test 0,1 -> Segment='Early'; test 3,6 -> Segment='Late'"
+          severity: "CRITICAL"
+        - name: "Theta range valid"
+          check: "mean_theta in [-3, 3]"
+          severity: "CRITICAL"
+        - name: "Probability range valid"
+          check: "mean_probability in [0, 1]"
+          severity: "CRITICAL"
+        - name: "CI structure valid"
+          check: "CI_lower < mean < CI_upper for all rows"
+          severity: "CRITICAL"
+        - name: "No NaN values"
+          check: "No NaN in any column"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step05_prepare_piecewise_plot_data.log"
+
+    log_file: "logs/step05_prepare_piecewise_plot_data.log"
+
+# ============================================================================
+# CROSS-RQ DEPENDENCIES
+# ============================================================================
+
+dependencies:
+  rq_5_1:
+    files_required:
+      - path: "results/ch5/rq1/data/step04_lmm_input.csv"
+        used_in: "step00"
+        purpose: "Base theta scores with TSVR for piecewise transformation"
+      - path: "results/ch5/rq1/data/step03_item_parameters.csv"
+        used_in: "step05"
+        purpose: "Item parameters for theta-to-probability conversion (D069)"
+    validation: "Check files exist before Step 0 execution"
+
+# ============================================================================
+# NAMING CONVENTIONS APPLIED
+# ============================================================================
+
+naming_conventions:
+  step_pattern: "stepNN_verb_noun"
+  file_pattern: "stepNN_description.csv"
+  log_pattern: "logs/stepNN_description.log"
+  new_variables_introduced:
+    - name: "Segment"
+      pattern: "Early | Late"
+      introduced: "RQ 5.2"
+      notes: "Piecewise segment factor (consolidation vs decay phase)"
+    - name: "Days_within"
+      pattern: "float >= 0"
+      introduced: "RQ 5.2"
+      notes: "Days elapsed within segment (centered at segment start)"
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+
+summary:
+  total_steps: 6
+  catalogued_tool_steps: 4
+  stdlib_steps: 2
+  validation_coverage: "100% (all 6 steps have validation)"
+  key_outputs:
+    - "data/step01_piecewise_lmm_model.pkl - Fitted piecewise LMM"
+    - "results/step02_segment_domain_slopes.csv - 6 segment-domain slopes"
+    - "results/step03_planned_contrasts.csv - 6 contrasts with dual p-values (D068)"
+    - "results/step03_effect_sizes.csv - Cohen's f-squared effect sizes"
+    - "results/step04_consolidation_benefit.csv - Consolidation benefit indices"
+    - "plots/step05_piecewise_theta_data.csv - Theta-scale plot data (D069)"
+    - "plots/step05_piecewise_probability_data.csv - Probability-scale plot data (D069)"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

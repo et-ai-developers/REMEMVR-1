@@ -186,7 +186,7 @@ QUITTING. Master must resolve before rq_stats can validate.
 
 3. **Tool Availability**
    - What tools/functions are implied by methods?
-   - Cross-reference with `docs/tools_inventory.md` later (Step 6)
+   - Cross-reference with `docs/v4/tools_inventory.md` later (Step 6)
 
 4. **Parameter Specifications**
    - Are parameters clearly stated?

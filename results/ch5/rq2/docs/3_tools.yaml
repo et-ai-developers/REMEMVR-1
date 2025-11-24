@@ -1,0 +1,441 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.2
+# Created by: rq_tools agent
+# Date: 2025-11-23
+# Architecture: Tool Catalog (each tool listed once, deduplication)
+# Consumed by: rq_analysis agent (Step 12 workflow)
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+
+  # ---------------------------------------------------------------------------
+  # LMM Analysis Tools
+  # ---------------------------------------------------------------------------
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    description: "D070: Fit LMM using TSVR (actual hours since encoding) as time variable"
+    validation_tool: "validate_lmm_convergence"
+
+    inputs:
+      theta_scores:
+        type: "DataFrame"
+        columns: ["composite_ID", "domain_name", "theta"]
+        description: "Long-format theta scores"
+      tsvr_data:
+        type: "DataFrame"
+        columns: ["UID", "Test", "TSVR_hours"]
+        description: "TSVR time variable data"
+      formula:
+        type: "str"
+        description: "LMM fixed effects formula"
+      groups:
+        type: "str"
+        default: "UID"
+        description: "Grouping variable for random effects"
+      re_formula:
+        type: "str"
+        default: "~Days"
+        description: "Random effects formula"
+      reml:
+        type: "bool"
+        default: false
+        description: "Use REML estimation (False for model comparison)"
+
+    outputs:
+      - type: "MixedLMResults"
+        description: "Fitted LMM model object"
+
+    notes:
+      - "Decision D070: Uses actual hours (TSVR_hours) not nominal days"
+      - "For piecewise LMM: formula includes Days_within * Segment * domain interaction"
+      - "Random effects: random intercepts and slopes by UID"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm"
+
+  # ---------------------------------------------------------------------------
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    description: "Extract fixed effects table from fitted LMM"
+    validation_tool: "validate_numeric_dataframe"
+
+    inputs:
+      result:
+        type: "MixedLMResults"
+        description: "Fitted LMM model object"
+
+    outputs:
+      - type: "DataFrame"
+        columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+        description: "Fixed effects table with coefficients, SE, z, p-values"
+
+    notes:
+      - "Used to extract coefficients for slope computation via linear combinations"
+      - "For piecewise LMM: 7 fixed effect terms (intercept + 6 interaction terms)"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm"
+
+  # ---------------------------------------------------------------------------
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    description: "Extract random effects variance components and ICC"
+    validation_tool: "validate_lmm_convergence"
+
+    inputs:
+      result:
+        type: "MixedLMResults"
+        description: "Fitted LMM model object"
+
+    outputs:
+      - type: "Dict"
+        keys: ["variance_components", "icc"]
+        description: "Random effects variance components and ICC"
+
+    notes:
+      - "Check variance > 0 (not singular fit)"
+      - "ICC indicates proportion of variance due to participant-level clustering"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm"
+
+  # ---------------------------------------------------------------------------
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    description: "D068: Post-hoc pairwise contrasts with dual p-value reporting"
+    validation_tool: "validate_contrast_results"
+
+    inputs:
+      lmm_result:
+        type: "MixedLMResults"
+        description: "Fitted LMM model object"
+      comparisons:
+        type: "List[str]"
+        description: "List of comparison strings (e.g., ['Where-What', 'When-What'])"
+      family_alpha:
+        type: "float"
+        default: 0.05
+        description: "Family-wise alpha for correction"
+
+    outputs:
+      - type: "DataFrame"
+        columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+        description: "Contrast results with BOTH uncorrected and Bonferroni p-values"
+
+    notes:
+      - "Decision D068: ALWAYS report both uncorrected AND Bonferroni-corrected p-values"
+      - "RQ 5.2: 6 planned contrasts, alpha_corrected = 0.05/6 = 0.0083"
+      - "Contrasts: C1-C4 within-segment domain comparisons, C5-C6 cross-segment comparisons"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm"
+
+  # ---------------------------------------------------------------------------
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    description: "Compute Cohen's f-squared effect sizes for LMM fixed effects"
+    validation_tool: "validate_effect_sizes"
+
+    inputs:
+      lmm_result:
+        type: "MixedLMResults"
+        description: "Fitted LMM model object"
+      include_interactions:
+        type: "bool"
+        default: false
+        description: "Include interaction terms in effect size computation"
+
+    outputs:
+      - type: "DataFrame"
+        columns: ["effect", "f_squared", "interpretation"]
+        description: "Effect sizes with Cohen's guidelines (negligible/small/medium/large)"
+
+    notes:
+      - "Cohen's f-squared: 0.02=small, 0.15=medium, 0.35=large"
+      - "For RQ 5.2: focus on main effects and key interactions"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm"
+
+  # ---------------------------------------------------------------------------
+  # Plotting Support Tools
+  # ---------------------------------------------------------------------------
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    description: "Transform theta scores to probability scale via IRT 2PL formula"
+    validation_tool: "validate_probability_range"
+
+    inputs:
+      theta:
+        type: "ndarray"
+        description: "Array of theta values"
+      discrimination:
+        type: "float"
+        default: 1.0
+        description: "IRT discrimination parameter (a)"
+      difficulty:
+        type: "float"
+        default: 0.0
+        description: "IRT difficulty parameter (b)"
+
+    outputs:
+      - type: "ndarray"
+        description: "Array of probabilities in range [0, 1]"
+
+    notes:
+      - "Decision D069: Required for dual-scale trajectory plots"
+      - "Formula: P = 1 / (1 + exp(-(a * (theta - b))))"
+      - "Use domain-specific average a and b from RQ 5.1 item parameters"
+
+    source_reference: "tools_inventory.md - Module: tools.plotting"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+
+  # ---------------------------------------------------------------------------
+  # LMM Validation
+  # ---------------------------------------------------------------------------
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    description: "Check LMM model convergence status and warnings"
+
+    inputs:
+      lmm_result:
+        type: "MixedLMResults"
+        description: "Fitted LMM model object"
+
+    outputs:
+      - type: "Dict[str, Any]"
+        keys: ["converged", "message", "warnings"]
+        description: "Convergence status with detailed message"
+
+    criteria:
+      - "Model converged successfully (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md - Module: tools.validation"
+
+  # ---------------------------------------------------------------------------
+
+  validate_lmm_residuals:
+    module: "tools.validation"
+    function: "validate_lmm_residuals"
+    description: "Test LMM residuals for normality using Kolmogorov-Smirnov test"
+
+    inputs:
+      residuals:
+        type: "ndarray"
+        description: "Array of model residuals"
+      alpha:
+        type: "float"
+        default: 0.05
+        description: "Significance level for KS test"
+
+    outputs:
+      - type: "Dict[str, Any]"
+        keys: ["normal", "ks_statistic", "p_value", "message"]
+        description: "Normality test results"
+
+    criteria:
+      - "KS test p-value >= alpha (residuals approximately normal)"
+      - "If p < alpha: note violation but continue (LMM robust to mild departures)"
+
+    behavior_on_failure:
+      action: "warn (non-fatal)"
+      log_to: "logs/stepNN_*.log"
+      invoke: "None (warning only)"
+
+    notes:
+      - "LMM is robust to mild normality violations with large samples"
+      - "Document any violations in results summary"
+
+    source_reference: "tools_inventory.md - Module: tools.validation"
+
+  # ---------------------------------------------------------------------------
+  # Generic Validation Tools (for steps without specific validators)
+  # ---------------------------------------------------------------------------
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    description: "Validate DataFrame has expected columns, rows, and data types"
+
+    inputs:
+      df:
+        type: "DataFrame"
+        description: "DataFrame to validate"
+      expected_columns:
+        type: "List[str]"
+        description: "Required column names"
+      min_rows:
+        type: "int"
+        default: 1
+        description: "Minimum expected row count"
+      max_rows:
+        type: "int"
+        default: null
+        description: "Maximum expected row count (null = no limit)"
+
+    outputs:
+      - type: "Dict[str, Any]"
+        keys: ["valid", "message", "missing_columns", "extra_columns", "row_count"]
+        description: "Validation results"
+
+    criteria:
+      - "All expected columns present"
+      - "Row count within expected range"
+      - "No unexpected NaN in required columns"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    notes:
+      - "Generic validator for data preparation steps"
+      - "Can be parameterized for specific step requirements"
+
+    source_reference: "Inferred from validation architecture (standard validator)"
+
+  # ---------------------------------------------------------------------------
+
+  validate_file_exists:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    description: "Validate required file exists and meets size requirements"
+
+    inputs:
+      file_path:
+        type: "str"
+        description: "Path to file to validate"
+      min_size_bytes:
+        type: "int"
+        default: 1000
+        description: "Minimum file size in bytes"
+
+    outputs:
+      - type: "Dict[str, Any]"
+        keys: ["valid", "message", "file_size"]
+        description: "File existence validation results"
+
+    criteria:
+      - "File exists at specified path"
+      - "File size >= minimum (not empty/corrupted)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    notes:
+      - "Used for validating cross-RQ dependencies (e.g., RQ 5.1 outputs)"
+      - "Used for validating plot output files"
+
+    source_reference: "Inferred from validation architecture (standard validator)"
+
+  # ---------------------------------------------------------------------------
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    description: "Validate numeric column values within expected range"
+
+    inputs:
+      df:
+        type: "DataFrame"
+        description: "DataFrame containing column to validate"
+      column:
+        type: "str"
+        description: "Column name to check"
+      min_val:
+        type: "float"
+        description: "Minimum allowed value"
+      max_val:
+        type: "float"
+        description: "Maximum allowed value"
+      allow_none:
+        type: "bool"
+        default: false
+        description: "Allow NaN values"
+
+    outputs:
+      - type: "Dict[str, Any]"
+        keys: ["valid", "message", "out_of_range_count", "out_of_range_rows"]
+        description: "Range validation results"
+
+    criteria:
+      - "All values in column within [min_val, max_val]"
+      - "If allow_none=False: no NaN values"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    notes:
+      - "Used for validating theta in [-3, 3], TSVR_hours in [0, 200], etc."
+      - "Used for validating slope estimates, p-values in [0, 1]"
+
+    source_reference: "Inferred from validation architecture (standard validator)"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (compute_contrasts_pairwise)"
+    - "D069: Dual-scale trajectory plots (convert_theta_to_probability)"
+    - "D070: TSVR time variable (fit_lmm_trajectory_tsvr)"
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+notes:
+  - "Each tool documented ONCE (deduplication across steps)"
+  - "rq_analysis will create step sequencing in 4_analysis.yaml"
+  - "g_code will use these signatures for pre-generation validation"
+  - "All tools verified against tools_inventory.md"
+  - "Stdlib functions (pandas, numpy) NOT cataloged - exempt from verification"
+
+# New naming conventions needed for RQ 5.2 (not yet in names.md):
+new_naming_conventions_needed:
+  - name: "segment_variable"
+    pattern: "Segment"
+    example: "Early, Late"
+    introduced: "RQ 5.2"
+    notes: "Piecewise LMM segment factor (consolidation vs decay phase)"
+
+  - name: "days_within_variable"
+    pattern: "Days_within"
+    example: "0.5"
+    introduced: "RQ 5.2"
+    notes: "Days elapsed within segment (centered at segment start)"
+
+# =============================================================================
+# END OF TOOL CATALOG
+# =============================================================================

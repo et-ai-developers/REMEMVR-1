@@ -157,10 +157,20 @@ Remove items that have difficulty less than -3 or more than 3, and items that ha
 
 **Data Required:**
 - **Analysis Set:** *-N-*ANS (What) vs. *-L-*ANS, *-U-*ANS, *-D-*ANS (Where) vs. *-O-*ANS (When)
-- **IRT Configuration:** Correlated factors, p1_med, 2 categories
+- **IRT Configuration:** Correlated factors, 2 categories
 - **IRT Factors:** What, Where, When
 - **Additional Variables:** Segment (Early: Days 0-1, Late: Days 1-6), Days_within_segment
 - **Structure:** 400 observations across 2 time segments
+
+**Note**
+Participants took tests at the following time points:
+T1 = Immediately after VR (Day 0)
+T2 = ~24 hours after VR (Day 1)
+T3 = ~72 hours after VR (Day 3)
+T4 = ~144 hours after VR (Day 6)
+
+Not all participants took tests on these exact days. Never early but sometimes late.
+Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
@@ -193,11 +203,11 @@ Remove items that have difficulty less than -3 or more than 3, and items that ha
 
 5. **Planned Contrasts**
    - Test hypothesis: Where shows less decline in Early segment (consolidation benefit)
-   - Bonferroni correction: α = 0.0033/6 = 0.00055 for 6 planned comparisons
+   - Bonferroni correction: α = 0.0033/6 = 0.00055 for 6 planned comparisons (With and without correction required)
    - Report domain-specific consolidation effects
 
 6. **Visualization**
-   - Generate piecewise trajectory plot showing slope change at Day 1
+   - Generate piecewise trajectory plot showing slope change at ~24 hours
    - Separate lines for What/Where/When
    - Highlight Early vs Late segments
 

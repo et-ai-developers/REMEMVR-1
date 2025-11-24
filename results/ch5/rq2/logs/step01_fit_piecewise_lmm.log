@@ -1,0 +1,94 @@
+[START] Step 01: Fit Piecewise LMM with 3-Way Interaction
+======================================================================
+[LOAD] Loading input data from step00...
+[LOADED] step00_piecewise_lmm_input.csv (1200 rows, 8 cols)
+[PASS] All required columns present: ['UID', 'domain', 'theta', 'Segment', 'Days_within']
+[INFO] Unique UIDs: 100
+[INFO] Segments: ['Early', 'Late']
+[INFO] Domains: ['what', 'where', 'when']
+[INFO] Days_within range: [0.00, 7.71]
+
+[ANALYSIS] Running fit_lmm_trajectory...
+----------------------------------------------------------------------
+[PARAM] Formula: theta ~ Days_within * C(Segment, Treatment('Early')) * C(domain, Treatment('what'))
+[PARAM] Groups: UID
+[PARAM] RE Formula: ~Days_within
+[PARAM] REML: False
+[DONE] Model fitting complete
+
+[SAVE] Saving model outputs...
+----------------------------------------------------------------------
+[SAVED] data/step01_piecewise_lmm_model.pkl
+[SAVED] results/step01_piecewise_lmm_summary.txt
+
+[INFO] Model Statistics:
+  - Number of observations: 1200
+[ERROR] 'MixedLMResults' object has no attribute 'n_groups'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq2/code/step01_fit_piecewise_lmm.py", line 240, in <module>
+    log(f"  - Number of groups: {lmm_model.n_groups}")
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/wrapper.py", line 34, in __getattribute__
+    obj = getattr(results, attr)
+          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MixedLMResults' object has no attribute 'n_groups'
+[START] Step 01: Fit Piecewise LMM with 3-Way Interaction
+======================================================================
+[LOAD] Loading input data from step00...
+[LOADED] step00_piecewise_lmm_input.csv (1200 rows, 8 cols)
+[PASS] All required columns present: ['UID', 'domain', 'theta', 'Segment', 'Days_within']
+[INFO] Unique UIDs: 100
+[INFO] Segments: ['Early', 'Late']
+[INFO] Domains: ['what', 'where', 'when']
+[INFO] Days_within range: [0.00, 7.71]
+
+[ANALYSIS] Running fit_lmm_trajectory...
+----------------------------------------------------------------------
+[PARAM] Formula: theta ~ Days_within * C(Segment, Treatment('Early')) * C(domain, Treatment('what'))
+[PARAM] Groups: UID
+[PARAM] RE Formula: ~Days_within
+[PARAM] REML: False
+[DONE] Model fitting complete
+
+[SAVE] Saving model outputs...
+----------------------------------------------------------------------
+[SAVED] data/step01_piecewise_lmm_model.pkl
+[SAVED] results/step01_piecewise_lmm_summary.txt
+
+[INFO] Model Statistics:
+  - Number of observations: 1200
+  - Number of groups (UIDs): 100
+  - Log-likelihood: -1580.0245
+  - AIC: 3192.0491
+  - BIC: 3273.4903
+
+[VALIDATION] Running validate_lmm_convergence...
+----------------------------------------------------------------------
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+
+[CHECK] Verifying fixed effect structure...
+[INFO] Fixed effects (12 terms):
+  1. Intercept: 0.7010 (p=0.0000)
+  2. C(Segment, Treatment('Early'))[T.Late]: -0.9166 (p=0.0000)
+  3. C(domain, Treatment('what'))[T.when]: -0.4559 (p=0.0001)
+  4. C(domain, Treatment('what'))[T.where]: -0.0225 (p=0.8481)
+  5. C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: 0.5853 (p=0.0015)
+  6. C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: 0.1929 (p=0.2941)
+  7. Days_within: -0.5072 (p=0.0000)
+  8. Days_within:C(Segment, Treatment('Early'))[T.Late]: 0.4760 (p=0.0000)
+  9. Days_within:C(domain, Treatment('what'))[T.when]: 0.2988 (p=0.0241)
+  10. Days_within:C(domain, Treatment('what'))[T.where]: 0.0517 (p=0.6966)
+  11. Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: -0.2809 (p=0.0479)
+  12. Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: -0.1273 (p=0.3701)
+[PASS] Model has 12 fixed effects (expected >= 7)
+
+[CHECK] Random effects structure...
+[INFO] Random effects covariance matrix shape: (2, 2)
+[INFO] Random effect variances: [0.20410481 0.01129714]
+[PASS] No singular fit detected (all RE variances > 0)
+
+======================================================================
+[SUCCESS] Step 01 complete: Piecewise LMM fitted successfully
+======================================================================

@@ -1,0 +1,87 @@
+[START] Step 03: Compute Planned Contrasts (Decision D068)
+============================================================
+
+[LOAD] Loading input data...
+
+[ERROR] 'NoneType' object has no attribute 'f_locals'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq2/code/step03_compute_contrasts.py", line 325, in <module>
+    lmm_model = pickle.load(f)
+                ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/data.py", line 112, in __setstate__
+    _, design = dmatrices(d['formula'], data, eval_env=depth,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/highlevel.py", line 316, in dmatrices
+    eval_env = EvalEnvironment.capture(eval_env, reference=1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/eval.py", line 242, in capture
+    [frame.f_locals, frame.f_globals],
+     ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'f_locals'
+[START] Step 03: Compute Planned Contrasts (Decision D068)
+============================================================
+
+[LOAD] Loading input data...
+[LOADED] data/step01_piecewise_lmm_model.pkl
+[LOADED] results/step02_segment_domain_slopes.csv (6 rows)
+[VALIDATION] Slopes file has all required columns
+[VALIDATION] All 6 segment-domain combinations present
+
+[ANALYSIS] Computing 6 planned contrasts...
+============================================================
+POST-HOC PAIRWISE CONTRASTS (Decision D068)
+============================================================
+Family-wise alpha: 0.05
+Number of comparisons: 6
+Bonferroni-corrected alpha: 0.0083
+
+[DONE] Computed 6 contrasts
+
+Results:
+  Significant (uncorrected alpha=0.05): 1/6
+  Significant (corrected alpha=0.0083): 0/6
+
+[DETAILS] Contrast estimates:
+  where-what_early: beta=0.0517, z=0.38, p=0.7007 
+  when-what_early: beta=0.2988, z=2.22, p=0.0262 *
+  where-what_late: beta=-0.0756, z=-1.40, p=0.1620 
+  when-what_late: beta=0.0180, z=0.33, p=0.7397 
+  where_slope_change-what_slope_change: beta=-0.1273, z=-0.88, p=0.3796 
+  when_slope_change-what_slope_change: beta=-0.2809, z=-1.94, p=0.0525 
+
+[ANALYSIS] Computing effect sizes (Cohen's f-squared)...
+[DONE] Computed effect sizes for 11 terms
+
+[SAVE] Saving outputs...
+[SAVED] results/step03_planned_contrasts.csv (6 rows)
+[SAVED] results/step03_effect_sizes.csv (11 rows)
+
+[VALIDATION] Validating outputs...
+[PASS] Contrast count correct: 6 rows
+[PASS] Dual p-values present (D068 compliant)
+[PASS] Bonferroni alpha correct: 0.0083
+[PASS] p-values valid and correctly ordered
+[PASS] Effect sizes computed: 11 terms
+
+[PASS] All validation criteria passed
+
+============================================================
+SUMMARY
+============================================================
+
+Contrasts (sorted by p-value):
+  [sig] when-what_early: beta=0.2988, p=0.0262
+  [ns] when_slope_change-what_slope_change: beta=-0.2809, p=0.0525
+  [ns] where-what_late: beta=-0.0756, p=0.1620
+  [ns] where_slope_change-what_slope_change: beta=-0.1273, p=0.3796
+  [ns] where-what_early: beta=0.0517, p=0.7007
+  [ns] when-what_late: beta=0.0180, p=0.7397
+
+Effect size distribution:
+  negligible: 9 terms
+  small: 2 terms
+
+============================================================
+[SUCCESS] Step 03 complete
+============================================================
