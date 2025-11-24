@@ -206,3 +206,125 @@ IRT_LINE_STYLE = 'dashed'
 **Reason:** Infrastructure enhancement completed, plots now publication-ready
 
 ---
+
+## RQ 5.4 Full Pipeline Execution - Linear Trend Contrast (2025-11-24 14:15)
+
+**Task:** Process RQ 5.4 (Linear Trend in Forgetting Rate Across Paradigms) through complete v4.X pipeline
+
+**Objective:** Secondary analysis on RQ 5.3 testing linear trend across paradigm-specific forgetting rates
+
+**Key Accomplishments:**
+
+**1. Full RQ 5.4 Pipeline Execution (All 11 Agents)**
+
+**Agent Execution Sequence:**
+- rq_builder: Created folder structure (6 subfolders + status.yaml)
+- rq_concept: Created 1_concept.md (linear trend contrast, secondary analysis on RQ 5.3)
+- rq_scholar: 9.4/10 APPROVED (encoding-retrieval specificity, polynomial contrasts)
+- rq_stats: 9.1/10 CONDITIONAL - Required 2 fixes applied:
+  - Changed from N=3 regression to within-LMM contrast testing (preserves N=100)
+  - Removed R-squared hypothesis (meaningless with 3 data points)
+- rq_planner: 4 steps planned (load RQ5.3 + marginal means + linear contrast + plot data)
+- rq_tools: 4 analysis + 2 validation tools cataloged (mostly stdlib)
+- rq_analysis: 4_analysis.yaml created
+- g_code: 4 Python scripts generated and executed - 1 bug fix (coefficient parsing)
+- rq_inspect: 4-layer validation PASS
+- rq_plots: 1 bar chart generated (paradigm forgetting rates)
+- rq_results: summary.md created with 2 anomalies flagged
+
+**2. Bug Fix: Coefficient Parsing**
+
+**Problem:** `log_Days Var` (random effect variance) was being selected instead of `log_Days` (fixed effect slope) due to substring matching in coefficient extraction.
+
+**Fix:** Use exact string matching for coefficient names rather than substring matching.
+
+**3. rq_stats Required Changes Applied**
+
+**Change 1: Within-LMM Contrast Testing**
+- Original: Proposed N=3 regression on extracted slopes (only 1 df)
+- Fixed: Test linear trend contrast directly within RQ5.3 LMM using marginal means
+- Benefit: Preserves full sample information (N=100) and proper degrees of freedom
+
+**Change 2: Remove R-squared Hypothesis**
+- Original: "R-squared for linearity of trend will exceed 0.90"
+- Fixed: Removed (statistically meaningless with N=3 data points)
+
+**4. RQ 5.4 Scientific Results (SUPERSEDED BY IRT SETTINGS CORRECTION)**
+
+**NOTE:** These results used imprecise IRT settings (20-100x lower than validated "Med" settings). Full rerun required - see Session 2025-11-24 21:30.
+
+**Linear Trend Contrast:**
+| Statistic | Value |
+|-----------|-------|
+| Estimate (b) | -0.127 |
+| z-value | -2.47 |
+| p (uncorrected) | 0.01 |
+| p (Bonferroni) | 0.20 |
+| 95% CI | [-0.228, -0.026] |
+
+**Paradigm-Specific Marginal Means (Day 3):**
+- Free Recall: -0.470 (slowest forgetting)
+- Cued Recall: -0.520
+- Recognition: -0.597 (fastest forgetting)
+
+**Hypothesis Outcome: NOT SUPPORTED**
+- Predicted: Free > Cued > Recognition (forgetting DECREASES with more retrieval support)
+- Observed: Free < Cued < Recognition (forgetting INCREASES with more retrieval support)
+- Direction is OPPOSITE to theoretical prediction
+- Effect does not survive Bonferroni correction
+
+**2 Anomalies Flagged:**
+1. Wrong direction effect (opposite to theory)
+2. Non-monotonic marginal means (Recognition > Free > Cued, not strictly monotonic)
+
+**5. Files Created (RQ 5.4)**
+
+**Documentation:**
+- `results/ch5/rq4/docs/1_concept.md` - RQ concept (linear trend contrast)
+- `results/ch5/rq4/docs/1_scholar.md` - Scholarly validation (9.4/10 APPROVED)
+- `results/ch5/rq4/docs/1_stats.md` - Statistical validation (9.1/10 CONDITIONAL)
+- `results/ch5/rq4/docs/2_plan.md` - Analysis plan (4 steps)
+- `results/ch5/rq4/docs/3_tools.yaml` - Tool specifications
+- `results/ch5/rq4/docs/4_analysis.yaml` - Complete analysis recipe
+
+**Code:**
+- `results/ch5/rq4/code/step00_load_rq53_outputs.py`
+- `results/ch5/rq4/code/step01_extract_marginal_means.py`
+- `results/ch5/rq4/code/step02_compute_linear_trend_contrast.py`
+- `results/ch5/rq4/code/step03_prepare_paradigm_plot_data.py`
+
+**Data:**
+- `results/ch5/rq4/data/step00_model_loaded.txt` - Model load confirmation
+- `results/ch5/rq4/data/step01_marginal_means.csv` - 3 rows (paradigms)
+- `results/ch5/rq4/data/step02_linear_trend_contrast.csv` - 1 row (contrast results)
+- `results/ch5/rq4/data/step02_contrast_interpretation.txt` - Plain-language interpretation
+
+**Plots:**
+- `results/ch5/rq4/plots/paradigm_forgetting_rates.png` - Bar chart with trend line
+- `results/ch5/rq4/plots/step03_paradigm_forgetting_rates_data.csv` - Plot source data
+- `results/ch5/rq4/plots/plots.py` - Plot generation script
+
+**Results:**
+- `results/ch5/rq4/results/summary.md` - Publication-ready summary (SUPERSEDED)
+
+**6. plots.py Path Fix**
+
+**Problem:** `ModuleNotFoundError: No module named 'tools'` when running plots.py
+**Fix:** Added sys.path.insert to add project root to Python path (5-level parent from plots.py)
+
+---
+
+**Session Duration:** ~45 minutes
+**Token Usage:** ~95k tokens
+**RQ Processed:** ch5/rq4 (Linear Trend Contrast)
+**Bugs Fixed:** 1 (coefficient parsing)
+**rq_stats Required Changes:** 2 applied (within-LMM contrast, remove R-sq)
+**Hypothesis Outcome:** NOT SUPPORTED (2 anomalies flagged - opposite direction)
+
+**Status:** RQ 5.4 COMPLETE but results SUPERSEDED by IRT settings correction (Session 2025-11-24 21:30). Rerun required after RQ 5.1 and 5.3 complete.
+
+**Archived from:** state.md
+**Original Date:** 2025-11-24 14:15
+**Reason:** RQ 5.4 pipeline execution history preserved, but scientific results superseded by IRT settings correction requiring full rerun
+
+---

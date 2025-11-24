@@ -51,3 +51,28 @@
 [INFO]   cued_recall: 24 items (patterns: ['ICR'])
 [INFO]   recognition: 24 items (patterns: ['IRE'])
 [ANALYSIS] Running calibrate_irt (Pass 1 - all items)...
+[DONE] IRT calibration complete
+[INFO] Theta scores: (400, 5)
+[INFO] Item parameters: (72, 6)
+[TRANSFORM] Converting outputs to expected format...
+[TRANSFORMED] Theta long format: 1200 rows
+[TRANSFORMED] Item params: 72 rows
+[SAVED] logs/step01_pass1_theta.csv (1200 rows)
+[SAVED] logs/step01_pass1_item_params.csv (72 rows)
+[VALIDATION] Validating IRT calibration results...
+[VALIDATION] Checking parameter ranges...
+[PASS] All discrimination values > 0
+[WARNING] 4 items have extreme difficulty (|b| > 6)
+[PASS] No NaN values in parameters
+[INFO] Theta range: [-2.67, 3.07]
+[VALIDATION] converged: True
+[VALIDATION] message: Model converged successfully
+[VALIDATION] final_loss: None
+[VALIDATION] epochs_run: None
+============================================================
+[SUCCESS] Step 01: IRT Calibration Pass 1 complete
+  - Theta scores: 1200 observations (long format)
+  - Item parameters: 72 items
+  - Factors: ['free_recall', 'cued_recall', 'recognition']
+  - Next: Step 02 will purify items using Decision D039 thresholds
+============================================================
