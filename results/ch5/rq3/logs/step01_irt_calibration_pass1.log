@@ -37,3 +37,17 @@
   - Factors: ['free_recall', 'cued_recall', 'recognition']
   - Next: Step 02 will purify items using Decision D039 thresholds
 ============================================================
+[START] Step 01: IRT Calibration Pass 1 (All Items)
+============================================================
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step00_q_matrix.csv (72 rows)
+[TRANSFORM] Converting wide to long format...
+[TRANSFORMED] Long format: 28800 rows
+[TRANSFORM] Converting Q-matrix to groups dict...
+[TRANSFORMED] Groups: {'free_recall': ['IFR'], 'cued_recall': ['ICR'], 'recognition': ['IRE']}
+[INFO] Factors: ['free_recall', 'cued_recall', 'recognition']
+[INFO]   free_recall: 24 items (patterns: ['IFR'])
+[INFO]   cued_recall: 24 items (patterns: ['ICR'])
+[INFO]   recognition: 24 items (patterns: ['IRE'])
+[ANALYSIS] Running calibrate_irt (Pass 1 - all items)...

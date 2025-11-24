@@ -270,20 +270,21 @@ if __name__ == "__main__":
         # =========================================================================
         # Parameters from 4_analysis.yaml
 
+        # Configuration - Validated "Med" settings from thesis/analyses/ANALYSES_DEFINITIVE.md
         config = {
             'factors': ['free_recall', 'cued_recall', 'recognition'],
             'correlated_factors': True,
             'device': 'cpu',
             'seed': 123,
             'model_fit': {
-                'batch_size': 128,
-                'iw_samples': 10,
-                'mc_samples': 10
+                'batch_size': 2048,      # Validated "Med" level
+                'iw_samples': 100,       # Validated "Med" level
+                'mc_samples': 1          # Per thesis validation
             },
             'model_scores': {
-                'scoring_batch_size': 128,
-                'mc_samples': 10,
-                'iw_samples': 10
+                'scoring_batch_size': 2048,  # Validated "Med" level
+                'mc_samples': 100,           # Validated "Med" level
+                'iw_samples': 100            # Validated "Med" level
             }
         }
 

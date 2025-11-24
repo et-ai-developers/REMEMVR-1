@@ -77,21 +77,21 @@ INPUT_Q_MATRIX = RQ_DIR / "data" / "step00_q_matrix.csv"
 OUTPUT_ITEM_PARAMS = RQ_DIR / "logs" / "step01_pass1_item_params.csv"
 OUTPUT_THETA = RQ_DIR / "logs" / "step01_pass1_theta.csv"
 
-# IRT configuration
+# IRT configuration - Validated "Med" settings from thesis/analyses/ANALYSES_DEFINITIVE.md
 IRT_CONFIG = {
     "factors": ["common", "congruent", "incongruent"],
     "correlated_factors": True,
     "device": "cpu",
     "seed": 42,
     "model_fit": {
-        "batch_size": 128,
-        "iw_samples": 10,
-        "mc_samples": 10
+        "batch_size": 2048,      # Validated "Med" level
+        "iw_samples": 100,       # Validated "Med" level
+        "mc_samples": 1          # Per thesis validation
     },
     "model_scores": {
-        "scoring_batch_size": 128,
-        "mc_samples": 10,
-        "iw_samples": 10
+        "scoring_batch_size": 2048,  # Validated "Med" level
+        "mc_samples": 100,           # Validated "Med" level
+        "iw_samples": 100            # Validated "Med" level
     }
 }
 

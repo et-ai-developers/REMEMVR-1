@@ -189,9 +189,9 @@ def fit_irt_grm(
     model: deepirtools.IWAVE,
     response_matrix: torch.Tensor,
     missing_mask: torch.Tensor,
-    batch_size: int = 128,
-    iw_samples: int = 10,
-    mc_samples: int = 10
+    batch_size: int = 2048,
+    iw_samples: int = 100,
+    mc_samples: int = 1
 ) -> deepirtools.IWAVE:
     """
     Fit IWAVE model to response data.
@@ -200,15 +200,19 @@ def fit_irt_grm(
         model: Configured IWAVE model (from configure_irt_model)
         response_matrix: Response data [n_observations, n_items]
         missing_mask: Missing data mask [n_observations, n_items] (1=observed, 0=missing)
-        batch_size: Batch size for gradient descent
-        iw_samples: Importance-weighted samples for estimation
-        mc_samples: Monte Carlo samples for estimation
+        batch_size: Batch size for gradient descent (default: 2048, validated "Med" level)
+        iw_samples: Importance-weighted samples for ELBO (default: 100, validated "Med" level)
+        mc_samples: Monte Carlo samples during fitting (default: 1, per thesis validation)
 
     Returns:
         Fitted IWAVE model
 
     Note:
         Model is fitted in-place. The function returns the model for convenience.
+
+    Validated Settings (from thesis/analyses/ANALYSES_DEFINITIVE.md):
+        - batch_size=2048, iw_samples=100, mc_samples=1 ("Med" iteration level)
+        - These settings balance precision with reasonable runtime (~60 min for 100 items)
     """
 
     # ─── Move Data to Device ─────────────────────────────────────────────────
@@ -240,9 +244,9 @@ def extract_theta_from_irt(
     missing_mask: torch.Tensor,
     composite_ids: List[str],
     factor_names: List[str],
-    scoring_batch_size: int = 128,
-    mc_samples: int = 10,
-    iw_samples: int = 10,
+    scoring_batch_size: int = 2048,
+    mc_samples: int = 100,
+    iw_samples: int = 100,
     invert_scale: bool = False
 ) -> pd.DataFrame:
     """
@@ -254,13 +258,17 @@ def extract_theta_from_irt(
         missing_mask: Missing data mask [n_observations, n_items]
         composite_ids: List of Composite_IDs (UID_T# format)
         factor_names: List of factor names (e.g., ['What', 'Where', 'When'])
-        scoring_batch_size: Batch size for scoring
-        mc_samples: Monte Carlo samples for scoring
-        iw_samples: Importance-weighted samples for scoring
+        scoring_batch_size: Batch size for scoring (default: 2048, validated "Med" level)
+        mc_samples: Monte Carlo samples for scoring (default: 100, validated "Med" level)
+        iw_samples: Importance-weighted samples for scoring (default: 100, validated "Med" level)
         invert_scale: If True, multiply theta scores by -1 for interpretability
 
     Returns:
         DataFrame with columns: [UID, test, Theta_Factor1, Theta_Factor2, ...]
+
+    Validated Settings (from thesis/analyses/ANALYSES_DEFINITIVE.md):
+        - mc_samples=100, iw_samples=100 for scoring ("Med" iteration level)
+        - Higher samples during scoring ensures accurate ability estimates
     """
 
     # ─── Move Data to Device ─────────────────────────────────────────────────
@@ -428,24 +436,31 @@ def calibrate_irt(
 
     Example:
         ```python
+        # Validated "Med" settings from thesis/analyses/ANALYSES_DEFINITIVE.md
         config = {
             'factors': ['What', 'Where', 'When'],
             'correlated_factors': True,
             'device': 'cpu',
+            'seed': 42,
             'model_fit': {
-                'batch_size': 128,
-                'iw_samples': 10,
-                'mc_samples': 10
+                'batch_size': 2048,
+                'iw_samples': 100,
+                'mc_samples': 1
             },
             'model_scores': {
-                'scoring_batch_size': 128,
-                'mc_samples': 10,
-                'iw_samples': 10
+                'scoring_batch_size': 2048,
+                'mc_samples': 100,
+                'iw_samples': 100
             }
         }
 
         df_thetas, df_items = calibrate_irt(df_long, groups, config)
         ```
+
+    Note:
+        The validated "Med" settings (~60 min runtime) should be used for publication.
+        Lower settings (iw_samples=5, mc_samples=1) run faster but produce less
+        precise estimates.
     """
 
     print("\n" + "=" * 60)

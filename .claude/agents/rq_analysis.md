@@ -137,7 +137,7 @@ agents:
   - What: Items matching pattern `VR-*-*-N-ANS`
   - Where: Items matching patterns `VR-*-*-U-ANS`, `VR-*-*-D-ANS`
   - When: Items matching pattern `VR-*-*-T-ANS`
-- Estimation: IWAVE (deepirtools), device=cpu, max_epochs=1000
+- Estimation: IWAVE (deepirtools), device=cpu
 
 **Expected Outputs:**
 - Item parameters: data/pass1_item_params.csv
@@ -147,6 +147,28 @@ agents:
 
 **Validation:** Check convergence, parameter bounds (0.3 ≤ a ≤ 2.5, -3 ≤ b ≤ 3)
 ```
+
+**MANDATORY IRT CONFIG (from thesis/analyses/ANALYSES_DEFINITIVE.md):**
+
+When specifying IRT analysis steps in 4_analysis.yaml, ALWAYS use these validated "Med" settings:
+
+```yaml
+config:
+  factors: ["Factor1", "Factor2", ...]  # Match RQ-specific factors
+  correlated_factors: true
+  device: "cpu"
+  seed: 42
+  model_fit:
+    batch_size: 2048        # MANDATORY - validated "Med" level
+    iw_samples: 100         # MANDATORY - validated "Med" level (ELBO precision)
+    mc_samples: 1           # Per thesis validation
+  model_scores:
+    scoring_batch_size: 2048  # MANDATORY - validated "Med" level
+    mc_samples: 100           # MANDATORY - validated "Med" level (theta accuracy)
+    iw_samples: 100           # MANDATORY - validated "Med" level
+```
+
+**WARNING:** Lower settings (iw_samples=5, mc_samples=1 for scoring) produce imprecise estimates that compromise publication quality. The validated settings take ~60 min for Pass 1 but ensure accurate theta scores for downstream LMM analyses.
 
 **Circuit Breaker:**
 - If 2_plan.md missing parameter values → QUIT: "Plan incomplete - Step X missing parameter: {param_name}"

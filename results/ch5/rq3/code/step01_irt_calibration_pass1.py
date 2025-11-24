@@ -267,20 +267,21 @@ if __name__ == "__main__":
         log("[ANALYSIS] Running calibrate_irt (Pass 1 - all items)...")
 
         # Configure IRT model
+        # Configuration - Validated "Med" settings from thesis/analyses/ANALYSES_DEFINITIVE.md
         config = {
             'factors': factor_names,
             'correlated_factors': True,
             'device': 'cpu',
             'seed': 123,
             'model_fit': {
-                'batch_size': 128,
-                'iw_samples': 10,
-                'mc_samples': 10
+                'batch_size': 2048,      # Validated "Med" level
+                'iw_samples': 100,       # Validated "Med" level
+                'mc_samples': 1          # Per thesis validation
             },
             'model_scores': {
-                'scoring_batch_size': 128,
-                'mc_samples': 10,
-                'iw_samples': 10
+                'scoring_batch_size': 2048,  # Validated "Med" level
+                'mc_samples': 100,           # Validated "Med" level
+                'iw_samples': 100            # Validated "Med" level
             }
         }
 

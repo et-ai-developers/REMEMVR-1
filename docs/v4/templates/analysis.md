@@ -396,10 +396,20 @@ steps:
           Where: ["RVR-LOC-*", "RVR-SPA-*"]
           When: ["RVR-TEM-*"]
         config:
-          model_type: "GRM"
+          # MANDATORY: Validated "Med" settings from thesis/analyses/ANALYSES_DEFINITIVE.md
+          # These settings are required for publication-quality results
+          factors: ["What", "Where", "When"]
           correlated_factors: true
-          convergence_threshold: 0.001
-          max_iterations: 1000
+          device: "cpu"
+          seed: 42
+          model_fit:
+            batch_size: 2048        # Validated "Med" level - DO NOT reduce
+            iw_samples: 100         # Validated "Med" level - DO NOT reduce
+            mc_samples: 1           # Per thesis validation
+          model_scores:
+            scoring_batch_size: 2048  # Validated "Med" level
+            mc_samples: 100           # Validated "Med" level - critical for theta accuracy
+            iw_samples: 100           # Validated "Med" level
 
       returns:
         type: "Tuple[pd.DataFrame, pd.DataFrame]"

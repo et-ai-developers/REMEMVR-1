@@ -305,21 +305,22 @@ if __name__ == "__main__":
 
         log("[ANALYSIS] Running calibrate_irt (Pass 1 - all items)...")
 
-        # Configuration from 4_analysis.yaml
+        # Configuration - Validated "Med" settings from thesis/analyses/ANALYSES_DEFINITIVE.md
+        # These settings balance precision with reasonable runtime (~60 min for Pass 1)
         config = {
             'factors': ['What', 'Where', 'When'],  # Factor names matching groups keys
             'correlated_factors': True,  # Allow factor correlations
             'device': 'cpu',  # Use CPU (no GPU requirement)
             'seed': 42,  # Reproducibility
             'model_fit': {
-                'batch_size': 128,
-                'iw_samples': 5,
-                'mc_samples': 1
+                'batch_size': 2048,      # Validated "Med" level (was 128)
+                'iw_samples': 100,       # Validated "Med" level (was 5)
+                'mc_samples': 1          # Same as thesis
             },
             'model_scores': {
-                'scoring_batch_size': 128,
-                'mc_samples': 1,
-                'iw_samples': 5
+                'scoring_batch_size': 2048,  # Validated "Med" level (was 128)
+                'mc_samples': 100,           # Validated "Med" level (was 1)
+                'iw_samples': 100            # Validated "Med" level (was 5)
             },
             'invert_scale': False
         }

@@ -43,3 +43,46 @@ RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
 [PASS] Theta count: 400 rows
 
 [SUCCESS] Step 01 complete (IRT Pass 1)
+[START] Step 01: IRT Calibration Pass 1
+RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
+
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step00_q_matrix.csv (72 rows)
+
+[BUILD] Building factor groups from Q-matrix...
+  common: 24 items
+  congruent: 24 items
+  incongruent: 24 items
+
+[CONVERT] Converting wide to long format...
+[CONVERTED] Long format: 28800 rows
+  Unique UIDs: 100
+  Unique items: 72
+  Test sessions: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+
+[BUILD] Building pattern-based groups for IRT...
+  common patterns ['-i1', '-i2']: matches 24 items
+  congruent patterns ['-i3', '-i4']: matches 24 items
+  incongruent patterns ['-i5', '-i6']: matches 24 items
+
+[CALIBRATE] Running IRT calibration (Pass 1)...
+
+[ERROR] [Errno 32] Broken pipe
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq5/code/step01_irt_calibration_pass1.py", line 203, in <module>
+    df_thetas, df_items = calibrate_irt(
+                          ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 525, in calibrate_irt
+    model = fit_irt_grm(
+            ^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 225, in fit_irt_grm
+    model.fit(
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/deepirtools/base.py", line 179, in fit
+    self.train(train_loader, epoch, **model_kwargs)
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/deepirtools/base.py", line 105, in train
+    self.checker.check_convergence(epoch, self.global_iter, loss.item())
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/deepirtools/utils.py", line 47, in check_convergence
+    print("\rEpoch = {:8d}".format(epoch),
+BrokenPipeError: [Errno 32] Broken pipe

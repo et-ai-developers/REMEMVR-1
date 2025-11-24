@@ -24,23 +24,23 @@ Step 01: IRT Calibration Pass 1
 [SAVE] Formatting and saving item parameters...
 [SAVED] step01_pass1_item_params.csv (105 items)
 [SUMMARY] Item parameters (Pass 1):
-[SUMMARY]   Discrimination range: 0.073 - 2.163
-[SUMMARY]   Difficulty range: -20.790 - 16.477
+[SUMMARY]   Discrimination range: 0.014 - 2.681
+[SUMMARY]   Difficulty range: -9.686 - 67.385
 [SUMMARY]   what items: 29
 [SUMMARY]   where items: 50
 [SUMMARY]   when items: 26
 [SAVE] Formatting and saving theta scores...
 [SAVED] step01_pass1_theta.csv (400 observations)
 [SUMMARY] Theta scores (Pass 1):
-[SUMMARY]   theta_what: mean=0.066, std=1.024
-[SUMMARY]   theta_where: mean=-0.033, std=0.968
-[SUMMARY]   theta_when: mean=-0.021, std=0.990
+[SUMMARY]   theta_what: mean=-0.034, std=0.903
+[SUMMARY]   theta_where: mean=0.021, std=0.928
+[SUMMARY]   theta_when: mean=0.044, std=0.766
 [VALIDATION] Running validate_irt_convergence...
 [VALIDATION] Converged: True
 [VALIDATION] Message: Model converged successfully
 [VALIDATION] Additional parameter checks:
-[VALIDATION]   Discrimination in [0.01, 10.0]: True (actual: [0.073, 2.163])
-[VALIDATION]   Difficulty in [-6.0, 6.0]: False (actual: [-20.790, 16.477])
+[VALIDATION]   Discrimination in [0.01, 10.0]: True (actual: [0.014, 2.681])
+[VALIDATION]   Difficulty in [-6.0, 6.0]: False (actual: [-9.686, 67.385])
 [VALIDATION]   No NaN in parameters: True (0 items with NaN)
 [VALIDATION]   No NaN in theta scores: True (0 observations with NaN)
 [WARN] Some validation checks failed - review item parameters
