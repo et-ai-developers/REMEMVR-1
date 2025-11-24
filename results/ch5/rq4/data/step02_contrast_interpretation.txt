@@ -1,0 +1,41 @@
+RQ 5.4 - Linear Trend Contrast Analysis
+==========================================
+
+RESEARCH QUESTION:
+Is there a systematic linear trend in forgetting rates across paradigms
+(Free Recall -> Cued Recall -> Recognition)?
+
+CONTRAST SPECIFICATION:
+- Weights: Free_Recall = -1, Cued_Recall = 0, Recognition = +1
+- Tests: Linear trend in SLOPES (forgetting rates), not intercepts
+
+RESULTS:
+- Contrast estimate: -0.1274
+- Standard error: 0.0515
+- z-value: -2.474
+- p-value (uncorrected): = 0.013
+- p-value (Bonferroni-corrected, n=15): 0.2003
+- 95% CI: [-0.2284, -0.0265]
+
+SIGNIFICANCE:
+- Uncorrected (alpha = 0.05): SIGNIFICANT
+- Bonferroni-corrected: NOT SIGNIFICANT
+
+INTERPRETATION:
+The linear trend contrast estimate is negative.
+This means forgetting rate INCREASES from Free Recall to Recognition.
+In practical terms: More retrieval support is associated with FASTER forgetting.
+
+PARADIGM-SPECIFIC SLOPES (for reference):
+- Free Recall: -0.4697 (slowest forgetting - least negative)
+- Cued Recall: -0.5203
+- Recognition: -0.5971 (fastest forgetting - most negative)
+
+Note: All slopes are negative because theta decreases over time (forgetting).
+A more negative slope = faster forgetting.
+A less negative slope = slower forgetting.
+
+STATISTICAL NOTE (D068):
+Per thesis decision D068, we report both uncorrected and Bonferroni-corrected
+p-values. The Bonferroni correction accounts for 15 planned comparisons across
+the thesis to control the family-wise error rate.

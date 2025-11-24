@@ -1,0 +1,21 @@
+[START] Step 00: Load RQ 5.3 Outputs
+[CHECK] Verifying RQ 5.3 dependency files...
+[PASS] Found LMM model: /home/etai/projects/REMEMVR/results/ch5/rq3/data/step05_lmm_fitted_model.pkl
+[PASS] Found LMM input data: /home/etai/projects/REMEMVR/results/ch5/rq3/data/step04_lmm_input.csv
+[PASS] Found Model comparison: /home/etai/projects/REMEMVR/results/ch5/rq3/data/step05_model_comparison.csv
+[LOAD] Loading model comparison results...
+[LOADED] model_comparison: 5 models compared
+[INFO] Best model: Log (AIC = 2346.60)
+[LOAD] Loading fitted LMM model...
+[LOADED] LMM model object successfully loaded
+[INFO] Model observations: 1200
+[INFO] Number of fixed effects: 9
+[LOAD] Loading theta data...
+[LOADED] theta_data: 1200 rows, 8 cols
+[INFO] Paradigm levels: ['free_recall', 'cued_recall', 'recognition']
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[SAVE] Writing confirmation file...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq4/data/step00_model_loaded.txt
+[SUCCESS] Step 00 complete - RQ 5.3 outputs loaded and validated

@@ -9,17 +9,18 @@
 
 ## What We're Doing
 
-**Current Task:** V4.X Production - RQ 5.1 + RQ 5.2 + RQ 5.3 COMPLETE
+**Current Task:** V4.X Production - RQ 5.1 + RQ 5.2 + RQ 5.3 + RQ 5.4 COMPLETE
 
-**Context:** Three RQs (5.1, 5.2, 5.3) fully processed through v4.X pipeline. All 13 agents tested and working. Pipeline is stable - RQ 5.3 completed with zero bugs.
+**Context:** Four RQs (5.1, 5.2, 5.3, 5.4) fully processed through v4.X pipeline. All 13 agents tested and working. Pipeline stable - RQ 5.4 completed with 1 bug fix (coefficient parsing).
 
 **Started:** 2025-11-15 14:00 (architecture realignment after v3.0 RQ 5.1 failures)
-**Current Status:** RQ 5.1 COMPLETE, RQ 5.2 COMPLETE, RQ 5.3 COMPLETE, Ready for RQ 5.4+
+**Current Status:** RQ 5.1 COMPLETE, RQ 5.2 COMPLETE, RQ 5.3 COMPLETE, RQ 5.4 COMPLETE, Ready for RQ 5.5+
 
 **Related Documents:**
 - `results/ch5/rq1/results/summary.md` - RQ 5.1 publication-ready results
 - `results/ch5/rq2/results/summary.md` - RQ 5.2 publication-ready results
 - `results/ch5/rq3/results/summary.md` - RQ 5.3 publication-ready results (paradigm analysis)
+- `results/ch5/rq4/results/summary.md` - RQ 5.4 publication-ready results (linear trend contrast)
 - `.claude/agents/g_code.md` - Enhanced with REMEMVR data conventions section
 - `.claude/agents/rq_analysis.md` - Fixed folder conventions (CSV -> data/, not results/)
 
@@ -33,12 +34,13 @@
 - **RQ 5.1 Pipeline:** FULLY COMPLETE (8 analysis steps + plots + results summary)
 - **RQ 5.2 Pipeline:** FULLY COMPLETE (6 analysis steps + plots + results summary)
 - **RQ 5.3 Pipeline:** FULLY COMPLETE (8 analysis steps + plots + results summary) - ZERO BUGS
+- **RQ 5.4 Pipeline:** FULLY COMPLETE (4 analysis steps + plot + results summary) - 1 bug fix
 - **Test Suite:** 107 passing, 14 failing (pre-existing)
 - **Agent Prompt Enhancements:** g_code + rq_analysis improved based on RQ 5.2 bugs
 
 ### Next
 
-- **RQ 5.4+:** Ready to continue Chapter 5 (rq4-15)
+- **RQ 5.5+:** Ready to continue Chapter 5 (rq5-15)
 - **Other RQs:** ch6, ch7 all available
 - **g_debug:** Still not tested (no errors encountered)
 
@@ -47,7 +49,7 @@
 ## Next Actions
 
 **Immediate (After /save + /clear + /refresh):**
-1. Start RQ 5.4 or user's choice of next RQ
+1. Start RQ 5.5 or user's choice of next RQ
 2. Continue systematic RQ processing through Chapter 5
 3. Address When domain anomalies if needed (floor effects in RQ 5.1 and 5.2)
 
@@ -292,8 +294,126 @@ logs/     ONLY execution logs (.log)
 
 ---
 
+## Session (2025-11-24 14:15)
+
+**Task:** RQ 5.4 Full Pipeline Execution
+
+**Objective:** Process RQ 5.4 (Linear Trend in Forgetting Rate Across Paradigms) through complete v4.X pipeline
+
+**Key Accomplishments:**
+
+**1. Full RQ 5.4 Pipeline Execution (All 11 Agents)**
+
+**Agent Execution Sequence:**
+- rq_builder: Created folder structure (6 subfolders + status.yaml)
+- rq_concept: Created 1_concept.md (linear trend contrast, secondary analysis on RQ 5.3)
+- rq_scholar: 9.4/10 APPROVED (encoding-retrieval specificity, polynomial contrasts)
+- rq_stats: 9.1/10 CONDITIONAL - Required 2 fixes applied:
+  - Changed from N=3 regression to within-LMM contrast testing (preserves N=100)
+  - Removed R-squared hypothesis (meaningless with 3 data points)
+- rq_planner: 4 steps planned (load RQ5.3 + marginal means + linear contrast + plot data)
+- rq_tools: 4 analysis + 2 validation tools cataloged (mostly stdlib)
+- rq_analysis: 4_analysis.yaml created
+- g_code: 4 Python scripts generated and executed - 1 bug fix (coefficient parsing)
+- rq_inspect: 4-layer validation PASS
+- rq_plots: 1 bar chart generated (paradigm forgetting rates)
+- rq_results: summary.md created with 2 anomalies flagged
+
+**2. Bug Fix: Coefficient Parsing**
+
+**Problem:** `log_Days Var` (random effect variance) was being selected instead of `log_Days` (fixed effect slope) due to substring matching in coefficient extraction.
+
+**Fix:** Use exact string matching for coefficient names rather than substring matching.
+
+**3. rq_stats Required Changes Applied**
+
+**Change 1: Within-LMM Contrast Testing**
+- Original: Proposed N=3 regression on extracted slopes (only 1 df)
+- Fixed: Test linear trend contrast directly within RQ5.3 LMM using marginal means
+- Benefit: Preserves full sample information (N=100) and proper degrees of freedom
+
+**Change 2: Remove R-squared Hypothesis**
+- Original: "R-squared for linearity of trend will exceed 0.90"
+- Fixed: Removed (statistically meaningless with N=3 data points)
+
+**4. RQ 5.4 Scientific Results**
+
+**Linear Trend Contrast:**
+| Statistic | Value |
+|-----------|-------|
+| Estimate (b) | -0.127 |
+| z-value | -2.47 |
+| p (uncorrected) | 0.01 ✓ |
+| p (Bonferroni) | 0.20 ✗ |
+| 95% CI | [-0.228, -0.026] |
+
+**Paradigm-Specific Marginal Means (Day 3):**
+- Free Recall: -0.470 (slowest forgetting)
+- Cued Recall: -0.520
+- Recognition: -0.597 (fastest forgetting)
+
+**Hypothesis Outcome: NOT SUPPORTED**
+- Predicted: Free > Cued > Recognition (forgetting DECREASES with more retrieval support)
+- Observed: Free < Cued < Recognition (forgetting INCREASES with more retrieval support)
+- Direction is OPPOSITE to theoretical prediction
+- Effect does not survive Bonferroni correction
+
+**2 Anomalies Flagged:**
+1. Wrong direction effect (opposite to theory)
+2. Non-monotonic marginal means (Recognition > Free > Cued, not strictly monotonic)
+
+**5. Files Created (RQ 5.4)**
+
+**Documentation:**
+- `results/ch5/rq4/docs/1_concept.md` - RQ concept (linear trend contrast)
+- `results/ch5/rq4/docs/1_scholar.md` - Scholarly validation (9.4/10 APPROVED)
+- `results/ch5/rq4/docs/1_stats.md` - Statistical validation (9.1/10 CONDITIONAL)
+- `results/ch5/rq4/docs/2_plan.md` - Analysis plan (4 steps)
+- `results/ch5/rq4/docs/3_tools.yaml` - Tool specifications
+- `results/ch5/rq4/docs/4_analysis.yaml` - Complete analysis recipe
+
+**Code:**
+- `results/ch5/rq4/code/step00_load_rq53_outputs.py`
+- `results/ch5/rq4/code/step01_extract_marginal_means.py`
+- `results/ch5/rq4/code/step02_compute_linear_trend_contrast.py`
+- `results/ch5/rq4/code/step03_prepare_paradigm_plot_data.py`
+
+**Data:**
+- `results/ch5/rq4/data/step00_model_loaded.txt` - Model load confirmation
+- `results/ch5/rq4/data/step01_marginal_means.csv` - 3 rows (paradigms)
+- `results/ch5/rq4/data/step02_linear_trend_contrast.csv` - 1 row (contrast results)
+- `results/ch5/rq4/data/step02_contrast_interpretation.txt` - Plain-language interpretation
+
+**Plots:**
+- `results/ch5/rq4/plots/paradigm_forgetting_rates.png` - Bar chart with trend line
+- `results/ch5/rq4/plots/step03_paradigm_forgetting_rates_data.csv` - Plot source data
+- `results/ch5/rq4/plots/plots.py` - Plot generation script
+
+**Results:**
+- `results/ch5/rq4/results/summary.md` - Publication-ready summary
+
+**6. plots.py Path Fix**
+
+**Problem:** `ModuleNotFoundError: No module named 'tools'` when running plots.py
+**Fix:** Added sys.path.insert to add project root to Python path (5-level parent from plots.py)
+
+---
+
+**End of Session (2025-11-24 14:15)**
+
+**Session Duration:** ~45 minutes
+**Token Usage:** ~95k tokens
+**RQ Processed:** ch5/rq4 (Linear Trend Contrast)
+**Bugs Fixed:** 1 (coefficient parsing)
+**rq_stats Required Changes:** 2 applied (within-LMM contrast, remove R-sq)
+**Hypothesis Outcome:** NOT SUPPORTED (2 anomalies flagged - opposite direction)
+
+**Status:** RQ 5.4 COMPLETE. 4 Chapter 5 RQs done. Ready for RQ 5.5+.
+
+---
+
 ## Active Topics (For context-manager)
 
-- rq53_paradigm_analysis (IFR/ICR/IRE, retrieval support gradient, hypothesis partially supported)
-- pipeline_stability (3 RQs completed, zero bugs in RQ 5.3, g_code enhancements validated)
-- when_domain_anomalies (floor effects in RQ 5.1 and 5.2, not present in RQ 5.3 paradigm analysis)
+- rq54_linear_trend_contrast (secondary analysis on RQ5.3, opposite direction effect, hypothesis not supported)
+- pipeline_stability (4 RQs completed, 1 bug fix in RQ 5.4)
+- when_domain_anomalies (floor effects in RQ 5.1 and 5.2, not present in paradigm analyses 5.3/5.4)

@@ -1,0 +1,207 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.4: Linear Trend in Paradigm Forgetting Rates
+# Created by: rq_tools agent
+# Date: 2025-11-24
+# Architecture: Tool Catalog (v4.X) - Each tool listed once, deduplication
+
+# SPECIAL NOTE: RQ 5.4 is a Secondary Analysis
+# This RQ operates on outputs from RQ 5.3 (fitted LMM model) and performs
+# contrast testing within that model. The analysis uses primarily STDLIB
+# operations (pickle, pandas, statsmodels, scipy) rather than custom tools/
+# module functions.
+
+# Stdlib operations (EXEMPT from tools_inventory.md verification):
+# - pickle/joblib: Model loading from .pkl file
+# - pandas: DataFrame operations, CSV I/O
+# - statsmodels: MixedLMResults methods (params, cov_params, predict)
+# - scipy.stats: p-value computation (norm.sf)
+# - numpy: Array operations, weighted sums
+
+---
+
+analysis_tools:
+  # Step 0: Load RQ 5.3 Outputs
+  # Note: Uses stdlib (pickle, pandas) - no custom tool required
+  load_lmm_model_pickle:
+    module: "stdlib"
+    function: "joblib.load or pickle.load"
+    description: "Load fitted LMM model from RQ 5.3 pickle file"
+    stdlib_exemption: true
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "../rq3/data/step05_lmm_fitted_model.pkl"
+        description: "Fitted MixedLM model object from RQ 5.3"
+        source: "RQ 5.3 Step 5"
+
+    output_files:
+      - path: "data/step00_model_loaded.txt"
+        description: "Confirmation file for successful model load"
+
+    parameters:
+      verify_model_type: "Log model (best AIC from RQ 5.3)"
+      verify_attributes: ["params", "cov_params", "nobs"]
+
+  # Step 1: Extract Marginal Means at Day 3
+  # Note: Uses statsmodels model.predict() - stdlib exemption
+  extract_marginal_means:
+    module: "stdlib"
+    function: "MixedLMResults.predict"
+    description: "Extract paradigm-specific marginal means at Day 3 midpoint"
+    stdlib_exemption: true
+    validation_tool: "validate_output_file"
+
+    input_files:
+      - path: "data/step00_model_loaded.txt"
+        description: "Confirmation of model load"
+        source: "Step 0"
+
+    output_files:
+      - path: "data/step01_marginal_means.csv"
+        columns: ["paradigm", "marginal_mean", "SE", "CI_lower", "CI_upper"]
+        description: "Paradigm-level predictions at Day 3"
+        expected_rows: 3
+
+    parameters:
+      timepoint: "Day 3 (72 hours or log(3) for Log model)"
+      paradigms: ["Free_Recall", "Cued_Recall", "Recognition"]
+      confidence_level: 0.95
+
+  # Step 2: Compute Linear Trend Contrast
+  # Note: Manual computation using model coefficients - stdlib (numpy, scipy)
+  compute_linear_trend_contrast:
+    module: "stdlib"
+    function: "manual computation (numpy, scipy.stats)"
+    description: "Compute linear trend contrast within RQ 5.3 LMM using polynomial weights"
+    stdlib_exemption: true
+    validation_tool: "validate_output_file"
+
+    input_files:
+      - path: "data/step01_marginal_means.csv"
+        description: "Marginal means for reference"
+        source: "Step 1"
+
+    output_files:
+      - path: "results/step02_linear_trend_contrast.csv"
+        columns: ["contrast_name", "estimate", "SE", "z_value", "p_value_uncorrected",
+                  "p_value_bonferroni", "significant_uncorrected", "significant_bonferroni",
+                  "CI_lower", "CI_upper"]
+        description: "Linear trend contrast test results"
+        expected_rows: 1
+      - path: "results/step02_contrast_interpretation.txt"
+        description: "Plain-language interpretation of contrast results"
+
+    parameters:
+      contrast_weights:
+        Free_Recall: -1
+        Cued_Recall: 0
+        Recognition: 1
+      bonferroni_alpha: 0.0033
+      decision_D068: "Dual p-value reporting (uncorrected + Bonferroni)"
+
+  # Step 3: Prepare Visualization Data
+  # Note: Pandas DataFrame operations - stdlib exemption
+  prepare_plot_data:
+    module: "stdlib"
+    function: "pandas DataFrame operations"
+    description: "Create plot-ready CSV with marginal means, CIs, and trend line values"
+    stdlib_exemption: true
+    validation_tool: "validate_output_file"
+
+    input_files:
+      - path: "data/step01_marginal_means.csv"
+        description: "Marginal means"
+        source: "Step 1"
+      - path: "results/step02_linear_trend_contrast.csv"
+        description: "Contrast results"
+        source: "Step 2"
+
+    output_files:
+      - path: "plots/step03_paradigm_forgetting_rates_data.csv"
+        columns: ["paradigm", "paradigm_code", "marginal_mean", "SE",
+                  "CI_lower", "CI_upper", "trend_line"]
+        description: "Plot source CSV for bar plot with trend line"
+        expected_rows: 3
+      - path: "plots/step03_contrast_annotation.txt"
+        description: "Plot annotation text (contrast results formatted)"
+
+    parameters:
+      paradigm_ordering:
+        Free_Recall: 1
+        Cued_Recall: 2
+        Recognition: 3
+
+---
+
+validation_tools:
+  # Primary validation tool from tools_inventory.md
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+    description: "Check LMM model convergence status and warnings"
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+    input_files:
+      - path: "loaded model object"
+        description: "MixedLMResults from pickle file"
+        source: "Step 0 load"
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "Model has valid parameters (not None, not NaN)"
+      - "Model has accessible covariance matrix"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "list"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_rq53_outputs.log"
+      invoke: "g_debug (master invokes)"
+
+  # Generic output file validation (stdlib-based)
+  validate_output_file:
+    module: "stdlib"
+    function: "pathlib.Path.exists + pandas shape check"
+    description: "Validate output files exist and have expected structure"
+    stdlib_exemption: true
+
+    criteria:
+      - "Output file exists at expected path"
+      - "CSV files have expected columns"
+      - "CSV files have expected row count"
+      - "No NaN values in required columns"
+
+    expected_output:
+      format: "bool"
+      fields:
+        valid: "bool (True if all checks pass)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError or ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+---
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 2
+  total_unique_tools: 6
+  stdlib_exemptions: 4
+  custom_tools_from_inventory: 1
+  mandatory_decisions_embedded: ["D068", "D070"]
+
+  notes:
+    - "RQ 5.4 is a secondary analysis operating on RQ 5.3 outputs"
+    - "Most operations use stdlib (pickle, pandas, statsmodels, scipy, numpy)"
+    - "Only custom tool required: validate_lmm_convergence from tools.validation"
+    - "Linear trend contrast computed manually (not using compute_contrasts_pairwise)"
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni) for contrast test"
+    - "D070: TSVR time variable inherited from RQ 5.3 model (no recalculation needed)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will generate step scripts using primarily stdlib operations"

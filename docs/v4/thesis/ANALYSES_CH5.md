@@ -465,14 +465,24 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - Get raw scores from ./results/ch5/rq1/data/step00_irt_input.csv
+   - Remove TQ_* columns that don't inlcude IFR, ICR, or IRE
+   - Get TSVR mapping from ./results/ch5/rq1/data/step00_tsvr_mapping.csv
+   - Create Q-matrix similar to ./results/ch5/rq1/data/step00_q_matrix.csv but map groups as:
+      common = *-i1 and *-i2
+      congruent = *-i3 and *-i4
+      incongruent = *-i5 and *-i6
+
 1. **Run IRT Analysis**
    - Execute IRT pipeline for "Items by Congruence" analysis set
-   - Use correlated factors, p1_med, 2-category GRM
+   - Use correlated factors, 2-category GRM
    - Extract theta scores from output
+   - Purify and run again
 
 2. **Data Preparation**
    - Reshape theta scores from wide to long format (Congruence as factor variable)
-   - Create time transformations: Days, Days², log(Days+1)
+   - Create time transformations: TSVR, TSVR², log(TSVR+1)
    - Validate factor structure
 
 3. **Model Fitting and Selection**
@@ -484,7 +494,7 @@ Use TSVR data to see the actual hours since VR for each px's scores
 4. **Post-hoc Contrasts**
    - Extract Time×Congruence interaction terms
    - Test differences in forgetting slopes: Congruent-Common, Incongruent-Common
-   - Bonferroni correction: α = 0.0033/3 = 0.0011
+   - Bonferroni correction: α = 0.0033/3 = 0.0011 (With and without)
 
 5. **Effect Size Computation**
    - Calculate Cohen's d for congruence differences at Day 6

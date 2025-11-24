@@ -1,0 +1,21 @@
+Plot Annotation for RQ 5.4
+
+MAIN ANNOTATION (for plot subtitle):
+Linear trend: b = -0.127, z = -2.47, p = 0.01
+
+DETAILED STATISTICS:
+- Linear trend contrast estimate: -0.1274
+- Standard error: 0.0515
+- z-value: -2.474
+- p-value (uncorrected): 0.013354
+- p-value (Bonferroni, n=15): 0.200310
+- Significant (uncorrected): True
+- Significant (Bonferroni): False
+
+TREND LINE PARAMETERS:
+- Slope: -0.0637
+- Intercept: 0.0253
+
+INTERPRETATION:
+The linear trend is statistically significant at alpha = 0.05 (uncorrected).
+The linear trend is NOT statistically significant after Bonferroni correction.

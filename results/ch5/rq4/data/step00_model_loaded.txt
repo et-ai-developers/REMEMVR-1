@@ -1,0 +1,38 @@
+RQ 5.4 - Step 00: Model Load Confirmation
+==========================================
+
+Source Files:
+- Model: /home/etai/projects/REMEMVR/results/ch5/rq3/data/step05_lmm_fitted_model.pkl
+- Input Data: /home/etai/projects/REMEMVR/results/ch5/rq3/data/step04_lmm_input.csv
+- Model Comparison: /home/etai/projects/REMEMVR/results/ch5/rq3/data/step05_model_comparison.csv
+
+Best Model: Log
+Best Model AIC: 2346.5961
+
+Model Statistics:
+- Number of observations: 1200
+- Number of fixed effects: 9
+- Converged: True
+
+Fixed Effect Names:
+- Intercept
+- C(Factor, Treatment('Free_Recall'))[T.Cued_Recall]
+- C(Factor, Treatment('Free_Recall'))[T.Recognition]
+- log_Days
+- log_Days:C(Factor, Treatment('Free_Recall'))[T.Cued_Recall]
+- log_Days:C(Factor, Treatment('Free_Recall'))[T.Recognition]
+- Group Var
+- Group x log_Days Cov
+- log_Days Var
+
+Paradigm Levels in Data:
+- cued_recall
+- free_recall
+- recognition
+
+Theta Data Summary:
+- Total rows: 1200
+- Unique participants: 100
+- Tests per participant: ~4
+
+Validation Status: PASSED
