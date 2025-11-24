@@ -561,11 +561,14 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Data Required:**
 - **Analysis Set:** "Items by Congruence" (same as RQ5.5)
-- **IRT Configuration:** Correlated factors, p1_med, 2 categories
-- **Additional Variables:** Segment (Early: Days 0-1, Late: Days 1-6), Days_within_segment
+- **IRT Configuration:** Correlated factors, 2 categories
+- **Additional Variables:** Segment (Early: Test 1-2, Late: Test 3-4), Days_within_segment
 - **Structure:** 400 observations across 2 time segments × 3 congruence types
 
 **Analysis Specification:**
+
+0. **Get Data**
+   - From ch5/rq5
 
 1. **Data Preparation**
    - Use theta scores from "Items by Congruence" analysis (RQ5.5)
@@ -592,7 +595,7 @@ Use TSVR data to see the actual hours since VR for each px's scores
 4. **Test Key Hypothesis: Congruent Consolidation Benefit**
    - Hypothesis: Congruent items show less decline in Early segment than Incongruent
    - Extract 3-way interaction: Days_within×Segment[Late]×Congruence[Congruent]
-   - Apply Bonferroni correction: α = 0.0033
+   - Apply Bonferroni correction: α = 0.0033 (report without correction as well)
 
 5. **Visualization**
    - Generate two-panel piecewise trajectory plot (Early | Late)

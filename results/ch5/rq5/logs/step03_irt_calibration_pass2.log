@@ -1,0 +1,43 @@
+[START] Step 03: IRT Calibration Pass 2 (Purified Items)
+RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
+
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step02_purified_items.csv (51 purified items)
+
+[FILTER] Filtering to purified items only...
+[FILTERED] 51 item columns retained
+
+[CONVERT] Converting wide to long format...
+[CONVERTED] Long format: 20400 rows
+  Unique UIDs: 100
+  Unique items: 51
+
+[CALIBRATE] Running IRT calibration (Pass 2 - Final)...
+[CALIBRATED] Theta scores: 400 rows
+[CALIBRATED] Item parameters: 51 items
+
+[PROCESS] Post-processing results...
+[PROCESSED] Theta output: 400 rows, 7 cols
+[PROCESSED] Item params output: 51 items
+
+[SAVE] Saving output files...
+[SAVED] step03_item_parameters.csv (51 rows)
+[SAVED] step03_theta_scores.csv (400 rows)
+
+[VALIDATE] Validating results...
+[PASS] Theta count: 400 rows
+[PASS] No NaN in theta scores
+  theta_common range: [-2.061, 2.717]
+  theta_congruent range: [-2.047, 2.468]
+  theta_incongruent range: [-2.070, 2.341]
+[PASS] se_common mean: 0.204
+[PASS] se_congruent mean: 0.204
+[PASS] se_incongruent mean: 0.250
+
+  Final a range: [0.208, 3.298]
+  Final b range: [-2.910, 4.384]
+[WARN] 4 items have a < 0.4
+[WARN] 2 items have |b| > 3.0
+
+[SUCCESS] Step 03 complete (IRT Pass 2 - Final)

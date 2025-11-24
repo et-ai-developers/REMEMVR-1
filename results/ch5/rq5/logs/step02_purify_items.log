@@ -1,0 +1,61 @@
+[START] Step 02: Item Purification (Decision D039)
+RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
+Thresholds: a >= 0.4, |b| <= 3.0
+
+[LOAD] Loading Pass 1 item parameters...
+[LOADED] step01_pass1_item_params.csv (72 items)
+  Initial a range: [0.030, 2.971]
+  Initial b range: [-5.577, 30.754]
+
+[PURIFY] Applying D039 purification thresholds...
+
+[RESULTS] Purification summary:
+  Total items: 72
+  Purified (retained): 51 (70.8%)
+  Removed: 21 (29.2%)
+
+  Items per dimension after purification:
+    common: 19 / 24 retained
+    congruent: 19 / 24 retained
+    incongruent: 13 / 24 retained
+
+  Removed items:
+    - TQ_ICR-O-i2 (common): |b| > 3.0 (3.699)
+    - TQ_ICR-O-i5 (incongruent): a < 0.4 (0.218); |b| > 3.0 (4.227)
+    - TQ_ICR-O-i6 (incongruent): a < 0.4 (0.329); |b| > 3.0 (3.520)
+    - TQ_IFR-D-i4 (congruent): a < 0.4 (0.114); |b| > 3.0 (6.474)
+    - TQ_IFR-D-i5 (incongruent): a < 0.4 (0.181); |b| > 3.0 (3.814)
+    - TQ_IFR-D-i6 (incongruent): a < 0.4 (0.056); |b| > 3.0 (19.264)
+    - TQ_IFR-O-i1 (common): a < 0.4 (0.030); |b| > 3.0 (30.754)
+    - TQ_IFR-O-i2 (common): a < 0.4 (0.199); |b| > 3.0 (5.381)
+    - TQ_IFR-O-i4 (congruent): a < 0.4 (0.052); |b| > 3.0 (13.179)
+    - TQ_IFR-O-i5 (incongruent): a < 0.4 (0.080); |b| > 3.0 (6.582)
+    - TQ_IFR-O-i6 (incongruent): a < 0.4 (0.141); |b| > 3.0 (6.246)
+    - TQ_IRE-D-i4 (congruent): a < 0.4 (0.384)
+    - TQ_IRE-D-i5 (incongruent): a < 0.4 (0.307)
+    - TQ_IRE-N-i2 (common): |b| > 3.0 (-5.577)
+    - TQ_IRE-N-i3 (congruent): |b| > 3.0 (-3.902)
+    - TQ_IRE-N-i5 (incongruent): |b| > 3.0 (-4.373)
+    - TQ_IRE-N-i6 (incongruent): |b| > 3.0 (-4.255)
+    - TQ_IRE-O-i2 (common): a < 0.4 (0.307); |b| > 3.0 (6.226)
+    - TQ_IRE-O-i4 (congruent): a < 0.4 (0.204); |b| > 3.0 (5.117)
+    - TQ_IRE-O-i5 (incongruent): a < 0.4 (0.243); |b| > 3.0 (4.081)
+    - TQ_IRE-O-i6 (incongruent): |b| > 3.0 (3.449)
+
+[SAVE] Saving output files...
+[SAVED] step02_purified_items.csv (51 items)
+[SAVED] step02_removed_items.csv (21 items)
+
+[VALIDATE] Validating purification results...
+[PASS] All retained items have a >= 0.4
+[PASS] All retained items have |b| <= 3.0
+[PASS] common: 19 items (>= 5)
+[PASS] congruent: 19 items (>= 5)
+[PASS] incongruent: 13 items (>= 5)
+[PASS] Total items: 51 (>= 30)
+[PASS] Retention rate: 70.8% (within expected 40-80%)
+
+  Final a range: [0.407, 2.971]
+  Final b range: [-2.942, 2.974]
+
+[SUCCESS] Step 02 complete (Item Purification)

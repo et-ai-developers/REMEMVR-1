@@ -1,0 +1,45 @@
+[START] Step 01: IRT Calibration Pass 1
+RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
+
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step00_q_matrix.csv (72 rows)
+
+[BUILD] Building factor groups from Q-matrix...
+  common: 24 items
+  congruent: 24 items
+  incongruent: 24 items
+
+[CONVERT] Converting wide to long format...
+[CONVERTED] Long format: 28800 rows
+  Unique UIDs: 100
+  Unique items: 72
+  Test sessions: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+
+[BUILD] Building pattern-based groups for IRT...
+  common patterns ['-i1', '-i2']: matches 24 items
+  congruent patterns ['-i3', '-i4']: matches 24 items
+  incongruent patterns ['-i5', '-i6']: matches 24 items
+
+[CALIBRATE] Running IRT calibration (Pass 1)...
+[CALIBRATED] Theta scores: 400 rows
+[CALIBRATED] Item parameters: 72 items
+
+[PROCESS] Post-processing results...
+[PROCESSED] Theta output: 400 rows, 7 cols
+[PROCESSED] Item params output: 72 items
+
+[SAVE] Saving output files...
+[SAVED] step01_pass1_item_params.csv (72 rows)
+[SAVED] step01_pass1_theta.csv (400 rows)
+
+[VALIDATE] Validating results...
+[PASS] No NaN in item parameters
+[PASS] Dimension 'common': 24 items
+[PASS] Dimension 'congruent': 24 items
+[PASS] Dimension 'incongruent': 24 items
+[INFO] Parameter ranges: a=[0.030, 2.971], b=[-5.577, 30.754]
+[WARN] Difficulty outside expected range [-6.0, 6.0]
+[PASS] Theta count: 400 rows
+
+[SUCCESS] Step 01 complete (IRT Pass 1)

@@ -1,0 +1,420 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.5 (Schema Congruence Effects)
+# Created by: rq_tools agent
+# Date: 2025-11-24
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Analysis Type: IRT (2-pass GRM) + LMM (5 candidate models)
+
+---
+
+analysis_tools:
+
+  # === IRT ANALYSIS TOOLS ===
+
+  calibrate_irt:
+    module: "tools.analysis_irt"
+    function: "calibrate_irt"
+    signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_parameters"
+
+    description: "Full IRT pipeline: prepare -> configure -> fit -> extract (convenience wrapper for GRM calibration)"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        required_columns: ["composite_ID", "item columns (VR_IFR_*, VR_ICR_*, VR_IRE_*)"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          item_columns: "int (values: 0, 1, NaN)"
+
+    output_files:
+      - path: "data/step03_theta_scores.csv"
+        columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+        description: "IRT ability estimates (theta) per congruence dimension"
+      - path: "data/step03_item_parameters.csv"
+        columns: ["item_name", "dimension", "a", "b"]
+        description: "IRT item parameters (discrimination a, difficulty b)"
+
+    parameters:
+      df_long: "DataFrame (long format with composite_ID, item, response)"
+      groups: "Dict[str, List[str]] (dimension -> item mapping from Q-matrix)"
+      config: "dict (irt_config with model params: n_cats, correlated_factors, device, seed)"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_irt - calibrate_irt"
+
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_parameters"
+
+    description: "D039: Purify items by quality thresholds for 2-pass IRT calibration"
+
+    input_files:
+      - path: "logs/step01_pass1_item_params.csv"
+        required_columns: ["item_name", "dimension", "a", "b"]
+        expected_rows: "90-120 items"
+        data_types:
+          item_name: "string"
+          dimension: "string (common/congruent/incongruent)"
+          a: "float (discrimination)"
+          b: "float (difficulty)"
+
+    output_files:
+      - path: "data/step02_purified_items.csv"
+        columns: ["item_name", "dimension", "a", "b", "retention_reason"]
+        description: "Items retained after D039 purification (|b| <= 3.0 AND a >= 0.4)"
+      - path: "data/step02_removed_items.csv"
+        columns: ["item_name", "dimension", "a", "b", "removal_reason"]
+        description: "Items excluded by D039 thresholds"
+
+    parameters:
+      df_items: "DataFrame (item parameters from Pass 1)"
+      a_threshold: "float (default 0.4, minimum discrimination)"
+      b_threshold: "float (default 3.0, maximum |difficulty|)"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_irt - filter_items_by_quality"
+
+
+  # === LMM ANALYSIS TOOLS ===
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "D070: Fit LMM using TSVR (actual hours since encoding) as time variable"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["UID", "composite_ID", "test", "congruence", "theta", "se", "TSVR_hours", "TSVR_sq", "TSVR_log"]
+        expected_rows: "~1200 (400 composite_IDs x 3 congruence levels)"
+        data_types:
+          UID: "string"
+          composite_ID: "string"
+          test: "string (T1, T2, T3, T4)"
+          congruence: "string (common/congruent/incongruent)"
+          theta: "float"
+          TSVR_hours: "float"
+
+    output_files:
+      - path: "data/step05_lmm_fitted_model.pkl"
+        description: "Pickled fitted MixedLMResults object for post-hoc contrasts"
+
+    parameters:
+      theta_scores: "DataFrame (composite_ID, domain_name, theta)"
+      tsvr_data: "DataFrame (UID, Test, TSVR_hours)"
+      formula: "str (e.g., 'theta ~ TSVR_hours * congruence')"
+      groups: "str (default 'UID')"
+      re_formula: "str (default '~Days')"
+      reml: "bool (default False)"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm - fit_lmm_trajectory_tsvr"
+
+
+  compare_lmm_models_by_aic:
+    module: "tools.analysis_lmm"
+    function: "compare_lmm_models_by_aic"
+    signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit all 5 candidate models, compare by AIC, return best model"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["UID", "theta", "TSVR_hours", "TSVR_sq", "TSVR_log", "congruence"]
+        expected_rows: "~1200"
+
+    output_files:
+      - path: "results/step05_model_comparison.csv"
+        columns: ["model_name", "AIC", "BIC", "logLik", "df"]
+        description: "AIC/BIC comparison table for 5 candidate models"
+      - path: "results/step05_lmm_model_summary.txt"
+        description: "Text summary of winning model (fixed effects, random effects, fit indices)"
+      - path: "data/step05_lmm_fitted_model.pkl"
+        description: "Pickled best model for post-hoc contrasts"
+
+    parameters:
+      data: "DataFrame (LMM input)"
+      n_factors: "int (3 for congruence: common/congruent/incongruent)"
+      reference_group: "str ('common' - schema-neutral baseline)"
+      groups: "str ('UID')"
+      save_dir: "Path (results/ directory)"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm - compare_lmm_models_by_aic"
+
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: null  # Output validation handled by rq_inspect
+
+    description: "Extract fixed effects table from fitted LMM"
+
+    input_files:
+      - path: "data/step05_lmm_fitted_model.pkl"
+        description: "Pickled MixedLMResults from LMM fitting step"
+
+    output_files:
+      - path: "results/step05_fixed_effects.csv"
+        columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+        description: "Fixed effects coefficients table"
+
+    parameters:
+      result: "MixedLMResults object"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm - extract_fixed_effects_from_lmm"
+
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: null  # Output validation handled by rq_inspect
+
+    description: "D068: Post-hoc pairwise contrasts with dual p-value reporting (uncorrected + Bonferroni)"
+
+    input_files:
+      - path: "data/step05_lmm_fitted_model.pkl"
+        description: "Pickled MixedLMResults from LMM fitting step"
+
+    output_files:
+      - path: "results/step06_post_hoc_contrasts.csv"
+        columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+        description: "Pairwise slope contrasts with D068 dual p-values"
+
+    parameters:
+      lmm_result: "MixedLMResults object"
+      comparisons: "List[str] (e.g., ['congruent-common', 'incongruent-common', 'congruent-incongruent'])"
+      family_alpha: "float (default 0.05)"
+
+    notes:
+      - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
+      - "Bonferroni alpha = 0.05 / 3 = 0.0167 for 3 contrasts"
+      - "Treatment coding: common as reference category"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm - compute_contrasts_pairwise"
+
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+    validation_tool: null  # Output validation handled by rq_inspect
+
+    description: "Compute Cohen's f-squared effect sizes for LMM fixed effects"
+
+    input_files:
+      - path: "data/step05_lmm_fitted_model.pkl"
+        description: "Pickled MixedLMResults from LMM fitting step"
+
+    output_files:
+      - path: "results/step06_effect_sizes.csv"
+        columns: ["effect", "f_squared", "interpretation"]
+        description: "Effect sizes with interpretation (negligible/small/medium/large)"
+
+    parameters:
+      lmm_result: "MixedLMResults object"
+      include_interactions: "bool (default False)"
+
+    source_reference: "tools_inventory.md - Module: tools.analysis_lmm - compute_effect_sizes_cohens"
+
+
+  # === PLOTTING TOOLS ===
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
+    validation_tool: null  # Output validation handled by rq_inspect
+
+    description: "D069: Transform theta scores to probability scale via IRT 2PL formula"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["theta"]
+        description: "Theta scores to transform"
+
+    output_files:
+      - path: "plots/step07_trajectory_probability_data.csv"
+        columns: ["time", "prob_mean", "CI_lower", "CI_upper", "congruence"]
+        description: "Probability-scale trajectory plot data (D069 dual-scale)"
+
+    parameters:
+      theta: "ndarray (theta values)"
+      discrimination: "float (default 1.0, average item discrimination)"
+      difficulty: "float (default 0.0, average item difficulty for interpretability)"
+
+    notes:
+      - "D069: Dual-scale trajectory plots (theta + probability)"
+      - "Probability scale aids interpretability for non-technical readers"
+
+    source_reference: "tools_inventory.md - Module: tools.plotting - convert_theta_to_probability"
+
+
+---
+
+validation_tools:
+
+  validate_irt_convergence:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+    description: "Check IRT model convergence based on loss stability and parameter bounds"
+
+    input_files:
+      - source: "IRT calibration results (in-memory Dict)"
+        required_keys: ["loss_history", "model parameters"]
+
+    criteria:
+      - "Loss history shows stable convergence (decreasing ELBO)"
+      - "No NaN in loss values (indicates estimation failure)"
+      - "Parameters within expected bounds"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if all convergence checks pass)"
+        checks: "list (individual check results)"
+        message: "str (human-readable convergence status)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_irt_calibration.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md - Module: tools.validation - validate_irt_convergence"
+
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+    description: "Validate item parameters against quality thresholds (post-purification verification)"
+
+    input_files:
+      - path: "data/step03_item_parameters.csv"
+        required_columns: ["item_name", "dimension", "a", "b"]
+        source: "IRT calibration output"
+
+    parameters:
+      df_items: "DataFrame (item parameters)"
+      a_min: "float (default 0.4, minimum discrimination after purification)"
+      b_max: "float (default 3.0, maximum |difficulty| after purification)"
+      a_col: "str (default 'Discrimination', column name for a parameter)"
+      b_col: "str (default 'Difficulty', column name for b parameter)"
+
+    criteria:
+      - "All retained items have discrimination >= a_min"
+      - "All retained items have |difficulty| <= b_max"
+      - "No NaN values in parameter columns"
+      - "All expected dimensions present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all items meet thresholds)"
+        n_items: "int (total items)"
+        n_valid: "int (items passing thresholds)"
+        n_invalid: "int (items failing thresholds)"
+        invalid_items: "list (item names violating criteria)"
+        message: "str (human-readable validation result)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_irt_calibration.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md - Module: tools.validation - validate_irt_parameters"
+
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    description: "Check LMM model convergence status and warnings"
+
+    input_files:
+      - source: "MixedLMResults object from LMM fitting"
+
+    criteria:
+      - "Model converged (no convergence failure flag)"
+      - "No singular fit warnings"
+      - "All fixed effect estimates are finite (no NaN/Inf)"
+      - "Random effect variance > 0"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged successfully)"
+        message: "str (convergence status description)"
+        warnings: "list (any warnings from estimation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md - Module: tools.validation - validate_lmm_convergence"
+
+
+  validate_lmm_residuals:
+    module: "tools.validation"
+    function: "validate_lmm_residuals"
+    signature: "validate_lmm_residuals(residuals: ndarray, alpha: float = 0.05) -> Dict[str, Any]"
+
+    description: "Test LMM residuals for normality using Kolmogorov-Smirnov test"
+
+    input_files:
+      - source: "Residuals array from fitted LMM"
+
+    parameters:
+      residuals: "ndarray (model residuals)"
+      alpha: "float (significance level, default 0.05)"
+
+    criteria:
+      - "Residuals approximately normal (K-S test p > alpha)"
+      - "No extreme outliers (|residual| > 3 SD)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        normal: "bool (True if normality assumption satisfied)"
+        ks_statistic: "float (Kolmogorov-Smirnov statistic)"
+        p_value: "float (K-S test p-value)"
+        message: "str (interpretation)"
+
+    behavior_on_failure:
+      action: "log warning (non-fatal)"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "note in results (LMM robust to minor violations)"
+
+    source_reference: "tools_inventory.md - Module: tools.validation - validate_lmm_residuals"
+
+
+---
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 4
+  total_unique_tools: 12
+  mandatory_decisions_embedded:
+    - "D039: 2-pass IRT purification (filter_items_by_quality)"
+    - "D068: Dual p-value reporting (compute_contrasts_pairwise)"
+    - "D069: Dual-scale trajectory plots (convert_theta_to_probability)"
+    - "D070: TSVR time variable (fit_lmm_trajectory_tsvr)"
+
+notes:
+  - "Each tool documented ONCE (even if used multiple times in workflow)"
+  - "rq_analysis will create step sequencing in 4_analysis.yaml"
+  - "g_code will use these signatures for pre-generation validation"
+  - "All signatures include full Python type hints"
+  - "Validation tools paired with analysis tools where applicable"
+  - "Some tools have null validation_tool - output validation handled by rq_inspect substance checks"
+  - "Congruence factor: common (reference), congruent, incongruent"
+  - "Treatment coding with common as reference (schema-neutral baseline)"
