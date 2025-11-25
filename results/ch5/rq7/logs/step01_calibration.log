@@ -1,0 +1,96 @@
+[START] Step 01: IRT Calibration with Omnibus Factor
+[LOAD] Loading VR item responses from RQ 5.1...
+[ERROR] [Errno 2] No such file or directory: '/home/etai/projects/REMEMVR/results/ch5/rq7/../../rq1/data/step00_irt_input.csv'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step01_irt_calibration_omnibus.py", line 152, in <module>
+    df_wide = pd.read_csv(input_path, encoding='utf-8')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+                   ^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/io/common.py", line 882, in get_handle
+    handle = open(handle, ioargs.mode)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/etai/projects/REMEMVR/results/ch5/rq7/../../rq1/data/step00_irt_input.csv'
+[START] Step 01: IRT Calibration with Omnibus Factor
+[LOAD] Loading VR item responses from RQ 5.1...
+[LOADED] step00_irt_input.csv (400 rows, 106 cols)
+[INFO] Found 105 VR item columns (TQ_* format)
+[TRANSFORM] Converting wide format to long format for IRT...
+[TRANSFORM] Long format: 42000 observations (0 missing values dropped)
+[VALIDATE] Score values confirmed binary: [np.int64(0), np.int64(1)]
+[CONFIG] Defining item groups for omnibus 'All' factor...
+[CONFIG] Omnibus factor 'All': 105 items
+[CONFIG] IRT model: 2PL, single factor 'All', max_iter=200, seed=42
+[ANALYSIS] Running IRT calibration with omnibus factor...
+[ANALYSIS] This may take 2-5 minutes...
+[ERROR] Missing required columns: ['UID', 'test']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step01_irt_calibration_omnibus.py", line 245, in <module>
+    df_theta, df_items = calibrate_irt(
+                         ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 472, in calibrate_irt
+    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_input_from_long(
+                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 67, in prepare_irt_input_from_long
+    raise ValueError(f"Missing required columns: {missing_cols}")
+ValueError: Missing required columns: ['UID', 'test']
+[START] Step 01: IRT Calibration with Omnibus Factor
+[LOAD] Loading VR item responses from RQ 5.1...
+[LOADED] step00_irt_input.csv (400 rows, 106 cols)
+[INFO] Found 105 VR item columns (TQ_* format)
+[TRANSFORM] Converting wide format to long format for IRT...
+[TRANSFORM] Long format: 42000 observations (0 missing values dropped)
+[VALIDATE] Score values confirmed binary: [np.int64(0), np.int64(1)]
+[TRANSFORM] Split composite_ID into UID and test columns
+[CONFIG] Defining item groups for omnibus 'All' factor...
+[CONFIG] Omnibus factor 'All': 105 items
+[CONFIG] IRT model: 2PL, single factor 'All', max_iter=200, seed=42
+[ANALYSIS] Running IRT calibration with omnibus factor...
+[ANALYSIS] This may take 2-5 minutes...
+[DONE] IRT calibration complete
+[PROCESS] Processing calibration outputs...
+[INFO] Theta scores: 400 rows, columns: ['UID', 'test', 'Theta_All']
+[ERROR] Missing expected theta columns: ['composite_ID', 'SE_All']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step01_irt_calibration_omnibus.py", line 279, in <module>
+    raise ValueError(f"Missing expected theta columns: {missing_cols}")
+ValueError: Missing expected theta columns: ['composite_ID', 'SE_All']
+[START] Step 01: IRT Calibration with Omnibus Factor
+[LOAD] Loading VR item responses from RQ 5.1...
+[LOADED] step00_irt_input.csv (400 rows, 106 cols)
+[INFO] Found 105 VR item columns (TQ_* format)
+[TRANSFORM] Converting wide format to long format for IRT...
+[TRANSFORM] Long format: 42000 observations (0 missing values dropped)
+[VALIDATE] Score values confirmed binary: [np.int64(0), np.int64(1)]
+[TRANSFORM] Split composite_ID into UID and test columns
+[CONFIG] Defining item groups for omnibus 'All' factor...
+[CONFIG] Omnibus factor 'All': 105 items
+[CONFIG] IRT model: 2PL, single factor 'All', max_iter=200, seed=42
+[ANALYSIS] Running IRT calibration with omnibus factor...
+[ANALYSIS] This may take 2-5 minutes...
+[START] Step 01: IRT Calibration with Omnibus Factor
+[LOAD] Loading VR item responses from RQ 5.1...
+[LOADED] step00_irt_input.csv (400 rows, 106 cols)
+[INFO] Found 105 VR item columns (TQ_* format)
+[TRANSFORM] Converting wide format to long format for IRT...
+[TRANSFORM] Long format: 42000 observations (0 missing values dropped)
+[VALIDATE] Score values confirmed binary: [np.int64(0), np.int64(1)]
+[TRANSFORM] Split composite_ID into UID and test columns
+[CONFIG] Defining item groups for omnibus 'All' factor...
+[CONFIG] Omnibus factor 'All': 105 items
+[CONFIG] IRT model: 2PL, single factor 'All', max_iter=200, seed=42
+[ANALYSIS] Running IRT calibration with omnibus factor...
+[ANALYSIS] This may take 2-5 minutes...

@@ -975,8 +975,8 @@ Use TSVR data to see the actual hours since VR for each px's scores
 **Analysis Specification:**
 
 1. **Data Preparation**
-   - Use theta scores from "All by Domain" analysis (RQ5.1)
-   - Load Age from dfData.csv (one value per UID)
+   - Use theta scores from analysis RQ5.1
+   - Load Age from dfData.csv (one value per UID column name 'age')
    - Merge Age with theta scores on UID
    - Grand-mean center Age (Age_c = Age - mean(Age))
    - Reshape to long format (Domain as factor variable: What/Where/When)
