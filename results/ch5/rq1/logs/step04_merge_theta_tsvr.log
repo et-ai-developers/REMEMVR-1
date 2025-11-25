@@ -32,13 +32,13 @@
   - Test sessions: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
   - Domains: ['what', 'when', 'where']
   - TSVR_hours range: [1.00, 246.24]
-  - theta range: [-3.0338, 3.8447]
-  - theta mean: 0.0365
-  - theta std: 1.0187
+  - theta range: [-2.4718, 2.5349]
+  - theta mean: 0.0461
+  - theta std: 0.8469
 
 [SUMMARY] Per-Domain Statistics:
-  - what: n=400, mean_theta=0.0515, std=1.0600
-  - where: n=400, mean_theta=0.0569, std=0.9812
-  - when: n=400, mean_theta=0.0010, std=1.0151
+  - what: n=400, mean_theta=-0.0072, std=0.8986
+  - where: n=400, mean_theta=0.0368, std=0.9319
+  - when: n=400, mean_theta=0.1087, std=0.6876
 
 [SUCCESS] Step 04 complete

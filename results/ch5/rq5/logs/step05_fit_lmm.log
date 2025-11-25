@@ -9,24 +9,24 @@ RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
 [FIT] Fitting candidate models...
 
   Fitting Linear model...
-    Fitted: AIC = 2698.79
-    Saved: step05_lmm_Linear.pkl
+    Loading existing model from step05_lmm_Linear.pkl
+    Loaded: AIC = 2698.79
 
   Fitting Quadratic model...
-    Fitted: AIC = 2691.55
-    Saved: step05_lmm_Quadratic.pkl
+    Loading existing model from step05_lmm_Quadratic.pkl
+    Loaded: AIC = 2691.55
 
   Fitting Log model...
-    Fitted: AIC = 2652.57
-    Saved: step05_lmm_Log.pkl
+    Loading existing model from step05_lmm_Log.pkl
+    Loaded: AIC = 2652.57
 
   Fitting Lin+Log model...
-    Fitted: AIC = 2674.50
-    Saved: step05_lmm_Lin+Log.pkl
+    Loading existing model from step05_lmm_Lin+Log.pkl
+    Loaded: AIC = 2674.50
 
   Fitting Quad+Log model...
-    Fitted: AIC = 2746.19
-    Saved: step05_lmm_Quad+Log.pkl
+    Loading existing model from step05_lmm_Quad+Log.pkl
+    Loaded: AIC = 2746.19
 
 [COMPARE] Creating AIC comparison table...
 

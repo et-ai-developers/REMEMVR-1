@@ -20,9 +20,9 @@
 [PARSED] Recognition adjustment: 0.2100
 [ANALYSIS] Computing observed means per paradigm x test...
 [INFO] Observed statistics computed for 12 paradigm x test combinations
-[INFO] free_recall: 4 test sessions, mean theta range [-0.407, 0.522]
-[INFO] cued_recall: 4 test sessions, mean theta range [-0.508, 0.517]
-[INFO] recognition: 4 test sessions, mean theta range [-0.424, 0.737]
+[INFO] free_recall: 4 test sessions, mean theta range [-0.390, 0.554]
+[INFO] cued_recall: 4 test sessions, mean theta range [-0.453, 0.635]
+[INFO] recognition: 4 test sessions, mean theta range [-0.498, 0.625]
 [ANALYSIS] Generating prediction grid...
 [INFO] Prediction grid: 50 points from 0 to 200 hours
 [ANALYSIS] Computing model predictions for each paradigm...

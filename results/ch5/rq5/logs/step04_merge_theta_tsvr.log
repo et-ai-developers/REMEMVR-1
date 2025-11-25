@@ -34,7 +34,7 @@ RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq5
 [PASS] congruent: 400 rows
 [PASS] incongruent: 400 rows
 [WARN] TSVR range [1.00, 246.24] outside expected [0, 170]
-[INFO] Theta range: [-2.070, 2.717]
+[INFO] Theta range: [-2.151, 2.335]
 [PASS] Unique UIDs: 100
 
 [SUCCESS] Step 04 complete (Merge Theta + TSVR)

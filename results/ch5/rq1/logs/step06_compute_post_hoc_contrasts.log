@@ -5,9 +5,9 @@
 [LOADED] step04_lmm_input.csv (1200 rows)
 [FIT] Re-fitting Log model (best by AIC)...
 [FITTED] Log model
-  - AIC: 3187.96
-  - BIC: 3238.86
-  - Log-Likelihood: -1583.98
+  - AIC: 2523.36
+  - BIC: 2574.26
+  - Log-Likelihood: -1251.68
   - Number of observations: 1200
   - Converged: True
 
@@ -22,6 +22,20 @@
   - Number of comparisons: 3
   - Bonferroni-corrected alpha: 0.0167
 
+============================================================
+POST-HOC PAIRWISE CONTRASTS (Decision D068)
+============================================================
+Family-wise alpha: 0.05
+Number of comparisons: 3
+Bonferroni-corrected alpha: 0.0167
+Detected reference level: What
+
+Results:
+  Significant (uncorrected alpha=0.05): 2/3
+  Significant (corrected alpha=0.0167): 2/3
+============================================================
+
+
 [DONE] Contrasts computed: 3 comparisons
 
 [SAVE] Saved contrasts: /home/etai/projects/REMEMVR/results/ch5/rq1/results/step06_post_hoc_contrasts.csv
@@ -29,11 +43,23 @@
   - Columns: ['comparison', 'beta', 'se', 'z', 'p_uncorrected', 'alpha_corrected', 'p_corrected', 'sig_uncorrected', 'sig_corrected']
 
 [RESULTS] Post-hoc contrast results:
-  Where-What: beta=0.0371, z=0.356, p_uncorr=0.7219, p_corr=1.0000 ns
-  When-What: beta=-0.4150, z=-3.978, p_uncorr=0.0001, p_corr=0.0002 *** (corrected)
-  When-Where: beta=-0.4522, z=-4.334, p_uncorr=0.0000, p_corr=0.0000 *** (corrected)
+  Where-What: beta=0.0733, z=0.957, p_uncorr=0.3386, p_corr=1.0000 ns
+  When-What: beta=-0.3144, z=-4.107, p_uncorr=0.0000, p_corr=0.0001 *** (corrected)
+  When-Where: beta=-0.3877, z=-5.064, p_uncorr=0.0000, p_corr=0.0000 *** (corrected)
 
 [ANALYSIS] Running compute_effect_sizes_cohens...
+
+============================================================
+EFFECT SIZES (Cohen's f²)
+============================================================
+
+Effect sizes computed for 5 fixed effects
+  Negligible (f²<0.02): 3
+  Small (0.02≤f²<0.15): 2
+  Medium (0.15≤f²<0.35): 0
+  Large (f²≥0.35): 0
+============================================================
+
 [DONE] Effect sizes computed: 5 effects
 
 [SAVE] Saved effect sizes: /home/etai/projects/REMEMVR/results/ch5/rq1/results/step06_effect_sizes.csv
@@ -41,11 +67,11 @@
   - Columns: ['effect', 'f_squared', 'interpretation']
 
 [RESULTS] Effect sizes (Cohen's f-squared):
-  C(Factor, Treatment('What'))[T.When]: f2=0.0132 (negligible)
-  C(Factor, Treatment('What'))[T.Where]: f2=0.0001 (negligible)
-  log_Days: f2=0.0624 (small)
-  log_Days:C(Factor, Treatment('What'))[T.When]: f2=0.0151 (negligible)
-  log_Days:C(Factor, Treatment('What'))[T.Where]: f2=0.0001 (negligible)
+  C(Factor, Treatment('What'))[T.When]: f2=0.0141 (negligible)
+  C(Factor, Treatment('What'))[T.Where]: f2=0.0008 (negligible)
+  log_Days: f2=0.1051 (small)
+  log_Days:C(Factor, Treatment('What'))[T.When]: f2=0.0389 (small)
+  log_Days:C(Factor, Treatment('What'))[T.Where]: f2=0.0002 (negligible)
 
 [VALIDATION] Running output validation checks...
   [PASS] Exactly 3 pairwise contrasts computed

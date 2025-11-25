@@ -22,7 +22,7 @@
 [VALIDATION] Running inline validation checks...
 [PASS] Row count == 1200
 [PASS] No missing TSVR values
-[PASS] Three paradigms present: {'recognition', 'cued_recall', 'free_recall'}
+[PASS] Three paradigms present: {'free_recall', 'cued_recall', 'recognition'}
 [PASS] 100 unique UIDs
 [WARN] TSVR range: 6 values outside 0-200 hours (min=1.00, max=246.24). This is expected with real participant data.
 [VALIDATION] All CRITICAL checks passed
@@ -34,11 +34,11 @@
   Test sessions: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
   Paradigms: ['free_recall', 'cued_recall', 'recognition']
   TSVR_hours: min=1.00, max=246.24, mean=64.95
-  Theta: min=-2.477, max=2.948, mean=0.044
+  Theta: min=-2.406, max=2.799, mean=0.045
 
 [SUMMARY] By Paradigm:
-  free_recall: n=400, theta_mean=0.030, theta_std=0.908
-  cued_recall: n=400, theta_mean=-0.001, theta_std=0.902
-  recognition: n=400, theta_mean=0.104, theta_std=0.983
+  free_recall: n=400, theta_mean=0.042, theta_std=0.899
+  cued_recall: n=400, theta_mean=0.063, theta_std=0.918
+  recognition: n=400, theta_mean=0.031, theta_std=0.965
 
 [SUCCESS] Step 04 complete

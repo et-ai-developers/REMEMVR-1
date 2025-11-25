@@ -3,18 +3,18 @@
 
 [LOAD] Loading input data...
 [LOADED] step04_lmm_input.csv (1200 rows)
-[LOADED] step03_item_parameters.csv (70 items)
+[LOADED] step03_item_parameters.csv (69 items)
 [MAPPED] Test values mapped: {1,2,3,4} -> {0,1,3,6}
 
 [COMPUTE] Computing domain-specific IRT parameters...
   Using columns: factor=factor, disc=a, diff=b
 [DONE] Domain parameters computed:
-  what: a=1.050, b=-1.232
-  when: a=1.378, b=1.862
-  where: a=0.833, b=0.112
+  what: a=1.043, b=-1.244
+  when: a=1.650, b=1.378
+  where: a=0.832, b=0.091
 
 [FIT] Fitting LMM model for predictions...
-  Model fitted: AIC = 3187.96
+  Model fitted: AIC = 2523.36
 
 [PREDICT] Generating predictions for each observation...
 [DONE] Predictions generated for 1200 observations
@@ -26,7 +26,7 @@
 
 [CONVERT] Transforming to probability scale (Decision D069)...
 [DONE] Probability conversion complete
-  Probability range: 0.003 - 0.991
+  Probability range: 0.023 - 0.981
 
 [SAVE] Saving plot data files...
 [SAVED] /home/etai/projects/REMEMVR/results/ch5/rq1/plots/step07_trajectory_theta_data.csv
@@ -62,6 +62,6 @@ Continuous TSVR: Individual-level data preserves real time variability
   - TSVR range: 1.0 - 246.2 hours
 
 [SUMMARY] Theta by domain:
-  what: n=400, theta mean=0.052, std=1.060
-  when: n=400, theta mean=0.001, std=1.015
-  where: n=400, theta mean=0.057, std=0.981
+  what: n=400, theta mean=-0.007, std=0.899
+  when: n=400, theta mean=0.109, std=0.688
+  where: n=400, theta mean=0.037, std=0.932

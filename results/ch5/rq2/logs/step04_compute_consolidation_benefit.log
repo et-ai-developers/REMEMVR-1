@@ -8,18 +8,18 @@
 [VERIFIED] All 3 domains present in both segments
 
 [COMPUTE] Computing consolidation benefit indices...
-  what: Early=-0.5072, Late=-0.0312, Benefit=-0.4760 (SE=0.1024)
-  where: Early=-0.4555, Late=-0.1068, Benefit=-0.3488 (SE=0.1024)
-  when: Early=-0.2084, Late=-0.0132, Benefit=-0.1952 (SE=0.1024)
+  what: Early=-0.4455, Late=-0.0686, Benefit=-0.3769 (SE=0.0764)
+  where: Early=-0.4222, Late=-0.0824, Benefit=-0.3398 (SE=0.0764)
+  when: Early=-0.3014, Late=-0.0056, Benefit=-0.2959 (SE=0.0764)
 
 [RANK] Ranking domains by consolidation benefit...
   Ranking interpretation:
     Rank 1 = Best consolidation benefit (least negative = least excess early forgetting)
     Rank 3 = Worst consolidation benefit (most negative = most excess early forgetting)
 
-  Rank 1: when (benefit=-0.1952)
-  Rank 2: where (benefit=-0.3488)
-  Rank 3: what (benefit=-0.4760)
+  Rank 1: when (benefit=-0.2959)
+  Rank 2: where (benefit=-0.3398)
+  Rank 3: what (benefit=-0.3769)
 
 [SAVE] Saving consolidation benefit indices to /home/etai/projects/REMEMVR/results/ch5/rq2/results/step04_consolidation_benefit.csv...
 [SAVED] step04_consolidation_benefit.csv (3 rows, 8 cols)
@@ -42,8 +42,8 @@ Interpretation:
   - Consolidation benefit: Early - Late (negative = more Early forgetting)
 
 Results:
-  when: benefit=-0.1952 [-0.3959, 0.0056] (non-significant)
-  where: benefit=-0.3488 [-0.5495, -0.1480] (significant)
-  what: benefit=-0.4760 [-0.6768, -0.2753] (significant)
+  when: benefit=-0.2959 [-0.4456, -0.1461] (significant)
+  where: benefit=-0.3398 [-0.4896, -0.1901] (significant)
+  what: benefit=-0.3769 [-0.5266, -0.2271] (significant)
 
 ============================================================

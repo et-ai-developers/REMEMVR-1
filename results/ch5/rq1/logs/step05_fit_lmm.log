@@ -1,3 +1,11 @@
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
 [START] Step 05: Fit LMM Trajectory Models
 ============================================================
 
@@ -17,21 +25,31 @@
   n_factors: 3 (what, where, when)
   reference_group: 'What' (treatment coding)
   groups: 'UID' (random effects grouping)
+Fitting Linear model...
+  Model saved to /home/etai/projects/REMEMVR/results/ch5/rq1/results/lmm_Linear.pkl
+Fitting Quadratic model...
+  Model saved to /home/etai/projects/REMEMVR/results/ch5/rq1/results/lmm_Quadratic.pkl
+Fitting Log model...
+  Model saved to /home/etai/projects/REMEMVR/results/ch5/rq1/results/lmm_Log.pkl
+Fitting Lin+Log model...
+  Model saved to /home/etai/projects/REMEMVR/results/ch5/rq1/results/lmm_Lin+Log.pkl
+Fitting Quad+Log model...
+  Model saved to /home/etai/projects/REMEMVR/results/ch5/rq1/results/lmm_Quad+Log.pkl
 [DONE] Model comparison complete
 
 [RESULTS] Best model: Log
-  AIC: 3187.96
-  BIC: 3238.86
-  Log-Likelihood: -1583.98
+  AIC: 2523.36
+  BIC: 2574.26
+  Log-Likelihood: -1251.68
 
 [SAVE] Saved AIC comparison: /home/etai/projects/REMEMVR/results/ch5/rq1/results/step05_lmm_model_comparison.csv
   5 models compared
   AIC Comparison Table:
-    Log: AIC=3187.96, delta=0.00, weight=0.619
-    Lin+Log: AIC=3189.18, delta=1.22, weight=0.336
-    Quadratic: AIC=3194.21, delta=6.25, weight=0.027
-    Quad+Log: AIC=3195.13, delta=7.16, weight=0.017
-    Linear: AIC=3219.40, delta=31.44, weight=0.000
+    Log: AIC=2523.36, delta=0.00, weight=0.917
+    Lin+Log: AIC=2528.39, delta=5.03, weight=0.074
+    Quad+Log: AIC=2532.77, delta=9.41, weight=0.008
+    Quadratic: AIC=2537.55, delta=14.18, weight=0.001
+    Linear: AIC=2581.09, delta=57.73, weight=0.000
 [SAVE] Saved model summary: /home/etai/projects/REMEMVR/results/ch5/rq1/results/step05_lmm_model_summary.txt
 [SAVE] Saved fitted model: /home/etai/projects/REMEMVR/results/ch5/rq1/data/step05_lmm_fitted_model.pkl
 
@@ -41,7 +59,7 @@
 
 [VALIDATION] Additional checks:
   Converged models: 5/5
-  Random effects variance: 0.2644
+  Random effects variance: 0.2923
   Fixed effects: All 9 estimates are finite
 
 ============================================================
@@ -55,4 +73,4 @@ Outputs:
 
 Best Model: Log
   Formula: Ability ~ Days * C(Factor, Treatment('What'))
-  AIC: 3187.96
+  AIC: 2523.36

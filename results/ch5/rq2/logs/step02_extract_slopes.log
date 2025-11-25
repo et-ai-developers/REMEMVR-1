@@ -10,21 +10,21 @@
 [DONE] Fixed effects extracted: 15 terms
 
 Fixed Effects:
-  Intercept: 0.7010 (SE=0.0950, p=0.0000)*
-  C(Segment, Treatment('Early'))[T.Late]: -0.9170 (SE=0.1310, p=0.0000)*
-  C(domain, Treatment('what'))[T.when]: -0.4560 (SE=0.1170, p=0.0000)*
-  C(domain, Treatment('what'))[T.where]: -0.0220 (SE=0.1170, p=0.8480)
-  C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: 0.5850 (SE=0.1840, p=0.0010)*
-  C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: 0.1930 (SE=0.1840, p=0.2940)
-  Days_within: -0.5070 (SE=0.0950, p=0.0000)*
-  Days_within:C(Segment, Treatment('Early'))[T.Late]: 0.4760 (SE=0.1010, p=0.0000)*
-  Days_within:C(domain, Treatment('what'))[T.when]: 0.2990 (SE=0.1330, p=0.0240)*
-  Days_within:C(domain, Treatment('what'))[T.where]: 0.0520 (SE=0.1330, p=0.6970)
-  Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: -0.2810 (SE=0.1420, p=0.0480)*
-  Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: -0.1270 (SE=0.1420, p=0.3700)
-  Group Var: 0.2040 (SE=0.0570, p=nan)
-  Group x Days_within Cov: -0.0090 (SE=0.0150, p=nan)
-  Days_within Var: 0.0110 (SE=0.0080, p=nan)
+  Intercept: 0.6060 (SE=0.0780, p=0.0000)*
+  C(Segment, Treatment('Early'))[T.Late]: -0.7990 (SE=0.0970, p=0.0000)*
+  C(domain, Treatment('what'))[T.when]: -0.2570 (SE=0.0870, p=0.0030)*
+  C(domain, Treatment('what'))[T.where]: 0.0530 (SE=0.0870, p=0.5470)
+  C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: 0.5160 (SE=0.1370, p=0.0000)*
+  C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: -0.0010 (SE=0.1370, p=0.9960)
+  Days_within: -0.4450 (SE=0.0710, p=0.0000)*
+  Days_within:C(Segment, Treatment('Early'))[T.Late]: 0.3770 (SE=0.0750, p=0.0000)*
+  Days_within:C(domain, Treatment('what'))[T.when]: 0.1440 (SE=0.0990, p=0.1440)
+  Days_within:C(domain, Treatment('what'))[T.where]: 0.0230 (SE=0.0990, p=0.8130)
+  Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]: -0.0810 (SE=0.1060, p=0.4430)
+  Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]: -0.0370 (SE=0.1060, p=0.7260)
+  Group Var: 0.2250 (SE=0.0690, p=nan)
+  Group x Days_within Cov: -0.0140 (SE=0.0150, p=nan)
+  Days_within Var: 0.0080 (SE=0.0060, p=nan)
 
 [ANALYSIS] Computing segment-domain slopes via linear combinations...
 [DEBUG] days_within: Days_within
@@ -36,12 +36,12 @@ Fixed Effects:
 [DONE] Slopes computed: 6 segment-domain combinations
 
 Segment-Domain Slopes (theta change per day):
-  Early-what: -0.5072 (SE=0.0950, 95% CI [-0.6935, -0.3209])
-  Early-where: -0.4555 (SE=0.0950, 95% CI [-0.6418, -0.2693])
-  Early-when: -0.2084 (SE=0.0950, 95% CI [-0.3946, -0.0221])
-  Late-what: -0.0312 (SE=0.0382, 95% CI [-0.1061, 0.0438])
-  Late-where: -0.1068 (SE=0.0382, 95% CI [-0.1817, -0.0318])
-  Late-when: -0.0132 (SE=0.0382, 95% CI [-0.0881, 0.0617])
+  Early-what: -0.4455 (SE=0.0708, 95% CI [-0.5842, -0.3067])
+  Early-where: -0.4222 (SE=0.0708, 95% CI [-0.5610, -0.2834])
+  Early-when: -0.3014 (SE=0.0708, 95% CI [-0.4402, -0.1627])
+  Late-what: -0.0686 (SE=0.0287, 95% CI [-0.1248, -0.0123])
+  Late-where: -0.0824 (SE=0.0287, 95% CI [-0.1386, -0.0261])
+  Late-when: -0.0056 (SE=0.0287, 95% CI [-0.0618, 0.0507])
 
 [SAVE] Saving fixed effects table...
 [SAVED] /home/etai/projects/REMEMVR/results/ch5/rq2/results/step02_fixed_effects.csv (15 rows)
@@ -51,9 +51,9 @@ Segment-Domain Slopes (theta change per day):
 [VALIDATION] Running inline validation checks...
   [PASS] Fixed effects table has 15 rows (>= 7 required)
   [PASS] Slope table has 6 rows (6 required)
-  [PASS] All segments present: {'Early', 'Late'}
-  [PASS] All domains present: {'where', 'when', 'what'}
-  [PASS] All SE values > 0 (min=0.0382)
+  [PASS] All segments present: {'Late', 'Early'}
+  [PASS] All domains present: {'what', 'where', 'when'}
+  [PASS] All SE values > 0 (min=0.0287)
   [PASS] CI structure valid (CI_lower < slope < CI_upper) for all rows
 
 [VALIDATION PASSED] All checks passed

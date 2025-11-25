@@ -10,37 +10,6 @@ RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq3
   Fixed effects: 9 terms
 
 [ANALYSIS] Computing pairwise contrasts (Decision D068)...
-  Comparisons: ['cued_recall-free_recall', 'recognition-free_recall', 'recognition-cued_recall']
-  Family-wise alpha: 0.05
-  Bonferroni-corrected alpha: 0.0167
-
-[ERROR] 'sig_uncorrected'
-[TRACEBACK] Full error details:
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/results/ch5/rq3/code/step06_compute_post_hoc_contrasts.py", line 197, in <module>
-    contrasts = compute_contrasts_pairwise(
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/tools/analysis_lmm.py", line 828, in compute_contrasts_pairwise
-    print(f"  Significant (uncorrected alpha=0.05): {df_contrasts['sig_uncorrected'].sum()}/{k}")
-                                                     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
-    indexer = self.columns.get_loc(key)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/range.py", line 417, in get_loc
-    raise KeyError(key)
-KeyError: 'sig_uncorrected'
-[START] Step 06: Compute Post-hoc Pairwise Contrasts
-RQ Directory: /home/etai/projects/REMEMVR/results/ch5/rq3
-
-[LOAD] Loading best LMM model from Step 5...
-[LOADED] Best LMM model from /home/etai/projects/REMEMVR/results/ch5/rq3/data/step05_lmm_fitted_model.pkl
-  AIC: 2346.60
-  N observations: 1200
-  N groups: 100
-[LOADED] Fixed effects reference from /home/etai/projects/REMEMVR/results/ch5/rq3/data/step05_fixed_effects.csv
-  Fixed effects: 9 terms
-
-[ANALYSIS] Computing pairwise contrasts (Decision D068)...
   Comparisons: ['Cued_Recall-Free_Recall', 'Recognition-Free_Recall', 'Recognition-Cued_Recall']
   Family-wise alpha: 0.05
   Bonferroni-corrected alpha: 0.0167
@@ -85,6 +54,18 @@ Results:
   Significant (Bonferroni): 2/3
 
 [ANALYSIS] Computing effect sizes (Cohen's f-squared)...
+
+============================================================
+EFFECT SIZES (Cohen's f²)
+============================================================
+
+Effect sizes computed for 5 fixed effects
+  Negligible (f²<0.02): 4
+  Small (0.02≤f²<0.15): 1
+  Medium (0.15≤f²<0.35): 0
+  Large (f²≥0.35): 0
+============================================================
+
 [DONE] Effect sizes computed
   Total effects: 5
 

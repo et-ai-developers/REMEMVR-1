@@ -2,27 +2,6 @@
 ============================================================
 
 [LOAD] Loading input data...
-
-[ERROR] 'NoneType' object has no attribute 'f_locals'
-[TRACEBACK] Full error details:
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/results/ch5/rq2/code/step03_compute_contrasts.py", line 325, in <module>
-    lmm_model = pickle.load(f)
-                ^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/data.py", line 112, in __setstate__
-    _, design = dmatrices(d['formula'], data, eval_env=depth,
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/highlevel.py", line 316, in dmatrices
-    eval_env = EvalEnvironment.capture(eval_env, reference=1)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/eval.py", line 242, in capture
-    [frame.f_locals, frame.f_globals],
-     ^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'f_locals'
-[START] Step 03: Compute Planned Contrasts (Decision D068)
-============================================================
-
-[LOAD] Loading input data...
 [LOADED] data/step01_piecewise_lmm_model.pkl
 [LOADED] results/step02_segment_domain_slopes.csv (6 rows)
 [VALIDATION] Slopes file has all required columns
@@ -39,18 +18,30 @@ Bonferroni-corrected alpha: 0.0083
 [DONE] Computed 6 contrasts
 
 Results:
-  Significant (uncorrected alpha=0.05): 1/6
+  Significant (uncorrected alpha=0.05): 0/6
   Significant (corrected alpha=0.0083): 0/6
 
 [DETAILS] Contrast estimates:
-  where-what_early: beta=0.0517, z=0.38, p=0.7007 
-  when-what_early: beta=0.2988, z=2.22, p=0.0262 *
-  where-what_late: beta=-0.0756, z=-1.40, p=0.1620 
-  when-what_late: beta=0.0180, z=0.33, p=0.7397 
-  where_slope_change-what_slope_change: beta=-0.1273, z=-0.88, p=0.3796 
-  when_slope_change-what_slope_change: beta=-0.2809, z=-1.94, p=0.0525 
+  where-what_early: beta=0.0233, z=0.23, p=0.8164 
+  when-what_early: beta=0.1440, z=1.44, p=0.1504 
+  where-what_late: beta=-0.0138, z=-0.34, p=0.7336 
+  when-what_late: beta=0.0630, z=1.55, p=0.1205 
+  where_slope_change-what_slope_change: beta=-0.0371, z=-0.34, p=0.7316 
+  when_slope_change-what_slope_change: beta=-0.0810, z=-0.75, p=0.4535 
 
 [ANALYSIS] Computing effect sizes (Cohen's f-squared)...
+
+============================================================
+EFFECT SIZES (Cohen's f²)
+============================================================
+
+Effect sizes computed for 11 fixed effects
+  Negligible (f²<0.02): 8
+  Small (0.02≤f²<0.15): 3
+  Medium (0.15≤f²<0.35): 0
+  Large (f²≥0.35): 0
+============================================================
+
 [DONE] Computed effect sizes for 11 terms
 
 [SAVE] Saving outputs...
@@ -71,16 +62,16 @@ SUMMARY
 ============================================================
 
 Contrasts (sorted by p-value):
-  [sig] when-what_early: beta=0.2988, p=0.0262
-  [ns] when_slope_change-what_slope_change: beta=-0.2809, p=0.0525
-  [ns] where-what_late: beta=-0.0756, p=0.1620
-  [ns] where_slope_change-what_slope_change: beta=-0.1273, p=0.3796
-  [ns] where-what_early: beta=0.0517, p=0.7007
-  [ns] when-what_late: beta=0.0180, p=0.7397
+  [ns] when-what_late: beta=0.0630, p=0.1205
+  [ns] when-what_early: beta=0.1440, p=0.1504
+  [ns] when_slope_change-what_slope_change: beta=-0.0810, p=0.4535
+  [ns] where_slope_change-what_slope_change: beta=-0.0371, p=0.7316
+  [ns] where-what_late: beta=-0.0138, p=0.7336
+  [ns] where-what_early: beta=0.0233, p=0.8164
 
 Effect size distribution:
-  negligible: 9 terms
-  small: 2 terms
+  negligible: 8 terms
+  small: 3 terms
 
 ============================================================
 [SUCCESS] Step 03 complete

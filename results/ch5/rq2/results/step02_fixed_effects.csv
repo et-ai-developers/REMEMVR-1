@@ -1,0 +1,16 @@
+Term,Coef,Std_Err,z,P_value,CI_lower,CI_upper
+Intercept,0.606,0.078,7.775,0.0,0.454,0.759
+"C(Segment, Treatment('Early'))[T.Late]",-0.799,0.097,-8.21,0.0,-0.99,-0.609
+"C(domain, Treatment('what'))[T.when]",-0.257,0.087,-2.952,0.003,-0.428,-0.087
+"C(domain, Treatment('what'))[T.where]",0.053,0.087,0.603,0.547,-0.118,0.224
+"C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]",0.516,0.137,3.776,0.0,0.248,0.784
+"C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]",-0.001,0.137,-0.005,0.996,-0.269,0.267
+Days_within,-0.445,0.071,-6.291,0.0,-0.584,-0.307
+"Days_within:C(Segment, Treatment('Early'))[T.Late]",0.377,0.075,5.0,0.0,0.229,0.525
+"Days_within:C(domain, Treatment('what'))[T.when]",0.144,0.099,1.461,0.144,-0.049,0.337
+"Days_within:C(domain, Treatment('what'))[T.where]",0.023,0.099,0.236,0.813,-0.17,0.216
+"Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]",-0.081,0.106,-0.767,0.443,-0.288,0.126
+"Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]",-0.037,0.106,-0.351,0.726,-0.244,0.17
+Group Var,0.225,0.069,,,,
+Group x Days_within Cov,-0.014,0.015,,,,
+Days_within Var,0.008,0.006,,,,

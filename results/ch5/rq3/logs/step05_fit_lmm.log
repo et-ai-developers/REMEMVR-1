@@ -18,6 +18,16 @@
   n_factors: 3 (free_recall, cued_recall, recognition)
   reference_group: 'Free_Recall' (treatment coding)
   groups: 'UID' (random effects grouping)
+Fitting Linear model...
+  Loading existing model from /home/etai/projects/REMEMVR/results/ch5/rq3/data/lmm_Linear.pkl
+Fitting Quadratic model...
+  Loading existing model from /home/etai/projects/REMEMVR/results/ch5/rq3/data/lmm_Quadratic.pkl
+Fitting Log model...
+  Loading existing model from /home/etai/projects/REMEMVR/results/ch5/rq3/data/lmm_Log.pkl
+Fitting Lin+Log model...
+  Loading existing model from /home/etai/projects/REMEMVR/results/ch5/rq3/data/lmm_Lin+Log.pkl
+Fitting Quad+Log model...
+  Loading existing model from /home/etai/projects/REMEMVR/results/ch5/rq3/data/lmm_Quad+Log.pkl
 [DONE] Model comparison complete
 
 [RESULTS] Best model: Log

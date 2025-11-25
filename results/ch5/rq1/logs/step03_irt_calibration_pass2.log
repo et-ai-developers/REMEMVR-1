@@ -23,3 +23,35 @@ Step 03: IRT Calibration Pass 2 (Purified Items - FINAL)
 [ANALYSIS] Config: factors=['What', 'Where', 'When'], correlated=True
 [ANALYSIS] Device: cpu, seed: 42
 [ANALYSIS] Items: 69 (purified)
+[DONE] IRT calibration complete
+[DONE] Theta scores shape: (400, 5)
+[DONE] Item parameters shape: (69, 6)
+[SAVE] Formatting and saving FINAL item parameters...
+[SAVED] step03_item_parameters.csv (69 items)
+[SUMMARY] Item parameters (Pass 2 - FINAL):
+[SUMMARY]   Discrimination range: 0.389 - 3.683
+[SUMMARY]   Difficulty range: -2.625 - 3.077
+[SUMMARY]   what items: 19
+[SUMMARY]   where items: 45
+[SUMMARY]   when items: 5
+[SAVE] Formatting and saving FINAL theta scores...
+[SAVED] step03_theta_scores.csv (400 observations)
+[SUMMARY] Theta scores (Pass 2 - FINAL):
+[SUMMARY]   theta_what: mean=-0.007, std=0.899
+[SUMMARY]   theta_where: mean=0.037, std=0.932
+[SUMMARY]   theta_when: mean=0.109, std=0.688
+[VALIDATION] Running validate_irt_convergence...
+[VALIDATION] Converged: True
+[VALIDATION] Message: Model converged successfully
+[VALIDATION] Additional parameter checks (D039 bounds):
+[VALIDATION]   Discrimination in [0.4, 10.0]: False (actual: [0.389, 3.683])
+[VALIDATION]   Difficulty in [-3.0, 3.0]: False (actual: [-2.625, 3.077])
+[VALIDATION]   No NaN in parameters: True (0 items with NaN)
+[VALIDATION]   No NaN in theta scores: True (0 observations with NaN)
+[WARN] Some validation checks failed - review item parameters
+[SUCCESS] Step 03: IRT Calibration Pass 2 (FINAL) complete
+
+Next: Step 04 will merge theta scores with TSVR for LMM input
+Outputs saved to data/ (FINAL):
+  - data/step03_item_parameters.csv
+  - data/step03_theta_scores.csv
