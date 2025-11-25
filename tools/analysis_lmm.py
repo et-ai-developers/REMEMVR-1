@@ -21,6 +21,246 @@ import warnings
 # DATA PREPARATION
 # ============================================================================
 
+def assign_piecewise_segments(
+    df: pd.DataFrame,
+    tsvr_col: str = 'TSVR_hours',
+    early_cutoff_hours: float = 24.0
+) -> pd.DataFrame:
+    """
+    Assign piecewise segments (Early/Late) and compute Days_within for piecewise LMM.
+
+    Implements piecewise regression design where forgetting trajectory is divided
+    into two temporal segments with distinct processes:
+    - Early segment (0-24h): Consolidation-dominated phase (includes one night's sleep)
+    - Late segment (24-168h): Decay-dominated phase
+
+    Parameters
+    ----------
+    df : DataFrame
+        Input data with TSVR time variable (hours since encoding)
+        Must contain columns: [test, {tsvr_col}]
+    tsvr_col : str, default='TSVR_hours'
+        Name of TSVR column (time since VR in hours)
+    early_cutoff_hours : float, default=24.0
+        Cutoff defining Early segment boundary (hours)
+        Default 24h = one night's sleep (consolidation window)
+
+    Returns
+    -------
+    DataFrame
+        Copy of input with added columns:
+        - Segment : str, 'Early' or 'Late'
+        - Days_within : float, time elapsed within segment (in days)
+
+    Notes
+    -----
+    Days_within calculation:
+    - Early segment: Days_within = TSVR_hours / 24 (starts at Day 0)
+    - Late segment: Days_within = (TSVR_hours - min_Late_TSVR) / 24 (resets at segment start)
+
+    This allows segment-specific slope estimation in piecewise LMM.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({
+    ...     'UID': ['P001'] * 4,
+    ...     'test': [1, 2, 3, 4],
+    ...     'TSVR_hours': [0.0, 24.0, 72.0, 144.0],
+    ...     'theta': [0.5, 0.3, 0.1, -0.2]
+    ... })
+    >>> result = assign_piecewise_segments(df)
+    >>> result[['test', 'Segment', 'Days_within']]
+       test Segment  Days_within
+    0     1   Early          0.0
+    1     2   Early          1.0
+    2     3    Late          0.0
+    3     4    Late          3.0
+    """
+    result = df.copy()
+
+    # Assign segments based on TSVR cutoff
+    result['Segment'] = result[tsvr_col].apply(
+        lambda x: 'Early' if x <= early_cutoff_hours else 'Late'
+    )
+
+    # Find minimum TSVR for Late segment (for resetting Days_within)
+    late_tsvr = result[result['Segment'] == 'Late'][tsvr_col]
+    min_late_tsvr = late_tsvr.min() if len(late_tsvr) > 0 else 0.0
+
+    # Compute Days_within for each segment
+    def compute_days_within(row):
+        if row['Segment'] == 'Early':
+            return row[tsvr_col] / 24.0
+        else:  # Late
+            return (row[tsvr_col] - min_late_tsvr) / 24.0
+
+    result['Days_within'] = result.apply(compute_days_within, axis=1)
+
+    return result
+
+
+def extract_segment_slopes_from_lmm(
+    lmm_result: MixedLMResults,
+    segment_col: str = 'Segment',
+    factor_col: str = 'Congruence',
+    segment_ref: str = 'Early',
+    factor_ref: str = 'Common'
+) -> pd.DataFrame:
+    """
+    Extract segment-factor specific slopes from piecewise LMM via delta method.
+
+    For a piecewise LMM with 3-way interaction (Days_within × Segment × Factor),
+    extracts the 6 slope estimates (2 segments × 3 factor levels) using linear
+    combinations of fixed effects coefficients. Standard errors computed via
+    delta method (variance propagation).
+
+    Parameters
+    ----------
+    lmm_result : MixedLMResults
+        Fitted piecewise LMM from statsmodels
+    segment_col : str, default='Segment'
+        Name of segment variable ('Early'/'Late')
+    factor_col : str, default='Congruence'
+        Name of factor variable (e.g., 'Congruence', 'domain')
+    segment_ref : str, default='Early'
+        Reference level for segment (treatment coding)
+    factor_ref : str, default='Common'
+        Reference level for factor (treatment coding)
+
+    Returns
+    -------
+    DataFrame
+        6 rows with columns: segment, factor, slope, se, CI_lower, CI_upper
+
+    Notes
+    -----
+    Slope formulas (assuming treatment coding with Early and Common as refs):
+    - Ref-Ref (Early-Common): β[Days_within]
+    - Ref-Level1 (Early-Level1): β[Days_within] + β[Days_within:Factor[T.Level1]]
+    - Ref-Level2 (Early-Level2): β[Days_within] + β[Days_within:Factor[T.Level2]]
+    - Late-Ref (Late-Common): β[Days_within] + β[Days_within:Segment[T.Late]]
+    - Late-Level1: sum of 4 terms (main + 2 two-ways + 1 three-way)
+    - Late-Level2: sum of 4 terms (main + 2 two-ways + 1 three-way)
+
+    Delta method used for SE propagation: Var(aX + bY) = a²Var(X) + b²Var(Y) + 2abCov(X,Y)
+
+    Examples
+    --------
+    >>> result = fit_piecewise_lmm(...)  # 3-way interaction model
+    >>> slopes = extract_segment_slopes_from_lmm(result)
+    >>> slopes
+      segment     factor     slope        se  CI_lower  CI_upper
+    0   Early     Common -0.192000  0.023000 -0.237080 -0.146920
+    1   Early  Congruent -0.145000  0.025000 -0.194000 -0.096000
+    2   Early Incongruent -0.221000  0.024000 -0.268040 -0.173960
+    3    Late     Common -0.051000  0.015000 -0.080400 -0.021600
+    4    Late  Congruent -0.048000  0.016000 -0.079360 -0.016640
+    5    Late Incongruent -0.055000  0.015500 -0.085380 -0.024620
+    """
+    params = lmm_result.params
+    cov_matrix = lmm_result.cov_params()
+    coef_names = list(params.index)
+
+    # Find coefficient names (verbose treatment coding names from statsmodels)
+    def find_coef_name(must_include: List[str], must_exclude: List[str] = []) -> str:
+        """Find single coefficient name matching inclusion/exclusion patterns."""
+        matches = [
+            name for name in coef_names
+            if all(pattern in name for pattern in must_include)
+            and all(pattern not in name for pattern in must_exclude)
+        ]
+        return matches[0] if len(matches) == 1 else None
+
+    # Get factor levels from model (excluding reference level)
+    factor_levels = []
+    for name in coef_names:
+        if factor_col in name and '[T.' in name:
+            # Extract level name from pattern like "C(Congruence, Treatment('Common'))[T.Congruent]"
+            level = name.split('[T.')[-1].split(']')[0]
+            if level not in factor_levels:
+                factor_levels.append(level)
+
+    # Base coefficient
+    days_within_coef = 'Days_within'
+
+    # Two-way interactions
+    days_segment = find_coef_name(['Days_within', segment_col, 'Late'], [factor_col])
+
+    # Find factor interaction coefficients
+    days_factor_coefs = {}
+    for level in factor_levels:
+        coef = find_coef_name(['Days_within', factor_col, level], [segment_col])
+        if coef:
+            days_factor_coefs[level] = coef
+
+    # Three-way interactions
+    days_seg_factor_coefs = {}
+    for level in factor_levels:
+        coef = find_coef_name(['Days_within', segment_col, 'Late', level])
+        if coef:
+            days_seg_factor_coefs[level] = coef
+
+    # Helper function to compute slope with delta method SE
+    def compute_slope_with_se(coef_list: List[str]) -> Tuple[float, float]:
+        """Compute linear combination slope and SE via delta method."""
+        slope = sum(params[c] for c in coef_list)
+
+        # Variance via delta method
+        variance = 0.0
+        for i, c1 in enumerate(coef_list):
+            for j, c2 in enumerate(coef_list):
+                variance += cov_matrix.loc[c1, c2]
+
+        se = np.sqrt(variance)
+        return slope, se
+
+    # Compute 6 slopes
+    results = []
+
+    # Early segment (reference)
+    for level in [factor_ref] + factor_levels:
+        if level == factor_ref:
+            coefs = [days_within_coef]
+        else:
+            coefs = [days_within_coef, days_factor_coefs[level]]
+
+        slope, se = compute_slope_with_se(coefs)
+        results.append({
+            'segment': segment_ref,
+            'factor': level,
+            'slope': slope,
+            'se': se,
+            'CI_lower': slope - 1.96 * se,
+            'CI_upper': slope + 1.96 * se
+        })
+
+    # Late segment
+    for level in [factor_ref] + factor_levels:
+        if level == factor_ref:
+            # Late-Ref: Days_within + Days_within:Segment[Late]
+            coefs = [days_within_coef, days_segment]
+        else:
+            # Late-Level: Days_within + Segment + Factor + Segment:Factor
+            coefs = [
+                days_within_coef,
+                days_segment,
+                days_factor_coefs[level],
+                days_seg_factor_coefs[level]
+            ]
+
+        slope, se = compute_slope_with_se(coefs)
+        results.append({
+            'segment': 'Late',
+            'factor': level,
+            'slope': slope,
+            'se': se,
+            'CI_lower': slope - 1.96 * se,
+            'CI_upper': slope + 1.96 * se
+        })
+
+    return pd.DataFrame(results)
+
+
 def prepare_lmm_input_from_theta(
     theta_scores: pd.DataFrame,
     factors: Optional[list] = None
@@ -1088,6 +1328,8 @@ def fit_lmm_trajectory_tsvr(
 
 
 __all__ = [
+    'assign_piecewise_segments',
+    'extract_segment_slopes_from_lmm',
     'prepare_lmm_input_from_theta',
     'configure_candidate_models',
     'fit_lmm_trajectory',

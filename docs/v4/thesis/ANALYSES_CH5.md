@@ -668,6 +668,9 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - From results/ch5/rq1/data/step00_irt_input.csv
+
 1. **Run IRT Analysis**
    - Execute IRT pipeline for "All" analysis set (single omnibus factor)
    - Use p1_med, 2-category GRM

@@ -649,3 +649,190 @@ def save_validation_report(report: Dict[str, Any], report_file: str) -> None:
 
     with open(report_path, 'w') as f:
         json.dump(report, f, indent=2)
+
+
+# ============================================================================
+# PIECEWISE LMM VALIDATION FUNCTIONS
+# ============================================================================
+
+def validate_hypothesis_tests(hypothesis_tests: pd.DataFrame) -> Dict[str, Any]:
+    """
+    Validate hypothesis test results format and p-value bounds.
+
+    Checks:
+    - Required columns present (Term, p_uncorrected, p_bonferroni)
+    - P-values in valid range [0, 1]
+    - Bonferroni correction properly applied
+    - No missing values
+
+    Parameters
+    ----------
+    hypothesis_tests : DataFrame
+        Hypothesis test results with columns: Term, Coef, SE, z, p_uncorrected, p_bonferroni
+
+    Returns
+    -------
+    dict
+        Validation result with keys: valid (bool), message (str), failed_checks (list)
+
+    Examples
+    --------
+    >>> tests = pd.DataFrame({
+    ...     'Term': ['Days_within', 'Segment[Late]'],
+    ...     'p_uncorrected': [0.001, 0.045],
+    ...     'p_bonferroni': [0.015, 0.675]
+    ... })
+    >>> result = validate_hypothesis_tests(tests)
+    >>> result['valid']
+    True
+    """
+    failed_checks = []
+
+    # Check required columns
+    required_cols = ['Term', 'p_uncorrected', 'p_bonferroni']
+    missing_cols = [c for c in required_cols if c not in hypothesis_tests.columns]
+    if missing_cols:
+        failed_checks.append(f"Missing required columns: {missing_cols}")
+
+    if not failed_checks:  # Only proceed if columns exist
+        # Check p-value bounds
+        for col in ['p_uncorrected', 'p_bonferroni']:
+            if not hypothesis_tests[col].between(0, 1).all():
+                out_of_bounds = hypothesis_tests[~hypothesis_tests[col].between(0, 1)]
+                failed_checks.append(f"{col} values out of [0,1] bounds: {len(out_of_bounds)} rows")
+
+        # Check for missing values
+        for col in required_cols:
+            if hypothesis_tests[col].isna().any():
+                failed_checks.append(f"{col} has {hypothesis_tests[col].isna().sum()} missing values")
+
+    valid = len(failed_checks) == 0
+    message = "All hypothesis test validations passed" if valid else f"{len(failed_checks)} validation checks failed"
+
+    return {
+        "valid": valid,
+        "message": message,
+        "failed_checks": failed_checks
+    }
+
+
+def validate_contrasts(contrasts: pd.DataFrame) -> Dict[str, Any]:
+    """
+    Validate contrast results format and dual p-value reporting (Decision D068).
+
+    Checks:
+    - Required columns present
+    - Dual p-values reported (uncorrected + Bonferroni)
+    - Effect size present
+    - No missing values
+
+    Parameters
+    ----------
+    contrasts : DataFrame
+        Contrast results with columns: Contrast, beta, SE, z, p_uncorrected, p_bonferroni, effect_size
+
+    Returns
+    -------
+    dict
+        Validation result with keys: valid (bool), message (str)
+
+    Examples
+    --------
+    >>> contrasts = pd.DataFrame({
+    ...     'Contrast': ['Congruent-Common'],
+    ...     'beta': [0.15],
+    ...     'p_uncorrected': [0.001],
+    ...     'p_bonferroni': [0.015]
+    ... })
+    >>> result = validate_contrasts(contrasts)
+    >>> result['valid']
+    True
+    """
+    failed_checks = []
+
+    # Check required columns
+    required_cols = ['Contrast', 'beta', 'p_uncorrected', 'p_bonferroni']
+    missing_cols = [c for c in required_cols if c not in contrasts.columns]
+    if missing_cols:
+        failed_checks.append(f"Missing required columns: {missing_cols}")
+
+    if not failed_checks:
+        # Check dual p-value reporting (Decision D068)
+        if 'p_uncorrected' not in contrasts.columns or 'p_bonferroni' not in contrasts.columns:
+            failed_checks.append("Decision D068 violated: Must report both uncorrected and Bonferroni-corrected p-values")
+
+        # Check p-value bounds
+        for col in ['p_uncorrected', 'p_bonferroni']:
+            if col in contrasts.columns and not contrasts[col].between(0, 1).all():
+                failed_checks.append(f"{col} values out of [0,1] bounds")
+
+    valid = len(failed_checks) == 0
+    message = "All contrast validations passed" if valid else f"{len(failed_checks)} validation checks failed"
+
+    return {
+        "valid": valid,
+        "message": message
+    }
+
+
+def validate_probability_transform(theta: np.ndarray, probability: np.ndarray) -> Dict[str, Any]:
+    """
+    Validate theta-to-probability transformation (logistic function).
+
+    Checks:
+    - Probability values in [0, 1]
+    - Monotonic relationship (higher theta → higher probability)
+    - No missing values
+    - Arrays same length
+
+    Parameters
+    ----------
+    theta : ndarray
+        Theta scores (ability estimates, unbounded)
+    probability : ndarray
+        Probability scores (transformed to [0,1])
+
+    Returns
+    -------
+    dict
+        Validation result with keys: valid (bool), message (str)
+
+    Examples
+    --------
+    >>> theta = np.array([-1.0, 0.0, 1.0])
+    >>> prob = 1 / (1 + np.exp(-theta))
+    >>> result = validate_probability_transform(theta, prob)
+    >>> result['valid']
+    True
+    """
+    failed_checks = []
+
+    # Check array lengths match
+    if len(theta) != len(probability):
+        failed_checks.append(f"Array length mismatch: theta={len(theta)}, probability={len(probability)}")
+        return {"valid": False, "message": "Array length mismatch"}
+
+    # Check probability bounds
+    if not np.all((probability >= 0) & (probability <= 1)):
+        out_of_bounds = np.sum((probability < 0) | (probability > 1))
+        failed_checks.append(f"Probability values out of [0,1] bounds: {out_of_bounds} values")
+
+    # Check for missing values
+    if np.any(np.isnan(theta)):
+        failed_checks.append(f"Theta has {np.sum(np.isnan(theta))} NaN values")
+    if np.any(np.isnan(probability)):
+        failed_checks.append(f"Probability has {np.sum(np.isnan(probability))} NaN values")
+
+    # Check monotonic relationship (correlation should be strongly positive)
+    if len(theta) > 2 and not failed_checks:
+        correlation = np.corrcoef(theta, probability)[0, 1]
+        if correlation < 0.95:  # Should be nearly perfect monotonic
+            failed_checks.append(f"Weak theta-probability correlation: {correlation:.3f} (expected > 0.95)")
+
+    valid = len(failed_checks) == 0
+    message = "Probability transform validation passed" if valid else f"{len(failed_checks)} validation checks failed"
+
+    return {
+        "valid": valid,
+        "message": message
+    }

@@ -1,0 +1,721 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-25
+# RQ: ch5/rq6
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq6"
+  total_steps: 7
+  analysis_type: "Piecewise LMM schema congruence consolidation analysis (3-way interaction)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-25T11:45:00"
+  dependencies:
+    - "results/ch5/rq5 (RQ 5.5 must complete Steps 1-3)"
+  key_decisions:
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
+    - "D070: TSVR (actual hours) as time variable"
+    - "NO D069: Two-panel plot but NOT dual-scale (theta only)"
+  inline_implementation_note: |
+    Per rq_tools context_dump: This RQ uses INLINE implementation strategy
+    following RQ 5.2 piecewise pattern. Missing piecewise-specific tools
+    will be implemented inline by g_code (reference: results/ch5/rq2/code/*.py).
+    Tools to extract to tools/ later after RQ 5.6 validation.
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Theta Scores from RQ 5.5
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_theta_from_rq5"
+    step_number: "00"
+    description: "Extract IRT theta scores by congruence from RQ 5.5 (DERIVED data dependency)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.5 status: Read results/ch5/rq5/status.yaml, verify rq_results.status = 'success'"
+        - "If RQ 5.5 incomplete: QUIT with EXPECTATIONS ERROR 'RQ 5.5 must complete before RQ 5.6'"
+        - "Read results/ch5/rq5/data/step03_theta_scores.csv"
+        - "Validate structure: 400 rows x 7 columns (composite_ID, theta_common, theta_congruent, theta_incongruent, se_common, se_congruent, se_incongruent)"
+        - "Validate value ranges: theta_* in [-3, 3], se_* in [0.1, 1.0]"
+        - "Copy to data/step00_theta_scores_from_rq5.csv (local cache for this RQ)"
+
+    input_files:
+      - path: "results/ch5/rq5/status.yaml"
+        required_columns: []
+        variable_name: "rq5_status"
+        description: "RQ 5.5 execution status (verify rq_results = success)"
+        expected_rows: 1
+      - path: "results/ch5/rq5/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+        variable_name: "df_rq5_theta"
+        description: "RQ 5.5 theta scores by congruence (Common/Congruent/Incongruent)"
+        expected_rows: 400
+
+    output_files:
+      - path: "data/step00_theta_scores_from_rq5.csv"
+        variable_name: "df_theta"
+        description: "Theta scores cached from RQ 5.5 (identical to RQ 5.5 output)"
+        expected_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+        expected_rows: 400
+
+    parameters:
+      dependency_check:
+        rq5_path: "results/ch5/rq5"
+        rq5_theta_file: "data/step03_theta_scores.csv"
+        required_status: "rq_results.status = success"
+      value_ranges:
+        theta_min: -3.0
+        theta_max: 3.0
+        se_min: 0.1
+        se_max: 1.0
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "RQ 5.5 dependency satisfied"
+          check: "results/ch5/rq5/status.yaml exists AND rq_results.status = 'success'"
+          severity: "CRITICAL"
+        - name: "Theta file exists"
+          check: "results/ch5/rq5/data/step03_theta_scores.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count correct"
+          check: "Output has 400 rows (100 participants x 4 tests)"
+          severity: "CRITICAL"
+        - name: "Column count correct"
+          check: "Output has 7 columns (composite_ID + 3 theta + 3 SE)"
+          severity: "CRITICAL"
+        - name: "Theta range valid"
+          check: "All theta_* values in [-3, 3]"
+          severity: "CRITICAL"
+        - name: "SE range valid"
+          check: "All se_* values in [0.1, 1.0]"
+          severity: "CRITICAL"
+        - name: "No missing data"
+          check: "No NaN in theta or SE columns"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step00_extract_theta_from_rq5.log"
+
+    log_file: "logs/step00_extract_theta_from_rq5.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Prepare Piecewise LMM Input
+  # --------------------------------------------------------------------------
+  - name: "step01_prepare_piecewise_input"
+    step_number: "01"
+    description: "Reshape theta to long format, merge TSVR, create piecewise segment structure"
+
+    analysis_call:
+      type: "inline"
+      implementation_note: |
+        INLINE IMPLEMENTATION per rq_tools strategy (reference: RQ 5.2 step00)
+        Function: assign_piecewise_segments (to be extracted to tools/ later)
+
+        Operations:
+        1. Reshape wide to long (400 rows x 7 cols -> 1200 rows with Congruence factor)
+        2. Parse composite_ID to extract UID and test
+        3. Merge TSVR_hours from master.xlsx via data.py functions
+        4. Assign piecewise segments: Early (0-24h), Late (24-168h)
+        5. Compute Days_within: centered at segment start
+        6. Treatment coding: Congruence=Common (ref), Segment=Early (ref)
+
+      operations:
+        - "Load data/step00_theta_scores_from_rq5.csv"
+        - "Reshape wide to long: melt theta_common/congruent/incongruent into (Congruence, theta, SE)"
+        - "Parse composite_ID: extract UID and test (format: {UID}_{test})"
+        - "Extract TSVR_hours from master.xlsx using data.py functions (pattern: {UID}-RVR-{Test}-STA-X-TSVR)"
+        - "Merge TSVR_hours on (UID, test) - expect all 1200 rows matched"
+        - "Assign Segment: TSVR_hours in [0, 24] -> 'Early', TSVR_hours in (24, 168] -> 'Late'"
+        - "Compute Days_within: Early = TSVR_hours/24, Late = (TSVR_hours - 24)/24"
+        - "Verify: No segment overlap, Days_within >= 0 for all rows"
+        - "Treatment coding: Set Congruence reference='Common', Segment reference='Early'"
+        - "Save to data/step01_lmm_input_piecewise.csv"
+
+      input_files:
+        - path: "data/step00_theta_scores_from_rq5.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          variable_name: "df_theta_wide"
+          description: "Theta scores from RQ 5.5 (wide format)"
+          expected_rows: 400
+
+      output_files:
+        - path: "data/step01_lmm_input_piecewise.csv"
+          variable_name: "df_piecewise"
+          description: "Long-format piecewise LMM input with Segment and Days_within"
+          expected_columns: ["UID", "test", "composite_ID", "Congruence", "theta", "SE", "TSVR_hours", "Segment", "Days_within"]
+          expected_rows: 1200
+
+      parameters:
+        reshape_operation: "melt theta_common/theta_congruent/theta_incongruent -> (Congruence, theta)"
+        segment_definition:
+          Early: "TSVR_hours in [0, 24] hours (Days 0-1, includes one night sleep)"
+          Late: "TSVR_hours in (24, 168] hours (Days 1-6, decay-dominated)"
+        days_within_formula:
+          Early: "Days_within = TSVR_hours / 24"
+          Late: "Days_within = (TSVR_hours - 24) / 24"
+        treatment_coding:
+          Congruence_reference: "Common"
+          Segment_reference: "Early"
+        critical_note: "Day 1 (TSVR ~ 24h) assigned to Early segment ONLY (no overlap)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Row count correct"
+          check: "Output has 1200 rows (400 composite_IDs x 3 congruence types)"
+          severity: "CRITICAL"
+        - name: "Column count correct"
+          check: "Output has 9 columns (UID, test, composite_ID, Congruence, theta, SE, TSVR_hours, Segment, Days_within)"
+          severity: "CRITICAL"
+        - name: "TSVR merge complete"
+          check: "All 1200 rows have non-null TSVR_hours"
+          severity: "CRITICAL"
+        - name: "Segment assignment correct"
+          check: "TSVR_hours in [0, 24] -> Segment='Early'; TSVR_hours > 24 -> Segment='Late'"
+          severity: "CRITICAL"
+        - name: "No segment overlap"
+          check: "Each observation in exactly one segment"
+          severity: "CRITICAL"
+        - name: "Days_within range valid"
+          check: "Early: Days_within in [0, 1]; Late: Days_within in [0, 6]"
+          severity: "CRITICAL"
+        - name: "All congruence types present"
+          check: "Congruence contains {Common, Congruent, Incongruent} for each composite_ID"
+          severity: "CRITICAL"
+        - name: "No missing data"
+          check: "No NaN in theta, SE, TSVR_hours, Segment, Days_within columns"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step01_prepare_piecewise_input.log"
+
+    log_file: "logs/step01_prepare_piecewise_input.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Piecewise LMM with 3-Way Interaction
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_piecewise_lmm"
+    step_number: "02"
+    description: "Fit piecewise LMM with Days_within * Segment * Congruence 3-way interaction"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_lmm_input_piecewise.csv"
+          required_columns: ["UID", "Days_within", "Segment", "Congruence", "theta"]
+          variable_name: "df_lmm"
+          description: "Piecewise LMM input from Step 1"
+
+      output_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model object (pickle)"
+        - path: "results/step02_lmm_model_summary.txt"
+          variable_name: "lmm_summary"
+          description: "Full model summary text (fixed effects, random effects, fit stats)"
+
+      parameters:
+        theta_scores: "df_lmm"
+        tsvr_data: "df_lmm"
+        formula: "theta ~ Days_within * C(Segment, Treatment('Early')) * C(Congruence, Treatment('Common'))"
+        groups: "UID"
+        re_formula: "~Days_within"
+        reml: false
+        convergence_note: |
+          Random slopes model (N=100 participants at lower boundary per Newsom)
+          If convergence fails: attempt simplified model (intercepts-only)
+          Document strategy in logs, proceed with best-converged model
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit piecewise LMM testing 3-way interaction: Does congruence effect differ between Early consolidation and Late decay?"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All 11 fixed effect terms present (4 main + 5 two-way + 2 three-way)"
+        - "Gradient norm < 0.01"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_piecewise_lmm.log"
+
+      description: "Validate LMM convergence and model structure"
+
+    log_file: "logs/step02_fit_piecewise_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract Segment-Specific Slopes
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_slopes"
+    step_number: "03"
+    description: "Extract 6 segment-congruence slopes via delta method linear combinations"
+
+    analysis_call:
+      type: "inline"
+      implementation_note: |
+        INLINE IMPLEMENTATION per rq_tools strategy (reference: RQ 5.2 step02)
+        Function: extract_segment_slopes_from_lmm (to be extracted to tools/ later)
+
+        Slope computation via linear combinations:
+        Early-Common: beta[Days_within]
+        Early-Congruent: beta[Days_within] + beta[Days_within:Congruence[Congruent]]
+        Early-Incongruent: beta[Days_within] + beta[Days_within:Congruence[Incongruent]]
+        Late-Common: beta[Days_within] + beta[Days_within:Segment[Late]]
+        Late-Congruent: beta[Days_within] + beta[Days_within:Segment[Late]] +
+                        beta[Days_within:Congruence[Congruent]] +
+                        beta[Days_within:Segment[Late]:Congruence[Congruent]]
+        Late-Incongruent: beta[Days_within] + beta[Days_within:Segment[Late]] +
+                          beta[Days_within:Congruence[Incongruent]] +
+                          beta[Days_within:Segment[Late]:Congruence[Incongruent]]
+
+        SE via delta method: SE = sqrt(a' * Sigma * a)
+        95% CI: slope +/- 1.96 * SE
+
+      operations:
+        - "Load data/step02_piecewise_lmm_model.pkl"
+        - "Extract fixed effects coefficients and variance-covariance matrix"
+        - "Compute 6 slopes via linear combinations (formula above)"
+        - "Compute SEs via delta method using variance-covariance matrix"
+        - "Compute 95% CI: CI_lower = slope - 1.96*SE, CI_upper = slope + 1.96*SE"
+        - "Add interpretation column: 'decline' if slope < 0, 'improvement' if slope > 0"
+        - "Save to results/step03_segment_slopes.csv"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model from Step 2"
+
+      output_files:
+        - path: "results/step03_segment_slopes.csv"
+          variable_name: "df_slopes"
+          description: "Segment-congruence slopes with SEs and CIs"
+          expected_columns: ["Segment", "Congruence", "Slope", "SE", "CI_lower", "CI_upper", "Interpretation"]
+          expected_rows: 6
+
+      parameters:
+        slope_formulas:
+          Early_Common: "beta[Days_within]"
+          Early_Congruent: "beta[Days_within] + beta[Days_within:Congruence[Congruent]]"
+          Early_Incongruent: "beta[Days_within] + beta[Days_within:Congruence[Incongruent]]"
+          Late_Common: "beta[Days_within] + beta[Days_within:Segment[Late]]"
+          Late_Congruent: "beta[Days_within] + beta[Days_within:Segment[Late]] + beta[Days_within:Congruence[Congruent]] + beta[Days_within:Segment[Late]:Congruence[Congruent]]"
+          Late_Incongruent: "beta[Days_within] + beta[Days_within:Segment[Late]] + beta[Days_within:Congruence[Incongruent]] + beta[Days_within:Segment[Late]:Congruence[Incongruent]]"
+        delta_method_formula: "SE = sqrt(a' * Sigma * a)"
+        ci_level: 0.95
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Slope count correct"
+          check: "df_slopes has 6 rows (2 segments x 3 congruence types)"
+          severity: "CRITICAL"
+        - name: "All segment-congruence combinations present"
+          check: "Segment in {Early, Late}; Congruence in {Common, Congruent, Incongruent}"
+          severity: "CRITICAL"
+        - name: "Delta method successful"
+          check: "All SE values are positive, no NaN"
+          severity: "CRITICAL"
+        - name: "CI ordering correct"
+          check: "CI_lower < Slope < CI_upper for all rows"
+          severity: "CRITICAL"
+        - name: "Slope range plausible"
+          check: "Slope in [-2, 2] theta/day (forgetting slopes typically -0.5 to -0.1)"
+          severity: "MODERATE"
+        - name: "Interpretation consistent"
+          check: "slope < 0 -> 'decline'; slope > 0 -> 'improvement'"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step03_extract_slopes.log"
+
+    log_file: "logs/step03_extract_slopes.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Test Key Hypothesis - Congruent Consolidation Benefit
+  # --------------------------------------------------------------------------
+  - name: "step04_test_hypothesis"
+    step_number: "04"
+    description: "Extract 11 hypothesis tests from LMM with dual p-value reporting (D068)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model from Step 2"
+
+      output_files:
+        - path: "results/step04_hypothesis_tests.csv"
+          variable_name: "df_tests"
+          description: "11 hypothesis tests with dual p-values (uncorrected + Bonferroni)"
+          expected_columns: ["Test_Name", "Coefficient", "SE", "z_value", "p_uncorrected", "p_bonferroni", "Significant_Bonferroni"]
+          expected_rows: 11
+
+      parameters:
+        result: "lmm_model"
+        bonferroni_correction:
+          n_tests: 15
+          alpha_uncorrected: 0.05
+          alpha_bonferroni: 0.0033
+          note: "Decision D068 - report BOTH uncorrected and Bonferroni-corrected p-values"
+        primary_hypothesis:
+          term: "Days_within:Segment[Late]:Congruence[Congruent]"
+          interpretation: "Does congruent slope differ between Early and Late more than common slope?"
+          expected_sign: "Negative (congruent benefit stronger in Early than Late)"
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "df_tests"
+
+      description: "Extract all 11 fixed effect tests with dual p-value reporting per D068"
+
+    validation_call:
+      type: "inline"
+      implementation_note: |
+        INLINE IMPLEMENTATION per rq_tools strategy
+        Function: validate_hypothesis_tests (to be extracted to tools/ later)
+
+      criteria:
+        - name: "Test count correct"
+          check: "df_tests has 11 rows (all LMM fixed effects)"
+          severity: "CRITICAL"
+        - name: "Dual p-values present"
+          check: "Both p_uncorrected and p_bonferroni columns exist"
+          severity: "CRITICAL"
+        - name: "p-value bounds valid"
+          check: "p_uncorrected in [0, 1]; p_bonferroni = p_uncorrected * 15"
+          severity: "CRITICAL"
+        - name: "Bonferroni correction applied"
+          check: "p_bonferroni >= p_uncorrected for all rows"
+          severity: "CRITICAL"
+        - name: "Significance labeling correct"
+          check: "Significant_Bonferroni = TRUE if p_bonferroni < 0.05, else FALSE"
+          severity: "CRITICAL"
+        - name: "Primary hypothesis present"
+          check: "Test_Name contains 'Days_within:Segment[Late]:Congruence[Congruent]'"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step04_test_hypothesis.log"
+
+    log_file: "logs/step04_test_hypothesis.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Validate LMM Assumptions
+  # --------------------------------------------------------------------------
+  - name: "step05_validate_assumptions"
+    step_number: "05"
+    description: "Validate 6 LMM assumptions + convergence diagnostics + 3 sensitivity analyses"
+
+    analysis_call:
+      type: "inline"
+      implementation_note: |
+        INLINE IMPLEMENTATION per rq_tools strategy (reference: RQ 5.2 step05)
+        Function: validate_lmm_assumptions_comprehensive + run_lmm_sensitivity_analyses
+        (to be extracted to tools/ later)
+
+        Assumption checks:
+        1. Residual normality (Shapiro-Wilk p > 0.05)
+        2. Homoscedasticity (Levene's p > 0.05)
+        3. Random effects normality (Shapiro-Wilk on BLUPs p > 0.01)
+        4. Autocorrelation (Durbin-Watson in [1.5, 2.5])
+        5. Outliers (|residual| > 3, Cook's D > 4/n)
+        6. Multicollinearity (VIF < 5)
+
+        Sensitivity analyses:
+        1. Piecewise vs continuous time models (Linear, Log, Lin+Log)
+        2. Knot placement (Day 0.5, 1.0, 1.5)
+        3. Derived data weighting (1/SE^2 weights)
+
+      operations:
+        - "Load data/step02_piecewise_lmm_model.pkl and data/step01_lmm_input_piecewise.csv"
+        - "Extract residuals and random effects from fitted model"
+        - "Test residual normality: Shapiro-Wilk test, Q-Q plot"
+        - "Test homoscedasticity: Levene's test, residuals vs fitted plot"
+        - "Test random effects normality: Shapiro-Wilk on BLUPs, Q-Q plot"
+        - "Test autocorrelation: Durbin-Watson statistic, ACF plot"
+        - "Detect outliers: |residual| > 3, Cook's D > 4/n"
+        - "Test multicollinearity: Compute VIF for fixed effects"
+        - "Convergence diagnostics: singular fit, variance components, gradient norm, Hessian"
+        - "Sensitivity 1: Fit Linear, Log, Lin+Log models, compare AIC"
+        - "Sensitivity 2: Fit models with knots at Day 0.5, 1.0, 1.5, compare AIC"
+        - "Sensitivity 3: Fit weighted model (1/SE^2), compare to unweighted"
+        - "Generate 4-panel diagnostic plot (Q-Q residuals, residuals vs fitted, Q-Q random effects, ACF)"
+        - "Save assumption validation report to results/step05_assumption_validation.txt"
+        - "Save convergence diagnostics to results/step05_convergence_diagnostics.txt"
+        - "Save sensitivity analyses to results/step05_sensitivity_analyses.csv"
+        - "Save diagnostic plot to plots/step05_residual_diagnostics.png"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model from Step 2"
+        - path: "data/step01_lmm_input_piecewise.csv"
+          variable_name: "df_data"
+          description: "Original data for sensitivity analyses"
+
+      output_files:
+        - path: "results/step05_assumption_validation.txt"
+          variable_name: "assumption_report"
+          description: "6 assumption checks with test statistics and pass/fail"
+        - path: "results/step05_convergence_diagnostics.txt"
+          variable_name: "convergence_report"
+          description: "Convergence status, variance components, gradient, Hessian"
+        - path: "results/step05_sensitivity_analyses.csv"
+          variable_name: "df_sensitivity"
+          description: "7 models (1 primary + 3 continuous + 2 knot + 1 weighted) with AIC comparison"
+          expected_columns: ["Model_Name", "Model_Type", "AIC", "BIC", "LogLik", "Delta_AIC", "Best_Model"]
+          expected_rows: 7
+        - path: "plots/step05_residual_diagnostics.png"
+          variable_name: "diagnostic_plot"
+          description: "4-panel diagnostic plot (residual Q-Q, fitted vs residuals, random effects Q-Q, ACF)"
+
+      parameters:
+        assumption_thresholds:
+          shapiro_alpha: 0.05
+          levene_alpha: 0.05
+          durbin_watson_range: [1.5, 2.5]
+          outlier_threshold: 3.0
+          cooks_d_threshold: "4 / n"
+          vif_threshold: 5.0
+        sensitivity_models:
+          continuous_time: ["Linear", "Logarithmic", "Linear+Log"]
+          knot_placements: [0.5, 1.0, 1.5]
+          weighting: "inverse_variance"
+        convergence_criteria:
+          gradient_norm_max: 0.01
+          variance_min: 0.0
+          singular_fit: "not acceptable"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "All assumption checks completed"
+          check: "assumption_report contains results for all 6 checks"
+          severity: "CRITICAL"
+        - name: "Convergence diagnostics complete"
+          check: "convergence_report contains status, variance components, gradient, Hessian"
+          severity: "CRITICAL"
+        - name: "Sensitivity analyses complete"
+          check: "df_sensitivity has 7 rows (all models fitted)"
+          severity: "CRITICAL"
+        - name: "Best model identified"
+          check: "Exactly one row with Best_Model = TRUE (lowest AIC)"
+          severity: "CRITICAL"
+        - name: "Diagnostic plot generated"
+          check: "plots/step05_residual_diagnostics.png exists and is valid PNG"
+          severity: "CRITICAL"
+        - name: "No critical assumption violations"
+          check: "Document violations in report, proceed cautiously (user may accept)"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "raise ValueError with specific failure message (computation errors only, not statistical violations)"
+        log_to: "logs/step05_validate_assumptions.log"
+
+    log_file: "logs/step05_validate_assumptions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Piecewise Trajectory Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_piecewise_plot_data"
+    step_number: "06"
+    description: "Prepare two-panel plot data (Early | Late segments, theta scale only)"
+
+    analysis_call:
+      type: "inline"
+      implementation_note: |
+        INLINE IMPLEMENTATION per rq_tools strategy (reference: RQ 5.2 step05)
+        Function: prepare_piecewise_plot_data (to be extracted to tools/ later)
+
+        NOTE: Decision D069 NOT applicable here (no dual-scale requirement per 2_plan.md)
+        Concept Section 5 mentions "two-panel piecewise trajectory plot" but no theta+probability
+        Generate theta-scale plot data ONLY (separate Early and Late panels)
+
+      operations:
+        - "Load data/step01_lmm_input_piecewise.csv"
+        - "Load data/step02_piecewise_lmm_model.pkl"
+        - "Load results/step03_segment_slopes.csv"
+        - "Group data by (Segment, Congruence, Days_within)"
+        - "Compute observed means: mean(theta), 95% CI (mean +/- 1.96 * SE_mean)"
+        - "Generate model predictions: Use fitted LMM to predict theta on Days_within grid"
+        - "Early segment grid: 20 points from 0 to 1 day"
+        - "Late segment grid: 60 points from 0 to 6 days (within Late segment)"
+        - "Merge observed means with model predictions on (Segment, Congruence, Days_within)"
+        - "Create two separate CSVs: Early panel data, Late panel data"
+        - "Save plots/step06_piecewise_early_data.csv (~60 rows: 3 congruence x 20 grid points)"
+        - "Save plots/step06_piecewise_late_data.csv (~180 rows: 3 congruence x 60 grid points)"
+
+      input_files:
+        - path: "data/step01_lmm_input_piecewise.csv"
+          required_columns: ["Segment", "Congruence", "Days_within", "theta"]
+          variable_name: "df_data"
+          description: "Piecewise LMM input data for observed means"
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted LMM for predictions"
+        - path: "results/step03_segment_slopes.csv"
+          variable_name: "df_slopes"
+          description: "Segment slopes for validation"
+
+      output_files:
+        - path: "plots/step06_piecewise_early_data.csv"
+          variable_name: "df_early_plot"
+          description: "Early segment plot data (Days 0-1)"
+          expected_columns: ["Days_within", "Congruence", "theta_observed", "CI_lower_observed", "CI_upper_observed", "theta_predicted", "Data_Type"]
+          expected_rows: 60
+        - path: "plots/step06_piecewise_late_data.csv"
+          variable_name: "df_late_plot"
+          description: "Late segment plot data (Days 1-6)"
+          expected_columns: ["Days_within", "Congruence", "theta_observed", "CI_lower_observed", "CI_upper_observed", "theta_predicted", "Data_Type"]
+          expected_rows: 180
+
+      parameters:
+        aggregation:
+          groupby_vars: ["Segment", "Congruence", "Days_within"]
+          observed_stats: "mean(theta), 95% CI via SE_mean"
+        prediction_grid:
+          Early_points: 20
+          Early_range: [0.0, 1.0]
+          Late_points: 60
+          Late_range: [0.0, 6.0]
+        output_note: "NO probability scale (D069 not applicable per 2_plan.md)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Early plot row count"
+          check: "df_early_plot has ~60 rows (3 congruence x 20 grid points)"
+          severity: "CRITICAL"
+        - name: "Late plot row count"
+          check: "df_late_plot has ~180 rows (3 congruence x 60 grid points)"
+          severity: "CRITICAL"
+        - name: "All congruence types present"
+          check: "Congruence contains {Common, Congruent, Incongruent} in both CSVs"
+          severity: "CRITICAL"
+        - name: "Days_within range valid"
+          check: "Early: [0, 1]; Late: [0, 6]"
+          severity: "CRITICAL"
+        - name: "Theta range plausible"
+          check: "theta_observed and theta_predicted in [-3, 3]"
+          severity: "CRITICAL"
+        - name: "CI ordering correct"
+          check: "CI_lower < theta_observed < CI_upper for all rows"
+          severity: "CRITICAL"
+        - name: "No missing data"
+          check: "No NaN in critical columns"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step06_prepare_piecewise_plot_data.log"
+
+    log_file: "logs/step06_prepare_piecewise_plot_data.log"
+
+# ============================================================================
+# CROSS-RQ DEPENDENCIES
+# ============================================================================
+
+dependencies:
+  rq_5_5:
+    files_required:
+      - path: "results/ch5/rq5/data/step03_theta_scores.csv"
+        used_in: "step00"
+        purpose: "IRT theta scores by congruence (DERIVED data)"
+      - path: "results/ch5/rq5/status.yaml"
+        used_in: "step00"
+        purpose: "Verify RQ 5.5 completed successfully"
+    validation: "Check files exist and rq_results.status = 'success' before Step 0 execution"
+
+# ============================================================================
+# NAMING CONVENTIONS APPLIED
+# ============================================================================
+
+naming_conventions:
+  step_pattern: "stepNN_verb_noun"
+  file_pattern: "stepNN_description.csv"
+  log_pattern: "logs/stepNN_description.log"
+  new_variables_introduced:
+    - name: "Segment"
+      pattern: "Early | Late"
+      introduced: "RQ 5.6 (inherited from RQ 5.2)"
+      notes: "Piecewise segment factor (consolidation vs decay phase)"
+    - name: "Days_within"
+      pattern: "float >= 0"
+      introduced: "RQ 5.6 (inherited from RQ 5.2)"
+      notes: "Days elapsed within segment (centered at segment start)"
+    - name: "Congruence"
+      pattern: "Common | Congruent | Incongruent"
+      introduced: "RQ 5.6 (schema congruence factor)"
+      notes: "Schema congruence type (Common = baseline, Congruent/Incongruent test consolidation theory)"
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+
+summary:
+  total_steps: 7
+  catalogued_tool_steps: 3
+  inline_steps: 4
+  stdlib_steps: 0
+  validation_coverage: "100% (all 7 steps have validation)"
+  inline_implementation_strategy: "Per RQ 5.2 piecewise pattern (extract to tools/ after validation)"
+  key_outputs:
+    - "data/step00_theta_scores_from_rq5.csv - Theta scores cached from RQ 5.5"
+    - "data/step01_lmm_input_piecewise.csv - Piecewise LMM input with Segment/Days_within"
+    - "data/step02_piecewise_lmm_model.pkl - Fitted piecewise LMM with 3-way interaction"
+    - "results/step02_lmm_model_summary.txt - LMM summary text"
+    - "results/step03_segment_slopes.csv - 6 segment-congruence slopes with CIs"
+    - "results/step04_hypothesis_tests.csv - 11 tests with dual p-values (D068)"
+    - "results/step05_assumption_validation.txt - 6 assumption checks"
+    - "results/step05_convergence_diagnostics.txt - Convergence status"
+    - "results/step05_sensitivity_analyses.csv - 7 models compared"
+    - "plots/step05_residual_diagnostics.png - 4-panel diagnostic plot"
+    - "plots/step06_piecewise_early_data.csv - Early segment plot data (theta scale)"
+    - "plots/step06_piecewise_late_data.csv - Late segment plot data (theta scale)"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

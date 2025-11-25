@@ -1,0 +1,77 @@
+rq_builder:
+  status: success
+  context_dump: |
+    Created results/ch5/rq6/ with 6 folders
+    Folders: docs/, data/, code/, logs/, plots/, results/
+    All folders empty, ready for agents
+    status.yaml initialized with 10 RQ-specific agents
+    Next: rq_concept extracts concept from thesis
+
+rq_concept:
+  status: success
+  context_dump: |
+    RQ 5.6: Schema congruence consolidation vs decay
+    Domains: N/A - items categorized by congruence (Congruent/Common/Incongruent), not WWW
+    Analysis: Piecewise LMM (Early Days 0-1, Late Days 1-6) + 3-way interaction
+    Data: DERIVED from RQ 5.5 theta scores (results/ch5/rq5/data/step03_theta_scores.csv)
+    Critical: Tests sleep consolidation theory - congruent benefit during Early segment (one night sleep)
+
+rq_scholar:
+  status: success
+  context_dump: |
+    9.3/10 APPROVED. Strong piecewise consolidation theory, good literature. Suggest: add practice effects discussion, acknowledge post-consolidation schema timing, nuance critical window claim.
+
+rq_stats:
+  status: success
+  context_dump: |
+    9.6/10 APPROVED. Cat1: 3.0/3 (exceptional piecewise LMM design). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (comprehensive params). Cat4: 1.8/2 (strong validation, minor theta weighting concern). Cat5: 0.8/1 (10 concerns, good quality). Section 7 resolved 8.9/10 REJECTED status. Suggest: elevate theta weighting, acknowledge N=100 limitation.
+
+rq_planner:
+  status: success
+  context_dump: |
+    7 analysis steps planned (Step 0: RQ 5.5 theta extraction + Steps 1-6: piecewise LMM)
+    Pipeline: LMM-only (uses DERIVED theta from RQ 5.5, no IRT calibration)
+    Key analysis: Piecewise LMM with 3-way interaction (Days_within x Segment x Congruence) tests consolidation vs decay
+    Expected outputs: LMM model, 6 segment-specific slopes, 11 hypothesis tests, assumption validation, 2 plot source CSVs
+    Validation: Per-step validation mandatory (100% coverage with 4-layer substance criteria)
+
+rq_tools:
+  status: fail
+  completed: 2025-11-25 11:30
+  context_dump: |
+    FAIL - Missing 8 custom tools required by analysis plan
+    Available: 4 analysis + 2 validation tools from tools_inventory.md
+    Missing analysis: extract_segment_slopes_from_lmm, assign_piecewise_segments, validate_lmm_assumptions_comprehensive, run_lmm_sensitivity_analyses, prepare_piecewise_plot_data
+    Missing validation: validate_hypothesis_tests, validate_contrasts, validate_probability_transform
+    Action: TDD migration (user + Claude develop tools -> update tools_inventory.md -> re-run rq_tools)
+
+rq_analysis:
+  status: success
+  completed: 2025-11-25 11:45
+  context_dump: |
+    7 steps specified with validation (piecewise LMM schema congruence consolidation)
+    Pipeline: LMM-only (DERIVED theta from RQ 5.5, no IRT calibration)
+    Key analysis: 3-way interaction (Days_within x Segment x Congruence) tests consolidation vs decay
+    Implementation: INLINE strategy per RQ 5.2 pattern (4 inline + 3 catalogued tools)
+    Expected outputs: LMM model, 6 segment-congruence slopes, 11 hypothesis tests, assumption validation, 2 plot CSVs
+
+rq_inspect:
+  status: pending
+  context_dump: |
+
+rq_plots:
+  status: pending
+  context_dump: |
+
+rq_results:
+  status: pending
+  context_dump: |
+
+analysis_steps:
+  step00_extract_theta_from_rq5: pending
+  step01_prepare_piecewise_input: pending
+  step02_fit_piecewise_lmm: pending
+  step03_extract_slopes: pending
+  step04_test_hypothesis: pending
+  step05_validate_assumptions: pending
+  step06_prepare_piecewise_plot_data: pending

@@ -1,0 +1,250 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.6
+# Created by: rq_tools agent
+# Date: 2025-11-25
+# Status: INCOMPLETE - Missing custom tools detected (TDD migration required)
+#
+# CRITICAL: This RQ requires custom analysis functions NOT yet documented in tools_inventory.md
+# See MISSING TOOLS section below for required migrations from v3.0
+
+# Architecture: Tool Catalog (Option A) - Each tool listed once with validation pairing
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit piecewise LMM with 3-way interaction (Days_within x Segment x Congruence) using TSVR time variable per Decision D070"
+
+    used_in_steps:
+      - "step02_fit_piecewise_lmm"
+
+    notes:
+      - "Decision D070: Uses TSVR_hours (actual time) not nominal days"
+      - "Piecewise structure: Early segment (0-24h) vs Late segment (24-168h)"
+      - "3-way interaction tests consolidation vs decay mechanism"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm'"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_hypothesis_tests"  # MISSING - not in tools_inventory.md
+
+    description: "Extract fixed effects table with coefficients, SEs, z-values, p-values for hypothesis testing"
+
+    used_in_steps:
+      - "step04_test_hypothesis"
+
+    notes:
+      - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni)"
+      - "Primary hypothesis: 3-way interaction Days_within:Segment[Late]:Congruence[Congruent]"
+      - "15 total tests requiring Bonferroni correction (alpha = 0.05 / 15 = 0.0033)"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm'"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_contrasts"  # MISSING - not in tools_inventory.md
+
+    description: "Compute post-hoc pairwise contrasts with dual p-value reporting per Decision D068"
+
+    used_in_steps:
+      - "step04_test_hypothesis"
+
+    notes:
+      - "Decision D068: Reports BOTH uncorrected and Bonferroni-corrected p-values"
+      - "Transparency for exploratory thesis - user interprets significance cautiously"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm'"
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
+    validation_tool: "validate_probability_transform"  # MISSING - not in tools_inventory.md
+
+    description: "Transform theta scores to probability scale via IRT 2PL formula for dual-scale plotting"
+
+    used_in_steps:
+      - "step06_prepare_plot_data"
+
+    notes:
+      - "Decision D069: NOT applicable here (concept Section 5 mentions two-panel plot, no dual-scale requirement)"
+      - "Function available if needed for interpretability"
+
+    source_reference: "tools_inventory.md section 'Module: tools.plotting'"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    criteria:
+      - "Model converged successfully (no convergence warnings)"
+      - "No singular fit warnings (variance components > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        message: "str (human-readable explanation)"
+        warnings: "list (convergence warnings if any)"
+
+    behavior_on_failure:
+      action: "Log warning, attempt simplified model (intercepts-only), proceed with best-converged model"
+      log_to: "logs/step02_fit_piecewise_lmm.log"
+      invoke: "g_debug if both maximal and simplified models fail"
+
+    description: "Validate LMM convergence status for piecewise model with random slopes"
+
+    used_in_steps:
+      - "step02_fit_piecewise_lmm"
+      - "step05_validate_assumptions"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+  validate_lmm_residuals:
+    module: "tools.validation"
+    function: "validate_lmm_residuals"
+    signature: "validate_lmm_residuals(residuals: ndarray, alpha: float = 0.05) -> Dict[str, Any]"
+
+    criteria:
+      - "Residuals approximately normal (Kolmogorov-Smirnov test p > 0.05)"
+      - "Moderate departures acceptable with N=100 (LMM robust)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        normal: "bool (True if residuals pass normality test)"
+        ks_statistic: "float (test statistic)"
+        p_value: "float (p-value from K-S test)"
+        message: "str (interpretation)"
+
+    behavior_on_failure:
+      action: "Log warning, document in assumption validation report, proceed cautiously"
+      log_to: "logs/step05_validate_assumptions.log"
+      invoke: "User interprets cautiously (may accept violations for exploratory thesis)"
+
+    description: "Test LMM residuals for normality assumption using Kolmogorov-Smirnov test"
+
+    used_in_steps:
+      - "step05_validate_assumptions"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+# ============================================================================
+# MISSING TOOLS - TDD MIGRATION REQUIRED
+# ============================================================================
+#
+# The analysis plan (2_plan.md) requires the following custom analysis functions
+# that are NOT documented in tools_inventory.md:
+#
+# 1. extract_segment_slopes_from_lmm
+#    Purpose: Extract Early and Late segment slopes for each congruence type
+#    Inputs: lmm_result (MixedLMResults), segment_factor (str), congruence_factor (str)
+#    Outputs: DataFrame with 6 rows (3 congruence x 2 segments), columns: Segment, Congruence, Slope, SE, CI_lower, CI_upper
+#    Method: Delta method for linear combinations of fixed effects coefficients
+#    Required by: Step 3 (extract segment-specific slopes)
+#    Status: MISSING - requires migration from v3.0 or new implementation
+#
+# 2. assign_piecewise_segments
+#    Purpose: Assign observations to Early (0-24h) or Late (24-168h) segments
+#    Inputs: df (DataFrame), tsvr_col (str), early_cutoff (float)
+#    Outputs: DataFrame with added columns: Segment (factor), Days_within (centered time)
+#    Logic: Early if TSVR <= 24h, Late if TSVR > 24h; Days_within = (TSVR - segment_start) / 24
+#    Required by: Step 1 (prepare piecewise LMM input)
+#    Status: MISSING - requires new implementation
+#
+# 3. validate_lmm_assumptions_comprehensive
+#    Purpose: Perform 6 core LMM assumption checks + diagnostics
+#    Inputs: lmm_result (MixedLMResults), data (DataFrame)
+#    Outputs: Dict with assumption check results + 4-panel diagnostic plot PNG
+#    Checks: Residual normality, homoscedasticity, random effects normality, autocorrelation, outliers, multicollinearity
+#    Required by: Step 5 (validate LMM assumptions)
+#    Status: MISSING - requires migration from v3.0 (likely exists in old codebase)
+#
+# 4. run_lmm_sensitivity_analyses
+#    Purpose: Fit alternative models for sensitivity analysis
+#    Inputs: data (DataFrame), primary_formula (str), alternative_specs (List[Dict])
+#    Outputs: DataFrame with 7 rows (1 primary + 3 continuous + 2 knot + 1 weighted), columns: Model_Name, AIC, BIC, Delta_AIC, Best_Model
+#    Analyses: Piecewise vs continuous time, knot placement sensitivity, derived data weighting
+#    Required by: Step 5 (sensitivity analyses)
+#    Status: MISSING - requires new implementation
+#
+# 5. prepare_piecewise_plot_data
+#    Purpose: Aggregate observed means and generate model predictions for two-panel plot
+#    Inputs: lmm_result (MixedLMResults), data (DataFrame), segment_slopes (DataFrame)
+#    Outputs: Two CSVs (plots/step06_piecewise_early_data.csv, plots/step06_piecewise_late_data.csv)
+#    Content: Observed means with 95% CI + model predictions on grid (20 points per segment)
+#    Required by: Step 6 (prepare trajectory plot data)
+#    Status: MISSING - requires new implementation
+#
+# 6. validate_hypothesis_tests
+#    Purpose: Validate p-values in bounds, Bonferroni correction applied correctly
+#    Inputs: hypothesis_tests (DataFrame)
+#    Outputs: Dict with valid (bool), message (str), failed_checks (list)
+#    Required by: Step 4 validation
+#    Status: MISSING - simple validation function, new implementation
+#
+# 7. validate_contrasts
+#    Purpose: Validate contrast results format and dual p-value reporting
+#    Inputs: contrasts (DataFrame)
+#    Outputs: Dict with valid (bool), message (str)
+#    Required by: Step 4 validation
+#    Status: MISSING - simple validation function, new implementation
+#
+# 8. validate_probability_transform
+#    Purpose: Validate probability transformation (values in [0,1], monotonic)
+#    Inputs: theta (ndarray), probability (ndarray)
+#    Outputs: Dict with valid (bool), message (str)
+#    Required by: Step 6 validation
+#    Status: MISSING - simple validation function, new implementation
+#
+# ============================================================================
+# ACTION REQUIRED (TDD WORKFLOW):
+# ============================================================================
+#
+# 1. User + Claude migrate missing tools from v3.0 OR implement new functions
+# 2. Update tools_inventory.md with function signatures and documentation
+# 3. Write tests for all new functions (TDD: test FIRST, then implementation)
+# 4. Re-run rq_tools agent to create complete 3_tools.yaml
+#
+# This is the TDD detection point - FAIL cleanly to trigger collaborative tool development.
+#
+# ============================================================================
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 2
+  missing_tools_count: 8
+  status: "INCOMPLETE - Missing custom tools detected"
+  action_required: "TDD migration workflow (user + Claude collaborate on tool development)"
+
+  available_tools:
+    - "fit_lmm_trajectory_tsvr"
+    - "extract_fixed_effects_from_lmm"
+    - "compute_contrasts_pairwise"
+    - "convert_theta_to_probability"
+    - "validate_lmm_convergence"
+    - "validate_lmm_residuals"
+
+  missing_analysis_tools:
+    - "extract_segment_slopes_from_lmm"
+    - "assign_piecewise_segments"
+    - "validate_lmm_assumptions_comprehensive"
+    - "run_lmm_sensitivity_analyses"
+    - "prepare_piecewise_plot_data"
+
+  missing_validation_tools:
+    - "validate_hypothesis_tests"
+    - "validate_contrasts"
+    - "validate_probability_transform"
+
+# End of 3_tools.yaml
