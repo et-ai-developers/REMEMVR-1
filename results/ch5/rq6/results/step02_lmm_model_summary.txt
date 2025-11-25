@@ -1,0 +1,39 @@
+================================================================================
+PIECEWISE LMM MODEL SUMMARY - RQ 5.6
+================================================================================
+
+Formula:
+  theta ~ Days_within * C(Segment, Treatment('Early')) * C(Congruence, Treatment('Common'))
+
+Random Effects:
+  ~Days_within | UID (random intercepts + slopes)
+
+Model Summary:
+                                                     Mixed Linear Model Regression Results
+===============================================================================================================================================
+Model:                                         MixedLM                              Dependent Variable:                              theta     
+No. Observations:                              1200                                 Method:                                          ML        
+No. Groups:                                    100                                  Scale:                                           0.3875    
+Min. group size:                               12                                   Log-Likelihood:                                  -1274.7745
+Max. group size:                               12                                   Converged:                                       Yes       
+Mean group size:                               12.0                                                                                            
+-----------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                                     Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Intercept                                                                                             0.461    0.081  5.670 0.000  0.302  0.621
+C(Segment, Treatment('Early'))[T.Late]                                                               -0.387    0.091 -4.248 0.000 -0.566 -0.209
+C(Congruence, Treatment('Common'))[T.Congruent]                                                      -0.030    0.092 -0.324 0.746 -0.211  0.151
+C(Congruence, Treatment('Common'))[T.Incongruent]                                                     0.056    0.092  0.608 0.543 -0.125  0.237
+C(Segment, Treatment('Early'))[T.Late]:C(Congruence, Treatment('Common'))[T.Congruent]                0.094    0.128  0.733 0.464 -0.157  0.345
+C(Segment, Treatment('Early'))[T.Late]:C(Congruence, Treatment('Common'))[T.Incongruent]             -0.065    0.128 -0.509 0.611 -0.316  0.186
+Days_within                                                                                          -0.263    0.164 -1.603 0.109 -0.585  0.059
+Days_within:C(Segment, Treatment('Early'))[T.Late]                                                    0.170    0.164  1.035 0.301 -0.152  0.493
+Days_within:C(Congruence, Treatment('Common'))[T.Congruent]                                           0.010    0.224  0.044 0.965 -0.430  0.450
+Days_within:C(Congruence, Treatment('Common'))[T.Incongruent]                                        -0.056    0.224 -0.252 0.801 -0.496  0.383
+Days_within:C(Segment, Treatment('Early'))[T.Late]:C(Congruence, Treatment('Common'))[T.Congruent]   -0.018    0.226 -0.078 0.938 -0.460  0.425
+Days_within:C(Segment, Treatment('Early'))[T.Late]:C(Congruence, Treatment('Common'))[T.Incongruent]  0.060    0.226  0.264 0.792 -0.383  0.502
+Group Var                                                                                             0.234    0.071                           
+Group x Days_within Cov                                                                              -0.014    0.013                           
+Days_within Var                                                                                       0.009    0.004                           
+===============================================================================================================================================
+

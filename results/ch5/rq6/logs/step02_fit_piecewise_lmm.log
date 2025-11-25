@@ -1,0 +1,49 @@
+[START] Step 2: Fit Piecewise LMM with 3-Way Interaction
+[LOAD] Loading piecewise LMM input from Step 1...
+[LOADED] step01_lmm_input_piecewise.csv (1200 rows, 9 cols)
+[CODING] Categorical coding restored (Congruence ref='Common', Segment ref='Early')
+[ANALYSIS] Fitting piecewise LMM with 3-way interaction...
+[FORMULA] theta ~ Days_within * C(Segment, Treatment('Early')) * C(Congruence, Treatment('Common'))
+[RANDOM] ~Days_within (random intercepts + slopes by UID)
+[ERROR] Error evaluating factor: NameError: name 'Days_within' is not defined
+    ~Days_within
+     ^^^^^^^^^^^
+[TRACEBACK] Full error details:
+[START] Step 2: Fit Piecewise LMM with 3-Way Interaction
+[LOAD] Loading piecewise LMM input from Step 1...
+[LOADED] step01_lmm_input_piecewise.csv (1200 rows, 9 cols)
+[CODING] Categorical coding restored (Congruence ref='Common', Segment ref='Early')
+[ANALYSIS] Fitting piecewise LMM with 3-way interaction...
+[FORMULA] theta ~ Days_within * C(Segment, Treatment('Early')) * C(Congruence, Treatment('Common'))
+[RANDOM] ~Days_within (random intercepts + slopes by UID)
+[DONE] Model fitting complete
+[SAVE] Saving fitted model object...
+[SAVED] step02_piecewise_lmm_model.pkl
+[SAVE] Saving model summary...
+[SAVED] step02_lmm_model_summary.txt
+[VALIDATION] Validating model convergence...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[ERROR] Fixed effects count incorrect: expected 11 terms (4 main + 5 two-way + 2 three-way), found 12
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq6/code/step02_fit_piecewise_lmm.py", line 205, in <module>
+    raise ValueError(
+ValueError: Fixed effects count incorrect: expected 11 terms (4 main + 5 two-way + 2 three-way), found 12
+[START] Step 2: Fit Piecewise LMM with 3-Way Interaction
+[LOAD] Loading piecewise LMM input from Step 1...
+[LOADED] step01_lmm_input_piecewise.csv (1200 rows, 9 cols)
+[CODING] Categorical coding restored (Congruence ref='Common', Segment ref='Early')
+[ANALYSIS] Fitting piecewise LMM with 3-way interaction...
+[FORMULA] theta ~ Days_within * C(Segment, Treatment('Early')) * C(Congruence, Treatment('Common'))
+[RANDOM] ~Days_within (random intercepts + slopes by UID)
+[DONE] Model fitting complete
+[SAVE] Saving fitted model object...
+[SAVED] step02_piecewise_lmm_model.pkl
+[SAVE] Saving model summary...
+[SAVED] step02_lmm_model_summary.txt
+[VALIDATION] Validating model convergence...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[PASS] All 12 fixed effect terms present
+[SUCCESS] Step 2 complete

@@ -58,7 +58,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import analysis and validation tools
-from tools.analysis_lmm import fit_lmm_trajectory_tsvr
+from tools.analysis_lmm import fit_lmm_trajectory
 from tools.validation import validate_lmm_convergence
 
 # =============================================================================
@@ -130,11 +130,9 @@ if __name__ == "__main__":
             "C(Congruence, Treatment('Common'))"
         )
 
-        # Fit model
-        # Note: theta_scores and tsvr_data are the same DataFrame (all data in one file)
-        lmm_model = fit_lmm_trajectory_tsvr(
-            theta_scores=df_lmm,
-            tsvr_data=df_lmm,
+        # Fit model using fit_lmm_trajectory (data already in long format with Days_within)
+        lmm_model = fit_lmm_trajectory(
+            data=df_lmm,
             formula=formula,
             groups='UID',
             re_formula='~Days_within',
@@ -203,13 +201,13 @@ if __name__ == "__main__":
 
         # Additional checks specific to 3-way interaction model
         n_fixed_effects = len(lmm_model.fe_params)
-        if n_fixed_effects != 11:
+        if n_fixed_effects != 12:
             raise ValueError(
-                f"Fixed effects count incorrect: expected 11 terms "
-                f"(4 main + 5 two-way + 2 three-way), found {n_fixed_effects}"
+                f"Fixed effects count incorrect: expected 12 terms "
+                f"(1 intercept + 4 main + 5 two-way + 2 three-way), found {n_fixed_effects}"
             )
 
-        log(f"[PASS] All 11 fixed effect terms present")
+        log(f"[PASS] All 12 fixed effect terms present")
 
         log("[SUCCESS] Step 2 complete")
         sys.exit(0)

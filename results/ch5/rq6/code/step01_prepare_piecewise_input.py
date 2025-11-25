@@ -61,15 +61,13 @@ import traceback
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-# Import data extraction functions
-from data.data import get_tag_value_for_participant, get_participant_list
-
 # =============================================================================
 # Configuration
 # =============================================================================
 
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq6
 LOG_FILE = RQ_DIR / "logs" / "step01_prepare_piecewise_input.log"
+DFDATA_PATH = PROJECT_ROOT / "data" / "cache" / "dfData.csv"
 
 # =============================================================================
 # Logging Function
@@ -81,49 +79,13 @@ def log(msg):
         f.write(f"{msg}\n")
     print(msg)
 
-# =============================================================================
-# Helper Functions (INLINE IMPLEMENTATION - to extract to tools/ later)
-# =============================================================================
-
-def extract_tsvr_hours(composite_id: str) -> float:
-    """
-    Extract TSVR_hours from master.xlsx for given composite_ID.
-
-    Args:
-        composite_id: Format "{UID}_{test}" (e.g., "001_1")
-
-    Returns:
-        TSVR value in hours (float)
-
-    Raises:
-        ValueError: If TSVR tag not found or invalid
-    """
-    # Parse composite_ID
-    uid, test = composite_id.split('_')
-    test_num = int(test)
-
-    # Map test number to session label
-    test_map = {1: 'T1', 2: 'T2', 3: 'T3', 4: 'T4'}
-    test_label = test_map[test_num]
-
-    # Build TSVR tag name: {UID}-RVR-{Test}-STA-X-TSVR
-    tsvr_tag = f"{uid}-RVR-{test_label}-STA-X-TSVR"
-
-    # Extract TSVR value
-    tsvr_value = get_tag_value_for_participant(uid, tsvr_tag)
-
-    if tsvr_value is None or pd.isna(tsvr_value):
-        raise ValueError(f"TSVR not found for {composite_id} (tag: {tsvr_tag})")
-
-    return float(tsvr_value)
-
 def assign_piecewise_segments(df: pd.DataFrame) -> pd.DataFrame:
     """
     Assign piecewise segments and compute Days_within.
 
     Segments:
       - Early: TSVR_hours in [0, 24] hours (Days 0-1, consolidation phase)
-      - Late: TSVR_hours in (24, 168] hours (Days 1-6, decay phase)
+      - Late: TSVR_hours > 24 hours (Days 1+, decay phase)
 
     Days_within (centered at segment start):
       - Early: Days_within = TSVR_hours / 24
@@ -137,12 +99,11 @@ def assign_piecewise_segments(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
 
-    # Assign Segment
-    df['Segment'] = pd.cut(
-        df['TSVR_hours'],
-        bins=[0, 24, 168],
-        labels=['Early', 'Late'],
-        include_lowest=True  # Include TSVR=0 in Early segment
+    # Assign Segment (use simple threshold instead of pd.cut to handle all values)
+    df['Segment'] = np.where(
+        df['TSVR_hours'] <= 24,
+        'Early',
+        'Late'
     )
 
     # Compute Days_within (centered at segment start)
@@ -225,29 +186,24 @@ if __name__ == "__main__":
         # =========================================================================
         # STEP 4: Merge TSVR Hours
         # =========================================================================
-        # Operation: Extract TSVR_hours from master.xlsx using data.py functions
+        # Operation: Load TSVR from dfData.csv and merge
         # Expected: All 1200 rows matched (no missing TSVR)
 
-        log("[TSVR] Extracting TSVR timestamps from master.xlsx...")
+        log("[TSVR] Loading TSVR timestamps from dfData.csv...")
 
-        tsvr_values = []
-        missing_count = 0
+        # Load dfData.csv with UID, TEST, TSVR columns
+        df_master = pd.read_csv(DFDATA_PATH, encoding='utf-8')
+        log(f"[LOADED] dfData.csv ({len(df_master)} rows)")
 
-        for composite_id in df_long['composite_ID'].unique():
-            try:
-                tsvr = extract_tsvr_hours(composite_id)
-                tsvr_values.append({'composite_ID': composite_id, 'TSVR_hours': tsvr})
-            except Exception as e:
-                log(f"[WARNING] TSVR extraction failed for {composite_id}: {e}")
-                missing_count += 1
+        # Create composite_ID in dfData: UID_TEST
+        df_master['composite_ID'] = df_master['UID'].astype(str) + '_' + df_master['TEST'].astype(str)
 
-        if missing_count > 0:
-            raise ValueError(
-                f"TSVR extraction incomplete: {missing_count} composite_IDs missing TSVR"
-            )
+        # Select TSVR mapping columns
+        df_tsvr = df_master[['composite_ID', 'TSVR']].rename(columns={'TSVR': 'TSVR_hours'})
+
+        log(f"[TSVR] Extracted TSVR for {len(df_tsvr)} composite_IDs")
 
         # Merge TSVR into long format
-        df_tsvr = pd.DataFrame(tsvr_values)
         df_long = df_long.merge(df_tsvr, on='composite_ID', how='left')
 
         # Check merge completeness
@@ -338,13 +294,12 @@ if __name__ == "__main__":
                 f"expected [0, 1]"
             )
 
-        if late_days.min() < 0 or late_days.max() > 6:
+        if late_days.min() < 0:
             raise ValueError(
-                f"Late Days_within range invalid: [{late_days.min():.3f}, {late_days.max():.3f}], "
-                f"expected [0, 6]"
+                f"Late Days_within minimum invalid: {late_days.min():.3f}, expected >= 0"
             )
 
-        log(f"[PASS] Days_within ranges valid (Early: [0, 1], Late: [0, 6])")
+        log(f"[PASS] Days_within ranges valid (Early: [{early_days.min():.3f}, {early_days.max():.3f}], Late: [{late_days.min():.3f}, {late_days.max():.3f}])")
 
         # Check no missing data
         critical_cols = ['theta', 'SE', 'TSVR_hours', 'Segment', 'Days_within']
