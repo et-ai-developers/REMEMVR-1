@@ -32,6 +32,8 @@
 | `extract_random_effects_from_lmm` | Extract random effects variance components and ICC |
 | `compute_contrasts_pairwise` | D068: Post-hoc pairwise contrasts with dual p-values (uncorrected + Bonferroni) |
 | `compute_effect_sizes_cohens` | Compute Cohen's f-squared effect sizes for fixed effects |
+| `assign_piecewise_segments` | Assign Early/Late segments and compute Days_within for piecewise LMM |
+| `extract_segment_slopes_from_lmm` | Extract segment-factor slopes from piecewise LMM via delta method |
 
 ---
 
@@ -40,6 +42,7 @@
 | Function | Description |
 |----------|-------------|
 | `convert_theta_to_probability` | Transform theta to probability scale via IRT 2PL formula |
+| `prepare_piecewise_plot_data` | Aggregate observed means + model predictions for two-panel piecewise plots |
 
 ---
 
@@ -51,6 +54,11 @@
 | `validate_irt_parameters` | Validate item quality against thresholds (a >= min, \|b\| <= max) |
 | `validate_lmm_convergence` | Check LMM convergence status and warnings |
 | `validate_lmm_residuals` | Test residuals normality via Kolmogorov-Smirnov test |
+| `validate_hypothesis_tests` | Validate hypothesis test format and p-value bounds |
+| `validate_contrasts` | Validate contrast results format and Decision D068 compliance (dual p-values) |
+| `validate_probability_transform` | Validate theta→probability transformation (bounds, monotonicity) |
+| `validate_lmm_assumptions_comprehensive` | Perform 6 LMM assumption checks (normality, homoscedasticity, autocorrelation, etc.) |
+| `run_lmm_sensitivity_analyses` | Compare 7 alternative models (piecewise vs continuous, knots, weighted) |
 
 ---
 

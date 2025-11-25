@@ -659,3 +659,179 @@ def plot_trajectory_probability(
     print("=" * 60 + "\n")
 
     return fig, ax, prob_data
+
+
+def prepare_piecewise_plot_data(
+    df_input: pd.DataFrame,
+    lmm_result,
+    segment_col: str,
+    factor_col: str,
+    segment_values: List[str],
+    factor_values: List[str],
+    days_within_col: str = 'Days_within',
+    theta_col: str = 'theta',
+    early_grid_points: int = 20,
+    late_grid_points: int = 60,
+    ci_level: float = 0.95
+) -> Dict[str, pd.DataFrame]:
+    """
+    Prepare piecewise trajectory plot data with observed means and model predictions.
+
+    Aggregates observed theta scores by segment and factor, computes 95% CI, and
+    generates model predictions on a grid of Days_within values for smooth trajectory
+    lines. Designed for piecewise LMM plots with separate Early and Late panels.
+
+    Args:
+        df_input: Input DataFrame with piecewise LMM data
+                  Required columns: segment_col, factor_col, days_within_col, theta_col
+        lmm_result: Fitted LMM model object (statsmodels MixedLMResults)
+        segment_col: Column name for segment variable (e.g., 'Segment')
+        factor_col: Column name for factor variable (e.g., 'Congruence', 'domain')
+        segment_values: List of segment names, first is Early (e.g., ['Early', 'Late'])
+        factor_values: List of factor levels (e.g., ['Common', 'Congruent', 'Incongruent'])
+        days_within_col: Column name for within-segment time (default: 'Days_within')
+        theta_col: Column name for theta scores (default: 'theta')
+        early_grid_points: Number of prediction points for Early segment (default: 20)
+        late_grid_points: Number of prediction points for Late segment (default: 60)
+        ci_level: Confidence interval level (default: 0.95)
+
+    Returns:
+        Dict with keys 'early' and 'late', each containing a DataFrame with columns:
+        - Days_within: Time within segment
+        - {factor_col}: Factor level
+        - theta_observed: Observed mean theta
+        - CI_lower_observed: Lower CI bound
+        - CI_upper_observed: Upper CI bound
+        - theta_predicted: Model predicted theta
+        - Data_Type: 'observed' or 'predicted'
+
+    Example:
+        >>> plot_data = prepare_piecewise_plot_data(
+        ...     df_input=df_piecewise,
+        ...     lmm_result=lmm_model,
+        ...     segment_col='Segment',
+        ...     factor_col='Congruence',
+        ...     segment_values=['Early', 'Late'],
+        ...     factor_values=['Common', 'Congruent', 'Incongruent']
+        ... )
+        >>> df_early = plot_data['early']  # Early segment plot data
+        >>> df_late = plot_data['late']    # Late segment plot data
+
+    Reference:
+        Based on RQ 5.2 step05_prepare_piecewise_plot_data.py but generalized
+        for any segment/factor variable names.
+    """
+    # Determine Early vs Late segment names
+    early_segment = segment_values[0]
+    late_segment = segment_values[1] if len(segment_values) > 1 else segment_values[0]
+
+    # Calculate z-score for CI
+    from scipy import stats as scipy_stats
+    z_score = scipy_stats.norm.ppf((1 + ci_level) / 2)
+
+    # Prepare output storage
+    result = {}
+
+    # Process each segment separately
+    for segment_name, segment_value, grid_points, max_days in [
+        ('early', early_segment, early_grid_points, 1.0),
+        ('late', late_segment, late_grid_points, 6.0)
+    ]:
+        # Filter data for this segment
+        df_segment = df_input[df_input[segment_col] == segment_value].copy()
+
+        if len(df_segment) == 0:
+            # Create empty dataframe if no data for this segment
+            result[segment_name] = pd.DataFrame(columns=[
+                days_within_col, factor_col, 'theta_observed',
+                'CI_lower_observed', 'CI_upper_observed',
+                'theta_predicted', 'Data_Type'
+            ])
+            continue
+
+        # Aggregate observed data by factor ONLY (not by days_within since it varies)
+        # We'll compute overall observed mean + CI for each factor level
+        grouped = df_segment.groupby([factor_col])[theta_col].agg(
+            theta_mean=('mean'),
+            theta_sem=('sem'),
+            n=('count')
+        ).reset_index()
+
+        # Compute representative Days_within (median for this factor-segment combo)
+        days_median = df_segment.groupby([factor_col])[days_within_col].median().reset_index()
+        grouped = grouped.merge(days_median, on=factor_col)
+
+        # Compute 95% CI
+        grouped['CI_lower_observed'] = grouped['theta_mean'] - z_score * grouped['theta_sem']
+        grouped['CI_upper_observed'] = grouped['theta_mean'] + z_score * grouped['theta_sem']
+        grouped['Data_Type'] = 'observed'
+
+        # Rename for output consistency
+        grouped = grouped.rename(columns={'theta_mean': 'theta_observed'})
+
+        # Generate prediction grid for smooth trajectories
+        pred_data = []
+        days_grid = np.linspace(0, max_days, grid_points)
+
+        for factor in factor_values:
+            for days_val in days_grid:
+                # Create row for prediction
+                pred_row = pd.DataFrame({
+                    segment_col: [segment_value],
+                    factor_col: [factor],
+                    days_within_col: [days_val]
+                })
+
+                try:
+                    # Get model prediction (population-level only, no random effects)
+                    pred_theta = lmm_result.predict(pred_row)
+                    theta_pred_val = pred_theta.values[0] if hasattr(pred_theta, 'values') else pred_theta[0]
+                except Exception as e:
+                    # Fallback to NaN if prediction fails
+                    theta_pred_val = np.nan
+
+                pred_data.append({
+                    days_within_col: days_val,
+                    factor_col: factor,
+                    'theta_observed': np.nan,
+                    'CI_lower_observed': np.nan,
+                    'CI_upper_observed': np.nan,
+                    'theta_predicted': theta_pred_val,
+                    'Data_Type': 'predicted'
+                })
+
+        df_predictions = pd.DataFrame(pred_data)
+
+        # For observed data, get corresponding predictions at the median Days_within
+        for idx, row in grouped.iterrows():
+            pred_row = pd.DataFrame({
+                segment_col: [segment_value],
+                factor_col: [row[factor_col]],
+                days_within_col: [row[days_within_col]]
+            })
+
+            try:
+                pred_theta = lmm_result.predict(pred_row)
+                grouped.loc[idx, 'theta_predicted'] = pred_theta.values[0] if hasattr(pred_theta, 'values') else pred_theta[0]
+            except Exception:
+                grouped.loc[idx, 'theta_predicted'] = np.nan
+
+        # Combine observed and predictions
+        # Select and reorder columns
+        observed_cols = [days_within_col, factor_col, 'theta_observed',
+                        'CI_lower_observed', 'CI_upper_observed',
+                        'theta_predicted', 'Data_Type']
+
+        # Ensure all columns exist
+        for col in observed_cols:
+            if col not in grouped.columns:
+                grouped[col] = np.nan
+
+        grouped_clean = grouped[observed_cols]
+
+        df_combined = pd.concat([grouped_clean, df_predictions], ignore_index=True)
+        df_combined = df_combined.sort_values([factor_col, days_within_col])
+
+        result[segment_name] = df_combined
+
+    return result
