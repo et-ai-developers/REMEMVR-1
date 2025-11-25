@@ -217,13 +217,13 @@ if __name__ == "__main__":
             "seed": 42,
             "model_fit": {
                 "batch_size": 2048,
-                "iw_samples": 100,
+                "iw_samples": 10,
                 "mc_samples": 1
             },
             "model_scores": {
                 "scoring_batch_size": 2048,
-                "mc_samples": 100,
-                "iw_samples": 100
+                "mc_samples": 10,
+                "iw_samples": 10
             }
         }
 
@@ -248,7 +248,10 @@ if __name__ == "__main__":
         theta_scores.to_csv(theta_output_path, index=False, encoding='utf-8')
         log(f"[SAVED] {theta_output_path.name} ({len(theta_scores)} rows, {len(theta_scores.columns)} cols)")
         log(f"  Theta_All range: [{theta_scores['Theta_All'].min():.3f}, {theta_scores['Theta_All'].max():.3f}]")
-        log(f"  SE_All range: [{theta_scores['SE_All'].min():.3f}, {theta_scores['SE_All'].max():.3f}]")
+        if 'SE_All' in theta_scores.columns:
+            log(f"  SE_All range: [{theta_scores['SE_All'].min():.3f}, {theta_scores['SE_All'].max():.3f}]")
+        else:
+            log(f"  SE_All: Not available with minimal settings")
 
         # Save item parameters (Pass 2 estimates)
         params_output_path = RQ_DIR / "logs" / "step03_item_parameters.csv"

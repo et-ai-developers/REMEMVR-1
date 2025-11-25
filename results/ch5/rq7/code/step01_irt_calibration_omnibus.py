@@ -148,7 +148,7 @@ if __name__ == "__main__":
         # Purpose: Raw VR item responses (0/1) for omnibus IRT calibration
 
         log("[LOAD] Loading VR item responses from RQ 5.1...")
-        input_path = Path("results/ch5/rq1/data/step00_irt_input.csv")
+        input_path = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data" / "step00_irt_input.csv"
         df_wide = pd.read_csv(input_path, encoding='utf-8')
         log(f"[LOADED] {input_path.name} ({len(df_wide)} rows, {len(df_wide.columns)} cols)")
 
@@ -316,22 +316,22 @@ if __name__ == "__main__":
             df_items = df_items.rename(columns=column_renames)
             log(f"[RENAME] Item parameters: {column_renames}")
 
-        # Add dimension column if missing (omnibus model has single 'All' dimension)
-        if 'dimension' not in df_items.columns:
-            df_items['dimension'] = 'All'
-            log("[TRANSFORM] Added dimension='All' column to item parameters")
+        # Add factor column if missing (omnibus model has single 'All' factor)
+        if 'factor' not in df_items.columns:
+            df_items['factor'] = 'All'
+            log("[TRANSFORM] Added factor='All' column to item parameters")
 
         # Validate items output columns
-        required_item_cols = ['item_name', 'dimension', 'a', 'b']
+        required_item_cols = ['item_name', 'factor', 'a', 'b']
         missing_cols = [col for col in required_item_cols if col not in df_items.columns]
         if missing_cols:
             raise ValueError(f"Missing expected item columns: {missing_cols}")
 
-        # Verify all items assigned to 'All' dimension
-        unique_dims = df_items['dimension'].unique().tolist()
-        if len(unique_dims) != 1 or unique_dims[0] != 'All':
-            raise ValueError(f"Expected all items dimension='All', found: {unique_dims}")
-        log(f"[VALIDATE] All {len(df_items)} items assigned to dimension='All'")
+        # Verify all items assigned to 'All' factor
+        unique_factors = df_items['factor'].unique().tolist()
+        if len(unique_factors) != 1 or unique_factors[0] != 'All':
+            raise ValueError(f"Expected all items factor='All', found: {unique_factors}")
+        log(f"[VALIDATE] All {len(df_items)} items assigned to factor='All'")
 
         # =========================================================================
         # STEP 7: Save Analysis Outputs
