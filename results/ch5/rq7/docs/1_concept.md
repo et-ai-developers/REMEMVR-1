@@ -103,11 +103,15 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 
 **Step 0:** Get IRT input data from RQ 5.1 (results/ch5/rq1/data/step00_irt_input.csv)
 
-**Step 1:** Run IRT calibration - Single omnibus factor "All" (aggregates all items), p1_med prior, 2-category GRM, extract theta scores (Theta_All)
+**Step 1:** IRT Pass 1 - Calibrate single omnibus factor "All" (all items), p1_med prior, 2-category GRM, extract Pass 1 theta scores and item parameters
 
-**Step 2:** Data preparation - Rename Theta_All to Theta, create time transformations (Days, Days², log(Days+1)), validate completeness (400 observations = 100 UIDs × 4 tests)
+**Step 2:** Item Purification - Apply Decision D039 thresholds (exclude items with |b| > 3.0 OR a < 0.4), create purified item list
 
-**Step 3:** Fit 5 candidate LMMs with different functional forms:
+**Step 3:** IRT Pass 2 - Re-calibrate with purified items only, extract final theta scores (Theta_All)
+
+**Step 4:** Data preparation - Rename Theta_All to Theta, merge with TSVR data, create time transformations (Days, Days², log(Days+1)), validate completeness (400 observations = 100 UIDs × 4 tests)
+
+**Step 5:** Fit 5 candidate LMMs with different functional forms:
   - Linear: Theta ~ Time
   - Quadratic: Theta ~ Time + Time²
   - Logarithmic: Theta ~ log(Time+1)
@@ -116,11 +120,16 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
   - All models: Random intercepts and random slopes by UID
   - Fit with REML=False for valid AIC comparison
 
-**Step 4:** Model selection via AIC - Compute AIC, BIC, log-likelihood for all 5 models, calculate Akaike weights (relative evidence, sum to 1.0), select best model via lowest AIC, save comparison table (CSV) and best model pickle
+**Step 6:** Model selection via AIC - Compute AIC, BIC, log-likelihood for all 5 models, calculate Akaike weights (relative evidence, sum to 1.0), select best model via lowest AIC, save comparison table (CSV) and best model pickle
 
-**Step 5:** Interpret model weights - Categorize uncertainty based on best model's Akaike weight (>0.90 = very strong, 0.60-0.90 = strong, 0.30-0.60 = moderate, <0.30 = high uncertainty), if high uncertainty compute cumulative weight for top 3 models
+**Step 7:** Prepare plot data - Create dual-scale (theta + probability) plot data with observed means and predicted trajectories for best model
 
-**Step 6:** Visualization - Multi-panel plot showing all 5 candidate model fits with observed means + error bars, overlay each model's predictions, highlight best model with annotation
+**Validation Steps:**
+- After Step 1: validate_irt_convergence, validate_irt_parameters
+- After Step 2: validate_purification_quality (retention rate, parameter distributions)
+- After Step 3: validate_irt_convergence, validate_irt_parameters (Pass 2)
+- After Step 5: validate_lmm_convergence (all 5 models)
+- After Step 6: validate_akaike_weights (sum=1.0, best model weight)
 
 **Data Preprocessing (Per Solution Section 1.4):**
 - **Accuracy Scores (-ANS tags):** Dichotomize before IRT: 1 = 1, all <1 = 0 (no partial credit)
@@ -129,6 +138,7 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 - **Likert Response Bias:** Document response style patterns (% using full range vs extremes), do NOT correct
 
 **Special Methods:**
+- **2-Pass IRT Purification (Decision D039):** Mandatory for ALL 50 RQs. Pass 1: calibrate all items. Pass 2: re-calibrate with purified items (|b| ≤ 3.0 AND a ≥ 0.4). Rationale: Extreme item parameters introduce systematic bias that distorts ability scores regardless of dimensionality. Evidence: 46% residual variance reduction in validated IRT settings. Applies to unidimensional RQ 5.7 despite being single-factor model (purification improves measurement quality, not just cross-dimensional contamination control).
 - **Single Omnibus Factor:** RQ 5.7 uses "All" factor (aggregates all items) unlike domain-specific RQs (What/Where/When factors)
 - **p1_med Prior:** Uses medium-precision prior for theta estimation (Decision D068, precision=1.0)
 - **REML=False:** Required for valid AIC comparison across models (REML likelihoods not comparable)

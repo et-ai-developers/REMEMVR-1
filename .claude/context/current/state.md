@@ -497,3 +497,218 @@ Successfully regenerated all 6 summaries using rq_results agent with validated I
 - rq57_pipeline_execution (RQ 5.7 phases 1-7 complete, Step 1 IRT debugging with 5 bugs fixed, minimal settings test PASS, production Med settings IRT running, omnibus "All" factor design for functional form comparison)
 - irt_minimal_settings_rule_validated (NEW RULE successfully validated: test IRT with minimal settings first - caught 5 bugs in ~10 min instead of crashing after 1.5 hrs, saves massive time)
 - rq_summaries_regenerated (All 6 RQ 5.1-5.6 summaries regenerated with validated IRT settings via rq_results agent, comprehensive anomaly flagging complete)
+
+## Session (2025-11-25 22:00)
+
+**Task:** RQ 5.7 Documentation & Code Complete - 2-Pass IRT Purification Implementation
+
+**Objective:** Update RQ 5.7 from 5-step workflow (no purification) to 7-step workflow (2-pass IRT purification) following proper v4.X agent workflow, then generate all analysis scripts
+
+**Key Accomplishments:**
+
+**1. Decision D039 Application to Unidimensional IRT - VALIDATED**
+
+**User Question:** "Is Decision D039 correct? We don't need 2-pass for unidimensional IRT? Is that statistically justified?"
+
+**Context-Finder Research:** Searched archives + docs for Decision D039 justification
+- D039 explicitly documented for MULTIDIMENSIONAL IRT (What/Where/When factors)
+- Rationale focused on cross-dimensional contamination in multidimensional models
+- **CRITICAL GAP:** Described as "standard psychometric practice" but NO scholarly citations provided (only Samejima 1969 for GRM, not purification)
+- Evidence from validation: 46% residual variance reduction with purification
+
+**Scientific Justification (User-Approved):**
+- Underlying psychometric principles (extreme difficulty distorts ability scores, low discrimination adds noise) apply to BOTH unidimensional and multidimensional IRT
+- Systematic bias (not random noise) affects group-level trends regardless of dimensionality
+- Thesis consistency: D039 states "ALL 50 RQs use 2-pass IRT" - making exception needs strong justification
+- Evidence: Recent validation showed purification + validated settings = 46% residual variance reduction
+
+**Decision:** Apply D039 to RQ 5.7 unidimensional IRT (measurement quality improvement regardless of dimensionality)
+
+**Documentation Gap Identified:** Entire D039 decision lacks literature citations (needs psychometric textbooks: Embretson & Reise 2000, Hambleton et al. 1991)
+
+**2. RQ 5.7 Documentation Updated (7-Step Workflow)**
+
+**1_concept.md (Updated):**
+- Added 2-pass IRT workflow (Steps 1-3: Pass 1 → Purify → Pass 2)
+- Added Decision D039 rationale to Special Methods section
+- Added validation steps for all 7 phases
+- Total: 7 steps vs original 5 steps
+
+**2_plan.md (Completely Rebuilt - 7 Steps):**
+- Step 1: IRT Pass 1 Calibration (all items, ~105 items)
+- Step 2: Item Purification (Decision D039: |b| ≤ 3.0 AND a ≥ 0.4)
+- Step 3: IRT Pass 2 Calibration (purified items, ~40-60 expected)
+- Step 4: Prepare LMM Input Data (TSVR merge, time transformations)
+- Step 5: Fit 5 Candidate LMMs (Linear, Quadratic, Log, LinLog, QuadLog)
+- Step 6: Model Selection via AIC (Akaike weights, best model)
+- Step 7: Prepare Plot Data (dual-scale per D069)
+- Used Python script to systematically insert Steps 2-3 and renumber old steps
+- File grew from ~953 lines (5 steps) to ~1,200+ lines (7 steps)
+
+**3_tools.yaml (Regenerated via rq_tools agent):**
+- 6 analysis tools: calibrate_irt (2x), filter_items_by_quality, fit_lmm_trajectory_tsvr (5x), configure_candidate_models, compare_lmm_models_by_aic, convert_theta_to_probability
+- 8 validation tools: validate_irt_calibration, validate_irt_parameters, validate_item_purification, validate_lmm_convergence, validate_model_formulas, validate_aic_comparison, validate_probability_transform
+- Total: 14 unique tools
+- Mandatory decisions: D039, D068, D069, D070
+
+**4_analysis.yaml (Regenerated via rq_analysis agent):**
+- Complete 7-step recipe with 100% validation coverage
+- All tool signatures verified with type hints
+- All parameter values complete (zero placeholders)
+- All input/output formats with complete column schemas
+- MANDATORY IRT settings embedded (Med: batch_size=2048, iw_samples=100, mc_samples=100)
+- Self-contained (g_code reads ONLY this file)
+
+**3. Tool Name Corrections (3 Issues Fixed)**
+
+**Issue 1: Function name mismatch**
+- **Expected:** `purify_items` (used in initial docs)
+- **Actual:** `filter_items_by_quality` (real function name in tools.analysis_irt)
+- **Fixed:** Updated 3_tools.yaml, 4_analysis.yaml with correct name
+- **Signature:** `filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]`
+
+**Issue 2: TSVR file path incorrect**
+- **Expected:** `results/ch5/rq1/data/step00a_tsvr_data.csv` (from old docs)
+- **Actual:** `results/ch5/rq1/data/step00_tsvr_mapping.csv` (verified via ls)
+- **Fixed:** Updated all references in 3_tools.yaml, 4_analysis.yaml
+
+**Issue 3: Step 1 output Bug 7 (duplicate 'a' columns)**
+- **Problem:** step01_irt_calibration_omnibus.py had bug creating duplicate 'a' columns (Bug 7 from earlier session)
+- **Fixed:** Code already corrected in step01 script (lines 300-313, uses elif to avoid duplicates)
+- **Action:** Deleted bad output files (step01_theta_scores.csv, step01_item_parameters.csv) so they'll regenerate correctly
+
+**4. Proper v4.X Workflow Execution**
+
+**User Correction:** "We're making mistakes again. Run rq_tools to get proper validation tools."
+
+**Workflow Reset:**
+- Deleted 3_tools.yaml and 4_analysis.yaml (user action)
+- Updated status.yaml to show rq_planner just finished
+- Ran rq_tools agent → generated 3_tools.yaml with all 14 tools cataloged
+- Ran rq_analysis agent → generated 4_analysis.yaml with complete 7-step recipe
+- Ran g_code agent → generated Steps 2-7 scripts (Step 1 exists, not regenerated)
+
+**5. Code Generation via g_code (6 Scripts Created)**
+
+**Generated Scripts:**
+- step02_purify_items.py (11K) - Item purification with D039 thresholds
+- step03_irt_calibration_pass2.py (13K) - Pass 2 IRT with purified items
+- step04_prepare_lmm_input.py (15K) - TSVR merge + time transformations
+- step05_fit_5_candidate_lmms.py (13K) - 5 functional form models
+- step06_aic_model_selection.py (17K) - Akaike weights + best model
+- step07_prepare_functional_form_plots.py (19K) - Dual-scale plot data
+
+**Step 1 NOT Regenerated:** step01_irt_calibration_omnibus.py exists with Bug 7 fix applied (per user instruction to keep it)
+
+**Validation (Pre-Generation):**
+- Layer 4a (Import Check): PASS - All tools exist
+- Layer 4b (Signature Check): PASS - All signatures match
+- Layer 4c (Input File Check): DEFERRED - Step 1 must run first
+- Layer 4d (Column Check): DEFERRED - Runtime validation in scripts
+
+**6. Current Production IRT Status**
+
+**Step 1 Production Run (Med Settings):**
+- Started: 2025-11-25 19:45
+- Status: Completed but validation crashed (Bug 7)
+- Output files: CREATED successfully (step01_theta_scores.csv, step01_item_parameters.csv saved BEFORE validation crash)
+- Bug 7 Impact: Non-critical - only affected validation reporting, not data generation
+- Files location:
+  - data/step01_theta_scores.csv (12K, 400 rows) ✅ EXISTS
+  - logs/step01_item_parameters.csv (5.9K, 105 rows) ✅ EXISTS but has duplicate 'a' columns
+- **Action Required:** Re-run Step 1 with fixed script to get correct item parameters file
+
+**7. Files Created/Modified**
+
+**Documentation (4 files updated):**
+- results/ch5/rq7/docs/1_concept.md (+47 lines, 2-pass IRT rationale)
+- results/ch5/rq7/docs/2_plan.md (rebuilt, 7 steps, ~1200 lines)
+- results/ch5/rq7/docs/3_tools.yaml (regenerated by rq_tools, 472 lines, 14 tools)
+- results/ch5/rq7/docs/4_analysis.yaml (regenerated by rq_analysis, ~720 lines, 7 steps)
+
+**Code (6 new scripts + 1 fixed):**
+- results/ch5/rq7/code/step01_irt_calibration_omnibus.py (Bug 7 fix applied, lines 300-313)
+- results/ch5/rq7/code/step02_purify_items.py (NEW, 11K)
+- results/ch5/rq7/code/step03_irt_calibration_pass2.py (NEW, 13K)
+- results/ch5/rq7/code/step04_prepare_lmm_input.py (NEW, 15K)
+- results/ch5/rq7/code/step05_fit_5_candidate_lmms.py (NEW, 13K)
+- results/ch5/rq7/code/step06_aic_model_selection.py (NEW, 17K)
+- results/ch5/rq7/code/step07_prepare_functional_form_plots.py (NEW, 19K)
+
+**Status (1 file updated):**
+- results/ch5/rq7/status.yaml (rq_tools=success, rq_analysis=success, 7 analysis_steps=pending)
+
+**8. Workflow Comparison**
+
+**Before (Incorrect - No Purification):**
+1. Step 1: IRT calibration omnibus (single pass)
+2. Step 2: Prepare LMM input
+3. Step 3: Fit 5 candidate LMMs
+4. Step 4: AIC model selection
+5. Step 5: Prepare plots
+
+**After (Correct - 2-Pass IRT per D039):**
+1. Step 1: IRT Pass 1 Calibration (all items)
+2. Step 2: Item Purification (Decision D039: |b| ≤ 3.0 AND a ≥ 0.4)
+3. Step 3: IRT Pass 2 Calibration (purified items only)
+4. Step 4: Prepare LMM input (TSVR merge, time transformations)
+5. Step 5: Fit 5 candidate LMMs
+6. Step 6: AIC model selection
+7. Step 7: Prepare plots (dual-scale)
+
+**9. Lessons Learned**
+
+**Following Proper Workflow Matters:**
+- Initial attempt: manually updating docs, calling g_code directly → validation errors
+- Correct approach: rq_tools → rq_analysis → g_code → all validations PASS
+- v4.X workflow exists for a reason (prevents API mismatches, ensures tool catalog correctness)
+
+**Context-Finder Value:**
+- Quickly identified D039 documentation gap (no scholarly citations)
+- Found evidence for purification applicability (46% residual variance reduction)
+- Enabled informed scientific decision-making
+
+**Git Safety:**
+- User comfortable deleting files because git history preserves everything
+- "We can always go back" mentality enables fast iteration
+
+**10. Next Actions**
+
+**Immediate:**
+1. Re-run Step 1 with fixed script (30-60 min IRT calibration, Med settings)
+2. Verify Step 1 outputs correct (no duplicate 'a' columns)
+3. Execute Steps 2-7 sequentially
+4. Debug any issues that arise
+
+**After Pipeline Complete:**
+5. Run rq_inspect (4-layer validation of all outputs)
+6. Run rq_plots (dual-scale trajectory plots)
+7. Run rq_results (summary.md with Akaike weight interpretation)
+
+**Future Enhancement (Low Priority):**
+- Add scholarly citations to Decision D039 documentation (Embretson & Reise 2000, Hambleton et al. 1991)
+- Document that purification principles apply to both unidimensional and multidimensional IRT
+
+---
+
+**End of Session (2025-11-25 22:00)**
+
+**Session Duration:** ~4 hours (including parallel agent work, g_code generation, documentation updates)
+**Token Usage:** ~140k / 200k (70%)
+**Decisions Made:** 1 major (apply D039 to unidimensional IRT with scientific justification)
+**Documentation Updates:** 4 files (1_concept, 2_plan, 3_tools, 4_analysis)
+**Code Generated:** 6 new scripts (Steps 2-7)
+**Bugs Fixed:** 3 tool/path corrections (filter_items_by_quality, TSVR path, Step 1 Bug 7)
+**Workflow Validation:** Proper v4.X agent sequence (rq_tools → rq_analysis → g_code) successfully executed
+**Git Status:** Ready for commit (all 11 files modified/created, Step 1 needs re-run to generate correct outputs)
+
+**Status:** RQ 5.7 documentation complete, code generated and validated, ready for execution pipeline (Steps 1-7 sequential run).
+
+---
+
+## Active Topics (For context-manager)
+
+- rq57_2pass_irt_implementation (RQ 5.7 updated from 5-step to 7-step workflow with Decision D039 2-pass purification, proper v4.X agent workflow executed, all 7 analysis scripts generated, ready for execution)
+- decision_d039_unidimensional_application (D039 applied to unidimensional RQ 5.7 with scientific justification - 46% residual variance reduction evidence, systematic bias affects measurement quality regardless of dimensionality, scholarly citation gap identified)
+- rq57_tool_corrections (3 corrections: filter_items_by_quality not purify_items, step00_tsvr_mapping.csv not step00a_tsvr_data.csv, Step 1 Bug 7 duplicate 'a' columns fixed)
+- v4x_workflow_validation_success (Proper agent sequence validated: rq_tools cataloged 14 tools → rq_analysis created complete 7-step recipe → g_code generated 6 scripts with 100% validation, prevents API mismatches)

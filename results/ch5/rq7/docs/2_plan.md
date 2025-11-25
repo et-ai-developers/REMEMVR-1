@@ -10,16 +10,16 @@
 
 This RQ determines which functional form best describes episodic forgetting trajectories across a 6-day retention interval. We compare 5 candidate mathematical models (Linear, Quadratic, Logarithmic, Linear+Logarithmic, Quadratic+Logarithmic) using model selection via AIC (Akaike Information Criterion).
 
-**Pipeline:** IRT (single omnibus factor) -> LMM (5 candidate models) -> AIC model selection
+**Pipeline:** 2-Pass IRT (single omnibus factor with purification) -> LMM (5 candidate models) -> AIC model selection
 
-**Steps:** 5 analysis steps (Step 1: IRT calibration, Step 2: Data prep, Step 3: LMM fitting, Step 4: Model selection, Step 5: Plot preparation)
+**Steps:** 7 analysis steps (Step 1: IRT Pass 1, Step 2: Item purification, Step 3: IRT Pass 2, Step 4: Data prep, Step 5: LMM fitting, Step 6: Model selection, Step 7: Plot preparation)
 
-**Estimated Runtime:** Medium (Step 1: 30-60 min IRT calibration, Steps 2-5: <10 min total)
+**Estimated Runtime:** High (Step 1: 30-60 min IRT Pass 1, Step 3: 20-40 min IRT Pass 2, Steps 2/4-7: <10 min total)
 
 **Key Decisions Applied:**
+- Decision D039: 2-Pass IRT purification (|b| ≤ 3.0 AND a ≥ 0.4) - APPLIES to unidimensional RQ 5.7 (improves measurement quality regardless of dimensionality)
 - Decision D070: TSVR as time variable (actual hours since encoding, not nominal days)
 - Decision D069: Dual-scale trajectory plots (theta + probability scales)
-- Decision D039: NOT applied (single-factor IRT, no 2-pass purification needed for omnibus analysis)
 
 **Critical Design Note:**
 RQ 5.7 uses DERIVED data from RQ 5.1 (step00_irt_input.csv). We reprocess this data with "All" factor configuration (single omnibus dimension aggregating all What/Where/When items) instead of domain-specific factors. Different IRT configuration yields theta estimates optimized for overall forgetting trajectory, not domain-specific patterns.
@@ -28,14 +28,14 @@ RQ 5.7 uses DERIVED data from RQ 5.1 (step00_irt_input.csv). We reprocess this d
 
 ## Analysis Plan
 
-This RQ requires 5 steps:
+This RQ requires 7 steps (2-pass IRT with purification):
 
-### Step 1: IRT Calibration with Omnibus Factor
+### Step 1: IRT Pass 1 Calibration (All Items)
 
 **Dependencies:** RQ 5.1 Step 0 complete (requires step00_irt_input.csv)
 **Complexity:** High (30-60 minute IRT model calibration)
 
-**Purpose:** Calibrate IRT model with single "All" factor aggregating all VR items (What/Where/When combined) to estimate overall episodic memory ability per participant x test.
+**Purpose:** Calibrate IRT model with single "All" factor on complete item set (all 105 items) to establish baseline item parameters for purification. This is Pass 1 of 2-pass IRT per Decision D039.
 
 **Input:**
 
@@ -126,9 +126,179 @@ Validation tools MUST be used after IRT calibration tool execution. Specific val
 
 ---
 
-### Step 2: Prepare LMM Input Data
+### Step 2: Item Purification (Decision D039)
 
-**Dependencies:** Step 1 (requires theta scores)
+**Dependencies:** Step 1 (requires Pass 1 item parameters)
+**Complexity:** Low (<1 min, simple filtering)
+
+**Purpose:** Apply Decision D039 purification thresholds to identify high-quality items for Pass 2 calibration. Exclude items with extreme difficulty (|b| > 3.0) or poor discrimination (a < 0.4).
+
+**Input:**
+
+**File:** logs/step01_item_parameters.csv (from Step 1 Pass 1)
+**Format:** CSV, one row per item
+**Columns:** item_name, dimension, a, b
+**Expected Rows:** ~105 items (all What/Where/When items)
+
+**Processing:**
+
+**Tool:** tools.analysis_irt.purify_items()
+
+**Purification Criteria (Decision D039):**
+1. Difficulty threshold: |b| ≤ 3.0 (extreme difficulty distorts ability scores)
+2. Discrimination threshold: a ≥ 0.4 (low discrimination adds noise without signal)
+3. Exclusion rule: Items failing EITHER criterion are excluded (logical OR)
+
+**Method:**
+1. Read step01_item_parameters.csv (Pass 1 results)
+2. Apply purification thresholds via purify_items() tool
+3. Create purified item list (items meeting BOTH criteria)
+4. Compute retention statistics (% retained per domain if desired, omnibus has no domains)
+5. Save purified item list for Pass 2 calibration
+
+**Output:**
+
+**File:** data/step02_purified_items.csv
+**Format:** CSV, one row per retained item
+**Columns:**
+  - `item_name` (string, format: TQ_* per REMEMVR naming)
+  - `pass1_a` (float, Pass 1 discrimination)
+  - `pass1_b` (float, Pass 1 difficulty)
+  - `dimension` (string, value: "All")
+**Expected Rows:** ~40-60 items (40-60% retention typical for REMEMVR per RQ 5.1 evidence)
+
+**Validation Requirement:**
+
+Validation tools MUST be used after purification. The rq_analysis agent will embed validation tool calls.
+
+**Substance Validation Criteria (for rq_inspect post-execution validation):**
+
+*Output Files:*
+- data/step02_purified_items.csv: 40-60 rows x 4 columns (item_name: object, pass1_a: float64, pass1_b: float64, dimension: object)
+
+*Value Ranges:*
+- pass1_a ≥ 0.4 (purification threshold enforced)
+- |pass1_b| ≤ 3.0 (purification threshold enforced)
+- Retention rate: 30-70% typical (below 30% = too restrictive, above 70% = purification ineffective)
+
+*Data Quality:*
+- No duplicate item_names
+- All items have dimension = "All"
+- No NaN values
+
+**Expected Behavior on Validation Failure:**
+- If retention rate < 30%: Log warning "Low retention rate may indicate poor item quality" but proceed
+- If retention rate < 10%: Raise error "Insufficient items for Pass 2 calibration"
+- If all items excluded: Raise error "No items passed purification thresholds"
+
+---
+
+### Step 3: IRT Pass 2 Calibration (Purified Items)
+
+**Dependencies:** Step 2 (requires purified item list)
+**Complexity:** High (20-40 min IRT calibration, fewer items than Pass 1)
+
+**Purpose:** Re-calibrate IRT model with purified item set only to obtain final theta estimates with improved measurement quality. This is Pass 2 of 2-pass IRT per Decision D039.
+
+**Input:**
+
+**File 1:** results/ch5/rq1/data/step00_irt_input.csv (same raw data as Step 1)
+**Source:** RQ 5.1 Step 0
+**Format:** CSV, wide format
+**Expected Rows:** 400
+
+**File 2:** data/step02_purified_items.csv (from Step 2)
+**Source:** Step 2 purification
+**Format:** CSV, list of retained items
+**Expected Rows:** ~40-60 items
+
+**Processing:**
+
+**Tool:** tools.analysis_irt.calibrate_irt()
+
+**Configuration:**
+- Single factor: "All" (same as Pass 1)
+- Prior: p1_med (medium-precision theta prior)
+- Model: GRM with 2 categories
+- Items: ONLY purified items (filtered from step00_irt_input.csv using step02_purified_items.csv)
+
+**Method:**
+1. Read step00_irt_input.csv (raw item responses)
+2. Read step02_purified_items.csv (purified item list)
+3. Filter step00_irt_input.csv to include ONLY purified items
+4. Configure IRT model with "All" analysis set (single factor)
+5. Fit GRM model via variational inference
+6. Extract Pass 2 theta scores (final ability estimates)
+7. Extract Pass 2 item parameters (for diagnostics)
+8. Save outputs to data/ and logs/
+
+**Output:**
+
+**File 1:** data/step03_theta_scores.csv (FINAL theta estimates for LMM)
+**Format:** CSV, one row per composite_ID
+**Columns:**
+  - `composite_ID` (string, format: UID_test)
+  - `Theta_All` (float, final IRT ability estimate, range typically -3 to +3)
+  - `SE_All` (float, standard error of theta estimate, typically 0.1-1.0)
+**Expected Rows:** 400 (100 participants x 4 tests)
+
+**File 2:** logs/step03_item_parameters.csv
+**Format:** CSV, one row per purified item
+**Columns:**
+  - `item_name` (string)
+  - `dimension` (string, value: "All")
+  - `a` (float, Pass 2 discrimination)
+  - `b` (float, Pass 2 difficulty)
+**Expected Rows:** ~40-60 items (matches step02_purified_items.csv count)
+
+**File 3:** logs/step03_calibration.log
+**Format:** Text log with IRT convergence diagnostics
+**Content:** Convergence status, final log-likelihood, parameter bounds, warnings
+
+**Validation Requirement:**
+
+Validation tools MUST be used after Pass 2 calibration. The rq_analysis agent will embed validation tool calls.
+
+**Substance Validation Criteria (for rq_inspect post-execution validation):**
+
+*Output Files:*
+- data/step03_theta_scores.csv: 400 rows x 3 columns (composite_ID: object, Theta_All: float64, SE_All: float64)
+- logs/step03_item_parameters.csv: 40-60 rows x 4 columns (item_name: object, dimension: object, a: float64, b: float64)
+- logs/step03_calibration.log: text file with convergence diagnostics
+
+*Value Ranges:*
+- Theta_All in [-4, 4] (typical IRT ability range)
+- SE_All in [0.1, 1.5] (above 1.5 = unreliable estimates)
+- a (discrimination) ≥ 0.4 (purification threshold, should be maintained or improved)
+- |b| (difficulty) ≤ 3.0 (purification threshold, should be maintained)
+
+*Data Quality:*
+- All 400 composite_IDs present (no data loss during calibration)
+- No NaN values in Theta_All or SE_All
+- Item count matches step02_purified_items.csv (no items lost during calibration)
+- All items have dimension = "All"
+
+*Comparison to Pass 1:*
+- SE_All should be equal or lower than Pass 1 (purification improves precision)
+- Theta_All correlation with Pass 1 should be high (r > 0.80, measuring same construct)
+
+*Log Validation:*
+- Required pattern: "Model converged: True" or "Convergence achieved"
+- Required pattern: "VALIDATION - PASS: theta range"
+- Forbidden patterns: "ERROR", "CONVERGENCE FAILED", "NaN parameters"
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure message
+- Log failure to logs/step03_calibration.log
+- Quit script immediately (do NOT proceed to Step 4)
+- g_debug invoked to diagnose root cause
+
+---
+
+
+### Step 4: Prepare LMM Input Data
+
+**Dependencies:** Step 3 (requires theta scores)
 **Complexity:** Low (<5 min data transformation)
 
 **Purpose:** Transform IRT output to LMM-ready format with time variable transformations (TSVR hours, Days, Days^2, log(Days+1)) and clean column naming.
@@ -219,9 +389,9 @@ Validation tools MUST be used after data preparation tool execution. Specific va
 
 ---
 
-### Step 3: Fit 5 Candidate LMM Models
+### Step 5: Fit 5 Candidate LMM Models
 
-**Dependencies:** Step 2 (requires LMM input data)
+**Dependencies:** Step 4 (requires LMM input data)
 **Complexity:** Medium (5-10 min to fit 5 models)
 
 **Purpose:** Fit 5 candidate Linear Mixed Models representing different functional forms of forgetting trajectories. All models use random intercepts and random slopes by UID. Fit with REML=False for valid AIC comparison.
@@ -333,9 +503,9 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 
 ---
 
-### Step 4: Model Selection via AIC
+### Step 6: Model Selection via AIC
 
-**Dependencies:** Step 3 (requires fitted models and AIC values)
+**Dependencies:** Step 5 (requires fitted models and AIC values)
 **Complexity:** Low (<2 min calculation)
 
 **Purpose:** Select best-fitting model using Akaike Information Criterion (AIC) and compute Akaike weights to quantify relative evidence for each candidate model.
@@ -445,7 +615,7 @@ Validation tools MUST be used after model selection tool execution. Specific val
 
 ---
 
-### Step 5: Prepare Multi-Panel Plot Data
+### Step 7: Prepare Multi-Panel Plot Data
 
 **Dependencies:** Steps 2, 3, 4 (requires LMM input data, all 5 fitted models, best model identification)
 **Complexity:** Low (<5 min data aggregation)

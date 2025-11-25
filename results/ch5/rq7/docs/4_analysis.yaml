@@ -9,12 +9,10 @@
 
 metadata:
   rq_id: "ch5/rq7"
-  total_steps: 5
-  analysis_type: "IRT single-factor -> LMM 5-model comparison -> AIC selection"
+  total_steps: 7
+  analysis_type: "IRT 2-pass purification -> 5-model LMM comparison -> AIC selection"
   generated_by: "rq_analysis v4.0.0"
   timestamp: "2025-11-25T00:00:00Z"
-  cross_rq_dependencies:
-    - "RQ 5.1 Step 0 (requires step00_irt_input.csv and step00a_tsvr_data.csv)"
 
 # ============================================================================
 # ANALYSIS STEPS - COMPLETE SPECIFICATIONS
@@ -22,580 +20,775 @@ metadata:
 
 steps:
   # --------------------------------------------------------------------------
-  # STEP 1: IRT Calibration with Omnibus Factor
+  # STEP 1: IRT CALIBRATION PASS 1 (All Items)
   # --------------------------------------------------------------------------
-  - name: "step01_irt_calibration_omnibus"
+  - name: "step01_irt_calibration_pass1"
     step_number: "01"
-    description: "Calibrate single-factor IRT model with 'All' omnibus dimension aggregating all What/Where/When items"
+    description: "Calibrate single-factor GRM on all items (baseline for purification)"
 
-    # Analysis tool specification
-    tool:
+    analysis_call:
+      type: "catalogued"
       module: "tools.analysis_irt"
       function: "calibrate_irt"
       signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
 
-    # Input specifications (COMPLETE)
-    inputs:
-      data_file:
-        path: "../../rq1/data/step00_irt_input.csv"
-        format: "CSV with UTF-8 encoding, wide format"
-        columns:
-          - {name: "composite_ID", type: "str", description: "UID_test format (e.g., P001_T1)"}
-          - {name: "VR item response columns", type: "int", description: "Item response columns (VR-*-*-*-ANS format), values 0 or 1"}
-        row_count: 400
-        description: "Wide-format IRT input from RQ 5.1, reprocessed with single 'All' factor instead of What/Where/When"
+      input_files:
+        - path: "results/ch5/rq1/data/step00_irt_input.csv"
+          source: "RQ 5.1 Step 0 (DERIVED data - VR item responses extracted from master.xlsx)"
+          format: "CSV, wide format (composite_ID x item columns)"
+          required_columns:
+            - name: "composite_ID"
+              type: "str"
+              description: "UID_test format (e.g., P001_T1)"
+          variable_name: "irt_data"
+          expected_rows: 400
+          notes: "All What/Where/When items from interactive paradigms"
 
-    # Parameter values (COMPLETE - from 2_plan.md + MANDATORY IRT config)
-    parameters:
-      df_long: "irt_data"
-      groups:
-        All:
-          - "all VR items from step00_irt_input.csv"
-          - "includes What items (VR-*-*-N-ANS)"
-          - "includes Where items (VR-*-*-U-ANS, VR-*-*-D-ANS)"
-          - "includes When items (VR-*-*-T-ANS)"
-      config:
-        factors: ["All"]
-        correlated_factors: false
-        device: "cpu"
-        seed: 42
-        n_cats: 2
-        model_fit:
-          batch_size: 2048
-          iw_samples: 100
-          mc_samples: 1
-        model_scores:
-          scoring_batch_size: 2048
-          mc_samples: 100
-          iw_samples: 100
-        max_iter: 200
+      output_files:
+        - path: "data/step01_theta_scores.csv"
+          format: "CSV, one row per composite_ID"
+          columns:
+            - name: "composite_ID"
+              type: "str"
+              description: "UID_test format"
+            - name: "Theta_All"
+              type: "float64"
+              description: "IRT ability estimate for omnibus 'All' factor"
+              range: "[-4, 4] typical"
+            - name: "SE_All"
+              type: "float64"
+              description: "Standard error of theta estimate"
+              range: "[0.1, 1.5] typical"
+          expected_rows: 400
+          variable_name: "theta_scores"
+          description: "Pass 1 theta estimates (all items, before purification)"
 
-    # Output specifications (COMPLETE)
-    outputs:
-      theta_scores:
-        path: "data/step01_theta_scores.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "composite_ID", type: "str", description: "UID_test format"}
-          - {name: "Theta_All", type: "float", description: "IRT ability estimate for omnibus 'All' factor"}
-          - {name: "SE_All", type: "float", description: "Standard error of theta estimate"}
-        row_count: 400
-        description: "Person ability estimates from single-factor omnibus calibration"
+        - path: "logs/step01_item_parameters.csv"
+          format: "CSV, one row per item"
+          columns:
+            - name: "item_name"
+              type: "str"
+              description: "Item identifier (VR-* format)"
+            - name: "dimension"
+              type: "str"
+              description: "Factor assignment (value: 'All' for all items)"
+            - name: "a"
+              type: "float64"
+              description: "Discrimination parameter"
+              range: ">0.0, typically [0.2, 4.0]"
+            - name: "b"
+              type: "float64"
+              description: "Difficulty parameter"
+              range: "unrestricted (temporal items may have |b|>3.0)"
+          expected_rows: 105
+          variable_name: "item_params"
+          description: "Pass 1 item parameters for purification decision"
 
-      item_parameters:
-        path: "logs/step01_item_parameters.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "item_name", type: "str", description: "Item identifier (VR-*-*-*-ANS format)"}
-          - {name: "dimension", type: "str", description: "Factor name (all items = 'All')"}
-          - {name: "a", type: "float", description: "Discrimination parameter (>0.0)"}
-          - {name: "b", type: "float", description: "Difficulty parameter (unrestricted)"}
-        row_count: "150-200"
-        description: "IRT item parameters for all items assigned to 'All' factor"
+        - path: "logs/step01_calibration.log"
+          format: "Text log"
+          description: "IRT convergence diagnostics"
+          variable_name: "log_file"
 
-      calibration_log:
-        path: "logs/step01_calibration.log"
-        format: "Text log file"
-        description: "IRT convergence diagnostics and parameter summaries"
+      parameters:
+        df_long: "irt_data"
+        groups:
+          All:
+            - "VR-*"
+        config:
+          factors:
+            - "All"
+          correlated_factors: false
+          device: "cpu"
+          seed: 42
+          model_fit:
+            batch_size: 2048
+            iw_samples: 100
+            mc_samples: 1
+          model_scores:
+            scoring_batch_size: 2048
+            mc_samples: 100
+            iw_samples: 100
 
-    # Validation tool specification (MANDATORY)
-    validation:
-      tool:
-        module: "tools.validation"
-        function_convergence: "validate_irt_convergence"
-        function_parameters: "validate_irt_parameters"
-        signature_convergence: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
-        signature_parameters: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_scores, item_params"
 
-      inputs:
-        theta_scores:
-          path: "data/step01_theta_scores.csv"
-          description: "Output from calibrate_irt (theta scores)"
-        item_parameters:
-          path: "logs/step01_item_parameters.csv"
-          description: "Output from calibrate_irt (item parameters)"
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "logs/step01_item_parameters.csv"
+          source: "analysis call output (calibrate_irt return value[1])"
+          variable_name: "item_params"
+        - path: "data/step01_theta_scores.csv"
+          source: "analysis call output (calibrate_irt return value[0])"
+          variable_name: "theta_scores"
+
+      parameters:
+        results:
+          item_params: "item_params"
+          theta_scores: "theta_scores"
+          log_file: "logs/step01_calibration.log"
 
       criteria:
-        - name: "Model convergence"
-          check: "Convergence status = True, loss stabilized"
-          severity: "CRITICAL"
-        - name: "Theta range"
-          check: "All Theta_All in [-4, 4]"
-          severity: "CRITICAL"
-        - name: "SE range"
-          check: "All SE_All in [0.1, 1.5]"
-          severity: "CRITICAL"
-        - name: "Discrimination bounds"
-          check: "All a > 0.0"
-          severity: "CRITICAL"
-        - name: "Single factor assignment"
-          check: "All items have dimension = 'All'"
-          severity: "CRITICAL"
-        - name: "No missing values"
-          check: "No NaN in theta scores or item parameters"
-          severity: "CRITICAL"
-        - name: "Complete data"
-          check: "All 400 composite_IDs present"
-          severity: "CRITICAL"
+        - "Model converged (loss function stabilized)"
+        - "Theta estimates in [-4, 4] range"
+        - "SE estimates in [0.1, 1.5] range"
+        - "Item discrimination a > 0"
+        - "All 400 composite_IDs present"
+        - "No NaN values"
 
       on_failure:
-        action: "QUIT"
-        message: "IRT calibration failed validation - see logs/step01_calibration.log"
+        action: "raise ValueError"
+        log_to: "logs/step01_calibration.log"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step01_calibration.log"
 
   # --------------------------------------------------------------------------
-  # STEP 2: Prepare LMM Input Data
+  # STEP 2: ITEM PURIFICATION (Decision D039)
   # --------------------------------------------------------------------------
-  - name: "step02_prepare_lmm_input"
+  - name: "step02_purify_items"
     step_number: "02"
-    description: "Transform IRT output to LMM-ready format with time variable transformations (TSVR hours, Days, Days^2, log(Days+1))"
+    description: "Apply Decision D039 thresholds (|b|<=3.0, a>=0.4) to identify high-quality items"
 
-    # This is stdlib operations (pandas/numpy data transformation)
-    tool:
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "logs/step01_item_parameters.csv"
+          source: "Step 1 output"
+          required_columns:
+            - "item_name"
+            - "dimension"
+            - "a"
+            - "b"
+          variable_name: "pass1_params"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          format: "CSV, one row per retained item"
+          columns:
+            - name: "item_name"
+              type: "str"
+            - name: "pass1_a"
+              type: "float64"
+              description: "Pass 1 discrimination"
+              range: ">=0.4 (threshold enforced)"
+            - name: "pass1_b"
+              type: "float64"
+              description: "Pass 1 difficulty"
+              range: "[-3.0, 3.0] (threshold enforced)"
+            - name: "dimension"
+              type: "str"
+              description: "value: 'All'"
+          expected_rows: "40-60 (40-60% retention typical)"
+          variable_name: "purified_items"
+
+        - path: "logs/step02_purification_report.txt"
+          format: "Text report"
+          description: "Excluded items with reasons"
+          variable_name: "removed_items"
+
+      parameters:
+        df_items: "pass1_params"
+        a_threshold: 0.4
+        b_threshold: 3.0
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "purified_items, removed_items"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_parameters"
+      signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_purified_items.csv"
+          source: "analysis call output"
+          variable_name: "purified_items"
+
+      parameters:
+        df_items: "purified_items"
+        a_min: 0.4
+        b_max: 3.0
+        a_col: "pass1_a"
+        b_col: "pass1_b"
+
+      criteria:
+        - "All retained items have a >= 0.4"
+        - "All retained items have |b| <= 3.0"
+        - "Retention rate 30-70%"
+        - "No NaN values"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step02_purification_report.txt"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step02_purification_report.txt"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: IRT CALIBRATION PASS 2 (Purified Items)
+  # --------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Re-calibrate GRM with purified items only (final theta estimates)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "results/ch5/rq1/data/step00_irt_input.csv"
+          source: "RQ 5.1 Step 0 (same raw data as Step 1)"
+          variable_name: "irt_data_raw"
+        - path: "data/step02_purified_items.csv"
+          source: "Step 2 output"
+          variable_name: "purified_items"
+
+      output_files:
+        - path: "data/step03_theta_scores.csv"
+          format: "CSV, one row per composite_ID"
+          columns:
+            - name: "composite_ID"
+              type: "str"
+            - name: "Theta_All"
+              type: "float64"
+              description: "Final IRT ability estimate"
+              range: "[-4, 4]"
+            - name: "SE_All"
+              type: "float64"
+              description: "Final standard error"
+              range: "[0.1, 1.5]"
+          expected_rows: 400
+          variable_name: "theta_scores"
+          description: "FINAL theta estimates for LMM (Pass 2, purified items)"
+
+        - path: "logs/step03_item_parameters.csv"
+          format: "CSV, one row per purified item"
+          columns:
+            - name: "item_name"
+              type: "str"
+            - name: "dimension"
+              type: "str"
+            - name: "a"
+              type: "float64"
+            - name: "b"
+              type: "float64"
+          expected_rows: "40-60 (matches purified item count)"
+          variable_name: "item_params"
+
+        - path: "logs/step03_calibration.log"
+          format: "Text log"
+          variable_name: "log_file"
+
+      parameters:
+        df_long: "irt_data_raw"
+        groups:
+          All: "purified_items['item_name'].tolist()"
+        config:
+          factors:
+            - "All"
+          correlated_factors: false
+          device: "cpu"
+          seed: 42
+          model_fit:
+            batch_size: 2048
+            iw_samples: 100
+            mc_samples: 1
+          model_scores:
+            scoring_batch_size: 2048
+            mc_samples: 100
+            iw_samples: 100
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_scores, item_params"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "logs/step03_item_parameters.csv"
+          variable_name: "item_params"
+        - path: "data/step03_theta_scores.csv"
+          variable_name: "theta_scores"
+
+      parameters:
+        results:
+          item_params: "item_params"
+          theta_scores: "theta_scores"
+          log_file: "logs/step03_calibration.log"
+
+      criteria:
+        - "Model converged"
+        - "Theta in [-4, 4]"
+        - "SE in [0.1, 1.5]"
+        - "SE_All <= SE_All from Pass 1 (purification improves precision)"
+        - "All 400 composite_IDs present"
+        - "Item count matches purified list"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step03_calibration.log"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step03_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: PREPARE LMM INPUT DATA
+  # --------------------------------------------------------------------------
+  - name: "step04_prepare_lmm_input"
+    step_number: "04"
+    description: "Transform theta scores to LMM-ready format with time transformations"
+
+    analysis_call:
       type: "stdlib"
       operations:
-        - "Read data/step01_theta_scores.csv (theta scores from Step 1)"
-        - "Read ../../rq1/data/step00a_tsvr_data.csv (TSVR time variable from RQ 5.1)"
-        - "Rename Theta_All -> Theta (simplifies LMM formula readability)"
-        - "Rename SE_All -> SE"
-        - "Merge theta scores with TSVR on composite_ID (left join, all theta scores kept)"
-        - "Create Days = TSVR_hours / 24.0 (convert hours to days for interpretability)"
-        - "Create Days_squared = Days^2 (quadratic term for polynomial models)"
-        - "Create log_Days_plus1 = log(Days + 1) (logarithmic term, +1 prevents log(0))"
-        - "Parse composite_ID: UID = composite_ID.split('_')[0], test = composite_ID.split('_')[1]"
-        - "Save to data/step02_lmm_input.csv"
+        - "Load data/step03_theta_scores.csv (theta scores from Pass 2)"
+        - "Load results/ch5/rq1/data/step00a_tsvr_data.csv (TSVR time variable)"
+        - "Rename: Theta_All -> Theta, SE_All -> SE"
+        - "Merge theta with TSVR on composite_ID (left join, all 400 must match)"
+        - "Create time transformations: Days = TSVR_hours / 24.0, Days_squared = Days^2, log_Days_plus1 = log(Days + 1)"
+        - "Parse composite_ID: Extract UID and test"
+        - "Save to data/step04_lmm_input.csv"
 
-    # Input specifications
-    inputs:
-      theta_scores:
-        path: "data/step01_theta_scores.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "composite_ID", type: "str"}
-          - {name: "Theta_All", type: "float"}
-          - {name: "SE_All", type: "float"}
-        row_count: 400
-        description: "Theta scores from Step 1"
+      input_files:
+        - path: "data/step03_theta_scores.csv"
+          source: "Step 3 output"
+          required_columns:
+            - "composite_ID"
+            - "Theta_All"
+            - "SE_All"
+          variable_name: "theta_data"
 
-      tsvr_data:
-        path: "../../rq1/data/step00a_tsvr_data.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "composite_ID", type: "str"}
-          - {name: "TSVR_hours", type: "float", description: "Actual hours since VR encoding"}
-        row_count: 400
-        description: "Time Since VR in hours (Decision D070)"
+        - path: "results/ch5/rq1/data/step00a_tsvr_data.csv"
+          source: "RQ 5.1 Step 0 (DERIVED data - TSVR extraction)"
+          required_columns:
+            - "composite_ID"
+            - "TSVR_hours"
+          variable_name: "tsvr_data"
 
-    # Output specifications
-    outputs:
-      lmm_input:
-        path: "data/step02_lmm_input.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "composite_ID", type: "str"}
-          - {name: "UID", type: "str", description: "Participant identifier"}
-          - {name: "test", type: "str", description: "Test session (T1, T2, T3, T4)"}
-          - {name: "Theta", type: "float", description: "Renamed from Theta_All"}
-          - {name: "SE", type: "float", description: "Renamed from SE_All"}
-          - {name: "TSVR_hours", type: "float", description: "Actual hours since encoding"}
-          - {name: "Days", type: "float", description: "TSVR_hours / 24, for interpretability"}
-          - {name: "Days_squared", type: "float", description: "Days^2, for quadratic models"}
-          - {name: "log_Days_plus1", type: "float", description: "log(Days+1), for logarithmic models"}
-        row_count: 400
-        description: "Long-format LMM input with time transformations"
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          format: "CSV, long format (one row per observation)"
+          columns:
+            - name: "composite_ID"
+              type: "str"
+            - name: "UID"
+              type: "str"
+            - name: "test"
+              type: "str"
+            - name: "Theta"
+              type: "float64"
+              range: "[-4, 4]"
+            - name: "SE"
+              type: "float64"
+              range: "[0.1, 1.5]"
+            - name: "TSVR_hours"
+              type: "float64"
+              range: "[0, 168]"
+            - name: "Days"
+              type: "float64"
+              range: "[0, 7]"
+            - name: "Days_squared"
+              type: "float64"
+              range: "[0, 49]"
+            - name: "log_Days_plus1"
+              type: "float64"
+              range: "[0, 2.2]"
+          expected_rows: 400
+          expected_columns: 9
+          variable_name: "lmm_input"
 
-    # Validation (inline checks for stdlib operations)
-    validation:
-      type: "inline"
-      criteria:
-        - name: "Data preparation complete"
-          check: "400 observations created"
-          severity: "CRITICAL"
-        - name: "TSVR merge successful"
-          check: "400/400 composite_IDs matched (no missing TSVR values)"
-          severity: "CRITICAL"
-        - name: "No missing values"
-          check: "No NaN in any column after transformations"
-          severity: "CRITICAL"
-        - name: "Theta range preserved"
-          check: "Theta in [-4, 4] (inherited from Step 1)"
-          severity: "CRITICAL"
-        - name: "SE range preserved"
-          check: "SE in [0.1, 1.5] (inherited from Step 1)"
-          severity: "CRITICAL"
-        - name: "TSVR range valid"
-          check: "TSVR_hours in [0, 168] (0=encoding, 168=7 days max)"
-          severity: "CRITICAL"
-        - name: "Days range valid"
-          check: "Days in [0, 7]"
-          severity: "CRITICAL"
-        - name: "Days_squared range valid"
-          check: "Days_squared in [0, 49]"
-          severity: "CRITICAL"
-        - name: "log_Days_plus1 range valid"
-          check: "log_Days_plus1 in [0, 2.2]"
-          severity: "CRITICAL"
-        - name: "No duplicates"
-          check: "No duplicate composite_IDs"
-          severity: "CRITICAL"
-        - name: "Balanced observations"
-          check: "Each UID appears exactly 4 times (T1-T4)"
-          severity: "CRITICAL"
+      parameters: {}
 
-      on_failure:
-        action: "QUIT"
-        message: "Data preparation failed validation - see error details"
+      returns:
+        type: "DataFrame"
+        variable_name: "lmm_input"
 
-  # --------------------------------------------------------------------------
-  # STEP 3: Fit 5 Candidate LMM Models
-  # --------------------------------------------------------------------------
-  - name: "step03_fit_5_candidate_lmms"
-    step_number: "03"
-    description: "Fit 5 candidate Linear Mixed Models representing different functional forms (Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log)"
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
 
-    # Analysis tool specification (called 5 times sequentially)
-    tool:
-      module: "tools.analysis_lmm"
-      function: "fit_lmm_trajectory_tsvr"
-      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "lmm_input"
 
-    # Input specifications
-    inputs:
-      lmm_input:
-        path: "data/step02_lmm_input.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "composite_ID", type: "str"}
-          - {name: "UID", type: "str"}
-          - {name: "test", type: "str"}
-          - {name: "Theta", type: "float"}
-          - {name: "SE", type: "float"}
-          - {name: "TSVR_hours", type: "float"}
-          - {name: "Days", type: "float"}
-          - {name: "Days_squared", type: "float"}
-          - {name: "log_Days_plus1", type: "float"}
-        row_count: 400
-        description: "LMM input with time transformations from Step 2"
-
-    # Parameter values (5 models fitted sequentially with REML=False)
-    parameters:
-      theta_scores: "lmm_input"
-      tsvr_data: "lmm_input"
-      groups: "UID"
-      reml: false
-      formulas:
-        Linear:
-          formula: "Theta ~ Days + (1 + Days | UID)"
-          description: "Simple linear trace decay"
-        Quadratic:
-          formula: "Theta ~ Days + Days_squared + (1 + Days | UID)"
-          description: "Two-phase consolidation (rapid then slow decay)"
-        Logarithmic:
-          formula: "Theta ~ log_Days_plus1 + (1 + log_Days_plus1 | UID)"
-          description: "Ebbinghaus curve (logarithmic forgetting)"
-        LinLog:
-          formula: "Theta ~ Days + log_Days_plus1 + (1 + Days | UID)"
-          description: "Flexible approximation combining linear and logarithmic"
-        QuadLog:
-          formula: "Theta ~ Days + Days_squared + log_Days_plus1 + (1 + Days | UID)"
-          description: "Most flexible approximation (polynomial + logarithmic)"
-
-    # Output specifications
-    outputs:
-      model_fits:
-        path: "data/step03_model_fits.pkl"
-        format: "Python pickle"
-        description: "Dictionary of 5 fitted model objects (keys: Linear, Quadratic, Logarithmic, LinLog, QuadLog)"
-
-      model_comparison:
-        path: "results/step03_model_comparison.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "model_name", type: "str", description: "Linear, Quadratic, Logarithmic, LinLog, QuadLog"}
-          - {name: "AIC", type: "float", description: "Akaike Information Criterion"}
-          - {name: "BIC", type: "float", description: "Bayesian Information Criterion"}
-          - {name: "log_likelihood", type: "float", description: "Log-likelihood at convergence"}
-          - {name: "n_params", type: "int", description: "Number of estimated parameters"}
-          - {name: "converged", type: "bool", description: "Convergence status"}
-        row_count: 5
-        description: "Model fit comparison table"
-
-      lmm_fitting_log:
-        path: "logs/step03_lmm_fitting.log"
-        format: "Text log file"
-        description: "LMM fitting diagnostics for all 5 models"
-
-    # Validation tool specification (MANDATORY)
-    validation:
-      tool:
-        module: "tools.validation"
-        function: "validate_lmm_convergence"
-        signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
-
-      inputs:
-        model_comparison:
-          path: "results/step03_model_comparison.csv"
-          description: "Model comparison table from Step 3"
-        lmm_fitting_log:
-          path: "logs/step03_lmm_fitting.log"
-          description: "LMM fitting diagnostics"
+      parameters:
+        results:
+          data: "lmm_input"
+          expected_rows: 400
+          expected_columns: 9
 
       criteria:
-        - name: "All models converged"
-          check: "All 5 models have converged=True"
-          severity: "CRITICAL"
-        - name: "No singular covariance"
-          check: "No singular matrix warnings"
-          severity: "CRITICAL"
-        - name: "AIC/BIC finite"
-          check: "All AIC/BIC values not NaN or Inf"
-          severity: "CRITICAL"
-        - name: "Log-likelihood reasonable"
-          check: "All log_likelihood negative, not -Inf"
-          severity: "CRITICAL"
-        - name: "Parameter counts correct"
-          check: "n_params matches model specification (Linear=4, QuadLog=7)"
-          severity: "CRITICAL"
+        - "All 400 rows present (no data loss during merge)"
+        - "No NaN values in any column"
+        - "TSVR merge 100% successful"
+        - "Each UID appears exactly 4 times (T1-T4)"
+        - "Time transformations valid (Days>=0, log_Days_plus1 defined)"
 
       on_failure:
-        action: "QUIT"
-        message: "LMM fitting failed validation - see logs/step03_lmm_fitting.log"
+        action: "raise ValueError"
+        log_to: "logs/step04_prepare_lmm_input.log"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step04_prepare_lmm_input.log"
 
   # --------------------------------------------------------------------------
-  # STEP 4: Model Selection via AIC
+  # STEP 5: FIT 5 CANDIDATE LMM MODELS
   # --------------------------------------------------------------------------
-  - name: "step04_aic_model_selection"
-    step_number: "04"
-    description: "Select best-fitting model using AIC and compute Akaike weights to quantify relative evidence"
+  - name: "step05_fit_5_candidate_lmms"
+    step_number: "05"
+    description: "Fit 5 LMM models (Linear, Quadratic, Log, Lin+Log, Quad+Log) with REML=False"
 
-    # Analysis tool specification
-    tool:
+    analysis_call:
+      type: "catalogued"
       module: "tools.analysis_lmm"
       function: "compare_lmm_models_by_aic"
       signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
 
-    # Input specifications
-    inputs:
-      model_comparison:
-        path: "results/step03_model_comparison.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "model_name", type: "str"}
-          - {name: "AIC", type: "float"}
-          - {name: "BIC", type: "float"}
-          - {name: "log_likelihood", type: "float"}
-        row_count: 5
-        description: "Model comparison table from Step 3"
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          source: "Step 4 output"
+          required_columns:
+            - "composite_ID"
+            - "UID"
+            - "test"
+            - "Theta"
+            - "TSVR_hours"
+            - "Days"
+            - "Days_squared"
+            - "log_Days_plus1"
+          variable_name: "lmm_input"
 
-      model_fits:
-        path: "data/step03_model_fits.pkl"
-        format: "Python pickle"
-        description: "Dictionary of fitted model objects"
+      output_files:
+        - path: "data/step05_model_fits.pkl"
+          format: "Python pickle"
+          description: "Dictionary of 5 fitted MixedLMResults objects"
+          keys:
+            - "Linear"
+            - "Quadratic"
+            - "Logarithmic"
+            - "LinLog"
+            - "QuadLog"
+          variable_name: "model_fits"
 
-    # Parameter values
-    parameters:
-      data: "model_comparison"
-      n_factors: 5
-      reference_group: "Linear"
-      groups: "model_name"
-      save_dir: "results/"
-      calculations:
-        delta_AIC: "AIC_i - AIC_min"
-        akaike_weight: "exp(-0.5 * delta_AIC_i) / sum(exp(-0.5 * delta_AIC_j))"
-      uncertainty_thresholds:
-        very_strong: ">0.90"
-        strong: "0.60-0.90"
-        moderate: "0.30-0.60"
-        high: "<0.30"
+        - path: "results/step05_model_comparison.csv"
+          format: "CSV, one row per model"
+          columns:
+            - name: "model_name"
+              type: "str"
+            - name: "AIC"
+              type: "float64"
+            - name: "BIC"
+              type: "float64"
+            - name: "log_likelihood"
+              type: "float64"
+            - name: "n_params"
+              type: "int64"
+            - name: "converged"
+              type: "bool"
+          expected_rows: 5
+          variable_name: "model_comparison"
 
-    # Output specifications
-    outputs:
-      aic_comparison:
-        path: "results/step04_aic_comparison.csv"
-        format: "CSV with UTF-8 encoding, sorted by AIC ascending"
-        columns:
-          - {name: "model_name", type: "str"}
-          - {name: "AIC", type: "float"}
-          - {name: "delta_AIC", type: "float", description: "AIC_i - AIC_min (best model = 0)"}
-          - {name: "akaike_weight", type: "float", description: "Relative probability (sums to 1.0)"}
-          - {name: "cumulative_weight", type: "float", description: "Cumulative sum of weights"}
-        row_count: 5
-        description: "AIC comparison with Akaike weights, best model first"
+        - path: "logs/step05_lmm_fitting.log"
+          format: "Text log"
+          variable_name: "log_file"
 
-      best_model:
-        path: "data/step04_best_model.pkl"
-        format: "Python pickle"
-        description: "Best-fitting model object (lowest AIC)"
+      parameters:
+        data: "lmm_input"
+        n_factors: 1
+        reference_group: null
+        groups: "UID"
+        save_dir: "results/ch5/rq7/data"
 
-      best_model_summary:
-        path: "results/step04_best_model_summary.txt"
-        format: "Text file"
-        description: "Summary of best model (AIC, Akaike weight, uncertainty category, fixed/random effects)"
+      returns:
+        type: "Dict"
+        variable_name: "comparison_results"
+        fields:
+          - "models: Dict of fitted objects"
+          - "aic_comparison: DataFrame"
+          - "best_model: str"
+          - "best_result: MixedLMResults"
 
-    # Validation tool specification (MANDATORY)
-    validation:
-      tool:
-        module: "tools.validation"
-        function: "validate_akaike_weights"
-        signature: "validate_akaike_weights(aic_comparison: DataFrame) -> Dict[str, Any]"
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
-      inputs:
-        aic_comparison:
-          path: "results/step04_aic_comparison.csv"
-          description: "AIC comparison table from Step 4"
+      input_files:
+        - path: "results/step05_model_comparison.csv"
+          variable_name: "model_comparison"
+
+      parameters:
+        lmm_result: "comparison_results['models']"
 
       criteria:
-        - name: "Akaike weights sum to 1.0"
-          check: "Sum of akaike_weight in [0.999, 1.001] (floating-point precision)"
-          severity: "CRITICAL"
-        - name: "All weights in valid range"
-          check: "All akaike_weight in (0, 1) exclusive"
-          severity: "CRITICAL"
-        - name: "delta_AIC correct"
-          check: "Best model delta_AIC = 0, others positive"
-          severity: "CRITICAL"
-        - name: "Cumulative weight monotonic"
-          check: "cumulative_weight monotonic increasing, ends at 1.0"
-          severity: "CRITICAL"
-        - name: "Best model identified"
-          check: "Row 1 has lowest AIC (sorted correctly)"
-          severity: "CRITICAL"
+        - "All 5 models converged (converged=True)"
+        - "AIC/BIC values finite (not NaN or Inf)"
+        - "Log-likelihood reasonable (negative, not -Inf)"
+        - "No singular covariance warnings"
 
       on_failure:
-        action: "QUIT"
-        message: "AIC model selection failed validation - see logs/step04_model_selection.log"
+        action: "raise ValueError"
+        log_to: "logs/step05_lmm_fitting.log"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step05_lmm_fitting.log"
 
   # --------------------------------------------------------------------------
-  # STEP 5: Prepare Multi-Panel Plot Data
+  # STEP 6: AIC MODEL SELECTION
   # --------------------------------------------------------------------------
-  - name: "step05_prepare_functional_form_plots"
-    step_number: "05"
-    description: "Create plot source CSVs for multi-panel visualization (5 model fits + observed data, dual-scale per Decision D069)"
+  - name: "step06_aic_model_selection"
+    step_number: "06"
+    description: "Compute delta AIC and Akaike weights, identify best model"
 
-    # Analysis tool specification
-    tool:
-      module: "tools.plotting"
-      function: "convert_theta_to_probability"
-      signature: "convert_theta_to_probability(theta: ndarray, discrimination: float, difficulty: float) -> ndarray"
-
-    # Input specifications
-    inputs:
-      lmm_input:
-        path: "data/step02_lmm_input.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "composite_ID", type: "str"}
-          - {name: "UID", type: "str"}
-          - {name: "test", type: "str"}
-          - {name: "Theta", type: "float"}
-          - {name: "SE", type: "float"}
-          - {name: "Days", type: "float"}
-        row_count: 400
-        description: "Observed theta scores with time variable"
-
-      model_fits:
-        path: "data/step03_model_fits.pkl"
-        format: "Python pickle"
-        description: "Dictionary of 5 fitted model objects"
-
-      aic_comparison:
-        path: "results/step04_aic_comparison.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "model_name", type: "str"}
-          - {name: "AIC", type: "float"}
-          - {name: "delta_AIC", type: "float"}
-          - {name: "akaike_weight", type: "float"}
-        row_count: 5
-        description: "AIC comparison for annotating best model"
-
-    # Parameter values
-    parameters:
-      theta: "lmm_input.Theta"
-      discrimination: 1.7
-      difficulty: 0.0
-      formula: "p = 1 / (1 + exp(-discrimination * theta))"
+    analysis_call:
+      type: "stdlib"
       operations:
-        - "Group lmm_input by test session (T1, T2, T3, T4)"
-        - "Compute mean Theta per test"
-        - "Compute 95% CI using SE: CI_lower = mean - 1.96*SE_pooled, CI_upper = mean + 1.96*SE_pooled"
-        - "For each of 5 models: create prediction grid (Days in [0, 7], 50 points)"
-        - "Generate model predictions using fitted coefficients (population-level, random effects = 0)"
-        - "Transform theta to probability: p = 1 / (1 + exp(-1.7 * theta))"
-        - "Apply probability transform to observed means and all model predictions"
-        - "Save theta-scale plot data to plots/step05_functional_form_theta_data.csv"
-        - "Save probability-scale plot data to plots/step05_functional_form_probability_data.csv"
+        - "Load results/step05_model_comparison.csv"
+        - "Compute delta_AIC = AIC_i - AIC_min"
+        - "Compute Akaike weights: w_i = exp(-0.5 * delta_AIC_i) / sum(exp(-0.5 * delta_AIC_j))"
+        - "Compute cumulative_weight (sorted by AIC)"
+        - "Identify best model (delta_AIC = 0)"
+        - "Categorize uncertainty (w_best > 0.90: very strong, 0.60-0.90: strong, 0.30-0.60: moderate, <0.30: high)"
+        - "Save best model object separately"
+        - "Generate best model summary text"
 
-    # Output specifications
-    outputs:
-      theta_plot_data:
-        path: "plots/step05_functional_form_theta_data.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "Days", type: "float", description: "Time variable for X-axis"}
-          - {name: "observed_theta", type: "float", description: "Mean observed theta per test"}
-          - {name: "CI_lower_theta", type: "float", description: "Lower 95% CI"}
-          - {name: "CI_upper_theta", type: "float", description: "Upper 95% CI"}
-          - {name: "pred_Linear", type: "float", description: "Linear model predictions"}
-          - {name: "pred_Quadratic", type: "float", description: "Quadratic model predictions"}
-          - {name: "pred_Logarithmic", type: "float", description: "Logarithmic model predictions"}
-          - {name: "pred_LinLog", type: "float", description: "Lin+Log model predictions"}
-          - {name: "pred_QuadLog", type: "float", description: "Quad+Log model predictions"}
-          - {name: "best_model", type: "str", description: "Name of best model (for annotation)"}
-        row_count: 54
-        description: "Theta-scale plot data (4 observed + 50 predicted)"
+      input_files:
+        - path: "results/step05_model_comparison.csv"
+          source: "Step 5 output"
+          variable_name: "model_comparison"
+        - path: "data/step05_model_fits.pkl"
+          source: "Step 5 output"
+          variable_name: "model_fits"
 
-      probability_plot_data:
-        path: "plots/step05_functional_form_probability_data.csv"
-        format: "CSV with UTF-8 encoding"
-        columns:
-          - {name: "Days", type: "float"}
-          - {name: "observed_prob", type: "float", description: "Observed theta transformed to probability"}
-          - {name: "CI_lower_prob", type: "float", description: "Lower 95% CI transformed"}
-          - {name: "CI_upper_prob", type: "float", description: "Upper 95% CI transformed"}
-          - {name: "pred_Linear_prob", type: "float", description: "Linear predictions transformed"}
-          - {name: "pred_Quadratic_prob", type: "float"}
-          - {name: "pred_Logarithmic_prob", type: "float"}
-          - {name: "pred_LinLog_prob", type: "float"}
-          - {name: "pred_QuadLog_prob", type: "float"}
-          - {name: "best_model", type: "str"}
-        row_count: 54
-        description: "Probability-scale plot data (Decision D069 dual-scale requirement)"
+      output_files:
+        - path: "results/step06_aic_comparison.csv"
+          format: "CSV, sorted by AIC ascending"
+          columns:
+            - name: "model_name"
+              type: "str"
+            - name: "AIC"
+              type: "float64"
+            - name: "delta_AIC"
+              type: "float64"
+              range: "[0, 20]"
+            - name: "akaike_weight"
+              type: "float64"
+              range: "(0, 1)"
+            - name: "cumulative_weight"
+              type: "float64"
+              range: "monotonic [first_weight, 1.0]"
+          expected_rows: 5
+          variable_name: "aic_comparison"
 
-    # Validation tool specification (MANDATORY)
-    validation:
-      tool:
-        module: "tools.validation"
-        function: "validate_probability_transform"
-        signature: "validate_probability_transform(prob_data: DataFrame) -> Dict[str, Any]"
+        - path: "data/step06_best_model.pkl"
+          format: "Python pickle"
+          description: "Best-fitting MixedLMResults object"
+          variable_name: "best_model"
 
-      inputs:
-        probability_plot_data:
-          path: "plots/step05_functional_form_probability_data.csv"
-          description: "Probability-scale plot data from Step 5"
+        - path: "results/step06_best_model_summary.txt"
+          format: "Text summary"
+          description: "Best model details (name, AIC, weight, uncertainty, coefficients)"
+          variable_name: "summary_text"
+
+      parameters: {}
+
+      returns:
+        type: "DataFrame"
+        variable_name: "aic_comparison"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step06_aic_comparison.csv"
+          variable_name: "aic_comparison"
+
+      parameters:
+        results:
+          data: "aic_comparison"
 
       criteria:
-        - name: "Plot data complete"
-          check: "54 rows created (4 observed + 50 predicted)"
-          severity: "CRITICAL"
-        - name: "Probability bounds valid"
-          check: "All probability values in [0, 1]"
-          severity: "CRITICAL"
-        - name: "CI bounds valid"
-          check: "CI_upper_prob > CI_lower_prob for all observed data"
-          severity: "CRITICAL"
-        - name: "No missing Days"
-          check: "No NaN in Days column (time grid complete)"
-          severity: "CRITICAL"
-        - name: "Monotonicity preserved"
-          check: "If theta1 > theta2, then prob1 > prob2 (transformation preserves order)"
-          severity: "MODERATE"
-        - name: "Best model annotated"
-          check: "best_model column populated with model name from AIC comparison"
-          severity: "CRITICAL"
+        - "Akaike weights sum to 1.0 (within [0.999, 1.001])"
+        - "All weights in (0, 1) exclusive"
+        - "delta_AIC correct (best model = 0, others positive)"
+        - "cumulative_weight monotonic increasing (ends at 1.0)"
+        - "Best model identified (row 1 has delta_AIC = 0)"
 
       on_failure:
-        action: "QUIT"
-        message: "Plot data preparation failed validation - see logs/step05_prepare_plot_data.log"
+        action: "raise ValueError"
+        log_to: "logs/step06_model_selection.log"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step06_model_selection.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: PREPARE FUNCTIONAL FORM PLOT DATA
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_functional_form_plots"
+    step_number: "07"
+    description: "Create dual-scale plot data (theta + probability) with all 5 model predictions"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step04_lmm_input.csv (observed data)"
+        - "Load data/step05_model_fits.pkl (all 5 models)"
+        - "Load results/step06_aic_comparison.csv (best model identification)"
+        - "Compute observed means per test with 95% CI"
+        - "Generate prediction grid: Days in [0, 7] with 50 points"
+        - "For each model: compute predictions on grid"
+        - "Transform to probability scale: p = 1 / (1 + exp(-1.7 * theta))"
+        - "Save theta-scale CSV (observed + 5 predictions)"
+        - "Save probability-scale CSV (observed + 5 predictions)"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          source: "Step 4 output"
+          variable_name: "lmm_input"
+        - path: "data/step05_model_fits.pkl"
+          source: "Step 5 output"
+          variable_name: "model_fits"
+        - path: "results/step06_aic_comparison.csv"
+          source: "Step 6 output"
+          variable_name: "aic_comparison"
+
+      output_files:
+        - path: "plots/step07_functional_form_theta_data.csv"
+          format: "CSV for theta-scale plot"
+          columns:
+            - name: "Days"
+              type: "float64"
+              range: "[0, 7]"
+            - name: "observed_theta"
+              type: "float64"
+              range: "[-3, 3]"
+            - name: "CI_lower_theta"
+              type: "float64"
+            - name: "CI_upper_theta"
+              type: "float64"
+            - name: "pred_Linear"
+              type: "float64"
+            - name: "pred_Quadratic"
+              type: "float64"
+            - name: "pred_Logarithmic"
+              type: "float64"
+            - name: "pred_LinLog"
+              type: "float64"
+            - name: "pred_QuadLog"
+              type: "float64"
+            - name: "best_model"
+              type: "str"
+          expected_rows: 54
+          variable_name: "theta_plot_data"
+
+        - path: "plots/step07_functional_form_probability_data.csv"
+          format: "CSV for probability-scale plot (Decision D069)"
+          columns:
+            - name: "Days"
+              type: "float64"
+            - name: "observed_prob"
+              type: "float64"
+              range: "[0, 1]"
+            - name: "CI_lower_prob"
+              type: "float64"
+            - name: "CI_upper_prob"
+              type: "float64"
+            - name: "pred_Linear_prob"
+              type: "float64"
+            - name: "pred_Quadratic_prob"
+              type: "float64"
+            - name: "pred_Logarithmic_prob"
+              type: "float64"
+            - name: "pred_LinLog_prob"
+              type: "float64"
+            - name: "pred_QuadLog_prob"
+              type: "float64"
+            - name: "best_model"
+              type: "str"
+          expected_rows: 54
+          variable_name: "prob_plot_data"
+
+      parameters: {}
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "theta_plot_data, prob_plot_data"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "plots/step07_functional_form_theta_data.csv"
+          variable_name: "theta_plot_data"
+        - path: "plots/step07_functional_form_probability_data.csv"
+          variable_name: "prob_plot_data"
+
+      parameters:
+        results:
+          theta_data: "theta_plot_data"
+          prob_data: "prob_plot_data"
+
+      criteria:
+        - "All probability values in [0, 1] bounds"
+        - "CI bounds valid (CI_upper > CI_lower)"
+        - "Monotonicity preserved (theta transform preserves ordering)"
+        - "No NaN in Days column"
+        - "Expected row count (54 rows per file)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step07_prepare_plot_data.log"
+        invoke: "g_debug"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+    log_file: "logs/step07_prepare_plot_data.log"
 
 # ============================================================================
 # END OF ANALYSIS RECIPE

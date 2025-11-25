@@ -302,10 +302,12 @@ if __name__ == "__main__":
         column_renames = {}
         if 'Difficulty' in df_items.columns and 'b' not in df_items.columns:
             column_renames['Difficulty'] = 'b'
+
+        # Priority: Overall_Discrimination > Discrim_* columns (avoid duplicates)
         if 'Overall_Discrimination' in df_items.columns and 'a' not in df_items.columns:
             column_renames['Overall_Discrimination'] = 'a'
-        # For discrimination by factor (e.g., Discrim_All), rename to a if no 'a' column
-        if 'a' not in df_items.columns:
+        elif 'a' not in df_items.columns:
+            # Only use Discrim_* if Overall_Discrimination not present
             discrim_cols = [col for col in df_items.columns if col.startswith('Discrim_')]
             if discrim_cols:
                 column_renames[discrim_cols[0]] = 'a'

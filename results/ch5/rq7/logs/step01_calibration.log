@@ -102,3 +102,35 @@ Item parameters shape: (105, 4)
 [CONFIG] IRT model: 2PL, single factor 'All', max_iter=200 (MED PRODUCTION), seed=42
 [ANALYSIS] Running IRT calibration with omnibus factor...
 [ANALYSIS] This may take 2-5 minutes...
+[DONE] IRT calibration complete
+[PROCESS] Processing calibration outputs...
+[INFO] Theta scores: 400 rows, columns: ['UID', 'test', 'Theta_All']
+[TRANSFORM] Created composite_ID from UID and test
+[WARNING] SE column missing from calibrate_irt output, added placeholder SE_All=0.3
+[INFO] Item parameters: 105 rows, columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_All']
+[RENAME] Item parameters: {'Difficulty': 'b', 'Overall_Discrimination': 'a', 'Discrim_All': 'a'}
+[TRANSFORM] Added dimension='All' column to item parameters
+[VALIDATE] All 105 items assigned to dimension='All'
+[SAVE] Saving calibration outputs...
+[SAVED] step01_theta_scores.csv (400 rows, 5 cols)
+[SAVED] step01_item_parameters.csv (105 rows, 5 cols)
+[VALIDATION] Running validation checks...
+[VALIDATION] Checking model convergence...
+[VALIDATION] converged: False
+[VALIDATION] message: Model did not converge
+[VALIDATION] final_loss: None
+[VALIDATION] epochs_run: None
+[VALIDATION] warning: Results may be unreliable
+[VALIDATION] Checking item parameter bounds...
+[ERROR] The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step01_irt_calibration_omnibus.py", line 389, in <module>
+    param_result = validate_irt_parameters(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 283, in validate_irt_parameters
+    if a_val < a_min:
+       ^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1580, in __nonzero__
+    raise ValueError(
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().

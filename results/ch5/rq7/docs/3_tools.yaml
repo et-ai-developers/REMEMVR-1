@@ -1,8 +1,12 @@
 # 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
-# Created by: rq_tools agent
-# RQ: 5.7 - Functional Form of Forgetting Trajectories
+# Created by: rq_tools agent (Step 11)
+# Research Question: RQ 5.7 - Functional Form Comparison
+# Created: 2025-11-25
 # Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
-# Consumed by: rq_analysis agent (Step 12)
+
+# Purpose: This file catalogs ALL analysis and validation tools required
+# for RQ 5.7's 7-step pipeline (2-pass IRT + 5 LMM models + AIC selection).
+# Each analysis tool is paired with corresponding validation tool.
 
 analysis_tools:
   calibrate_irt:
@@ -11,308 +15,458 @@ analysis_tools:
     signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
     validation_tool: "validate_irt_calibration"
 
-    description: "Calibrate single-factor IRT model with 'All' omnibus dimension aggregating all What/Where/When items for overall episodic memory trajectory"
+    description: "Full IRT pipeline (prepare -> configure -> fit -> extract) for Graded Response Model calibration. Used for both Pass 1 (all items) and Pass 2 (purified items) in 2-pass purification workflow per Decision D039."
 
     input_format:
-      - path: "../../rq1/data/step00_irt_input.csv"
-        required_columns: ["composite_ID", "item response columns (VR-* format)"]
-        expected_rows: 400
-        notes: "Wide-format IRT input from RQ 5.1, reprocessed with different factor structure"
+      - "df_long: Wide-format DataFrame with composite_ID and item response columns (0/1 dichotomous)"
+      - "groups: Dict mapping factor names to item lists (e.g., {'All': ['VR-IFR-*', 'VR-*']})"
+      - "config: IRT configuration dict (prior, n_cats, device, batch_size, etc.)"
 
     output_format:
-      - path: "data/step01_theta_scores.csv"
-        columns: ["composite_ID", "Theta_All", "SE_All"]
-        description: "IRT ability estimates with single omnibus factor"
-      - path: "logs/step01_item_parameters.csv"
-        columns: ["item_name", "dimension", "a", "b"]
-        description: "Item parameters for all items (dimension='All' for all)"
-      - path: "logs/step01_calibration.log"
-        description: "IRT convergence diagnostics"
+      - "Tuple[DataFrame, DataFrame]"
+      - "First DataFrame: theta_scores (composite_ID, domain_name, theta)"
+      - "Second DataFrame: item_parameters (item, domain, Discrimination, Difficulty_1...Difficulty_k)"
 
-    parameters:
-      groups:
-        All: ["all VR items from step00_irt_input.csv"]
-      config:
-        n_cats: 2
-        correlated_factors: false
-        device: "cpu"
-        max_iter: 200
+    notes:
+      - "RQ 5.7 uses single 'All' factor (omnibus dimension) NOT domain-specific factors"
+      - "Called twice: Step 1 (all items), Step 3 (purified items only)"
+      - "Prior setting: p1_med (precision=1.0) per Decision D068"
+      - "Device: 'cpu' (GPU optional if available)"
 
     source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - calibrate_irt"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float = 0.4, b_threshold: float = 3.0) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_item_purification"
+
+    description: "Decision D039: Apply quality thresholds to item parameters from Pass 1 IRT calibration. Exclude items with extreme difficulty (|b| > 3.0) or poor discrimination (a < 0.4)."
+
+    input_format:
+      - "df_items: DataFrame with item parameters (item, domain, a, b columns)"
+      - "a_threshold: Minimum discrimination (default 0.4 per Decision D039)"
+      - "b_threshold: Maximum |difficulty| (default 3.0 per Decision D039)"
+
+    output_format:
+      - "Tuple[DataFrame, DataFrame]"
+      - "First DataFrame: retained_items (items meeting BOTH thresholds)"
+      - "Second DataFrame: removed_items (items failing EITHER threshold with exclusion reason)"
+
+    notes:
+      - "Used in Step 2 between Pass 1 and Pass 2 IRT calibrations"
+      - "Exclusion rule: Items failing EITHER criterion are excluded (logical OR)"
+      - "Expected retention: 40-60% typical for REMEMVR items per RQ 5.1 evidence"
+      - "RQ 5.7 applies to unidimensional 'All' factor (purification improves measurement quality regardless of dimensionality)"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - filter_items_by_quality"
 
   fit_lmm_trajectory_tsvr:
     module: "tools.analysis_lmm"
     function: "fit_lmm_trajectory_tsvr"
-    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
     validation_tool: "validate_lmm_convergence"
 
-    description: "Fit Linear Mixed Model using TSVR (actual hours) as time variable per Decision D070. Used 5 times with different formulas for candidate model comparison."
+    description: "Decision D070: Fit Linear Mixed Model using TSVR (actual hours since encoding) as time variable. Used to fit all 5 candidate models (Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log) sequentially."
 
     input_format:
-      - path: "data/step02_lmm_input.csv"
-        required_columns: ["composite_ID", "UID", "test", "Theta", "SE", "TSVR_hours", "Days", "Days_squared", "log_Days_plus1"]
-        expected_rows: 400
-        notes: "Long-format LMM input with time transformations"
+      - "theta_scores: DataFrame with composite_ID, domain_name, theta columns"
+      - "tsvr_data: DataFrame with UID, Test, TSVR_hours columns"
+      - "formula: Fixed effects formula (e.g., 'theta ~ Days + Days_squared + log_Days_plus1')"
+      - "groups: Grouping variable for random effects (default 'UID')"
+      - "re_formula: Random effects formula (default '~Days' for random slope)"
+      - "reml: Use REML (default False for AIC comparison per RQ 5.7 requirement)"
 
     output_format:
-      - path: "data/step03_model_fits.pkl"
-        description: "Python pickle containing dictionary of 5 fitted model objects"
-      - path: "results/step03_model_comparison.csv"
-        columns: ["model_name", "AIC", "BIC", "log_likelihood", "n_params", "converged"]
-        description: "Model fit comparison table"
-      - path: "logs/step03_lmm_fitting.log"
-        description: "LMM fitting diagnostics for all 5 models"
+      - "MixedLMResults object (statsmodels fitted model)"
+      - "Contains: fixed effects, random effects, AIC, BIC, log-likelihood, convergence status"
 
-    parameters:
-      formulas:
-        Linear: "Theta ~ Days + (1 + Days | UID)"
-        Quadratic: "Theta ~ Days + Days_squared + (1 + Days | UID)"
-        Logarithmic: "Theta ~ log_Days_plus1 + (1 + log_Days_plus1 | UID)"
-        LinLog: "Theta ~ Days + log_Days_plus1 + (1 + Days | UID)"
-        QuadLog: "Theta ~ Days + Days_squared + log_Days_plus1 + (1 + Days | UID)"
-      groups: "UID"
-      reml: false
+    notes:
+      - "REML=False MANDATORY for valid AIC comparison across models"
+      - "Used 5 times in Step 5 (one call per candidate model)"
+      - "Decision D070: TSVR_hours is actual elapsed time, NOT nominal days"
+      - "Time transformations: Days = TSVR_hours / 24, Days_squared = Days^2, log_Days_plus1 = log(Days+1)"
+      - "All models use random intercepts + random slopes per UID"
 
-    notes: "Called 5 times sequentially with different formulas. REML=False required for valid AIC comparison."
     source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  configure_candidate_models:
+    module: "tools.analysis_lmm"
+    function: "configure_candidate_models"
+    signature: "configure_candidate_models(n_factors: int, reference_group: str = None) -> Dict[str, Dict[str, str]]"
+    validation_tool: "validate_model_formulas"
+
+    description: "Generate formulas for 5 candidate LMM models (Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log). Returns dictionary of model specifications."
+
+    input_format:
+      - "n_factors: Number of memory domains (1 for RQ 5.7 omnibus 'All' factor)"
+      - "reference_group: Reference level for multi-factor models (None for n_factors=1)"
+
+    output_format:
+      - "Dict[str, Dict[str, str]] with keys: Linear, Quadratic, Log, Lin+Log, Quad+Log"
+      - "Each model contains: {'formula': '...', 're_formula': '...'}"
+      - "Example: {'Linear': {'formula': 'theta ~ Days', 're_formula': '~Days'}}"
+
+    notes:
+      - "RQ 5.7: n_factors=1 (single omnibus factor, no domain comparisons)"
+      - "Used in Step 5 before fitting 5 models"
+      - "Output formulas passed to fit_lmm_trajectory_tsvr() iteratively"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - configure_candidate_models"
 
   compare_lmm_models_by_aic:
     module: "tools.analysis_lmm"
     function: "compare_lmm_models_by_aic"
     signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
-    validation_tool: "validate_akaike_weights"
+    validation_tool: "validate_aic_comparison"
 
-    description: "Compute AIC-based model selection with Akaike weights quantifying relative evidence for each candidate model (Burnham & Anderson 2004 framework)"
+    description: "Fit all 5 candidate models, compare by AIC, compute Akaike weights, identify best model. Returns comprehensive comparison dictionary."
 
     input_format:
-      - path: "results/step03_model_comparison.csv"
-        required_columns: ["model_name", "AIC", "BIC", "log_likelihood"]
-        expected_rows: 5
-        notes: "Model comparison table from Step 3"
-      - path: "data/step03_model_fits.pkl"
-        notes: "Fitted model objects for extracting best model"
+      - "data: LMM input DataFrame (composite_ID, UID, test, theta, TSVR_hours, Days, Days_squared, log_Days_plus1)"
+      - "n_factors: Number of memory domains (1 for RQ 5.7)"
+      - "reference_group: Reference level (None for n_factors=1)"
+      - "groups: Grouping variable for random effects ('UID')"
+      - "save_dir: Path to save model objects and comparison CSV"
 
     output_format:
-      - path: "results/step04_aic_comparison.csv"
-        columns: ["model_name", "AIC", "delta_AIC", "akaike_weight", "cumulative_weight"]
-        description: "AIC comparison with Akaike weights, sorted by AIC ascending"
-      - path: "data/step04_best_model.pkl"
-        description: "Best-fitting model object (lowest AIC)"
-      - path: "results/step04_best_model_summary.txt"
-        description: "Text summary of best model with fixed/random effects"
+      - "Dict with keys:"
+      - "  - 'models': Dict of all 5 fitted MixedLMResults objects"
+      - "  - 'aic_comparison': DataFrame (model_name, AIC, delta_AIC, akaike_weight, cumulative_weight)"
+      - "  - 'best_model': str (name of best model, e.g., 'Quadratic')"
+      - "  - 'best_result': MixedLMResults (fitted object for best model)"
 
-    parameters:
-      calculation:
-        delta_AIC: "AIC_i - AIC_min"
-        akaike_weight: "exp(-0.5 * delta_AIC_i) / sum(exp(-0.5 * delta_AIC_j))"
-      uncertainty_thresholds:
-        very_strong: ">0.90"
-        strong: "0.60-0.90"
-        moderate: "0.30-0.60"
-        high: "<0.30"
+    notes:
+      - "Used in Step 6 for model selection"
+      - "Akaike weights quantify relative evidence per model (sum to 1.0)"
+      - "delta_AIC = AIC_i - AIC_min (best model has delta_AIC = 0)"
+      - "Saves model objects as pickle files for downstream analysis"
 
     source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compare_lmm_models_by_aic"
 
   convert_theta_to_probability:
     module: "tools.plotting"
     function: "convert_theta_to_probability"
-    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float, difficulty: float) -> ndarray"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
     validation_tool: "validate_probability_transform"
 
-    description: "Transform theta scores to probability scale via IRT 2PL formula for Decision D069 dual-scale plotting"
+    description: "Decision D069: Transform theta scores to probability scale via IRT 2PL formula for dual-scale trajectory plotting (theta + probability)."
 
     input_format:
-      - path: "data/step02_lmm_input.csv"
-        required_columns: ["Theta"]
-        notes: "Observed theta values and model predictions to transform"
+      - "theta: numpy array of IRT ability estimates (typically range -3 to +3)"
+      - "discrimination: IRT discrimination parameter (default 1.0 for standard logistic)"
+      - "difficulty: IRT difficulty parameter (default 0.0 for median probability)"
 
     output_format:
-      - path: "plots/step05_functional_form_theta_data.csv"
-        columns: ["Days", "observed_theta", "CI_lower_theta", "CI_upper_theta", "pred_Linear", "pred_Quadratic", "pred_Logarithmic", "pred_LinLog", "pred_QuadLog", "best_model"]
-        description: "Theta-scale plot data"
-      - path: "plots/step05_functional_form_probability_data.csv"
-        columns: ["Days", "observed_prob", "CI_lower_prob", "CI_upper_prob", "pred_Linear_prob", "pred_Quadratic_prob", "pred_Logarithmic_prob", "pred_LinLog_prob", "pred_QuadLog_prob", "best_model"]
-        description: "Probability-scale plot data (Decision D069 dual-scale)"
+      - "ndarray of probabilities in range [0, 1]"
+      - "Formula: p = 1 / (1 + exp(-discrimination * (theta - difficulty)))"
 
-    parameters:
-      discrimination: 1.7
-      difficulty: 0.0
-      formula: "p = 1 / (1 + exp(-discrimination * theta))"
+    notes:
+      - "Used in Step 7 for probability-scale plot data preparation"
+      - "Decision D069: RQ 5.7 produces dual-scale plots (theta + probability)"
+      - "Default discrimination=1.0 approximates standard logistic CDF"
+      - "Applied to observed means AND all 5 model predictions"
 
-    notes: "Applied to all theta values (observed means + 5 model predictions) for dual-scale visualization per Decision D069"
     source_reference: "tools_inventory.md section 'Module: tools.plotting' - convert_theta_to_probability"
 
 validation_tools:
   validate_irt_calibration:
     module: "tools.validation"
-    function_convergence: "validate_irt_convergence"
-    function_parameters: "validate_irt_parameters"
-    signature_convergence: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
-    signature_parameters: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
 
-    description: "Validate IRT model convergence and item parameters for single-factor omnibus model"
+    description: "Validate IRT model convergence based on loss stability, parameter bounds, and theta/SE ranges."
 
     input_files:
-      - path: "data/step01_theta_scores.csv"
-        required_columns: ["composite_ID", "Theta_All", "SE_All"]
-        source: "analysis tool output (step01_calibrate_irt)"
       - path: "logs/step01_item_parameters.csv"
-        required_columns: ["item_name", "dimension", "a", "b"]
-        source: "analysis tool output (step01_calibrate_irt)"
+        source: "calibrate_irt() output (Pass 1 or Pass 2)"
+        required_columns: ["item", "domain", "Discrimination", "Difficulty"]
+      - path: "data/step01_theta_scores.csv"
+        source: "calibrate_irt() output"
+        required_columns: ["composite_ID", "domain_name", "theta"]
 
     criteria:
-      - "Model converged (loss stabilized, parameters within bounds)"
-      - "All theta estimates in valid range [-4, 4] (outside suggests calibration issue)"
-      - "All SE estimates in valid range [0.1, 1.5] (outside suggests unreliable estimates)"
-      - "All discrimination (a) > 0.0 (negative impossible for GRM)"
-      - "All items have dimension = 'All' (single-factor configuration check)"
-      - "No NaN values in theta scores or item parameters"
-      - "All 400 composite_IDs present (no data loss)"
+      - "Model converged (loss function stabilized)"
+      - "Theta estimates in valid range ([-4, 4] typical)"
+      - "SE estimates reasonable ([0.1, 1.5] range)"
+      - "Item discrimination a > 0 (positive slope required)"
+      - "No NaN values in theta or item parameters"
+      - "All 400 composite_IDs present in output"
 
     expected_output:
       format: "Dict[str, Any]"
       fields:
         converged: "bool (True if all criteria passed)"
-        message: "str (human-readable explanation)"
         checks: "list of check results"
+        message: "str (human-readable summary)"
 
     behavior_on_failure:
       action: "raise ValueError"
       log_to: "logs/step01_calibration.log"
       invoke: "g_debug (master invokes after error)"
 
-    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence, validate_irt_parameters"
+    notes:
+      - "Used for BOTH Pass 1 (Step 1) and Pass 2 (Step 3) calibrations"
+      - "Pass 2 should have equal or better SE than Pass 1 (purification improves precision)"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+    description: "Validate item parameters against quality thresholds (Decision D039 compliance)."
+
+    input_files:
+      - path: "logs/step01_item_parameters.csv"
+        source: "calibrate_irt() output from Pass 1"
+        required_columns: ["item", "Discrimination", "Difficulty"]
+
+    parameters:
+      a_min: 0.4  # Decision D039 threshold
+      b_max: 3.0  # Decision D039 threshold
+      a_col: "Discrimination"
+      b_col: "Difficulty"
+
+    criteria:
+      - "All discrimination (a) values >= 0.4 per Decision D039"
+      - "All |difficulty (b)| values <= 3.0 per Decision D039"
+      - "No NaN values in item parameters"
+      - "Expected retention: 40-60% typical"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        n_items: "int (total items)"
+        n_valid: "int (items passing thresholds)"
+        n_invalid: "int (items failing thresholds)"
+        invalid_items: "list of item names failing criteria"
+        message: "str (human-readable summary)"
+
+    behavior_on_failure:
+      action: "Log warning if retention < 30%, raise error if retention < 10%"
+      log_to: "logs/step02_purification_report.txt"
+      invoke: "g_debug if insufficient items for Pass 2"
+
+    notes:
+      - "Used AFTER Pass 1 calibration, BEFORE purification step"
+      - "Informs filter_items_by_quality() on which items to exclude"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_parameters"
+
+  validate_item_purification:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float = 0.4, b_max: float = 3.0, a_col: str = 'Discrimination', b_col: str = 'Difficulty') -> Dict[str, Any]"
+
+    description: "Validate purified item list meets Decision D039 thresholds (used AFTER filter_items_by_quality)."
+
+    input_files:
+      - path: "data/step02_purified_items.csv"
+        source: "filter_items_by_quality() output"
+        required_columns: ["item_name", "pass1_a", "pass1_b"]
+
+    parameters:
+      a_min: 0.4
+      b_max: 3.0
+      a_col: "pass1_a"
+      b_col: "pass1_b"
+
+    criteria:
+      - "ALL retained items have a >= 0.4 (purification threshold enforced)"
+      - "ALL retained items have |b| <= 3.0 (purification threshold enforced)"
+      - "Retention rate: 30-70% typical (below 30% = too restrictive)"
+      - "No NaN values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all purified items meet thresholds)"
+        n_items: "int (number of retained items)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError if ANY purified item violates threshold"
+      log_to: "logs/step02_purification_report.txt"
+      invoke: "g_debug (purification logic error)"
+
+    notes:
+      - "Used AFTER Step 2 purification"
+      - "Ensures filter_items_by_quality() correctly applied thresholds"
+      - "Sanity check: If this fails, purification function has bug"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_parameters"
 
   validate_lmm_convergence:
     module: "tools.validation"
     function: "validate_lmm_convergence"
     signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
-    description: "Validate LMM convergence for all 5 candidate models (Linear, Quadratic, Logarithmic, LinLog, QuadLog)"
+    description: "Check LMM model convergence status and warnings for fitted model."
 
     input_files:
-      - path: "results/step03_model_comparison.csv"
-        required_columns: ["model_name", "converged"]
-        source: "analysis tool output (step03_fit_lmm_trajectory_tsvr)"
-      - path: "logs/step03_lmm_fitting.log"
-        source: "analysis tool log output"
+      - path: "results/step05_lmm_model_summary.txt"
+        source: "fit_lmm_trajectory_tsvr() output (any of 5 models)"
 
     criteria:
-      - "All 5 models converged (converged=True for all model_name entries)"
+      - "Model converged (converged=True in MixedLMResults)"
       - "No singular covariance matrix warnings"
       - "AIC/BIC values finite (not NaN or Inf)"
-      - "Log-likelihood values reasonable (negative, not -Inf)"
-      - "Parameter counts correct per model specification"
+      - "Log-likelihood reasonable (negative, not -Inf)"
+      - "All fixed effects have finite estimates"
 
     expected_output:
       format: "Dict[str, Any]"
       fields:
-        converged: "bool"
-        message: "str"
-        warnings: "list"
+        converged: "bool (True if model converged)"
+        message: "str (convergence summary)"
+        warnings: "list of warning strings"
 
     behavior_on_failure:
-      action: "raise ValueError"
-      log_to: "logs/step03_lmm_fitting.log"
-      invoke: "g_debug (master invokes after error)"
+      action: "raise ValueError if convergence failed"
+      log_to: "logs/step05_lmm_fitting.log"
+      invoke: "g_debug (common: singular covariance, insufficient variance)"
 
-    notes: "Called once after all 5 models fitted. Validates convergence for entire set, not individual models."
+    notes:
+      - "Used in Step 5 AFTER each of 5 model fits"
+      - "ALL 5 models must converge for valid AIC comparison"
+      - "If ANY model fails -> quit immediately, do NOT proceed to Step 6"
+
     source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
 
-  validate_akaike_weights:
+  validate_model_formulas:
     module: "tools.validation"
-    function: "validate_akaike_weights"
-    signature: "validate_akaike_weights(aic_comparison: DataFrame) -> Dict[str, Any]"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
 
-    description: "Validate Akaike weights calculation (sum to 1.0, all in (0,1), delta_AIC correct)"
+    description: "Validate model formula specifications from configure_candidate_models() output."
 
     input_files:
-      - path: "results/step04_aic_comparison.csv"
-        required_columns: ["model_name", "AIC", "delta_AIC", "akaike_weight", "cumulative_weight"]
-        source: "analysis tool output (step04_compare_lmm_models_by_aic)"
+      - path: "N/A (in-memory validation)"
+        source: "configure_candidate_models() return value"
 
     criteria:
-      - "Akaike weights sum to 1.0 (within floating-point precision 0.999-1.001)"
-      - "All weights in (0, 1) exclusive (no weight = 0 or 1 exactly)"
-      - "delta_AIC values correct (best model = 0, others positive)"
-      - "cumulative_weight monotonic increasing (ends at 1.0)"
-      - "Best model identified (row 1 after sorting by AIC)"
+      - "All 5 models present (Linear, Quadratic, Log, Lin+Log, Quad+Log)"
+      - "Each model has 'formula' and 're_formula' keys"
+      - "Formulas contain expected time terms (Days, Days_squared, log_Days_plus1)"
+      - "Random effects formula valid ('~Days' or similar)"
 
     expected_output:
       format: "Dict[str, Any]"
       fields:
-        valid: "bool"
+        valid: "bool (True if all formulas valid)"
         message: "str"
-        weight_sum: "float (actual sum for diagnostics)"
 
     behavior_on_failure:
-      action: "raise ValueError"
-      log_to: "logs/step04_model_selection.log"
-      invoke: "g_debug (master invokes after error)"
+      action: "raise ValueError if formula generation failed"
+      log_to: "logs/step05_lmm_fitting.log"
+      invoke: "g_debug (formula syntax error)"
 
-    notes: "Custom validation function for Akaike weight calculation. Not in current tools_inventory.md - will need TDD creation during g_code execution."
-    source_reference: "To be added to tools_inventory.md during Step 4 execution"
+    notes:
+      - "Used in Step 5 BEFORE fitting models"
+      - "Catches formula generation errors early"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence"
+
+  validate_aic_comparison:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+    description: "Validate AIC comparison results and Akaike weight calculations."
+
+    input_files:
+      - path: "results/step06_aic_comparison.csv"
+        source: "compare_lmm_models_by_aic() output"
+        required_columns: ["model_name", "AIC", "delta_AIC", "akaike_weight", "cumulative_weight"]
+
+    criteria:
+      - "Akaike weights sum to 1.0 (within floating-point precision)"
+      - "All weights in (0, 1) exclusive"
+      - "delta_AIC values correct (best model = 0, others positive)"
+      - "cumulative_weight monotonic increasing (ends at 1.0)"
+      - "Best model identified (row 1 has delta_AIC = 0)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if AIC comparison valid)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError if weights don't sum to 1.0 or delta_AIC incorrect"
+      log_to: "logs/step06_model_selection.log"
+      invoke: "g_debug (numerical precision error)"
+
+    notes:
+      - "Used in Step 6 AFTER AIC comparison"
+      - "Critical for valid model selection"
+      - "Weight sum tolerance: [0.999, 1.001] acceptable"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence"
 
   validate_probability_transform:
     module: "tools.validation"
-    function: "validate_probability_transform"
-    signature: "validate_probability_transform(prob_data: DataFrame) -> Dict[str, Any]"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
 
-    description: "Validate theta to probability transformation for Decision D069 dual-scale plotting"
+    description: "Decision D069: Validate theta -> probability transformation for dual-scale plots."
 
     input_files:
-      - path: "plots/step05_functional_form_probability_data.csv"
-        required_columns: ["observed_prob", "CI_lower_prob", "CI_upper_prob", "pred_*_prob columns"]
-        source: "analysis tool output (step05_prepare_plot_data)"
+      - path: "plots/step07_trajectory_probability_data.csv"
+        source: "convert_theta_to_probability() output"
+        required_columns: ["Days", "observed_prob", "CI_lower_prob", "CI_upper_prob", "pred_*_prob"]
 
     criteria:
       - "All probability values in [0, 1] bounds"
-      - "CI_upper_prob > CI_lower_prob for all observed data"
+      - "CI bounds valid (CI_upper_prob > CI_lower_prob)"
       - "Monotonicity preserved (if theta1 > theta2, then prob1 > prob2)"
-      - "No NaN in Days column (time grid complete)"
-      - "Expected row count (54 rows: 4 observed + 50 predicted)"
+      - "No NaN in Days column"
 
     expected_output:
       format: "Dict[str, Any]"
       fields:
-        valid: "bool"
+        valid: "bool (True if transformation valid)"
         message: "str"
-        out_of_bounds: "list (probability values outside [0,1])"
 
     behavior_on_failure:
-      action: "raise ValueError"
-      log_to: "logs/step05_prepare_plot_data.log"
-      invoke: "g_debug (master invokes after error)"
+      action: "raise ValueError if probability out of bounds [0, 1]"
+      log_to: "logs/step07_prepare_plot_data.log"
+      invoke: "g_debug (transformation error)"
 
-    notes: "Custom validation function for probability transform. Not in current tools_inventory.md - will need TDD creation during g_code execution."
-    source_reference: "To be added to tools_inventory.md during Step 5 execution"
+    notes:
+      - "Used in Step 7 AFTER plot data preparation"
+      - "Decision D069 compliance check"
+      - "Ensures probability scale interpretable"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence"
 
 summary:
-  analysis_tools_count: 4
-  validation_tools_count: 4
-  total_unique_tools: 8
-  mandatory_decisions_embedded: ["D069", "D070"]
+  analysis_tools_count: 6
+  validation_tools_count: 8
+  total_unique_tools: 14
+  mandatory_decisions_embedded:
+    - "D039: 2-pass IRT purification (filter_items_by_quality with |b|<=3.0, a>=0.4)"
+    - "D068: p1_med prior (precision=1.0 in calibrate_irt config)"
+    - "D069: Dual-scale trajectory plots (convert_theta_to_probability for probability scale)"
+    - "D070: TSVR time variable (fit_lmm_trajectory_tsvr uses TSVR_hours not nominal days)"
+
   notes:
-    - "Each tool listed ONCE (deduplication across 5 analysis steps)"
-    - "fit_lmm_trajectory_tsvr called 5 times with different formulas (rq_analysis will sequence)"
-    - "Two validation tools (validate_akaike_weights, validate_probability_transform) NOT in current tools_inventory.md"
-    - "Missing validation tools will trigger TDD workflow during g_code execution (expected)"
-    - "RQ 5.7 reuses RQ 5.1 data extraction (step00_irt_input.csv from ../../rq1/data/)"
-    - "Decision D039 NOT applied (single-factor IRT, no 2-pass purification for omnibus analysis)"
+    - "Tool catalog approach: Each tool listed ONCE (even if used multiple times)"
+    - "calibrate_irt used twice: Step 1 (Pass 1 all items), Step 3 (Pass 2 purified items)"
+    - "fit_lmm_trajectory_tsvr used 5 times: Step 5 (one call per candidate model)"
+    - "All stdlib functions (pandas, numpy) NOT cataloged (exempted from verification)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
 
-decision_compliance:
-  D069_dual_scale_plots:
-    status: "COMPLIANT"
-    implementation: "convert_theta_to_probability generates both theta and probability scale plot data"
-    outputs: ["plots/step05_functional_form_theta_data.csv", "plots/step05_functional_form_probability_data.csv"]
+# Architecture Notes:
+# - This is a TOOL CATALOG (Option A), not per-step specifications
+# - Deduplication: Each tool appears ONCE regardless of usage frequency
+# - Separation of concerns: This file defines HOW tools work, 4_analysis.yaml defines WHEN to use them
+# - Type signatures enable g_code validation (prevents v3.0 API mismatches)
+# - Every analysis tool has validation_tool reference (architectural validation enforcement)
 
-  D070_tsvr_time_variable:
-    status: "COMPLIANT"
-    implementation: "fit_lmm_trajectory_tsvr uses TSVR_hours (actual hours) not nominal days"
-    note: "Days derived from TSVR_hours for interpretability only, not used as LMM time variable"
-
-cross_rq_dependencies:
-  RQ_5_1:
-    - "results/ch5/rq1/data/step00_irt_input.csv (IRT input data for reprocessing)"
-    - "results/ch5/rq1/data/step00a_tsvr_data.csv (TSVR time variable)"
-    note: "RQ 5.7 must execute AFTER RQ 5.1 Step 0 completes"
+# Version History:
+# - v1.0 (2025-11-25): Initial tool catalog created by rq_tools for RQ 5.7

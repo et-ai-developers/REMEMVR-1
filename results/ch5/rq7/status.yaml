@@ -28,22 +28,19 @@ rq_stats:
 rq_planner:
   status: success
   context_dump: |
-    5 analysis steps planned (Step 1: IRT calibration omnibus, Step 2: Data prep, Step 3: Fit 5 LMMs, Step 4: AIC selection, Step 5: Plot data)
-    Tool requirements: IRT calibration (single "All" factor), LMM fitting (5 candidate models), AIC model comparison, probability transformation (D069 dual-scale)
-    Expected outputs: 12 files (theta scores, 5 model objects, AIC comparison, best model summary, dual-scale plot CSVs). Validation required at every step.
+    7 analysis steps planned with 2-pass IRT purification (Step 1: IRT Pass 1 all items, Step 2: Item purification Decision D039, Step 3: IRT Pass 2 purified items, Step 4: Data prep, Step 5: Fit 5 LMMs, Step 6: AIC selection, Step 7: Plot data)
+    Tool requirements: IRT calibration (single "All" factor 2-pass), item purification (filter_items_by_quality), LMM fitting (5 candidate models), AIC model comparison, probability transformation (D069 dual-scale)
+    Expected outputs: 15 files (Pass 1 theta/items, purified items list, Pass 2 theta/items, LMM input, 5 model objects, AIC comparison, best model summary, dual-scale plot CSVs). Validation required at every step.
+    Next: rq_tools catalogues all analysis + validation tools
 
 rq_tools:
   status: success
-  context_dump: |
-    4 analysis + 4 validation tools cataloged for functional form comparison
-    Analysis: calibrate_irt (single-factor), fit_lmm_trajectory_tsvr (5 models), compare_lmm_models_by_aic, convert_theta_to_probability
-    Validation: IRT calibration, LMM convergence, Akaike weights (TDD), probability transform (TDD)
-    WARNING: 2 validation tools (validate_akaike_weights, validate_probability_transform) NOT in tools_inventory.md - will trigger TDD during g_code execution
+  context_dump: "6 analysis + 8 validation tools cataloged for 2-pass IRT + 5-model LMM comparison"
 
 rq_analysis:
   status: success
   timestamp: "2025-11-25T00:00:00Z"
-  context_dump: "5 steps specified with validation (IRT single-factor -> LMM 5-model comparison -> AIC selection -> dual-scale plots)"
+  context_dump: "7 steps specified with validation (IRT 2-pass -> 5 LMM models -> AIC selection -> dual-scale plots)"
 
 rq_inspect:
   status: pending
@@ -58,8 +55,10 @@ rq_results:
   context_dump: |
 
 analysis_steps:
-  step01_irt_calibration_omnibus: pending
-  step02_prepare_lmm_input: pending
-  step03_fit_5_candidate_lmms: pending
-  step04_aic_model_selection: pending
-  step05_prepare_functional_form_plots: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_prepare_lmm_input: pending
+  step05_fit_5_candidate_lmms: pending
+  step06_aic_model_selection: pending
+  step07_prepare_functional_form_plots: pending
