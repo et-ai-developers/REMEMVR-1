@@ -212,6 +212,12 @@
 ### rq53_paradigm_analysis
 **Description:** Complete RQ 5.3 (Paradigm Differences: Free/Cued/Recognition) pipeline execution record (2025-11-24). Zero bugs encountered. IRT calibration (43/72 items retained), LMM results (logarithmic best model), post-hoc contrasts showing Recognition > (Cued = Free). Hypothesis PARTIALLY SUPPORTED - retrieval support gradient confirmed at extremes but not middle. Consistent with dual-process theory.
 
+### rq55_schema_congruence_complete
+**Description:** Complete RQ 5.5 (Schema Congruence Effects on Forgetting Trajectories) pipeline execution. First v4.X RQ with zero bugs encountered. IRT calibration (51/72 items retained), LMM results (logarithmic best model, AIC=2652.57), post-hoc contrasts ALL non-significant. Hypothesis NOT SUPPORTED - no differential forgetting by schema congruence level (Common/Congruent/Incongruent show parallel trajectories). Demonstrates pipeline stability (5th consecutive RQ).
+
+### validated_irt_settings_complete
+**Description:** Complete history of IRT settings correction crisis and resolution. Discovery of systematic error (mc_samples 1 vs 100, 100x difference), impact assessment (theta r=0.68-0.91, below r≥0.95 threshold), full RQ 5.1-5.5 rerun with validated "Med" settings from ANALYSES_DEFINITIVE.md, comprehensive impact analysis showing 46% residual variance reduction and AIC improvement of 665 points. Scientific robustness confirmed - same models selected, same significance patterns, effect magnitudes adjusted 2-24%. Publication quality achieved. Includes user Q&A on item purification necessity and GPU cluster optimization decisions.
+
 ---
 
 ## How to Use This Index
