@@ -1,0 +1,19 @@
+[START] Step 6: Prepare Piecewise Trajectory Plot Data
+[LOAD] Loading piecewise data and fitted model...
+[LOADED] Data (1200 rows) and model
+[AGGREGATE] Computing observed means and CIs by segment...
+[AGGREGATE] Early segment: 12 observed points
+[AGGREGATE] Late segment: 132 observed points
+[PREDICT] Generating model predictions on grid...
+[PREDICT] Early predictions: 60 points
+[PREDICT] Late predictions: 180 points
+[MERGE] Merging observed and predicted data...
+[MERGE] Early plot data: 60 rows
+[MERGE] Late plot data: 180 rows
+[VALIDATION] Validating plot data...
+[PASS] All congruence types present in both segments
+[PASS] Days_within ranges valid
+[PASS] Theta ranges plausible
+[SAVED] step06_piecewise_early_data.csv (60 rows)
+[SAVED] step06_piecewise_late_data.csv (180 rows)
+[SUCCESS] Step 6 complete

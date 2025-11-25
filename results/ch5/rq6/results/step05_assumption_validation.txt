@@ -1,0 +1,10 @@
+================================================================================
+LMM ASSUMPTION VALIDATION - RQ 5.6
+================================================================================
+
+1. Residual Normality (Shapiro-Wilk): W=0.9985, p=0.3938 [PASS]
+2. Homoscedasticity (Levene): W=10.6396, p=0.0000 [FAIL]
+3. Random Effects Normality: W=0.9699, p=0.0218 [PASS]
+4. Autocorrelation (Durbin-Watson): DW=2.4561 [PASS]
+5. Outliers (|std_resid| > 3): 3 / 1200 (0.2%) [PASS]
+6. Multicollinearity (VIF): [SKIP - complex calculation]

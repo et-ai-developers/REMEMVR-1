@@ -67,7 +67,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import LMM fitting tool
-from tools.analysis_lmm import fit_lmm_trajectory_tsvr
+from tools.analysis_lmm import fit_lmm_trajectory
 
 # =============================================================================
 # Configuration
@@ -255,9 +255,8 @@ if __name__ == "__main__":
             formula_linear = (
                 "theta ~ TSVR_hours * C(Congruence, Treatment('Common'))"
             )
-            model_linear = fit_lmm_trajectory_tsvr(
-                theta_scores=df_data,
-                tsvr_data=df_data,
+            model_linear = fit_lmm_trajectory(
+                data=df_data,
                 formula=formula_linear,
                 groups='UID',
                 re_formula='~TSVR_hours',
@@ -282,9 +281,8 @@ if __name__ == "__main__":
             formula_log = (
                 "theta ~ log_TSVR * C(Congruence, Treatment('Common'))"
             )
-            model_log = fit_lmm_trajectory_tsvr(
-                theta_scores=df_data_log,
-                tsvr_data=df_data_log,
+            model_log = fit_lmm_trajectory(
+                data=df_data_log,
                 formula=formula_log,
                 groups='UID',
                 re_formula='~log_TSVR',
@@ -306,9 +304,8 @@ if __name__ == "__main__":
             formula_linlog = (
                 "theta ~ (TSVR_hours + log_TSVR) * C(Congruence, Treatment('Common'))"
             )
-            model_linlog = fit_lmm_trajectory_tsvr(
-                theta_scores=df_data_log,
-                tsvr_data=df_data_log,
+            model_linlog = fit_lmm_trajectory(
+                data=df_data_log,
                 formula=formula_linlog,
                 groups='UID',
                 re_formula='~TSVR_hours + log_TSVR',
