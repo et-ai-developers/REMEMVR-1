@@ -869,7 +869,7 @@ Use TSVR data to see the actual hours since VR for each px's scores
 **Data Required:**
 - **Analysis Set:** "All" (single factor)
 - **IRT Configuration:** Same as RQ5.7
-- **Additional Variable:** Age (from dfData.csv via data/data.py startup())
+- **Additional Variable:** age (from data/cache/dfData.csv)
 - **Merge Key:** UID
 - **Structure:** 400 observations with Age as between-subjects predictor
 
@@ -877,7 +877,7 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 1. **Data Preparation**
    - Use theta scores from "All" analysis (RQ5.7)
-   - Load Age from dfData.csv (one value per UID)
+   - Load Age from data/cache/dfData.csv (one value per UID, column is called 'age')
    - Merge Age with theta scores on UID
    - Grand-mean center Age (Age_c = Age - mean(Age))
    - Verify no missing Age values
