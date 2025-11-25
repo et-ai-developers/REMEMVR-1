@@ -1,88 +1,122 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq3/ with 6 folders
+  context_dump: 'Created results/ch5/rq3/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.3: Paradigm-specific forgetting trajectories (Free/Cued/Recognition)
+  context_dump: 'RQ 5.3: Paradigm-specific forgetting trajectories (Free/Cued/Recognition)
+
     Paradigms: IFR, ICR, IRE (excludes RFR, TCR)
+
     Analysis: IRT (correlated factors, 2-cat GRM) + LMM (5 candidate models)
+
     Data: DERIVED from RQ 5.1 (step00_irt_input.csv, step00_tsvr_mapping.csv)
+
     Critical: New Q-matrix needed (paradigm factors not domain factors)
 
+    '
 rq_scholar:
   status: success
-  context_dump: |
-    9.5/10 APPROVED. Theory excellent (TAP + dual-process + retrieval support).
+  context_dump: '9.5/10 APPROVED. Theory excellent (TAP + dual-process + retrieval
+    support).
+
     0 CRITICAL, 5 MODERATE concerns (practice effects, ceiling, single-process alt).
+
     Key citations to add: Yonelinas 2022, Xu 2016. Ready for rq_stats.
 
+    '
 rq_stats:
   status: success
-  context_dump: |
-    9.1/10 CONDITIONAL. Cat1: 2.6/3 (N=100 marginal for MGRM). Cat2: 2.0/2 (100% tools). Cat3: 1.8/2 (params good). Cat4: 1.7/2 (missing residual diagnostics). Cat5: 1.0/1 (7 concerns). Required: add sample size acknowledgment + LMM diagnostics.
+  context_dump: '9.1/10 CONDITIONAL. Cat1: 2.6/3 (N=100 marginal for MGRM). Cat2:
+    2.0/2 (100% tools). Cat3: 1.8/2 (params good). Cat4: 1.7/2 (missing residual diagnostics).
+    Cat5: 1.0/1 (7 concerns). Required: add sample size acknowledgment + LMM diagnostics.
 
+    '
 rq_planner:
   status: success
-  context_dump: |
-    8 steps planned (Step 0: data filtering + Steps 1-7: IRT->LMM pipeline)
-    Tools: IRT calibration (paradigm factors), 2-pass purification, LMM (5 models), post-hoc contrasts
-    Outputs: 6 data/results files, 2 plot source CSVs. Depends on RQ 5.1 step00 outputs.
-    Decisions: D039 purification, D068 dual p-values, D069 dual-scale plots, D070 TSVR
+  context_dump: '8 steps planned (Step 0: data filtering + Steps 1-7: IRT->LMM pipeline)
 
+    Tools: IRT calibration (paradigm factors), 2-pass purification, LMM (5 models),
+    post-hoc contrasts
+
+    Outputs: 6 data/results files, 2 plot source CSVs. Depends on RQ 5.1 step00 outputs.
+
+    Decisions: D039 purification, D068 dual p-values, D069 dual-scale plots, D070
+    TSVR
+
+    '
 rq_tools:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    8 analysis + 4 validation tools cataloged for IRT->LMM paradigm trajectory analysis
-    IRT: calibrate_irt, filter_items_by_quality. LMM: fit_lmm_trajectory_tsvr, compare_lmm_models_by_aic, compute_contrasts_pairwise, compute_effect_sizes_cohens
-    Validation: validate_irt_convergence, validate_irt_parameters, validate_lmm_convergence, validate_lmm_residuals
+  context_dump: '8 analysis + 4 validation tools cataloged for IRT->LMM paradigm trajectory
+    analysis
+
+    IRT: calibrate_irt, filter_items_by_quality. LMM: fit_lmm_trajectory_tsvr, compare_lmm_models_by_aic,
+    compute_contrasts_pairwise, compute_effect_sizes_cohens
+
+    Validation: validate_irt_convergence, validate_irt_parameters, validate_lmm_convergence,
+    validate_lmm_residuals
+
     Decisions embedded: D039/D068/D069/D070. All tools verified in tools_inventory.md
 
+    '
 rq_analysis:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    8 steps specified with validation (IRT 2-pass -> LMM 5-model comparison -> contrasts -> dual-scale plots)
+  context_dump: '8 steps specified with validation (IRT 2-pass -> LMM 5-model comparison
+    -> contrasts -> dual-scale plots)
+
     Steps 0,4,7: stdlib operations (data filtering, merge, plot prep)
+
     Steps 1,2,3: IRT calibration with validate_irt_convergence/validate_irt_parameters
+
     Steps 5,6: LMM fitting + contrasts with validate_lmm_convergence
+
     All tool signatures from 3_tools.yaml, all parameters from 2_plan.md
 
+    '
 rq_inspect:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    All 8 steps validated (step00-step07). 4-layer validation PASS for all.
+  context_dump: 'All 8 steps validated (step00-step07). 4-layer validation PASS for
+    all.
+
     IRT: 72 items -> 43 purified (59.7%), theta [-2.48, 2.95], convergence=True
+
     LMM: Best model=Log (AIC=2346.60), all 5 converged, 2/3 contrasts significant
+
     Outputs: 11 data files, 2 plot CSVs (theta+probability scales)
 
+    '
 rq_plots:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    2 plots generated: trajectory_theta.png, trajectory_probability.png
+  context_dump: '2 plots generated: trajectory_theta.png, trajectory_probability.png
+
     Data source: step04_lmm_input.csv (1200 obs), step03_item_parameters.csv
+
     D069 compliance: YES (dual-scale trajectory plots included)
+
     Functions used: set_plot_style_defaults, convert_theta_to_probability
 
+    '
 rq_results:
   status: success
-  completed: 2025-11-24
+  completed: 2025-11-25
+  timestamp: 2025-11-25T03:30:00Z
   context_dump: |
     Results validated for scientific plausibility
-    0 anomalies flagged (plausibility acceptable)
-    Key findings: Log model best (AIC=2346.60), Recognition > Free/Cued (p=.002), Cued=Free (p=.726)
-    Hypothesis PARTIALLY SUPPORTED: retrieval support gradient at extremes only
+    2 anomalies flagged: Recognition faster forgetting (contradicts hypothesis), Cued=Free baseline (unexplained)
     Summary documented in results/summary.md
-
 analysis_steps:
   step00_prepare_paradigm_data: success
   step01_irt_calibration_pass1: success

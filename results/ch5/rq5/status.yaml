@@ -1,59 +1,93 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq5/ with 6 folders
+  context_dump: 'Created results/ch5/rq5/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.5: Schema congruence effects on forgetting trajectories
+  context_dump: 'RQ 5.5: Schema congruence effects on forgetting trajectories
+
     Factors: Common/Congruent/Incongruent (NOT WWW domains)
+
     Analysis: IRT (2-pass GRM) + LMM (5 candidate models)
+
     Data: DERIVED from RQ 5.1 (step00_irt_input.csv, step00_tsvr_mapping.csv)
+
     Critical: Congruence coded by item suffix (i1-i2=common, i3-i4=congruent, i5-i6=incongruent)
 
+    '
 rq_scholar:
   status: success
-  context_dump: |
-    5.5 validated: 9.4/10 APPROVED. Theory excellent, needs 2-3 recent citations.
-    0 critical issues, 5 moderate suggestions for U-shaped function, age modulation, practice effects.
-    Literature: 14 papers reviewed, 6 high-relevance. Key additions: Gilboa & Marlatte 2017, Brod 2018.
+  context_dump: '5.5 validated: 9.4/10 APPROVED. Theory excellent, needs 2-3 recent
+    citations.
+
+    0 critical issues, 5 moderate suggestions for U-shaped function, age modulation,
+    practice effects.
+
+    Literature: 14 papers reviewed, 6 high-relevance. Key additions: Gilboa & Marlatte
+    2017, Brod 2018.
+
     Next: rq_stats for statistical validation.
 
+    '
 rq_stats:
   status: success
-  context_dump: |
-    9.4/10 APPROVED. Cat1: 2.8/3 (IRT+LMM appropriate). Cat2: 2.0/2 (100% tool reuse). Cat3: 1.9/2 (Bonferroni calc unclear). Cat4: 1.8/2 (no convergence contingency). Cat5: 0.9/1 (7 concerns, well-cited). Schema congruence methodology sound. Next: rq_planner.
+  context_dump: '9.4/10 APPROVED. Cat1: 2.8/3 (IRT+LMM appropriate). Cat2: 2.0/2 (100%
+    tool reuse). Cat3: 1.9/2 (Bonferroni calc unclear). Cat4: 1.8/2 (no convergence
+    contingency). Cat5: 0.9/1 (7 concerns, well-cited). Schema congruence methodology
+    sound. Next: rq_planner.
 
+    '
 rq_planner:
   status: success
-  context_dump: |
-    8 analysis steps planned (Step 00-07): extraction, IRT Pass1, purification, IRT Pass2, TSVR merge, LMM, post-hoc, plot data.
-    IRT: 3-dim GRM (common/congruent/incongruent), Treatment coding (common=reference). Cross-RQ: uses RQ 5.1 step00 outputs.
-    LMM: 5 candidate models, Congruence x Time interaction tests. D039/D068/D069/D070 applied. Validation at every step.
+  context_dump: '8 analysis steps planned (Step 00-07): extraction, IRT Pass1, purification,
+    IRT Pass2, TSVR merge, LMM, post-hoc, plot data.
 
+    IRT: 3-dim GRM (common/congruent/incongruent), Treatment coding (common=reference).
+    Cross-RQ: uses RQ 5.1 step00 outputs.
+
+    LMM: 5 candidate models, Congruence x Time interaction tests. D039/D068/D069/D070
+    applied. Validation at every step.
+
+    '
 rq_tools:
   status: success
   completed: 2025-11-24 15:00
-  context_dump: |
-    8 analysis + 4 validation tools cataloged for IRT->LMM schema congruence analysis.
-    IRT: calibrate_irt, filter_items_by_quality. LMM: fit_lmm_trajectory_tsvr, compare_lmm_models_by_aic, compute_contrasts_pairwise, compute_effect_sizes_cohens.
-    Validation: validate_irt_convergence, validate_irt_parameters, validate_lmm_convergence, validate_lmm_residuals.
+  context_dump: '8 analysis + 4 validation tools cataloged for IRT->LMM schema congruence
+    analysis.
+
+    IRT: calibrate_irt, filter_items_by_quality. LMM: fit_lmm_trajectory_tsvr, compare_lmm_models_by_aic,
+    compute_contrasts_pairwise, compute_effect_sizes_cohens.
+
+    Validation: validate_irt_convergence, validate_irt_parameters, validate_lmm_convergence,
+    validate_lmm_residuals.
+
     D039/D068/D069/D070 embedded. All tools verified in tools_inventory.md.
 
+    '
 rq_analysis:
   status: success
   completed: 2025-11-24 15:30
-  context_dump: |
-    8 steps specified with validation (IRT 2-pass -> LMM schema congruence).
-    Steps: step00_extract, step01_irt_pass1, step02_purify, step03_irt_pass2, step04_tsvr_merge, step05_lmm, step06_contrasts, step07_plot_data.
-    Cross-RQ: Uses RQ 5.1 step00 outputs. Congruence factor: common/congruent/incongruent (Treatment coding).
-    4 catalogued tools + 4 stdlib operations. D039/D068/D069/D070 embedded. All signatures with type hints.
+  context_dump: '8 steps specified with validation (IRT 2-pass -> LMM schema congruence).
 
+    Steps: step00_extract, step01_irt_pass1, step02_purify, step03_irt_pass2, step04_tsvr_merge,
+    step05_lmm, step06_contrasts, step07_plot_data.
+
+    Cross-RQ: Uses RQ 5.1 step00 outputs. Congruence factor: common/congruent/incongruent
+    (Treatment coding).
+
+    4 catalogued tools + 4 stdlib operations. D039/D068/D069/D070 embedded. All signatures
+    with type hints.
+
+    '
 analysis_steps:
   step00_extract_congruence_data: success
   step01_irt_calibration_pass1: success
@@ -63,31 +97,39 @@ analysis_steps:
   step05_fit_lmm: success
   step06_compute_post_hoc_contrasts: success
   step07_prepare_trajectory_plot_data: success
-
 rq_inspect:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    Validated all 8 analysis steps for RQ 5.5 (schema congruence).
+  context_dump: 'Validated all 8 analysis steps for RQ 5.5 (schema congruence).
+
     IRT: 72 items -> 51 purified (70.8%), 3-dim GRM converged, theta in [-2.07, 2.72].
-    LMM: Log model best (AIC=2652.57), no significant Congruence x Time interactions (all p > 0.14).
-    Post-hoc: 3 contrasts computed with Bonferroni correction, 5 effect sizes (1 small, 4 negligible).
+
+    LMM: Log model best (AIC=2652.57), no significant Congruence x Time interactions
+    (all p > 0.14).
+
+    Post-hoc: 3 contrasts computed with Bonferroni correction, 5 effect sizes (1 small,
+    4 negligible).
+
     Outputs: 8 data files, 4 results files, 2 plot data files. All pass 4-layer validation.
 
+    '
 rq_plots:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    Generated 2 plots: trajectory_theta.png, trajectory_probability.png
-    Data sources: step07_trajectory_theta_data.csv, step07_trajectory_probability_data.csv
-    D069 compliance: YES (dual-scale trajectory plots included)
-    Functions used: set_plot_style_defaults (matplotlib/seaborn direct for pre-aggregated data)
+  context_dump: 'Generated 2 plots: trajectory_theta.png, trajectory_probability.png
 
+    Data sources: step07_trajectory_theta_data.csv, step07_trajectory_probability_data.csv
+
+    D069 compliance: YES (dual-scale trajectory plots included)
+
+    Functions used: set_plot_style_defaults (matplotlib/seaborn direct for pre-aggregated
+    data)
+
+    '
 rq_results:
   status: success
-  completed: 2025-11-24
+  timestamp: '2025-11-25T17:50:00'
   context_dump: |
     Results validated for scientific plausibility
-    2 anomalies flagged: 1 asymmetric purification (incongruent 45.8% removed vs 20.8% others), 1 Pass 2 parameter drift warning
-    Primary hypothesis NOT SUPPORTED: No differential forgetting by congruence (all p > 0.14, all f-squared < 0.001)
+    1 anomaly flagged: null schema effect (see summary.md Section 3)
     Summary documented in results/summary.md

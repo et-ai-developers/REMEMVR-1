@@ -1,91 +1,126 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq4/ with 6 folders
+  context_dump: 'Created results/ch5/rq4/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.4: Linear trend in paradigm forgetting rates
+  context_dump: 'RQ 5.4: Linear trend in paradigm forgetting rates
+
     Domains: N/A - paradigm-level analysis (Free/Cued/Recognition)
+
     Analysis: Linear trend contrast on RQ5.3 model slopes
+
     Data: DERIVED from RQ5.3 (theta scores + LMM pickle)
+
     Critical: Requires RQ5.3 complete; Day 3 slope evaluation
 
+    '
 rq_scholar:
   status: success
-  context_dump: |
-    RQ5.4 validated: 9.4/10 APPROVED
+  context_dump: 'RQ5.4 validated: 9.4/10 APPROVED
+
     Theory excellent (encoding-retrieval specificity, polynomial contrasts)
+
     Suggest acknowledging ceiling effects in recognition paradigm
+
     12 papers reviewed, 6 high-relevance
+
     Ready for stats validation
 
+    '
 rq_stats:
   status: success
-  context_dump: |
-    9.1/10 CONDITIONAL. Cat1: 2.5/3 (N=3 regression suboptimal). Cat2: 2.0/2 (100% stdlib). Cat3: 1.8/2 (R-sq meaningless N=3). Cat4: 1.8/2 (slope reliability). Cat5: 1.0/1 (8 concerns, 4 CRITICAL). Required: Use within-LMM contrast, remove R-sq hypothesis.
+  context_dump: '9.1/10 CONDITIONAL. Cat1: 2.5/3 (N=3 regression suboptimal). Cat2:
+    2.0/2 (100% stdlib). Cat3: 1.8/2 (R-sq meaningless N=3). Cat4: 1.8/2 (slope reliability).
+    Cat5: 1.0/1 (8 concerns, 4 CRITICAL). Required: Use within-LMM contrast, remove
+    R-sq hypothesis.
 
+    '
 rq_planner:
   status: success
-  context_dump: |
-    4 steps planned (Step 0: load RQ5.3 + Steps 1-3: marginal means, linear contrast, plot prep)
-    Tools: LMM contrast testing (within-model), marginal means extraction, plot data preparation
-    Outputs: 2 data files, 2 results files, 2 plot files. Depends on RQ 5.3 complete (step05_lmm_fitted_model.pkl)
+  context_dump: '4 steps planned (Step 0: load RQ5.3 + Steps 1-3: marginal means,
+    linear contrast, plot prep)
+
+    Tools: LMM contrast testing (within-model), marginal means extraction, plot data
+    preparation
+
+    Outputs: 2 data files, 2 results files, 2 plot files. Depends on RQ 5.3 complete
+    (step05_lmm_fitted_model.pkl)
+
     Decisions: D068 dual p-values, D070 TSVR inherited from RQ5.3
 
+    '
 rq_tools:
   status: success
   completed: 2025-11-24 13:15
-  context_dump: |
-    4 analysis + 2 validation tools cataloged for linear trend contrast analysis
+  context_dump: '4 analysis + 2 validation tools cataloged for linear trend contrast
+    analysis
+
     Stdlib exemptions: 4 (pickle, pandas, statsmodels, scipy - no custom tools/ required)
+
     Custom tool: validate_lmm_convergence (from tools_inventory.md)
+
     D068 dual p-values, D070 TSVR inherited from RQ5.3
 
+    '
 rq_analysis:
   status: success
   completed: 2025-11-24 13:30
-  context_dump: |
-    4 steps specified with validation (secondary analysis: load RQ5.3 -> marginal means -> linear contrast -> plot prep)
-    Stdlib operations: 4 (pickle load, statsmodels predict, numpy/scipy contrast, pandas plot data)
+  context_dump: '4 steps specified with validation (secondary analysis: load RQ5.3
+    -> marginal means -> linear contrast -> plot prep)
+
+    Stdlib operations: 4 (pickle load, statsmodels predict, numpy/scipy contrast,
+    pandas plot data)
+
     Catalogued validation: 1 (validate_lmm_convergence for Step 0 model check)
+
     Output: 4_analysis.yaml with complete specifications for g_code
 
+    '
 analysis_steps:
   step00_load_rq53_outputs: success
   step01_extract_marginal_means: success
   step02_compute_linear_trend_contrast: success
   step03_prepare_paradigm_plot_data: success
-
 rq_inspect:
   status: success
   completed: 2025-11-24 14:00
-  context_dump: |
-    Validated 4 analysis steps (step00-step03) - all PASS
+  context_dump: 'Validated 4 analysis steps (step00-step03) - all PASS
+
     Outputs: 3 data files, 3 plot files, 4 logs - all validated
+
     Linear contrast: b=-0.127, z=-2.47, p=0.01 (uncorr), p=0.20 (Bonf)
+
     All value ranges valid, no NaN, CI bounds logical
+
     Ready for rq_plots
 
+    '
 rq_plots:
   status: success
   completed: 2025-11-24
-  context_dump: |
-    Plots generated: 1 (paradigm_forgetting_rates.png)
+  context_dump: 'Plots generated: 1 (paradigm_forgetting_rates.png)
+
     Data source: step03_paradigm_forgetting_rates_data.csv
+
     D069 compliance: N/A (bar chart, not trajectory)
+
     Functions used: set_plot_style_defaults, save_plot_with_data + matplotlib bar
 
+    '
 rq_results:
   status: success
-  completed: 2025-11-24
+  completed: 2025-11-25
   context_dump: |
     Results validated for scientific plausibility
-    2 anomalies flagged: 1 wrong direction, 1 unexpected pattern (see summary.md Sections 3-4)
-    Key finding: Linear trend b=-0.127, p=0.01 (uncorr), p=0.20 (Bonf) - OPPOSITE direction to hypothesis
-    Summary documented in results/summary.md - ceiling effects investigation recommended
+    2 anomalies flagged: 1 wrong direction (Recognition fastest forgetting contradicts hypothesis), 1 presentation (incomplete D068 plot annotation)
+    Summary documented in results/summary.md

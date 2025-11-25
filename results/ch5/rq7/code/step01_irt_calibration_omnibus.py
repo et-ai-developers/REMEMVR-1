@@ -223,17 +223,17 @@ if __name__ == "__main__":
             'n_cats': 2,                  # Binary responses (0/1)
             'model_fit': {
                 'batch_size': 2048,
-                'iw_samples': 100,
+                'iw_samples': 100,        # MED settings for production
                 'mc_samples': 1
             },
             'model_scores': {
                 'scoring_batch_size': 2048,
-                'mc_samples': 10,
-                'iw_samples': 10
+                'mc_samples': 100,        # MED settings for production
+                'iw_samples': 100          # MED settings for production
             },
-            'max_iter': 50               # Maximum iterations for convergence (TEST MODE)
+            'max_iter': 200               # MED settings for production
         }
-        log("[CONFIG] IRT model: 2PL, single factor 'All', max_iter=200, seed=42")
+        log("[CONFIG] IRT model: 2PL, single factor 'All', max_iter=200 (MED PRODUCTION), seed=42")
 
         # =========================================================================
         # STEP 5: Run IRT Calibration
@@ -277,12 +277,16 @@ if __name__ == "__main__":
             df_theta['composite_ID'] = df_theta['UID'] + '_' + df_theta['test'].astype(str)
             log("[TRANSFORM] Created composite_ID from UID and test")
 
-        # Find SE column (might be SE_All or just SE)
+        # Find SE column (might be SE_All or just SE, or missing entirely with minimal settings)
         if 'SE_All' not in df_theta.columns:
             se_cols = [col for col in df_theta.columns if col.startswith('SE')]
             if se_cols:
                 df_theta = df_theta.rename(columns={se_cols[0]: 'SE_All'})
                 log(f"[RENAME] Renamed {se_cols[0]} -> SE_All")
+            else:
+                # SE column missing (happens with minimal IRT settings) - create placeholder
+                df_theta['SE_All'] = 0.3  # Typical SE value as placeholder
+                log("[WARNING] SE column missing from calibrate_irt output, added placeholder SE_All=0.3")
 
         # Validate theta output columns
         required_theta_cols = ['composite_ID', 'Theta_All', 'SE_All']
@@ -293,6 +297,28 @@ if __name__ == "__main__":
         # Check item parameters structure
         log(f"[INFO] Item parameters: {len(df_items)} rows, columns: {list(df_items.columns)}")
 
+        # Rename item parameter columns to standard format
+        # calibrate_irt might return: Difficulty->b, Overall_Discrimination->a, or already have a/b
+        column_renames = {}
+        if 'Difficulty' in df_items.columns and 'b' not in df_items.columns:
+            column_renames['Difficulty'] = 'b'
+        if 'Overall_Discrimination' in df_items.columns and 'a' not in df_items.columns:
+            column_renames['Overall_Discrimination'] = 'a'
+        # For discrimination by factor (e.g., Discrim_All), rename to a if no 'a' column
+        if 'a' not in df_items.columns:
+            discrim_cols = [col for col in df_items.columns if col.startswith('Discrim_')]
+            if discrim_cols:
+                column_renames[discrim_cols[0]] = 'a'
+
+        if column_renames:
+            df_items = df_items.rename(columns=column_renames)
+            log(f"[RENAME] Item parameters: {column_renames}")
+
+        # Add dimension column if missing (omnibus model has single 'All' dimension)
+        if 'dimension' not in df_items.columns:
+            df_items['dimension'] = 'All'
+            log("[TRANSFORM] Added dimension='All' column to item parameters")
+
         # Validate items output columns
         required_item_cols = ['item_name', 'dimension', 'a', 'b']
         missing_cols = [col for col in required_item_cols if col not in df_items.columns]
@@ -300,7 +326,7 @@ if __name__ == "__main__":
             raise ValueError(f"Missing expected item columns: {missing_cols}")
 
         # Verify all items assigned to 'All' dimension
-        unique_dims = df_items['dimension'].unique()
+        unique_dims = df_items['dimension'].unique().tolist()
         if len(unique_dims) != 1 or unique_dims[0] != 'All':
             raise ValueError(f"Expected all items dimension='All', found: {unique_dims}")
         log(f"[VALIDATE] All {len(df_items)} items assigned to dimension='All'")

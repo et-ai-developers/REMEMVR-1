@@ -126,9 +126,8 @@ rq_plots:
 
 rq_results:
   status: success
-  completed: 2025-11-22T23:30:00Z
+  timestamp: 2025-11-25T17:35:00Z
   context_dump: |
-    Results validated for scientific plausibility
-    2 anomalies flagged: When domain floor effect (6-9% probability), When item attrition (77% excluded)
-    What/Where domains plausible. When domain requires investigation before acceptance.
-    Summary documented in results/summary.md
+    Results validated for scientific plausibility (5 anomalies flagged)
+    Anomalies: IRT parameter drift (4 items), Where-What null (unexpected), When domain floor effect (8-12%), When item attrition (77%), LMM boundary warnings
+    Summary exists at results/summary.md (created 2025-11-22, validated 2025-11-25)

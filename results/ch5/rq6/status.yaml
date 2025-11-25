@@ -1,80 +1,130 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq6/ with 6 folders
+  context_dump: 'Created results/ch5/rq6/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.6: Schema congruence consolidation vs decay
-    Domains: N/A - items categorized by congruence (Congruent/Common/Incongruent), not WWW
-    Analysis: Piecewise LMM (Early Days 0-1, Late Days 1-6) + 3-way interaction
-    Data: DERIVED from RQ 5.5 theta scores (results/ch5/rq5/data/step03_theta_scores.csv)
-    Critical: Tests sleep consolidation theory - congruent benefit during Early segment (one night sleep)
+  context_dump: 'RQ 5.6: Schema congruence consolidation vs decay
 
+    Domains: N/A - items categorized by congruence (Congruent/Common/Incongruent),
+    not WWW
+
+    Analysis: Piecewise LMM (Early Days 0-1, Late Days 1-6) + 3-way interaction
+
+    Data: DERIVED from RQ 5.5 theta scores (results/ch5/rq5/data/step03_theta_scores.csv)
+
+    Critical: Tests sleep consolidation theory - congruent benefit during Early segment
+    (one night sleep)
+
+    '
 rq_scholar:
   status: success
-  context_dump: |
-    9.3/10 APPROVED. Strong piecewise consolidation theory, good literature. Suggest: add practice effects discussion, acknowledge post-consolidation schema timing, nuance critical window claim.
+  context_dump: '9.3/10 APPROVED. Strong piecewise consolidation theory, good literature.
+    Suggest: add practice effects discussion, acknowledge post-consolidation schema
+    timing, nuance critical window claim.
 
+    '
 rq_stats:
   status: success
-  context_dump: |
-    9.6/10 APPROVED. Cat1: 3.0/3 (exceptional piecewise LMM design). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (comprehensive params). Cat4: 1.8/2 (strong validation, minor theta weighting concern). Cat5: 0.8/1 (10 concerns, good quality). Section 7 resolved 8.9/10 REJECTED status. Suggest: elevate theta weighting, acknowledge N=100 limitation.
+  context_dump: '9.6/10 APPROVED. Cat1: 3.0/3 (exceptional piecewise LMM design).
+    Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (comprehensive params). Cat4: 1.8/2 (strong
+    validation, minor theta weighting concern). Cat5: 0.8/1 (10 concerns, good quality).
+    Section 7 resolved 8.9/10 REJECTED status. Suggest: elevate theta weighting, acknowledge
+    N=100 limitation.
 
+    '
 rq_planner:
   status: success
-  context_dump: |
-    7 analysis steps planned (Step 0: RQ 5.5 theta extraction + Steps 1-6: piecewise LMM)
-    Pipeline: LMM-only (uses DERIVED theta from RQ 5.5, no IRT calibration)
-    Key analysis: Piecewise LMM with 3-way interaction (Days_within x Segment x Congruence) tests consolidation vs decay
-    Expected outputs: LMM model, 6 segment-specific slopes, 11 hypothesis tests, assumption validation, 2 plot source CSVs
-    Validation: Per-step validation mandatory (100% coverage with 4-layer substance criteria)
+  context_dump: '7 analysis steps planned (Step 0: RQ 5.5 theta extraction + Steps
+    1-6: piecewise LMM)
 
+    Pipeline: LMM-only (uses DERIVED theta from RQ 5.5, no IRT calibration)
+
+    Key analysis: Piecewise LMM with 3-way interaction (Days_within x Segment x Congruence)
+    tests consolidation vs decay
+
+    Expected outputs: LMM model, 6 segment-specific slopes, 11 hypothesis tests, assumption
+    validation, 2 plot source CSVs
+
+    Validation: Per-step validation mandatory (100% coverage with 4-layer substance
+    criteria)
+
+    '
 rq_tools:
   status: success
   completed: 2025-11-25 12:06
-  context_dump: |
-    4 catalogued + 8 missing piecewise tools identified (INLINE strategy approved)
-    Catalogued: fit_lmm_trajectory_tsvr, extract_fixed_effects, compute_contrasts_pairwise, convert_theta_to_probability
-    Missing: Piecewise-specific tools (extract_segment_slopes, assign_piecewise_segments, assumption validation, sensitivity analyses, plot data prep)
-    Strategy: Inline implementation per RQ 5.2 pattern, extract to tools/ after RQ 5.6 validation
+  context_dump: '4 catalogued + 8 missing piecewise tools identified (INLINE strategy
+    approved)
+
+    Catalogued: fit_lmm_trajectory_tsvr, extract_fixed_effects, compute_contrasts_pairwise,
+    convert_theta_to_probability
+
+    Missing: Piecewise-specific tools (extract_segment_slopes, assign_piecewise_segments,
+    assumption validation, sensitivity analyses, plot data prep)
+
+    Strategy: Inline implementation per RQ 5.2 pattern, extract to tools/ after RQ
+    5.6 validation
+
     All signatures documented in 3_tools.yaml for g_code reference
 
+    '
 rq_analysis:
   status: success
-  timestamp: "2025-11-25T14:16:00"
-  context_dump: |
-    7 steps specified with validation (Piecewise LMM consolidation vs decay analysis)
-    Step 0: stdlib (RQ 5.5 theta extraction), Steps 1-6: 3 catalogued + 4 inline tools
-    All step types: stdlib (1), catalogued (3), inline (3) - INLINE per RQ 5.2 pattern
-    Complete specifications: Full signatures, input/output formats, parameters, validation criteria
-    Key outputs: Piecewise LMM model, 6 segment slopes, 11 hypothesis tests, assumption validation, 2 plot CSVs
+  timestamp: '2025-11-25T14:16:00'
+  context_dump: '7 steps specified with validation (Piecewise LMM consolidation vs
+    decay analysis)
 
+    Step 0: stdlib (RQ 5.5 theta extraction), Steps 1-6: 3 catalogued + 4 inline tools
+
+    All step types: stdlib (1), catalogued (3), inline (3) - INLINE per RQ 5.2 pattern
+
+    Complete specifications: Full signatures, input/output formats, parameters, validation
+    criteria
+
+    Key outputs: Piecewise LMM model, 6 segment slopes, 11 hypothesis tests, assumption
+    validation, 2 plot CSVs
+
+    '
 rq_plots:
   status: success
-  context_dump: |
-    1 plot generated: piecewise_trajectory.png (two-panel Early|Late)
+  context_dump: '1 plot generated: piecewise_trajectory.png (two-panel Early|Late)
+
     Data sources: step06_piecewise_early_data.csv, step06_piecewise_late_data.csv
+
     D069 compliance: NOT applicable (piecewise segment comparison, not dual-scale)
+
     Custom two-panel matplotlib layout + set_plot_style_defaults for consistency
 
+    '
 rq_inspect:
-  status: pending
-  context_dump: |
+  status: success
+  context_dump: 'Validated all 7 analysis steps (step00-step06) - ALL PASS
 
+    Four-layer validation: Existence, Structure, Substance, Execution logs
+
+    Key findings: 400 theta scores -> 1200 piecewise rows, 6 slopes computed, 12 hypothesis tests
+
+    Model converged, 2/12 tests significant (Bonferroni), sensitivity: Lin+Log time best (AIC=2491 vs 2582)
+
+    All outputs scientifically reasonable, no errors in logs
+
+    '
 rq_results:
   status: success
-  timestamp: "2025-11-25T16:30:00"
+  timestamp: '2025-11-25T18:45:00'
   context_dump: |
-    Results validated for scientific plausibility
-    3 anomalies flagged: 1 model misspecification (ΔAICThere=91 favors continuous time), 1 homoscedasticity violation, 1 hypothesis NOT supported (3-way interaction p=.938)
-    Summary documented in results/summary.md
-
+    Results validated for scientific plausibility (summary.md already exists)
+    4 anomalies flagged: 1 unexpected null (primary hypothesis p=0.938), 1 assumption violation (heteroscedasticity), 1 model specification (Lin+Log fits better), 1 incomplete sensitivity
+    Summary documented in results/summary.md - sleep consolidation hypothesis NOT supported
 analysis_steps:
   step00_extract_theta_from_rq5: success
   step01_prepare_piecewise_input: success
