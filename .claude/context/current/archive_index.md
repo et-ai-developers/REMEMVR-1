@@ -224,6 +224,15 @@
 ### ch5_rq8_15_concept_validation
 **Description:** Complete history of RQ 5.8-5.15 concept generation, dual-agent validation (rq_scholar + rq_stats), iterative enhancement cycles, and acceptance of 9.1/10 CONDITIONAL publication-quality standard. Includes RQ 5.7 completion, agent prompt enhancements, first validation cycle (4 APPROVED, 2 CONDITIONAL, 2 REJECTED), final enhancement cycle achieving 6 APPROVED and 2 CONDITIONAL (9.1/10). Documents validation iteration dynamics and transition to pipeline execution phase.
 
+### ch5_rq8_15_pipeline_planning
+**Description:** RQ 5.8-5.15 pipeline execution preparation via rq_planner (8/8 successful plans) and TDD tool detection via rq_tools (7/8 failures expected). Includes execution order constraints (4 tiers), cross-RQ dependencies identified, 26 missing tools catalogued across 3 categories (LMM validation, specialized analysis, clustering). Created tools_status.tsv tracking system (21 GREEN production-validated, 25 ORANGE flagged, 28 RED legacy) and tools_todo.yaml development roadmap (25 tools, 3 priority levels, 24-33 hour estimate). Documents TDD detection working as designed and strategic options for tool development vs RQ execution.
+
+### phase1_critical_path_complete
+**Description:** Phase 1 Critical Path TDD tool development complete (4/4 HIGH priority tools, 50/50 tests GREEN, 1,590 lines code, 3 hours execution). Tool 1 check_file_exists (10 GREEN, 15min), Tool 2 validate_lmm_assumptions_comprehensive (14 GREEN, 90min, 7 comprehensive diagnostics with plots/CSVs), Tool 3 compute_cronbachs_alpha (13 GREEN, 45min, creates NEW MODULE tools/analysis_ctt.py with bootstrap CIs), Tool 4 compare_correlations_dependent (13 GREEN, 30min, Steiger's z-test). Unblocks 4/8 RQs (5.8, 5.11, 5.12, 5.15 = 50%). Validates TDD methodology benefits and 9-step workflow effectiveness. Documents legacy code integration strategies and module creation principles.
+
+### phase2_tools_5_6_7_complete
+**Description:** Phase 2 TDD tool development continuation (Tools 5-7 COMPLETE, velocity acceleration 120min→45min→30min via workflow mastery). Tool 5 select_lmm_random_structure_via_lrt (12/15 GREEN with 3 skipped for statsmodels limitations, REML=False decision approved, v1 pragmatic simplification Uncorrelated=Full documented). Tool 6 prepare_age_effects_plot_data (15/15 GREEN, 45min, pd.qcut tertiles with 95% CIs). Tool 7 compute_icc_from_variance_components (14/14 GREEN, 30min, 3 ICC estimates with interpretation). Total progress 7/25 tools (28%), demonstrates TDD velocity gains and simplified workflow effectiveness. Strategic assessment estimates ~10.5 hours and 4 sessions remaining for 18 tools.
+
 ---
 
 ## How to Use This Index
