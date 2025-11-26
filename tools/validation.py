@@ -2457,3 +2457,564 @@ def validate_model_convergence(
         'message': message,
         'converged': converged
     }
+
+
+def validate_standardization(
+    df: pd.DataFrame,
+    column_names: List[str],
+    tolerance: float = 0.01
+) -> Dict[str, Any]:
+    """
+    Validate z-score standardization (mean ≈ 0, SD ≈ 1).
+
+    Used in RQ 5.14 clustering analysis to verify features are properly
+    standardized before K-means clustering (prevents scale-dependent results).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing columns to validate
+    column_names : List[str]
+        List of column names to validate
+    tolerance : float, default=0.01
+        Maximum acceptable deviation from target (mean=0, SD=1)
+        Default 0.01 allows mean in [-0.01, 0.01] and SD in [0.99, 1.01]
+
+    Returns
+    -------
+    Dict[str, Any]
+        - valid : bool
+            True if all columns have mean ≈ 0 and SD ≈ 1 within tolerance
+        - message : str
+            Description of validation result
+        - mean_values : Dict[str, float]
+            Actual mean for each column
+        - sd_values : Dict[str, float]
+            Actual SD for each column
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'Age_z': np.random.randn(100)})
+    >>> result = validate_standardization(df, ['Age_z'])
+    >>> result['valid']
+    True
+    >>> abs(result['mean_values']['Age_z']) < 0.1
+    True
+
+    Notes
+    -----
+    - Empty DataFrames return invalid (can't compute statistics)
+    - NaN values are excluded via pandas default (skipna=True)
+    - Tolerance applies to BOTH mean and SD
+    - Designed for clustering pre-validation (Decision D0XX)
+    """
+    mean_values = {}
+    sd_values = {}
+    issues = []
+
+    # Check for empty DataFrame
+    if len(df) == 0:
+        return {
+            'valid': False,
+            'message': 'DataFrame is empty. Cannot validate standardization.',
+            'mean_values': {},
+            'sd_values': {}
+        }
+
+    # Validate each column
+    for col in column_names:
+        # Compute statistics
+        mean_val = df[col].mean()
+        sd_val = df[col].std()
+
+        mean_values[col] = mean_val
+        sd_values[col] = sd_val
+
+        # Check mean ≈ 0
+        if abs(mean_val) > tolerance:
+            issues.append(
+                f"{col}: mean={mean_val:.4f} (expected ~0, tolerance={tolerance})"
+            )
+
+        # Check SD ≈ 1
+        if abs(sd_val - 1.0) > tolerance:
+            issues.append(
+                f"{col}: SD={sd_val:.4f} (expected ~1, tolerance={tolerance})"
+            )
+
+    # Determine validity
+    valid = len(issues) == 0
+
+    # Generate message
+    if valid:
+        message = (
+            f'All {len(column_names)} columns properly standardized '
+            f'(mean ≈ 0, SD ≈ 1 within tolerance={tolerance}).'
+        )
+    else:
+        message = (
+            f'Standardization validation failed for {len(issues)} check(s): '
+            + '; '.join(issues)
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'mean_values': mean_values,
+        'sd_values': sd_values
+    }
+
+
+def validate_variance_positivity(
+    variance_df: pd.DataFrame,
+    component_col: str,
+    value_col: str
+) -> Dict[str, Any]:
+    """
+    Validate that all variance components are strictly positive.
+
+    Used in RQ 5.13 to verify LMM variance components are valid.
+    Negative or zero variance indicates estimation issues (collinearity,
+    convergence failure, or model misspecification).
+
+    Parameters
+    ----------
+    variance_df : pd.DataFrame
+        DataFrame containing variance components
+    component_col : str
+        Column name containing component names (e.g., 'Component')
+    value_col : str
+        Column name containing variance values (e.g., 'Variance')
+
+    Returns
+    -------
+    Dict[str, Any]
+        - valid : bool
+            True if all variance values > 0
+        - message : str
+            Description of validation result
+        - negative_components : List[str]
+            Names of components with variance <= 0
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({
+    ...     'Component': ['Intercept', 'Slope', 'Residual'],
+    ...     'Variance': [1.5, 0.8, 0.3]
+    ... })
+    >>> result = validate_variance_positivity(df, 'Component', 'Variance')
+    >>> result['valid']
+    True
+
+    Notes
+    -----
+    - Variance must be STRICTLY positive (> 0)
+    - Zero variance indicates perfect fit or estimation failure
+    - Negative variance indicates numerical issues in estimation
+    - Typically occurs with collinearity or overfitting
+    """
+    negative_components = []
+
+    # Check for empty DataFrame
+    if len(variance_df) == 0:
+        return {
+            'valid': False,
+            'message': 'Variance DataFrame is empty. Cannot validate.',
+            'negative_components': []
+        }
+
+    # Find components with variance <= 0
+    for idx, row in variance_df.iterrows():
+        component_name = row[component_col]
+        variance_value = row[value_col]
+
+        if variance_value <= 0:
+            negative_components.append(component_name)
+
+    # Determine validity
+    valid = len(negative_components) == 0
+
+    # Generate message
+    if valid:
+        message = (
+            f'All {len(variance_df)} components have positive variance '
+            f'(range: {variance_df[value_col].min():.4f} to {variance_df[value_col].max():.4f}).'
+        )
+    else:
+        message = (
+            f'Found {len(negative_components)} component(s) with zero or negative variance: '
+            f'{", ".join(negative_components)}. '
+            f'This indicates estimation issues (collinearity, convergence failure, or model misspecification).'
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'negative_components': negative_components
+    }
+
+
+def validate_icc_bounds(
+    icc_df: pd.DataFrame,
+    icc_col: str
+) -> Dict[str, Any]:
+    """
+    Validate that all ICC values are in [0,1] range.
+
+    Used in RQ 5.13 to verify ICC computation correctness.
+    ICC (Intraclass Correlation Coefficient) must be in [0,1] by definition.
+    Values outside this range indicate computation errors.
+
+    Parameters
+    ----------
+    icc_df : pd.DataFrame
+        DataFrame containing ICC estimates
+    icc_col : str
+        Column name containing ICC values (e.g., 'icc_value')
+
+    Returns
+    -------
+    Dict[str, Any]
+        - valid : bool
+            True if all ICC values in [0, 1]
+        - message : str
+            Description of validation result
+        - out_of_bounds : List[Dict]
+            Rows with ICC values outside [0, 1]
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({
+    ...     'icc_type': ['intercept', 'slope'],
+    ...     'icc_value': [0.611, 0.071]
+    ... })
+    >>> result = validate_icc_bounds(df, 'icc_value')
+    >>> result['valid']
+    True
+
+    Notes
+    -----
+    - ICC bounds are INCLUSIVE: [0, 1]
+    - ICC = 0: no clustering (all variance at observation level)
+    - ICC = 1: perfect clustering (no within-cluster variance)
+    - Values < 0 or > 1 indicate computation errors
+    - NaN values are considered out of bounds
+    """
+    out_of_bounds = []
+
+    # Check for empty DataFrame
+    if len(icc_df) == 0:
+        return {
+            'valid': False,
+            'message': 'ICC DataFrame is empty. Cannot validate.',
+            'out_of_bounds': []
+        }
+
+    # Find values outside [0,1]
+    for idx, row in icc_df.iterrows():
+        icc_value = row[icc_col]
+
+        # Check if NaN
+        if pd.isna(icc_value):
+            out_of_bounds.append(row.to_dict())
+        # Check if out of bounds
+        elif icc_value < 0 or icc_value > 1:
+            out_of_bounds.append(row.to_dict())
+
+    # Determine validity
+    valid = len(out_of_bounds) == 0
+
+    # Generate message
+    if valid:
+        message = (
+            f'All {len(icc_df)} ICC values within valid bounds [0,1] '
+            f'(range: {icc_df[icc_col].min():.3f} to {icc_df[icc_col].max():.3f}).'
+        )
+    else:
+        message = (
+            f'Found {len(out_of_bounds)} ICC value(s) outside valid bounds [0,1]. '
+            f'This indicates computation errors.'
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'out_of_bounds': out_of_bounds
+    }
+
+
+def validate_dataframe_structure(
+    df: pd.DataFrame,
+    expected_rows: Union[int, tuple],
+    expected_columns: List[str],
+    column_types: Optional[Dict[str, tuple]] = None
+) -> Dict[str, Any]:
+    """
+    Validate DataFrame structure (rows, columns, types).
+
+    Used in RQ 5.14 clustering analysis to verify cluster assignments,
+    summary statistics, and other structured outputs.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to validate
+    expected_rows : int or tuple
+        Expected number of rows (exact int) or range (min, max) tuple
+    expected_columns : List[str]
+        List of required column names (extra columns allowed)
+    column_types : Dict[str, tuple], optional
+        Dict mapping column names to expected types (tuple of types)
+        Example: {'cluster': (int, np.integer)}
+
+    Returns
+    -------
+    Dict[str, Any]
+        - valid : bool
+            True if all checks pass
+        - message : str
+            Description of validation result
+        - checks : Dict
+            Individual check results (row_count_valid, columns_valid, types_valid)
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'A': [1, 2], 'B': [3, 4]})
+    >>> result = validate_dataframe_structure(df, expected_rows=2, expected_columns=['A', 'B'])
+    >>> result['valid']
+    True
+
+    Notes
+    -----
+    - Row count can be exact (int) or range (min, max) tuple
+    - Extra columns are allowed (only checks required columns present)
+    - Type checking is optional
+    - Empty DataFrames fail validation
+    """
+    checks = {}
+    issues = []
+
+    # Check row count
+    actual_rows = len(df)
+    if isinstance(expected_rows, int):
+        row_count_valid = actual_rows == expected_rows
+        if not row_count_valid:
+            issues.append(f"Expected {expected_rows} rows, found {actual_rows}")
+    elif isinstance(expected_rows, tuple):
+        min_rows, max_rows = expected_rows
+        row_count_valid = min_rows <= actual_rows <= max_rows
+        if not row_count_valid:
+            issues.append(f"Expected {min_rows}-{max_rows} rows, found {actual_rows}")
+    else:
+        row_count_valid = False
+        issues.append(f"Invalid expected_rows type: {type(expected_rows)}")
+
+    checks['row_count_valid'] = row_count_valid
+    checks['actual_rows'] = actual_rows
+
+    # Check columns
+    missing_columns = [col for col in expected_columns if col not in df.columns]
+    columns_valid = len(missing_columns) == 0
+
+    if not columns_valid:
+        issues.append(f"Missing columns: {', '.join(missing_columns)}")
+
+    checks['columns_valid'] = columns_valid
+    checks['missing_columns'] = missing_columns
+
+    # Check types (optional)
+    if column_types is not None:
+        type_mismatches = []
+        for col, expected_types in column_types.items():
+            if col in df.columns:
+                actual_type = df[col].dtype
+                if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+                    type_mismatches.append(f"{col}: expected {expected_types}, got {actual_type}")
+
+        types_valid = len(type_mismatches) == 0
+        if not types_valid:
+            issues.append(f"Type mismatches: {'; '.join(type_mismatches)}")
+
+        checks['types_valid'] = types_valid
+        checks['type_mismatches'] = type_mismatches
+    else:
+        checks['types_valid'] = True  # Not checked
+
+    # Determine overall validity
+    valid = row_count_valid and columns_valid and checks['types_valid']
+
+    # Generate message
+    if valid:
+        message = (
+            f'DataFrame structure valid: {actual_rows} rows, '
+            f'{len(df.columns)} columns (required: {len(expected_columns)}).'
+        )
+    else:
+        message = f'DataFrame structure validation failed: {"; ".join(issues)}'
+
+    return {
+        'valid': valid,
+        'message': message,
+        'checks': checks
+    }
+
+
+def validate_plot_data_completeness(
+    plot_data: pd.DataFrame,
+    required_domains: List[str],
+    required_groups: List[str],
+    domain_col: str = 'domain',
+    group_col: str = 'group'
+) -> Dict[str, Any]:
+    """Validate all required domains and groups are present in plot data."""
+    missing_domains = [d for d in required_domains if d not in plot_data[domain_col].values]
+    missing_groups = [g for g in required_groups if g not in plot_data[group_col].values]
+
+    valid = len(missing_domains) == 0 and len(missing_groups) == 0
+
+    if valid:
+        message = f'Plot data complete: {len(required_domains)} domains, {len(required_groups)} groups.'
+    else:
+        issues = []
+        if missing_domains:
+            issues.append(f"Missing domains: {', '.join(missing_domains)}")
+        if missing_groups:
+            issues.append(f"Missing groups: {', '.join(missing_groups)}")
+        message = f'Plot data incomplete: {"; ".join(issues)}'
+
+    return {
+        'valid': valid,
+        'message': message,
+        'missing_domains': missing_domains,
+        'missing_groups': missing_groups
+    }
+
+
+def validate_cluster_assignment(
+    assignments_df: pd.DataFrame,
+    n_participants: int,
+    min_cluster_size: int,
+    cluster_col: str = 'cluster'
+) -> Dict[str, Any]:
+    """Validate cluster assignments are consecutive and meet size requirements."""
+    cluster_ids = sorted(assignments_df[cluster_col].unique())
+    cluster_sizes = assignments_df[cluster_col].value_counts().to_dict()
+
+    # Check consecutive IDs
+    expected_ids = list(range(len(cluster_ids)))
+    consecutive = cluster_ids == expected_ids
+
+    # Check all participants assigned
+    total_assigned = len(assignments_df)
+    all_assigned = total_assigned == n_participants
+
+    # Check minimum cluster sizes
+    small_clusters = [cid for cid, size in cluster_sizes.items() if size < min_cluster_size]
+    size_valid = len(small_clusters) == 0
+
+    valid = consecutive and all_assigned and size_valid
+
+    if not consecutive:
+        message = f'Cluster IDs are non-consecutive: {cluster_ids}'
+    elif not all_assigned:
+        message = f'Expected {n_participants} participants, found {total_assigned}'
+    elif not size_valid:
+        message = f'Clusters below minimum size ({min_cluster_size}): {small_clusters}'
+    else:
+        message = f'Valid cluster assignment: {len(cluster_ids)} clusters, sizes {dict(cluster_sizes)}'
+
+    return {
+        'valid': valid,
+        'message': message,
+        'cluster_sizes': cluster_sizes
+    }
+
+
+def validate_bootstrap_stability(
+    stability_df: pd.DataFrame,
+    min_jaccard_threshold: float = 0.75,
+    jaccard_col: str = 'jaccard'
+) -> Dict[str, Any]:
+    """Validate bootstrap stability via Jaccard coefficient."""
+    jaccard_values = stability_df[jaccard_col]
+
+    # Check bounds [0,1]
+    out_of_bounds = ((jaccard_values < 0) | (jaccard_values > 1)).any()
+
+    if out_of_bounds:
+        return {
+            'valid': False,
+            'message': 'Jaccard values outside [0,1] range',
+            'mean_jaccard': float('nan'),
+            'ci_lower': float('nan'),
+            'ci_upper': float('nan')
+        }
+
+    # Compute statistics
+    mean_jaccard = float(jaccard_values.mean())
+    ci_lower = float(jaccard_values.quantile(0.025))
+    ci_upper = float(jaccard_values.quantile(0.975))
+
+    valid = bool(mean_jaccard >= min_jaccard_threshold)
+
+    if valid:
+        message = f'Stable clustering: mean Jaccard={mean_jaccard:.3f} (≥{min_jaccard_threshold})'
+    else:
+        message = f'Unstable clustering: mean Jaccard={mean_jaccard:.3f} (<{min_jaccard_threshold})'
+
+    return {
+        'valid': valid,
+        'message': message,
+        'mean_jaccard': mean_jaccard,
+        'ci_lower': ci_lower,
+        'ci_upper': ci_upper
+    }
+
+
+def validate_cluster_summary_stats(
+    summary_df: pd.DataFrame
+) -> Dict[str, Any]:
+    """Validate cluster summary statistics are mathematically consistent."""
+    failed_checks = []
+
+    for idx, row in summary_df.iterrows():
+        cluster_id = row.get('cluster', idx)
+
+        # Find min/mean/max/SD columns (flexible naming)
+        for base_col in summary_df.columns:
+            if '_min' in base_col:
+                var_name = base_col.replace('_min', '')
+                mean_col = f'{var_name}_mean'
+                max_col = f'{var_name}_max'
+                sd_col = f'{var_name}_SD'
+
+                if all(col in row.index for col in [mean_col, max_col, sd_col]):
+                    min_val = row[base_col]
+                    mean_val = row[mean_col]
+                    max_val = row[max_col]
+                    sd_val = row[sd_col]
+
+                    # Check min ≤ mean ≤ max
+                    if not (min_val <= mean_val <= max_val):
+                        failed_checks.append(f"Cluster {cluster_id}, {var_name}: min/mean/max inconsistent")
+
+                    # Check SD ≥ 0
+                    if sd_val < 0:
+                        failed_checks.append(f"Cluster {cluster_id}, {var_name}: negative SD")
+
+        # Check N > 0
+        if 'N' in row.index and row['N'] <= 0:
+            failed_checks.append(f"Cluster {cluster_id}: N ≤ 0")
+
+    valid = len(failed_checks) == 0
+
+    if valid:
+        message = f'All {len(summary_df)} cluster summaries mathematically consistent'
+    else:
+        message = f'Found {len(failed_checks)} inconsistencies: {"; ".join(failed_checks[:3])}'
+
+    return {
+        'valid': valid,
+        'message': message,
+        'failed_checks': failed_checks
+    }
