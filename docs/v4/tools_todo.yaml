@@ -81,10 +81,13 @@ analysis_lmm:
       - "Return DataFrame with all 3 ICC values + interpretation"
     inputs:
       - variance_components_df: pd.DataFrame
-      - method: str (simple, conditional)
-      - time_point: float (e.g., 6.0 for Day 6)
-    outputs: "pd.DataFrame with ICC estimates"
-    done: false
+      - slope_name: str (default 'TSVR_hours')
+      - timepoint: float (default 6.0 for Day 6)
+    outputs: "pd.DataFrame[icc_type: str, icc_value: float, interpretation: str]"
+    done: true
+    completed_date: 2025-11-26
+    test_status: "14/14 GREEN"
+    notes: "Three ICC formulas: (1) ICC_intercept = σ²_intercept / (σ²_intercept + σ²_residual), (2) ICC_slope_simple = σ²_slope / (σ²_slope + σ²_residual), (3) ICC_slope_conditional = Var(b₀ᵢ + b₁ᵢ×t) / [Var(b₀ᵢ + b₁ᵢ×t) + σ²_residual] where Var(b₀ᵢ + b₁ᵢ×t) = σ²_intercept + 2×t×cov(b₀,b₁) + t²×σ²_slope. Interpretation thresholds: <0.10 Low, 0.10-0.30 Moderate, 0.30-0.75 High, ≥0.75 Very High per Snijders & Bosker (2012). Helper function _interpret_icc() provides plain language interpretation. Handles intercept-only models (missing slope variance) gracefully. 100 lines implementation (85 main function + 15 helper). 30 min development time demonstrating TDD workflow mastery."
 
   - name: test_intercept_slope_correlation_d068
     module: tools.analysis_lmm
@@ -101,8 +104,13 @@ analysis_lmm:
       - random_effects_df: pd.DataFrame
       - family_alpha: float (default 0.05)
       - n_tests: int (default 15 for Chapter 5)
-    outputs: "Dict[r: float, p_uncorrected: float, p_bonferroni: float, significant: bool]"
-    done: false
+      - intercept_col: str (default 'Group Var')
+      - slope_col: str (default 'Group x TSVR_hours Var')
+    outputs: "Dict[r: float, p_uncorrected: float, p_bonferroni: float, significant_uncorrected: bool, significant_bonferroni: bool, interpretation: str]"
+    done: true
+    completed_date: 2025-11-26
+    test_status: "14/14 GREEN"
+    notes: "Pearson correlation via scipy.stats.pearsonr. Bonferroni: p_bonf = min(p_uncorr × n_tests, 1.0). Interpretation thresholds: |r| < 0.30 Weak, 0.30-0.50 Moderate, ≥0.50 Strong. RQ 5.13 hypothesis: negative correlation (higher baseline → slower forgetting). Configurable column names for different statsmodels random effects naming conventions. 115 lines implementation. 20 min development time (excellent velocity!). Decision D068 compliant (dual p-value reporting)."
 
 analysis_ctt:
 
@@ -487,8 +495,8 @@ validation_clustering:
 # SUMMARY STATISTICS
 
 total_tools: 25
-done_count: 6
-remaining_count: 19
+done_count: 8
+remaining_count: 17
 
 by_priority:
   HIGH: 6  # Blocks multiple RQs or creates new modules

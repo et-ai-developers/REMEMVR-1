@@ -34,6 +34,8 @@
 | `compute_effect_sizes_cohens` | Compute Cohen's f-squared effect sizes for fixed effects |
 | `select_lmm_random_structure_via_lrt` | Compare 3 random structures via LRT (Full, Uncorrelated, Intercept-only), select parsimoniously |
 | `prepare_age_effects_plot_data` | Create age tertiles (Young/Middle/Older), aggregate observed means + predictions for Age × Domain × Time plot |
+| `compute_icc_from_variance_components` | Compute 3 ICC estimates (intercept, slope_simple, slope_conditional) with interpretation thresholds |
+| `test_intercept_slope_correlation_d068` | D068: Pearson correlation between random intercepts/slopes with dual p-values (uncorrected + Bonferroni) |
 | `assign_piecewise_segments` | Assign Early/Late segments and compute Days_within for piecewise LMM |
 | `extract_segment_slopes_from_lmm` | Extract segment-factor slopes from piecewise LMM via delta method |
 

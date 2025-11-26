@@ -19,8 +19,8 @@ tools.analysis_lmm	prepare_lmm_input_from_theta	GREEN	RQ 5.1-5.7: Convert theta 
 tools.analysis_lmm	run_lmm_analysis	RED	Complete LMM pipeline	theta_scores, output_dir, n_factors, reference_group, save_models	Dict
 tools.analysis_lmm	select_lmm_random_structure_via_lrt	YELLOW	RQ 5.10: LRT comparison of 3 random structures (Full, Uncorrelated, Intercept-only) with parsimonious selection (12/15 tests GREEN, 3 SKIPPED)	data, formula, time_var, groups, reml	Dict[selected_model, lrt_results, fitted_models]
 tools.analysis_lmm	prepare_age_effects_plot_data	YELLOW	RQ 5.10: Create age tertiles (Young/Middle/Older pd.qcut), aggregate means + 95% CI, generate predictions (15/15 tests GREEN)	lmm_input, lmm_model, output_path	DataFrame[domain, age_tertile, TSVR, theta_obs, se, ci, theta_pred]
-tools.analysis_lmm	compute_icc_from_variance_components	ORANGE	RQ 5.13: Compute 3 ICC estimates (intercept, slope_simple, slope_conditional)	variance_components_df, method, time_point	DataFrame
-tools.analysis_lmm	test_intercept_slope_correlation_d068	ORANGE	RQ 5.13: Pearson correlation + D068 dual p-values	random_effects_df, family_alpha, n_tests	Dict
+tools.analysis_lmm	compute_icc_from_variance_components	YELLOW	RQ 5.13: 3 ICC estimates (intercept, slope_simple, slope_conditional at timepoint) with interpretation thresholds (14/14 tests GREEN)	variance_components_df, slope_name, timepoint	DataFrame[icc_type, icc_value, interpretation]
+tools.analysis_lmm	test_intercept_slope_correlation_d068	YELLOW	RQ 5.13: Pearson r between random intercepts/slopes with D068 dual p-values (uncorrected + Bonferroni) (14/14 tests GREEN)	random_effects_df, family_alpha, n_tests, intercept_col, slope_col	Dict[r, p_uncorrected, p_bonferroni, significant_*, interpretation]
 tools.analysis_ctt	compute_cronbachs_alpha	ORANGE	RQ 5.12: Compute Cronbach's alpha with bootstrap CIs	data, items, n_bootstrap	Dict
 tools.analysis_ctt	compare_correlations_dependent	ORANGE	RQ 5.12: Steiger's z-test for dependent correlations	r12, r13, r23, n	Dict
 tools.config	expand_env_vars_in_path	RED	NOT IMPLEMENTED	path_str	str

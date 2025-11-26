@@ -1797,6 +1797,123 @@ def _interpret_icc(icc: float) -> str:
         return "Very high clustering (≥0.75)"
 
 
+def test_intercept_slope_correlation_d068(
+    random_effects_df: pd.DataFrame,
+    family_alpha: float = 0.05,
+    n_tests: int = 15,
+    intercept_col: str = 'Group Var',
+    slope_col: str = 'Group x TSVR_hours Var'
+) -> Dict:
+    """
+    Test correlation between random intercepts and slopes with D068 dual p-value reporting.
+
+    Computes Pearson correlation between random intercepts and random slopes
+    from LMM. Reports BOTH uncorrected and Bonferroni-corrected p-values per
+    Decision D068 (dual p-value reporting for all hypothesis tests).
+
+    Used in RQ 5.13 to test whether individuals with higher baseline memory
+    (intercepts) show different rates of forgetting (slopes).
+
+    Parameters
+    ----------
+    random_effects_df : DataFrame
+        Random effects from LMM with columns for UID, intercepts, and slopes
+    family_alpha : float, default=0.05
+        Family-wise alpha level for significance threshold
+    n_tests : int, default=15
+        Number of tests in family for Bonferroni correction (15 for Chapter 5)
+    intercept_col : str, default='Group Var'
+        Column name for random intercepts (statsmodels default naming)
+    slope_col : str, default='Group x TSVR_hours Var'
+        Column name for random slopes (statsmodels default naming)
+
+    Returns
+    -------
+    Dict
+        Results with keys:
+        - r: float - Pearson correlation coefficient
+        - p_uncorrected: float - Uncorrected p-value
+        - p_bonferroni: float - Bonferroni-corrected p-value (min(p * n_tests, 1.0))
+        - significant_uncorrected: bool - Significant at family_alpha (uncorrected)
+        - significant_bonferroni: bool - Significant at family_alpha (Bonferroni)
+        - interpretation: str - Plain language interpretation
+
+    Notes
+    -----
+    Decision D068: ALWAYS report both uncorrected and corrected p-values for
+    transparency and reproducibility.
+
+    Bonferroni correction: p_bonf = min(p_uncorrected × n_tests, 1.0)
+
+    Interpretation guidelines:
+    - |r| < 0.30: Weak correlation
+    - 0.30 ≤ |r| < 0.50: Moderate correlation
+    - |r| ≥ 0.50: Strong correlation
+
+    RQ 5.13 hypothesis: Negative correlation expected (higher baseline → slower forgetting)
+
+    Examples
+    --------
+    >>> # Extract random effects from fitted LMM
+    >>> random_fx = lmm_result.random_effects
+    >>> random_fx_df = pd.DataFrame({
+    ...     'UID': list(random_fx.keys()),
+    ...     'Group Var': [fx['Group'] for fx in random_fx.values()],
+    ...     'Group x TSVR_hours Var': [fx['Group x TSVR_hours'] for fx in random_fx.values()]
+    ... })
+    >>> # Test intercept-slope correlation
+    >>> result = test_intercept_slope_correlation_d068(random_fx_df, family_alpha=0.05, n_tests=15)
+    >>> print(f"r = {result['r']:.3f}, p_uncorr = {result['p_uncorrected']:.4f}, "
+    ...       f"p_bonf = {result['p_bonferroni']:.4f}")
+    >>> print(result['interpretation'])
+    """
+    # Extract intercepts and slopes
+    intercepts = random_effects_df[intercept_col].values
+    slopes = random_effects_df[slope_col].values
+
+    # Compute Pearson correlation
+    r, p_uncorrected = stats.pearsonr(intercepts, slopes)
+
+    # Bonferroni correction
+    p_bonferroni = min(p_uncorrected * n_tests, 1.0)
+
+    # Significance flags
+    significant_uncorrected = p_uncorrected < family_alpha
+    significant_bonferroni = p_bonferroni < family_alpha
+
+    # Interpretation
+    abs_r = abs(r)
+    if abs_r < 0.30:
+        strength = "weak"
+    elif abs_r < 0.50:
+        strength = "moderate"
+    else:
+        strength = "strong"
+
+    direction = "positive" if r > 0 else "negative"
+
+    interpretation = (
+        f"{strength.capitalize()} {direction} correlation (r={r:.3f}) between "
+        f"random intercepts and slopes. "
+    )
+
+    if significant_bonferroni:
+        interpretation += f"Significant after Bonferroni correction (p={p_bonferroni:.4f} < {family_alpha})."
+    elif significant_uncorrected:
+        interpretation += f"Significant uncorrected (p={p_uncorrected:.4f} < {family_alpha}) but NOT after Bonferroni correction (p={p_bonferroni:.4f})."
+    else:
+        interpretation += f"Not significant (p_uncorr={p_uncorrected:.4f}, p_bonf={p_bonferroni:.4f})."
+
+    return {
+        'r': r,
+        'p_uncorrected': p_uncorrected,
+        'p_bonferroni': p_bonferroni,
+        'significant_uncorrected': significant_uncorrected,
+        'significant_bonferroni': significant_bonferroni,
+        'interpretation': interpretation
+    }
+
+
 __all__ = [
     'assign_piecewise_segments',
     'extract_segment_slopes_from_lmm',
@@ -1812,5 +1929,6 @@ __all__ = [
     'fit_lmm_trajectory_tsvr',
     'select_lmm_random_structure_via_lrt',
     'prepare_age_effects_plot_data',
-    'compute_icc_from_variance_components'
+    'compute_icc_from_variance_components',
+    'test_intercept_slope_correlation_d068'
 ]

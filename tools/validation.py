@@ -1551,3 +1551,192 @@ def run_lmm_sensitivity_analyses(
         df_results.loc[best_idx, 'Best_Model'] = True
 
     return df_results
+
+
+def validate_contrasts_d068(contrasts_df: pd.DataFrame) -> Dict:
+    """
+    Validate that contrast results include Decision D068 dual p-value reporting.
+
+    Checks that contrasts DataFrame contains BOTH uncorrected and corrected
+    p-values per Decision D068 (dual p-value reporting for transparency and
+    reproducibility).
+
+    Parameters
+    ----------
+    contrasts_df : DataFrame
+        Contrast results from post-hoc comparisons
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if D068 compliant
+        - d068_compliant: bool - True if has both uncorrected and corrected p-values
+        - missing_cols: List[str] - Missing required columns
+        - message: str - Validation message
+
+    Notes
+    -----
+    Decision D068: ALL hypothesis tests must report BOTH:
+    - p_uncorrected: Raw p-value
+    - Corrected p-value: One of [p_bonferroni, p_tukey, p_holm]
+
+    Accepted correction column names:
+    - p_bonferroni: Bonferroni correction
+    - p_tukey: Tukey HSD correction (common for pairwise)
+    - p_holm: Holm-Bonferroni correction
+
+    Examples
+    --------
+    >>> contrasts = pd.DataFrame({
+    ...     'comparison': ['A vs B', 'A vs C'],
+    ...     'p_uncorrected': [0.01, 0.05],
+    ...     'p_bonferroni': [0.03, 0.15]
+    ... })
+    >>> result = validate_contrasts_d068(contrasts)
+    >>> assert result['valid'] is True
+    >>> assert result['d068_compliant'] is True
+    """
+    missing_cols = []
+
+    # Check for p_uncorrected
+    if 'p_uncorrected' not in contrasts_df.columns:
+        missing_cols.append('p_uncorrected')
+
+    # Check for at least one correction method
+    corrected_cols = ['p_bonferroni', 'p_tukey', 'p_holm']
+    has_correction = any(col in contrasts_df.columns for col in corrected_cols)
+
+    if not has_correction:
+        # Add generic marker - user needs at least one
+        missing_cols.append('p_bonferroni')
+
+    # Determine validity
+    valid = len(missing_cols) == 0
+    d068_compliant = valid
+
+    # Generate message
+    if valid:
+        # Identify which correction was used
+        used_correction = next(
+            (col for col in corrected_cols if col in contrasts_df.columns),
+            'unknown'
+        )
+        message = (
+            f"Decision D068 compliant: Found both p_uncorrected and "
+            f"{used_correction} columns."
+        )
+    else:
+        message = (
+            f"Decision D068 violation: Missing required columns {missing_cols}. "
+            f"ALL contrasts must report BOTH uncorrected and corrected p-values."
+        )
+
+    return {
+        'valid': valid,
+        'd068_compliant': d068_compliant,
+        'missing_cols': missing_cols,
+        'message': message
+    }
+
+
+def validate_hypothesis_test_dual_pvalues(
+    interaction_df: pd.DataFrame,
+    required_terms: List[str],
+    alpha_bonferroni: float = 0.05
+) -> Dict:
+    """
+    Validate that hypothesis test results include required terms and D068 dual p-values.
+
+    Checks that hypothesis tests (e.g., 3-way interactions) DataFrame contains:
+    1. All required statistical terms (e.g., 'Age:Domain:Time')
+    2. BOTH uncorrected and corrected p-values per Decision D068
+
+    Parameters
+    ----------
+    interaction_df : DataFrame
+        Hypothesis test results (typically fixed effects from LMM)
+    required_terms : List[str]
+        Required statistical terms to check (e.g., ['Age:Domain:Time'])
+    alpha_bonferroni : float, default=0.05
+        Alpha level for Bonferroni correction (used in message only)
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if all required terms present AND D068 compliant
+        - missing_terms: List[str] - Missing required terms
+        - d068_compliant: bool - True if has both uncorrected and corrected p-values
+        - message: str - Validation message
+
+    Notes
+    -----
+    Decision D068: ALL hypothesis tests must report BOTH:
+    - p_uncorrected: Raw p-value
+    - Corrected p-value: One of [p_bonferroni, p_holm, p_fdr]
+
+    Examples
+    --------
+    >>> fixed_fx = pd.DataFrame({
+    ...     'term': ['Age:Domain:Time'],
+    ...     'p_uncorrected': [0.003],
+    ...     'p_bonferroni': [0.045]
+    ... })
+    >>> result = validate_hypothesis_test_dual_pvalues(
+    ...     fixed_fx,
+    ...     required_terms=['Age:Domain:Time']
+    ... )
+    >>> assert result['valid'] is True
+    """
+    missing_terms = []
+    missing_cols = []
+
+    # Check for required terms
+    if 'term' in interaction_df.columns:
+        available_terms = set(interaction_df['term'].values)
+        for term in required_terms:
+            if term not in available_terms:
+                missing_terms.append(term)
+    else:
+        # If no 'term' column, all required terms are missing
+        missing_terms = required_terms.copy()
+
+    # Check for D068 compliance (dual p-values)
+    if 'p_uncorrected' not in interaction_df.columns:
+        missing_cols.append('p_uncorrected')
+
+    corrected_cols = ['p_bonferroni', 'p_holm', 'p_fdr']
+    has_correction = any(col in interaction_df.columns for col in corrected_cols)
+
+    if not has_correction:
+        missing_cols.append('p_bonferroni')
+
+    # Determine validity
+    d068_compliant = len(missing_cols) == 0
+    valid = len(missing_terms) == 0 and d068_compliant
+
+    # Generate message
+    if valid:
+        used_correction = next(
+            (col for col in corrected_cols if col in interaction_df.columns),
+            'unknown'
+        )
+        message = (
+            f"Decision D068 compliant: All {len(required_terms)} required terms present "
+            f"with both p_uncorrected and {used_correction}."
+        )
+    else:
+        parts = []
+        if missing_terms:
+            parts.append(f"Missing required terms: {missing_terms}")
+        if missing_cols:
+            parts.append(f"Missing D068 columns: {missing_cols}")
+        message = ". ".join(parts) + "."
+
+    return {
+        'valid': valid,
+        'missing_terms': missing_terms,
+        'd068_compliant': d068_compliant,
+        'message': message
+    }

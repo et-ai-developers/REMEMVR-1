@@ -162,6 +162,26 @@
 | **Reference** | RQ 5.10 1_concept.md, ANALYSES_CH5.md lines 921-926, tools_todo.yaml lines 51-67 |
 | **Notes** | Age tertiles created using pd.qcut(Age, q=3) for equal-sized groups (~20 subjects each for N=60). Tertiles used ONLY for visualization; analysis uses continuous Age_c (grand-mean centered). Predictions generated from LMM fittedvalues aggregated by group (not marginal effects). CIs computed as mean ± 1.96*SEM. 15/15 tests GREEN. |
 
+### compute_icc_from_variance_components
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute 3 Intraclass Correlation Coefficient (ICC) estimates from LMM variance components for RQ 5.13 individual differences analysis. ICC quantifies proportion of variance due to between-person differences vs within-person residual variation. Provides ICC_intercept (baseline individual differences), ICC_slope_simple (slope variance only), and ICC_slope_conditional (slope variance accounting for correlation with intercepts at specific timepoint). |
+| **Inputs** | `variance_components_df: DataFrame` (with columns: Component, Variance), `slope_name: str = 'TSVR_hours'` (slope component name), `timepoint: float = 6.0` (for conditional ICC calculation, e.g., Day 6) |
+| **Outputs** | `DataFrame` with columns: icc_type, icc_value, interpretation (3 rows, sorted by icc_type) |
+| **Reference** | Snijders & Bosker (2012) Ch 3, RQ 5.13 1_concept.md Step 4, tools_todo.yaml lines 71-86 |
+| **Notes** | Three ICC formulas: (1) ICC_intercept = σ²_intercept / (σ²_intercept + σ²_residual), (2) ICC_slope_simple = σ²_slope / (σ²_slope + σ²_residual), (3) ICC_slope_conditional = Var(b₀ᵢ + b₁ᵢ×t) / [Var(b₀ᵢ + b₁ᵢ×t) + σ²_residual] where Var(b₀ᵢ + b₁ᵢ×t) = σ²_intercept + 2×t×cov(b₀,b₁) + t²×σ²_slope. Interpretation thresholds: <0.10 Low, 0.10-0.30 Moderate, 0.30-0.75 High, ≥0.75 Very High. Handles intercept-only models (no slope variance) gracefully. 14/14 tests GREEN. |
+
+### test_intercept_slope_correlation_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Test correlation between random intercepts and random slopes from LMM with Decision D068 dual p-value reporting (uncorrected + Bonferroni). Tests whether individuals with higher baseline memory (intercepts) show different rates of forgetting (slopes). Used in RQ 5.13 individual differences analysis. |
+| **Inputs** | `random_effects_df: DataFrame` (UID, intercepts, slopes), `family_alpha: float = 0.05` (significance threshold), `n_tests: int = 15` (Chapter 5 family size for Bonferroni), `intercept_col: str = 'Group Var'` (statsmodels default), `slope_col: str = 'Group x TSVR_hours Var'` (statsmodels default) |
+| **Outputs** | `Dict[r: float, p_uncorrected: float, p_bonferroni: float, significant_uncorrected: bool, significant_bonferroni: bool, interpretation: str]` |
+| **Reference** | Decision D068 (dual p-value reporting), RQ 5.13 1_concept.md Step 5, Pearson correlation via scipy.stats.pearsonr, tools_todo.yaml lines 89-105 |
+| **Notes** | Pearson correlation between random intercepts and slopes with Bonferroni correction (p_bonf = min(p_uncorr × n_tests, 1.0)). Interpretation thresholds: \|r\| < 0.30 Weak, 0.30-0.50 Moderate, ≥0.50 Strong. RQ 5.13 hypothesis: negative correlation (higher starters forget slower). 14/14 tests GREEN. Configurable column names for different random effects naming conventions. |
+
 ---
 
 ## Module: tools.plotting
