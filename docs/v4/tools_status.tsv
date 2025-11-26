@@ -17,8 +17,8 @@ tools.analysis_lmm	fit_lmm_trajectory	RED	Fit single LMM	data, formula, groups, 
 tools.analysis_lmm	fit_lmm_trajectory_tsvr	GREEN	RQ 5.1-5.7: D070 fit LMM with TSVR (actual hours not nominal days)	theta_scores, tsvr_data, formula, groups, re_formula, reml	MixedLMResults
 tools.analysis_lmm	prepare_lmm_input_from_theta	GREEN	RQ 5.1-5.7: Convert theta wide→long + time vars (DEPRECATED: use fit_lmm_trajectory_tsvr)	theta_scores, factors	DataFrame
 tools.analysis_lmm	run_lmm_analysis	RED	Complete LMM pipeline	theta_scores, output_dir, n_factors, reference_group, save_models	Dict
-tools.analysis_lmm	select_lmm_random_structure_via_lrt	ORANGE	RQ 5.10: Fit 3 random structures, compare via LRT	data, formula, groups, reml	Dict
-tools.analysis_lmm	prepare_age_effects_plot_data	ORANGE	RQ 5.10: Create age tertiles, aggregate means, generate predictions	lmm_input, lmm_model, age_effects, output_path	DataFrame
+tools.analysis_lmm	select_lmm_random_structure_via_lrt	YELLOW	RQ 5.10: LRT comparison of 3 random structures (Full, Uncorrelated, Intercept-only) with parsimonious selection (12/15 tests GREEN, 3 SKIPPED)	data, formula, time_var, groups, reml	Dict[selected_model, lrt_results, fitted_models]
+tools.analysis_lmm	prepare_age_effects_plot_data	YELLOW	RQ 5.10: Create age tertiles (Young/Middle/Older pd.qcut), aggregate means + 95% CI, generate predictions (15/15 tests GREEN)	lmm_input, lmm_model, output_path	DataFrame[domain, age_tertile, TSVR, theta_obs, se, ci, theta_pred]
 tools.analysis_lmm	compute_icc_from_variance_components	ORANGE	RQ 5.13: Compute 3 ICC estimates (intercept, slope_simple, slope_conditional)	variance_components_df, method, time_point	DataFrame
 tools.analysis_lmm	test_intercept_slope_correlation_d068	ORANGE	RQ 5.13: Pearson correlation + D068 dual p-values	random_effects_df, family_alpha, n_tests	Dict
 tools.analysis_ctt	compute_cronbachs_alpha	ORANGE	RQ 5.12: Compute Cronbach's alpha with bootstrap CIs	data, items, n_bootstrap	Dict

@@ -142,6 +142,26 @@
 | **Inputs** | `lmm_result: MixedLMResults`, `include_interactions: bool` (default False) |
 | **Outputs** | `DataFrame` with columns: effect, f_squared, interpretation (negligible/small/medium/large) |
 
+### select_lmm_random_structure_via_lrt
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compare 3 random structure specifications via Likelihood Ratio Test: (1) Full (random intercepts + slopes with correlation), (2) Uncorrelated (random intercepts + slopes without correlation), (3) Intercept-only. Uses parsimonious selection: prefers simpler model if p ≥ 0.05. |
+| **Inputs** | `data: DataFrame` (long-format LMM input), `formula: str` (fixed effects formula), `time_var: str` (time variable name for random slopes), `groups: str = 'UID'` (grouping variable), `reml: bool = False` (ML required for LRT) |
+| **Outputs** | `Dict[selected_model: str, lrt_results: DataFrame, fitted_models: Dict[str, MixedLMResults]]` |
+| **Reference** | Pinheiro & Bates (2000), Verbeke & Molenberghs (2000), RQ 5.10 1_concept.md |
+| **Notes** | v1 implementation: Uncorrelated model equals Full model (statsmodels limitation - no simple formula syntax for uncorrelated random effects). Compares Intercept-only vs Full via LRT. All models fitted with REML=False (ML estimation required for valid LRT comparison). Selection logic: start from Intercept-only, test if Full improves fit (p < 0.05). Handles convergence failures gracefully by falling back to simpler models. 12/15 tests GREEN, 3 skipped (statsmodels convergence limitations with synthetic data documented). |
+
+### prepare_age_effects_plot_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Create age tertiles (Young/Middle/Older), aggregate observed means, and generate LMM predictions for RQ 5.10 Age × Domain × Time interaction visualization. Produces plot-ready data with observed values (mean ± 95% CI) and model predictions for each domain × tertile × timepoint combination. |
+| **Inputs** | `lmm_input: DataFrame` (long format with UID, Age, domain_name, TSVR_hours, theta), `lmm_model: MixedLMResults` (fitted model), `output_path: Path` (CSV save location) |
+| **Outputs** | `DataFrame` with columns: domain_name, age_tertile, TSVR_hours, theta_observed, se_observed, ci_lower, ci_upper, theta_predicted (36 rows = 3 domains × 3 tertiles × 4 timepoints) |
+| **Reference** | RQ 5.10 1_concept.md, ANALYSES_CH5.md lines 921-926, tools_todo.yaml lines 51-67 |
+| **Notes** | Age tertiles created using pd.qcut(Age, q=3) for equal-sized groups (~20 subjects each for N=60). Tertiles used ONLY for visualization; analysis uses continuous Age_c (grand-mean centered). Predictions generated from LMM fittedvalues aggregated by group (not marginal effects). CIs computed as mean ± 1.96*SEM. 15/15 tests GREEN. |
+
 ---
 
 ## Module: tools.plotting

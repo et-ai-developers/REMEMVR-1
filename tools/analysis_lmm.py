@@ -1549,6 +1549,254 @@ def select_lmm_random_structure_via_lrt(
     }
 
 
+def prepare_age_effects_plot_data(
+    lmm_input: pd.DataFrame,
+    lmm_model: MixedLMResults,
+    output_path: Path
+) -> pd.DataFrame:
+    """
+    Create age tertiles, aggregate means, and generate predictions for RQ 5.10 visualization.
+
+    Prepares plot-ready data for Age × Domain × Time interaction visualization with three
+    age groups (Young/Middle/Older tertiles). Aggregates observed data by domain, age tertile,
+    and timepoint; generates model predictions for smooth trajectories.
+
+    Parameters
+    ----------
+    lmm_input : DataFrame
+        Long-format LMM input data. Must contain columns:
+        - UID: Subject identifier
+        - Age: Continuous age variable (years)
+        - domain_name: Memory domain (What/Where/When)
+        - TSVR_hours: Time since VR in hours
+        - theta: Ability estimate
+    lmm_model : MixedLMResults
+        Fitted LMM model from fit_lmm_trajectory_tsvr() or similar
+    output_path : Path
+        Path to save plot data CSV file (e.g., results/ch5/rq10/plots/age_effects_plot_data.csv)
+
+    Returns
+    -------
+    DataFrame
+        Plot-ready data with columns:
+        - domain_name: Memory domain (What/Where/When)
+        - age_tertile: Age group (Young/Middle/Older)
+        - TSVR_hours: Time since VR in hours
+        - theta_observed: Mean theta across subjects in group
+        - se_observed: Standard error of the mean (SEM)
+        - ci_lower: Lower 95% CI (mean - 1.96*SEM)
+        - ci_upper: Upper 95% CI (mean + 1.96*SEM)
+        - theta_predicted: Model-predicted theta at group centroid
+
+    Notes
+    -----
+    **Age Tertiles:**
+    - Created using pd.qcut(Age, q=3) for equal-sized groups
+    - Labels: 'Young' (lowest tertile), 'Middle', 'Older' (highest tertile)
+    - Used ONLY for visualization; analysis uses continuous Age_c (grand-mean centered)
+
+    **Aggregation:**
+    - Observed data: mean and SEM computed within each domain × tertile × timepoint
+    - Groups typically have ~20 subjects each (for N=60 total sample)
+    - SEM = SD / sqrt(n) where n is number of subjects in group at that timepoint
+
+    **Predictions:**
+    - Generated using LMM fitted values at group level (not marginal effects)
+    - Reflects full model including Age × Domain × Time interactions
+    - One prediction per domain × tertile × timepoint combination
+
+    **Output Structure:**
+    - 3 domains × 3 tertiles × 4 timepoints = 36 rows
+    - Each row represents one data point for rq_plots multi-panel trajectory plot
+
+    **RQ 5.10 Context:**
+    - Tests Age × Domain × Time 3-way interaction (continuous Age in model)
+    - Visualization shows if age effects differ across memory domains
+    - Tertiles for interpretability: "Older adults show faster forgetting in Where domain"
+
+    References
+    ----------
+    - RQ 5.10 1_concept.md: Age effects on domain-specific forgetting trajectories
+    - tools_todo.yaml: Tool specification (lines 51-67)
+    - ANALYSES_CH5.md: Multi-panel plot specification (lines 921-926)
+
+    Example
+    -------
+    >>> plot_data = prepare_age_effects_plot_data(
+    ...     lmm_input=df_long,
+    ...     lmm_model=best_model,
+    ...     output_path=output_dir / "age_effects_plot_data.csv"
+    ... )
+    >>> print(plot_data.shape)  # (36, 8)
+    >>> print(plot_data['age_tertile'].unique())  # ['Young', 'Middle', 'Older']
+    """
+    # Copy input to avoid modifying original
+    df = lmm_input.copy()
+
+    # ========================================================================
+    # STEP 1: Create age tertiles using qcut (equal-sized groups)
+    # ========================================================================
+
+    # Create age tertiles at subject level (not observation level)
+    # Get unique Age per UID, assign tertiles, then merge back
+    subject_ages = df[['UID', 'Age']].drop_duplicates()
+    subject_ages['age_tertile'] = pd.qcut(
+        subject_ages['Age'],
+        q=3,
+        labels=['Young', 'Middle', 'Older']
+    )
+
+    # Merge tertiles back to full data
+    df = df.merge(subject_ages[['UID', 'age_tertile']], on='UID', how='left')
+
+    # ========================================================================
+    # STEP 2: Aggregate observed data by domain × tertile × timepoint
+    # ========================================================================
+
+    # Group by domain, age tertile, and timepoint
+    grouped = df.groupby(['domain_name', 'age_tertile', 'TSVR_hours'])['theta'].agg([
+        ('theta_observed', 'mean'),
+        ('se_observed', lambda x: x.sem()),  # Standard error of the mean
+        ('n', 'count')
+    ]).reset_index()
+
+    # ========================================================================
+    # STEP 3: Compute 95% confidence intervals
+    # ========================================================================
+
+    # CI = mean ± 1.96 * SEM (95% CI for normal distribution)
+    z_critical = 1.96
+    grouped['ci_lower'] = grouped['theta_observed'] - z_critical * grouped['se_observed']
+    grouped['ci_upper'] = grouped['theta_observed'] + z_critical * grouped['se_observed']
+
+    # ========================================================================
+    # STEP 4: Generate model predictions
+    # ========================================================================
+
+    # Use fitted values from the LMM model
+    # Create DataFrame with same structure as grouped data for prediction lookup
+    df['fitted_theta'] = lmm_model.fittedvalues
+
+    # Aggregate fitted values by domain × tertile × timepoint (take mean of fitted values in group)
+    predictions = df.groupby(['domain_name', 'age_tertile', 'TSVR_hours'])['fitted_theta'].mean().reset_index()
+    predictions.rename(columns={'fitted_theta': 'theta_predicted'}, inplace=True)
+
+    # ========================================================================
+    # STEP 5: Merge predictions with observed data
+    # ========================================================================
+
+    result = grouped.merge(
+        predictions,
+        on=['domain_name', 'age_tertile', 'TSVR_hours'],
+        how='left'
+    )
+
+    # ========================================================================
+    # STEP 6: Select final columns and save to CSV
+    # ========================================================================
+
+    # Select columns for rq_plots
+    result = result[['domain_name', 'age_tertile', 'TSVR_hours', 'theta_observed',
+                     'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']]
+
+    # Sort by domain, tertile, time for readability
+    result = result.sort_values(['domain_name', 'age_tertile', 'TSVR_hours']).reset_index(drop=True)
+
+    # Create parent directories if needed
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save to CSV
+    result.to_csv(output_path, index=False)
+
+    return result
+
+
+def compute_icc_from_variance_components(
+    variance_components_df: pd.DataFrame,
+    time_point: Optional[float] = None,
+    slope_name: str = 'TSVR_hours'
+) -> pd.DataFrame:
+    """
+    Compute 3 ICC estimates from LMM variance components for RQ 5.13.
+
+    Calculates Intraclass Correlation Coefficients (ICC) to quantify proportion
+    of variance attributable to between-subject differences for intercepts and slopes.
+
+    Parameters
+    ----------
+    variance_components_df : DataFrame
+        Variance components with columns: component, variance
+    time_point : float, optional
+        Timepoint for conditional ICC (e.g., 144.0 for Day 6)
+    slope_name : str, default='TSVR_hours'
+        Name of slope component
+
+    Returns
+    -------
+    DataFrame
+        ICC estimates with columns: icc_type, icc_value, interpretation
+    """
+    # Extract variance components
+    components = {row['component']: row['variance']
+                  for _, row in variance_components_df.iterrows()}
+
+    var_intercept = components.get('Intercept', 0.0)
+    var_slope = components.get(slope_name, None)
+    var_residual = components.get('Residual', 0.0)
+    cov_intercept_slope = components.get(f'Intercept:{slope_name}',
+                                         components.get('Intercept:slope', 0.0))
+
+    results = []
+
+    # ICC intercept
+    icc_intercept = var_intercept / (var_intercept + var_residual) if (var_intercept + var_residual) > 0 else 0.0
+    results.append({
+        'icc_type': 'intercept',
+        'icc_value': icc_intercept,
+        'interpretation': _interpret_icc(icc_intercept)
+    })
+
+    # ICC slopes (if slope variance exists)
+    if var_slope is not None:
+        # Simple ICC
+        icc_slope_simple = var_slope / (var_slope + var_residual) if (var_slope + var_residual) > 0 else 0.0
+        results.append({
+            'icc_type': 'slope_simple',
+            'icc_value': icc_slope_simple,
+            'interpretation': _interpret_icc(icc_slope_simple)
+        })
+
+        # Conditional ICC at timepoint
+        if time_point is None:
+            time_point = 0.0
+
+        var_at_time = (var_intercept +
+                      2 * time_point * cov_intercept_slope +
+                      time_point**2 * var_slope)
+
+        icc_conditional = var_at_time / (var_at_time + var_residual) if (var_at_time + var_residual) > 0 else 0.0
+        results.append({
+            'icc_type': 'slope_conditional',
+            'icc_value': icc_conditional,
+            'interpretation': _interpret_icc(icc_conditional)
+        })
+
+    return pd.DataFrame(results).sort_values('icc_type').reset_index(drop=True)
+
+
+def _interpret_icc(icc: float) -> str:
+    """Helper function to interpret ICC values"""
+    if icc < 0.10:
+        return "Low clustering (<0.10)"
+    elif icc < 0.30:
+        return "Moderate clustering (0.10-0.30)"
+    elif icc < 0.75:
+        return "High clustering (0.30-0.75)"
+    else:
+        return "Very high clustering (≥0.75)"
+
+
 __all__ = [
     'assign_piecewise_segments',
     'extract_segment_slopes_from_lmm',
@@ -1562,5 +1810,7 @@ __all__ = [
     'compute_contrasts_pairwise',
     'compute_effect_sizes_cohens',
     'fit_lmm_trajectory_tsvr',
-    'select_lmm_random_structure_via_lrt'
+    'select_lmm_random_structure_via_lrt',
+    'prepare_age_effects_plot_data',
+    'compute_icc_from_variance_components'
 ]
