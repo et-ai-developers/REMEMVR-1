@@ -8,16 +8,22 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.8: Two-phase forgetting (rapid then slow)
+    Domains: All three WWW (inherited from RQ 5.7, collapsed across domains)
+    Analysis: LMM (3 convergent tests - quadratic term, piecewise vs continuous AIC, slope ratio)
+    Data: DERIVED from RQ 5.7 (theta scores, TSVR mapping, best continuous model)
+    Critical: Tests consolidation theory inflection at Day 1 (48h TSVR). Requires RQ 5.7 complete.
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    5.8 validated: 9.3/10 APPROVED. Strong consolidation theory, 5 suggested lit additions (Radvansky 2022 high priority). 10 moderate concerns identified. Ready for stats.
 
 rq_stats:
-  status: pending
-  context_dump: |
+  status: success
+  context_dump: "9.1/10 CONDITIONAL. Category 1: 2.7/3 (appropriate triangulation, convergence risk unacknowledged). Category 2: 2.0/2 (100% reuse). Category 3: 1.8/2 (random structure underspecified). Category 4: 1.8/2 (assumption validation missing). Category 5: 0.8/1 (7 concerns, good coverage, commission subsection thin)."
 
 rq_planner:
   status: pending

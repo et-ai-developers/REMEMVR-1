@@ -8,16 +8,23 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.12: CTT-IRT convergence via item purification
+    Domains: What/Where/When (all three, full coverage)
+    Analysis: Methodological comparison (Full CTT vs Purified CTT vs IRT)
+    Data: DERIVED from RQ 5.1 (IRT params, theta, TSVR) + raw dfData.csv for CTT
+    Critical: Parallel LMM on 3 measurement approaches tests purification validity
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    9.3/10 APPROVED. Strong psychometric theory. 1 CRITICAL omission (practice effects), needs recent citations. 6 suggested improvements. Ready for stats.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    8.2/10 REJECTED. Cat1: 2.7/3 (Fisher's r-to-z error). Cat2: 1.4/2 (75% tools, missing Steiger's z). Cat3: 1.7/2 (parameters OK). Cat4: 1.5/2 (no Cronbach's alpha). Cat5: 0.9/1 (9 concerns). 3 CRITICAL fixes: Steiger's z-test, Cronbach's alpha, standardize outcomes for AIC.
 
 rq_planner:
   status: pending

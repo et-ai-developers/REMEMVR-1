@@ -8,16 +8,22 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.13: Between-Person Variance in Forgetting Rates
+    Domains: What/Where/When (All - single factor from RQ 5.7)
+    Analysis: Variance decomposition of LMM random effects (ICC computation)
+    Data: DERIVED from RQ 5.7 (saved LMM model + theta scores + TSVR)
+    Critical: Requires RQ 5.7 complete, extracts variance components and individual random slopes for RQ 5.14
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    5.13 validated: 9.3/10 APPROVED. Strong theory, adequate literature (missing Sense 2016), excellent interpretation. 3 CRITICAL concerns (practice effects, encoding vs forgetting, test-retest carryover) all have reasonable rebuttals. 5 optional improvements suggested.
 
 rq_stats:
-  status: pending
-  context_dump: |
+  status: success
+  context_dump: "9.5/10 APPROVED. Category 1: 3.0/3 (optimal variance decomposition, REML for N=100, dual ICC methods). Category 2: 1.7/2 (75% tool reuse, missing ICC + normality tools). Category 3: 2.0/2 (parameters well-specified, Bonferroni overcorrection noted). Category 4: 2.0/2 (normality check + DERIVED convergence). Category 5: 0.8/1 (9 concerns, all cited, moderate thoroughness)."
 
 rq_planner:
   status: pending

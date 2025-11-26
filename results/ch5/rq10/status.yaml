@@ -8,16 +8,23 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.10: Domain-specific age effects on forgetting
+    Domains: What/Where/When (all three)
+    Analysis: LMM with 3-way Age × Domain × Time interaction
+    Data: DERIVED from RQ 5.1 theta scores + Age from dfData.csv
+    Critical: Treatment coding (What reference), Bonferroni α=0.0033, age tertiles for viz only
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    9.3/10 APPROVED. Theory strong (hippocampal aging, dual-process), lit adequate (needs 2020-2024 citations). 5 optional improvements: add Cheke 2022 (temporal vulnerability), Zheng 2020 (subfield aging), acknowledge perirhinal aging, justify immersive VR design. Ready for stats.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    7.8/10 REJECTED. Cat1: 2.7/3 (appropriate, convergence/power concerns). Cat2: 1.8/2 (67% reuse). Cat3: 1.6/2 (Bonferroni unclear, no model selection). Cat4: 0.8/2 (no assumption validation - CRITICAL gap). Cat5: 0.9/1 (11 concerns, comprehensive devil's advocate). Requires: Add LMM validation, clarify Bonferroni, add model selection, specify post-hoc correction.
 
 rq_planner:
   status: pending

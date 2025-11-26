@@ -8,16 +8,23 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.15: Item Difficulty × Time Interaction (cross-level)
+    Domains: What/Where/When (all domains, match RQ 5.1 IRT calibration)
+    Analysis: Cross-classified LMM (pymer4) - Time × Difficulty_c + (Time|UID) + (1|Item)
+    Data: DERIVED (RQ 5.1 difficulty estimates) + RAW (response data from dfData.csv)
+    Critical: Requires pymer4 for crossed random effects, Bonferroni α=0.0033, exploratory (no directional hypothesis)
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    9.3/10 APPROVED. Theory excellent (competing predictions), 12 papers reviewed, 5 suggested improvements (add recent citations, acknowledge practice effects). Ready for stats.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    7.3/10 REJECTED. Cat1: 2.7/3 (appropriate, random slopes convergence concern). Cat2: 1.5/2 (N/A tools, validation tools unused). Cat3: 1.5/2 (parameters clear, no random slopes justification). Cat4: 0.8/2 (NO assumption validation). Cat5: 0.8/1 (7 concerns, well-cited). Critical gap: Validation procedures absent.
 
 rq_planner:
   status: pending

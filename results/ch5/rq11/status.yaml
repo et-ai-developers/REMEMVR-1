@@ -8,16 +8,23 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.11: IRT-CTT convergent validity comparison
+    Domains: What/Where/When (all three domains)
+    Analysis: Correlation (r > 0.90) + Parallel LMM (IRT vs CTT)
+    Data: DERIVED from RQ 5.1 IRT scores + raw data for CTT computation
+    Critical: Uses purified item set from RQ 5.1 for fair comparison. Paired design (UID × Test × Domain).
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    9.4/10 APPROVED. Theory exceptional (convergent validity + measurement invariance). Literature adequate (needs recent empirical citations). Interpretation perfect (r > 0.90, >80% LMM agreement thresholds). CRITICAL omission: practice effects (4-session design). 5 suggested improvements. Ready for stats validation.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    9.1/10 CONDITIONAL. Cat1: 2.8/3 (appropriate). Cat2: 1.8/2 (75% reuse). Cat3: 1.9/2 (parameters). Cat4: 1.8/2 (validation). Cat5: 0.8/1 (7 concerns). Main gaps: multiple testing correction, LMM assumption validation, convergence strategy.
 
 rq_planner:
   status: pending

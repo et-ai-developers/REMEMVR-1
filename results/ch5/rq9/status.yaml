@@ -8,16 +8,23 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.9: Age effects on baseline memory and forgetting rate
+    Domains: All (What/Where/When combined composite)
+    Analysis: LMM (Age × Time interaction, Lin+Log functional form)
+    Data: DERIVED from RQ 5.7 theta scores + Age from dfData.csv
+    Critical: Age grand-mean centered, Bonferroni α=0.0033, Age tertiles for visualization
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    9.0/10 CONDITIONAL. Theory excellent (3.0/3.0), literature dated (1.7/2.0 - all pre-2015). CRITICAL omission: practice effects unaddressed. 15 papers reviewed (8 high-relevance 2020-2024). Add recent cites + practice discussion -> APPROVED. Ready for stats validation.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    9.5/10 APPROVED. Cat1: 3.0/3 (appropriate). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (Bonferroni α=0.0033 for 3 tests should be 0.0167, overly conservative). Cat4: 1.8/2 (convergence diagnostics missing). Cat5: 0.7/1 (6 concerns, below 8+ target).
 
 rq_planner:
   status: pending
