@@ -351,9 +351,53 @@ logs/     ONLY execution logs (.log)
 
 **Rule:** If file extension is `.csv`, `.pkl`, or `.txt`, it goes in `data/` (or `plots/` if plot source data)
 
+**MANDATORY VALIDATION (BEFORE WRITING 4_analysis.yaml):**
+
+Before writing 4_analysis.yaml, validate ALL output paths comply with folder conventions:
+
+1. Extract ALL output paths from every analysis step
+2. For each output path, check folder matches file extension:
+   - `.csv`/`.pkl`/`.txt` files → MUST be in `data/` folder
+   - `.png`/`.pdf`/`.svg` files → MUST be in `plots/` folder
+   - `.log` files → MUST be in `logs/` folder
+   - `.md`/`.html` files → MUST be in `results/` folder
+3. If ANY path violates conventions → QUIT with detailed error listing ALL violations
+
+**Example Violations that MUST trigger QUIT:**
+- ❌ `results/step05_model_comparison.csv` → CSV in results/ (should be data/)
+- ❌ `logs/step02_purified_items.csv` → CSV in logs/ (should be data/)
+- ❌ `plots/step03_theta_scores.csv` → CSV in plots/ (should be data/)
+
+**Error Format:**
+```
+CLARITY ERROR: Output paths violate folder conventions
+
+Violations found:
+  1. results/step05_model_comparison.csv
+     Problem: CSV file in results/ folder (CSV files MUST go to data/)
+  2. logs/step02_purified_items.csv
+     Problem: CSV file in logs/ folder (CSV files MUST go to data/)
+
+Folder conventions:
+  - data/ for ALL CSV/PKL/TXT files
+  - logs/ for .log files ONLY
+  - plots/ for PNG/PDF/SVG files ONLY
+  - results/ for .md/.html files ONLY
+
+Recommendation: Update 2_plan.md output paths to comply with folder conventions, then regenerate 4_analysis.yaml
+
+Action: QUIT (did not write 4_analysis.yaml - fix violations first)
+```
+
+**Why This Matters:**
+- g_code will generate code that writes to wrong folders (causes pipeline failures)
+- rq_inspect expects ALL data files in data/ folder for validation
+- Prevents file organization chaos discovered in RQ 5.1-5.2 execution
+
 **Circuit Breaker:**
 - If catalogued tool missing from 3_tools.yaml → QUIT with error
 - If stdlib operations unclear in 2_plan.md → QUIT asking for clarification
+- If output paths violate folder conventions → QUIT with violations list
 - NEVER invent fake module/function names for stdlib operations
 - NEVER use placeholders like "TBD" or "see config"
 - NEVER leave g_code to guess anything
@@ -371,13 +415,14 @@ logs/     ONLY execution logs (.log)
 3. ✅ Every step has complete parameter values (not pointers)?
 4. ✅ Every step has explicit input file paths with format specifications?
 5. ✅ Every step has explicit output file paths with format specifications?
-6. ✅ Every CATALOGUED step has paired validation tool from 3_tools.yaml?
-7. ✅ Every STDLIB step has inline validation criteria (row counts, value ranges)?
-8. ✅ All data formats documented (column names, types)?
-9. ✅ All naming conventions from names.md enforced?
-10. ✅ Zero placeholders, zero "TBD", zero "see other file"?
-11. ✅ Zero invented module/function names (stdlib uses `type: "stdlib"` not fake tools)?
-12. ✅ g_code can generate perfect Python reading ONLY 4_analysis.yaml?
+6. ✅ **ALL output paths comply with folder conventions (CSV→data/, PNG→plots/, LOG→logs/, MD→results/)?**
+7. ✅ Every CATALOGUED step has paired validation tool from 3_tools.yaml?
+8. ✅ Every STDLIB step has inline validation criteria (row counts, value ranges)?
+9. ✅ All data formats documented (column names, types)?
+10. ✅ All naming conventions from names.md enforced?
+11. ✅ Zero placeholders, zero "TBD", zero "see other file"?
+12. ✅ Zero invented module/function names (stdlib uses `type: "stdlib"` not fake tools)?
+13. ✅ g_code can generate perfect Python reading ONLY 4_analysis.yaml?
 
 **If ANY answer is NO:**
 - QUIT with detailed error report

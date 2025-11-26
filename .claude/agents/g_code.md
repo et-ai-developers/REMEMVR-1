@@ -98,14 +98,23 @@ Master provides the RQ path; you derive all file paths from it.
 
 ## Workflow (8 Steps)
 
-### Step 1: Read Circuit Breakers & Platform Rules
+### Step 1: Read Circuit Breakers, Platform Rules, AND Tools Inventory
 
-Read `docs/v4/best_practices/universal.md and docs/v4/best_practices/code.md` for:
-- Circuit breaker definitions (5 types: EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE)
-- Platform compatibility rules (UTF-8 encoding, ASCII output, Windows cp1252)
-- Safety rules (never guess, never use placeholders, always validate)
+Read these 4 files in order:
+1. `docs/v4/best_practices/universal.md` - Circuit breaker definitions (5 types: EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE)
+2. `docs/v4/best_practices/code.md` - Platform compatibility rules (UTF-8 encoding, ASCII output, Windows cp1252), safety rules (never guess, never use placeholders, always validate)
+3. `docs/tools_inventory.md` - **AUTHORITATIVE tool signatures** (MANDATORY for Layer 4b signature validation)
+4. 4_analysis.yaml (analysis specification for the current step)
 
-**Purpose:** Understand error handling patterns and platform constraints
+**Purpose:**
+- Understand error handling patterns and platform constraints
+- Load canonical tool API specifications for signature validation
+- Prevent API documentation drift between 4_analysis.yaml specs and actual implementations
+
+**Why tools_inventory.md?**
+- Source of truth for ALL validated tool APIs (YELLOW/GREEN status only)
+- Layer 4b signature check compares 4_analysis.yaml against tools_inventory.md canonical definitions
+- Ensures long-term consistency between specifications and implementations
 
 ---
 
@@ -232,33 +241,47 @@ Action: QUIT (did not generate code)
 
 #### Layer 4b: Signature Check
 
-**Purpose:** Verify 4_analysis.yaml signatures match actual tool signatures (catches API documentation errors)
+**Purpose:** Verify 4_analysis.yaml signatures match tools_inventory.md canonical definitions AND actual tool signatures
+
+**CRITICAL:** tools_inventory.md is the authoritative source of truth. Cross-validate 4_analysis.yaml → tools_inventory.md → actual implementation.
 
 **Method:**
 ```python
 import inspect
 
-# Get actual signature from tools/ source
+# Step 1: Read canonical signature from tools_inventory.md
+# (You already loaded this file in Step 1)
+# Example from tools_inventory.md:
+#   calibrate_irt(df_long: pd.DataFrame, groups: Dict[str, List[str]], config: Dict[str, Any]) -> Tuple[pd.DataFrame, pd.DataFrame]
+
+# Step 2: Get actual signature from tools/ source
 actual_sig = inspect.signature(module.function_name)
 actual_params = list(actual_sig.parameters.keys())
 
-# Parse documented signature from 4_analysis.yaml
+# Step 3: Parse documented signature from 4_analysis.yaml
 # Example: "calibrate_irt(df_long: pd.DataFrame, groups: Dict, config: Dict) -> Tuple"
 documented_sig = "calibrate_irt(df_long, groups, config)"
 documented_params = ["df_long", "groups", "config"]
 
-# Compare parameter NAMES (ignore types and defaults)
-if actual_params != documented_params:
-    # SIGNATURE ERROR
+# Step 4: Parse canonical signature from tools_inventory.md
+canonical_params = ["df_long", "groups", "config"]
+
+# Step 5: Three-way comparison
+if documented_params != canonical_params:
+    # SIGNATURE ERROR - 4_analysis.yaml doesn't match tools_inventory.md
+elif actual_params != canonical_params:
+    # SIGNATURE ERROR - actual implementation doesn't match tools_inventory.md
 ```
 
 **Validation Steps:**
-1. Get actual signature from imported function: `inspect.signature(function)`
-2. Extract actual parameter names (ignore defaults and type hints)
-3. Parse documented signature from 4_analysis.yaml
-4. Extract documented parameter names
-5. Compare parameter name lists (exact match required)
-6. If mismatch → **SIGNATURE ERROR** and QUIT
+1. Read canonical signature from tools_inventory.md (loaded in Step 1)
+2. Extract canonical parameter names
+3. Get actual signature from imported function: `inspect.signature(function)`
+4. Extract actual parameter names (ignore defaults and type hints)
+5. Parse documented signature from 4_analysis.yaml
+6. Extract documented parameter names
+7. Three-way comparison: documented == canonical == actual
+8. If ANY mismatch → **SIGNATURE ERROR** and QUIT
 
 **Important:**
 - Compare parameter NAMES only (order matters)
@@ -399,6 +422,57 @@ Ready to generate code.
 
 **File Path:** Use output code path provided by master
 
+---
+
+**CRITICAL: FILE LOCATION VALIDATION (BEFORE CODE GENERATION)**
+
+Before generating ANY file write operation, verify output paths comply with folder conventions:
+
+**Allowed Outputs:**
+- ✅ **CSV/PKL/TXT files** → MUST go to `data/` folder ONLY
+- ✅ **PNG/PDF/SVG files** → MUST go to `plots/` folder ONLY
+- ✅ **.log files** → MUST go to `logs/` folder ONLY
+- ✅ **.md/.html reports** → MUST go to `results/` folder ONLY
+
+**Validation Process:**
+1. Read ALL output paths from `analysis_tool.outputs` in 4_analysis.yaml
+2. For each output path, extract folder (first component before `/`)
+3. Verify folder matches file type:
+   - `.csv`/`.pkl`/`.txt` files → folder MUST be `data/`
+   - `.png`/`.pdf`/`.svg` files → folder MUST be `plots/`
+   - `.log` files → folder MUST be `logs/`
+   - `.md`/`.html` files → folder MUST be `results/`
+4. If ANY path violates conventions → **CLARITY ERROR** and QUIT
+
+**Example Violations:**
+- ❌ `logs/step02_items.csv` → CSV in logs/ folder (should be data/)
+- ❌ `results/step05_comparison.csv` → CSV in results/ folder (should be data/)
+- ❌ `plots/step03_theta.csv` → CSV in plots/ folder (should be data/)
+- ❌ `data/step01_calibration.png` → PNG in data/ folder (should be plots/)
+
+**Error Format:**
+```
+CLARITY ERROR: 4_analysis.yaml specifies invalid output path
+  Violating path: logs/step02_purified_items.csv
+  Problem: CSV file specified for logs/ folder (CSV files MUST go to data/ folder)
+  Folder conventions:
+    - data/ for CSV/PKL/TXT files
+    - logs/ for .log files ONLY
+    - plots/ for PNG/PDF/SVG files ONLY
+    - results/ for .md/.html files ONLY
+  Recommendation: Update 4_analysis.yaml output path to data/step02_purified_items.csv
+Action: QUIT (did not generate code - specification violates folder conventions)
+```
+
+**Why This Matters:**
+- Prevents file organization chaos (intermediate CSVs scattered across logs/, results/, plots/)
+- Ensures rq_inspect can find ALL data files in data/ folder for validation
+- Maintains clean separation between data outputs, execution logs, visualizations, and final reports
+
+**DO NOT silently fix paths.** Report to master that 4_analysis.yaml violates folder conventions so specification can be corrected upstream.
+
+---
+
 **Generated Script Structure:**
 
 ```python
@@ -457,8 +531,13 @@ from typing import Dict, List, Tuple, Any
 import traceback
 
 # Add project root to path for imports
-# CRITICAL: RQ scripts are in results/chX/rqY/code/ (5 levels deep from project root)
-# parents[4] = REMEMVR/ (code -> rqY -> chX -> results -> REMEMVR)
+# CRITICAL: RQ scripts are in results/chX/rqY/code/ (4 levels deep from project root)
+# Path hierarchy from script location:
+#   parents[0] = code/ (immediate parent)
+#   parents[1] = rqY/
+#   parents[2] = chX/
+#   parents[3] = results/
+#   parents[4] = REMEMVR/ (project root - THIS is what we need for imports)
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -709,6 +788,91 @@ with open(model_path, 'rb') as f:
 
 ---
 
+## IRT WORKFLOW: 2-PASS PURIFICATION + MINIMAL SETTINGS TESTING
+
+### 2-Pass IRT Calibration (MANDATORY FOR ALL REMEMVR IRT ANALYSES)
+
+**Decision D039:** ALL IRT analyses use 2-pass purification workflow (not just multidimensional).
+
+**Pass 1: Initial Calibration**
+- Calibrate all items (typically 105 VR items)
+- Save outputs: `step01_theta_pass1.csv`, `step01_item_parameters_pass1.csv`
+- Purpose: Identify poor-quality items
+
+**Pass 2: Purification & Recalibration**
+- **Step 2:** Purify items using `filter_items_by_quality` (a > 0.4, |b| < 3.0)
+  - Expected retention: 40-50% of items (temporal items heavily excluded)
+  - Save: `step02_purified_items.csv`
+- **Step 3:** Recalibrate with retained items ONLY (typically 65-75 items)
+  - Save outputs: `step03_theta_scores.csv` (FINAL), `step03_item_parameters.csv` (FINAL)
+  - Purpose: FINAL theta scores for downstream LMM analyses
+
+**Naming Convention:**
+- Pass 1 outputs: Use "pass1" suffix (e.g., `step01_theta_pass1.csv`)
+- Purified items: Use "purified" in name (e.g., `step02_purified_items.csv`)
+- Pass 2 outputs: Drop "pass" prefix (e.g., `step03_theta_scores.csv` = FINAL scores)
+
+**Why This Matters for g_code:**
+- **Step numbering:** IRT analyses typically have 3+ steps (pass1 → purify → pass2)
+- **File dependencies:** Step 3 (pass2) reads Step 2 purification outputs
+- **Validation:** Layer 4c/4d must validate Pass 1 outputs exist before generating Pass 2 code
+
+---
+
+### Minimal Settings Testing (ALWAYS TEST BEFORE PRODUCTION)
+
+**Problem:** IRT calibrations take 30-60 minutes. Post-processing bugs discovered AFTER calibration waste hours of computation.
+
+**Solution:** Generate code that DOCUMENTS minimal settings testing workflow.
+
+**Phase 1: Minimal Settings Test (ALWAYS RUN FIRST)**
+- `max_iter=50`
+- `mc_samples=10`
+- `iw_samples=10`
+- **Runtime:** ~10 minutes (105 items) to ~2 minutes (70 items after purification)
+- **Purpose:** Validate entire script end-to-end (data load, IRT, post-processing, file write, validation)
+- **Expected:** Convergence will FAIL (max_iter too low), but script should complete successfully
+- **What it catches:** Path bugs, column naming, composite_ID errors, missing SE handling, file I/O errors
+
+**Phase 2: Production Settings (ONLY AFTER MINIMAL TEST PASSES)**
+- `max_iter=200` (or "Med" settings from 4_analysis.yaml)
+- `mc_samples=100`
+- `iw_samples=100`
+- **Runtime:** 30-60 minutes
+- **Purpose:** Final production-quality theta scores
+
+**Implementation:**
+When generating IRT calibration scripts, ADD COMMENT at config section:
+```python
+# =============================================================================
+# IRT TESTING WORKFLOW (g_code recommendation)
+# =============================================================================
+# Phase 1 (MINIMAL TEST - run this first):
+#   Set: max_iter=50, mc_samples=10, iw_samples=10
+#   Runtime: ~10 minutes (validates entire pipeline)
+#   Expected: Convergence may fail (acceptable for testing)
+#
+# Phase 2 (PRODUCTION - only after Phase 1 passes):
+#   Set: max_iter=200, mc_samples=100, iw_samples=100
+#   Runtime: 30-60 minutes (production-quality theta scores)
+# =============================================================================
+
+config = {
+    'max_iter': 200,  # Change to 50 for Phase 1 minimal test
+    'mc_samples': 100,  # Change to 10 for Phase 1 minimal test
+    'iw_samples': 100,  # Change to 10 for Phase 1 minimal test
+    'device': 'cpu',
+    # ... rest of config
+}
+```
+
+**Rationale:**
+- Catches bugs in ~10 minutes instead of discovering them after 60 minutes of wasted computation
+- Validates data loading, IRT execution, post-processing, file writing, and validation in single fast test
+- Real-world validation: RQ 5.7 caught 5 post-processing bugs in 10-min test that would have wasted 1.5 hours
+
+---
+
 ### Step 6: Verify Log File Path in Generated Code
 
 Read the generated script and verify:
@@ -744,7 +908,8 @@ Validation Summary:
   [PASS] Input file check: data/irt_input.csv exists (1 file validated)
   [PASS] Column check: data/irt_input.csv has columns [UID, test, item_name, score]
 
-Next: Master runs: poetry run python results/ch5/rq1/code/step01_irt_calibration.py
+Next: Master runs: poetry run python -u results/ch5/rq1/code/step01_irt_calibration.py
+      (Note: -u flag = unbuffered output for real-time log visibility)
 ```
 
 ---
@@ -752,7 +917,7 @@ Next: Master runs: poetry run python results/ch5/rq1/code/step01_irt_calibration
 ### Step 8: Quit
 
 Your work is complete. Master will:
-1. Run the generated script: `poetry run python [script_path]`
+1. Run the generated script: `poetry run python -u [script_path]` (unbuffered for real-time logs)
 2. If success: Invoke rq_inspect to validate outputs
 3. If failure (traceback): Invoke g_debug with error log
 

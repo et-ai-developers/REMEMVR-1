@@ -245,12 +245,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
    - Save all results/outputs/figures to: results/CH5/RQ2
    - Create draft writeup for thesis of the above and save to results/CH5/RQ2/draft.md
 
-**Reviewer Rebuttals:**
-
-**Q:** "Why assign Day 1 to Early only? This loses information about whether consolidation is complete by 24h."
-
-**A:** "We assign Day 1 to Early based on sleep consolidation theory: one night's sleep (0-24h post-encoding) is the critical window for hippocampal replay and consolidation (Rasch & Born, 2013). Creating overlap (Day 1 in both segments) would violate independence assumptions and complicate interpretation. Alternative models with Day 1 as transition point could be explored, but our primary question is: does forgetting differ BEFORE vs AFTER the first night, for which this specification is appropriate."
-
 ---
 
 ### RQ5.3: Do Free Recall, Cued Recall, and Recognition exhibit different forgetting trajectories?
@@ -350,24 +344,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Plot shows clear divergence over time
 - [ ] Results replicate with seed=42
 
-**Reviewer Rebuttals:**
-
-**Q:** "Free Recall, Cued Recall, and Recognition aren't pure constructs - they differ in both retrieval support AND encoding strategies. How can you isolate paradigm effects?"
-
-**A:** "We cannot isolate paradigm from encoding - this is intentional. REMEMVR uses incidental encoding (participants don't know which paradigm they'll face), so encoding strategies are identical. The paradigm effect IS the retrieval support effect. This is the ecologically valid scenario: real-world memory operates under uncertainty about future retrieval demands. We interpret differences as reflecting retrieval processes, not differential encoding."
-
----
-
-**Q:** "Why not analyze each paradigm separately instead of pooling into a single LMM?"
-
-**A:** "Pooling increases statistical power and allows direct tests of Paradigm × Time interactions (our primary interest). Separate models would require post-hoc comparisons of slopes with inflated Type I error. The LMM framework naturally handles within-person correlations across paradigms and provides unified inference. We do report paradigm-specific trajectories in supplementary materials for readers interested in individual patterns."
-
----
-
-**Q:** "Items differ across paradigms (RFR uses different items than IFR). Isn't this confounded?"
-
-**A:** "The IRT model estimates paradigm-specific factors from paradigm-specific items, so item differences are modeled, not confounded. Theta_Free reflects ability on Free Recall items, Theta_Cued on Cued items, etc. These thetas are on a common scale (standardized latent trait), making them comparable despite different item sets. This is a strength of IRT over CTT, where raw scores would be incomparable."
-
 ---
 
 ### RQ5.4: Is there a linear trend in forgetting rate across paradigms?
@@ -435,18 +411,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] R² for trend > 0.90 (strong linearity)
 - [ ] Bar plot clearly shows ordered pattern
 - [ ] Results replicate
-
-**Reviewer Rebuttals:**
-
-**Q:** "Why test linear trend when you already tested pairwise contrasts in RQ5.3?"
-
-**A:** "Linear trend is a more specific, powerful test of our theoretical prediction. Pairwise contrasts (RQ5.3) test if paradigms differ; linear trend (RQ5.4) tests if they lie on an ordered continuum. The trend test has 1 df (more power), whereas 3 pairwise tests have 3 df and require multiple comparison correction. Both are informative: pairwise contrasts show which specific pairs differ, trend test confirms the ordered gradient."
-
----
-
-**Q:** "How can you justify assuming equal spacing between Free, Cued, and Recognition?"
-
-**A:** "We don't assume equal spacing in the data - that's what we're testing. The [-1, 0, +1] contrast weights assume equal spacing in the predictor for the trend test, which is a standard simplification. The R² tells us how well this linear model fits. If paradigms were not equally spaced in their effects, we'd see lower R² and could test quadratic trends. Our high R² (>0.95 expected) supports approximate linearity, validating the equal-spacing assumption post-hoc."
 
 ---
 
@@ -539,18 +503,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Plot shows divergence by Day 6
 - [ ] Replicates with seed=42
 
-**Reviewer Rebuttals:**
-
-**Q:** "Aren't congruent items just easier, not better consolidated?"
-
-**A:** "IRT theta scores control for baseline difficulty - each factor (Common, Congruent, Incongruent) is scaled independently with item difficulties modeled. The Congruence × Time interaction tests if *slopes* differ, not intercepts. If congruent items were just easier, we'd see parallel trajectories with different intercepts. Diverging trajectories indicate differential *forgetting rates*, consistent with consolidation, not difficulty."
-
----
-
-**Q:** "Your 'common' items (keys, phone, book) are actually schema-congruent for household rooms. How is this different from 'congruent'?"
-
-**A:** "Common items are schema-neutral *placeholders* - they could plausibly appear in any room (phone in kitchen, bedroom, bathroom). Congruent items are schema-specific (toothbrush IN bathroom, frying pan IN kitchen). The distinction is specificity, not mere presence. Schema theory predicts that schema-specific bindings consolidate better than schema-general associations. If this distinction is invalid, we'd see no Common-Congruent difference, which is itself informative."
-
 ---
 
 ### RQ5.6: Do congruent items benefit more from early consolidation than incongruent items?
@@ -638,18 +590,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] 3-way interaction significant (α=0.0033)
 - [ ] Plot shows divergence in Early, convergence in Late
 - [ ] Replicates
-
-**Reviewer Rebuttals:**
-
-**Q:** "How do you know the Early-Late difference is due to sleep consolidation, not just nonlinear forgetting?"
-
-**A:** "We cannot definitively attribute Early-Late differences to sleep (participants' sleep quality varies, unmeasured). However: (1) the Early segment (Day 0-1) includes one night's sleep for all participants, while Late (Day 1-6) includes multiple nights, diluting per-night effects; (2) sleep consolidation theory predicts schema-congruent items benefit *more* during early consolidation, which we test with the 3-way interaction; (3) alternative nonlinear models (e.g., power law) don't predict schema-specific effects. We interpret this cautiously as consistent with consolidation, not proof."
-
----
-
-**Q:** "Why not measure sleep quality and include it as a covariate?"
-
-**A:** "We collected self-report sleep quality (see Sleep Hygiene data), but it's unreliable and measured only at test sessions, not during the retention interval. Including it would reduce power (additional parameter) without much benefit. Future studies with actigraphy could test this directly. Here, we average across participants' natural sleep variation, asking if schema effects emerge despite this noise - a more generalizable (if less mechanistic) test."
 
 ---
 
@@ -746,18 +686,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Table saved to CSV
 - [ ] Results replicate
 
-**Reviewer Rebuttals:**
-
-**Q:** "Why not use BIC instead of AIC? BIC is more conservative."
-
-**A:** "AIC is appropriate for our goal: selecting the best approximating model for prediction and inference, not identifying the 'true' model (which we know doesn't exist - these are all approximations). BIC penalizes complexity more heavily (penalty = log(n) vs 2), suitable for selecting among a finite set of candidates when one is 'true.' Our exploratory context favors avoiding underfitting (AIC). We report both AIC and BIC for transparency."
-
----
-
-**Q:** "Shouldn't you fit additional models like exponential or power-law?"
-
-**A:** "Power-law (y ~ t^-α) is equivalent to log-log (log(y) ~ log(t)), which we test as 'Log' model. Exponential (y ~ exp(-t)) is poorly suited to our discrete time points (0,1,3,6) and theoretically implausible for episodic memory (no evidence for exponential forgetting in this domain). Our 5 models span the plausible theoretical space: linear (trace decay), logarithmic (Ebbinghaus), quadratic (two-phase), and combinations. Adding more models inflates multiple comparisons without theoretical justification."
-
 ---
 
 ### RQ5.8: Is there evidence for two-phase forgetting (rapid then slow)?
@@ -767,18 +695,22 @@ Use TSVR data to see the actual hours since VR for each px's scores
 **Hypothesis:** Yes. Forgetting exhibits an initial rapid phase (pre-consolidation) and later shallow phase (post-consolidation). Evidence: (1) Quadratic term significant, (2) Piecewise model fits better than continuous, (3) Visual inspection shows inflection around Day 1.
 
 **Data Required:**
-- **Analysis Set:** "All" (same as RQ5.7)
+- **Analysis Set:** From ch5/rq7
 - **IRT Configuration:** Same as RQ5.7
 - **Prerequisites:** Best-fitting continuous model from RQ5.7 (for comparison)
 - **Structure:** 400 observations (100 participants × 4 time points)
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - Use theta scores and best-fitting model from ./results/ch5/rq7/
+   - Get TSVR mapping from ./results/ch5/rq7/data/step00_tsvr_mapping.csv
+
 1. **Data Preparation**
-   - Use theta scores from "All" analysis (RQ5.7)
+   - Use theta scores from RQ5.7 analysis
    - Load best-fitting continuous model from RQ5.7 pickle
-   - Create time transformations: Days, Days², log(Days+1)
-   - Create piecewise time structure (Early: Days 0-1, Late: Days 1-6)
+   - Create time transformations using TSVR: TSVR (hours), TSVR², log(TSVR+1)
+   - Create piecewise time structure (Early: 0-48 hours TSVR, Late: 48-240 hours TSVR)
 
 2. **Test 1: Quadratic Term Significance**
    - Fit quadratic model: Theta ~ Time + Time² + (Time | UID)
@@ -846,18 +778,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Interpretation consistent with data
 - [ ] Replicates
 
-**Reviewer Rebuttals:**
-
-**Q:** "A significant quadratic term doesn't prove two-phase forgetting - it could just mean the decline is nonlinear."
-
-**A:** "Correct. The quadratic term tests *curvature*, not mechanism. We use three convergent tests (quadratic, piecewise, slope ratio) to triangulate. If data support: (1) positive quadratic coefficient (deceleration), (2) piecewise model fits better, (3) Early slope >> Late slope, this pattern is *consistent with* two-phase forgetting, though not definitive proof. Alternative explanations (e.g., power-law approximated by quadratic) are discussed. We claim pattern consistency, not causal mechanism."
-
----
-
-**Q:** "Why is Day 1 the inflection point? This seems arbitrary."
-
-**A:** "Day 1 is theoretically motivated: it follows one night's sleep (critical consolidation window in sleep consolidation theory). It's not data-driven. We test this a priori boundary. If data showed inflection at Day 3, the piecewise model with Day 1 cutoff would fit poorly. Our piecewise model fitting better than continuous (ΔAIC < -2) supports this choice post-hoc. Alternative piecewise models (e.g., Day 0.5 or Day 2 cutoff) could be tested in sensitivity analyses."
-
 ---
 
 ### RQ5.9: Does age affect baseline memory ability or forgetting rate?
@@ -875,13 +795,17 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - Use theta scores from ./results/ch5/rq7/
+   - Get TSVR mapping from ./results/ch5/rq7/data/step00_tsvr_mapping.csv
+   - Load Age from data/cache/dfData.csv (one value per UID, column is called 'age')
+
 1. **Data Preparation**
    - Use theta scores from "All" analysis (RQ5.7)
-   - Load Age from data/cache/dfData.csv (one value per UID, column is called 'age')
    - Merge Age with theta scores on UID
    - Grand-mean center Age (Age_c = Age - mean(Age))
    - Verify no missing Age values
-   - Create time transformations: Days, log(Days+1)
+   - Create time transformations using TSVR: TSVR (hours), log(TSVR+1)
 
 2. **Fit LMM with Age × Time Interaction**
    - Formula: Theta ~ (Time + log(Time+1)) × Age_c + (Time | UID)
@@ -945,18 +869,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Plot shows ordered tertiles
 - [ ] Replicates
 
-**Reviewer Rebuttals:**
-
-**Q:** "Age is confounded with cohort effects (education, technology exposure). How can you interpret this as aging?"
-
-**A:** "Correct - this is a cross-sectional design, so Age effects confound biological aging, cohort, and lifespan experience. We cannot disentangle these without longitudinal data. We interpret 'age differences' not 'age changes.' However, our pattern (lower intercept, faster forgetting) is consistent with hippocampal aging literature (Raz et al., 2005), suggesting biological aging contributes. Cohort effects would more likely affect intercepts (education) than slopes (forgetting rate), yet we see both."
-
----
-
-**Q:** "Why continuous Age instead of age groups (young/old)?"
-
-**A:** "Continuous Age: (1) More powerful (1 df test vs 1+ df group comparison), (2) Avoids arbitrary cutoffs (e.g., 'old' = 65?), (3) Models full variance, (4) Tests linearity assumption (can add Age² if needed). We provide tertile visualization for interpretability, but statistical tests use continuous Age. If Age effects are nonlinear (e.g., accelerate after 60), we'd detect this via Age² term in sensitivity analyses."
-
 ---
 
 ### RQ5.10: Do age effects differ across memory domains?
@@ -974,13 +886,17 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - Use theta scores from ./results/ch5/rq1/
+   - Get TSVR mapping from ./results/ch5/rq1/data/step00_tsvr_mapping.csv
+   - Load Age from data/cache/dfData.csv (one value per UID, column name 'age')
+
 1. **Data Preparation**
-   - Use theta scores from analysis RQ5.1
-   - Load Age from dfData.csv (one value per UID column name 'age')
+   - Use theta scores from RQ5.1 analysis
    - Merge Age with theta scores on UID
    - Grand-mean center Age (Age_c = Age - mean(Age))
    - Reshape to long format (Domain as factor variable: What/Where/When)
-   - Create time transformations: Days, log(Days+1)
+   - Create time transformations using TSVR: TSVR (hours), log(TSVR+1)
 
 2. **Fit LMM with 3-Way Interaction**
    - Formula: Theta ~ (Time + log(Time+1)) × Age_c × Domain + (Time | UID)
@@ -1040,18 +956,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Plot shows domain-specific divergence
 - [ ] Replicates
 
-**Reviewer Rebuttals:**
-
-**Q:** "With 3-way interactions, you're testing many parameters. Isn't this overfitting?"
-
-**A:** "The 3-way interaction (Age × Domain × Time) is a single theoretical hypothesis, not exploratory fishing. We have n=400 observations (100 UIDs × 4 Tests) and ~15 fixed effects parameters - a ratio of 27:1, well above the 10:1 rule of thumb. Random effects add complexity, but are justified by likelihood ratio tests. If overfitting were severe, the model would fail cross-validation (not performed here, but could be). We prioritize theoretical completeness over parsimony."
-
----
-
-**Q:** "Why expect Where and When to be more age-sensitive than What? What about associative deficit hypothesis?"
-
-**A:** "Associative deficit hypothesis (Naveh-Benjamin, 2000) predicts older adults struggle with binding, affecting all domains. However, Where and When require *relational* binding (item-to-context), while What can rely on item familiarity (less hippocampal). Hippocampal volume declines with age (Raz et al., 2005), disproportionately impairing hippocampal-dependent domains. If associative deficit affects all equally, we'd see no 3-way interaction (null result = informative). Our hypothesis is hippocampal-aging-specific, not general deficit."
-
 ---
 
 ### RQ5.11: Do IRT and CTT approaches converge on the same conclusions?
@@ -1069,12 +973,18 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - Use IRT theta scores from ./results/ch5/rq1/
+   - Get TSVR mapping from ./results/ch5/rq1/data/step00_tsvr_mapping.csv
+   - Load raw scores from data/cache/dfData.csv for CTT computation
+
 1. **Data Preparation**
    - Load IRT theta scores (Theta_What, Theta_Where, Theta_When)
    - Compute CTT mean scores from raw data:
      - Extract all TQ_ items for each domain (What/Where/When)
      - Calculate mean score per UID × Test × Domain
    - Merge IRT and CTT scores on UID, Test, Domain
+   - Merge TSVR data on UID, Test
    - Reshape to long format for LMM comparison
 
 2. **Correlation Analysis**
@@ -1139,18 +1049,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Interpretation matches data (convergence or divergence documented)
 - [ ] Replicates
 
-**Reviewer Rebuttals:**
-
-**Q:** "Aren't IRT and CTT always correlated? This seems like a trivial validation."
-
-**A:** "High correlation is expected but not guaranteed. CTT aggregates items linearly, assuming equal discrimination and no guessing; IRT weights items by discrimination and models response probabilities. If items vary widely in quality (discrimination 0.5-4.0 range), or if guessing affects responses, IRT and CTT *could* diverge. Our r=0.95 shows they don't - validating both approaches. More importantly, we test if *conclusions* converge (e.g., does Where forget faster than What?), not just scores. Agreement rate=100% means our substantive findings are robust."
-
----
-
-**Q:** "Why not just use CTT if it gives the same answer?"
-
-**A:** "IRT provides: (1) Item-level diagnostics (discrimination, difficulty) unavailable in CTT, (2) Handling of missing data without imputation, (3) Comparable scores across different item subsets (e.g., retained vs purified), (4) Principled item selection (remove low-discrimination items). CTT is simpler but less flexible. Our convergence analysis shows IRT's added complexity doesn't change substantive conclusions, *given our high-quality items*. If items were poor, IRT would outperform CTT."
-
 ---
 
 ### RQ5.12: Does purified IRT item set change CTT conclusions?
@@ -1167,6 +1065,11 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - **Structure:** Compare full CTT vs purified CTT vs IRT
 
 **Analysis Specification:**
+
+0. **Get Data**
+   - Use IRT item parameters and theta scores from ./results/ch5/rq1/
+   - Get TSVR mapping from ./results/ch5/rq1/data/step00_tsvr_mapping.csv
+   - Load raw scores from data/cache/dfData.csv for CTT computation
 
 1. **Identify IRT-Retained Items**
    - Load IRT item parameters (difficulty and discrimination estimates)
@@ -1239,18 +1142,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Interpretation matches data
 - [ ] Replicates
 
-**Reviewer Rebuttals:**
-
-**Q:** "Of course purified CTT fits better - you're removing items, reducing data. Isn't this circular?"
-
-**A:** "Item purification is not circular - it's based on IRT discrimination parameters from a *separate* model (not the CTT LMM). We're testing if IRT-identified poor items also degrade CTT models. Lower AIC despite fewer items means better fit *per parameter*, not just fewer parameters. If removed items contained signal (not noise), purified CTT would fit *worse*. Our ΔAIC=-36 supports that removed items were indeed low-quality."
-
----
-
-**Q:** "Why not just select items based on CTT item-total correlations?"
-
-**A:** "CTT item-total correlation conflates difficulty and discrimination, and is sample-dependent. IRT discrimination is a pure measure of how well an item differentiates ability levels, independent of item difficulty. We could compare IRT-based vs CTT-based purification in sensitivity analyses. Our goal here is to show that IRT-based purification improves CTT, validating cross-method consistency."
-
 ---
 
 ### RQ5.13: How much between-person variance exists in forgetting rates?
@@ -1265,6 +1156,10 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - **Prerequisites:** LMM with random slopes from RQ5.7
 
 **Analysis Specification:**
+
+0. **Get Data**
+   - Use best model and theta scores from ./results/ch5/rq7/
+   - Get TSVR mapping from ./results/ch5/rq7/data/step00_tsvr_mapping.csv
 
 1. **Load Best Model from RQ5.7**
    - Load saved LMM with random slopes (from "All" analysis)
@@ -1346,18 +1241,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Random effects saved for RQ5.14
 - [ ] Replicates
 
-**Reviewer Rebuttals:**
-
-**Q:** "ICC=0.18 for slopes seems low. Does this mean individual differences in forgetting are trivial?"
-
-**A:** "ICC=0.18 means 18% of slope variance is between-person (stable), 82% is within-person (error + true change). This is *moderate* for behavioral data - forgetting is influenced by many unmeasured factors (sleep, stress, interference) causing within-person variability. For comparison, personality trait ICCs are ~0.50-0.70 (more stable), while mood ICCs are ~0.10-0.30 (less stable). Our ICC=0.18 suggests forgetting rate has detectable individual differences, but is not a highly stable trait. This justifies clustering (RQ5.14) to identify subgroups with distinct patterns."
-
----
-
-**Q:** "Shouldn't you use a different ICC formula for slopes?"
-
-**A:** "There's no consensus ICC formula for random slopes in LMMs. We report: (1) Simple ratio (var_slope / [var_slope + var_residual]) = conservative, assumes residual variance affects slopes equally; (2) Conditional ICC at Day 6 (total between-person variance / total variance) = less conservative, accounts for intercept-slope covariance. Both are valid; we report both for transparency. The simple ICC=0.18 is our primary estimate; Day 6 ICC=0.55 shows that by study end, most variance (55%) is between-person, as slopes accumulate."
-
 ---
 
 ### RQ5.14: Are there distinct forgetting profiles (fast vs slow forgetters)?
@@ -1372,6 +1255,11 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - **Clustering variables:** Total_Intercept, Total_Slope
 
 **Analysis Specification:**
+
+0. **Get Data**
+   - Use random effects from ./results/ch5/rq13/
+   - Use theta scores from ./results/ch5/rq7/ for trajectory plotting
+   - Get TSVR mapping from ./results/ch5/rq7/data/step00_tsvr_mapping.csv
 
 1. **Load Random Effects from RQ5.13**
    - Load saved random effects (Total_Intercept, Total_Slope for each UID)
@@ -1448,18 +1336,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Cluster assignments saved
 - [ ] Replicates (K-means uses random initialization, but seed=42 ensures replication)
 
-**Reviewer Rebuttals:**
-
-**Q:** "K-means assumes spherical clusters. Is this appropriate for behavioral data?"
-
-**A:** "K-means is a starting point for exploratory clustering. We chose it for: (1) Simplicity and interpretability, (2) BIC model selection straightforward, (3) Two dimensions only (intercept, slope) - spherical assumption less problematic. Alternative approaches (Gaussian Mixture Models, hierarchical clustering) could be explored in sensitivity analyses. If clusters show clear separation in our plot, K-means is adequate. If overlap is substantial, we'd note limitations and suggest alternatives."
-
----
-
-**Q:** "How do you know these clusters are real, not just artifacts of K-means forcing a partition?"
-
-**A:** "We use BIC to select K, which penalizes overfitting. If K=1 had lowest BIC, we'd conclude no meaningful clusters exist. Our K=3 selection suggests data support 3 clusters over a single homogeneous group. We also inspect cluster separation visually - well-separated clusters suggest real subgroups, overlapping clusters suggest continuous variation. This is exploratory hypothesis-generation, not confirmatory - future studies could validate profiles in independent samples."
-
 ---
 
 ### RQ5.15: Does item difficulty interact with time (easier items forgotten faster)?
@@ -1476,10 +1352,16 @@ Use TSVR data to see the actual hours since VR for each px's scores
 
 **Analysis Specification:**
 
+0. **Get Data**
+   - Use item parameters from ./results/ch5/rq1/
+   - Load raw response data from data/cache/dfData.csv
+   - Get TSVR mapping from ./results/ch5/rq1/data/step00_tsvr_mapping.csv
+
 1. **Load and Merge Data**
    - Load item parameters (difficulty estimates from IRT)
-   - Load response data in long format (UID × Test × Days × Item)
+   - Load response data in long format (UID × Test × TSVR × Item)
    - Merge item difficulty into response-level data
+   - Merge TSVR data on UID, Test
    - Verify data structure (number of observations, unique UIDs, unique items)
 
 2. **Center Predictors**
@@ -1537,18 +1419,6 @@ Use TSVR data to see the actual hours since VR for each px's scores
 - [ ] Interpretation matches coefficient sign
 - [ ] Plot generated
 - [ ] Replicates
-
-**Reviewer Rebuttals:**
-
-**Q:** "Why use pymer4 instead of native Python? This adds a dependency on R."
-
-**A:** "statsmodels (native Python) doesn't support crossed random effects (UID × Item). Options: (1) Use pymer4 (Python wrapper for R's lme4) - cleanest solution, (2) Treat Item as fixed effect - inflates parameters and loses generalizability, (3) Use hierarchical Bayesian model (PyMC3/Stan) - overkill for exploratory analysis. pymer4 is lightweight and widely used. If R unavailable, we document alternative fixed-effects approach and note limitation."
-
----
-
-**Q:** "Doesn't item difficulty confound encoding and retrieval? How can you isolate forgetting?"
-
-**A:** "Item difficulty (from IRT) reflects *average* endorsement probability across the sample and time points. The Difficulty × Time interaction tests if difficulty *slope* (change over time) varies by difficulty level. If difficult items just have lower intercepts (encoding), we'd see a main effect of Difficulty, not an interaction. The interaction specifically tests if forgetting rate (slope) depends on initial difficulty - addressing the confound you raise. We acknowledge that 'difficulty' could reflect encoding, storage, or retrieval; our design can't isolate these."
 
 ---
 

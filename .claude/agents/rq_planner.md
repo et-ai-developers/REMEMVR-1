@@ -407,6 +407,8 @@ Agent-generated naming creates maintenance nightmare. Controlled vocabulary only
    - Pass 1: All items  ->  Pass 2: Purified items only
    - Thresholds: |b| <= 3.0 (difficulty), a >= 0.4 (discrimination)
    - Expected: 40-50% item retention (temporal items difficult)
+   - **Minimal Settings Testing:** ALL IRT calibrations should be tested with minimal settings FIRST (max_iter=50, mc_samples=10, iw_samples=10) to validate pipeline in ~10 minutes before committing to 30-60 minute production runs
+   - Production settings: max_iter=200, mc_samples=100, iw_samples=100
 
 2. **Decision D068 (Dual P-Value Reporting)**
    - If group comparisons or post-hoc tests
