@@ -50,6 +50,7 @@
 
 | Function | Description |
 |----------|-------------|
+| `check_file_exists` | Validate file exists and optionally meets minimum size requirement |
 | `validate_irt_convergence` | Check IRT model convergence (loss stability, parameter bounds) |
 | `validate_irt_parameters` | Validate item quality against thresholds (a >= min, \|b\| <= max) |
 | `validate_lmm_convergence` | Check LMM convergence status and warnings |

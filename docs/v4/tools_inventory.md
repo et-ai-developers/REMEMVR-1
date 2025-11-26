@@ -190,6 +190,15 @@
 | **Inputs** | `residuals: ndarray`, `alpha: float` (default 0.05) |
 | **Outputs** | `Dict[str, Any]` with keys: normal (bool), ks_statistic (float), p_value (float), message (str) |
 
+### check_file_exists
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate that file exists and optionally meets minimum size requirement |
+| **Inputs** | `file_path: Union[str, Path]`, `min_size_bytes: int` (default 0, 0 = no minimum) |
+| **Outputs** | `Dict[str, Any]` with keys: valid (bool), file_path (str), size_bytes (int, 0 if file doesn't exist), message (str) |
+| **Notes** | Returns `valid=False` if: (1) file doesn't exist, (2) path is directory not file, (3) file size < min_size_bytes. Accepts both string paths and pathlib.Path objects. |
+
 ---
 
 **End of Tools Inventory**

@@ -42,7 +42,7 @@ tools.plotting	plot_trajectory	RED	Trajectory with fitted curves	time_pred, fitt
 tools.plotting	plot_trajectory_probability	RED	D069: Trajectory on probability scale	df_thetas, item_parameters_path, time_var, factors, title, **kwargs	Tuple[Figure, Axes, DataFrame]
 tools.plotting	save_plot_with_data	RED	Save PNG + CSV	fig, output_path, data, dpi	None
 tools.plotting	set_plot_style_defaults	RED	Apply matplotlib styling	config_path	None
-tools.validation	check_file_exists	ORANGE	RQ 5.8-15: Validate file exists (needed by 7 RQs)	file_path	Dict
+tools.validation	check_file_exists	YELLOW	RQ 5.8-15: Validate file exists + optional min size (10/10 tests GREEN)	file_path, min_size_bytes	Dict[valid, file_path, size_bytes, message]
 tools.validation	check_missing_data	RED	Check missing data	df	Dict
 tools.validation	create_lineage_metadata	RED	Create lineage metadata	source_file, output_file, operation, parameters, description	Dict
 tools.validation	generate_validation_report	RED	Generate validation report	validation_checks, report_title	Dict

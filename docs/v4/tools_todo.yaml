@@ -155,7 +155,10 @@ validation_generic:
       - file_path: Path
       - min_size_bytes: int (default 0)
     outputs: "Dict[valid: bool, message: str, size_bytes: int]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "10/10 GREEN"
+    notes: "Enhanced existing function with min_size_bytes parameter, directory detection, comprehensive tests"
 
   - name: validate_dataframe_structure
     module: tools.validation
