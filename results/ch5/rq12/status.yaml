@@ -24,7 +24,7 @@ rq_scholar:
 rq_stats:
   status: success
   context_dump: |
-    8.2/10 REJECTED. Cat1: 2.7/3 (Fisher's r-to-z error). Cat2: 1.4/2 (75% tools, missing Steiger's z). Cat3: 1.7/2 (parameters OK). Cat4: 1.5/2 (no Cronbach's alpha). Cat5: 0.9/1 (9 concerns). 3 CRITICAL fixes: Steiger's z-test, Cronbach's alpha, standardize outcomes for AIC.
+    9.5/10 APPROVED. Cat1: 2.9/3 (all critical fixes implemented). Cat2: 1.2/2 (40% tools, missing CTT module but well-specified). Cat3: 1.8/2 (strong parameters). Cat4: 1.7/2 (alpha added, minor gaps). Cat5: 0.9/1 (9 concerns, 0 CRITICAL). All 3 prior CRITICAL flaws corrected: Steiger's z, Cronbach's alpha, z-score standardization. Ready for planning.
 
 rq_planner:
   status: pending

@@ -23,7 +23,7 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "9.1/10 CONDITIONAL. Category 1: 2.7/3 (appropriate triangulation, convergence risk unacknowledged). Category 2: 2.0/2 (100% reuse). Category 3: 1.8/2 (random structure underspecified). Category 4: 1.8/2 (assumption validation missing). Category 5: 0.8/1 (7 concerns, good coverage, commission subsection thin)."
+  context_dump: "9.2/10 CONDITIONAL. Category 1: 2.8/3 (strong triangulation, convergence risk impact unacknowledged). Category 2: 2.0/2 (100% reuse). Category 3: 1.8/2 (random structure + thresholds underspecified). Category 4: 1.7/2 (comprehensive checks, decision rules gaps). Category 5: 0.9/1 (7 concerns, Commission thin)."
 
 rq_planner:
   status: pending

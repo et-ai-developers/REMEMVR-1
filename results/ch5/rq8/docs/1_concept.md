@@ -96,9 +96,11 @@ LMM (Linear Mixed Models) for trajectory modeling with three convergent tests: (
 
 **Step 1:** Data Preparation - Create time transformations (TSVR, TSVR², log(TSVR+1)), create piecewise time structure (Early: 0-48 hours, Late: 48-240 hours) with Days_within variable for each segment
 
-**Step 2:** Test 1 - Quadratic Term Significance - Fit Theta ~ Time + Time² + (Time | UID), extract Time² coefficient and p-value, apply Bonferroni correction (α = 0.0033), significant positive coefficient = evidence for deceleration (two-phase)
+**Step 2:** Test 1 - Quadratic Term Significance - Fit Theta ~ Time + Time² + (Time | UID), **model selection strategy:** attempt full random slopes model (Time | UID) first, if convergence fails (checked via validate_lmm_convergence), simplify to: (1) uncorrelated random slopes (Time || UID) (removes intercept-slope correlation parameter), (2) if still fails, random intercepts only (1 | UID), with N=100, quadratic random slopes may not converge (Bates et al., 2015 recommend N>=200 for complex random structures), extract Time² coefficient and p-value, apply Bonferroni correction (α = 0.0033), significant positive coefficient = evidence for deceleration (two-phase)
 
-**Step 3:** Test 2 - Piecewise vs Continuous Model Comparison - Fit Theta ~ Days_within × Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7, ΔAIC < -2 favors piecewise (two-phase), ΔAIC > +2 favors continuous (single-phase), |ΔAIC| < 2 = equivalent
+**Step 3:** Test 2 - Piecewise vs Continuous Model Comparison - Fit Theta ~ Days_within × Segment + (Days_within | UID), **model selection strategy:** same fallback as Step 2 - attempt random slopes, simplify if convergence fails, compare AIC to best continuous model from RQ 5.7, ΔAIC < -2 favors piecewise (two-phase), ΔAIC > +2 favors continuous (single-phase), |ΔAIC| < 2 = equivalent
+
+**Step 3.5:** Validate LMM Assumptions - After fitting quadratic and piecewise models, perform comprehensive assumption checks: (1) Residual normality via Q-Q plots + Shapiro-Wilk test (p>0.05 threshold), (2) Homoscedasticity via residual vs fitted plot (visual inspection for funnel patterns), (3) Random effects normality via Q-Q plots of random intercepts/slopes, (4) Independence via ACF plots (Lag-1 ACF < 0.1 threshold - repeated measures data), (5) Linearity within segments via partial residual plots, use validate_lmm_assumptions_comprehensive tool for automated checks, **remedial actions:** if residual normality violated, use robust standard errors; if homoscedasticity violated, model variance structure; if autocorrelation detected, add AR(1) correlation structure; document all assumption test results in validation report
 
 **Step 4:** Test 3 - Extract Early vs Late Forgetting Rates - Extract slope for Early segment (0-48 hours), extract slope for Late segment (48-240 hours), compute Late/Early ratio (expect < 0.5 if two-phase robust), test Segment × Time interaction significance
 
@@ -116,6 +118,8 @@ LMM (Linear Mixed Models) for trajectory modeling with three convergent tests: (
 - **AIC Decision Rule:** ΔAIC < -2 (piecewise superior), ΔAIC > +2 (continuous superior), |ΔAIC| < 2 (equivalent)
 - **Theoretical Inflection Point:** 48 hours TSVR chosen based on consolidation theory (one night's sleep + ~24 hour consolidation window)
 - **Model Comparison to RQ 5.7:** Uses best-fitting continuous model from RQ 5.7 as baseline (avoids re-fitting multiple continuous models)
+- **Convergence Fallback Strategy:** Quadratic random slopes (Time | UID) may not converge with N=100 participants, fallback hierarchy: (1) attempt maximal model (Time | UID), (2) if fails, simplify to uncorrelated slopes (Time || UID), (3) if still fails, random intercepts only (1 | UID), document convergence decisions in results, same strategy applies to piecewise model with Days_within random slopes
+- **Comprehensive LMM Assumption Validation:** After fitting quadratic and piecewise models, validate assumptions via validate_lmm_assumptions_comprehensive tool (performs 6 assumption checks: normality, homoscedasticity, autocorrelation, etc.), comprehensive validation critical with N=100 and complex random structures where assumption violations can substantially affect Type I error rates (Schielzeth et al., 2020), report all assumption test results with remedial actions if violations detected
 
 ---
 

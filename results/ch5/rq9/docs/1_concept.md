@@ -28,8 +28,11 @@ Hippocampal aging literature suggests older adults exhibit dual deficits: lower 
 
 **Key Citations:**
 - Raz et al. (2005): Meta-analysis showing hippocampal volume declines accelerate after age 60
+- Neurobiology of Aging (2025): Recent validation - older age significantly related to smaller hippocampal volume, higher diffusion, and worse episodic memory
 - Nyberg et al. (2012): Longitudinal study demonstrating age predicts both baseline memory and forgetting rate
 - Dudai (2004): Consolidation framework predicting age effects on time-dependent memory processes
+- Online Cognitive Test 40,000+ participants (2022): Segmented regression revealed shift from gradual to rapid decline in episodic memory in early 60s (gradual ages 18-60, rapid 60-90, nonlinear age threshold)
+- Scientific Reports (2024): Encoding quality alternative - forgetting rates may be comparable when initial encoding equated, but dual deficit hypothesis predicts independent effects on both baseline (encoding) and slope (consolidation/retrieval)
 
 **Theoretical Predictions:**
 Hippocampal aging hypothesis predicts older adults will show:
@@ -99,6 +102,8 @@ LMM (Linear Mixed Model) with Age × Time interaction, testing age as continuous
 **Step 0:** Get Data - Use theta scores from RQ 5.7 "All" analysis (results/ch5/rq7/), load Age from data/cache/dfData.csv, merge TSVR mapping
 
 **Step 1:** Data Preparation - Merge Age with theta scores on UID, grand-mean center Age (Age_c = Age - mean(Age)), verify no missing Age values, create time transformations (TSVR, log(TSVR+1))
+
+**Practice Effects Acknowledgment:** Participants complete same VR test 4 times (Days 0, 1, 3, 6), introducing practice effects (mean retest effect ~0.60 SD in longitudinal memory studies, BMC Neuroscience 2010). Mitigation strategies: (1) IRT theta scoring separates item difficulty from person ability, reducing direct practice contamination, (2) Random slopes by UID in LMM model individual variation in trajectories, including practice-related improvements, (3) If practice benefits are age-invariant (all ages improve equally), they affect intercept but not Age × Time interaction. However, if younger adults benefit more from practice (age-dependent practice effects), this could confound Age × slope interaction. Note: RQ tests Age effects on forgetting (decline from Day 0 baseline), not absolute trajectories, so practice effects primarily affect interpretation of slope magnitudes rather than Age × Time interaction direction
 
 **Step 2:** Fit LMM with Age × Time Interaction - Formula: Theta ~ (Time + log(Time+1)) × Age_c + (Time | UID), using Lin+Log functional form (best model from RQ 5.7), random intercepts and slopes by UID, fit with REML=False, save model pickle
 

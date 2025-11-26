@@ -103,17 +103,21 @@ Convergent validity comparison using Correlation Analysis + Parallel LMM (Linear
 - Reshape to long format for LMM (columns: UID, Test, Domain, TSVR, IRT_Score, CTT_Score)
 
 **Step 2:** Correlation Analysis
-- Compute Pearson correlations between IRT and CTT for each domain (What, Where, When) + overall
-- Test if r > 0.90 (high convergence threshold)
-- Report 95% confidence intervals and p-values
+- Compute Pearson correlations between IRT and CTT for each domain (What, Where, When) + overall (4 tests total)
+- **Multiple Testing Correction:** Apply Holm-Bonferroni correction to control family-wise error rate across 4 correlation tests (less conservative than standard Bonferroni), rank p-values from smallest to largest, compare each p-value to α/(m-k+1) where m=4 tests and k=rank, reject null if p < adjusted α, report both uncorrected and corrected p-values for transparency (dual reporting aligns with Decision D068 philosophy)
+- Test if r > 0.70 (strong convergence per psychometric standards, Carlson & Herdman 2012) as primary threshold, with r > 0.90 as exceptional convergence (secondary threshold)
+- Report 95% confidence intervals and both uncorrected and Holm-Bonferroni corrected p-values
 - Generate scatterplots: IRT (x-axis) vs CTT (y-axis) with regression lines, separate panels per domain
 
 **Step 3:** Parallel LMM Comparison
-- Fit identical LMMs for IRT and CTT: Ability ~ (Time + log(Time+1)) × Domain + (Time | UID)
+- Fit identical LMMs for IRT and CTT: Ability ~ (Time + log(Time+1)) × Domain + (Time | UID), **model selection strategy:** attempt full random slopes model (Time | UID) first, if convergence fails for EITHER model (checked via validate_lmm_convergence), simplify BOTH to random intercepts (1 | UID) to maintain identical structure, with N=100, random slopes may cause convergence issues (Bates et al., 2015 recommend N>=200), document convergence decisions in results
 - Extract Time × Domain interaction coefficients for both models
 - Compare statistical significance patterns (p < 0.05 threshold)
-- Calculate agreement rate: % of coefficients with matching significance (both sig or both nonsig)
+- Calculate agreement rate: % of coefficients with matching significance (both sig or both nonsig), supplement with Cohen's κ > 0.60 (substantial agreement per Landis & Koch 1977) to account for chance agreement, report both raw agreement percentage and chance-corrected κ statistic
 - Compare effect size magnitudes (beta coefficients)
+
+**Step 3.5:** Validate LMM Assumptions for Both Models
+- Perform comprehensive assumption checks for BOTH IRT and CTT LMMs: (1) Residual normality via Q-Q plots + Shapiro-Wilk test (p>0.05 threshold), (2) Homoscedasticity via residual vs fitted plots (visual inspection), (3) Random effects normality via Q-Q plots, (4) Independence via ACF plots (Lag-1 ACF < 0.1 threshold for repeated measures), use validate_lmm_assumptions_comprehensive tool for automated checks, **remedial actions:** if either model violates assumptions, apply same remediation to both (e.g., robust standard errors, AR(1) correlation structure) to maintain parallelism, document all assumption test results and remedial actions in validation report
 
 **Step 4:** Model Fit Comparison
 - Compare AIC/BIC between IRT and CTT models
