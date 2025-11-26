@@ -1966,3 +1966,494 @@ def validate_correlation_test_d068(
         'missing_cols': missing_cols,
         'message': message
     }
+
+
+# =============================================================================
+# NUMERIC RANGE VALIDATION
+# =============================================================================
+
+def validate_numeric_range(
+    data: Union[np.ndarray, pd.Series],
+    min_val: float,
+    max_val: float,
+    column_name: str
+) -> Dict:
+    """
+    Validate that all numeric values fall within specified range [min_val, max_val].
+
+    Checks for:
+    - Values below minimum
+    - Values above maximum
+    - NaN values (reported as violations)
+    - Infinite values (reported as violations)
+
+    Parameters
+    ----------
+    data : np.ndarray or pd.Series
+        Numeric data to validate
+    min_val : float
+        Minimum allowed value (inclusive)
+    max_val : float
+        Maximum allowed value (inclusive)
+    column_name : str
+        Name of column/variable for error messages
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if all values within range
+        - message: str - Validation message
+        - out_of_range_count: int - Number of out-of-range values
+        - violations: list - List of out-of-range values (first 10 max)
+
+    Notes
+    -----
+    Used by RQ 5.9 for probability transformation validation.
+    Range is INCLUSIVE: min_val and max_val are considered valid.
+
+    Examples
+    --------
+    >>> theta = np.array([-2.5, -1.0, 0.0, 1.5, 2.8])
+    >>> result = validate_numeric_range(theta, min_val=-3.0, max_val=3.0, column_name='theta')
+    >>> assert result['valid'] is True
+
+    >>> theta_outlier = np.array([-3.5, 0.0, 1.0])  # -3.5 out of range
+    >>> result = validate_numeric_range(theta_outlier, min_val=-3.0, max_val=3.0, column_name='theta')
+    >>> assert result['valid'] is False
+    >>> assert result['out_of_range_count'] == 1
+    """
+    # Convert to numpy array if pandas Series
+    if isinstance(data, pd.Series):
+        data_array = data.values
+    else:
+        data_array = np.asarray(data)
+
+    # Handle empty data
+    if len(data_array) == 0:
+        return {
+            'valid': True,
+            'message': f'{column_name}: Empty data (no values to validate).',
+            'out_of_range_count': 0,
+            'violations': []
+        }
+
+    # Find violations: below min, above max, NaN, or infinite
+    violations_mask = (
+        (data_array < min_val) |
+        (data_array > max_val) |
+        np.isnan(data_array) |
+        np.isinf(data_array)
+    )
+
+    out_of_range_count = int(np.sum(violations_mask))
+
+    # Extract violation values (limit to first 10 for reporting)
+    violations = data_array[violations_mask].tolist()
+    if len(violations) > 10:
+        violations = violations[:10]  # Limit to first 10
+
+    # Determine validity
+    valid = out_of_range_count == 0
+
+    # Generate message
+    if valid:
+        message = (
+            f'{column_name}: All values within range '
+            f'[{min_val}, {max_val}] (n={len(data_array)}).'
+        )
+    else:
+        violation_types = []
+        if np.any(data_array < min_val):
+            violation_types.append('below minimum')
+        if np.any(data_array > max_val):
+            violation_types.append('above maximum')
+        if np.any(np.isnan(data_array)):
+            violation_types.append('NaN')
+        if np.any(np.isinf(data_array)):
+            violation_types.append('infinite')
+
+        message = (
+            f'{column_name}: {out_of_range_count} values out of range '
+            f'[{min_val}, {max_val}]. Violations: {", ".join(violation_types)}. '
+            f'First violations: {violations[:5]}'
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'out_of_range_count': out_of_range_count,
+        'violations': violations
+    }
+
+
+def validate_data_format(
+    df: pd.DataFrame,
+    required_cols: List[str]
+) -> Dict:
+    """
+    Validate DataFrame has required columns.
+
+    Checks that all required columns are present in the DataFrame.
+    Does NOT check for missing values within columns - only column presence.
+
+    Parameters
+    ----------
+    df : DataFrame
+        DataFrame to validate
+    required_cols : List[str]
+        List of required column names (case-sensitive)
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if all required columns present
+        - message: str - Validation message
+        - missing_cols: List[str] - List of missing columns
+
+    Notes
+    -----
+    Used by RQ 5.9 for fixed effects table validation.
+    Column names are CASE-SENSITIVE.
+    Column order does not matter.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'predictor': ['Age'], 'coef': [0.1], 'p_value': [0.05]})
+    >>> result = validate_data_format(df, required_cols=['predictor', 'coef', 'p_value'])
+    >>> assert result['valid'] is True
+
+    >>> df_incomplete = pd.DataFrame({'predictor': ['Age'], 'coef': [0.1]})
+    >>> result = validate_data_format(df_incomplete, required_cols=['predictor', 'coef', 'p_value'])
+    >>> assert result['valid'] is False
+    >>> assert 'p_value' in result['missing_cols']
+    """
+    # Find missing columns
+    missing_cols = [col for col in required_cols if col not in df.columns]
+
+    # Determine validity
+    valid = len(missing_cols) == 0
+
+    # Generate message
+    if valid:
+        message = (
+            f'All required columns present ({len(required_cols)} columns). '
+            f'DataFrame has {len(df)} rows.'
+        )
+    else:
+        message = (
+            f'Missing required columns: {missing_cols}. '
+            f'Present: {list(df.columns)}.'
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'missing_cols': missing_cols
+    }
+
+
+def validate_effect_sizes(
+    effect_sizes_df: pd.DataFrame,
+    f2_column: str = 'cohens_f2'
+) -> Dict:
+    """
+    Validate Cohen's f² effect sizes are within reasonable bounds.
+
+    Checks for:
+    - Negative values (invalid - f² must be non-negative)
+    - NaN or infinite values (invalid)
+    - Very large values (f² > 1.0, warns but valid)
+
+    Parameters
+    ----------
+    effect_sizes_df : DataFrame
+        DataFrame containing effect sizes
+    f2_column : str, default 'cohens_f2'
+        Name of column containing Cohen's f² values
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if all f² values non-negative and not NaN/inf
+        - message: str - Validation message
+        - warnings: List[str] - Warning messages (e.g., very large values)
+
+    Notes
+    -----
+    Used by RQ 5.9 for LMM effect size validation.
+
+    Cohen (1988) guidelines:
+    - f² = 0.02: Small effect
+    - f² = 0.15: Medium effect
+    - f² = 0.35: Large effect
+    - f² > 1.0: Very large (uncommon, may indicate issue)
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'cohens_f2': [0.02, 0.15, 0.35]})
+    >>> result = validate_effect_sizes(df)
+    >>> assert result['valid'] is True
+
+    >>> df_large = pd.DataFrame({'cohens_f2': [0.1, 1.5]})  # 1.5 triggers warning
+    >>> result = validate_effect_sizes(df_large)
+    >>> assert result['valid'] is True  # Still valid, just warned
+    >>> assert len(result['warnings']) > 0
+    """
+    f2_values = effect_sizes_df[f2_column]
+
+    # Handle empty DataFrame
+    if len(f2_values) == 0:
+        return {
+            'valid': True,
+            'message': 'Empty DataFrame (no effect sizes to validate).',
+            'warnings': []
+        }
+
+    warnings = []
+
+    # Check for invalid values
+    has_negative = np.any(f2_values < 0)
+    has_nan = np.any(np.isnan(f2_values))
+    has_inf = np.any(np.isinf(f2_values))
+
+    # Determine validity (negative, NaN, or inf makes it invalid)
+    valid = not (has_negative or has_nan or has_inf)
+
+    # Check for very large values (warning only, not invalid)
+    very_large_mask = f2_values > 1.0
+    n_very_large = int(np.sum(very_large_mask))
+
+    if n_very_large > 0:
+        max_f2 = float(f2_values.max())
+        warnings.append(
+            f'{n_very_large} effect sizes exceed f²>1.0 (very large). '
+            f'Maximum f²={max_f2:.3f}. Verify these are expected.'
+        )
+
+    # Generate message
+    if not valid:
+        issues = []
+        if has_negative:
+            issues.append('negative values')
+        if has_nan:
+            issues.append('NaN values')
+        if has_inf:
+            issues.append('infinite values')
+
+        message = (
+            f'Invalid effect sizes detected: {", ".join(issues)}. '
+            f'Cohen\'s f² must be non-negative and finite.'
+        )
+    else:
+        n_values = len(f2_values)
+        min_f2 = float(f2_values.min())
+        max_f2 = float(f2_values.max())
+        message = (
+            f'All effect sizes valid (n={n_values}, range=[{min_f2:.3f}, {max_f2:.3f}]).'
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'warnings': warnings
+    }
+
+
+def validate_probability_range(
+    probability_df: pd.DataFrame,
+    prob_columns: List[str]
+) -> Dict:
+    """
+    Validate probability values are in [0, 1] with no NaN/infinite values.
+
+    Checks all specified probability columns for:
+    - Values < 0 (invalid)
+    - Values > 1 (invalid)
+    - NaN values (invalid)
+    - Infinite values (invalid)
+
+    Parameters
+    ----------
+    probability_df : DataFrame
+        DataFrame containing probability columns
+    prob_columns : List[str]
+        List of column names containing probabilities to validate
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if all probabilities in [0, 1] and not NaN/inf
+        - message: str - Validation message
+        - violations: List[Dict] - List of violations with column and value info
+
+    Notes
+    -----
+    Used by RQ 5.9 for IRT theta→probability transformation validation.
+    Range is INCLUSIVE: 0 and 1 are valid probabilities.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'prob_T1': [0.0, 0.5, 1.0]})
+    >>> result = validate_probability_range(df, prob_columns=['prob_T1'])
+    >>> assert result['valid'] is True
+
+    >>> df_invalid = pd.DataFrame({'prob_T1': [0.5, 1.5]})  # 1.5 > 1
+    >>> result = validate_probability_range(df_invalid, prob_columns=['prob_T1'])
+    >>> assert result['valid'] is False
+    """
+    violations = []
+
+    # Check each probability column
+    for col in prob_columns:
+        if col not in probability_df.columns:
+            violations.append({
+                'column': col,
+                'issue': 'Column not found in DataFrame'
+            })
+            continue
+
+        prob_values = probability_df[col]
+
+        # Skip empty columns
+        if len(prob_values) == 0:
+            continue
+
+        # Find violations
+        below_zero_mask = prob_values < 0
+        above_one_mask = prob_values > 1
+        nan_mask = np.isnan(prob_values)
+        inf_mask = np.isinf(prob_values)
+
+        # Collect violations
+        if np.any(below_zero_mask):
+            violations.append({
+                'column': col,
+                'issue': 'Values below 0',
+                'count': int(np.sum(below_zero_mask)),
+                'example': float(prob_values[below_zero_mask].iloc[0])
+            })
+
+        if np.any(above_one_mask):
+            violations.append({
+                'column': col,
+                'issue': 'Values above 1',
+                'count': int(np.sum(above_one_mask)),
+                'example': float(prob_values[above_one_mask].iloc[0])
+            })
+
+        if np.any(nan_mask):
+            violations.append({
+                'column': col,
+                'issue': 'NaN values',
+                'count': int(np.sum(nan_mask))
+            })
+
+        if np.any(inf_mask):
+            violations.append({
+                'column': col,
+                'issue': 'Infinite values',
+                'count': int(np.sum(inf_mask))
+            })
+
+    # Determine validity
+    valid = len(violations) == 0
+
+    # Generate message
+    if valid:
+        total_values = sum(len(probability_df[col]) for col in prob_columns if col in probability_df.columns)
+        message = (
+            f'All probability values valid (n={len(prob_columns)} columns, '
+            f'{total_values} total values in [0, 1]).'
+        )
+    else:
+        n_violations = len(violations)
+        violation_summary = ', '.join(
+            f"{v['column']}: {v['issue']}" for v in violations[:3]
+        )
+        message = (
+            f'{n_violations} violation(s) found. '
+            f'Probabilities must be in [0, 1]. Issues: {violation_summary}'
+            + (' ...' if n_violations > 3 else '')
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'violations': violations
+    }
+
+
+# =============================================================================
+# LMM CONVERGENCE VALIDATION
+# =============================================================================
+
+def validate_model_convergence(
+    lmm_result: Any
+) -> Dict:
+    """
+    Validate that statsmodels LMM model converged successfully.
+
+    Checks the model.converged attribute to ensure optimization succeeded.
+
+    Parameters
+    ----------
+    lmm_result : statsmodels.regression.mixed_linear_model.MixedLMResults
+        Fitted LMM results object
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if model converged
+        - message: str - Validation message
+        - converged: bool - Value of model.converged attribute
+
+    Notes
+    -----
+    Used by RQ 5.13 for LMM convergence validation.
+
+    Statsmodels sets converged=True when optimization algorithm successfully
+    reaches a solution. Convergence failures can indicate:
+    - Collinearity in predictors
+    - Insufficient data
+    - Model specification issues
+    - Numerical instability
+
+    Examples
+    --------
+    >>> # Assuming fitted_model is a MixedLMResults object
+    >>> result = validate_model_convergence(fitted_model)
+    >>> if result['valid']:
+    ...     print("Model converged successfully")
+    """
+    # Check if converged attribute exists
+    if not hasattr(lmm_result, 'converged'):
+        return {
+            'valid': False,
+            'message': 'Model object missing "converged" attribute. Cannot validate convergence.',
+            'converged': False
+        }
+
+    converged = lmm_result.converged
+
+    # Determine validity
+    valid = converged is True
+
+    # Generate message
+    if valid:
+        message = 'Model converged successfully.'
+    else:
+        message = (
+            'Model did not converge. '
+            'Check for collinearity, insufficient data, or model specification issues.'
+        )
+
+    return {
+        'valid': valid,
+        'message': message,
+        'converged': converged
+    }

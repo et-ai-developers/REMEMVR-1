@@ -67,6 +67,11 @@
 | `validate_hypothesis_test_dual_pvalues` | D068: Validate hypothesis tests have required terms AND dual p-values (uncorrected + correction) |
 | `validate_contrasts_dual_pvalues` | D068: Validate post-hoc contrasts have required comparisons AND dual p-values (uncorrected + tukey/bonferroni/holm) |
 | `validate_correlation_test_d068` | D068: Validate correlation tests have dual p-values (uncorrected + bonferroni/holm/fdr) |
+| `validate_numeric_range` | Validate numeric values within range [min, max], detect NaN/inf violations |
+| `validate_data_format` | Validate DataFrame has all required columns (case-sensitive) |
+| `validate_effect_sizes` | Validate Cohen's f² non-negative, warn if >1.0 (very large) |
+| `validate_probability_range` | Validate probabilities in [0,1] across multiple columns, no NaN/inf |
+| `validate_model_convergence` | Validate statsmodels LMM converged successfully |
 | `run_lmm_sensitivity_analyses` | Compare 7 alternative models (piecewise vs continuous, knots, weighted) |
 
 ---

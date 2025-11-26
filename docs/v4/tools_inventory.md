@@ -319,4 +319,64 @@
 
 ---
 
+### validate_numeric_range
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate numeric values fall within specified range [min_val, max_val]. Checks for values below minimum, above maximum, NaN values, and infinite values. Returns violations list for debugging. Range is INCLUSIVE. |
+| **Inputs** | `data: np.ndarray or pd.Series` (numeric data), `min_val: float` (minimum allowed, inclusive), `max_val: float` (maximum allowed, inclusive), `column_name: str` (for error messages) |
+| **Outputs** | `Dict[valid: bool, message: str, out_of_range_count: int, violations: list]` |
+| **Reference** | RQ 5.9 probability transformation validation, tools_todo.yaml lines 202-217 |
+| **Notes** | Used for theta score range validation before probability transformation. Violations list limited to first 10 values for reporting. Handles empty data gracefully (returns valid). Example: validate theta in [-3, 3] before GRM probability transformation. 12/12 tests GREEN. ~120 lines implementation. 10 min development time. |
+
+---
+
+### validate_data_format
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate DataFrame has all required columns present. Does NOT check for missing values within columns - only column presence. Case-sensitive column name matching. Column order irrelevant. |
+| **Inputs** | `df: DataFrame` (DataFrame to validate), `required_cols: List[str]` (list of required column names, case-sensitive) |
+| **Outputs** | `Dict[valid: bool, message: str, missing_cols: List[str]]` |
+| **Reference** | RQ 5.9 fixed effects table validation, tools_todo.yaml lines 324-339 |
+| **Notes** | Simple column presence check. Reports both missing columns and present columns in message. Empty DataFrame returns invalid if required_cols specified. Empty required_cols list returns valid (trivial case). Used for validating LMM fixed effects table format. 11/11 tests GREEN. ~65 lines implementation. 10 min development time. |
+
+---
+
+### validate_effect_sizes
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate Cohen's f² effect sizes are within reasonable bounds. Checks for negative values (invalid), NaN/infinite values (invalid), and very large values f²>1.0 (warning but valid). Follows Cohen (1988) guidelines. |
+| **Inputs** | `effect_sizes_df: DataFrame` (DataFrame containing effect sizes), `f2_column: str = 'cohens_f2'` (column name for f² values) |
+| **Outputs** | `Dict[valid: bool, message: str, warnings: List[str]]` |
+| **Reference** | Cohen (1988) Statistical Power Analysis, RQ 5.9 effect size validation, tools_todo.yaml lines 436-452 |
+| **Notes** | Cohen (1988) guidelines: f²=0.02 (small), f²=0.15 (medium), f²=0.35 (large), f²>1.0 (very large, uncommon). Very large values trigger warnings but don't invalidate. Reports min/max range in success message. Handles empty DataFrames (returns valid). 13/13 tests GREEN. ~105 lines implementation. 10 min development time. |
+
+---
+
+### validate_probability_range
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate probability values are in [0, 1] with no NaN/infinite values. Checks multiple probability columns simultaneously. Returns detailed violation information per column. Range is INCLUSIVE (0 and 1 are valid). |
+| **Inputs** | `probability_df: DataFrame` (DataFrame with probability columns), `prob_columns: List[str]` (list of column names to validate) |
+| **Outputs** | `Dict[valid: bool, message: str, violations: List[Dict]]` |
+| **Reference** | RQ 5.9 IRT theta→probability transformation validation, tools_todo.yaml lines 235-248 |
+| **Notes** | Used for validating GRM probability transformation output. Violations list contains dicts with column, issue, count, and example fields. Checks each column for: values <0, values >1, NaN, infinite. Reports total columns and total values in success message. Handles empty DataFrames gracefully. 11/11 tests GREEN. ~125 lines implementation. 10 min development time. |
+
+---
+
+### validate_model_convergence
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate statsmodels LMM model converged successfully. Checks model.converged attribute to ensure optimization algorithm reached a solution. Handles missing converged attribute gracefully. |
+| **Inputs** | `lmm_result: statsmodels MixedLMResults` (fitted LMM results object) |
+| **Outputs** | `Dict[valid: bool, message: str, converged: bool]` |
+| **Reference** | RQ 5.13 LMM convergence validation, tools_todo.yaml lines 278-291 |
+| **Notes** | Statsmodels sets converged=True when optimization succeeds. Convergence failures indicate: collinearity, insufficient data, model specification issues, or numerical instability. Returns False if converged attribute missing. Simple boolean check - fastest validator. 6/6 tests GREEN. ~67 lines implementation. 10 min development time. |
+
+---
+
 **End of Tools Inventory**

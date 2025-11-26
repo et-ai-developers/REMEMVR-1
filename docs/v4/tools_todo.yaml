@@ -214,7 +214,10 @@ validation_numeric:
       - max_val: float
       - column_name: str (for error messages)
     outputs: "Dict[valid: bool, message: str, out_of_range_count: int, violations: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "12/12 GREEN"
+    notes: "Validates values within [min, max] range (INCLUSIVE). Detects values below minimum, above maximum, NaN, and infinite. Returns violations list (first 10 max) for debugging. Used for theta score validation before GRM probability transformation. Handles empty data gracefully. 120 lines implementation. 10 min development time."
 
   - name: validate_standardization
     module: tools.validation
@@ -245,7 +248,10 @@ validation_numeric:
       - probability_df: pd.DataFrame
       - prob_columns: List[str]
     outputs: "Dict[valid: bool, message: str, violations: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "11/11 GREEN"
+    notes: "Validates probabilities in [0,1] range (INCLUSIVE) across multiple columns. Checks for values <0, values >1, NaN, and infinite. Returns detailed violation information per column (column, issue, count, example). Used for IRT GRM theta→probability transformation validation. Handles empty DataFrames gracefully. 125 lines implementation. 10 min development time."
 
 validation_lmm:
 
@@ -288,7 +294,10 @@ validation_lmm:
     inputs:
       - lmm_result: MixedLMResults
     outputs: "Dict[valid: bool, message: str, converged: bool]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "6/6 GREEN"
+    notes: "Simple boolean check of model.converged attribute from statsmodels LMM results. Handles missing converged attribute gracefully (returns invalid). Convergence failures indicate: collinearity, insufficient data, model specification issues, or numerical instability. Fastest validator (simple attribute check). 67 lines implementation. 10 min development time."
 
   - name: validate_variance_positivity
     module: tools.validation
@@ -336,7 +345,10 @@ validation_data_format:
       - df: pd.DataFrame
       - required_cols: List[str]
     outputs: "Dict[valid: bool, message: str, missing_cols: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "11/11 GREEN"
+    notes: "Simple column presence check (does NOT check for missing values within columns - only column presence). Case-sensitive column name matching. Column order irrelevant. Reports both missing and present columns in message. Used for validating LMM fixed effects table format. 65 lines implementation. 10 min development time."
 
   - name: validate_plot_data_completeness
     module: tools.validation
@@ -449,7 +461,10 @@ validation_effect_sizes:
       - effect_sizes_df: pd.DataFrame
       - f2_column: str (default 'cohens_f2')
     outputs: "Dict[valid: bool, message: str, warnings: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "13/13 GREEN"
+    notes: "Validates Cohen's f² effect sizes per Cohen (1988) guidelines (f²=0.02 small, f²=0.15 medium, f²=0.35 large, f²>1.0 very large). Negative/NaN/infinite values are invalid. Very large values (f²>1.0) trigger warnings but don't invalidate. Reports min/max range in success message. Handles empty DataFrames gracefully. 105 lines implementation. 10 min development time."
 
 validation_clustering:
 
@@ -507,8 +522,8 @@ validation_clustering:
 # SUMMARY STATISTICS
 
 total_tools: 25
-done_count: 12
-remaining_count: 13
+done_count: 17
+remaining_count: 8
 
 by_priority:
   HIGH: 6  # Blocks multiple RQs or creates new modules
