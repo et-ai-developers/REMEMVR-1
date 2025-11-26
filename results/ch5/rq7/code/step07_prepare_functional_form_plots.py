@@ -181,20 +181,8 @@ if __name__ == "__main__":
         lmm_input = pd.read_csv(observed_path, encoding='utf-8')
         log(f"[LOADED] {observed_path.name} ({len(lmm_input)} rows)")
 
-        log("[LOAD] Loading fitted model objects...")
-        pickle_path = RQ_DIR / "data" / "step05_model_fits.pkl"
-
-        if not pickle_path.exists():
-            raise FileNotFoundError(f"Model fits pickle missing: {pickle_path}\n"
-                                     "Run step05_fit_5_candidate_lmms.py first")
-
-        with open(pickle_path, 'rb') as f:
-            model_fits = pickle.load(f)
-
-        log(f"[LOADED] {pickle_path.name} ({len(model_fits)} models)")
-
         log("[LOAD] Loading best model identification...")
-        aic_path = RQ_DIR / "results" / "step06_aic_comparison.csv"
+        aic_path = RQ_DIR / "results" / "step05_model_comparison.csv"
 
         if not aic_path.exists():
             raise FileNotFoundError(f"AIC comparison missing: {aic_path}\n"
@@ -204,6 +192,20 @@ if __name__ == "__main__":
         best_model_name = aic_comparison.iloc[0]['model_name']
         log(f"[LOADED] {aic_path.name}")
         log(f"  Best model: {best_model_name}")
+
+        # Load all 5 model pickle files for predictions
+        log("[LOAD] Loading all 5 fitted models for predictions...")
+        model_fits = {}
+        for model_name in ['Linear', 'Quadratic', 'Logarithmic', 'LinLog', 'QuadLog']:
+            pickle_path = RQ_DIR / "data" / f"lmm_{model_name}.pkl"
+            if pickle_path.exists():
+                with open(pickle_path, 'rb') as f:
+                    model_fits[model_name] = pickle.load(f)
+                log(f"  Loaded {model_name}")
+            else:
+                log(f"  WARNING: {model_name} pickle not found")
+
+        log(f"[LOADED] {len(model_fits)} model objects")
 
         # =========================================================================
         # STEP 2: Compute Observed Means per Test Session

@@ -1,0 +1,61 @@
+[START] Step 7: Prepare Functional Form Plot Data
+[LOAD] Loading observed theta scores...
+[LOADED] step04_lmm_input.csv (400 rows)
+[LOAD] Loading fitted model objects...
+[ERROR] Model fits pickle missing: /home/etai/projects/REMEMVR/results/ch5/rq7/data/step05_model_fits.pkl
+Run step05_fit_5_candidate_lmms.py first
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step07_prepare_functional_form_plots.py", line 188, in <module>
+    raise FileNotFoundError(f"Model fits pickle missing: {pickle_path}\n"
+FileNotFoundError: Model fits pickle missing: /home/etai/projects/REMEMVR/results/ch5/rq7/data/step05_model_fits.pkl
+Run step05_fit_5_candidate_lmms.py first
+[START] Step 7: Prepare Functional Form Plot Data
+[LOAD] Loading observed theta scores...
+[LOADED] step04_lmm_input.csv (400 rows)
+[LOAD] Loading best model identification...
+[LOADED] step05_model_comparison.csv
+  Best model: Log
+[COMPUTE] Computing observed means per test session...
+  Computed means for 4 test sessions
+
+Observed Means (Theta Scale):
+ test     Days  observed_theta  CI_lower_theta  CI_upper_theta
+    1 0.041667        0.660651        0.487984        0.833319
+    2 1.198738        0.105340       -0.060492        0.271172
+    3 3.277837       -0.241440       -0.400322       -0.082558
+    4 6.307300       -0.499833       -0.661378       -0.338288
+
+[COMPUTE] Generating prediction grid...
+  Grid: 50 points from 0.0 to 7.0 days
+[PREDICT] Generating predictions for all 5 models...
+[ERROR] name 'model_fits' is not defined
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step07_prepare_functional_form_plots.py", line 252, in <module>
+    for model_name, model_result in model_fits.items():
+                                    ^^^^^^^^^^
+NameError: name 'model_fits' is not defined
+[START] Step 7: Prepare Functional Form Plot Data
+[LOAD] Loading observed theta scores...
+[LOADED] step04_lmm_input.csv (400 rows)
+[LOAD] Loading best model identification...
+[LOADED] step05_model_comparison.csv
+  Best model: Log
+[LOAD] Loading all 5 fitted models for predictions...
+[ERROR] 'NoneType' object has no attribute 'f_locals'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step07_prepare_functional_form_plots.py", line 203, in <module>
+    model_fits[model_name] = pickle.load(f)
+                             ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/data.py", line 112, in __setstate__
+    _, design = dmatrices(d['formula'], data, eval_env=depth,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/highlevel.py", line 316, in dmatrices
+    eval_env = EvalEnvironment.capture(eval_env, reference=1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/eval.py", line 242, in capture
+    [frame.f_locals, frame.f_globals],
+     ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'f_locals'

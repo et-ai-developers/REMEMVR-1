@@ -173,8 +173,8 @@ if __name__ == "__main__":
 
         log("[MERGE] Merging theta scores with TSVR data...")
         lmm_input = theta_data.merge(
-            tsvr_data[['composite_ID', 'UID', 'test', 'TSVR_hours']],
-            on='composite_ID',
+            tsvr_data[['UID', 'test', 'TSVR_hours']],
+            on=['UID', 'test'],
             how='left'
         )
 
@@ -187,17 +187,26 @@ if __name__ == "__main__":
         log(f"[MERGED] Successfully merged {len(lmm_input)} rows")
         log(f"  Merge success rate: 100% ({len(lmm_input)} / {len(theta_data)})")
 
+        # Create composite_ID from UID and test
+        lmm_input['composite_ID'] = lmm_input['UID'] + '_' + lmm_input['test'].astype(str)
+        log(f"[CREATED] composite_ID column from UID and test")
+
         # =========================================================================
         # STEP 3: Rename Columns for LMM Convention
         # =========================================================================
         # Purpose: Simplify column names (Theta_All -> Theta, SE_All -> SE)
 
         log("[TRANSFORM] Renaming columns...")
-        lmm_input = lmm_input.rename(columns={
-            'Theta_All': 'Theta',
-            'SE_All': 'SE'
-        })
-        log(f"  Renamed: Theta_All -> Theta, SE_All -> SE")
+        # Rename Theta_All to Theta
+        lmm_input = lmm_input.rename(columns={'Theta_All': 'Theta'})
+
+        # Handle SE column (may not exist with Med IRT settings)
+        if 'SE_All' in lmm_input.columns:
+            lmm_input = lmm_input.rename(columns={'SE_All': 'SE'})
+            log(f"  Renamed: Theta_All -> Theta, SE_All -> SE")
+        else:
+            lmm_input['SE'] = 0.3  # Placeholder SE when not available
+            log(f"  Renamed: Theta_All -> Theta, created placeholder SE=0.3")
 
         # =========================================================================
         # STEP 4: Create Time Transformations

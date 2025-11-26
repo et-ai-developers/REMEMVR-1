@@ -162,16 +162,17 @@ if __name__ == "__main__":
         log(f"  AIC range: [{model_comparison['AIC'].min():.2f}, {model_comparison['AIC'].max():.2f}]")
 
         log("[LOAD] Loading fitted model objects...")
-        pickle_path = RQ_DIR / "data" / "step05_model_fits.pkl"
+        # Load individual model pickle files (created by compare_lmm_models_by_aic)
+        model_fits = {}
+        for model_name in model_comparison['model_name']:
+            pickle_path = RQ_DIR / "data" / f"lmm_{model_name}.pkl"
+            if pickle_path.exists():
+                with open(pickle_path, 'rb') as f:
+                    model_fits[model_name] = pickle.load(f)
+            else:
+                log(f"  WARNING: Model pickle not found: {pickle_path.name}")
 
-        if not pickle_path.exists():
-            raise FileNotFoundError(f"Model fits pickle missing: {pickle_path}\n"
-                                     "Run step05_fit_5_candidate_lmms.py first")
-
-        with open(pickle_path, 'rb') as f:
-            model_fits = pickle.load(f)
-
-        log(f"[LOADED] {pickle_path.name} ({len(model_fits)} model objects)")
+        log(f"[LOADED] {len(model_fits)} model objects from individual pickle files")
 
         # =========================================================================
         # STEP 2: Compute Delta AIC

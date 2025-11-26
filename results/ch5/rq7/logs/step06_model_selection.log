@@ -1,0 +1,22 @@
+[START] Step 6: AIC Model Selection
+[LOAD] Loading model comparison table...
+[LOADED] step05_model_comparison.csv (5 models)
+  Columns: ['model_name', 'AIC', 'delta_AIC', 'AIC_weight']
+  AIC range: [873.71, 905.54]
+[LOAD] Loading fitted model objects...
+[ERROR] 'NoneType' object has no attribute 'f_locals'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq7/code/step06_aic_model_selection.py", line 171, in <module>
+    model_fits[model_name] = pickle.load(f)
+                             ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/data.py", line 112, in __setstate__
+    _, design = dmatrices(d['formula'], data, eval_env=depth,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/highlevel.py", line 316, in dmatrices
+    eval_env = EvalEnvironment.capture(eval_env, reference=1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/eval.py", line 242, in capture
+    [frame.f_locals, frame.f_globals],
+     ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'f_locals'

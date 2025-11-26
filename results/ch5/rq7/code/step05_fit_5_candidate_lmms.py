@@ -161,6 +161,22 @@ if __name__ == "__main__":
         log(f"  Days range: [{lmm_input['Days'].min():.2f}, {lmm_input['Days'].max():.2f}]")
 
         # =========================================================================
+        # STEP 1.5: Transform Column Names for Tool Compatibility
+        # =========================================================================
+        # The compare_lmm_models_by_aic tool expects specific column names:
+        # - 'Ability' as outcome variable (instead of 'Theta')
+        # - 'Days_sq' for quadratic term (instead of 'Days_squared')
+        # - 'log_Days' for logarithmic term (instead of 'log_Days_plus1')
+
+        log("[TRANSFORM] Renaming columns for tool compatibility...")
+        lmm_input = lmm_input.rename(columns={
+            'Theta': 'Ability',
+            'Days_squared': 'Days_sq',
+            'log_Days_plus1': 'log_Days'
+        })
+        log("  Renamed: Theta -> Ability, Days_squared -> Days_sq, log_Days_plus1 -> log_Days")
+
+        # =========================================================================
         # STEP 2: Fit 5 Candidate Models
         # =========================================================================
         # Tool: compare_lmm_models_by_aic
