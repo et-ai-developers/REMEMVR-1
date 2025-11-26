@@ -26,12 +26,31 @@ rq_stats:
   context_dump: "9.7/10 APPROVED. Category 1: 2.8/3 (appropriate, sample size marginal for 3-way interaction). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (comprehensive). Category 4: 2.0/2 (thorough validation). Category 5: 0.9/1 (9 concerns, 5 MODERATE, 4 MINOR)."
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    6 steps planned (Step 0: get data from RQ 5.1 + Steps 1-5: LMM analysis)
+    Analysis: LMM-only with 3-way Age x Domain x Time interaction
+    Dependencies: RQ 5.1 (theta scores, TSVR mapping), dfData.csv (age)
+    Key methods: Grand-mean centering Age, TSVR time variable (D070), Bonferroni correction (D068), assumption validation, random effects model selection
+    Outputs: LMM model, 3-way interaction terms, domain-specific age effects, post-hoc contrasts, age effects plot data
 
 rq_tools:
-  status: pending
+  status: fail
   context_dump: |
+    FAIL: Missing 6 custom tools + 7 naming conventions
+    Required tools NOT in tools_inventory.md:
+    - LMM assumption validation (7 diagnostics per 1_concept.md)
+    - LRT random effects model selection (3 models)
+    - Hypothesis test validation (D068 dual p-values)
+    - Contrast validation (D068 Tukey correction)
+    - Age effects plot data aggregation (tertiles)
+    - Plot data validation (domain/tertile completeness)
+    Required naming NOT in names.md:
+    - Age_c (centered age variable)
+    - age_tertile (Young/Middle/Older)
+    - Step naming for assumption validation/model selection
+    - File naming for age effects/model selection outputs
+    Action: User + Claude migrate tools from v3.0 with TDD OR simplify RQ 5.10 plan
 
 rq_analysis:
   status: pending

@@ -1,22 +1,28 @@
 module	component	status	description	inputs	outputs
-tools.analysis_irt	calibrate_grm	YELLOW	Wrapper for calibrate_irt() backwards compatibility	df_long, groups, config	Tuple[DataFrame, DataFrame]
-tools.analysis_irt	calibrate_irt	YELLOW	Full IRT pipeline: prepare→configure→fit→extract	df_long, groups, config	Tuple[DataFrame, DataFrame]
-tools.analysis_irt	configure_irt_model	YELLOW	Build IWAVE GRM model	n_items, n_factors, n_cats, Q_matrix, correlated_factors, device, seed	IWAVE model
-tools.analysis_irt	extract_parameters_from_irt	YELLOW	Extract item parameters (a, b)	model, item_list, factor_names, n_cats	DataFrame
-tools.analysis_irt	extract_theta_from_irt	YELLOW	Extract theta scores	model, response_matrix, missing_mask, composite_ids, factor_names, scoring_batch_size, mc_samples, iw_samples, invert_scale	DataFrame
-tools.analysis_irt	filter_items_by_quality	YELLOW	D039: Purify items (a>=0.4, |b|<=3.0)	df_items, a_threshold, b_threshold	Tuple[DataFrame, DataFrame]
-tools.analysis_irt	fit_irt_grm	YELLOW	Fit IWAVE via variational inference	model, response_matrix, missing_mask, batch_size, iw_samples, mc_samples	IWAVE model
-tools.analysis_irt	prepare_irt_input_from_long	YELLOW	Convert long→IRT tensors	df_long, groups	Tuple[Tensor, Tensor, Tensor, List, List]
-tools.analysis_lmm	compare_lmm_models_by_aic	YELLOW	Fit 5 models, compare AIC	data, n_factors, reference_group, groups, save_dir	Dict
-tools.analysis_lmm	compute_contrasts_pairwise	YELLOW	D068: Post-hoc contrasts (dual p-values)	lmm_result, comparisons, family_alpha	DataFrame
-tools.analysis_lmm	compute_effect_sizes_cohens	YELLOW	Cohen's f² effect sizes	lmm_result, include_interactions	DataFrame
-tools.analysis_lmm	configure_candidate_models	YELLOW	Generate 5 LMM formulas	n_factors, reference_group	Dict[str, Dict]
-tools.analysis_lmm	extract_fixed_effects_from_lmm	YELLOW	Extract fixed effects table	result	DataFrame
-tools.analysis_lmm	extract_random_effects_from_lmm	YELLOW	Extract random effects + ICC	result	Dict
+tools.analysis_irt	calibrate_grm	GREEN	RQ 5.1-5.7: Wrapper for calibrate_irt() backwards compatibility	df_long, groups, config	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	calibrate_irt	GREEN	RQ 5.1-5.7: Full IRT pipeline (prepare→configure→fit→extract)	df_long, groups, config	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	configure_irt_model	GREEN	RQ 5.1-5.7: Build IWAVE GRM model	n_items, n_factors, n_cats, Q_matrix, correlated_factors, device, seed	IWAVE model
+tools.analysis_irt	extract_parameters_from_irt	GREEN	RQ 5.1-5.7: Extract item parameters (a, b)	model, item_list, factor_names, n_cats	DataFrame
+tools.analysis_irt	extract_theta_from_irt	GREEN	RQ 5.1-5.7: Extract theta scores (validated Med settings: mc=100, iw=100)	model, response_matrix, missing_mask, composite_ids, factor_names, scoring_batch_size, mc_samples, iw_samples, invert_scale	DataFrame
+tools.analysis_irt	filter_items_by_quality	GREEN	RQ 5.1-5.7: D039 2-pass purification (a>=0.4, |b|<=3.0, 40-66% retention)	df_items, a_threshold, b_threshold	Tuple[DataFrame, DataFrame]
+tools.analysis_irt	fit_irt_grm	GREEN	RQ 5.1-5.7: Fit IWAVE via variational inference	model, response_matrix, missing_mask, batch_size, iw_samples, mc_samples	IWAVE model
+tools.analysis_irt	prepare_irt_input_from_long	GREEN	RQ 5.1-5.7: Convert long→IRT tensors	df_long, groups	Tuple[Tensor, Tensor, Tensor, List, List]
+tools.analysis_lmm	compare_lmm_models_by_aic	GREEN	RQ 5.1-5.7: Fit 5 models, compare AIC weights	data, n_factors, reference_group, groups, save_dir	Dict
+tools.analysis_lmm	compute_contrasts_pairwise	GREEN	RQ 5.1-5.7: D068 post-hoc contrasts (dual p-values: uncorrected + Bonferroni)	lmm_result, comparisons, family_alpha	DataFrame
+tools.analysis_lmm	compute_effect_sizes_cohens	GREEN	RQ 5.1-5.7: Cohen's f² effect sizes	lmm_result, include_interactions	DataFrame
+tools.analysis_lmm	configure_candidate_models	GREEN	RQ 5.1-5.7: Generate 5 LMM formulas (Linear, Log, Quadratic, Cubic, Compound)	n_factors, reference_group	Dict[str, Dict]
+tools.analysis_lmm	extract_fixed_effects_from_lmm	GREEN	RQ 5.1-5.7: Extract fixed effects table	result	DataFrame
+tools.analysis_lmm	extract_random_effects_from_lmm	GREEN	RQ 5.1-5.7: Extract variance components + ICC	result	Dict
 tools.analysis_lmm	fit_lmm_trajectory	RED	Fit single LMM	data, formula, groups, re_formula, reml	MixedLMResults
-tools.analysis_lmm	fit_lmm_trajectory_tsvr	YELLOW	D070: Fit LMM with TSVR time	theta_scores, tsvr_data, formula, groups, re_formula, reml	MixedLMResults
-tools.analysis_lmm	prepare_lmm_input_from_theta	YELLOW	Convert theta wide→long + time vars	theta_scores, factors	DataFrame
+tools.analysis_lmm	fit_lmm_trajectory_tsvr	GREEN	RQ 5.1-5.7: D070 fit LMM with TSVR (actual hours not nominal days)	theta_scores, tsvr_data, formula, groups, re_formula, reml	MixedLMResults
+tools.analysis_lmm	prepare_lmm_input_from_theta	GREEN	RQ 5.1-5.7: Convert theta wide→long + time vars (DEPRECATED: use fit_lmm_trajectory_tsvr)	theta_scores, factors	DataFrame
 tools.analysis_lmm	run_lmm_analysis	RED	Complete LMM pipeline	theta_scores, output_dir, n_factors, reference_group, save_models	Dict
+tools.analysis_lmm	select_lmm_random_structure_via_lrt	ORANGE	RQ 5.10: Fit 3 random structures, compare via LRT	data, formula, groups, reml	Dict
+tools.analysis_lmm	prepare_age_effects_plot_data	ORANGE	RQ 5.10: Create age tertiles, aggregate means, generate predictions	lmm_input, lmm_model, age_effects, output_path	DataFrame
+tools.analysis_lmm	compute_icc_from_variance_components	ORANGE	RQ 5.13: Compute 3 ICC estimates (intercept, slope_simple, slope_conditional)	variance_components_df, method, time_point	DataFrame
+tools.analysis_lmm	test_intercept_slope_correlation_d068	ORANGE	RQ 5.13: Pearson correlation + D068 dual p-values	random_effects_df, family_alpha, n_tests	Dict
+tools.analysis_ctt	compute_cronbachs_alpha	ORANGE	RQ 5.12: Compute Cronbach's alpha with bootstrap CIs	data, items, n_bootstrap	Dict
+tools.analysis_ctt	compare_correlations_dependent	ORANGE	RQ 5.12: Steiger's z-test for dependent correlations	r12, r13, r23, n	Dict
 tools.config	expand_env_vars_in_path	RED	NOT IMPLEMENTED	path_str	str
 tools.config	load_config_from_file	RED	Load YAML config	config_name	Dict
 tools.config	load_config_from_yaml	RED	Get config by dot path	config_name, key_path	Any
@@ -29,14 +35,14 @@ tools.config	reset_config_cache	RED	Reset cache (testing)	None	None
 tools.config	resolve_path_from_config	RED	Get path with substitution	key_path, **kwargs	Path
 tools.config	validate_irt_params	RED	NOT IMPLEMENTED	config	None
 tools.config	validate_paths_exist	RED	NOT IMPLEMENTED	config	None
-tools.plotting	convert_theta_to_probability	YELLOW	Theta→probability via 2PL	theta, discrimination, difficulty	ndarray
+tools.plotting	convert_theta_to_probability	GREEN	RQ 5.1-5.7: D069 theta→probability via 2PL (dual-scale plots)	theta, discrimination, difficulty	ndarray
 tools.plotting	plot_diagnostics	RED	2x2 diagnostic grid	df, fitted_col, residuals_col, group_col, figsize, output_path	Tuple[Figure, ndarray]
 tools.plotting	plot_histogram_by_group	RED	Grouped histogram	df, value_col, group_col, xlabel, ylabel, title, bins, colors, figsize, output_path, vline, vline_label	Tuple[Figure, Axes]
 tools.plotting	plot_trajectory	RED	Trajectory with fitted curves	time_pred, fitted_curves, observed_data, time_col, value_col, group_col, xlabel, ylabel, title, colors, figsize, output_path, show_errorbar, annotation	Tuple[Figure, Axes]
 tools.plotting	plot_trajectory_probability	RED	D069: Trajectory on probability scale	df_thetas, item_parameters_path, time_var, factors, title, **kwargs	Tuple[Figure, Axes, DataFrame]
 tools.plotting	save_plot_with_data	RED	Save PNG + CSV	fig, output_path, data, dpi	None
 tools.plotting	set_plot_style_defaults	RED	Apply matplotlib styling	config_path	None
-tools.validation	check_file_exists	RED	Validate file exists	file_path	Dict
+tools.validation	check_file_exists	ORANGE	RQ 5.8-15: Validate file exists (needed by 7 RQs)	file_path	Dict
 tools.validation	check_missing_data	RED	Check missing data	df	Dict
 tools.validation	create_lineage_metadata	RED	Create lineage metadata	source_file, output_file, operation, parameters, description	Dict
 tools.validation	generate_validation_report	RED	Generate validation report	validation_checks, report_title	Dict
@@ -44,9 +50,26 @@ tools.validation	load_lineage_from_file	RED	Load lineage JSON	lineage_file	Dict
 tools.validation	save_lineage_to_file	RED	Save lineage JSON	metadata, lineage_file	None
 tools.validation	save_validation_report	RED	Save validation JSON	report, report_file	None
 tools.validation	validate_data_columns	RED	Validate required columns	df, required_columns	Dict
-tools.validation	validate_irt_convergence	YELLOW	Validate IRT convergence	results	Dict
-tools.validation	validate_irt_parameters	YELLOW	Validate item quality	df_items, a_min, b_max, a_col, b_col	Dict
+tools.validation	validate_irt_convergence	GREEN	RQ 5.1-5.7: Validate IRT convergence status	results	Dict
+tools.validation	validate_irt_parameters	GREEN	RQ 5.1-5.7: Validate item quality (a>=0.4, |b|<=3.0)	df_items, a_min, b_max, a_col, b_col	Dict
 tools.validation	validate_lineage	RED	Validate data source	lineage_file, expected_source, expected_pass	Dict
-tools.validation	validate_lmm_convergence	YELLOW	Validate LMM convergence	lmm_result	Dict
-tools.validation	validate_lmm_residuals	YELLOW	Validate residuals normality	residuals, alpha	Dict
-tools.validation	validate_numeric_range	RED	Validate numeric range	data, min_val, max_val, column_name	Dict
+tools.validation	validate_lmm_convergence	GREEN	RQ 5.1-5.7: Validate LMM convergence status	lmm_result	Dict
+tools.validation	validate_lmm_residuals	GREEN	RQ 5.1-5.7: Validate residuals normality (Shapiro-Wilk, Q-Q plot)	residuals, alpha	Dict
+tools.validation	validate_numeric_range	ORANGE	RQ 5.9: Validate numeric range for probability transformation	data, min_val, max_val, column_name	Dict
+tools.validation	validate_lmm_assumptions_comprehensive	ORANGE	RQ 5.8,5.10,5.15: 7 diagnostics (normality, homoscedasticity, Q-Q, ACF, linearity, outliers, convergence)	lmm_result, data, output_dir	Dict
+tools.validation	validate_data_format	ORANGE	RQ 5.9: Validate fixed effects table format	df, required_cols	Dict
+tools.validation	validate_contrasts_d068	ORANGE	RQ 5.9: Verify D068 dual p-value reporting	contrasts_df	Dict
+tools.validation	validate_effect_sizes	ORANGE	RQ 5.9: Validate effect size bounds	effect_sizes_df	Dict
+tools.validation	validate_probability_range	ORANGE	RQ 5.9: Validate probability transformation	probability_df	Dict
+tools.validation	validate_hypothesis_test_dual_pvalues	ORANGE	RQ 5.10: Verify 3-way interaction includes D068 dual p-values	interaction_df, required_terms, alpha_bonferroni	Dict
+tools.validation	validate_contrasts_dual_pvalues	ORANGE	RQ 5.10: Verify post-hoc contrasts include D068 dual p-values	contrasts_df, required_comparisons	Dict
+tools.validation	validate_plot_data_completeness	ORANGE	RQ 5.10: Verify all domains/tertiles present	plot_data, required_domains, required_groups	Dict
+tools.validation	validate_model_convergence	ORANGE	RQ 5.13: Validate loaded model convergence	lmm_result	Dict
+tools.validation	validate_variance_positivity	ORANGE	RQ 5.13: Validate variance components positive	variance_df, component_col, value_col	Dict
+tools.validation	validate_icc_bounds	ORANGE	RQ 5.13: Validate ICC in [0,1]	icc_df, icc_col	Dict
+tools.validation	validate_correlation_test_d068	ORANGE	RQ 5.13: Verify correlation test includes D068 dual p-values	correlation_df, required_cols	Dict
+tools.validation	validate_dataframe_structure	ORANGE	RQ 5.14: Generic dataframe validation (rows, cols, types)	file_path, expected_rows, expected_columns, column_types	Dict
+tools.validation	validate_standardization	ORANGE	RQ 5.14: Check z-scores mean~0, SD~1	df, column_names, tolerance	Dict
+tools.validation	validate_cluster_assignment	ORANGE	RQ 5.14: Check cluster IDs consecutive, sizes >= threshold	assignments_df, n_participants, min_cluster_size	Dict
+tools.validation	validate_bootstrap_stability	ORANGE	RQ 5.14: Check Jaccard values in [0,1], mean >= threshold	stability_df, min_jaccard_threshold	Dict
+tools.validation	validate_cluster_summary_stats	ORANGE	RQ 5.14: Check summary stats mathematically consistent	summary_df	Dict

@@ -27,8 +27,13 @@ rq_stats:
     9.3/10 APPROVED. Cat1: 2.9/3 (excellent, model selection + random slopes justified). Cat2: 1.7/2 (validation tools used). Cat3: 1.8/2 (parameters clear, slopes justified). Cat4: 1.9/2 (comprehensive validation, Step 4.5 added). Cat5: 1.0/1 (5 concerns, all cited). All required changes addressed.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    6 analysis steps planned (Step 0: load/merge data + Steps 1-5: center, LMM, extract, validate, plot)
+    LMM only (no IRT - uses DERIVED difficulty from RQ 5.1)
+    Cross-classified random effects (UID x Item) via pymer4, model selection strategy documented
+    RQ 5.1 dependencies: step03_difficulty.csv, step00_tsvr_mapping.csv, dfData.csv
+    Validation: All steps have 4-layer substance criteria, comprehensive LMM assumptions (Step 4)
 
 rq_tools:
   status: pending

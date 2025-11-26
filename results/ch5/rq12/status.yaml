@@ -27,12 +27,24 @@ rq_stats:
     9.5/10 APPROVED. Cat1: 2.9/3 (all critical fixes implemented). Cat2: 1.2/2 (40% tools, missing CTT module but well-specified). Cat3: 1.8/2 (strong parameters). Cat4: 1.7/2 (alpha added, minor gaps). Cat5: 0.9/1 (9 concerns, 0 CRITICAL). All 3 prior CRITICAL flaws corrected: Steiger's z, Cronbach's alpha, z-score standardization. Ready for planning.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    9 analysis steps planned (Step 0: load data, Steps 1-8: CTT-IRT comparison)
+    Pipeline: Hybrid CTT-IRT methodological comparison (Full CTT vs Purified CTT vs IRT theta)
+    Analysis tools: Item mapping, CTT scoring, Cronbach's alpha (bootstrap CIs), Steiger's z-test (dependent correlations), z-score standardization, parallel LMMs (3 models), plot data prep
+    Cross-RQ dependency: RQ 5.1 (IRT parameters, theta scores, TSVR mapping)
+    Validation: Per-step validation mandatory (all 9 steps have 4-layer substance criteria)
 
 rq_tools:
-  status: pending
+  status: FAIL
   context_dump: |
+    TOOL ERROR: Missing CTT analysis tools required by 2_plan.md
+    Required: tools.analysis_ctt.compute_cronbachs_alpha (Step 4)
+    Required: tools.analysis_ctt.compare_correlations_dependent (Step 5)
+    Found: tools_inventory.md has NO tools.analysis_ctt section
+    Found: tools/analysis_ctt.py file does NOT exist
+    Action: User + Claude must migrate CTT tools from v3.0 with TDD -> Update tools_inventory.md -> Re-run rq_tools
+    Note: rq_stats warned "40% tools, missing CTT module but well-specified" - this is the detection point
 
 rq_analysis:
   status: pending

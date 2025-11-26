@@ -1,0 +1,176 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 5.11 - IRT-CTT Convergent Validity
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Date: 2025-11-26
+
+# CRITICAL NOTE: This RQ primarily uses standard library functions (pandas, scipy, statsmodels, sklearn)
+# which are EXEMPT from tools_inventory.md verification per best practices.
+# Only custom tools/ module functions are cataloged below.
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit Linear Mixed Model using TSVR (actual hours since encoding) as time variable per Decision D070"
+
+    input_requirements:
+      theta_scores:
+        type: "pd.DataFrame"
+        columns: ["composite_ID", "domain_name", "theta"]
+        description: "Ability estimates in long format"
+      tsvr_data:
+        type: "pd.DataFrame"
+        columns: ["UID", "Test", "TSVR_hours"]
+        description: "Time Since VR mapping per participant × test"
+      formula:
+        type: "str"
+        example: "theta ~ (time_linear + time_log) * domain"
+        description: "Fixed effects formula (R-style)"
+      groups:
+        type: "str"
+        default: "UID"
+        description: "Grouping variable for random effects"
+      re_formula:
+        type: "str"
+        default: "~Days"
+        example: "~time_linear"
+        description: "Random effects formula"
+      reml:
+        type: "bool"
+        default: false
+        description: "Use REML estimation (False = ML for model comparison)"
+
+    output_specification:
+      type: "statsmodels.regression.mixed_linear_model.MixedLMResults"
+      attributes:
+        - "fe_params (fixed effects coefficients)"
+        - "bse (standard errors)"
+        - "pvalues (p-values)"
+        - "aic (Akaike Information Criterion)"
+        - "bic (Bayesian Information Criterion)"
+        - "converged (convergence status)"
+
+    usage_notes:
+      - "Used in Step 2 (IRT model) and Step 3 (CTT model) with IDENTICAL formulas"
+      - "Random effects structure MUST match between IRT and CTT models (parallel comparison requirement)"
+      - "If convergence fails, simplify random effects from slopes to intercepts only"
+      - "Document any simplification in logs"
+
+    source_reference: "tools_inventory.md line 97-103"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    description: "Check LMM model convergence status and warnings"
+
+    input_requirements:
+      lmm_result:
+        type: "statsmodels.regression.mixed_linear_model.MixedLMResults"
+        description: "Fitted LMM model object from fit_lmm_trajectory_tsvr"
+
+    output_specification:
+      type: "Dict[str, Any]"
+      required_keys:
+        converged:
+          type: "bool"
+          description: "True if model converged successfully"
+        message:
+          type: "str"
+          description: "Human-readable convergence status message"
+        warnings:
+          type: "list"
+          description: "List of convergence warnings (empty if converged=True)"
+
+    validation_criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_behavior_on_failure:
+      action: "raise ValueError"
+      message_format: "LMM convergence failed: {specific_issue}"
+      log_destination: "logs/stepNN_*.log"
+
+    usage_notes:
+      - "Run immediately after fit_lmm_trajectory_tsvr in Steps 2 and 3"
+      - "If validation fails, g_debug investigates model specification or data quality"
+
+    source_reference: "tools_inventory.md line 177-183"
+
+standard_library_tools:
+  # NOTE: These are NOT custom tools/ module functions, but documented here for completeness
+  # They are EXEMPT from tools_inventory.md verification per best practices
+
+  pandas_operations:
+    description: "Data extraction, merging, CTT computation (Step 0)"
+    operations:
+      - "pd.read_csv() - Load RQ 5.1 outputs and dfData.csv"
+      - "pd.merge() - Merge IRT scores, TSVR, and raw data"
+      - "df.groupby().mean() - Compute CTT scores per domain"
+      - "df.pivot() / df.melt() - Reshape wide <-> long format"
+    usage: "Step 0 data extraction and preparation"
+
+  scipy_stats:
+    description: "Correlation analysis with Holm-Bonferroni correction (Step 1)"
+    functions:
+      - "scipy.stats.pearsonr() - Compute Pearson correlation coefficient"
+      - "statsmodels.stats.multitest.multipletests() - Holm-Bonferroni correction"
+    usage: "Step 1 correlation analysis"
+
+  assumption_diagnostics:
+    description: "LMM assumption validation (Step 4)"
+    functions:
+      - "scipy.stats.shapiro() - Shapiro-Wilk normality test for residuals"
+      - "statsmodels.graphics.gofplots.qqplot() - Q-Q plot for normality"
+      - "statsmodels.stats.stattools.durbin_watson() - Autocorrelation test"
+      - "statsmodels.stats.outliers_influence.variance_inflation_factor() - VIF for multicollinearity"
+      - "matplotlib.pyplot - Diagnostic plots (residuals vs fitted, ACF)"
+    usage: "Step 4 comprehensive LMM assumption checks"
+
+  agreement_analysis:
+    description: "Significance agreement metrics (Step 5)"
+    functions:
+      - "sklearn.metrics.cohen_kappa_score() - Cohen's kappa statistic"
+      - "pandas DataFrame operations - Contingency table construction"
+    usage: "Step 5 IRT vs CTT significance agreement"
+
+  plotting:
+    description: "Comparison visualizations (Step 7)"
+    functions:
+      - "matplotlib.pyplot - Trajectory plots, scatterplots"
+      - "seaborn - Enhanced aesthetics (optional)"
+    usage: "Step 7 IRT vs CTT comparison plots"
+
+summary:
+  analysis_tools_count: 1
+  validation_tools_count: 1
+  standard_library_tools_count: 5
+  total_cataloged_tools: 7
+
+  notes:
+    - "This RQ relies heavily on standard library (pandas, scipy, statsmodels, sklearn, matplotlib)"
+    - "Only 1 custom analysis tool required: fit_lmm_trajectory_tsvr (used twice, Steps 2 and 3)"
+    - "Only 1 custom validation tool required: validate_lmm_convergence"
+    - "All other operations use stdlib functions (EXEMPT from tools_inventory.md per best practices)"
+    - "Standard library tools documented for transparency, NOT cataloged as custom tools"
+
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (uncorrected + Holm-Bonferroni) in Step 1 correlation analysis"
+    - "D070: TSVR time variable (actual hours) used in fit_lmm_trajectory_tsvr for Steps 2 and 3"
+
+  cross_rq_dependencies:
+    - "RQ 5.1: IRT theta scores (step03_theta_scores.csv)"
+    - "RQ 5.1: TSVR mapping (step00_tsvr_mapping.csv)"
+    - "RQ 5.1: Purified item list (step02_purified_items.csv)"
+
+  validation_architecture:
+    approach: "Tool pairing (analysis tool + validation tool)"
+    coverage: "100% (all analysis steps have validation requirements)"
+    enforcement: "rq_analysis embeds validation calls in 4_analysis.yaml"

@@ -27,12 +27,21 @@ rq_stats:
     9.5/10 APPROVED. Cat1: 3.0/3 (appropriate). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (Bonferroni α=0.0033 for 3 tests should be 0.0167, overly conservative). Cat4: 1.8/2 (convergence diagnostics missing). Cat5: 0.7/1 (6 concerns, below 8+ target).
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    6 analysis steps planned (Step 0: data merge + Steps 1-5: LMM analysis)
+    Tool requirements: LMM fitting (Age x Time interaction), effect extraction, effect size computation, plot data preparation
+    Expected outputs: 7 data files, 6 result files, 2 plot source CSVs. Validation required at every step.
+    Cross-RQ dependency: RQ 5.7 (theta scores for "All" composite factor + TSVR mapping)
 
 rq_tools:
-  status: pending
+  status: fail
   context_dump: |
+    FAIL - Missing Validation Tools
+    Required: 4 validation tools for Steps 1-5
+    Missing from tools_inventory.md: validate_data_format, validate_contrasts_d068, validate_effect_sizes, validate_probability_range
+    Action: User + Claude create validation functions with TDD OR revise plan to use assertions
+    This is TDD detection point - DO NOT IMPROVISE
 
 rq_analysis:
   status: pending

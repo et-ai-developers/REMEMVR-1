@@ -27,12 +27,20 @@ rq_stats:
     9.1/10 CONDITIONAL. Cat1: 2.6/3 (appropriate, minor correlation-agreement gap). Cat2: 1.9/2 (100% tools). Cat3: 1.9/2 (well-specified). Cat4: 1.9/2 (comprehensive validation). Cat5: 0.8/1 (9 concerns: 3 CRITICAL re correlation-agreement distinction + practice effects + Bland-Altman omission).
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    8 analysis steps planned (Step 0: extraction + Steps 1-7: analysis)
+    Tool requirements: Correlation (Pearson + Holm-Bonferroni), parallel LMM (IRT vs CTT, identical structure), LMM assumption validation (6 checks), agreement analysis (Cohen's kappa), model fit comparison (AIC/BIC), comparison plotting
+    Expected outputs: 4 correlation tests, 2 fitted LMMs, 10 assumption tests, 4 significance agreement comparisons, 6 fit metrics, 2 comparison plots. Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    1 analysis + 1 validation tools cataloged for IRT-CTT convergent validity comparison
+    Primary tool: fit_lmm_trajectory_tsvr (used for both IRT and CTT parallel LMMs)
+    Standard library tools documented: pandas, scipy, statsmodels, sklearn, matplotlib (5 categories)
+    All custom tools verified exist in tools_inventory.md
+    Validation architecture: 100% coverage with tool pairing
 
 rq_analysis:
   status: pending
