@@ -113,10 +113,12 @@ analysis_ctt:
       - "NOTE: This creates NEW MODULE tools/analysis_ctt.py"
     inputs:
       - data: pd.DataFrame
-      - items: List[str] (column names)
       - n_bootstrap: int (default 1000)
-    outputs: "Dict[alpha: float, ci_lower: float, ci_upper: float, n_items: int]"
-    done: false
+    outputs: "Dict[alpha: float, ci_lower: float, ci_upper: float, n_items: int, n_participants: int]"
+    done: true
+    completed_date: 2025-11-26
+    test_status: "13/13 GREEN"
+    notes: "Created NEW MODULE tools/analysis_ctt.py. Percentile bootstrap method (resamples participants, preserves item correlation structure). Formula: α = (k/(k-1)) × (1 - Σσ²ᵢ / σ²ₓ). For dichotomous items, mathematically equals KR-20. Handles NaN via pairwise deletion. Requires ≥2 items, ≥3 participants. CI width 0.02-0.15 for N=100. 45 min implementation time."
 
   - name: compare_correlations_dependent
     module: tools.analysis_ctt
@@ -133,8 +135,11 @@ analysis_ctt:
       - r13: float (correlation 1-3)
       - r23: float (correlation 2-3)
       - n: int (sample size)
-    outputs: "Dict[z: float, p_value: float, significant: bool, interpretation: str]"
-    done: false
+    outputs: "Dict[z_statistic: float, p_value: float, r_difference: float, significant: bool, interpretation: str]"
+    done: true
+    completed_date: 2025-11-26
+    test_status: "13/13 GREEN"
+    notes: "Implements Steiger (1980) equations 3 & 10 for asymptotic covariance of overlapping correlations. Fisher's z-transformation applied. Two-tailed p-value. Requires n ≥ 20, all correlations in [-1, 1]. N=100 adequate for 90% power per literature. Plain language interpretation in output. 30 min implementation time."
 
 ---
 
@@ -249,8 +254,13 @@ validation_lmm:
       - lmm_result: MixedLMResults
       - data: pd.DataFrame
       - output_dir: Path
+      - acf_lag1_threshold: float (default 0.1)
+      - alpha: float (default 0.05)
     outputs: "Dict[valid: bool, diagnostics: Dict, plot_paths: List, message: str]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "14/14 GREEN"
+    notes: "Complete rewrite of v3.0 minimal implementation. 400+ lines production code. 7 comprehensive diagnostics with 6 diagnostic plots (qq_residuals, residuals_vs_fitted, qq_random_intercepts, qq_random_slopes, acf, cooks_distance). Partial residual CSVs for ALL predictors. Remedial action recommendations per RQ 5.8 specification. Configurable thresholds."
 
   - name: validate_model_convergence
     module: tools.validation
@@ -471,8 +481,8 @@ validation_clustering:
 # SUMMARY STATISTICS
 
 total_tools: 25
-done_count: 0
-remaining_count: 25
+done_count: 4
+remaining_count: 21
 
 by_priority:
   HIGH: 6  # Blocks multiple RQs or creates new modules

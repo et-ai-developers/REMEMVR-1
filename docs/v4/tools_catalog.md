@@ -58,8 +58,17 @@
 | `validate_hypothesis_tests` | Validate hypothesis test format and p-value bounds |
 | `validate_contrasts` | Validate contrast results format and Decision D068 compliance (dual p-values) |
 | `validate_probability_transform` | Validate theta→probability transformation (bounds, monotonicity) |
-| `validate_lmm_assumptions_comprehensive` | Perform 6 LMM assumption checks (normality, homoscedasticity, autocorrelation, etc.) |
+| `validate_lmm_assumptions_comprehensive` | 7 LMM diagnostics (normality, homoscedasticity, Q-Q, ACF, linearity, outliers, convergence) with plots and remedial recommendations |
 | `run_lmm_sensitivity_analyses` | Compare 7 alternative models (piecewise vs continuous, knots, weighted) |
+
+---
+
+## CTT Analysis Tools
+
+| Function | Description |
+|----------|-------------|
+| `compute_cronbachs_alpha` | Cronbach's alpha internal consistency with bootstrap 95% CIs (1000+ iterations, KR-20 equivalent for binary) |
+| `compare_correlations_dependent` | Steiger's z-test for dependent correlations (tests if r13 differs from r12 when sharing variable 1) |
 
 ---
 

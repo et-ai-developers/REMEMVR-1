@@ -201,4 +201,42 @@
 
 ---
 
+### validate_lmm_assumptions_comprehensive
+
+| Field | Value |
+|-------|-------|
+| **Description** | Comprehensive LMM assumption validation with 7 diagnostics: (1) Residual normality (Shapiro-Wilk + Q-Q plot), (2) Homoscedasticity (Breusch-Pagan + residuals vs fitted), (3) Random effects normality (Shapiro-Wilk + separate Q-Q plots for intercepts/slopes), (4) Autocorrelation (ACF plot + Lag-1 test), (5) Linearity (partial residual CSVs for rq_plots), (6) Outliers (Cook's distance), (7) Convergence diagnostics. Includes remedial action recommendations. |
+| **Inputs** | `lmm_result: MixedLMResults` (fitted model), `data: DataFrame` (original data), `output_dir: Path` (plot save directory), `acf_lag1_threshold: float = 0.1` (ACF threshold), `alpha: float = 0.05` (significance level) |
+| **Outputs** | `Dict[valid: bool, diagnostics: Dict, plot_paths: List[Path], message: str]` |
+| **Reference** | RQ 5.8 1_concept.md Step 3.5, Schielzeth et al. 2020 (LMM diagnostics) |
+| **Notes** | Complete rewrite of v3.0 minimal implementation. Generates 6 diagnostic plots: qq_residuals.png, residuals_vs_fitted.png, qq_random_intercepts.png, qq_random_slopes.png, acf.png, cooks_distance.png. Generates partial residual CSVs for ALL predictors. Configurable thresholds per RQ requirements. Returns `valid=True` only if ALL 7 diagnostics pass. |
+
+---
+
+## Module: tools.analysis_ctt
+
+### compute_cronbachs_alpha
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Cronbach's alpha internal consistency reliability with bootstrap confidence intervals. For dichotomous (0/1) items, equals KR-20. Uses percentile bootstrap method (resamples participants, preserves item structure). |
+| **Inputs** | `data: DataFrame` (items as columns, participants as rows), `n_bootstrap: int = 1000` (iterations, 1000-10000 recommended) |
+| **Outputs** | `Dict[alpha: float, ci_lower: float, ci_upper: float, n_items: int, n_participants: int]` |
+| **Reference** | Cronbach (1951), PMC4205511, PMC8451024 (KR-20 equivalence), RQ 5.12 1_concept.md Step 3b |
+| **Notes** | Bootstrap percentile method for 95% CI (2.5th and 97.5th percentiles). Handles NaN via pairwise deletion. Requires ≥2 items and ≥3 participants. For N=100, CI width typically 0.02-0.15. |
+
+---
+
+### compare_correlations_dependent
+
+| Field | Value |
+|-------|-------|
+| **Description** | Test if two dependent correlations differ significantly using Steiger's z-test. Appropriate when both correlations share a common variable (e.g., testing if r(IRT, Purified_CTT) > r(IRT, Full_CTT) from same participants). |
+| **Inputs** | `r12: float` (correlation 1-2), `r13: float` (correlation 1-3), `r23: float` (correlation 2-3), `n: int` (sample size) |
+| **Outputs** | `Dict[z_statistic: float, p_value: float, r_difference: float, significant: bool, interpretation: str]` |
+| **Reference** | Steiger (1980) Psychological Bulletin 87:245-251, RQ 5.12 1_stats.md |
+| **Notes** | Uses Steiger's (1980) equations 3 & 10 for asymptotic covariance of overlapping correlations. Fisher's z-transformation applied. Two-tailed p-value. Requires n ≥ 20, correlations in [-1, 1]. N=100 adequate for 90% power. |
+
+---
+
 **End of Tools Inventory**

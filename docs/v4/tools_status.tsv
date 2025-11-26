@@ -56,7 +56,7 @@ tools.validation	validate_lineage	RED	Validate data source	lineage_file, expecte
 tools.validation	validate_lmm_convergence	GREEN	RQ 5.1-5.7: Validate LMM convergence status	lmm_result	Dict
 tools.validation	validate_lmm_residuals	GREEN	RQ 5.1-5.7: Validate residuals normality (Shapiro-Wilk, Q-Q plot)	residuals, alpha	Dict
 tools.validation	validate_numeric_range	ORANGE	RQ 5.9: Validate numeric range for probability transformation	data, min_val, max_val, column_name	Dict
-tools.validation	validate_lmm_assumptions_comprehensive	ORANGE	RQ 5.8,5.10,5.15: 7 diagnostics (normality, homoscedasticity, Q-Q, ACF, linearity, outliers, convergence)	lmm_result, data, output_dir	Dict
+tools.validation	validate_lmm_assumptions_comprehensive	YELLOW	RQ 5.8,5.10,5.15: 7 diagnostics with plots (Shapiro-Wilk, Breusch-Pagan, Q-Q intercepts/slopes, ACF, Cook's D, convergence) + remedial recommendations (14/14 tests GREEN)	lmm_result, data, output_dir, acf_lag1_threshold, alpha	Dict[valid, diagnostics, plot_paths, message]
 tools.validation	validate_data_format	ORANGE	RQ 5.9: Validate fixed effects table format	df, required_cols	Dict
 tools.validation	validate_contrasts_d068	ORANGE	RQ 5.9: Verify D068 dual p-value reporting	contrasts_df	Dict
 tools.validation	validate_effect_sizes	ORANGE	RQ 5.9: Validate effect size bounds	effect_sizes_df	Dict
@@ -73,3 +73,5 @@ tools.validation	validate_standardization	ORANGE	RQ 5.14: Check z-scores mean~0,
 tools.validation	validate_cluster_assignment	ORANGE	RQ 5.14: Check cluster IDs consecutive, sizes >= threshold	assignments_df, n_participants, min_cluster_size	Dict
 tools.validation	validate_bootstrap_stability	ORANGE	RQ 5.14: Check Jaccard values in [0,1], mean >= threshold	stability_df, min_jaccard_threshold	Dict
 tools.validation	validate_cluster_summary_stats	ORANGE	RQ 5.14: Check summary stats mathematically consistent	summary_df	Dict
+tools.analysis_ctt	compute_cronbachs_alpha	YELLOW	RQ 5.12: Cronbach's alpha with bootstrap CIs (percentile method, 1000+ iterations, KR-20 equivalent for binary) (13/13 tests GREEN)	data, n_bootstrap	Dict[alpha, ci_lower, ci_upper, n_items, n_participants]
+tools.analysis_ctt	compare_correlations_dependent	YELLOW	RQ 5.12: Steiger's z-test for dependent correlations (overlapping, asymptotic covariance) (13/13 tests GREEN)	r12, r13, r23, n	Dict[z_statistic, p_value, r_difference, significant, interpretation]
