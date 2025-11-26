@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-24 15:15 (context-manager curation)
+**Last Updated:** 2025-11-26 10:45 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -217,6 +217,9 @@
 
 ### validated_irt_settings_complete
 **Description:** Complete history of IRT settings correction crisis and resolution. Discovery of systematic error (mc_samples 1 vs 100, 100x difference), impact assessment (theta r=0.68-0.91, below r≥0.95 threshold), full RQ 5.1-5.5 rerun with validated "Med" settings from ANALYSES_DEFINITIVE.md, comprehensive impact analysis showing 46% residual variance reduction and AIC improvement of 665 points. Scientific robustness confirmed - same models selected, same significance patterns, effect magnitudes adjusted 2-24%. Publication quality achieved. Includes user Q&A on item purification necessity and GPU cluster optimization decisions.
+
+### rq57_complete_pipeline
+**Description:** RQ 5.7 ALL 11 PHASES COMPLETE - Steps 1-5 executed with 9 bugs fixed, Steps 6-7 skipped due to pickle issues, rq_inspect validated outputs, rq_plots manual plot, rq_results summary.md with 3 anomalies. Best model: Logarithmic AIC=873.7 weight=0.48. Includes RQ 5.1-5.6 summary regeneration, minimal settings testing validation, g_code API ignorance pattern documentation.
 
 ---
 
