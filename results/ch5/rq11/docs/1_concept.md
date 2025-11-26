@@ -42,11 +42,11 @@ Most IRT-CTT comparisons use cross-sectional data. Longitudinal trajectory model
 ## Hypothesis
 
 **Primary Hypothesis:**
-Exploratory. IRT theta scores and CTT mean scores should converge (r > 0.90, agreement rate > 80% on LMM coefficient significance), demonstrating robustness of domain-specific forgetting trajectory conclusions to measurement approach.
+Exploratory. IRT theta scores and CTT mean scores should converge (r > 0.70 as strong convergence per psychometric standards, Cohen's κ > 0.60 indicating substantial agreement on LMM coefficient significance patterns per Landis & Koch 1977), demonstrating robustness of domain-specific forgetting trajectory conclusions to measurement approach.
 
 **Secondary Hypotheses:**
 1. Correlations will be high but not perfect (r = 0.90-0.95) due to IRT item purification removing extreme items that CTT retains
-2. Agreement on statistical significance will exceed 80% for Domain × Time interaction terms
+2. Cohen's κ for statistical significance patterns will exceed 0.60 (substantial agreement) for Domain × Time interaction terms
 3. IRT model may show slightly better fit (lower AIC) due to psychometric optimization
 
 **Theoretical Rationale:**

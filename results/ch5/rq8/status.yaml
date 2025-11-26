@@ -23,7 +23,7 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "9.2/10 CONDITIONAL. Category 1: 2.8/3 (strong triangulation, convergence risk impact unacknowledged). Category 2: 2.0/2 (100% reuse). Category 3: 1.8/2 (random structure + thresholds underspecified). Category 4: 1.7/2 (comprehensive checks, decision rules gaps). Category 5: 0.9/1 (7 concerns, Commission thin)."
+  context_dump: "9.1/10 CONDITIONAL. Cat1: 2.8/3 (triangulation strong, breakpoint bias concern). Cat2: 2.0/2 (100% reuse). Cat3: 1.9/2 (well-specified, slope ratio unjustified). Cat4: 1.7/2 (comprehensive, missing sensitivity). Cat5: 0.7/1 (8 concerns, uneven). Address breakpoint bias + sensitivity."
 
 rq_planner:
   status: pending

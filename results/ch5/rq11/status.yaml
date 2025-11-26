@@ -24,7 +24,7 @@ rq_scholar:
 rq_stats:
   status: success
   context_dump: |
-    9.1/10 CONDITIONAL. Cat1: 2.8/3 (appropriate). Cat2: 1.8/2 (75% reuse). Cat3: 1.9/2 (parameters). Cat4: 1.8/2 (validation). Cat5: 0.8/1 (7 concerns). Main gaps: multiple testing correction, LMM assumption validation, convergence strategy.
+    9.1/10 CONDITIONAL. Cat1: 2.6/3 (appropriate, minor correlation-agreement gap). Cat2: 1.9/2 (100% tools). Cat3: 1.9/2 (well-specified). Cat4: 1.9/2 (comprehensive validation). Cat5: 0.8/1 (9 concerns: 3 CRITICAL re correlation-agreement distinction + practice effects + Bland-Altman omission).
 
 rq_planner:
   status: pending
