@@ -63,6 +63,10 @@
 | `validate_contrasts` | Validate contrast results format and Decision D068 compliance (dual p-values) |
 | `validate_probability_transform` | Validate theta→probability transformation (bounds, monotonicity) |
 | `validate_lmm_assumptions_comprehensive` | 7 LMM diagnostics (normality, homoscedasticity, Q-Q, ACF, linearity, outliers, convergence) with plots and remedial recommendations |
+| `validate_contrasts_d068` | D068: Validate contrast results have dual p-values (uncorrected + bonferroni/tukey/holm) |
+| `validate_hypothesis_test_dual_pvalues` | D068: Validate hypothesis tests have required terms AND dual p-values (uncorrected + correction) |
+| `validate_contrasts_dual_pvalues` | D068: Validate post-hoc contrasts have required comparisons AND dual p-values (uncorrected + tukey/bonferroni/holm) |
+| `validate_correlation_test_d068` | D068: Validate correlation tests have dual p-values (uncorrected + bonferroni/holm/fdr) |
 | `run_lmm_sensitivity_analyses` | Compare 7 alternative models (piecewise vs continuous, knots, weighted) |
 
 ---

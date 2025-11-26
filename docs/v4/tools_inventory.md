@@ -251,6 +251,46 @@
 | **Reference** | RQ 5.8 1_concept.md Step 3.5, Schielzeth et al. 2020 (LMM diagnostics) |
 | **Notes** | Complete rewrite of v3.0 minimal implementation. Generates 6 diagnostic plots: qq_residuals.png, residuals_vs_fitted.png, qq_random_intercepts.png, qq_random_slopes.png, acf.png, cooks_distance.png. Generates partial residual CSVs for ALL predictors. Configurable thresholds per RQ requirements. Returns `valid=True` only if ALL 7 diagnostics pass. |
 
+### validate_contrasts_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate Decision D068 compliance in contrast results by checking for dual p-value reporting (uncorrected + correction method). Ensures contrasts include both p_uncorrected AND at least one correction method (p_bonferroni, p_tukey, or p_holm). Pure validation function (no computation). |
+| **Inputs** | `contrasts_df: DataFrame` (contrast results with p-value columns) |
+| **Outputs** | `Dict[valid: bool, d068_compliant: bool, missing_cols: List[str], message: str]` |
+| **Reference** | Decision D068 (dual p-value reporting), RQ 5.9 1_concept.md Step 4, tools_todo.yaml lines 360-373 |
+| **Notes** | Accepts alternative correction names: p_bonferroni, p_tukey, or p_holm (all valid correction methods). Returns `valid=True` if p_uncorrected AND at least one correction column present. Case-sensitive column names. Handles empty DataFrames (returns invalid). 11/11 tests GREEN. |
+
+### validate_hypothesis_test_dual_pvalues
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate hypothesis test results (e.g., 3-way interactions) include both required statistical terms AND Decision D068 dual p-value reporting. Checks that all specified interaction terms are present in results DataFrame AND that each has p_uncorrected + correction method columns. Used for validating LMM fixed effects tables. |
+| **Inputs** | `interaction_df: DataFrame` (hypothesis test results with term names as index/column), `required_terms: List[str]` (e.g., ['Age:Domain:Time'] for 3-way interaction), `alpha_bonferroni: float = 0.05` (significance threshold, unused in validation but part of spec) |
+| **Outputs** | `Dict[valid: bool, d068_compliant: bool, missing_terms: List[str], missing_cols: List[str], message: str]` |
+| **Reference** | Decision D068 (dual p-value reporting), RQ 5.10 1_concept.md Step 4, tools_todo.yaml lines 375-390 |
+| **Notes** | Validates TWO aspects: (1) Required terms present (e.g., 'Age:Domain:Time'), (2) D068 compliance (p_uncorrected + one of p_bonferroni/p_holm/p_fdr). Case-sensitive term matching. Handles empty DataFrames and empty required_terms list (still checks D068). 11/11 tests GREEN. |
+
+### validate_contrasts_dual_pvalues
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate post-hoc contrasts include required pairwise comparisons AND Decision D068 dual p-value reporting. Checks that contrast results DataFrame contains: (1) All required comparison names (e.g., 'Where-What', 'Where-When', 'What-When'), (2) BOTH uncorrected and corrected p-values per Decision D068. Used for validating post-hoc tests after significant interactions. |
+| **Inputs** | `contrasts_df: DataFrame` (post-hoc contrast results with 'comparison' column), `required_comparisons: List[str]` (required comparison names to check) |
+| **Outputs** | `Dict[valid: bool, d068_compliant: bool, missing_comparisons: List[str], message: str]` |
+| **Reference** | Decision D068 (dual p-value reporting), RQ 5.10 1_concept.md Step 4, tools_todo.yaml lines 398-415 |
+| **Notes** | Typically p_tukey (Tukey HSD) for post-hoc contrasts, but accepts p_bonferroni or p_holm alternatives. Case-sensitive comparison name matching. Handles empty DataFrames (returns invalid). Empty required_comparisons list allowed (still checks D068). 11/11 tests GREEN. 112 lines implementation. |
+
+### validate_correlation_test_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate correlation test results include Decision D068 dual p-value reporting. Ensures correlation results contain BOTH uncorrected and corrected p-values. Supports multiple correlation tests in single DataFrame. Optional custom required_cols parameter for non-standard column names. |
+| **Inputs** | `correlation_df: DataFrame` (correlation test results with p-value columns), `required_cols: List[str] = None` (optional custom required columns, defaults to D068 spec) |
+| **Outputs** | `Dict[valid: bool, d068_compliant: bool, missing_cols: List[str], message: str]` |
+| **Reference** | Decision D068 (dual p-value reporting), RQ 5.13 1_concept.md Step 5, tools_todo.yaml lines 417-434 |
+| **Notes** | Default D068 validation: p_uncorrected + one of [p_bonferroni, p_holm, p_fdr]. Bonferroni or Holm-Bonferroni typical for correlation tests. Handles empty DataFrames (returns invalid). Reports row count in success message. 10/10 tests GREEN. 110 lines implementation. Used for validating intercept-slope correlation in RQ 5.13. |
+
 ---
 
 ## Module: tools.analysis_ctt

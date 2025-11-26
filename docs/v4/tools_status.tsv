@@ -58,16 +58,16 @@ tools.validation	validate_lmm_residuals	GREEN	RQ 5.1-5.7: Validate residuals nor
 tools.validation	validate_numeric_range	ORANGE	RQ 5.9: Validate numeric range for probability transformation	data, min_val, max_val, column_name	Dict
 tools.validation	validate_lmm_assumptions_comprehensive	YELLOW	RQ 5.8,5.10,5.15: 7 diagnostics with plots (Shapiro-Wilk, Breusch-Pagan, Q-Q intercepts/slopes, ACF, Cook's D, convergence) + remedial recommendations (14/14 tests GREEN)	lmm_result, data, output_dir, acf_lag1_threshold, alpha	Dict[valid, diagnostics, plot_paths, message]
 tools.validation	validate_data_format	ORANGE	RQ 5.9: Validate fixed effects table format	df, required_cols	Dict
-tools.validation	validate_contrasts_d068	ORANGE	RQ 5.9: Verify D068 dual p-value reporting	contrasts_df	Dict
+tools.validation	validate_contrasts_d068	YELLOW	RQ 5.9: D068 compliance validator for contrasts (uncorrected + bonferroni/tukey/holm) (11/11 tests GREEN)	contrasts_df	Dict[valid, d068_compliant, missing_cols, message]
 tools.validation	validate_effect_sizes	ORANGE	RQ 5.9: Validate effect size bounds	effect_sizes_df	Dict
 tools.validation	validate_probability_range	ORANGE	RQ 5.9: Validate probability transformation	probability_df	Dict
-tools.validation	validate_hypothesis_test_dual_pvalues	ORANGE	RQ 5.10: Verify 3-way interaction includes D068 dual p-values	interaction_df, required_terms, alpha_bonferroni	Dict
-tools.validation	validate_contrasts_dual_pvalues	ORANGE	RQ 5.10: Verify post-hoc contrasts include D068 dual p-values	contrasts_df, required_comparisons	Dict
+tools.validation	validate_hypothesis_test_dual_pvalues	YELLOW	RQ 5.10: Validates required terms AND D068 dual p-values in hypothesis tests (11/11 tests GREEN)	interaction_df, required_terms, alpha_bonferroni	Dict[valid, d068_compliant, missing_terms, missing_cols, message]
+tools.validation	validate_contrasts_dual_pvalues	YELLOW	RQ 5.10: Validates required comparisons AND D068 dual p-values in post-hoc contrasts (11/11 tests GREEN)	contrasts_df, required_comparisons	Dict[valid, d068_compliant, missing_comparisons, message]
 tools.validation	validate_plot_data_completeness	ORANGE	RQ 5.10: Verify all domains/tertiles present	plot_data, required_domains, required_groups	Dict
 tools.validation	validate_model_convergence	ORANGE	RQ 5.13: Validate loaded model convergence	lmm_result	Dict
 tools.validation	validate_variance_positivity	ORANGE	RQ 5.13: Validate variance components positive	variance_df, component_col, value_col	Dict
 tools.validation	validate_icc_bounds	ORANGE	RQ 5.13: Validate ICC in [0,1]	icc_df, icc_col	Dict
-tools.validation	validate_correlation_test_d068	ORANGE	RQ 5.13: Verify correlation test includes D068 dual p-values	correlation_df, required_cols	Dict
+tools.validation	validate_correlation_test_d068	YELLOW	RQ 5.13: D068 compliance for correlation tests (uncorrected + bonferroni/holm/fdr) (10/10 tests GREEN)	correlation_df, required_cols	Dict[valid, d068_compliant, missing_cols, message]
 tools.validation	validate_dataframe_structure	ORANGE	RQ 5.14: Generic dataframe validation (rows, cols, types)	file_path, expected_rows, expected_columns, column_types	Dict
 tools.validation	validate_standardization	ORANGE	RQ 5.14: Check z-scores mean~0, SD~1	df, column_names, tolerance	Dict
 tools.validation	validate_cluster_assignment	ORANGE	RQ 5.14: Check cluster IDs consecutive, sizes >= threshold	assignments_df, n_participants, min_cluster_size	Dict

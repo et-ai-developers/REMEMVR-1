@@ -370,7 +370,10 @@ validation_d068_compliance:
     inputs:
       - contrasts_df: pd.DataFrame
     outputs: "Dict[valid: bool, message: str, d068_compliant: bool, missing_cols: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "11/11 GREEN"
+    notes: "Pure validation (no computation). Checks p_uncorrected column present AND at least one correction method (p_bonferroni, p_tukey, or p_holm). Case-sensitive column names. Handles empty DataFrames (returns invalid). 85 lines implementation. 10 min development time (LOW complexity). Decision D068 compliance validator for contrast results."
 
   - name: validate_hypothesis_test_dual_pvalues
     module: tools.validation
@@ -387,7 +390,10 @@ validation_d068_compliance:
       - required_terms: List[str]
       - alpha_bonferroni: float
     outputs: "Dict[valid: bool, missing_terms: List, d068_compliant: bool, message: str]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "11/11 GREEN"
+    notes: "Validates TWO aspects: (1) Required terms present (e.g., 'Age:Domain:Time'), (2) D068 compliance (p_uncorrected + one of p_bonferroni/p_holm/p_fdr). Case-sensitive term matching. Handles empty DataFrames and empty required_terms list (still checks D068). 100 lines implementation. 10 min development time (LOW complexity). Used for validating LMM fixed effects tables with interaction terms."
 
   - name: validate_contrasts_dual_pvalues
     module: tools.validation
@@ -403,7 +409,10 @@ validation_d068_compliance:
       - contrasts_df: pd.DataFrame
       - required_comparisons: List[str]
     outputs: "Dict[valid: bool, d068_compliant: bool, missing_comparisons: List, message: str]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "11/11 GREEN"
+    notes: "Validates TWO aspects: (1) Required comparisons present (e.g., 'Where-What', 'Where-When', 'What-When'), (2) D068 compliance (p_uncorrected + one of p_tukey/p_bonferroni/p_holm). Typically p_tukey for post-hoc contrasts. Case-sensitive comparison name matching. Handles empty DataFrames (returns invalid). 112 lines implementation. 10 min development time (LOW complexity). Used for validating post-hoc contrast results after 3-way interactions."
 
   - name: validate_correlation_test_d068
     module: tools.validation
@@ -419,7 +428,10 @@ validation_d068_compliance:
       - correlation_df: pd.DataFrame
       - required_cols: List[str] (e.g., ['p_uncorrected', 'p_bonferroni'])
     outputs: "Dict[valid: bool, d068_compliant: bool, missing_cols: List, message: str]"
-    done: false
+    done: true
+    completed_date: 2025-11-26
+    test_status: "10/10 GREEN"
+    notes: "Validates D068 compliance for correlation tests (p_uncorrected + one of p_bonferroni/p_holm/p_fdr). Optional custom required_cols parameter for flexibility. Handles empty DataFrames (returns invalid). Multiple correlation tests in single DataFrame supported. 110 lines implementation. 10 min development time (LOW complexity). Used for validating intercept-slope correlation results in RQ 5.13."
 
 validation_effect_sizes:
 
@@ -495,8 +507,8 @@ validation_clustering:
 # SUMMARY STATISTICS
 
 total_tools: 25
-done_count: 8
-remaining_count: 17
+done_count: 12
+remaining_count: 13
 
 by_priority:
   HIGH: 6  # Blocks multiple RQs or creates new modules

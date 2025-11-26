@@ -1740,3 +1740,229 @@ def validate_hypothesis_test_dual_pvalues(
         'd068_compliant': d068_compliant,
         'message': message
     }
+
+
+def validate_contrasts_dual_pvalues(
+    contrasts_df: pd.DataFrame,
+    required_comparisons: List[str]
+) -> Dict:
+    """
+    Validate that post-hoc contrasts include required comparisons and D068 dual p-values.
+
+    Checks that contrast results DataFrame contains:
+    1. All required pairwise comparisons (e.g., ['Where-What', 'Where-When', 'What-When'])
+    2. BOTH uncorrected and corrected p-values per Decision D068
+
+    Parameters
+    ----------
+    contrasts_df : DataFrame
+        Post-hoc contrast results with 'comparison' column
+    required_comparisons : List[str]
+        Required comparison names to check (e.g., ['Where-What', 'Where-When'])
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if all comparisons present AND D068 compliant
+        - d068_compliant: bool - True if has both uncorrected and corrected p-values
+        - missing_comparisons: List[str] - Missing required comparisons
+        - message: str - Validation message
+
+    Notes
+    -----
+    Decision D068: ALL post-hoc contrasts must report BOTH:
+    - p_uncorrected: Raw p-value
+    - Corrected p-value: One of [p_tukey, p_bonferroni, p_holm] for post-hoc tests
+
+    Typically p_tukey (Tukey HSD) is used for post-hoc contrasts, while
+    p_bonferroni is used for hypothesis tests.
+
+    Examples
+    --------
+    >>> contrasts = pd.DataFrame({
+    ...     'comparison': ['Where-What', 'Where-When', 'What-When'],
+    ...     'p_uncorrected': [0.0002, 0.0001, 0.0008],
+    ...     'p_tukey': [0.0006, 0.0003, 0.0024]
+    ... })
+    >>> result = validate_contrasts_dual_pvalues(
+    ...     contrasts,
+    ...     required_comparisons=['Where-What', 'Where-When', 'What-When']
+    ... )
+    >>> assert result['valid'] is True
+    """
+    # Handle empty DataFrame
+    if contrasts_df.empty:
+        return {
+            'valid': False,
+            'd068_compliant': False,
+            'missing_comparisons': required_comparisons.copy(),
+            'message': 'Empty DataFrame provided. Cannot validate contrasts.'
+        }
+
+    missing_comparisons = []
+    missing_cols = []
+
+    # Check for required comparisons
+    if 'comparison' in contrasts_df.columns:
+        available_comparisons = set(contrasts_df['comparison'].values)
+        for comp in required_comparisons:
+            if comp not in available_comparisons:
+                missing_comparisons.append(comp)
+    else:
+        # If no 'comparison' column, all required comparisons are missing
+        missing_comparisons = required_comparisons.copy()
+
+    # Check for D068 compliance (dual p-values)
+    if 'p_uncorrected' not in contrasts_df.columns:
+        missing_cols.append('p_uncorrected')
+
+    # For post-hoc contrasts, typically p_tukey is used
+    # But accept alternative corrections (p_bonferroni, p_holm)
+    corrected_cols = ['p_tukey', 'p_bonferroni', 'p_holm']
+    has_correction = any(col in contrasts_df.columns for col in corrected_cols)
+
+    if not has_correction:
+        missing_cols.append('p_tukey')
+
+    # Determine validity
+    d068_compliant = len(missing_cols) == 0
+    valid = len(missing_comparisons) == 0 and d068_compliant
+
+    # Generate message
+    if valid:
+        used_correction = next(
+            (col for col in corrected_cols if col in contrasts_df.columns),
+            'unknown'
+        )
+        message = (
+            f"Decision D068 compliant: ALL required comparisons present "
+            f"({len(required_comparisons)} total) with both p_uncorrected and {used_correction}."
+        )
+    else:
+        parts = []
+        if missing_comparisons:
+            parts.append(f"Missing required comparisons: {missing_comparisons}")
+        if missing_cols:
+            parts.append(f"Missing D068 columns: {missing_cols}")
+        message = ". ".join(parts) + "."
+
+    return {
+        'valid': valid,
+        'd068_compliant': d068_compliant,
+        'missing_comparisons': missing_comparisons,
+        'message': message
+    }
+
+
+def validate_correlation_test_d068(
+    correlation_df: pd.DataFrame,
+    required_cols: Optional[List[str]] = None
+) -> Dict:
+    """
+    Validate that correlation test results include D068 dual p-value reporting.
+
+    Checks that correlation results DataFrame contains BOTH uncorrected
+    and corrected p-values per Decision D068.
+
+    Parameters
+    ----------
+    correlation_df : DataFrame
+        Correlation test results with p-value columns
+    required_cols : List[str], optional
+        Custom required columns. If None, defaults to D068 spec:
+        ['p_uncorrected', one of ['p_bonferroni', 'p_holm', 'p_fdr']]
+
+    Returns
+    -------
+    Dict
+        Validation results with keys:
+        - valid: bool - True if D068 compliant
+        - d068_compliant: bool - True if has both uncorrected and corrected p-values
+        - missing_cols: List[str] - Missing required columns
+        - message: str - Validation message
+
+    Notes
+    -----
+    Decision D068: ALL correlation tests must report BOTH:
+    - p_uncorrected: Raw p-value
+    - Corrected p-value: One of [p_bonferroni, p_holm, p_fdr]
+
+    For correlation tests, Bonferroni or Holm-Bonferroni corrections are typical.
+
+    Examples
+    --------
+    >>> corr_results = pd.DataFrame({
+    ...     'r': [-0.45],
+    ...     'p_uncorrected': [0.003],
+    ...     'p_bonferroni': [0.045]
+    ... })
+    >>> result = validate_correlation_test_d068(corr_results)
+    >>> assert result['valid'] is True
+    """
+    # Handle empty DataFrame
+    if correlation_df.empty:
+        return {
+            'valid': False,
+            'd068_compliant': False,
+            'missing_cols': [],
+            'message': 'Empty DataFrame provided. Cannot validate correlation test.'
+        }
+
+    missing_cols = []
+
+    # If custom required_cols provided, use those
+    if required_cols is not None:
+        for col in required_cols:
+            if col not in correlation_df.columns:
+                missing_cols.append(col)
+
+        valid = len(missing_cols) == 0
+        d068_compliant = valid  # Assume custom cols meet D068 if provided
+
+        message = (
+            f"Custom validation: {len(required_cols)} required columns."
+            if valid
+            else f"Missing required columns: {missing_cols}."
+        )
+    else:
+        # Default D068 validation
+        if 'p_uncorrected' not in correlation_df.columns:
+            missing_cols.append('p_uncorrected')
+
+        # For correlation tests, typically p_bonferroni or p_holm
+        corrected_cols = ['p_bonferroni', 'p_holm', 'p_fdr']
+        has_correction = any(col in correlation_df.columns for col in corrected_cols)
+
+        if not has_correction:
+            missing_cols.append('p_bonferroni')
+
+        # Determine validity
+        d068_compliant = len(missing_cols) == 0
+        valid = d068_compliant
+
+        # Generate message
+        if valid:
+            used_correction = next(
+                (col for col in corrected_cols if col in correlation_df.columns),
+                'unknown'
+            )
+            n_rows = len(correlation_df)
+            message = (
+                f"Decision D068 compliant: Correlation test results ({n_rows} rows) "
+                f"have both p_uncorrected and {used_correction}."
+            )
+        else:
+            if len(missing_cols) == 1 and missing_cols[0] == 'p_bonferroni':
+                message = "Missing correction method column (p_bonferroni, p_holm, or p_fdr required)."
+            elif 'p_uncorrected' in missing_cols:
+                message = f"Missing D068 required columns: {missing_cols}."
+            else:
+                message = f"Missing D068 columns: {missing_cols}."
+
+    return {
+        'valid': valid,
+        'd068_compliant': d068_compliant,
+        'missing_cols': missing_cols,
+        'message': message
+    }
