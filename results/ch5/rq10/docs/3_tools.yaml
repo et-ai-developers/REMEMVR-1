@@ -91,7 +91,7 @@ analysis_tools:
         source: "Step 2c output (fixed effects from selected model)"
 
     output_files:
-      - path: "results/step04_age_effects_by_domain.csv"
+      - path: "data/step04_age_effects_by_domain.csv"
         columns: ["domain", "age_effect", "se", "z", "p", "CI_lower", "CI_upper"]
         description: "Domain-specific age effects on forgetting rate (3 rows: What, Where, When)"
       - path: "results/step04_post_hoc_contrasts.csv"
@@ -115,19 +115,19 @@ analysis_tools:
 
     input_files:
       - path: "data/step01_lmm_input.csv"
-        required_columns: ["UID", "Age", "domain_name", "TSVR_hours", "theta"]
+        required_columns: ["UID", "age", "domain", "TSVR_hours", "theta"]
         source: "Step 1 output (LMM input with age variable)"
       - path: "results/step02_lmm_model.pkl"
         description: "Selected LMM model from Step 2c"
         source: "Step 2c output (for generating predictions)"
-      - path: "results/step04_age_effects_by_domain.csv"
+      - path: "data/step04_age_effects_by_domain.csv"
         description: "Domain-specific age effects"
         source: "Step 4 output (for interpretation context)"
 
     output_files:
       - path: "plots/step05_age_effects_plot_data.csv"
-        columns: ["domain_name", "age_tertile", "TSVR_hours", "theta_observed", "se_observed", "ci_lower", "ci_upper", "theta_predicted"]
-        description: "Plot source CSV with observed means and model predictions (36 rows = 3 domains × 3 age tertiles × 4 timepoints)"
+        columns: ["domain", "age_tertile", "TSVR_hours", "theta_observed", "CI_lower_observed", "CI_upper_observed", "theta_predicted", "CI_lower_predicted", "CI_upper_predicted", "data_type"]
+        description: "Plot source CSV with observed means and model predictions (~600 rows = 3 domains × 3 age tertiles × ~67 timepoints including observed and predicted data)"
 
     parameters:
       output_path: "plots/step05_age_effects_plot_data.csv"
@@ -215,8 +215,8 @@ validation_tools:
 
   validate_model_selection:
     module: "tools.validation"
-    function: "validate_model_convergence"
-    signature: "validate_model_convergence(lmm_result: statsmodels MixedLMResults) -> Dict[valid: bool, message: str, converged: bool]"
+    function: "validate_model_selection"
+    signature: "validate_model_selection(lmm_result: statsmodels MixedLMResults) -> Dict[valid: bool, message: str, converged: bool]"
 
     input_files:
       - path: "results/step02c_model_selection.txt"
@@ -327,20 +327,20 @@ validation_tools:
 
     input_files:
       - path: "plots/step05_age_effects_plot_data.csv"
-        required_columns: ["domain_name", "age_tertile", "TSVR_hours", "theta_observed", "theta_predicted"]
+        required_columns: ["domain", "age_tertile", "TSVR_hours", "theta_observed", "theta_predicted"]
         source: "Analysis tool output (prepare_age_effects_plot_data)"
 
     parameters:
       required_domains: ["What", "Where", "When"]
       required_groups: ["Young", "Middle", "Older"]
-      domain_col: "domain_name"
+      domain_col: "domain"
       group_col: "age_tertile"
 
     criteria:
       - "All 3 domains present (What, Where, When)"
       - "All 3 age tertiles present (Young, Middle, Older)"
-      - "~36 rows expected (3 domains × 3 tertiles × 4 timepoints)"
-      - "No NaN values in critical columns (domain_name, age_tertile, TSVR_hours)"
+      - "~600 rows expected (3 domains × 3 tertiles × ~67 timepoints including observed and predicted)"
+      - "No NaN values in critical columns (domain, age_tertile, TSVR_hours)"
       - "CI_upper > CI_lower for all observed data rows"
 
     expected_output:
