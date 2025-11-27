@@ -1,104 +1,66 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq9/ with 6 folders
+  context_dump: 'Created results/ch5/rq9/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.9: Age effects on baseline memory and forgetting rate
-    Domains: All (What/Where/When combined composite)
-    Analysis: LMM (Age × Time interaction, Lin+Log functional form)
-    Data: DERIVED from RQ 5.7 theta scores + Age from dfData.csv
-    Critical: Age grand-mean centered, Bonferroni α=0.0033, Age tertiles for visualization
-
+  context_dump: "RQ 5.9: Age effects on baseline memory and forgetting rate\nDomains:\
+    \ All (What/Where/When combined composite)\nAnalysis: LMM (Age \xD7 Time interaction,\
+    \ Lin+Log functional form)\nData: DERIVED from RQ 5.7 theta scores + Age from\
+    \ dfData.csv\nCritical: Age grand-mean centered, Bonferroni \u03B1=0.0033, Age\
+    \ tertiles for visualization\n"
 rq_scholar:
   status: success
-  context_dump: |
-    9.0/10 CONDITIONAL. Theory excellent (3.0/3.0), literature dated (1.7/2.0 - all pre-2015). CRITICAL omission: practice effects unaddressed. 15 papers reviewed (8 high-relevance 2020-2024). Add recent cites + practice discussion -> APPROVED. Ready for stats validation.
+  context_dump: '9.0/10 CONDITIONAL. Theory excellent (3.0/3.0), literature dated
+    (1.7/2.0 - all pre-2015). CRITICAL omission: practice effects unaddressed. 15
+    papers reviewed (8 high-relevance 2020-2024). Add recent cites + practice discussion
+    -> APPROVED. Ready for stats validation.
 
+    '
 rq_stats:
   status: success
-  context_dump: |
-    9.5/10 APPROVED. Cat1: 3.0/3 (appropriate). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (Bonferroni α=0.0033 for 3 tests should be 0.0167, overly conservative). Cat4: 1.8/2 (convergence diagnostics missing). Cat5: 0.7/1 (6 concerns, below 8+ target).
-
+  context_dump: "9.5/10 APPROVED. Cat1: 3.0/3 (appropriate). Cat2: 2.0/2 (100% reuse).\
+    \ Cat3: 2.0/2 (Bonferroni \u03B1=0.0033 for 3 tests should be 0.0167, overly conservative).\
+    \ Cat4: 1.8/2 (convergence diagnostics missing). Cat5: 0.7/1 (6 concerns, below\
+    \ 8+ target).\n"
 rq_planner:
   status: success
   context_dump: |
-    6 analysis steps planned (Step 0: data merge + Steps 1-5: LMM analysis)
-    Tool requirements: LMM fitting (Age x Time interaction), effect extraction, effect size computation, plot data preparation
-    Expected outputs: 7 data files, 6 result files, 2 plot source CSVs. Validation required at every step.
-    Cross-RQ dependency: RQ 5.7 (theta scores for "All" composite factor + TSVR mapping)
-
+    6 analysis steps planned (Step 0: data merge + Steps 1-5: LMM analysis).
+    Pipeline: DERIVED data (RQ 5.7 theta + Age) -> Age centering -> LMM (Age x Time) -> Effect size -> Plot prep.
+    Tool requirements: Data merge, grand-mean centering, Lin+Log LMM with Age x Time interactions, Bonferroni correction (α=0.0167), age tertile aggregation.
+    Expected outputs: 9 files (4 data, 3 results, 2 plots source CSVs). Validation required at every step.
 rq_tools:
-  status: fail
-  context_dump: |
-    FAIL - Missing Analysis Tools (TDD Detection Point)
-
-    Required Analysis Tools (from 2_plan.md):
-    Step 2: fit_lmm_trajectory_tsvr (FOUND in tools.analysis_lmm)
-    Step 2: extract_fixed_effects_from_lmm (FOUND in tools.analysis_lmm)
-    Step 3: extract_age_effects_with_bonferroni (NOT FOUND - custom needed)
-    Step 4: compute_age_effect_sizes_from_lmm (NOT FOUND - custom needed)
-    Step 5: prepare_age_effects_plot_data (FOUND in tools.analysis_lmm)
-
-    Missing from tools_inventory.md:
-    1. extract_age_effects_with_bonferroni
-       - Purpose: Extract Age-related fixed effects, apply Bonferroni correction
-       - Expected signature: extract_age_effects_with_bonferroni(fixed_effects_df: DataFrame, age_terms: List[str], n_tests: int, alpha: float) -> DataFrame
-       - Outputs: DataFrame with term, coef, se, z, p_uncorrected, p_bonferroni, significant_bonferroni columns
-       - Decision D068 compliance: Dual p-value reporting
-
-    2. compute_age_effect_sizes_from_lmm
-       - Purpose: Compute Age effect sizes as theta difference for 1 SD Age increase
-       - Expected signature: compute_age_effect_sizes_from_lmm(lmm_result: MixedLMResults, age_sd: float, reference_time: float) -> DataFrame
-       - Outputs: DataFrame with metric, value, unit, interpretation columns
-       - Rationale: Quantify Age effects in interpretable units
-
-    Required Validation Tools (from 2_plan.md):
-    Step 0: validate_data_merge (NOT FOUND - custom needed)
-    Step 1: validate_centering_transformation (NOT FOUND - custom needed)
-    Step 2: validate_lmm_convergence (FOUND in tools.validation)
-    Step 2: validate_lmm_residuals (FOUND in tools.validation)
-    Step 3: validate_hypothesis_test_dual_pvalues (FOUND in tools.validation)
-    Step 4: validate_effect_sizes (FOUND in tools.validation)
-    Step 5: validate_plot_data_completeness (FOUND in tools.validation)
-
-    Missing from tools_inventory.md:
-    3. validate_data_merge
-       - Purpose: Validate merge success (no missing values, expected row count)
-       - Expected signature: validate_data_merge(df: DataFrame, expected_rows: int, no_nan_cols: List[str]) -> Dict[str, Any]
-       - Checks: Row count, NaN detection, duplicate keys
-
-    4. validate_centering_transformation
-       - Purpose: Validate grand-mean centering (mean ~ 0) and transformations
-       - Expected signature: validate_centering_transformation(df: DataFrame, centered_col: str, transformation_specs: Dict) -> Dict[str, Any]
-       - Checks: Centered variable mean in [-0.01, 0.01], transformation formulas correct
-
-    Action Required:
-    1. User + Claude migrate 4 missing tools from v3.0 OR create new with TDD
-    2. Update tools_inventory.md with function signatures
-    3. Re-run rq_tools agent
-
-    This is the TDD detection point per rq_tools circuit breaker CB1 (TOOL_NOT_FOUND).
-    DO NOT IMPROVISE. DO NOT GUESS SIGNATURES.
-
+  status: success
+  completed: 2025-11-27 23:50
+  context_dump: '1 analysis + 10 validation tools cataloged for LMM Age x Time analysis'
 rq_analysis:
-  status: pending
-  context_dump: |
-
+  status: success
+  timestamp: '2025-11-28T00:00:00Z'
+  context_dump: '6 steps specified with validation (LMM Age x Time -> Effect size -> Age tertile plot data)'
 rq_inspect:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_plots:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_results:
   status: pending
-  context_dump: |
+  context_dump: ''
+
+analysis_steps:
+  step00_extract_merge_data: pending
+  step01_prepare_predictors: pending
+  step02_fit_lmm: pending
+  step03_extract_age_effects: pending
+  step04_compute_effect_size: pending
+  step05_prepare_plot_data: pending

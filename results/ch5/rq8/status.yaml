@@ -1,61 +1,75 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq8/ with 6 folders
+  context_dump: 'Created results/ch5/rq8/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.8: Two-phase forgetting (rapid then slow)
-    Domains: All three WWW (inherited from RQ 5.7, collapsed across domains)
-    Analysis: LMM (3 convergent tests - quadratic term, piecewise vs continuous AIC, slope ratio)
-    Data: DERIVED from RQ 5.7 (theta scores, TSVR mapping, best continuous model)
-    Critical: Tests consolidation theory inflection at Day 1 (48h TSVR). Requires RQ 5.7 complete.
+  context_dump: 'RQ 5.8: Two-phase forgetting (rapid then slow)
 
+    Domains: All three WWW (inherited from RQ 5.7, collapsed across domains)
+
+    Analysis: LMM (3 convergent tests - quadratic term, piecewise vs continuous AIC,
+    slope ratio)
+
+    Data: DERIVED from RQ 5.7 (theta scores, TSVR mapping, best continuous model)
+
+    Critical: Tests consolidation theory inflection at Day 1 (48h TSVR). Requires
+    RQ 5.7 complete.
+
+    '
 rq_scholar:
   status: success
-  context_dump: |
-    5.8 validated: 9.3/10 APPROVED. Strong consolidation theory, 5 suggested lit additions (Radvansky 2022 high priority). 10 moderate concerns identified. Ready for stats.
+  context_dump: '5.8 validated: 9.3/10 APPROVED. Strong consolidation theory, 5 suggested
+    lit additions (Radvansky 2022 high priority). 10 moderate concerns identified.
+    Ready for stats.
 
+    '
 rq_stats:
   status: success
-  context_dump: "9.1/10 CONDITIONAL. Cat1: 2.8/3 (triangulation strong, breakpoint bias concern). Cat2: 2.0/2 (100% reuse). Cat3: 1.9/2 (well-specified, slope ratio unjustified). Cat4: 1.7/2 (comprehensive, missing sensitivity). Cat5: 0.7/1 (8 concerns, uneven). Address breakpoint bias + sensitivity."
-
+  context_dump: '9.1/10 CONDITIONAL. Cat1: 2.8/3 (triangulation strong, breakpoint
+    bias concern). Cat2: 2.0/2 (100% reuse). Cat3: 1.9/2 (well-specified, slope ratio
+    unjustified). Cat4: 1.7/2 (comprehensive, missing sensitivity). Cat5: 0.7/1 (8
+    concerns, uneven). Address breakpoint bias + sensitivity.'
 rq_planner:
   status: success
   context_dump: |
-    7 steps planned (Step 0: Get Data, Steps 1-6: Analysis + Visualization)
-    LMM-only analysis (no IRT - uses DERIVED theta from RQ 5.7)
-    3 convergent tests: quadratic term, piecewise vs continuous AIC, Early/Late slope ratio
-    Expected outputs: Quadratic model, piecewise model, assumption validation, slope comparison, plot source CSV
-    Validation: Per-step mandatory (4-layer substance criteria)
-
+    Analysis plan created: 7 steps planned (Step 0: data loading + Steps 1-6: analysis and visualization).
+    Tool requirements: LMM trajectory modeling (quadratic, piecewise), comprehensive assumption validation, slope extraction, plot data preparation.
+    Expected outputs: 10+ files (2 model summaries, predictions CSVs, assumption validation report, slope comparison, plot source CSV).
+    Cross-RQ dependency: RQ 5.7 (theta scores, TSVR mapping, best continuous model).
+    Validation required at every step (6 analysis steps, all with 4-layer substance criteria).
 rq_tools:
   status: success
-  completed: 2025-11-27 02:45
-  context_dump: |
-    3 analysis + 4 validation tools cataloged for LMM-only two-phase forgetting analysis
-    Analysis: fit_lmm_trajectory_tsvr, extract_fixed_effects_from_lmm, extract_segment_slopes_from_lmm
-    Validation: validate_lmm_convergence, validate_lmm_assumptions_comprehensive, validate_data_format, validate_numeric_range
-    All tools verified exist in tools_inventory.md (stdlib exempted)
-    All naming conventions verified exist in names.md
-
+  completed: 2025-11-27
+  context_dump: '5 analysis + 6 validation tools cataloged for LMM-only two-phase forgetting analysis (no IRT - theta from RQ 5.7)'
 rq_analysis:
-  status: pending
-  context_dump: |
+  status: success
+  completed: 2025-11-27
+  context_dump: '7 steps specified with validation (LMM-only: quadratic + piecewise + convergent tests for two-phase forgetting)'
+analysis_steps:
+  step00_get_data: pending
+  step01_create_time_transformations: pending
+  step02_fit_quadratic_model: pending
+  step03_fit_piecewise_model: pending
+  step04_validate_lmm_assumptions: pending
+  step05_extract_slopes: pending
+  step06_prepare_plot_data: pending
 
 rq_inspect:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_plots:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_results:
   status: pending
-  context_dump: |
+  context_dump: ''

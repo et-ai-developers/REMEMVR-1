@@ -1,70 +1,114 @@
-# 3_tools.yaml - Tool Catalog for RQ 5.9
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
 # Created by: rq_tools agent
-# Date: 2025-11-27
-# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once
-
-# PURPOSE: This file catalogs CUSTOM tools from tools/ module used in RQ 5.9 analysis
-# SCOPE: Standard library functions (pandas, numpy, statsmodels) are NOT cataloged
-# WHY: Only custom project-specific tools require validation pairing documentation
-
----
+# RQ: 5.9 (Age effects on baseline memory and forgetting rate)
+# Date: 2025-11-27 (Updated)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
 
 analysis_tools:
-  # NO CUSTOM ANALYSIS TOOLS REQUIRED
-  # RQ 5.9 uses only standard library functions:
-  # - pandas: merge, mean, std, log transformations
-  # - statsmodels: MixedLM fitting
-  # - numpy: arithmetic operations
-  # These stdlib functions are exempt from tools_inventory.md verification per rq_tools spec
+  prepare_age_effects_plot_data:
+    module: "tools.analysis_lmm"
+    function: "prepare_age_effects_plot_data"
+    signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    description: "Create age tertiles (Young/Middle/Older), aggregate observed means, and generate LMM predictions for Age x Time visualization"
+
+    input_files:
+      - path: "data/step01_lmm_input_prepared.csv"
+        required_columns: ["UID", "age", "TSVR_hours", "theta"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          UID: "string (participant identifier)"
+          age: "float (raw age in years)"
+          TSVR_hours: "float (actual hours since encoding)"
+          theta: "float (IRT ability estimate from RQ 5.7 'All' factor)"
+      - path: "data/step02_lmm_model.pkl"
+        description: "Fitted LMM for generating predictions"
+
+    output_files:
+      - path: "plots/step05_age_tertile_plot_data.csv"
+        columns: ["age_tertile", "TSVR_hours", "theta_observed", "se_observed", "ci_lower", "ci_upper", "theta_predicted"]
+        description: "Plot-ready data with 12 rows (3 tertiles x 4 timepoints)"
+
+    parameters:
+      tertile_method: "pd.qcut(age, q=3)"
+      timepoints: [0, 24, 72, 144]
+      ci_level: 0.95
+
+    notes:
+      - "Age tertiles created for visualization only (analysis uses continuous Age_c)"
+      - "Predictions aggregated from LMM fitted values by tertile x timepoint"
+      - "Adapted for RQ 5.9 single-domain case (no domain_name column like RQ 5.10)"
+      - "This is a CUSTOM tools/ module function, NOT stdlib (must be cataloged)"
+
+    source_reference: "tools_inventory.md lines 155-164"
 
 validation_tools:
   validate_data_format:
     module: "tools.validation"
     function: "validate_data_format"
-    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
 
-    purpose: "Validate DataFrame has all required columns present"
+    input_files:
+      - path: "data/step00_lmm_input_raw.csv"
+        description: "Merged data after Step 0"
+      - path: "data/step01_lmm_input_prepared.csv"
+        description: "Prepared data after Step 1"
+      - path: "data/step02_fixed_effects.csv"
+        description: "Fixed effects table after Step 2"
 
-    input_specification:
-      df: "DataFrame to validate"
-      required_cols: "List of required column names (case-sensitive)"
+    parameters:
+      step0_required_cols: ["composite_ID", "UID", "TEST", "TSVR_hours", "theta", "se_all", "age"]
+      step1_required_cols: ["composite_ID", "UID", "TEST", "TSVR_hours", "theta", "se_all", "age", "Age_c", "Time", "Time_log"]
+      step2_required_cols: ["term", "coef", "se", "z", "p"]
 
-    output_specification:
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column order irrelevant"
+      - "Case-sensitive column name matching"
+
+    expected_output:
       format: "Dict[str, Any]"
       fields:
         valid: "bool (True if all required columns present)"
         message: "str (success message or error details)"
         missing_cols: "List[str] (empty if valid=True)"
 
-    validation_criteria:
-      - "All required columns present in DataFrame"
-      - "Column order irrelevant"
-      - "Case-sensitive column name matching"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug if merge/extraction produced wrong format"
 
-    usage_notes: "Does NOT check for missing values within columns - only column presence"
-    source_reference: "tools_inventory.md lines 335-342"
-    introduced: "RQ 5.9 Step 0, Step 1 (data merge and centering validation)"
+    description: "Validate DataFrame has all required columns present (does NOT check for missing values within columns)"
+    source_reference: "tools_inventory.md lines 494-503"
 
   validate_model_convergence:
     module: "tools.validation"
     function: "validate_model_convergence"
-    signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+    signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
-    purpose: "Validate statsmodels LMM model converged successfully"
+    input_files:
+      - path: "data/step02_lmm_model.pkl"
+        description: "Fitted LMM from Step 2"
 
-    input_specification:
-      lmm_result: "Fitted LMM results object from statsmodels"
+    parameters:
+      check_attributes: ["converged"]
 
-    output_specification:
+    criteria:
+      - "Model.converged attribute == True"
+      - "Optimization algorithm reached solution"
+
+    expected_output:
       format: "Dict[str, Any]"
       fields:
         valid: "bool (True if converged==True)"
         message: "str (success or failure details)"
         converged: "bool (model.converged attribute value)"
 
-    validation_criteria:
-      - "Model.converged attribute == True"
-      - "Optimization algorithm reached solution"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug with convergence diagnostics"
 
     failure_indicators:
       - "Collinearity between predictors"
@@ -72,21 +116,69 @@ validation_tools:
       - "Model specification issues"
       - "Numerical instability"
 
-    usage_notes: "Simple boolean check - fastest validator. Handles missing converged attribute gracefully."
-    source_reference: "tools_inventory.md lines 370-378"
-    introduced: "RQ 5.9 Step 2 (LMM fitting validation)"
+    description: "Validate statsmodels LMM model converged successfully - simple boolean check, fastest validator"
+    source_reference: "tools_inventory.md lines 530-539"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+    input_files:
+      - path: "data/step02_lmm_model.pkl"
+        description: "Fitted LMM for diagnostics"
+      - path: "data/step01_lmm_input_prepared.csv"
+        description: "Original data for residual analysis"
+
+    parameters:
+      output_dir: "logs/"
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+
+    criteria:
+      - "Residuals approximately normal (Shapiro-Wilk test)"
+      - "Homoscedasticity (Breusch-Pagan test)"
+      - "Random effects approximately normal"
+      - "No strong autocorrelation (ACF lag-1 < 0.1)"
+      - "No influential outliers (Cook's distance < 1.0)"
+      - "Model converged"
+
+    expected_output:
+      format: "Dict[valid: bool, diagnostics: Dict, plot_paths: List[Path], message: str]"
+      diagnostic_plots:
+        - "logs/qq_residuals.png"
+        - "logs/residuals_vs_fitted.png"
+        - "logs/qq_random_intercepts.png"
+        - "logs/qq_random_slopes.png"
+        - "logs/acf.png"
+        - "logs/cooks_distance.png"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug with diagnostic plots for investigation"
+
+    description: "Comprehensive 7-diagnostic LMM assumption validation with plots and remedial recommendations"
+    source_reference: "tools_inventory.md lines 404-413"
 
   validate_contrasts_d068:
     module: "tools.validation"
     function: "validate_contrasts_d068"
-    signature: "validate_contrasts_d068(contrasts_df: pd.DataFrame) -> Dict[str, Any]"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
 
-    purpose: "Validate Decision D068 compliance (dual p-value reporting) in contrast results"
+    input_files:
+      - path: "results/step03_age_effects.csv"
+        description: "Age effects table with dual p-values"
 
-    input_specification:
-      contrasts_df: "DataFrame with contrast results and p-value columns"
+    parameters:
+      required_p_cols: ["p_uncorrected", "p_bonferroni"]
 
-    output_specification:
+    criteria:
+      - "p_uncorrected column present"
+      - "At least one correction column present (p_bonferroni, p_tukey, or p_holm)"
+      - "Decision D068 dual reporting requirement"
+
+    expected_output:
       format: "Dict[str, Any]"
       fields:
         valid: "bool (True if D068 compliant)"
@@ -94,106 +186,226 @@ validation_tools:
         missing_cols: "List[str] (empty if compliant)"
         message: "str (compliance status or missing columns)"
 
-    validation_criteria:
-      - "p_uncorrected column present"
-      - "At least one correction column present (p_bonferroni, p_tukey, or p_holm)"
-      - "Both required for Decision D068 dual reporting"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_age_effects.log"
+      invoke: "g_debug if Bonferroni correction missing or incorrect"
 
-    usage_notes: "Pure validation function (no computation). Case-sensitive column names. Handles empty DataFrames."
-    source_reference: "tools_inventory.md lines 255-262"
-    introduced: "RQ 5.9 Step 3 (Age effects extraction with Bonferroni correction)"
+    description: "Validate Decision D068 compliance (dual p-value reporting) in age effects results"
+    source_reference: "tools_inventory.md lines 414-423"
 
-  validate_effect_sizes:
+  validate_hypothesis_test_dual_pvalues:
     module: "tools.validation"
-    function: "validate_effect_sizes"
-    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict"
 
-    purpose: "Validate Cohen's f² effect sizes are within reasonable bounds"
+    input_files:
+      - path: "results/step03_age_effects.csv"
+        description: "Age effects table to validate"
 
-    input_specification:
-      effect_sizes_df: "DataFrame containing effect sizes"
-      f2_column: "Column name for f² values (default: 'cohens_f2')"
+    parameters:
+      required_terms: ["Age_c", "Time:Age_c", "Time_log:Age_c"]
+      alpha_bonferroni: 0.0167
 
-    output_specification:
-      format: "Dict[str, Any]"
-      fields:
-        valid: "bool (True if all effect sizes valid)"
-        message: "str (validation summary)"
-        warnings: "List[str] (warnings for very large f² values)"
+    criteria:
+      - "All 3 age effect terms present (Age_c, Time:Age_c, Time_log:Age_c)"
+      - "Both p_uncorrected and p_bonferroni columns exist (Decision D068)"
+      - "p_bonferroni = min(p_uncorrected * 3, 1.0) for all rows"
 
-    validation_criteria:
-      - "No negative f² values (invalid)"
-      - "No NaN or infinite f² values (invalid)"
-      - "f² > 1.0 triggers warning (uncommon but valid)"
+    expected_output:
+      format: "Dict[valid: bool, d068_compliant: bool, missing_terms: List[str], missing_cols: List[str], message: str]"
 
-    cohen_guidelines:
-      small: "f² = 0.02"
-      medium: "f² = 0.15"
-      large: "f² = 0.35"
-      very_large: "f² > 1.0 (rare, triggers warning)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_age_effects.log"
+      invoke: "g_debug if terms missing or Bonferroni formula incorrect"
 
-    usage_notes: "Very large values trigger warnings but don't invalidate. Reports min/max range. Handles empty DataFrames."
-    source_reference: "tools_inventory.md lines 347-354"
-    introduced: "RQ 5.9 Step 4 (Age effect size computation validation)"
+    description: "Validate age effects include required terms AND Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md lines 424-433"
 
-  validate_probability_range:
+  validate_numeric_range:
     module: "tools.validation"
-    function: "validate_probability_range"
-    signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
 
-    purpose: "Validate probability values are in [0, 1] with no NaN/infinite values"
+    input_files:
+      - path: "results/step04_effect_size.csv"
+        description: "Effect size predictions to validate"
+      - path: "data/step01_lmm_input_prepared.csv"
+        description: "Prepared data with Age_c and Time_log to validate"
 
-    input_specification:
-      probability_df: "DataFrame with probability columns"
-      prob_columns: "List of column names to validate"
+    parameters:
+      step4_checks:
+        - column: "theta_predicted"
+          min_val: -4.0
+          max_val: 4.0
+        - column: "age_c"
+          min_val: -30.0
+          max_val: 30.0
+      step1_checks:
+        - column: "Age_c"
+          min_val: -30.0
+          max_val: 30.0
+        - column: "Time_log"
+          min_val: 0.0
+          max_val: 6.0
 
-    output_specification:
-      format: "Dict[str, Any]"
-      fields:
-        valid: "bool (True if all probabilities in [0, 1])"
-        message: "str (validation summary)"
-        violations: "List[Dict] (details per column if violations found)"
-
-    validation_criteria:
-      - "All probability values in [0, 1] (inclusive)"
+    criteria:
+      - "All values in specified [min_val, max_val] range (inclusive)"
       - "No NaN values"
       - "No infinite values"
-      - "Range is INCLUSIVE (0 and 1 are valid)"
 
-    usage_notes: "Checks multiple probability columns simultaneously. Returns detailed violation information per column. Used for validating IRT theta→probability transformations."
-    source_reference: "tools_inventory.md lines 359-366"
-    introduced: "RQ 5.9 Step 5 (Age tertile plot data validation)"
+    expected_output:
+      format: "Dict[valid: bool, message: str, out_of_range_count: int, violations: list]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug to investigate range violations"
+
+    description: "Validate numeric values fall within expected ranges for transformations and predictions"
+    source_reference: "tools_inventory.md lines 482-491"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict"
+
+    input_files:
+      - path: "data/step01_lmm_input_prepared.csv"
+        description: "Prepared data with Age_c to validate"
+
+    parameters:
+      column_names: ["Age_c"]
+      tolerance: 0.01
+
+    criteria:
+      - "Age_c has mean approximately 0 (|mean| < 0.01)"
+      - "Age_c SD matches original age SD (centering preserves spread)"
+
+    expected_output:
+      format: "Dict[valid: bool, message: str, mean_values: Dict[str, float], sd_values: Dict[str, float]]"
+
+    behavior_on_failure:
+      action: "Warning only (not fatal)"
+      log_to: "logs/step01_prepare_predictors.log"
+      invoke: "Report centering deviation but proceed"
+
+    description: "Validate grand-mean centering applied correctly to Age variable (mean ≈ 0, SD unchanged)"
+    source_reference: "tools_inventory.md lines 540-549"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict"
+
+    input_files:
+      - path: "plots/step05_age_tertile_plot_data.csv"
+        description: "Plot data produced by prepare_age_effects_plot_data"
+
+    parameters:
+      required_groups: ["Young", "Middle", "Older"]
+      required_timepoints: [0, 24, 72, 144]
+      group_col: "age_tertile"
+      timepoint_col: "TSVR_hours"
+
+    criteria:
+      - "All 3 age tertiles present (Young, Middle, Older)"
+      - "All 4 timepoints present (0, 24, 72, 144 hours)"
+      - "Complete factorial: 12 rows (3 tertiles x 4 timepoints)"
+      - "No missing data in observed/predicted columns"
+
+    expected_output:
+      format: "Dict[valid: bool, message: str, missing_domains: List[str], missing_groups: List[str]]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_prepare_plot_data.log"
+      invoke: "g_debug if factorial incomplete (missing tertile x timepoint combinations)"
+
+    description: "Verify all age tertiles and timepoints present in plot data (complete factorial design)"
+    source_reference: "tools_inventory.md lines 580-589"
+
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+    input_files: []
+
+    parameters:
+      files_to_check:
+        - path: "results/ch5/rq7/data/step03_theta_all.csv"
+          min_size_bytes: 1000
+        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          min_size_bytes: 1000
+        - path: "data/cache/dfData.csv"
+          min_size_bytes: 1000
+
+    criteria:
+      - "All 3 dependency files exist (RQ 5.7 outputs + dfData)"
+      - "Each file > 1KB (not empty or corrupted)"
+
+    expected_output:
+      format: "Dict[valid: bool, file_path: str, size_bytes: int, message: str]"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_extract_merge_data.log"
+      invoke: "Report cross-RQ dependency error - user must execute RQ 5.7 first"
+
+    description: "Validate cross-RQ dependencies exist before data merge (Step 0 prerequisite check)"
+    source_reference: "tools_inventory.md lines 334-341"
+
+  check_missing_data:
+    module: "tools.validation"
+    function: "check_missing_data"
+    signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_lmm_input_raw.csv"
+        description: "Merged data to check for NaN"
+
+    parameters:
+      tolerance: 0.0
+
+    criteria:
+      - "Zero NaN values tolerated in merged data (all columns complete)"
+      - "Expected N = 400 rows (100 participants x 4 tests)"
+
+    expected_output:
+      format: "Dict[has_missing: bool, total_missing: int, total_cells: int, percent_missing: float, missing_by_column: Dict[str, int]]"
+
+    behavior_on_failure:
+      action: "raise ValueError with UIDs missing Age"
+      log_to: "logs/step00_extract_merge_data.log"
+      invoke: "g_debug to investigate data source quality (dfData.csv Age column)"
+
+    description: "Comprehensive missing data check after merge - identifies problematic participants"
+    source_reference: "tools_inventory.md lines 383-391"
 
 summary:
-  analysis_tools_count: 0
-  validation_tools_count: 5
-  total_unique_tools: 5
+  analysis_tools_count: 1
+  validation_tools_count: 10
+  total_unique_tools: 11
   stdlib_functions_used:
-    - "pandas: merge, mean, std, log, qcut (tertiles)"
-    - "statsmodels: MixedLM (LMM fitting)"
+    - "pandas: merge, mean, std, log, qcut (data operations)"
+    - "statsmodels.formula.api: mixedlm (LMM fitting)"
     - "numpy: arithmetic operations"
-  notes:
-    - "RQ 5.9 uses only standard library analysis functions (no custom tools/ analysis required)"
-    - "All 5 validation tools verified in tools_inventory.md"
-    - "Decision D068 enforced via validate_contrasts_d068"
-    - "Each validation tool listed ONCE (deduplication across steps)"
-    - "rq_analysis will map these tools to specific steps in 4_analysis.yaml"
+  mandatory_decisions_embedded:
+    - decision: "D068"
+      enforcement: "validate_contrasts_d068 + validate_hypothesis_test_dual_pvalues"
+      requirement: "Dual p-value reporting (uncorrected + Bonferroni)"
+    - decision: "D070"
+      enforcement: "LMM formula uses TSVR_hours not nominal days"
+      requirement: "Actual time since encoding as time variable"
 
-mandatory_decisions_embedded:
-  - decision: "D068"
-    tool: "validate_contrasts_d068"
-    requirement: "Dual p-value reporting (uncorrected + Bonferroni)"
-    steps: ["Step 3"]
-  - decision: "D070"
-    tool: "N/A (LMM formula enforces this)"
-    requirement: "TSVR_hours as time variable (not nominal days)"
-    steps: ["Step 0", "Step 2"]
-
-cross_rq_dependencies:
-  - source_rq: "RQ 5.7"
-    files:
-      - "results/ch5/rq7/data/step03_theta_all.csv"
-      - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
-    usage: "Step 0 input data (theta scores + TSVR mapping)"
-
-# END OF TOOL CATALOG
+notes:
+  - "RQ 5.9 uses DERIVED data from RQ 5.7 (theta scores for 'All' composite factor)"
+  - "prepare_age_effects_plot_data is the ONLY custom analysis tool required"
+  - "All other analysis operations use stdlib (pandas, statsmodels, numpy)"
+  - "Cross-RQ dependency validated in Step 0 via check_file_exists"
+  - "Age_c grand-mean centering makes intercept interpretable (average-aged adult baseline)"
+  - "Lin+Log functional form inherited from RQ 5.7 best model selection"
+  - "Bonferroni correction: alpha = 0.0167 for 3 age effects tested (baseline + 2 slopes)"
+  - "Each tool listed ONCE (deduplication) - rq_analysis maps to steps in 4_analysis.yaml"

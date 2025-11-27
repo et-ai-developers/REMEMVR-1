@@ -341,7 +341,7 @@ If EITHER 3-way interaction (linear or log) is significant at Bonferroni-correct
   - Number of observations, groups
   - Convergence status
 
-**File 3:** results/step02_fixed_effects.csv
+**File 3:** data/step02_fixed_effects.csv
 **Format:** CSV with fixed effects table
 **Columns:**
   - term (string, coefficient name)
@@ -361,7 +361,7 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 *Output Files:*
 - results/step02_lmm_model.pkl: pickle file exists (fitted model object)
 - results/step02_lmm_summary.txt: text file exists
-- results/step02_fixed_effects.csv: ~20 rows x 7 columns (term: object, estimate: float64, se: float64, z: float64, p: float64, CI_lower: float64, CI_upper: float64)
+- data/step02_fixed_effects.csv: ~20 rows x 7 columns (term: object, estimate: float64, se: float64, z: float64, p: float64, CI_lower: float64, CI_upper: float64)
 
 *Value Ranges:*
 - estimate: unrestricted (can be positive or negative)
@@ -568,7 +568,7 @@ Generate diagnostic plots and statistical tests for LMM assumptions. Report resu
 **Format:** Pickle file (fitted statsmodels MixedLM object with selected random structure)
 **Note:** Replaces Step 2 output with selected model, refit with REML=False
 
-**File 3:** results/step02_fixed_effects.csv (UPDATED)
+**File 3:** data/step02_fixed_effects.csv (UPDATED)
 **Format:** CSV with fixed effects table from selected model
 **Note:** Replaces Step 2 output with fixed effects from selected model
 
@@ -580,7 +580,7 @@ Validation tools MUST be used after model selection tool execution. Specific val
 *Output Files:*
 - results/step02c_model_selection.txt: text file exists
 - results/step02_lmm_model.pkl: pickle file exists (updated with selected model)
-- results/step02_fixed_effects.csv: CSV file exists (updated with selected model fixed effects)
+- data/step02_fixed_effects.csv: CSV file exists (updated with selected model fixed effects)
 
 *Value Ranges:*
 - -2 log-likelihood < 0 (log-likelihood is negative, -2LL is positive)
@@ -624,7 +624,7 @@ Fit 3 candidate random effects structures, compare via LRT, select most parsimon
 **File 1:** results/step02_lmm_model.pkl (from Step 2c - selected model, REML=False)
 **Format:** Pickle file (fitted statsmodels MixedLM object)
 
-**File 2:** results/step02_fixed_effects.csv (from Step 2c - selected model fixed effects)
+**File 2:** data/step02_fixed_effects.csv (from Step 2c - selected model fixed effects)
 **Format:** CSV with columns: term, estimate, se, z, p, CI_lower, CI_upper
 **Expected Rows:** ~20 rows (all fixed effects terms)
 
@@ -651,7 +651,7 @@ Fit 3 candidate random effects structures, compare via LRT, select most parsimon
 
 **Output:**
 
-**File 1:** results/step03_interaction_terms.csv
+**File 1:** data/step03_interaction_terms.csv
 **Format:** CSV with 3-way interaction terms only
 **Columns:** term, estimate, se, z, p, p_bonferroni, CI_lower, CI_upper
 **Expected Rows:** 4 (two linear + two log 3-way interactions)
@@ -679,7 +679,7 @@ Validation tools MUST be used after hypothesis testing tool execution. Specific 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step03_interaction_terms.csv: 4 rows x 8 columns (term: object, estimate: float64, se: float64, z: float64, p: float64, p_bonferroni: float64, CI_lower: float64, CI_upper: float64)
+- data/step03_interaction_terms.csv: 4 rows x 8 columns (term: object, estimate: float64, se: float64, z: float64, p: float64, p_bonferroni: float64, CI_lower: float64, CI_upper: float64)
 - results/step03_hypothesis_test.txt: text file exists
 
 *Value Ranges:*
@@ -730,7 +730,7 @@ Extract 4 three-way interaction terms, apply Bonferroni correction (alpha = 0.02
 **File 1:** results/step02_lmm_model.pkl (from Step 2c - selected model)
 **Format:** Pickle file (fitted statsmodels MixedLM object)
 
-**File 2:** results/step02_fixed_effects.csv (from Step 2c - all fixed effects)
+**File 2:** data/step02_fixed_effects.csv (from Step 2c - all fixed effects)
 **Format:** CSV with columns: term, estimate, se, z, p, CI_lower, CI_upper
 
 **Processing:**
@@ -754,7 +754,7 @@ Extract 4 three-way interaction terms, apply Bonferroni correction (alpha = 0.02
 
 **Output:**
 
-**File 1:** results/step04_age_effects_by_domain.csv
+**File 1:** data/step04_age_effects_by_domain.csv
 **Format:** CSV with domain-specific age effects
 **Columns:**
   - domain (string, What/Where/When)
@@ -767,7 +767,7 @@ Extract 4 three-way interaction terms, apply Bonferroni correction (alpha = 0.02
 **Expected Rows:** 3 (one per domain)
 **Interpretation:** Negative age_effect means older adults show steeper forgetting (worse memory retention)
 
-**File 2:** results/step04_post_hoc_contrasts.csv
+**File 2:** data/step04_post_hoc_contrasts.csv
 **Format:** CSV with pairwise domain comparisons
 **Columns:**
   - contrast (string, e.g., "Where vs What", "When vs What", "Where vs When")
@@ -802,8 +802,8 @@ Validation tools MUST be used after post-hoc contrast tool execution. Specific v
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step04_age_effects_by_domain.csv: 3 rows x 7 columns (domain: object, age_effect: float64, se: float64, z: float64, p: float64, CI_lower: float64, CI_upper: float64)
-- results/step04_post_hoc_contrasts.csv: 3 rows x 8 columns (contrast: object, estimate: float64, se: float64, z: float64, p_uncorrected: float64, p_tukey: float64, CI_lower: float64, CI_upper: float64)
+- data/step04_age_effects_by_domain.csv: 3 rows x 7 columns (domain: object, age_effect: float64, se: float64, z: float64, p: float64, CI_lower: float64, CI_upper: float64)
+- data/step04_post_hoc_contrasts.csv: 3 rows x 8 columns (contrast: object, estimate: float64, se: float64, z: float64, p_uncorrected: float64, p_tukey: float64, CI_lower: float64, CI_upper: float64)
 - results/step04_summary.txt: text file exists
 
 *Value Ranges:*
@@ -865,7 +865,7 @@ Compute age effect on forgetting rate for each domain (What, Where, When), perfo
 **File 2:** results/step02_lmm_model.pkl (from Step 2c - selected model)
 **Format:** Pickle file (for generating model predictions)
 
-**File 3:** results/step04_age_effects_by_domain.csv (from Step 4)
+**File 3:** data/step04_age_effects_by_domain.csv (from Step 4)
 **Format:** CSV with domain-specific age effects
 
 **Processing:**
@@ -913,7 +913,7 @@ Compute age effect on forgetting rate for each domain (What, Where, When), perfo
 **Required Data Sources:**
 - data/step01_lmm_input.csv (theta, TSVR, age for observed means)
 - results/step02_lmm_model.pkl (model predictions)
-- results/step04_age_effects_by_domain.csv (domain-specific effects for interpretation)
+- data/step04_age_effects_by_domain.csv (domain-specific effects for interpretation)
 
 **Aggregation Logic:**
 1. Create age tertiles from continuous age variable (tertiles for visualization only)
@@ -1189,11 +1189,11 @@ This is not optional. This is the core architectural principle preventing cascad
 
 **Primary Outputs:**
 - results/step02_lmm_model.pkl (fitted LMM with selected random structure)
-- results/step02_fixed_effects.csv (all fixed effects coefficients)
-- results/step03_interaction_terms.csv (3-way Age x Domain x Time interactions)
+- data/step02_fixed_effects.csv (all fixed effects coefficients)
+- data/step03_interaction_terms.csv (3-way Age x Domain x Time interactions)
 - results/step03_hypothesis_test.txt (hypothesis decision: age effects differ by domain?)
-- results/step04_age_effects_by_domain.csv (domain-specific age effects on forgetting)
-- results/step04_post_hoc_contrasts.csv (pairwise domain comparisons with Tukey HSD)
+- data/step04_age_effects_by_domain.csv (domain-specific age effects on forgetting)
+- data/step04_post_hoc_contrasts.csv (pairwise domain comparisons with Tukey HSD)
 - plots/step05_age_effects_plot_data.csv (plot source CSV for age effects visualization)
 
 **Validation Coverage:** 100% (all 6 steps have validation requirements)

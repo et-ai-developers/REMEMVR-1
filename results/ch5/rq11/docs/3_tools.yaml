@@ -1,176 +1,594 @@
 # 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
-# Created by: rq_tools agent
-# RQ: 5.11 - IRT-CTT Convergent Validity
+# Created by: rq_tools agent (Step 11 workflow)
+# Date: 2025-11-27
+# RQ: 5.11 - IRT-CTT Convergent Validity Comparison
 # Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
-# Date: 2025-11-26
-
-# CRITICAL NOTE: This RQ primarily uses standard library functions (pandas, scipy, statsmodels, sklearn)
-# which are EXEMPT from tools_inventory.md verification per best practices.
-# Only custom tools/ module functions are cataloged below.
 
 analysis_tools:
-  fit_lmm_trajectory_tsvr:
-    module: "tools.analysis_lmm"
-    function: "fit_lmm_trajectory_tsvr"
-    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+  compute_ctt_scores:
+    module: "pandas"
+    function: "DataFrame.groupby"
+    signature: "DataFrame.groupby(by: Union[str, List[str]], **kwargs) -> DataFrameGroupBy"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/step00_raw_data_filtered.csv"
+        required_columns: ["UID", "TEST", "item_columns (variable count)"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          UID: "string (participant identifier)"
+          TEST: "string (test session: T1, T2, T3, T4)"
+          item_columns: "float64 (values: 0, 1, NaN)"
+
+      - path: "data/step00_purified_items.csv"
+        required_columns: ["item_name", "dimension", "a", "b"]
+        expected_rows: "~40-60 (purified items from RQ 5.1)"
+        data_types:
+          item_name: "string (item tag)"
+          dimension: "string (domain)"
+          a: "float64 (discrimination)"
+          b: "float64 (difficulty)"
+
+    output_files:
+      - path: "data/step01_ctt_scores.csv"
+        columns: ["composite_ID", "UID", "test", "domain", "CTT_score", "n_items"]
+        description: "CTT mean scores per UID x test x domain (long format)"
+
+    parameters:
+      aggregation: "mean"
+      na_rm: true
+      domain_mapping:
+        What: "'-N-' tag pattern"
+        Where: "'-L-', '-U-', '-D-' tag patterns (aggregate all three)"
+        When: "'-O-' tag pattern"
+
+    description: "Compute CTT (Classical Test Theory) mean scores per UID x test x domain using same purified item set as RQ 5.1 IRT for fair comparison"
+    source_reference: "Standard pandas aggregation (not in tools_inventory.md - stdlib function)"
+
+  compute_correlations_holm_bonferroni:
+    module: "scipy.stats"
+    function: "pearsonr"
+    signature: "pearsonr(x: ndarray, y: ndarray) -> Tuple[float, float]"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step00_irt_theta_loaded.csv"
+        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        expected_rows: "~400"
+        source: "RQ 5.1 IRT theta scores"
+
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["composite_ID", "domain", "CTT_score"]
+        expected_rows: "1200"
+        source: "Step 1 CTT computation"
+
+    output_files:
+      - path: "results/step02_correlations.csv"
+        columns: ["domain", "r", "CI_lower", "CI_upper", "p_uncorrected", "p_holm", "n", "threshold_0.70", "threshold_0.90"]
+        description: "Pearson correlations (IRT vs CTT) with Holm-Bonferroni correction per Decision D068"
+
+    parameters:
+      correlation_type: "pearson"
+      ci_level: 0.95
+      fisher_z_transform: true
+      correction_method: "holm-bonferroni"
+      m_tests: 4
+      alpha: 0.05
+      thresholds: [0.70, 0.90]
+
+    description: "Compute Pearson correlations between IRT theta and CTT mean scores for each domain, test significance with Holm-Bonferroni correction per Decision D068 dual p-value reporting"
+    source_reference: "scipy.stats.pearsonr (stdlib) + custom Holm-Bonferroni implementation"
+
+  fit_parallel_lmms:
+    module: "statsmodels.regression.mixed_linear_model"
+    function: "MixedLM"
+    signature: "MixedLM(endog: ndarray, exog: ndarray, groups: ndarray, exog_re: Optional[ndarray] = None, **kwargs) -> MixedLMResults"
     validation_tool: "validate_lmm_convergence"
 
-    description: "Fit Linear Mixed Model using TSVR (actual hours since encoding) as time variable per Decision D070"
+    input_files:
+      - path: "data/step00_irt_theta_loaded.csv"
+        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        expected_rows: "~400"
 
-    input_requirements:
-      theta_scores:
-        type: "pd.DataFrame"
-        columns: ["composite_ID", "domain_name", "theta"]
-        description: "Ability estimates in long format"
-      tsvr_data:
-        type: "pd.DataFrame"
-        columns: ["UID", "Test", "TSVR_hours"]
-        description: "Time Since VR mapping per participant × test"
-      formula:
-        type: "str"
-        example: "theta ~ (time_linear + time_log) * domain"
-        description: "Fixed effects formula (R-style)"
-      groups:
-        type: "str"
-        default: "UID"
-        description: "Grouping variable for random effects"
-      re_formula:
-        type: "str"
-        default: "~Days"
-        example: "~time_linear"
-        description: "Random effects formula"
-      reml:
-        type: "bool"
-        default: false
-        description: "Use REML estimation (False = ML for model comparison)"
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["composite_ID", "UID", "test", "domain", "CTT_score"]
+        expected_rows: "1200"
 
-    output_specification:
-      type: "statsmodels.regression.mixed_linear_model.MixedLMResults"
-      attributes:
-        - "fe_params (fixed effects coefficients)"
-        - "bse (standard errors)"
-        - "pvalues (p-values)"
-        - "aic (Akaike Information Criterion)"
-        - "bic (Bayesian Information Criterion)"
-        - "converged (convergence status)"
+      - path: "data/step00_tsvr_loaded.csv"
+        required_columns: ["UID", "test", "TSVR_hours"]
+        expected_rows: "~400"
 
-    usage_notes:
-      - "Used in Step 2 (IRT model) and Step 3 (CTT model) with IDENTICAL formulas"
-      - "Random effects structure MUST match between IRT and CTT models (parallel comparison requirement)"
-      - "If convergence fails, simplify random effects from slopes to intercepts only"
-      - "Document any simplification in logs"
+    output_files:
+      - path: "data/step03_irt_lmm_input.csv"
+        columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "IRT_score"]
+        description: "Long-format IRT LMM input (1200 rows)"
 
-    source_reference: "tools_inventory.md line 97-103"
+      - path: "data/step03_ctt_lmm_input.csv"
+        columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "CTT_score"]
+        description: "Long-format CTT LMM input (1200 rows)"
+
+      - path: "results/step03_irt_lmm_summary.txt"
+        description: "IRT model summary (fixed effects, random effects, AIC, BIC)"
+
+      - path: "results/step03_ctt_lmm_summary.txt"
+        description: "CTT model summary (fixed effects, random effects, AIC, BIC)"
+
+      - path: "results/step03_irt_lmm_fixed_effects.csv"
+        columns: ["term", "estimate", "SE", "z", "p_uncorrected"]
+        description: "IRT model fixed effects table (~10 rows)"
+
+      - path: "results/step03_ctt_lmm_fixed_effects.csv"
+        columns: ["term", "estimate", "SE", "z", "p_uncorrected"]
+        description: "CTT model fixed effects table (~10 rows)"
+
+      - path: "logs/step03_convergence_report.txt"
+        description: "Convergence decisions and random structure simplifications"
+
+    parameters:
+      formula: "Score ~ (TSVR_hours + log(TSVR_hours + 1)) * domain"
+      re_formula: "TSVR_hours | UID"
+      groups: "UID"
+      method: "REML"
+      time_variable: "TSVR_hours"
+      convergence_strategy: "attempt random slopes, simplify to intercepts only if either model fails"
+      identical_structure: true
+
+    description: "Fit parallel LMMs (IRT model + CTT model) with identical structure using TSVR time variable per Decision D070. Implements convergence-aware simplification strategy (N=100 may require random intercepts only per Bates et al. 2015)."
+    source_reference: "statsmodels.regression.mixed_linear_model.MixedLM (stdlib)"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "check_file_exists"
+
+    input_files:
+      - path: "results/step03_irt_lmm_summary.txt"
+        source: "Step 3 fitted IRT model"
+
+      - path: "results/step03_ctt_lmm_summary.txt"
+        source: "Step 3 fitted CTT model"
+
+      - path: "data/step03_irt_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "IRT_score"]
+
+      - path: "data/step03_ctt_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "CTT_score"]
+
+    output_files:
+      - path: "results/step04_irt_assumptions_report.txt"
+        description: "IRT model assumption diagnostics (Shapiro-Wilk, homoscedasticity, ACF)"
+
+      - path: "results/step04_ctt_assumptions_report.txt"
+        description: "CTT model assumption diagnostics"
+
+      - path: "plots/step04_irt_diagnostics.png"
+        format: "PNG (800x600 @ 300 DPI)"
+        description: "IRT model diagnostic plots (2x2 grid)"
+
+      - path: "plots/step04_ctt_diagnostics.png"
+        format: "PNG (800x600 @ 300 DPI)"
+        description: "CTT model diagnostic plots (2x2 grid)"
+
+      - path: "results/step04_assumptions_comparison.csv"
+        columns: ["model", "residual_normality_p", "residual_normality_pass", "homoscedasticity_pass", "random_effects_normality_pass", "acf_lag1_mean", "acf_lag1_pass", "overall_pass", "remedial_action"]
+        description: "Assumption test results comparison (2 rows: IRT, CTT)"
+
+    parameters:
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+      parallel_remediation: true
+      diagnostics:
+        - "residual_normality"
+        - "homoscedasticity"
+        - "random_effects_normality"
+        - "autocorrelation"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics (normality, homoscedasticity, Q-Q, ACF, linearity, outliers, convergence). Applies same remediation to BOTH models to maintain parallelism per RQ 5.11 concept.md requirement."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_assumptions_comprehensive"
+
+  compare_coefficients_cohens_kappa:
+    module: "pandas"
+    function: "DataFrame.merge"
+    signature: "DataFrame.merge(right: DataFrame, how: str = 'inner', on: Union[str, List[str]] = None, **kwargs) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "results/step03_irt_lmm_fixed_effects.csv"
+        required_columns: ["term", "estimate", "SE", "z", "p_uncorrected"]
+        expected_rows: "~10"
+
+      - path: "results/step03_ctt_lmm_fixed_effects.csv"
+        required_columns: ["term", "estimate", "SE", "z", "p_uncorrected"]
+        expected_rows: "~10"
+
+    output_files:
+      - path: "results/step05_coefficient_comparison.csv"
+        columns: ["term", "estimate_irt", "SE_irt", "p_irt", "sig_irt", "estimate_ctt", "SE_ctt", "p_ctt", "sig_ctt", "agreement", "beta_ratio", "discrepancy_flag"]
+        description: "Coefficient comparison with significance agreement (~10 rows)"
+
+      - path: "results/step05_agreement_metrics.csv"
+        columns: ["metric", "value", "threshold", "pass"]
+        description: "Agreement metrics (3 rows: raw_agreement_percent, cohens_kappa_all, cohens_kappa_interactions)"
+
+    parameters:
+      alpha: 0.05
+      kappa_threshold: 0.60
+      agreement_threshold: 0.80
+      discrepancy_multiplier: 2.0
+      focus_terms:
+        - "TSVR_hours:domain"
+        - "log(TSVR_hours+1):domain"
+
+    description: "Extract and compare fixed effects from both models, calculate Cohen's kappa for significance agreement (accounts for chance agreement per Landis & Koch 1977), flag discrepancies beyond scaling differences"
+    source_reference: "Custom Cohen's kappa implementation (not in tools_inventory.md - standard statistical metric)"
+
+  compare_model_fit_aic_bic:
+    module: "pandas"
+    function: "DataFrame constructor"
+    signature: "DataFrame(data: Optional[Union[Dict, List, ndarray]] = None, **kwargs) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "results/step03_irt_lmm_summary.txt"
+        description: "Contains AIC and BIC values for IRT model"
+
+      - path: "results/step03_ctt_lmm_summary.txt"
+        description: "Contains AIC and BIC values for CTT model"
+
+    output_files:
+      - path: "results/step06_model_fit_comparison.csv"
+        columns: ["model", "AIC", "BIC", "delta_AIC", "delta_BIC", "interpretation"]
+        description: "Model fit comparison (2 rows: IRT, CTT)"
+
+    parameters:
+      thresholds:
+        equivalent: 2.0
+        moderate: 10.0
+      delta_computation: "CTT - IRT"
+
+    description: "Parse AIC and BIC from model summaries, compute deltas (CTT - IRT), interpret per concept.md thresholds (|delta| < 2 = equivalent, |delta| > 10 = substantial difference)"
+    source_reference: "Standard pandas operations (stdlib)"
+
+  prepare_plot_data_scatterplot:
+    module: "pandas"
+    function: "DataFrame.merge"
+    signature: "DataFrame.merge(right: DataFrame, how: str = 'inner', on: Union[str, List[str]] = None, **kwargs) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step00_irt_theta_loaded.csv"
+        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        expected_rows: "~400"
+
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["composite_ID", "domain", "CTT_score"]
+        expected_rows: "1200"
+
+      - path: "results/step02_correlations.csv"
+        required_columns: ["domain", "r"]
+        expected_rows: "4"
+
+    output_files:
+      - path: "plots/step07_scatterplot_data.csv"
+        columns: ["composite_ID", "domain", "IRT_score", "CTT_score", "r"]
+        description: "Scatterplot source data (1200 rows = 400 UID x test x 3 domains)"
+
+    parameters:
+      reshape_irt: true
+      domain_mapping:
+        theta_common: "What"
+        theta_congruent: "Where"
+        theta_incongruent: "When"
+      merge_keys: ["composite_ID", "domain"]
+
+    description: "Reshape IRT theta to long format, merge with CTT scores, add correlation annotations for scatterplot with regression lines (Option B architecture per Decision D069)"
+    source_reference: "Standard pandas operations (stdlib)"
+
+  prepare_plot_data_trajectory:
+    module: "pandas"
+    function: "DataFrame.groupby"
+    signature: "DataFrame.groupby(by: Union[str, List[str]], **kwargs) -> DataFrameGroupBy"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step03_irt_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "IRT_score"]
+        expected_rows: "1200"
+
+      - path: "data/step03_ctt_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "CTT_score"]
+        expected_rows: "1200"
+
+    output_files:
+      - path: "plots/step08_trajectory_data.csv"
+        columns: ["TSVR_hours", "domain", "model", "mean_score", "CI_lower", "CI_upper", "n"]
+        description: "Trajectory plot source data (~24 rows = 4 timepoints x 3 domains x 2 models)"
+
+    parameters:
+      aggregation: "mean"
+      ci_level: 0.95
+      groupby_keys: ["TSVR_hours", "domain"]
+      model_identifier:
+        IRT: "IRT"
+        CTT: "CTT"
+
+    description: "Aggregate observed means per timepoint x domain x model, compute 95% CIs, stack IRT and CTT datasets for trajectory comparison plot with overlaid lines (Option B architecture)"
+    source_reference: "Standard pandas operations (stdlib)"
 
 validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["composite_ID", "UID", "test", "domain", "CTT_score", "n_items"]
+        source: "compute_ctt_scores output"
+
+    parameters:
+      required_columns: ["composite_ID", "UID", "test", "domain", "CTT_score", "n_items"]
+      expected_row_count: 1200
+      expected_domains: ["What", "Where", "When"]
+
+    criteria:
+      - "Exactly 1200 rows (400 UID x test x 3 domains)"
+      - "All required columns present (6 columns)"
+      - "All 3 domains present (What, Where, When)"
+      - "CTT_score in [0, 1] (proportion correct)"
+      - "n_items > 0 (at least 1 item per domain)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (empty if valid)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_ctt.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate CTT score computation output has correct structure, row count, and value ranges"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step02_correlations.csv"
+        required_columns: ["domain", "r", "CI_lower", "CI_upper", "p_uncorrected", "p_holm"]
+        source: "compute_correlations_holm_bonferroni output"
+
+    parameters:
+      required_cols: ["p_uncorrected", "p_holm"]
+      alpha: 0.05
+      expected_rows: 4
+
+    criteria:
+      - "BOTH p_uncorrected AND p_holm columns present (Decision D068 dual p-value reporting)"
+      - "r values in [-1, 1] (correlation coefficient bounds)"
+      - "CI_lower < r < CI_upper (confidence interval brackets point estimate)"
+      - "p_holm >= p_uncorrected (correction cannot make p-value smaller)"
+      - "Exactly 4 rows (What, Where, When, Overall)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_correlations.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate correlation results include Decision D068 dual p-value reporting (uncorrected + Holm-Bonferroni correction)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_correlation_test_d068"
+
   validate_lmm_convergence:
     module: "tools.validation"
     function: "validate_lmm_convergence"
     signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
-    description: "Check LMM model convergence status and warnings"
+    input_files:
+      - path: "results/step03_irt_lmm_summary.txt"
+        source: "fit_parallel_lmms IRT model output"
 
-    input_requirements:
-      lmm_result:
-        type: "statsmodels.regression.mixed_linear_model.MixedLMResults"
-        description: "Fitted LMM model object from fit_lmm_trajectory_tsvr"
+      - path: "results/step03_ctt_lmm_summary.txt"
+        source: "fit_parallel_lmms CTT model output"
 
-    output_specification:
-      type: "Dict[str, Any]"
-      required_keys:
-        converged:
-          type: "bool"
-          description: "True if model converged successfully"
-        message:
-          type: "str"
-          description: "Human-readable convergence status message"
-        warnings:
-          type: "list"
-          description: "List of convergence warnings (empty if converged=True)"
+    parameters:
+      check_singularity: true
+      min_observations: 100
 
-    validation_criteria:
+    criteria:
       - "Model converged (no convergence warnings)"
       - "No singular fit (random effects variance > 0)"
+      - "Minimum 100 observations used"
       - "All fixed effects have finite estimates (no NaN/Inf)"
+      - "BOTH models converged OR BOTH simplified to same random structure (parallelism requirement)"
 
-    expected_behavior_on_failure:
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        convergence_status: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
       action: "raise ValueError"
-      message_format: "LMM convergence failed: {specific_issue}"
-      log_destination: "logs/stepNN_*.log"
+      log_to: "logs/step03_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
 
-    usage_notes:
-      - "Run immediately after fit_lmm_trajectory_tsvr in Steps 2 and 3"
-      - "If validation fails, g_debug investigates model specification or data quality"
+    description: "Validate LMM convergence for both IRT and CTT models, enforce identical random structure requirement"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
 
-    source_reference: "tools_inventory.md line 177-183"
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
 
-standard_library_tools:
-  # NOTE: These are NOT custom tools/ module functions, but documented here for completeness
-  # They are EXEMPT from tools_inventory.md verification per best practices
+    input_files: []
 
-  pandas_operations:
-    description: "Data extraction, merging, CTT computation (Step 0)"
-    operations:
-      - "pd.read_csv() - Load RQ 5.1 outputs and dfData.csv"
-      - "pd.merge() - Merge IRT scores, TSVR, and raw data"
-      - "df.groupby().mean() - Compute CTT scores per domain"
-      - "df.pivot() / df.melt() - Reshape wide <-> long format"
-    usage: "Step 0 data extraction and preparation"
+    parameters:
+      files_to_check:
+        - path: "results/step04_irt_assumptions_report.txt"
+          min_size_bytes: 500
+        - path: "results/step04_ctt_assumptions_report.txt"
+          min_size_bytes: 500
+        - path: "plots/step04_irt_diagnostics.png"
+          min_size_bytes: 10000
+        - path: "plots/step04_ctt_diagnostics.png"
+          min_size_bytes: 10000
+        - path: "results/step04_assumptions_comparison.csv"
+          min_size_bytes: 100
 
-  scipy_stats:
-    description: "Correlation analysis with Holm-Bonferroni correction (Step 1)"
-    functions:
-      - "scipy.stats.pearsonr() - Compute Pearson correlation coefficient"
-      - "statsmodels.stats.multitest.multipletests() - Holm-Bonferroni correction"
-    usage: "Step 1 correlation analysis"
+    criteria:
+      - "All 5 output files exist (2 text reports, 2 PNG plots, 1 comparison CSV)"
+      - "Text reports > 500 characters (comprehensive diagnostics)"
+      - "PNG files > 10KB (not empty/corrupted)"
+      - "CSV file > 100 bytes (valid table)"
 
-  assumption_diagnostics:
-    description: "LMM assumption validation (Step 4)"
-    functions:
-      - "scipy.stats.shapiro() - Shapiro-Wilk normality test for residuals"
-      - "statsmodels.graphics.gofplots.qqplot() - Q-Q plot for normality"
-      - "statsmodels.stats.stattools.durbin_watson() - Autocorrelation test"
-      - "statsmodels.stats.outliers_influence.variance_inflation_factor() - VIF for multicollinearity"
-      - "matplotlib.pyplot - Diagnostic plots (residuals vs fitted, ACF)"
-    usage: "Step 4 comprehensive LMM assumption checks"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        file_path: "str"
+        size_bytes: "int"
+        message: "str"
 
-  agreement_analysis:
-    description: "Significance agreement metrics (Step 5)"
-    functions:
-      - "sklearn.metrics.cohen_kappa_score() - Cohen's kappa statistic"
-      - "pandas DataFrame operations - Contingency table construction"
-    usage: "Step 5 IRT vs CTT significance agreement"
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step04_validate_assumptions.log"
+      invoke: "g_debug (master invokes after error)"
 
-  plotting:
-    description: "Comparison visualizations (Step 7)"
-    functions:
-      - "matplotlib.pyplot - Trajectory plots, scatterplots"
-      - "seaborn - Enhanced aesthetics (optional)"
-    usage: "Step 7 IRT vs CTT comparison plots"
+    description: "Validate all assumption diagnostic outputs were created successfully with non-trivial content"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - check_file_exists"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step05_coefficient_comparison.csv"
+        required_columns: ["term", "estimate_irt", "SE_irt", "p_irt", "sig_irt", "estimate_ctt", "SE_ctt", "p_ctt", "sig_ctt", "agreement", "beta_ratio", "discrepancy_flag"]
+        source: "compare_coefficients_cohens_kappa output"
+
+      - path: "results/step05_agreement_metrics.csv"
+        required_columns: ["metric", "value", "threshold", "pass"]
+        source: "compare_coefficients_cohens_kappa output"
+
+      - path: "results/step06_model_fit_comparison.csv"
+        required_columns: ["model", "AIC", "BIC", "delta_AIC", "delta_BIC", "interpretation"]
+        source: "compare_model_fit_aic_bic output"
+
+    parameters:
+      coefficient_comparison:
+        expected_rows: [8, 12]
+        expected_columns: 12
+      agreement_metrics:
+        expected_rows: 3
+        expected_columns: 4
+      model_fit_comparison:
+        expected_rows: 2
+        expected_columns: 6
+
+    criteria:
+      - "Row counts in expected ranges (~10 coefficients, 3 metrics, 2 models)"
+      - "All required columns present (no missing columns)"
+      - "No NaN in p-values or estimates (all coefficients computed)"
+      - "Cohen's kappa in [-1, 1] range"
+      - "AIC/BIC > 0 (information criteria valid)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_compare_coefficients.log or logs/step06_compare_fit.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame structure (rows, columns, types) for coefficient comparison, agreement metrics, and model fit comparison outputs"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_dataframe_structure"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "plots/step07_scatterplot_data.csv"
+        required_columns: ["composite_ID", "domain", "IRT_score", "CTT_score", "r"]
+        source: "prepare_plot_data_scatterplot output"
+
+      - path: "plots/step08_trajectory_data.csv"
+        required_columns: ["TSVR_hours", "domain", "model", "mean_score", "CI_lower", "CI_upper", "n"]
+        source: "prepare_plot_data_trajectory output"
+
+    parameters:
+      scatterplot:
+        required_domains: ["What", "Where", "When"]
+        expected_rows: 1200
+        domain_col: "domain"
+      trajectory:
+        required_domains: ["What", "Where", "When"]
+        required_models: ["IRT", "CTT"]
+        expected_rows: [20, 30]
+        domain_col: "domain"
+        model_col: "model"
+
+    criteria:
+      - "All 3 domains present (What, Where, When)"
+      - "For trajectory: both models present (IRT, CTT)"
+      - "No missing categories (complete factorial design)"
+      - "IRT_score in [-3, 3] (typical IRT ability range)"
+      - "CTT_score in [0, 1] (proportion correct)"
+      - "CI_lower < mean_score < CI_upper (confidence bounds bracket mean)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_prepare_scatterplot.log or logs/step08_prepare_trajectory.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Verify all domains/models present in plot data for complete visualizations (no missing categories that would create incomplete plots)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_plot_data_completeness"
 
 summary:
-  analysis_tools_count: 1
-  validation_tools_count: 1
-  standard_library_tools_count: 5
-  total_cataloged_tools: 7
-
+  analysis_tools_count: 9
+  validation_tools_count: 7
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D068", "D070"]
+  stdlib_tools: ["pandas.DataFrame.groupby", "pandas.DataFrame.merge", "scipy.stats.pearsonr", "statsmodels.regression.mixed_linear_model.MixedLM"]
+  custom_tools: ["tools.validation.validate_lmm_assumptions_comprehensive", "tools.validation.validate_correlation_test_d068", "tools.validation.validate_lmm_convergence", "tools.validation.check_file_exists", "tools.validation.validate_data_format", "tools.validation.validate_dataframe_structure", "tools.validation.validate_plot_data_completeness"]
   notes:
-    - "This RQ relies heavily on standard library (pandas, scipy, statsmodels, sklearn, matplotlib)"
-    - "Only 1 custom analysis tool required: fit_lmm_trajectory_tsvr (used twice, Steps 2 and 3)"
-    - "Only 1 custom validation tool required: validate_lmm_convergence"
-    - "All other operations use stdlib functions (EXEMPT from tools_inventory.md per best practices)"
-    - "Standard library tools documented for transparency, NOT cataloged as custom tools"
+    - "Each analysis tool documented ONCE (deduplication across steps)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All custom validation tools include full signatures with type hints"
+    - "Stdlib tools (pandas, scipy, statsmodels) exempt from tools_inventory.md verification per code.md"
+    - "Decision D068 enforced via validate_correlation_test_d068 (dual p-value reporting)"
+    - "Decision D070 enforced via TSVR_hours time variable in all LMM formulas"
 
-  mandatory_decisions_embedded:
-    - "D068: Dual p-value reporting (uncorrected + Holm-Bonferroni) in Step 1 correlation analysis"
-    - "D070: TSVR time variable (actual hours) used in fit_lmm_trajectory_tsvr for Steps 2 and 3"
-
-  cross_rq_dependencies:
-    - "RQ 5.1: IRT theta scores (step03_theta_scores.csv)"
-    - "RQ 5.1: TSVR mapping (step00_tsvr_mapping.csv)"
-    - "RQ 5.1: Purified item list (step02_purified_items.csv)"
-
-  validation_architecture:
-    approach: "Tool pairing (analysis tool + validation tool)"
-    coverage: "100% (all analysis steps have validation requirements)"
-    enforcement: "rq_analysis embeds validation calls in 4_analysis.yaml"
+---
+# End of 3_tools.yaml

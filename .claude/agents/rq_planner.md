@@ -22,7 +22,7 @@ model: Haiku
 - rq_builder, rq_concept, rq_scholar, rq_stats must be complete (status = success)
 - 1_concept.md must exist and be comprehensive (>=100 lines)
 - Validation reports (1_scholar.md, 1_stats.md) should exist
-- thesis/ANALYSES_CHX.md must exist for RQ context
+- docs/v4/thesis/ANALYSES_CHX.md must exist for RQ context
 
 **What This Agent Does:**
 1. Reads validated concept (1_concept.md) and validation reports
@@ -400,7 +400,7 @@ Agent-generated naming creates maintenance nightmare. Controlled vocabulary only
 
 **Purpose:** Apply mandatory project-wide decisions documented in validated concept
 
-**Critical Decisions (documented in 1_concept.md and thesis/ANALYSES_CHX.md):**
+**Critical Decisions (documented in 1_concept.md and docs/v4/thesis/ANALYSES_CHX.md):**
 
 1. **Decision D039 (2-Pass IRT Purification)**
    - MANDATORY for ALL IRT analyses

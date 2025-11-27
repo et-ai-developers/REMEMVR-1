@@ -1,0 +1,597 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-28
+# RQ: ch5/rq10
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq10"
+  total_steps: 7
+  analysis_type: "LMM-only with 3-way Age x Domain x Time interaction (uses DERIVED theta from RQ 5.1)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-28T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Get Data from RQ 5.1 (DERIVED data extraction)
+  # --------------------------------------------------------------------------
+  - name: "step00_get_data_from_rq51"
+    step_number: "00"
+    description: "Extract theta scores, TSVR mapping, and Age variable from RQ 5.1 outputs and dfData.csv"
+
+    # Analysis call specification (stdlib operations - pandas copy)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/ch5/rq1/data/step03_theta_scores.csv (1200 rows: 100 participants x 4 tests x 3 domains)"
+        - "Read results/ch5/rq1/data/step00_tsvr_mapping.csv (400 rows: 100 participants x 4 tests)"
+        - "Read data/cache/dfData.csv Age column (100 rows: one per participant)"
+        - "Copy theta_scores to data/step00_theta_from_rq51.csv (no transformations)"
+        - "Copy tsvr_mapping to data/step00_tsvr_from_rq51.csv (no transformations)"
+        - "Subset dfData to UID and age columns, save to data/step00_age_from_dfdata.csv"
+        - "Verify all files exist (circuit breaker if RQ 5.1 incomplete)"
+
+      input_files:
+        - path: "results/ch5/rq1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "domain", "test", "theta"]
+          description: "IRT theta scores from RQ 5.1 Pass 2 calibration (purified)"
+        - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "test", "TSVR_hours"]
+          description: "TSVR actual hours mapping from RQ 5.1"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "age"]
+          description: "Project-level demographic data"
+
+      output_files:
+        - path: "data/step00_theta_from_rq51.csv"
+          description: "Copy of RQ 5.1 theta scores (1200 rows, 4 columns)"
+        - path: "data/step00_tsvr_from_rq51.csv"
+          description: "Copy of RQ 5.1 TSVR mapping (400 rows, 3 columns)"
+        - path: "data/step00_age_from_dfdata.csv"
+          description: "Age variable from dfData (100 rows, 2 columns: UID, age)"
+
+      validation:
+        inline_checks:
+          - "Theta file exists with 1200 rows (100 participants x 4 tests x 3 domains)"
+          - "TSVR file exists with 400 rows (100 participants x 4 tests)"
+          - "Age file exists with ~100 rows (one per participant)"
+          - "No NaN values in theta, TSVR_hours, or age columns"
+          - "All domains present: What, Where, When"
+          - "All tests present: T1, T2, T3, T4"
+        on_failure:
+          action: "Raise error if RQ 5.1 files missing or incomplete"
+          message: "RQ 5.1 must complete before RQ 5.10 (dependency)"
+
+    log_file: "logs/step00_get_data_from_rq51.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Prepare LMM Input with Age Variable
+  # --------------------------------------------------------------------------
+  - name: "step01_prepare_lmm_input"
+    step_number: "01"
+    description: "Merge theta scores with TSVR and Age, grand-mean center Age, reshape to long format for LMM"
+
+    # Analysis call specification (stdlib operations - pandas merge/transform)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step00_theta_from_rq51.csv (theta scores)"
+        - "Read data/step00_tsvr_from_rq51.csv (TSVR mapping)"
+        - "Read data/step00_age_from_dfdata.csv (age variable)"
+        - "Extract UID from composite_ID (parse UID_test format)"
+        - "Left join theta with TSVR on composite_ID and test"
+        - "Left join result with age on UID"
+        - "Grand-mean center Age: Age_c = age - mean(age)"
+        - "Create log_TSVR = log(TSVR_hours + 1)"
+        - "Add mean_age column (constant for all rows)"
+        - "Verify long format structure: 1200 rows (100 participants x 4 tests x 3 domains)"
+        - "Save to data/step01_lmm_input.csv"
+
+      input_files:
+        - path: "data/step00_theta_from_rq51.csv"
+          required_columns: ["composite_ID", "domain", "test", "theta"]
+          description: "Theta scores from Step 0"
+        - path: "data/step00_tsvr_from_rq51.csv"
+          required_columns: ["composite_ID", "test", "TSVR_hours"]
+          description: "TSVR mapping from Step 0"
+        - path: "data/step00_age_from_dfdata.csv"
+          required_columns: ["UID", "age"]
+          description: "Age variable from Step 0"
+
+      output_files:
+        - path: "data/step01_lmm_input.csv"
+          columns: ["UID", "composite_ID", "test", "domain", "theta", "TSVR_hours", "log_TSVR", "age", "Age_c", "mean_age"]
+          description: "Long-format LMM input (1200 rows, 10 columns)"
+        - path: "data/step01_preprocessing_summary.txt"
+          description: "Text summary of preprocessing (grand mean age, age range, TSVR range, N participants)"
+
+      validation:
+        inline_checks:
+          - "All 1200 rows present (100 participants x 4 tests x 3 domains)"
+          - "No NaN values in any column (complete data after merges)"
+          - "Mean Age_c approximately 0 (within 1e-10 tolerance)"
+          - "Age_c range symmetric (|min(Age_c)| approximately equals max(Age_c))"
+          - "All UIDs have exactly 12 rows (4 tests x 3 domains)"
+          - "TSVR_hours in [0, 200] range"
+          - "log_TSVR in [0, 6] range"
+        on_failure:
+          action: "Raise error with specific check failure"
+          message: "Data preparation failed: [specific check]"
+
+    log_file: "logs/step01_prepare_lmm_input.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with 3-Way Age x Domain x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm"
+    step_number: "02"
+    description: "Fit Linear Mixed Model testing whether age effects on forgetting rate vary by memory domain"
+
+    # Analysis tool specification (catalogued tool from 3_tools.yaml)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "composite_ID", "test", "domain", "theta", "TSVR_hours", "log_TSVR", "age", "Age_c", "mean_age"]
+          variable_name: "lmm_input"
+          description: "Long-format LMM input from Step 1"
+
+      output_files:
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted statsmodels MixedLM model object with 3-way Age x Domain x Time interaction"
+        - path: "results/step02_lmm_summary.txt"
+          variable_name: "lmm_summary_text"
+          description: "Full model summary (fixed effects table, random effects variance, AIC, BIC, log-likelihood)"
+        - path: "data/step02_fixed_effects.csv"
+          variable_name: "fixed_effects_df"
+          description: "Fixed effects coefficients table (~20 rows including 3-way interactions)"
+
+      parameters:
+        theta_scores: "lmm_input"
+        tsvr_data: "lmm_input"
+        formula: "theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+    # Validation tool specification (catalogued tool from 3_tools.yaml)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr)"
+        - path: "results/step02_lmm_summary.txt"
+          variable_name: "lmm_summary_text"
+          source: "analysis call output (model summary)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        check_singularity: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+        - "3-way interaction terms present in fixed effects"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm.log"
+
+    log_file: "logs/step02_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2b: Validate LMM Assumptions
+  # --------------------------------------------------------------------------
+  - name: "step02b_validate_assumptions"
+    step_number: "02b"
+    description: "Verify LMM assumptions before proceeding to inference (7 diagnostics)"
+
+    # Analysis tool specification (catalogued tool from 3_tools.yaml)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[valid: bool, diagnostics: Dict, plot_paths: List[Path], message: str]"
+
+      input_files:
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted LMM from Step 2"
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          description: "Original data for residual diagnostics"
+
+      output_files:
+        - path: "results/step02b_assumption_diagnostics.txt"
+          variable_name: "diagnostics_report"
+          description: "Text summary of 7 assumption checks"
+        - path: "plots/step02b_diagnostic_plots.png"
+          variable_name: "diagnostic_plot"
+          description: "Multi-panel diagnostic plot (Q-Q, residuals vs fitted, ACF, Cook's D)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_input"
+        output_dir: "plots/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "assumption_result"
+
+    # Validation tool specification (self-validating - same function)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[valid: bool, diagnostics: Dict, plot_paths: List[Path], message: str]"
+
+      input_files:
+        - path: "results/step02b_assumption_diagnostics.txt"
+          variable_name: "diagnostics_report"
+          source: "analysis call output (assumption diagnostics)"
+        - path: "plots/step02b_diagnostic_plots.png"
+          variable_name: "diagnostic_plot"
+          source: "analysis call output (diagnostic plots)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_input"
+        output_dir: "plots/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 7 diagnostics reported (residual normality, homoscedasticity, random effects normality, independence, linearity, outliers, convergence)"
+        - "Overall assessment stated (Pass / Conditional pass / Fail)"
+        - "Diagnostic plots generated successfully"
+
+      on_failure:
+        action: "Flag violations in report, proceed with caution (not blocking)"
+        log_to: "logs/step02b_validate_assumptions.log"
+
+    log_file: "logs/step02b_validate_assumptions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2c: Model Selection for Random Effects
+  # --------------------------------------------------------------------------
+  - name: "step02c_model_selection"
+    step_number: "02c"
+    description: "Select optimal random effects structure via likelihood ratio test"
+
+    # Analysis tool specification (catalogued tool from 3_tools.yaml)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "select_lmm_random_structure_via_lrt"
+      signature: "select_lmm_random_structure_via_lrt(data: DataFrame, formula: str, time_var: str, groups: str = 'UID', reml: bool = False) -> Dict[selected_model: str, lrt_results: DataFrame, fitted_models: Dict[str, MixedLMResults]]"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "theta", "TSVR_hours", "log_TSVR", "Age_c", "domain"]
+          variable_name: "lmm_input"
+          description: "Long-format LMM input from Step 1"
+
+      output_files:
+        - path: "results/step02c_model_selection.txt"
+          variable_name: "model_selection_report"
+          description: "Model selection report (3 models fit, LRT results, selected model, rationale)"
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "selected_model"
+          description: "UPDATED: Selected model refit with REML=False for fixed effects inference"
+        - path: "data/step02_fixed_effects.csv"
+          variable_name: "fixed_effects_df"
+          description: "UPDATED: Fixed effects table from selected model"
+
+      parameters:
+        data: "lmm_input"
+        formula: "theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain"
+        time_var: "TSVR_hours"
+        groups: "UID"
+        reml: false
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "selection_result"
+
+    # Validation tool specification (catalogued tool from 3_tools.yaml)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: statsmodels MixedLMResults) -> Dict[valid: bool, message: str, converged: bool]"
+
+      input_files:
+        - path: "results/step02c_model_selection.txt"
+          variable_name: "model_selection_report"
+          source: "analysis call output (model selection report)"
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "selected_model"
+          source: "analysis call output (selected model, refit with REML=False)"
+
+      parameters:
+        lmm_result: "selected_model"
+        check_refit: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 candidate models fit (or convergence failures documented)"
+        - "Selected model converged successfully"
+        - "Selected model refit with REML=False for fixed effects inference"
+        - "LRT comparisons performed (3 comparisons documented)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02c_model_selection.log"
+
+    log_file: "logs/step02c_model_selection.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract 3-Way Interaction Terms and Test Hypothesis
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_interactions"
+    step_number: "03"
+    description: "Extract and test 3-way Age x Domain x Time interaction terms (primary hypothesis)"
+
+    # Analysis call specification (stdlib operations - filter DataFrame)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/step02_lmm_model.pkl (selected model from Step 2c)"
+        - "Read data/step02_fixed_effects.csv (fixed effects table)"
+        - "Filter fixed_effects for terms containing 'TSVR_hours:Age_c:domain' and 'log_TSVR:Age_c:domain'"
+        - "Expected 4 terms: TSVR_hours:Age_c:domain[Where], TSVR_hours:Age_c:domain[When], log_TSVR:Age_c:domain[Where], log_TSVR:Age_c:domain[When]"
+        - "Apply Bonferroni correction: p_bonferroni = min(p * 2, 1.0) for each term"
+        - "Perform omnibus tests for linear and log 3-way interactions (chi-square, df=2)"
+        - "Decision: Hypothesis supported if EITHER omnibus test significant at alpha = 0.025"
+        - "Save interaction_terms.csv with dual p-values (Decision D068)"
+        - "Save hypothesis_test.txt with omnibus results and decision"
+
+      input_files:
+        - path: "results/step02_lmm_model.pkl"
+          description: "Selected LMM model from Step 2c (REML=False)"
+        - path: "data/step02_fixed_effects.csv"
+          required_columns: ["term", "estimate", "se", "z", "p", "CI_lower", "CI_upper"]
+          variable_name: "fixed_effects"
+          description: "Fixed effects from selected model"
+
+      output_files:
+        - path: "data/step03_interaction_terms.csv"
+          columns: ["term", "estimate", "se", "z", "p", "p_bonferroni", "CI_lower", "CI_upper"]
+          description: "3-way interaction terms with dual p-values (4 rows)"
+        - path: "results/step03_hypothesis_test.txt"
+          description: "Hypothesis test summary with omnibus tests and decision"
+
+      validation:
+        inline_checks:
+          - "Exactly 4 interaction terms extracted"
+          - "All expected terms present: TSVR_hours:Age_c:domain[Where], TSVR_hours:Age_c:domain[When], log_TSVR:Age_c:domain[Where], log_TSVR:Age_c:domain[When]"
+          - "p_bonferroni correctly computed (min(p * 2, 1.0))"
+          - "Decision D068 compliance: BOTH p and p_bonferroni columns present"
+          - "Omnibus tests performed (linear and log 3-way interactions)"
+          - "Hypothesis decision stated (supported or not supported)"
+        on_failure:
+          action: "Raise error if interaction terms missing or p-values invalid"
+          message: "3-way interaction extraction failed: [specific check]"
+
+    # Validation tool specification (catalogued tool from 3_tools.yaml)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[valid: bool, d068_compliant: bool, missing_terms: List[str], missing_cols: List[str], message: str]"
+
+      input_files:
+        - path: "data/step03_interaction_terms.csv"
+          required_columns: ["term", "estimate", "se", "z", "p", "p_bonferroni"]
+          variable_name: "interaction_terms"
+          source: "analysis call output (3-way interaction terms)"
+
+      parameters:
+        interaction_df: "interaction_terms"
+        required_terms: ["TSVR_hours:Age_c:domain[Where]", "TSVR_hours:Age_c:domain[When]", "log_TSVR:Age_c:domain[Where]", "log_TSVR:Age_c:domain[When]"]
+        alpha_bonferroni: 0.025
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 4 three-way interaction terms present"
+        - "p_uncorrected column present (Decision D068)"
+        - "p_bonferroni column present (Decision D068)"
+        - "All p-values in [0, 1] range"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_interactions.log"
+
+    log_file: "logs/step03_extract_interactions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Domain-Specific Age Effects and Post-Hoc Contrasts
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_contrasts"
+    step_number: "04"
+    description: "Quantify age effect on forgetting rate for each domain, test pairwise differences"
+
+    # Analysis tool specification (catalogued tool from 3_tools.yaml)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+
+      input_files:
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Selected LMM model from Step 2c"
+        - path: "data/step02_fixed_effects.csv"
+          required_columns: ["term", "estimate", "se", "z", "p"]
+          variable_name: "fixed_effects"
+          description: "Fixed effects from selected model"
+
+      output_files:
+        - path: "data/step04_age_effects_by_domain.csv"
+          columns: ["domain", "age_effect", "se", "z", "p", "CI_lower", "CI_upper"]
+          variable_name: "age_effects"
+          description: "Domain-specific age effects on forgetting rate (3 rows: What, Where, When)"
+        - path: "data/step04_post_hoc_contrasts.csv"
+          columns: ["contrast", "estimate", "se", "z", "p_uncorrected", "p_tukey", "CI_lower", "CI_upper"]
+          variable_name: "contrasts"
+          description: "Pairwise domain comparisons with dual p-values per Decision D068 (3 rows)"
+        - path: "results/step04_summary.txt"
+          variable_name: "summary_text"
+          description: "Text summary of age effects and contrasts with interpretation"
+
+      parameters:
+        lmm_result: "lmm_model"
+        comparisons: ["Where-What", "When-What", "Where-When"]
+        family_alpha: 0.05
+
+      returns:
+        type: "DataFrame"
+        variable_name: "contrasts"
+
+    # Validation tool specification (catalogued tool from 3_tools.yaml)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[valid: bool, d068_compliant: bool, missing_comparisons: List[str], message: str]"
+
+      input_files:
+        - path: "data/step04_post_hoc_contrasts.csv"
+          required_columns: ["contrast", "estimate", "se", "z", "p_uncorrected", "p_tukey"]
+          variable_name: "contrasts"
+          source: "analysis call output (compute_contrasts_pairwise)"
+
+      parameters:
+        contrasts_df: "contrasts"
+        required_comparisons: ["Where-What", "When-What", "Where-When"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 pairwise comparisons present"
+        - "p_uncorrected column present (Decision D068)"
+        - "p_tukey column present (Decision D068)"
+        - "All p-values in [0, 1] range"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_contrasts.log"
+
+    log_file: "logs/step04_compute_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Visualization Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create plot source CSV for multi-panel age effects visualization (Option B architecture)"
+
+    # Analysis tool specification (catalogued tool from 3_tools.yaml)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "prepare_age_effects_plot_data"
+      signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "age", "domain", "TSVR_hours", "theta"]
+          variable_name: "lmm_input"
+          description: "LMM input with age variable from Step 1"
+        - path: "results/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Selected LMM model from Step 2c (for predictions)"
+        - path: "data/step04_age_effects_by_domain.csv"
+          variable_name: "age_effects"
+          description: "Domain-specific age effects from Step 4"
+
+      output_files:
+        - path: "plots/step05_age_effects_plot_data.csv"
+          columns: ["domain", "age_tertile", "TSVR_hours", "theta_observed", "CI_lower_observed", "CI_upper_observed", "theta_predicted", "CI_lower_predicted", "CI_upper_predicted", "data_type"]
+          variable_name: "plot_data"
+          description: "Plot source CSV with observed means and model predictions (~600 rows)"
+
+      parameters:
+        lmm_input: "lmm_input"
+        lmm_model: "lmm_model"
+        output_path: "plots/step05_age_effects_plot_data.csv"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "plot_data"
+
+    # Validation tool specification (catalogued tool from 3_tools.yaml)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[valid: bool, message: str, missing_domains: List[str], missing_groups: List[str]]"
+
+      input_files:
+        - path: "plots/step05_age_effects_plot_data.csv"
+          required_columns: ["domain", "age_tertile", "TSVR_hours", "theta_observed", "theta_predicted"]
+          variable_name: "plot_data"
+          source: "analysis call output (prepare_age_effects_plot_data)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["What", "Where", "When"]
+        required_groups: ["Young", "Middle", "Older"]
+        domain_col: "domain"
+        group_col: "age_tertile"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 domains present (What, Where, When)"
+        - "All 3 age tertiles present (Young, Middle, Older)"
+        - "~600 rows expected (3 domains x 3 tertiles x ~67 timepoints per group)"
+        - "No NaN values in critical columns (domain, age_tertile, TSVR_hours)"
+        - "CI_upper > CI_lower for all observed data rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

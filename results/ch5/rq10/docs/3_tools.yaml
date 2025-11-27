@@ -1,0 +1,374 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.10
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.10 - Domain-Specific Age Effects on Forgetting
+
+analysis_tools:
+  # Step 1: Data preparation (pandas/pathlib operations - no custom tool)
+  # Note: Step 1 uses standard library functions for merging and transformation
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_lmm_input.csv"
+        required_columns: ["UID", "composite_ID", "test", "domain", "theta", "TSVR_hours", "log_TSVR", "age", "Age_c", "mean_age"]
+        expected_rows: "1200 (100 participants × 4 tests × 3 domains)"
+        data_types:
+          UID: "string (format: P###)"
+          composite_ID: "string (format: UID_test)"
+          test: "string (T1/T2/T3/T4)"
+          domain: "string (What/Where/When)"
+          theta: "float (IRT ability estimate)"
+          TSVR_hours: "float (actual time since encoding, 0-168 hours)"
+          log_TSVR: "float (log(TSVR_hours + 1))"
+          age: "float (raw age in years, 18-80)"
+          Age_c: "float (grand-mean centered age)"
+          mean_age: "float (grand mean age, constant)"
+
+    output_files:
+      - path: "results/step02_lmm_model.pkl"
+        description: "Fitted statsmodels MixedLM model object with 3-way Age × Domain × Time interaction"
+      - path: "results/step02_lmm_summary.txt"
+        description: "Full model summary (fixed effects table, random effects variance, AIC, BIC, log-likelihood)"
+      - path: "results/step02_fixed_effects.csv"
+        columns: ["term", "estimate", "se", "z", "p", "CI_lower", "CI_upper"]
+        description: "Fixed effects coefficients table (~20 rows including 3-way interactions)"
+
+    parameters:
+      formula: "theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Fit LMM testing whether age effects on forgetting rate vary by memory domain (3-way Age × Domain × Time interaction). Decision D070: TSVR_hours as time variable."
+    source_reference: "tools_inventory.md lines 98-103"
+
+  select_lmm_random_structure_via_lrt:
+    module: "tools.analysis_lmm"
+    function: "select_lmm_random_structure_via_lrt"
+    signature: "select_lmm_random_structure_via_lrt(data: DataFrame, formula: str, time_var: str, groups: str = 'UID', reml: bool = False) -> Dict[selected_model: str, lrt_results: DataFrame, fitted_models: Dict[str, MixedLMResults]]"
+    validation_tool: "validate_model_selection"
+
+    input_files:
+      - path: "data/step01_lmm_input.csv"
+        required_columns: ["UID", "theta", "TSVR_hours", "log_TSVR", "Age_c", "domain"]
+        source: "Step 1 output (merged theta + TSVR + age data)"
+
+    output_files:
+      - path: "results/step02c_model_selection.txt"
+        description: "Model selection report (3 models fit, LRT results, selected model, rationale)"
+      - path: "results/step02_lmm_model.pkl"
+        description: "UPDATED: Selected model refit with REML=False for fixed effects inference"
+      - path: "results/step02_fixed_effects.csv"
+        description: "UPDATED: Fixed effects table from selected model"
+
+    parameters:
+      formula: "theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain"
+      time_var: "TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Select optimal random effects structure via LRT comparison: Full (random intercepts + slopes, correlated) vs Uncorrelated vs Intercept-only. Refit selected model with REML=False."
+    source_reference: "tools_inventory.md lines 145-153"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+
+    input_files:
+      - path: "results/step02_lmm_model.pkl"
+        description: "Selected LMM model from Step 2c"
+        source: "Step 2c output (model selection)"
+      - path: "results/step02_fixed_effects.csv"
+        required_columns: ["term", "estimate", "se", "z", "p"]
+        source: "Step 2c output (fixed effects from selected model)"
+
+    output_files:
+      - path: "results/step04_age_effects_by_domain.csv"
+        columns: ["domain", "age_effect", "se", "z", "p", "CI_lower", "CI_upper"]
+        description: "Domain-specific age effects on forgetting rate (3 rows: What, Where, When)"
+      - path: "results/step04_post_hoc_contrasts.csv"
+        columns: ["contrast", "estimate", "se", "z", "p_uncorrected", "p_tukey", "CI_lower", "CI_upper"]
+        description: "Pairwise domain comparisons with dual p-values per Decision D068 (3 rows: Where vs What, When vs What, Where vs When)"
+      - path: "results/step04_summary.txt"
+        description: "Text summary of age effects and contrasts with interpretation"
+
+    parameters:
+      comparisons: ["Where-What", "When-What", "Where-When"]
+      family_alpha: 0.05
+
+    description: "Compute domain-specific age effects on forgetting rate and post-hoc pairwise contrasts with Tukey HSD correction. Decision D068: Dual p-value reporting (uncorrected + Tukey)."
+    source_reference: "tools_inventory.md lines 129-135"
+
+  prepare_age_effects_plot_data:
+    module: "tools.analysis_lmm"
+    function: "prepare_age_effects_plot_data"
+    signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step01_lmm_input.csv"
+        required_columns: ["UID", "Age", "domain_name", "TSVR_hours", "theta"]
+        source: "Step 1 output (LMM input with age variable)"
+      - path: "results/step02_lmm_model.pkl"
+        description: "Selected LMM model from Step 2c"
+        source: "Step 2c output (for generating predictions)"
+      - path: "results/step04_age_effects_by_domain.csv"
+        description: "Domain-specific age effects"
+        source: "Step 4 output (for interpretation context)"
+
+    output_files:
+      - path: "plots/step05_age_effects_plot_data.csv"
+        columns: ["domain_name", "age_tertile", "TSVR_hours", "theta_observed", "se_observed", "ci_lower", "ci_upper", "theta_predicted"]
+        description: "Plot source CSV with observed means and model predictions (36 rows = 3 domains × 3 age tertiles × 4 timepoints)"
+
+    parameters:
+      output_path: "plots/step05_age_effects_plot_data.csv"
+
+    description: "Create age tertiles (Young/Middle/Older), aggregate observed means, and generate LMM predictions for Age × Domain × Time interaction visualization. Option B architecture: plot data prepared during analysis."
+    source_reference: "tools_inventory.md lines 155-163"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step02_lmm_model.pkl"
+        source: "Analysis tool output (fit_lmm_trajectory_tsvr)"
+      - path: "results/step02_lmm_summary.txt"
+        source: "Analysis tool output (LMM summary text)"
+
+    parameters:
+      check_singularity: true
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+      - "3-way interaction terms present in fixed effects"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        convergence_status: "str (converged/failed)"
+        warnings: "List[str] (any warnings detected)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully with all 3-way interaction terms estimable. No singular fit allowed."
+    source_reference: "tools_inventory.md lines 317-322"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[valid: bool, diagnostics: Dict, plot_paths: List[Path], message: str]"
+
+    input_files:
+      - path: "results/step02_lmm_model.pkl"
+        source: "Analysis tool output (Step 2 fit_lmm_trajectory_tsvr)"
+      - path: "data/step01_lmm_input.csv"
+        source: "Step 1 output (original data for residual diagnostics)"
+
+    parameters:
+      output_dir: "plots/"
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+
+    criteria:
+      - "Residual normality (Shapiro-Wilk p > 0.05 or minor violation acceptable with N=1200)"
+      - "Homoscedasticity (Breusch-Pagan, visual inspection of residuals vs fitted)"
+      - "Random effects normality (Q-Q plots for intercepts and slopes)"
+      - "Independence (Lag-1 ACF < 0.1)"
+      - "Linearity (partial residual plots for Age_c and TSVR_hours)"
+      - "Outliers (Cook's distance, threshold D > 0.04 for N=100)"
+      - "Convergence diagnostics (no singularity warnings)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all 7 diagnostics pass)"
+        diagnostics: "Dict (results per diagnostic)"
+        plot_paths: "List[Path] (6 diagnostic plots generated)"
+        message: "str (overall assessment)"
+
+    behavior_on_failure:
+      action: "Flag violations in report, proceed with caution (not blocking for exploratory thesis)"
+      log_to: "logs/step02b_validate_assumptions.log"
+      invoke: "g_debug (if major violations detected)"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics. Generates 6 diagnostic plots + partial residual CSVs. Minor violations acceptable for exploratory thesis."
+    source_reference: "tools_inventory.md lines 404-412"
+
+  validate_model_selection:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels MixedLMResults) -> Dict[valid: bool, message: str, converged: bool]"
+
+    input_files:
+      - path: "results/step02c_model_selection.txt"
+        source: "Analysis tool output (select_lmm_random_structure_via_lrt)"
+      - path: "results/step02_lmm_model.pkl"
+        source: "Analysis tool output (selected model, refit with REML=False)"
+
+    parameters:
+      check_refit: true
+
+    criteria:
+      - "All 3 candidate models fit (or convergence failures documented)"
+      - "Selected model converged successfully"
+      - "Selected model refit with REML=False for fixed effects inference"
+      - "LRT comparisons performed (3 comparisons documented)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02c_model_selection.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate model selection process completed successfully with selected model refit for inference."
+    source_reference: "tools_inventory.md lines 530-538"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[valid: bool, d068_compliant: bool, missing_terms: List[str], missing_cols: List[str], message: str]"
+
+    input_files:
+      - path: "results/step03_interaction_terms.csv"
+        required_columns: ["term", "estimate", "se", "z", "p", "p_bonferroni"]
+        source: "Analysis tool output (Step 3 extract 3-way interactions)"
+
+    parameters:
+      required_terms: ["TSVR_hours:Age_c:domain[Where]", "TSVR_hours:Age_c:domain[When]", "log_TSVR:Age_c:domain[Where]", "log_TSVR:Age_c:domain[When]"]
+      alpha_bonferroni: 0.025
+
+    criteria:
+      - "All 4 three-way interaction terms present"
+      - "p_uncorrected column present (Decision D068)"
+      - "p_bonferroni column present (Decision D068)"
+      - "All p-values in [0, 1] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_interactions.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate 3-way interaction terms present with Decision D068 dual p-value reporting (uncorrected + Bonferroni)."
+    source_reference: "tools_inventory.md lines 424-432"
+
+  validate_contrasts_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_contrasts_dual_pvalues"
+    signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[valid: bool, d068_compliant: bool, missing_comparisons: List[str], message: str]"
+
+    input_files:
+      - path: "results/step04_post_hoc_contrasts.csv"
+        required_columns: ["contrast", "estimate", "se", "z", "p_uncorrected", "p_tukey"]
+        source: "Analysis tool output (compute_contrasts_pairwise)"
+
+    parameters:
+      required_comparisons: ["Where-What", "When-What", "Where-When"]
+
+    criteria:
+      - "All 3 pairwise comparisons present"
+      - "p_uncorrected column present (Decision D068)"
+      - "p_tukey column present (Decision D068)"
+      - "All p-values in [0, 1] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_comparisons: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_compute_contrasts.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate post-hoc contrasts include all pairwise comparisons with Decision D068 dual p-value reporting (uncorrected + Tukey HSD)."
+    source_reference: "tools_inventory.md lines 434-442"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[valid: bool, message: str, missing_domains: List[str], missing_groups: List[str]]"
+
+    input_files:
+      - path: "plots/step05_age_effects_plot_data.csv"
+        required_columns: ["domain_name", "age_tertile", "TSVR_hours", "theta_observed", "theta_predicted"]
+        source: "Analysis tool output (prepare_age_effects_plot_data)"
+
+    parameters:
+      required_domains: ["What", "Where", "When"]
+      required_groups: ["Young", "Middle", "Older"]
+      domain_col: "domain_name"
+      group_col: "age_tertile"
+
+    criteria:
+      - "All 3 domains present (What, Where, When)"
+      - "All 3 age tertiles present (Young, Middle, Older)"
+      - "~36 rows expected (3 domains × 3 tertiles × 4 timepoints)"
+      - "No NaN values in critical columns (domain_name, age_tertile, TSVR_hours)"
+      - "CI_upper > CI_lower for all observed data rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_prepare_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Verify all domains and age tertiles present in plot data for complete Age × Domain × Time visualization."
+    source_reference: "tools_inventory.md lines 580-588"
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 6
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Step 0 uses pandas/pathlib for DERIVED data extraction (no custom tools)"
+    - "Step 1 uses pandas for data merging and transformation (no custom tools)"
+    - "Step 3 uses custom coefficient extraction logic (no dedicated tool in inventory)"
+    - "All validation tools paired with analysis tools per v4.X architecture"
+    - "Decision D068: Dual p-value reporting enforced in Steps 3 and 4"
+    - "Decision D070: TSVR_hours (actual time) used as time variable in LMM"
+    - "Decision D069: NOT applicable (no dual-scale trajectory plots for age effects visualization)"

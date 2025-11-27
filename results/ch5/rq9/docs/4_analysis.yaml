@@ -1,0 +1,569 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-28
+# RQ: ch5/rq9 (Age effects on baseline memory and forgetting rate)
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq9"
+  total_steps: 6
+  analysis_type: "LMM Age x Time interaction (Lin+Log functional form)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-28T00:00:00Z"
+  dependencies:
+    - rq: "ch5/rq7"
+      files:
+        - "results/ch5/rq7/data/step03_theta_all.csv"
+        - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+      rationale: "DERIVED theta scores for 'All' composite factor + TSVR time variable"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract and Merge Data Sources
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_merge_data"
+    step_number: "00"
+    description: "Load theta scores from RQ 5.7, merge with TSVR and Age from dfData.csv"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/rq7/data/step03_theta_all.csv') -> theta_df"
+        - "Parse composite_ID to extract UID and TEST (split on underscore)"
+        - "pd.read_csv('results/ch5/rq7/data/step00_tsvr_mapping.csv') -> tsvr_df"
+        - "Merge theta_df + tsvr_df on (UID, TEST) using left join"
+        - "pd.read_csv('data/cache/dfData.csv') -> age_df"
+        - "Merge result + age_df on UID using left join"
+        - "Validate: Check for any missing Age values (raise error if NaN found)"
+        - "Rename columns: theta_all -> theta, TSVR -> TSVR_hours"
+        - "Create composite_ID column (UID + '_' + TEST for traceability)"
+        - "Select final columns: composite_ID, UID, TEST, TSVR_hours, theta, se_all, age"
+        - "Save to data/step00_lmm_input_raw.csv"
+
+      input_files:
+        - path: "results/ch5/rq7/data/step03_theta_all.csv"
+          required_columns: ["composite_ID", "theta_all", "se_all"]
+          description: "Theta scores from RQ 5.7 'All' factor analysis"
+          dependency_check: "If missing -> EXPECTATIONS ERROR: RQ 5.7 must complete first"
+        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          required_columns: ["UID", "TEST", "TSVR"]
+          description: "TSVR time variable from RQ 5.7"
+          dependency_check: "If missing -> EXPECTATIONS ERROR: RQ 5.7 Step 0 required"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "age"]
+          description: "Participant demographics (Age variable)"
+
+      output_files:
+        - path: "data/step00_lmm_input_raw.csv"
+          columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "theta", "se_all", "age"]
+          expected_rows: 400
+          description: "Merged theta + TSVR + Age (100 participants x 4 tests)"
+
+      parameters:
+        merge_on_theta_tsvr: ["UID", "TEST"]
+        merge_on_age: "UID"
+        merge_type: "left"
+        nan_tolerance: 0
+
+    validation_call:
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      parameters:
+        file_checks:
+          - file_path: "results/ch5/rq7/data/step03_theta_all.csv"
+            min_size_bytes: 1000
+          - file_path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+            min_size_bytes: 1000
+          - file_path: "data/cache/dfData.csv"
+            min_size_bytes: 1000
+
+      criteria:
+        - "All 3 source files exist (RQ 5.7 outputs + dfData)"
+        - "Each file > 1KB (not empty or corrupted)"
+
+      on_failure:
+        action: "raise FileNotFoundError(validation_result['message'])"
+        log_to: "logs/step00_extract_merge_data.log"
+        message: "Cross-RQ dependency error - user must execute RQ 5.7 first"
+
+      description: "Validate cross-RQ dependencies exist before data merge"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_lmm_input_raw.csv"
+          description: "Merged data after Step 0"
+
+      parameters:
+        df_path: "data/step00_lmm_input_raw.csv"
+        required_cols: ["composite_ID", "UID", "TEST", "TSVR_hours", "theta", "se_all", "age"]
+
+      criteria:
+        - "All 7 required columns present"
+        - "No missing columns after merge"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_merge_data.log"
+
+      description: "Validate merged data has all required columns"
+
+    validation_call_3:
+      module: "tools.validation"
+      function: "check_missing_data"
+      signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_lmm_input_raw.csv"
+          description: "Merged data to check for NaN"
+
+      parameters:
+        df_path: "data/step00_lmm_input_raw.csv"
+        tolerance: 0.0
+
+      criteria:
+        - "Zero NaN values tolerated (all columns complete)"
+        - "Expected N = 400 rows (100 participants x 4 tests)"
+
+      on_failure:
+        action: "raise ValueError with UIDs missing Age"
+        log_to: "logs/step00_extract_merge_data.log"
+
+      description: "Validate no missing data after merge (especially Age)"
+
+    log_file: "logs/step00_extract_merge_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Prepare Age-Centered Predictor and Time Transformations
+  # --------------------------------------------------------------------------
+  - name: "step01_prepare_predictors"
+    step_number: "01"
+    description: "Grand-mean center Age variable and create time transformations (linear + log)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step00_lmm_input_raw.csv') -> df"
+        - "Compute grand mean age: mean_age = mean(age)"
+        - "Create centered age: Age_c = age - mean_age"
+        - "Create linear time: Time = TSVR_hours"
+        - "Create log time: Time_log = log(TSVR_hours + 1)"
+        - "Validate: Age_c mean ≈ 0 (within 0.01), no NaN/inf in Time_log"
+        - "Add columns: Age_c, Time, Time_log"
+        - "Save to data/step01_lmm_input_prepared.csv"
+
+      input_files:
+        - path: "data/step00_lmm_input_raw.csv"
+          required_columns: ["age", "TSVR_hours"]
+          description: "Merged data from Step 0"
+
+      output_files:
+        - path: "data/step01_lmm_input_prepared.csv"
+          columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "theta", "se_all", "age", "Age_c", "Time", "Time_log"]
+          expected_rows: 400
+          description: "Prepared data with centered Age and time transformations"
+
+      parameters:
+        centering_method: "grand_mean"
+        log_offset: 1
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict"
+
+      input_files:
+        - path: "data/step01_lmm_input_prepared.csv"
+          description: "Prepared data with Age_c"
+
+      parameters:
+        df_path: "data/step01_lmm_input_prepared.csv"
+        column_names: ["Age_c"]
+        tolerance: 0.01
+
+      criteria:
+        - "Age_c has mean approximately 0 (|mean| < 0.01)"
+        - "Age_c SD matches original age SD (centering preserves spread)"
+
+      on_failure:
+        action: "Warning only (not fatal)"
+        log_to: "logs/step01_prepare_predictors.log"
+        message: "Age_c centering deviation detected but proceed"
+
+      description: "Validate grand-mean centering applied correctly"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
+
+      input_files:
+        - path: "data/step01_lmm_input_prepared.csv"
+          description: "Prepared data with Age_c and Time_log"
+
+      parameters:
+        df_path: "data/step01_lmm_input_prepared.csv"
+        checks:
+          - column: "Age_c"
+            min_val: -30.0
+            max_val: 30.0
+          - column: "Time_log"
+            min_val: 0.0
+            max_val: 6.0
+
+      criteria:
+        - "Age_c in [-30, 30] (centered around 0)"
+        - "Time_log in [0, 6] (log(169) ≈ 5.13)"
+        - "No NaN or inf values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_prepare_predictors.log"
+
+      description: "Validate transformation value ranges"
+
+    log_file: "logs/step01_prepare_predictors.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with Age x Time Interaction (Lin+Log Model)
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm"
+    step_number: "02"
+    description: "Fit LMM testing age effects on baseline memory and forgetting rate (Lin+Log)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step01_lmm_input_prepared.csv') -> df"
+        - "Configure LMM formula: theta ~ (Time + Time_log) * Age_c"
+        - "Random effects: (Time | UID)"
+        - "Fit using statsmodels.formula.api.mixedlm with REML=False"
+        - "Check convergence: model.converged == True"
+        - "Extract model summary (fixed effects, random effects, fit indices)"
+        - "Save fitted model as pickle: data/step02_lmm_model.pkl"
+        - "Save summary text: results/step02_lmm_summary.txt"
+        - "Save fixed effects table: data/step02_fixed_effects.csv"
+
+      input_files:
+        - path: "data/step01_lmm_input_prepared.csv"
+          required_columns: ["theta", "Age_c", "Time", "Time_log", "UID"]
+          description: "Prepared data with predictors"
+
+      output_files:
+        - path: "data/step02_lmm_model.pkl"
+          description: "Fitted LMM model object (pickle)"
+        - path: "results/step02_lmm_summary.txt"
+          description: "Human-readable model summary"
+        - path: "data/step02_fixed_effects.csv"
+          columns: ["term", "coef", "se", "z", "p"]
+          expected_rows: 6
+          description: "Fixed effects table (Intercept + 5 predictors)"
+
+      parameters:
+        formula: "theta ~ (Time + Time_log) * Age_c"
+        re_formula: "(Time | UID)"
+        reml: false
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          description: "Fitted LMM from Step 2"
+
+      parameters:
+        model_path: "data/step02_lmm_model.pkl"
+
+      criteria:
+        - "Model.converged attribute == True"
+        - "Optimization algorithm reached solution"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm.log"
+
+      description: "Validate LMM converged successfully"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          description: "Fitted LMM for diagnostics"
+        - path: "data/step01_lmm_input_prepared.csv"
+          description: "Original data for residual analysis"
+
+      parameters:
+        model_path: "data/step02_lmm_model.pkl"
+        data_path: "data/step01_lmm_input_prepared.csv"
+        output_dir: "logs/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      criteria:
+        - "Residuals approximately normal (Shapiro-Wilk test)"
+        - "Homoscedasticity (Breusch-Pagan test)"
+        - "Random effects approximately normal"
+        - "No strong autocorrelation (ACF lag-1 < 0.1)"
+        - "No influential outliers (Cook's distance < 1.0)"
+        - "Model converged"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm.log"
+
+      description: "Comprehensive LMM assumption validation with diagnostic plots"
+
+    log_file: "logs/step02_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract and Test Age Effects (Bonferroni Correction)
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_age_effects"
+    step_number: "03"
+    description: "Extract age effects (baseline + 2 slopes), apply Bonferroni correction"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step02_fixed_effects.csv') -> fixed_effects"
+        - "Extract 3 age effect terms: Age_c, Time:Age_c, Time_log:Age_c"
+        - "For each term: coef, SE, z-statistic, p_uncorrected"
+        - "Apply Bonferroni correction: alpha_corrected = 0.05 / 3 = 0.0167"
+        - "Compute p_bonferroni = min(p_uncorrected * 3, 1.0)"
+        - "Create significance flags: sig_uncorrected (p < 0.05), sig_bonferroni (p < 0.0167)"
+        - "Interpret direction: negative coef -> older adults worse (expected)"
+        - "Create summary table with dual p-values (Decision D068)"
+        - "Save to results/step03_age_effects.csv"
+
+      input_files:
+        - path: "data/step02_fixed_effects.csv"
+          required_columns: ["term", "coef", "se", "z", "p"]
+          description: "Fixed effects from LMM"
+
+      output_files:
+        - path: "results/step03_age_effects.csv"
+          columns: ["term", "hypothesis", "coef", "se", "z", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni", "interpretation"]
+          expected_rows: 3
+          description: "Age effects with dual p-values (Decision D068)"
+
+      parameters:
+        required_terms: ["Age_c", "Time:Age_c", "Time_log:Age_c"]
+        alpha_bonferroni: 0.0167
+        n_tests: 3
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step03_age_effects.csv"
+          description: "Age effects table with dual p-values"
+
+      parameters:
+        df_path: "results/step03_age_effects.csv"
+        required_p_cols: ["p_uncorrected", "p_bonferroni"]
+
+      criteria:
+        - "p_uncorrected column present"
+        - "p_bonferroni column present"
+        - "Decision D068 dual reporting requirement met"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_age_effects.log"
+
+      description: "Validate Decision D068 compliance (dual p-value reporting)"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict"
+
+      input_files:
+        - path: "results/step03_age_effects.csv"
+          description: "Age effects table to validate"
+
+      parameters:
+        df_path: "results/step03_age_effects.csv"
+        required_terms: ["Age_c", "Time:Age_c", "Time_log:Age_c"]
+        alpha_bonferroni: 0.0167
+
+      criteria:
+        - "All 3 age effect terms present"
+        - "Both p_uncorrected and p_bonferroni columns exist"
+        - "p_bonferroni = min(p_uncorrected * 3, 1.0) for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_age_effects.log"
+
+      description: "Validate age effects include required terms AND Decision D068 compliance"
+
+    log_file: "logs/step03_extract_age_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Effect Size (Age Impact on Day 6 Memory)
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_effect_size"
+    step_number: "04"
+    description: "Quantify age impact by comparing Day 6 memory for average vs older adults"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load fitted model: pickle.load('data/step02_lmm_model.pkl')"
+        - "Load prepared data to extract: SD_age = std(age), TSVR_day6 ≈ 144 hours"
+        - "Create two scenarios:"
+        - "  Scenario 1: Average age (Age_c = 0), Day 6 (Time = TSVR_day6, Time_log = log(TSVR_day6 + 1))"
+        - "  Scenario 2: Age + 1 SD (Age_c = SD_age), Day 6 (Time = TSVR_day6, Time_log = log(TSVR_day6 + 1))"
+        - "Predict theta for both scenarios using fitted model fixed effects"
+        - "Compute decline: Decline_theta = theta_older - theta_avg (expected negative)"
+        - "Compute decline_percent = (Decline_theta / theta_avg) * 100"
+        - "Save comparison table: data/step04_effect_size.csv"
+        - "Save summary text: results/step04_effect_size_summary.txt"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          description: "Fitted LMM for predictions"
+        - path: "data/step01_lmm_input_prepared.csv"
+          required_columns: ["age", "TSVR_hours"]
+          description: "Data for extracting SD_age and TSVR_day6"
+
+      output_files:
+        - path: "data/step04_effect_size.csv"
+          columns: ["scenario", "age_c", "age_years", "time_hours", "theta_predicted"]
+          expected_rows: 2
+          description: "Effect size scenarios (Average age vs Age + 1 SD)"
+        - path: "results/step04_effect_size_summary.txt"
+          description: "Effect size interpretation (decline in theta and percentage)"
+
+      parameters:
+        tsvr_day6: 144
+        scenarios:
+          - name: "Average age"
+            age_c: 0
+          - name: "Age + 1 SD"
+            age_c: "SD_age"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
+
+      input_files:
+        - path: "data/step04_effect_size.csv"
+          description: "Effect size predictions to validate"
+
+      parameters:
+        df_path: "data/step04_effect_size.csv"
+        checks:
+          - column: "theta_predicted"
+            min_val: -4.0
+            max_val: 4.0
+          - column: "age_c"
+            min_val: -30.0
+            max_val: 30.0
+
+      criteria:
+        - "theta_predicted in [-4, 4] (typical IRT range)"
+        - "age_c in [-30, 30] (centered range)"
+        - "No NaN predictions"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_effect_size.log"
+
+      description: "Validate effect size predictions within plausible ranges"
+
+    log_file: "logs/step04_compute_effect_size.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Age Tertile Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create age tertiles, aggregate observed means, generate LMM predictions for visualization"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "prepare_age_effects_plot_data"
+      signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+
+      input_files:
+        - path: "data/step01_lmm_input_prepared.csv"
+          required_columns: ["UID", "age", "TSVR_hours", "theta"]
+          description: "Prepared data with Age and theta"
+        - path: "data/step02_lmm_model.pkl"
+          description: "Fitted LMM for predictions"
+
+      output_files:
+        - path: "plots/step05_age_tertile_plot_data.csv"
+          columns: ["age_tertile", "TSVR_hours", "theta_observed", "se_observed", "ci_lower", "ci_upper", "theta_predicted"]
+          expected_rows: 12
+          description: "Plot-ready data (3 tertiles x 4 timepoints)"
+
+      parameters:
+        lmm_input_path: "data/step01_lmm_input_prepared.csv"
+        lmm_model_path: "data/step02_lmm_model.pkl"
+        output_path: "plots/step05_age_tertile_plot_data.csv"
+        tertile_method: "pd.qcut(age, q=3)"
+        timepoints: [0, 24, 72, 144]
+        ci_level: 0.95
+
+      returns:
+        type: "DataFrame"
+        variable_name: "plot_data"
+
+      description: "Create age tertiles (Young/Middle/Older), aggregate observed means, generate LMM predictions"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict"
+
+      input_files:
+        - path: "plots/step05_age_tertile_plot_data.csv"
+          description: "Plot data produced by prepare_age_effects_plot_data"
+
+      parameters:
+        plot_data_path: "plots/step05_age_tertile_plot_data.csv"
+        required_groups: ["Young", "Middle", "Older"]
+        required_timepoints: [0, 24, 72, 144]
+        group_col: "age_tertile"
+        timepoint_col: "TSVR_hours"
+
+      criteria:
+        - "All 3 age tertiles present (Young, Middle, Older)"
+        - "All 4 timepoints present (0, 24, 72, 144 hours)"
+        - "Complete factorial: 12 rows (3 tertiles x 4 timepoints)"
+        - "No missing data in observed/predicted columns"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+      description: "Verify all age tertiles and timepoints present (complete factorial design)"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

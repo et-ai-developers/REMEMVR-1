@@ -1,61 +1,79 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq12/ with 6 folders
+  context_dump: 'Created results/ch5/rq12/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.12: CTT-IRT convergence via item purification
+  context_dump: 'RQ 5.12: CTT-IRT convergence via item purification
+
     Domains: What/Where/When (all three, full coverage)
+
     Analysis: Methodological comparison (Full CTT vs Purified CTT vs IRT)
+
     Data: DERIVED from RQ 5.1 (IRT params, theta, TSVR) + raw dfData.csv for CTT
+
     Critical: Parallel LMM on 3 measurement approaches tests purification validity
 
+    '
 rq_scholar:
   status: success
-  context_dump: |
-    9.3/10 APPROVED. Strong psychometric theory. 1 CRITICAL omission (practice effects), needs recent citations. 6 suggested improvements. Ready for stats.
+  context_dump: '9.3/10 APPROVED. Strong psychometric theory. 1 CRITICAL omission
+    (practice effects), needs recent citations. 6 suggested improvements. Ready for
+    stats.
 
+    '
 rq_stats:
   status: success
-  context_dump: |
-    9.5/10 APPROVED. Cat1: 2.9/3 (all critical fixes implemented). Cat2: 1.2/2 (40% tools, missing CTT module but well-specified). Cat3: 1.8/2 (strong parameters). Cat4: 1.7/2 (alpha added, minor gaps). Cat5: 0.9/1 (9 concerns, 0 CRITICAL). All 3 prior CRITICAL flaws corrected: Steiger's z, Cronbach's alpha, z-score standardization. Ready for planning.
+  context_dump: '9.5/10 APPROVED. Cat1: 2.9/3 (all critical fixes implemented). Cat2:
+    1.2/2 (40% tools, missing CTT module but well-specified). Cat3: 1.8/2 (strong
+    parameters). Cat4: 1.7/2 (alpha added, minor gaps). Cat5: 0.9/1 (9 concerns, 0
+    CRITICAL). All 3 prior CRITICAL flaws corrected: Steiger''s z, Cronbach''s alpha,
+    z-score standardization. Ready for planning.
 
+    '
 rq_planner:
   status: success
-  context_dump: |
-    9 analysis steps planned (Step 0: load data, Steps 1-8: CTT-IRT comparison)
-    Pipeline: Hybrid CTT-IRT methodological comparison (Full CTT vs Purified CTT vs IRT theta)
-    Analysis tools: Item mapping, CTT scoring, Cronbach's alpha (bootstrap CIs), Steiger's z-test (dependent correlations), z-score standardization, parallel LMMs (3 models), plot data prep
-    Cross-RQ dependency: RQ 5.1 (IRT parameters, theta scores, TSVR mapping)
-    Validation: Per-step validation mandatory (all 9 steps have 4-layer substance criteria)
+  context_dump: '9 analysis steps planned (Step 0 + Steps 1-8). Tool requirements:
+    CTT scoring (full + purified), Cronbach''s alpha (bootstrap), Steiger''s z-test
+    (dependent correlations), z-score standardization, 3 parallel LMMs. Expected outputs:
+    CTT scores, reliability, correlations, AIC comparison, plot data. Cross-RQ dependency:
+    RQ 5.1. Validation required every step.
 
+    '
 rq_tools:
   status: success
-  context_dump: |
-    11 unique tools cataloged (5 analysis + 6 validation)
-    Analysis: compute_cronbachs_alpha, compare_correlations_dependent, fit_lmm_trajectory_tsvr, extract_fixed_effects_from_lmm
-    Validation: check_file_exists, validate_data_format, validate_numeric_range, validate_standardization, validate_lmm_convergence, validate_model_convergence, validate_plot_data_completeness
-    All tools exist in tools_inventory.md (0 missing)
-    All naming conventions exist in names.md (0 missing)
-
+  completed: 2025-11-27
+  context_dump: '3 analysis + 5 validation tools cataloged for CTT-IRT convergence comparison. CTT module: compute_cronbachs_alpha, compare_correlations_dependent. LMM: fit_lmm_trajectory_tsvr. Stdlib operations (pandas) exempt from verification.'
 rq_analysis:
-  status: pending
-  context_dump: |
-
+  status: success
+  timestamp: '2025-11-28T00:00:00Z'
+  context_dump: '9 steps specified with validation (CTT-IRT convergence: Full CTT vs Purified CTT vs IRT theta via parallel LMMs, Cronbach alpha, Steiger z-test)'
 rq_inspect:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_plots:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_results:
   status: pending
-  context_dump: |
+  context_dump: ''
+
+analysis_steps:
+  step00_load_data: pending
+  step01_map_items: pending
+  step02_compute_full_ctt: pending
+  step03_compute_purified_ctt: pending
+  step04_assess_reliability: pending
+  step05_correlation_analysis: pending
+  step06_standardize_outcomes: pending
+  step07_fit_parallel_lmms: pending
+  step08_prepare_plot_data: pending

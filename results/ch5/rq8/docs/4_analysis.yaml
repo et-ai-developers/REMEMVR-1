@@ -1,0 +1,620 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-27
+# RQ: ch5/rq8
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq8"
+  total_steps: 7
+  analysis_type: "LMM-only two-phase forgetting (quadratic + piecewise + convergent tests)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-27T00:00:00Z"
+  cross_rq_dependencies:
+    - "RQ 5.7 (theta scores, TSVR mapping, best continuous model)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Get Data (Load RQ 5.7 Outputs)
+  # --------------------------------------------------------------------------
+  - name: "step00_get_data"
+    step_number: "00"
+    description: "Load theta scores, TSVR mapping, and best continuous model from RQ 5.7 outputs"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.7 dependency files exist using check_file_exists validation"
+        - "Load results/ch5/rq7/data/step02_theta_long.csv (theta scores)"
+        - "Load results/ch5/rq7/data/step00_tsvr_mapping.csv (TSVR time variable)"
+        - "Merge theta with TSVR on (UID, test) keys"
+        - "Collapse across domains: group by (UID, test, TSVR_hours), compute mean(theta)"
+        - "Load results/ch5/rq7/data/step03_best_model.pkl using pickle.load()"
+        - "Extract AIC value from best continuous model"
+        - "Save merged theta + TSVR to data/step00_theta_tsvr.csv"
+        - "Save AIC value to data/step00_best_continuous_aic.txt"
+
+      input_files:
+        - path: "results/ch5/rq7/data/step02_theta_long.csv"
+          required_columns: ["UID", "test", "domain", "theta"]
+          expected_rows: "~1200 (100 participants x 4 tests x 3 domains)"
+          source: "RQ 5.7 Step 2 (IRT calibration Pass 2 theta scores)"
+        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          required_columns: ["UID", "test", "TSVR_hours"]
+          expected_rows: "~400 (100 participants x 4 tests)"
+          source: "RQ 5.7 Step 0 (TSVR extraction from master.xlsx)"
+        - path: "results/ch5/rq7/data/step03_best_model.pkl"
+          source: "RQ 5.7 Step 3 (best continuous model selection by AIC)"
+
+      output_files:
+        - path: "data/step00_theta_tsvr.csv"
+          columns:
+            - {name: "UID", type: "string", description: "Participant identifier"}
+            - {name: "test", type: "string", description: "Test session (T1, T2, T3, T4)"}
+            - {name: "TSVR_hours", type: "float64", description: "Time since VR in hours (Decision D070)"}
+            - {name: "theta", type: "float64", description: "Mean theta across 3 domains"}
+          expected_rows: "~400 (100 participants x 4 tests)"
+          description: "Merged theta + TSVR, domain-collapsed"
+        - path: "data/step00_best_continuous_aic.txt"
+          description: "AIC of best continuous model from RQ 5.7 (for Step 3 comparison)"
+
+      parameters:
+        merge_keys: ["UID", "test"]
+        collapse_domains: true
+        domain_aggregation: "mean"
+
+    validation_call:
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch5/rq7/data/step02_theta_long.csv"
+          source: "RQ 5.7 dependency (must exist before Step 0)"
+        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          source: "RQ 5.7 dependency (must exist before Step 0)"
+        - path: "results/ch5/rq7/data/step03_best_model.pkl"
+          source: "RQ 5.7 dependency (must exist before Step 0)"
+
+      parameters:
+        file_paths:
+          - "results/ch5/rq7/data/step02_theta_long.csv"
+          - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          - "results/ch5/rq7/data/step03_best_model.pkl"
+        min_size_bytes: 0
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 RQ 5.7 files exist"
+        - "No file size = 0 (files not empty)"
+        - "Merge produces ~400 rows (no unexpected data loss)"
+        - "No NaN in theta or TSVR_hours after merge"
+        - "AIC value is positive and reasonable (10000-20000 range)"
+
+      on_failure:
+        action: "raise FileNotFoundError(validation_result['message'])"
+        log_to: "logs/step00_get_data.log"
+        invoke: "QUIT with EXPECTATIONS ERROR - RQ 5.7 must complete before RQ 5.8"
+
+      description: "Validate RQ 5.7 dependency files exist before data loading"
+
+    log_file: "logs/step00_get_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Create Time Transformations
+  # --------------------------------------------------------------------------
+  - name: "step01_create_time_transformations"
+    step_number: "01"
+    description: "Create time variables for quadratic model (Time, Time_squared, Time_log) and piecewise model (Segment, Days_within)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "assign_piecewise_segments"
+      signature: "assign_piecewise_segments(df: DataFrame, tsvr_col: str = 'TSVR_hours', early_cutoff_hours: float = 24.0) -> DataFrame"
+
+      input_files:
+        - path: "data/step00_theta_tsvr.csv"
+          required_columns: ["UID", "test", "TSVR_hours", "theta"]
+          variable_name: "theta_tsvr_data"
+
+      output_files:
+        - path: "data/step01_time_transformed.csv"
+          variable_name: "time_transformed_data"
+          columns:
+            - {name: "UID", type: "string"}
+            - {name: "test", type: "string"}
+            - {name: "TSVR_hours", type: "float64", description: "Original time variable"}
+            - {name: "theta", type: "float64", description: "Outcome variable"}
+            - {name: "Time", type: "float64", description: "Copy of TSVR_hours for quadratic model"}
+            - {name: "Time_squared", type: "float64", description: "TSVR_hours^2 for quadratic term"}
+            - {name: "Time_log", type: "float64", description: "log(TSVR_hours + 1) for potential log model"}
+            - {name: "Segment", type: "string", description: "Early (0-48h) or Late (48-240h)"}
+            - {name: "Days_within", type: "float64", description: "Time recentered within segment"}
+          expected_rows: "~400 (same as input)"
+          description: "Time transformations for quadratic and piecewise models"
+
+      parameters:
+        df: "theta_tsvr_data"
+        tsvr_col: "TSVR_hours"
+        early_cutoff_hours: 48.0
+        create_quadratic: true
+        create_log: true
+        segment_names:
+          early: "Early"
+          late: "Late"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "time_transformed_data"
+
+      description: "Create time transformations: quadratic (Time, Time^2), log (Time_log), piecewise (Segment, Days_within with 48h inflection)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_time_transformed.csv"
+          variable_name: "time_transformed_data"
+          source: "analysis call output (assign_piecewise_segments return value)"
+
+      parameters:
+        df: "time_transformed_data"
+        required_columns: ["UID", "test", "TSVR_hours", "theta", "Time", "Time_squared", "Time_log", "Segment", "Days_within"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 9 expected columns present"
+        - "No NaN in any column (transformations deterministic)"
+        - "Segment ~50% Early, ~50% Late (2 tests per segment)"
+        - "Days_within starts at 0 for both segments"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_create_time_transformations.log"
+
+      description: "Validate all expected columns created with no NaN values"
+
+    log_file: "logs/step01_create_time_transformations.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Quadratic Model (Test 1 - Quadratic Term Significance)
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_quadratic_model"
+    step_number: "02"
+    description: "Fit theta ~ Time + Time_squared + (Time | UID), test if quadratic term significant (p < 0.0033 Bonferroni)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_time_transformed.csv"
+          required_columns: ["UID", "test", "TSVR_hours", "theta", "Time", "Time_squared"]
+          variable_name: "time_data"
+
+      output_files:
+        - path: "results/step02_quadratic_model_summary.txt"
+          variable_name: "quadratic_model"
+          description: "Quadratic model summary (fixed effects, random effects, AIC, BIC, convergence status)"
+        - path: "data/step02_quadratic_predictions.csv"
+          variable_name: "quadratic_predictions"
+          columns:
+            - {name: "Time", type: "float64", description: "Prediction grid (0, 24, 48, ..., 240 hours)"}
+            - {name: "predicted_theta", type: "float64", description: "Predicted theta from quadratic model"}
+            - {name: "CI_lower", type: "float64", description: "Lower 95% CI"}
+            - {name: "CI_upper", type: "float64", description: "Upper 95% CI"}
+          expected_rows: "11 (prediction grid timepoints)"
+          description: "Quadratic model predictions for plotting"
+
+      parameters:
+        theta_scores: "time_data"
+        tsvr_data: "time_data"
+        formula: "theta ~ Time + Time_squared + (Time | UID)"
+        groups: "UID"
+        re_formula: "~Time"
+        reml: false
+        fallback_strategy:
+          - "Maximal: (Time | UID)"
+          - "Uncorrelated: (Time || UID)"
+          - "Intercept-only: (1 | UID)"
+        prediction_grid: [0, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240]
+        bonferroni_alpha: 0.0033
+        bonferroni_n_tests: 15
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "quadratic_model"
+
+      description: "Fit quadratic LMM with random slopes, test Time_squared significance (Test 1 for two-phase forgetting)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step02_quadratic_model_summary.txt"
+          variable_name: "quadratic_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "quadratic_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (or fallback documented)"
+        - "All fixed effects finite (no NaN)"
+        - "Predictions generated for all 11 timepoints"
+        - "Time_squared p-value in [0, 1]"
+        - "AIC > 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_quadratic_model.log"
+
+      description: "Validate quadratic model convergence and parameter estimation"
+
+    log_file: "logs/step02_fit_quadratic_model.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Piecewise Model (Test 2 - Piecewise vs Continuous Comparison)
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_piecewise_model"
+    step_number: "03"
+    description: "Fit theta ~ Days_within * Segment + (Days_within | UID), compare AIC to best continuous (deltaAIC < -2 favors piecewise)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_time_transformed.csv"
+          required_columns: ["UID", "test", "Segment", "Days_within", "theta", "TSVR_hours"]
+          variable_name: "time_data"
+        - path: "data/step00_best_continuous_aic.txt"
+          variable_name: "continuous_aic"
+          description: "AIC of best continuous model from RQ 5.7"
+
+      output_files:
+        - path: "results/step03_piecewise_model_summary.txt"
+          variable_name: "piecewise_model"
+          description: "Piecewise model summary (segment slopes, interaction, AIC comparison, convergence status)"
+        - path: "data/step03_piecewise_predictions.csv"
+          variable_name: "piecewise_predictions"
+          columns:
+            - {name: "Segment", type: "string", description: "Early or Late"}
+            - {name: "Days_within", type: "float64", description: "Time within segment"}
+            - {name: "TSVR_hours", type: "float64", description: "Actual time since encoding (for plotting)"}
+            - {name: "predicted_theta", type: "float64", description: "Predicted theta from piecewise model"}
+            - {name: "CI_lower", type: "float64", description: "Lower 95% CI"}
+            - {name: "CI_upper", type: "float64", description: "Upper 95% CI"}
+          expected_rows: "18 (9 Early + 9 Late timepoints)"
+          description: "Piecewise model predictions per segment"
+
+      parameters:
+        theta_scores: "time_data"
+        tsvr_data: "time_data"
+        formula: "theta ~ Days_within * Segment + (Days_within | UID)"
+        groups: "UID"
+        re_formula: "~Days_within"
+        reml: false
+        fallback_strategy:
+          - "Maximal: (Days_within | UID)"
+          - "Uncorrelated: (Days_within || UID)"
+          - "Intercept-only: (1 | UID)"
+        prediction_grid_early: [0, 6, 12, 18, 24, 30, 36, 42, 48]
+        prediction_grid_late: [0, 24, 48, 72, 96, 120, 144, 168, 192]
+        continuous_aic_file: "data/step00_best_continuous_aic.txt"
+        aic_threshold: -2.0
+        bonferroni_alpha: 0.0033
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "piecewise_model"
+
+      description: "Fit piecewise LMM with interaction term, compare AIC to continuous (Test 2 for two-phase forgetting)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step03_piecewise_model_summary.txt"
+          variable_name: "piecewise_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "piecewise_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (or fallback documented)"
+        - "All fixed effects finite (Intercept, Days_within, SegmentLate, interaction)"
+        - "Predictions generated for all 18 timepoints (9 Early + 9 Late)"
+        - "AIC comparison computed (deltaAIC finite, not NaN)"
+        - "Interaction p-value in [0, 1]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_fit_piecewise_model.log"
+
+      description: "Validate piecewise model convergence and AIC comparison"
+
+    log_file: "logs/step03_fit_piecewise_model.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Validate LMM Assumptions (Test 3 - Comprehensive Checks)
+  # --------------------------------------------------------------------------
+  - name: "step04_validate_lmm_assumptions"
+    step_number: "04"
+    description: "Perform 6 assumption checks for both quadratic and piecewise models (residual normality, homoscedasticity, random effects normality, autocorrelation, linearity, outliers)"
+
+    analysis_call:
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+      input_files:
+        - path: "Fitted model objects (in memory from Steps 2-3)"
+          description: "Quadratic and piecewise LMM results"
+        - path: "data/step01_time_transformed.csv"
+          variable_name: "time_data"
+          description: "Original data for residual computation"
+
+      output_files:
+        - path: "results/step04_assumption_validation_report.txt"
+          variable_name: "assumption_report"
+          description: "Comprehensive assumption validation for both models (12 total checks: 6 per model)"
+
+      parameters:
+        models_to_validate:
+          - name: "quadratic"
+            lmm_result: "quadratic_model"
+          - name: "piecewise"
+            lmm_result: "piecewise_model"
+        data: "time_data"
+        output_dir: "results/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict"
+        variable_name: "assumption_report"
+
+      description: "Comprehensive assumption validation for both models (Step 4 unique: validation IS the analysis)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step04_assumption_validation_report.txt"
+          variable_name: "assumption_report"
+          source: "analysis call output (validate_lmm_assumptions_comprehensive return value)"
+
+      parameters:
+        interaction_df: "assumption_report"
+        required_terms: ["Shapiro-Wilk", "Breusch-Pagan", "ACF", "Cook's D"]
+        alpha_bonferroni: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 6 assumption checks performed for both models (12 total)"
+        - "Test statistics finite (not NaN/Inf)"
+        - "p-values in [0, 1]"
+        - "PASS/FAIL documented per check"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_validate_lmm_assumptions.log"
+
+      description: "Validate assumption tests executed correctly (meta-validation for Step 4)"
+
+    log_file: "logs/step04_validate_lmm_assumptions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Extract Slopes and Compute Ratio (Test 4 - Slope Comparison)
+  # --------------------------------------------------------------------------
+  - name: "step05_extract_slopes"
+    step_number: "05"
+    description: "Extract Early/Late segment slopes from piecewise model, compute Late/Early ratio (expect <0.5 for robust two-phase)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "extract_segment_slopes_from_lmm"
+      signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> DataFrame"
+
+      input_files:
+        - path: "results/step03_piecewise_model_summary.txt"
+          variable_name: "piecewise_model"
+          description: "Piecewise model with Days_within:SegmentLate interaction term"
+
+      output_files:
+        - path: "results/step05_slope_comparison.csv"
+          variable_name: "slope_comparison"
+          columns:
+            - {name: "metric", type: "string", description: "Early_slope, Late_slope, Ratio, or Interaction_p"}
+            - {name: "value", type: "float64", description: "Estimated value"}
+            - {name: "SE", type: "float64", description: "Standard error (NA for p-value)"}
+            - {name: "CI_lower", type: "float64", description: "Lower 95% CI (NA for p-value)"}
+            - {name: "CI_upper", type: "float64", description: "Upper 95% CI (NA for p-value)"}
+            - {name: "interpretation", type: "string", description: "Verbal interpretation"}
+          expected_rows: "4 (Early slope, Late slope, Ratio, Interaction p)"
+          description: "Slope estimates with ratio computation (Test 4 for two-phase forgetting)"
+
+      parameters:
+        lmm_result: "piecewise_model"
+        segment_col: "Segment"
+        time_col: "Days_within"
+        ratio_threshold: 0.5
+        bonferroni_alpha: 0.0033
+        use_delta_method: true
+
+      returns:
+        type: "DataFrame"
+        variable_name: "slope_comparison"
+
+      description: "Extract segment slopes and compute Late/Early ratio with delta method SE propagation"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/step05_slope_comparison.csv"
+          variable_name: "slope_comparison"
+          source: "analysis call output (extract_segment_slopes_from_lmm return value)"
+
+      parameters:
+        data: "slope_comparison['value']"
+        min_val: -0.1
+        max_val: 2.0
+        column_name: "value"
+        expected_ranges:
+          Early_slope: [-0.1, 0.0]
+          Late_slope: [-0.05, 0.0]
+          Ratio: [0, 2.0]
+          Interaction_p: [0, 1]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Early_slope in [-0.1, 0.0] (negative = forgetting)"
+        - "Late_slope in [-0.05, 0.0] (negative, shallower than Early)"
+        - "Ratio in [0, 2.0] (positive, typically <1.0)"
+        - "Interaction_p in [0, 1]"
+        - "No NaN, no Inf"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_extract_slopes.log"
+
+      description: "Validate slope estimates and ratio in reasonable bounds"
+
+    log_file: "logs/step05_extract_slopes.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_plot_data"
+    step_number: "06"
+    description: "Aggregate observed means and model predictions for piecewise vs continuous visualization"
+
+    analysis_call:
+      module: "tools.plotting"
+      function: "prepare_piecewise_plot_data"
+      signature: "prepare_piecewise_plot_data(df_input: DataFrame, lmm_result: MixedLMResults, segment_col: str, factor_col: str, segment_values: List[str], factor_values: List[str], days_within_col: str = 'Days_within', theta_col: str = 'theta', early_grid_points: int = 20, late_grid_points: int = 60, ci_level: float = 0.95) -> Dict[str, DataFrame]"
+
+      input_files:
+        - path: "data/step00_theta_tsvr.csv"
+          variable_name: "observed_data"
+          description: "Observed theta scores"
+        - path: "data/step02_quadratic_predictions.csv"
+          variable_name: "quadratic_preds"
+          description: "Quadratic model predictions"
+        - path: "data/step03_piecewise_predictions.csv"
+          variable_name: "piecewise_preds"
+          description: "Piecewise model predictions"
+
+      output_files:
+        - path: "plots/step06_piecewise_comparison_data.csv"
+          variable_name: "plot_data"
+          columns:
+            - {name: "source", type: "string", description: "Observed, Quadratic, or Piecewise"}
+            - {name: "TSVR_hours", type: "float64", description: "Time since encoding"}
+            - {name: "theta", type: "float64", description: "Observed or predicted theta"}
+            - {name: "CI_lower", type: "float64", description: "Lower 95% CI"}
+            - {name: "CI_upper", type: "float64", description: "Upper 95% CI"}
+            - {name: "Segment", type: "string", description: "Early or Late (for Piecewise only, NA for others)"}
+          expected_rows: "~33 (4 observed + 11 quadratic + 18 piecewise)"
+          description: "Combined plot data for two-panel piecewise vs continuous comparison"
+
+      parameters:
+        df_input: "observed_data"
+        lmm_result: "piecewise_model"
+        segment_col: "Segment"
+        factor_col: "source"
+        segment_values: ["Early", "Late"]
+        factor_values: ["Observed", "Quadratic", "Piecewise"]
+        days_within_col: "Days_within"
+        theta_col: "theta"
+        early_grid_points: 20
+        late_grid_points: 60
+        ci_level: 0.95
+        inflection_point: 48.0
+
+      returns:
+        type: "Dict[str, DataFrame]"
+        variable_name: "plot_data"
+
+      description: "Aggregate observed means + quadratic predictions + piecewise predictions for visualization"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "plots/step06_piecewise_comparison_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (prepare_piecewise_plot_data return value)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["Observed", "Quadratic", "Piecewise"]
+        required_groups: ["Early", "Late"]
+        domain_col: "source"
+        group_col: "Segment"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 sources present (Observed, Quadratic, Piecewise)"
+        - "Expected row count: 30-35"
+        - "No NaN in critical columns (source, TSVR_hours, theta, CIs)"
+        - "Segment can be NA for non-piecewise sources"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_prepare_plot_data.log"
+
+      description: "Validate all data sources present in plot CSV"
+
+    log_file: "logs/step06_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

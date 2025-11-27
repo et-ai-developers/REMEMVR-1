@@ -442,7 +442,7 @@ Validation tools MUST be used after purified CTT scoring execution. Specific val
 
 **Output:**
 
-**File 1:** results/step04_ctt_reliability.csv
+**File 1:** data/step04_ctt_reliability.csv
 **Format:** CSV, one row per domain x item_set
 **Columns:**
   - `domain` (string, values: {What, Where, When})
@@ -459,7 +459,7 @@ Validation tools MUST be used after Cronbach's alpha computation execution. Spec
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step04_ctt_reliability.csv: 6 rows x 6 columns (domain, item_set, alpha, ci_lower, ci_upper, n_items)
+- data/step04_ctt_reliability.csv: 6 rows x 6 columns (domain, item_set, alpha, ci_lower, ci_upper, n_items)
 - Data types: string (domain, item_set), float (alpha, CIs), int (n_items)
 
 *Value Ranges:*
@@ -530,7 +530,7 @@ Validation tools MUST be used after Cronbach's alpha computation execution. Spec
 
 **Output:**
 
-**File 1:** results/step05_correlations.csv
+**File 1:** data/step05_correlations.csv
 **Format:** CSV, one row per domain x correlation_pair
 **Columns:**
   - `domain` (string)
@@ -539,7 +539,7 @@ Validation tools MUST be used after Cronbach's alpha computation execution. Spec
   - `n` (int, sample size)
 **Expected Rows:** 9 (3 domains x 3 correlation_pairs)
 
-**File 2:** results/step05_steiger_tests.csv
+**File 2:** data/step05_steiger_tests.csv
 **Format:** CSV, one row per domain
 **Columns:**
   - `domain` (string)
@@ -557,8 +557,8 @@ Validation tools MUST be used after correlation analysis execution. Specific val
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step05_correlations.csv: 9 rows x 4 columns (domain, correlation_pair, r, n)
-- results/step05_steiger_tests.csv: 3 rows x 7 columns (domain, r_full_irt, r_purified_irt, delta_r, z_statistic, p_value, interpretation)
+- data/step05_correlations.csv: 9 rows x 4 columns (domain, correlation_pair, r, n)
+- data/step05_steiger_tests.csv: 3 rows x 7 columns (domain, r_full_irt, r_purified_irt, delta_r, z_statistic, p_value, interpretation)
 - Data types: string (domain, correlation_pair, interpretation), float (r, delta_r, z, p), int (n)
 
 *Value Ranges:*
@@ -709,22 +709,22 @@ Validation tools MUST be used after z-score standardization execution. Specific 
 
 **Output:**
 
-**File 1:** results/step07_lmm_full_ctt_summary.txt
+**File 1:** data/step07_lmm_full_ctt_summary.txt
 **Format:** Plain text LMM summary
 **Content:** Fixed effects, random effects, AIC, BIC
 **Purpose:** Full CTT model results
 
-**File 2:** results/step07_lmm_purified_ctt_summary.txt
+**File 2:** data/step07_lmm_purified_ctt_summary.txt
 **Format:** Plain text LMM summary
 **Content:** Fixed effects, random effects, AIC, BIC
 **Purpose:** Purified CTT model results
 
-**File 3:** results/step07_lmm_irt_theta_summary.txt
+**File 3:** data/step07_lmm_irt_theta_summary.txt
 **Format:** Plain text LMM summary
 **Content:** Fixed effects, random effects, AIC, BIC
 **Purpose:** IRT theta model results (gold standard)
 
-**File 4:** results/step07_lmm_comparison.csv
+**File 4:** data/step07_lmm_comparison.csv
 **Format:** CSV, one row per measurement approach
 **Columns:**
   - `measurement_approach` (string, values: {Full_CTT, Purified_CTT, IRT_theta})
@@ -734,7 +734,7 @@ Validation tools MUST be used after z-score standardization execution. Specific 
   - `interpretation` (string, per Burnham & Anderson thresholds)
 **Expected Rows:** 3
 
-**File 5:** results/step07_interaction_coefficients.csv
+**File 5:** data/step07_interaction_coefficients.csv
 **Format:** CSV, one row per measurement approach x interaction term
 **Columns:**
   - `measurement_approach` (string)
@@ -750,11 +750,11 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step07_lmm_full_ctt_summary.txt: Text file, 50-100 lines
-- results/step07_lmm_purified_ctt_summary.txt: Text file, 50-100 lines
-- results/step07_lmm_irt_theta_summary.txt: Text file, 50-100 lines
-- results/step07_lmm_comparison.csv: 3 rows x 5 columns
-- results/step07_interaction_coefficients.csv: 6 rows x 5 columns
+- data/step07_lmm_full_ctt_summary.txt: Text file, 50-100 lines
+- data/step07_lmm_purified_ctt_summary.txt: Text file, 50-100 lines
+- data/step07_lmm_irt_theta_summary.txt: Text file, 50-100 lines
+- data/step07_lmm_comparison.csv: 3 rows x 5 columns
+- data/step07_interaction_coefficients.csv: 6 rows x 5 columns
 - Data types: string (approach, term, interpretation), float (AIC, BIC, delta_AIC, coef, SE, p)
 
 *Value Ranges:*

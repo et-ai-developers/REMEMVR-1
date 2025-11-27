@@ -558,7 +558,7 @@ Read `results/chX/rqY/concept.md` - This is the user's description of the RQ in 
 
 5. **docs/tools_inventory.md** - Available tools (check if user's requested analysis is feasible)
 
-6. **thesis/analyses/ANALYSES_CH5.md** (or CH6/CH7) - Original RQ specification
+6. **docs/v4/thesis/ANALYSES_CH5.md** (or CH6/CH7) - Original RQ specification
 
 **CONDITIONAL READS:**
 - **docs/irt_methodology.md** - If concept.md mentions IRT

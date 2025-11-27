@@ -1,55 +1,68 @@
 rq_builder:
   status: success
-  context_dump: |
-    Created results/ch5/rq10/ with 6 folders
+  context_dump: 'Created results/ch5/rq10/ with 6 folders
+
     Folders: docs/, data/, code/, logs/, plots/, results/
+
     All folders empty, ready for agents
+
     status.yaml initialized with 10 RQ-specific agents
+
     Next: rq_concept extracts concept from thesis
 
+    '
 rq_concept:
   status: success
-  context_dump: |
-    RQ 5.10: Domain-specific age effects on forgetting
-    Domains: What/Where/When (all three)
-    Analysis: LMM with 3-way Age × Domain × Time interaction
-    Data: DERIVED from RQ 5.1 theta scores + Age from dfData.csv
-    Critical: Treatment coding (What reference), Bonferroni α=0.0033, age tertiles for viz only
-
+  context_dump: "RQ 5.10: Domain-specific age effects on forgetting\nDomains: What/Where/When\
+    \ (all three)\nAnalysis: LMM with 3-way Age \xD7 Domain \xD7 Time interaction\n\
+    Data: DERIVED from RQ 5.1 theta scores + Age from dfData.csv\nCritical: Treatment\
+    \ coding (What reference), Bonferroni \u03B1=0.0033, age tertiles for viz only\n"
 rq_scholar:
   status: success
-  context_dump: |
-    9.3/10 APPROVED. Theory strong (hippocampal aging, dual-process), lit adequate (needs 2020-2024 citations). 5 optional improvements: add Cheke 2022 (temporal vulnerability), Zheng 2020 (subfield aging), acknowledge perirhinal aging, justify immersive VR design. Ready for stats.
+  context_dump: '9.3/10 APPROVED. Theory strong (hippocampal aging, dual-process),
+    lit adequate (needs 2020-2024 citations). 5 optional improvements: add Cheke 2022
+    (temporal vulnerability), Zheng 2020 (subfield aging), acknowledge perirhinal
+    aging, justify immersive VR design. Ready for stats.
 
+    '
 rq_stats:
   status: success
-  context_dump: "9.7/10 APPROVED. Category 1: 2.8/3 (appropriate, sample size marginal for 3-way interaction). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (comprehensive). Category 4: 2.0/2 (thorough validation). Category 5: 0.9/1 (9 concerns, 5 MODERATE, 4 MINOR)."
-
+  context_dump: '9.7/10 APPROVED. Category 1: 2.8/3 (appropriate, sample size marginal
+    for 3-way interaction). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (comprehensive).
+    Category 4: 2.0/2 (thorough validation). Category 5: 0.9/1 (9 concerns, 5 MODERATE,
+    4 MINOR).'
 rq_planner:
   status: success
-  context_dump: |
-    6 steps planned (Step 0: get data from RQ 5.1 + Steps 1-5: LMM analysis)
-    Analysis: LMM-only with 3-way Age x Domain x Time interaction
-    Dependencies: RQ 5.1 (theta scores, TSVR mapping), dfData.csv (age)
-    Key methods: Grand-mean centering Age, TSVR time variable (D070), Bonferroni correction (D068), assumption validation, random effects model selection
-    Outputs: LMM model, 3-way interaction terms, domain-specific age effects, post-hoc contrasts, age effects plot data
-
+  context_dump: '7 steps planned (Step 0: data preparation + Steps 1-6: LMM analysis,
+    validation, inference, visualization). LMM-only pipeline (no IRT - uses DERIVED
+    theta from RQ 5.1). Primary hypothesis: 3-way Age x Domain x Time interaction
+    tests hippocampal aging hypothesis. Expected outputs: LMM model, 3-way interaction
+    tests, domain-specific age effects, post-hoc contrasts, plot data. Validation:
+    100% coverage.'
 rq_tools:
-  status: pending
-  context_dump: |
-
+  status: success
+  completed: 2025-11-27
+  context_dump: '4 analysis + 6 validation tools cataloged for Age x Domain x Time LMM analysis. LMM trajectory, model selection, contrasts, plot data prep. All tools verified in tools_inventory.md.'
 rq_analysis:
-  status: pending
-  context_dump: |
-
+  status: success
+  completed: 2025-11-28
+  context_dump: '7 steps specified with validation (LMM 3-way Age x Domain x Time interaction, model selection, contrasts, plot data prep)'
 rq_inspect:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_plots:
   status: pending
-  context_dump: |
-
+  context_dump: ''
 rq_results:
   status: pending
-  context_dump: |
+  context_dump: ''
+
+analysis_steps:
+  step00_get_data_from_rq51: pending
+  step01_prepare_lmm_input: pending
+  step02_fit_lmm: pending
+  step02b_validate_assumptions: pending
+  step02c_model_selection: pending
+  step03_extract_interactions: pending
+  step04_compute_contrasts: pending
+  step05_prepare_plot_data: pending
