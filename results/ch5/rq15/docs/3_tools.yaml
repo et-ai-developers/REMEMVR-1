@@ -1,0 +1,289 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 5.15 - Item Difficulty x Time Interaction
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Created: 2025-11-27
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_centered_data.csv"
+        required_columns: ["UID", "item_name", "response", "TSVR_hours", "Difficulty_c"]
+        expected_rows: "~40,000 (100 UIDs x 4 tests x ~100 items)"
+        data_types:
+          UID: "string (format: P### with leading zeros)"
+          item_name: "string (item tag identifier)"
+          response: "int (values: 0 or 1)"
+          TSVR_hours: "float (range: 0 to ~200 hours)"
+          Difficulty_c: "float (centered difficulty, range: approximately -3 to +3)"
+
+    output_files:
+      - path: "results/step02_lmm_model_summary.txt"
+        description: "LMM model summary (fixed effects, random effects, convergence status)"
+      - path: "results/step02_fixed_effects.csv"
+        columns: ["term", "estimate", "se", "z_value", "p_value", "p_bonferroni"]
+        description: "Fixed effects table with Bonferroni-corrected p-values (4 rows: intercept + 2 main + 1 interaction)"
+      - path: "results/step02_random_effects.csv"
+        columns: ["group", "variance", "sd"]
+        description: "Random effects variance components (2-4 rows depending on random structure)"
+      - path: "data/step02_model_object.pkl"
+        description: "Serialized pymer4 model object for assumption validation and plotting"
+
+    parameters:
+      formula: "response ~ TSVR_hours * Difficulty_c"
+      re_formula: "(TSVR_hours | UID) + (1 | item_name)"
+      groups: "UID"
+      reml: false
+      software: "pymer4"
+      model_selection_strategy: "Maximal first, simplify if convergence fails"
+
+    description: "Fit cross-classified LMM with Time x Difficulty_c interaction using pymer4 for crossed random effects (UID x Item). Model selection: attempt (TSVR_hours | UID) + (1 | item_name), simplify to (TSVR_hours || UID) + (1 | item_name) if singular, further to (1 | UID) + (1 | item_name) if still fails."
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "results/step02_lmm_model_summary.txt"
+        source: "analysis tool output (step02_fit_lmm)"
+
+    output_files:
+      - path: "results/step02_fixed_effects.csv"
+        columns: ["term", "estimate", "se", "z_value", "p_value"]
+        description: "Fixed effects table (4 rows: Intercept, TSVR_hours, Difficulty_c, TSVR_hours:Difficulty_c)"
+
+    parameters:
+      bonferroni_n: 15
+
+    description: "Extract fixed effects table from fitted LMM with Bonferroni correction for 15 Chapter 5 RQs (p_bonferroni = p_value * 15)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_fixed_effects_from_lmm"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "check_file_exists"
+
+    input_files:
+      - path: "data/step02_model_object.pkl"
+        source: "analysis tool output (step02_fit_lmm)"
+      - path: "data/step01_centered_data.csv"
+        source: "data used for LMM fitting"
+
+    output_files:
+      - path: "results/step04_assumption_validation_report.txt"
+        description: "Text summary of all 6 assumption checks with pass/fail/warning status"
+      - path: "plots/step04_diagnostic_plots.png"
+        description: "Multi-panel diagnostic plots (6 panels: residual Q-Q, residuals vs fitted, random effects Q-Q, ACF, partial residuals, Cook's distance)"
+      - path: "results/step04_assumption_tests.csv"
+        columns: ["assumption", "test_name", "statistic", "p_value", "threshold", "result", "recommendation"]
+        description: "Formal assumption test results (6 rows: normality, homoscedasticity, random effects normality, autocorrelation, linearity, outliers)"
+
+    parameters:
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+      output_dir: "plots/"
+
+    description: "Comprehensive LMM assumption validation with 6 checks: residual normality (Shapiro-Wilk + Q-Q), homoscedasticity (Breusch-Pagan + residuals vs fitted), random effects normality (Shapiro-Wilk + Q-Q), autocorrelation (ACF + Lag-1), linearity (partial residuals), outliers (Cook's distance). Generates diagnostic plots and formal test results."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_assumptions_comprehensive"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step02_lmm_model_summary.txt"
+        required_columns: []
+        source: "analysis tool output (fit_lmm_trajectory_tsvr)"
+
+    parameters:
+      check_singularity: true
+      min_observations: 100
+
+    criteria:
+      - "Model converged successfully (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "Minimum 100 observations used"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        convergence_status: "str (convergence message from pymer4)"
+        warnings: "List[str] (any warnings encountered)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully, no singular fit, all estimates finite. Checks model.converged attribute and inspects variance components for zeros (singular fit indicator)."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step02_fixed_effects.csv"
+        required_columns: ["term", "estimate", "se", "z_value", "p_value"]
+        source: "analysis tool output (extract_fixed_effects_from_lmm)"
+
+    parameters:
+      required_cols: ["term", "estimate", "se", "z_value", "p_value", "p_bonferroni"]
+
+    criteria:
+      - "All required columns present (term, estimate, se, z_value, p_value, p_bonferroni)"
+      - "No missing columns"
+      - "Column order irrelevant (only presence checked)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (any missing columns)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_interaction.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate DataFrame has all required columns present. Case-sensitive column name matching. Does NOT check for missing values within columns - only column presence."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+    input_files: []
+
+    parameters:
+      files_to_check:
+        - path: "results/step04_assumption_validation_report.txt"
+          min_size_bytes: 1000
+        - path: "plots/step04_diagnostic_plots.png"
+          min_size_bytes: 10000
+        - path: "results/step04_assumption_tests.csv"
+          min_size_bytes: 500
+
+    criteria:
+      - "All output files exist (assumption report, diagnostic plots, assumption tests)"
+      - "Each file meets minimum size requirement (not empty/corrupted)"
+      - "Diagnostic plot PNG file > 10KB (valid image)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all files exist and meet size requirements)"
+        message: "str (human-readable explanation)"
+        file_path: "str (validated file path)"
+        size_bytes: "int (actual file size, 0 if file doesn't exist)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step04_validate_assumptions.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate that file exists and optionally meets minimum size requirement. Returns valid=False if: (1) file doesn't exist, (2) path is directory not file, (3) file size < min_size_bytes."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - check_file_exists"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_centered_data.csv"
+        required_columns: ["Difficulty_c"]
+        source: "centering transformation output (step01)"
+
+    parameters:
+      checks:
+        - column: "Difficulty_c"
+          min_val: -6.0
+          max_val: 6.0
+          column_name: "Difficulty_c"
+
+    criteria:
+      - "All Difficulty_c values in range [-6.0, 6.0] (IRT difficulty bounds)"
+      - "No NaN values (centering should not introduce missing data)"
+      - "No infinite values"
+      - "Mean approximately 0 (within rounding error <0.001)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (human-readable explanation)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values for debugging)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_centered_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate numeric values fall within specified range [min_val, max_val]. Checks for values below minimum, above maximum, NaN values, and infinite values. Range is INCLUSIVE."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "plots/step05_interaction_plot_data.csv"
+        required_columns: ["PredictedResponse", "CI_lower", "CI_upper"]
+        source: "plot data preparation output (step05)"
+
+    parameters:
+      prob_columns: ["PredictedResponse", "CI_lower", "CI_upper"]
+
+    criteria:
+      - "PredictedResponse in [0, 1] (probability scale)"
+      - "CI_lower in [0, 1] (confidence bounds on probability scale)"
+      - "CI_upper in [0, 1] (confidence bounds on probability scale)"
+      - "No NaN values in probability columns"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all probabilities in [0,1])"
+        message: "str (human-readable explanation)"
+        violations: "List[Dict] (per-column violation details)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_interaction_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate probability values are in [0, 1] with no NaN/infinite values. Checks multiple probability columns simultaneously. Returns detailed violation information per column. Range is INCLUSIVE (0 and 1 are valid)."
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_probability_range"
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 5
+  total_unique_tools: 9
+  mandatory_decisions_embedded: ["D070"]
+  notes:
+    - "RQ 5.15 requires pymer4 for cross-classified random effects (statsmodels doesn't support crossed UID x Item)"
+    - "Validation tools paired with analysis tools via validation_tool reference"
+    - "Tool catalog approach: each tool listed ONCE (deduplication across steps)"
+    - "Standard library functions (pandas, numpy) NOT cataloged"
+    - "All signatures include full Python type hints for g_code validation"

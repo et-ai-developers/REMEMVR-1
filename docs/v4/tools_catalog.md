@@ -72,6 +72,14 @@
 | `validate_effect_sizes` | Validate Cohen's f² non-negative, warn if >1.0 (very large) |
 | `validate_probability_range` | Validate probabilities in [0,1] across multiple columns, no NaN/inf |
 | `validate_model_convergence` | Validate statsmodels LMM converged successfully |
+| `validate_standardization` | Validate z-score standardization (mean ≈ 0, SD ≈ 1) with configurable tolerance for sampling variation |
+| `validate_variance_positivity` | Validate all LMM variance components > 0 (detects collinearity/convergence issues) |
+| `validate_icc_bounds` | Validate ICC values in [0,1] range (detects computation errors) |
+| `validate_dataframe_structure` | Generic DataFrame validator (rows exact/range, columns present, types match) |
+| `validate_plot_data_completeness` | Verify all domains/groups present in plot data (complete factorial design) |
+| `validate_cluster_assignment` | Validate K-means clusters (consecutive IDs 0...K-1, minimum cluster size enforced) |
+| `validate_bootstrap_stability` | Validate clustering stability via Jaccard coefficient (mean, 95% CI, threshold check) |
+| `validate_cluster_summary_stats` | Validate cluster summaries (min <= mean <= max, SD >= 0, N > 0) |
 | `run_lmm_sensitivity_analyses` | Compare 7 alternative models (piecewise vs continuous, knots, weighted) |
 
 ---

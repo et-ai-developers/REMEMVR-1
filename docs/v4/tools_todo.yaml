@@ -112,6 +112,26 @@ analysis_lmm:
     test_status: "14/14 GREEN"
     notes: "Pearson correlation via scipy.stats.pearsonr. Bonferroni: p_bonf = min(p_uncorr × n_tests, 1.0). Interpretation thresholds: |r| < 0.30 Weak, 0.30-0.50 Moderate, ≥0.50 Strong. RQ 5.13 hypothesis: negative correlation (higher baseline → slower forgetting). Configurable column names for different statsmodels random effects naming conventions. 115 lines implementation. 20 min development time (excellent velocity!). Decision D068 compliant (dual p-value reporting)."
 
+  - name: extract_segment_slopes_from_lmm
+    module: tools.analysis_lmm
+    priority: HIGH
+    blocks_rqs: [5.8]
+    description: "Extract Early/Late segment slopes from piecewise LMM with delta method SE propagation"
+    requirements:
+      - "Extract Early segment slope from piecewise LMM fixed effects (Days_within coefficient)"
+      - "Extract Late segment slope (Days_within + Days_within:SegmentLate interaction)"
+      - "Compute Late/Early slope ratio for two-phase forgetting test"
+      - "Propagate standard errors via delta method for ratio"
+      - "Compute 95% confidence intervals for both slopes and ratio"
+      - "Return structured output with slopes, ratio, SEs, CIs, interpretation"
+    inputs:
+      - lmm_result: statsmodels.MixedLMResults
+      - segment_col: str (default 'Segment')
+      - time_col: str (default 'Days_within')
+    outputs: "pd.DataFrame[metric: str, value: float, SE: float, CI_lower: float, CI_upper: float, interpretation: str]"
+    done: false
+    notes: "RQ 5.8 Test 4 (Convergent Evidence) requires Early/Late slope ratio < 0.5 to indicate robust two-phase forgetting pattern. Delta method SE propagation required because ratio SE ≠ simple quadrature. Function extracts Days_within coefficient (Early slope) and Days_within + Days_within:SegmentLate interaction (Late slope), then computes ratio with propagated SE via delta method: SE_ratio² ≈ (∂ratio/∂β_early)²×SE_early² + (∂ratio/∂β_late)²×SE_late² + 2×(∂ratio/∂β_early)×(∂ratio/∂β_late)×Cov(β_early,β_late). Returns 3 rows: Early_slope, Late_slope, Ratio_Late_Early with value/SE/CI/interpretation for each."
+
 analysis_ctt:
 
   - name: compute_cronbachs_alpha
@@ -195,7 +215,10 @@ validation_generic:
       - expected_columns: List[str]
       - column_types: Dict[str, type]
     outputs: "Dict[valid: bool, message: str, checks: Dict]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "10/10 GREEN"
+    notes: "Generic DataFrame validation with flexible row count (exact or range), required columns check, and optional type checking. Three validation checks: (1) Row count in expected range, (2) All required columns present, (3) Column types match. Reports all checks separately. Used for RQ 5.14 clustering outputs. 117 lines implementation. 10 min development time."
 
 validation_numeric:
 
@@ -233,7 +256,10 @@ validation_numeric:
       - column_names: List[str]
       - tolerance: float (default 0.01)
     outputs: "Dict[valid: bool, message: str, mean_values: Dict, sd_values: Dict]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "11/11 GREEN"
+    notes: "Validates z-score standardization (mean ≈ 0, SD ≈ 1). Configurable tolerance parameter accounts for sampling variation (default 0.01 for N=100 scenarios). Reports actual mean/SD values for all columns. Used for pre-clustering validation to ensure all variables on same scale. Handles NaN via pairwise deletion. 107 lines implementation. 10 min development time."
 
   - name: validate_probability_range
     module: tools.validation
@@ -313,7 +339,10 @@ validation_lmm:
       - component_col: str (column name for component names)
       - value_col: str (column name for variance values)
     outputs: "Dict[valid: bool, message: str, negative_components: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "11/11 GREEN"
+    notes: "Validates all LMM variance components > 0. Detects negative or zero variance which indicate estimation issues (collinearity, convergence failure, model misspecification). Reports variance range and lists problematic components. Used for RQ 5.13 LMM variance validation. 85 lines implementation. 10 min development time."
 
   - name: validate_icc_bounds
     module: tools.validation
@@ -328,7 +357,10 @@ validation_lmm:
       - icc_df: pd.DataFrame
       - icc_col: str (column name for ICC values)
     outputs: "Dict[valid: bool, message: str, out_of_bounds: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "10/10 GREEN"
+    notes: "Validates ICC values in [0,1] range (INCLUSIVE). Detects NaN and values <0 or >1 which indicate computation errors. Reports ICC range in message. Out-of-bounds ICCs indicate formula error, negative variance components, or missing data. Used for RQ 5.13 ICC validation. 87 lines implementation. 10 min development time."
 
 validation_data_format:
 
@@ -365,7 +397,10 @@ validation_data_format:
       - required_domains: List[str]
       - required_groups: List[str]
     outputs: "Dict[valid: bool, message: str, missing_domains: List, missing_groups: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "6/6 GREEN"
+    notes: "Validates all domains/groups present in plot data for complete visualizations. Configurable column names for domain and group variables. Reports missing domains and groups separately. Lightweight validator for ensuring complete factorial design. Used for RQ 5.10 age effects plot validation. 32 lines implementation. 10 min development time."
 
 validation_d068_compliance:
 
@@ -483,7 +518,10 @@ validation_clustering:
       - n_participants: int
       - min_cluster_size: int
     outputs: "Dict[valid: bool, message: str, cluster_sizes: Dict]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "4/4 GREEN"
+    notes: "Validates K-means cluster assignments with three checks: (1) All participants assigned (length = n_expected), (2) Cluster IDs consecutive starting from 0, (3) Each cluster has >= min_cluster_size members. Reports actual cluster sizes. Prevents degenerate solutions with tiny or empty clusters. Used for RQ 5.14 clustering validation. 32 lines implementation. 10 min development time."
 
   - name: validate_bootstrap_stability
     module: tools.validation
@@ -500,7 +538,10 @@ validation_clustering:
       - stability_df: pd.DataFrame
       - min_jaccard_threshold: float (default 0.75)
     outputs: "Dict[valid: bool, message: str, mean_jaccard: float, ci_lower: float, ci_upper: float]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "4/4 GREEN"
+    notes: "Validates clustering stability via Jaccard coefficient (0 = no overlap, 1 = perfect agreement). Checks values in [0,1] range, computes mean and 95% CI via percentile method. Stability threshold typically 0.75 for reliable clusters. Fixed numpy boolean conversion issue during development. Used for RQ 5.14 bootstrap validation. 40 lines implementation. 10 min development time."
 
   - name: validate_cluster_summary_stats
     module: tools.validation
@@ -515,28 +556,31 @@ validation_clustering:
     inputs:
       - summary_df: pd.DataFrame
     outputs: "Dict[valid: bool, message: str, failed_checks: List]"
-    done: false
+    done: true
+    completed_date: 2025-11-27
+    test_status: "4/4 GREEN"
+    notes: "Validates cluster summary statistics consistency with mathematical constraints: (1) min <= mean <= max for each row, (2) SD >= 0, (3) N > 0. Flexible column naming for different summary table formats. Reports specific failed checks with row indices. Detects computation errors in clustering summaries. Used for RQ 5.14 cluster summary tables. 47 lines implementation. 10 min development time."
 
 ---
 
 # SUMMARY STATISTICS
 
-total_tools: 25
-done_count: 17
-remaining_count: 8
+total_tools: 26
+done_count: 25
+remaining_count: 1
 
 by_priority:
-  HIGH: 6  # Blocks multiple RQs or creates new modules
+  HIGH: 7  # Blocks multiple RQs or creates new modules (added extract_segment_slopes_from_lmm)
   MEDIUM: 10  # Blocks 1-2 RQs
   LOW: 9  # Nice-to-have validators
 
 by_module:
-  tools.analysis_lmm: 4
+  tools.analysis_lmm: 5  # Added extract_segment_slopes_from_lmm
   tools.analysis_ctt: 2  # NEW MODULE
   tools.validation: 19
 
 by_rq_blocking:
-  RQ_5_8: 2 tools (check_file_exists, validate_lmm_assumptions_comprehensive)
+  RQ_5_8: 3 tools (check_file_exists, validate_lmm_assumptions_comprehensive, extract_segment_slopes_from_lmm)
   RQ_5_9: 6 tools (check_file_exists, validate_numeric_range, validate_data_format, validate_contrasts_d068, validate_effect_sizes, validate_probability_range)
   RQ_5_10: 7 tools (check_file_exists, select_lmm_random_structure_via_lrt, prepare_age_effects_plot_data, validate_lmm_assumptions_comprehensive, validate_hypothesis_test_dual_pvalues, validate_contrasts_dual_pvalues, validate_plot_data_completeness)
   RQ_5_11: 1 tool (check_file_exists) # RQ 5.11 succeeded with only GREEN tools

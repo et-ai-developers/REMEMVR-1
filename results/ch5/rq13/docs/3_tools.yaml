@@ -1,0 +1,307 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.13
+# Created by: rq_tools agent
+# Date: 2025-11-27
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  load_rq_dependency:
+    module: "pickle + pandas"
+    function: "load (pickle.load, pd.read_csv)"
+    signature: "pickle.load(file: BinaryIO) -> Any, pd.read_csv(filepath: str) -> DataFrame"
+    validation_tool: "check_file_exists"
+
+    input_files:
+      - path: "results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl"
+        source: "RQ 5.7 Step 5 (best-fitting LMM with random slopes)"
+        required_properties:
+          - "Model fitted with random intercepts AND random slopes"
+          - "Converged successfully (convergence status = True)"
+          - "Contains random effects covariance matrix"
+          - "Contains residual variance estimate"
+      - path: "results/ch5/rq7/data/step04_theta_scores_allitems.csv"
+        source: "RQ 5.7 Step 4 (IRT theta scores for 'All' factor)"
+        required_columns: ["UID", "TEST", "theta"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+      - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+        source: "RQ 5.7 Step 0 (TSVR time variable mapping)"
+        required_columns: ["UID", "TEST", "TSVR_hours"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+
+    output_files:
+      - path: "data/step00_loaded_model_info.txt"
+        description: "Model metadata (convergence status, random effects structure, N observations)"
+        expected_lines: "15-20 lines of metadata"
+
+    parameters:
+      pickle_protocol: "Default (highest protocol)"
+      csv_encoding: "utf-8"
+
+    description: "Load saved LMM model object and associated data files from RQ 5.7 (cross-RQ dependency)"
+    source_reference: "Python stdlib (pickle), pandas documentation"
+
+  extract_variance_components:
+    module: "custom (statsmodels MixedLMResults extraction)"
+    function: "extract_variance_components"
+    signature: "extract_variance_components(lmm_result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_variance_positivity"
+
+    input_files:
+      - path: "Loaded LMM model object (from Step 0, in-memory)"
+        required_attributes:
+          - "cov_re (random effects covariance matrix, 2x2 for intercepts + slopes)"
+          - "scale (residual variance, scalar)"
+          - "random_effects (dictionary of participant-specific random effects)"
+
+    output_files:
+      - path: "data/step01_variance_components.csv"
+        columns: ["component", "value"]
+        description: "Variance components extracted from LMM (var_intercept, var_slope, cov_int_slope, var_residual, cor_int_slope)"
+        expected_rows: "5 (one row per variance component)"
+
+    parameters:
+      extract_from: "cov_re attribute + scale attribute"
+      compute_correlation: true
+
+    description: "Extract variance components from LMM random effects covariance matrix for ICC computation"
+    source_reference: "Custom extraction from statsmodels MixedLMResults, RQ 5.13 1_concept.md Step 3"
+
+  compute_icc_from_variance_components:
+    module: "tools.analysis_lmm"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_icc_bounds"
+
+    input_files:
+      - path: "data/step01_variance_components.csv"
+        required_columns: ["component", "value"]
+        source: "analysis tool output (step01_extract_variance_components)"
+        expected_rows: "5 (var_intercept, var_slope, cov_int_slope, var_residual, cor_int_slope)"
+
+    output_files:
+      - path: "results/step02_icc_estimates.csv"
+        columns: ["icc_type", "icc_value", "interpretation"]
+        description: "Three ICC estimates (ICC_intercept, ICC_slope_simple, ICC_slope_conditional_day6)"
+        expected_rows: "3 (one row per ICC estimate)"
+
+    parameters:
+      slope_name: "TSVR_hours"
+      timepoint: 6.0
+
+    description: "Compute 3 ICC estimates (intercept, slope_simple, slope_conditional) to quantify between-person variance proportion per Snijders & Bosker (2012)"
+    source_reference: "tools_inventory.md lines 165-174, RQ 5.13 1_concept.md Step 4"
+
+  test_intercept_slope_correlation_d068:
+    module: "tools.analysis_lmm"
+    function: "test_intercept_slope_correlation_d068"
+    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict[str, Any]"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "Loaded LMM model object (from Step 0, in-memory)"
+        required_attributes:
+          - "random_effects (dictionary: keys = UID, values = [random_intercept, random_slope])"
+          - "fe_params (fixed effects parameter estimates)"
+
+    output_files:
+      - path: "data/step03_random_effects.csv"
+        columns: ["UID", "random_intercept", "random_slope", "total_intercept", "total_slope"]
+        description: "Person-specific random intercepts and slopes with total effects"
+        expected_rows: "~100 (one row per participant)"
+      - path: "results/step03_slope_descriptives.csv"
+        columns: ["statistic", "value"]
+        description: "Descriptive statistics for random slopes (mean, SD, min, max, Q1, Q2, Q3)"
+        expected_rows: "7 (one row per descriptive statistic)"
+      - path: "results/step03_intercept_slope_correlation.csv"
+        columns: ["correlation_r", "p_uncorrected", "p_bonferroni", "interpretation"]
+        description: "Intercept-slope correlation test with Decision D068 dual p-value reporting"
+        expected_rows: "1 (single correlation test)"
+
+    parameters:
+      family_alpha: 0.05
+      n_tests: 15
+      intercept_col: "Group Var"
+      slope_col: "Group x TSVR_hours Var"
+
+    description: "Test correlation between random intercepts and slopes with Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md lines 175-183, RQ 5.13 1_concept.md Step 5"
+
+  plot_histogram_qq:
+    module: "matplotlib.pyplot"
+    function: "hist + scipy.stats.probplot"
+    signature: "hist(x: array_like, bins: int, ...) -> Tuple[array, array, patches], probplot(x: array_like, ...) -> Tuple[Tuple[array, array], Tuple[float, float]]"
+    validation_tool: "check_file_exists"
+
+    input_files:
+      - path: "data/step03_random_effects.csv"
+        required_columns: ["UID", "random_slope"]
+        source: "output from step03_extract_random_effects"
+
+    output_files:
+      - path: "plots/step04_random_slopes_histogram.png"
+        format: "PNG image"
+        dimensions: "800 x 600 pixels @ 300 DPI"
+        description: "Histogram with normal curve overlay showing distribution of random slopes"
+      - path: "plots/step04_random_slopes_qqplot.png"
+        format: "PNG image"
+        dimensions: "800 x 600 pixels @ 300 DPI"
+        description: "Q-Q plot assessing normality of random slopes"
+
+    parameters:
+      bins: "20-30 (automatic binning)"
+      overlay_normal: true
+      reference_line: true
+
+    description: "Generate histogram and Q-Q plot for random slopes distribution to validate LMM normality assumption"
+    source_reference: "matplotlib + scipy documentation, RQ 5.13 1_concept.md Step 6"
+
+validation_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+    input_files:
+      - path: "Variable (depends on analysis step)"
+        source: "File path to validate"
+
+    parameters:
+      min_size_bytes: 0
+
+    criteria:
+      - "File exists at specified path"
+      - "Path is file not directory"
+      - "File size >= min_size_bytes (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        file_path: "str (validated file path)"
+        size_bytes: "int (actual file size, 0 if file doesn't exist)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError or ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate file exists and optionally meets minimum size requirement"
+    source_reference: "tools_inventory.md lines 234-240"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_variance_components.csv"
+        required_columns: ["component", "value"]
+        source: "analysis tool output (step01_extract_variance_components)"
+
+    parameters:
+      component_col: "component"
+      value_col: "value"
+
+    criteria:
+      - "All variance components > 0 (var_intercept, var_slope, var_residual)"
+      - "Correlation in [-1, 1] (cor_int_slope)"
+      - "No NaN values in variance estimates"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        negative_components: "List[str]"
+        variance_range: "Tuple[float, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_variance.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate all LMM variance components > 0 (negative/zero indicates estimation issues)"
+    source_reference: "tools_inventory.md lines 390-398"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step02_icc_estimates.csv"
+        required_columns: ["icc_type", "icc_value", "interpretation"]
+        source: "analysis tool output (step02_compute_icc)"
+
+    parameters:
+      icc_col: "icc_value"
+
+    criteria:
+      - "All ICC values in [0, 1] (proportion by definition)"
+      - "No NaN values"
+      - "interpretation matches value (>0.40 = substantial, 0.20-0.40 = moderate, <0.20 = low)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_bounds: "List[Dict]"
+        icc_range: "Tuple[float, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_icc.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate ICC values in [0,1] range (outside bounds indicates computation errors)"
+    source_reference: "tools_inventory.md lines 400-408"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "results/step03_intercept_slope_correlation.csv"
+        required_columns: ["correlation_r", "p_uncorrected", "p_bonferroni", "interpretation"]
+        source: "analysis tool output (step03_extract_random_effects)"
+
+    parameters:
+      required_cols: null
+
+    criteria:
+      - "BOTH p_uncorrected AND p_bonferroni present (Decision D068 compliance)"
+      - "Correlation r in [-1, 1]"
+      - "p-values in [0, 1]"
+      - "p_bonferroni = 15 * p_uncorrected (Bonferroni correction factor)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_random_effects.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate correlation test results include Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md lines 284-292"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 4
+  total_unique_tools: 9
+  cross_rq_dependencies: ["RQ 5.7 (saved LMM model object)"]
+  mandatory_decisions_embedded: ["D068 (dual p-value reporting)"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "Step 0 uses stdlib (pickle, pandas) - exempted from tools_inventory.md verification"
+    - "Step 1 uses custom variance extraction (not in tools_inventory.md) - documented here for g_code"
+    - "All validation tools verified exist in tools_inventory.md (GREEN status)"

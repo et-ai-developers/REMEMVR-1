@@ -1,0 +1,199 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.9
+# Created by: rq_tools agent
+# Date: 2025-11-27
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once
+
+# PURPOSE: This file catalogs CUSTOM tools from tools/ module used in RQ 5.9 analysis
+# SCOPE: Standard library functions (pandas, numpy, statsmodels) are NOT cataloged
+# WHY: Only custom project-specific tools require validation pairing documentation
+
+---
+
+analysis_tools:
+  # NO CUSTOM ANALYSIS TOOLS REQUIRED
+  # RQ 5.9 uses only standard library functions:
+  # - pandas: merge, mean, std, log transformations
+  # - statsmodels: MixedLM fitting
+  # - numpy: arithmetic operations
+  # These stdlib functions are exempt from tools_inventory.md verification per rq_tools spec
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    purpose: "Validate DataFrame has all required columns present"
+
+    input_specification:
+      df: "DataFrame to validate"
+      required_cols: "List of required column names (case-sensitive)"
+
+    output_specification:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        message: "str (success message or error details)"
+        missing_cols: "List[str] (empty if valid=True)"
+
+    validation_criteria:
+      - "All required columns present in DataFrame"
+      - "Column order irrelevant"
+      - "Case-sensitive column name matching"
+
+    usage_notes: "Does NOT check for missing values within columns - only column presence"
+    source_reference: "tools_inventory.md lines 335-342"
+    introduced: "RQ 5.9 Step 0, Step 1 (data merge and centering validation)"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+
+    purpose: "Validate statsmodels LMM model converged successfully"
+
+    input_specification:
+      lmm_result: "Fitted LMM results object from statsmodels"
+
+    output_specification:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if converged==True)"
+        message: "str (success or failure details)"
+        converged: "bool (model.converged attribute value)"
+
+    validation_criteria:
+      - "Model.converged attribute == True"
+      - "Optimization algorithm reached solution"
+
+    failure_indicators:
+      - "Collinearity between predictors"
+      - "Insufficient data for model complexity"
+      - "Model specification issues"
+      - "Numerical instability"
+
+    usage_notes: "Simple boolean check - fastest validator. Handles missing converged attribute gracefully."
+    source_reference: "tools_inventory.md lines 370-378"
+    introduced: "RQ 5.9 Step 2 (LMM fitting validation)"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: pd.DataFrame) -> Dict[str, Any]"
+
+    purpose: "Validate Decision D068 compliance (dual p-value reporting) in contrast results"
+
+    input_specification:
+      contrasts_df: "DataFrame with contrast results and p-value columns"
+
+    output_specification:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (same as valid)"
+        missing_cols: "List[str] (empty if compliant)"
+        message: "str (compliance status or missing columns)"
+
+    validation_criteria:
+      - "p_uncorrected column present"
+      - "At least one correction column present (p_bonferroni, p_tukey, or p_holm)"
+      - "Both required for Decision D068 dual reporting"
+
+    usage_notes: "Pure validation function (no computation). Case-sensitive column names. Handles empty DataFrames."
+    source_reference: "tools_inventory.md lines 255-262"
+    introduced: "RQ 5.9 Step 3 (Age effects extraction with Bonferroni correction)"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    purpose: "Validate Cohen's f² effect sizes are within reasonable bounds"
+
+    input_specification:
+      effect_sizes_df: "DataFrame containing effect sizes"
+      f2_column: "Column name for f² values (default: 'cohens_f2')"
+
+    output_specification:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all effect sizes valid)"
+        message: "str (validation summary)"
+        warnings: "List[str] (warnings for very large f² values)"
+
+    validation_criteria:
+      - "No negative f² values (invalid)"
+      - "No NaN or infinite f² values (invalid)"
+      - "f² > 1.0 triggers warning (uncommon but valid)"
+
+    cohen_guidelines:
+      small: "f² = 0.02"
+      medium: "f² = 0.15"
+      large: "f² = 0.35"
+      very_large: "f² > 1.0 (rare, triggers warning)"
+
+    usage_notes: "Very large values trigger warnings but don't invalidate. Reports min/max range. Handles empty DataFrames."
+    source_reference: "tools_inventory.md lines 347-354"
+    introduced: "RQ 5.9 Step 4 (Age effect size computation validation)"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    purpose: "Validate probability values are in [0, 1] with no NaN/infinite values"
+
+    input_specification:
+      probability_df: "DataFrame with probability columns"
+      prob_columns: "List of column names to validate"
+
+    output_specification:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all probabilities in [0, 1])"
+        message: "str (validation summary)"
+        violations: "List[Dict] (details per column if violations found)"
+
+    validation_criteria:
+      - "All probability values in [0, 1] (inclusive)"
+      - "No NaN values"
+      - "No infinite values"
+      - "Range is INCLUSIVE (0 and 1 are valid)"
+
+    usage_notes: "Checks multiple probability columns simultaneously. Returns detailed violation information per column. Used for validating IRT theta→probability transformations."
+    source_reference: "tools_inventory.md lines 359-366"
+    introduced: "RQ 5.9 Step 5 (Age tertile plot data validation)"
+
+summary:
+  analysis_tools_count: 0
+  validation_tools_count: 5
+  total_unique_tools: 5
+  stdlib_functions_used:
+    - "pandas: merge, mean, std, log, qcut (tertiles)"
+    - "statsmodels: MixedLM (LMM fitting)"
+    - "numpy: arithmetic operations"
+  notes:
+    - "RQ 5.9 uses only standard library analysis functions (no custom tools/ analysis required)"
+    - "All 5 validation tools verified in tools_inventory.md"
+    - "Decision D068 enforced via validate_contrasts_d068"
+    - "Each validation tool listed ONCE (deduplication across steps)"
+    - "rq_analysis will map these tools to specific steps in 4_analysis.yaml"
+
+mandatory_decisions_embedded:
+  - decision: "D068"
+    tool: "validate_contrasts_d068"
+    requirement: "Dual p-value reporting (uncorrected + Bonferroni)"
+    steps: ["Step 3"]
+  - decision: "D070"
+    tool: "N/A (LMM formula enforces this)"
+    requirement: "TSVR_hours as time variable (not nominal days)"
+    steps: ["Step 0", "Step 2"]
+
+cross_rq_dependencies:
+  - source_rq: "RQ 5.7"
+    files:
+      - "results/ch5/rq7/data/step03_theta_all.csv"
+      - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+    usage: "Step 0 input data (theta scores + TSVR mapping)"
+
+# END OF TOOL CATALOG

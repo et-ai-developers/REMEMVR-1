@@ -377,6 +377,86 @@
 | **Reference** | RQ 5.13 LMM convergence validation, tools_todo.yaml lines 278-291 |
 | **Notes** | Statsmodels sets converged=True when optimization succeeds. Convergence failures indicate: collinearity, insufficient data, model specification issues, or numerical instability. Returns False if converged attribute missing. Simple boolean check - fastest validator. 6/6 tests GREEN. ~67 lines implementation. 10 min development time. |
 
+### validate_standardization
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate z-score standardization (mean ≈ 0, SD ≈ 1). Checks that standardized variables have mean within tolerance of 0 and SD within tolerance of 1. Used for pre-clustering validation to ensure all variables on same scale. |
+| **Inputs** | `df: pd.DataFrame` (data with standardized columns), `column_names: List[str]` (columns to validate), `tolerance: float` (default 0.01, allows for sampling variation) |
+| **Outputs** | `Dict[valid: bool, message: str, mean_values: Dict[str, float], sd_values: Dict[str, float]]` |
+| **Reference** | RQ 5.14 clustering pre-validation, tools_todo.yaml lines 222-237 |
+| **Notes** | Configurable tolerance parameter accounts for sampling variation (N=100 scenarios). Default tolerance 0.01 allows small deviations from ideal 0/1. Reports actual mean/SD values for all columns. Handles NaN via pairwise deletion in scipy.stats. 11/11 tests GREEN. ~107 lines implementation. 10 min development time. |
+
+### validate_variance_positivity
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate all LMM variance components > 0. Negative or zero variance indicates estimation issues (collinearity, convergence failure, model misspecification). Used for RQ 5.13 LMM variance validation. |
+| **Inputs** | `variance_df: pd.DataFrame` (variance components table), `component_col: str` (column name for component names, default 'component'), `value_col: str` (column name for variance values, default 'variance') |
+| **Outputs** | `Dict[valid: bool, message: str, negative_components: List[str], variance_range: Tuple[float, float]]` |
+| **Reference** | RQ 5.13 LMM variance validation, tools_todo.yaml lines 302-316 |
+| **Notes** | Detects negative or zero variance components which should never occur in valid LMM results. Reports range of variance values and lists any problematic components. Common causes: collinearity between random effects, convergence issues, overparameterized random effects structure. 11/11 tests GREEN. ~85 lines implementation. 10 min development time. |
+
+### validate_icc_bounds
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate ICC values in [0,1] range. ICCs outside this range indicate computation errors since ICC is a proportion of variance. Used for RQ 5.13 ICC validation. |
+| **Inputs** | `icc_df: pd.DataFrame` (ICC results table), `icc_col: str` (column name for ICC values, default 'icc_value') |
+| **Outputs** | `Dict[valid: bool, message: str, out_of_bounds: List[Dict], icc_range: Tuple[float, float]]` |
+| **Reference** | RQ 5.13 ICC computation validation, tools_todo.yaml lines 318-332 |
+| **Notes** | Boundary values 0 and 1 are inclusive (valid). Detects NaN and values <0 or >1. Reports range of ICC values in message. Out-of-bounds ICCs indicate: formula error, negative variance components, or missing data. 10/10 tests GREEN. ~87 lines implementation. 10 min development time. |
+
+### validate_dataframe_structure
+
+| Field | Value |
+|-------|-------|
+| **Description** | Generic DataFrame validation (rows, columns, types). Flexible validator for checking expected structure of analysis outputs. Supports exact row count or range. Optional type checking. |
+| **Inputs** | `df: pd.DataFrame` (data to validate), `expected_rows: Union[int, Tuple[int, int]]` (exact count or (min, max) range), `expected_columns: List[str]` (required columns), `column_types: Optional[Dict[str, type]]` (expected dtypes) |
+| **Outputs** | `Dict[valid: bool, message: str, checks: Dict[str, bool]]` |
+| **Reference** | RQ 5.14 clustering outputs validation, tools_todo.yaml lines 183-199 |
+| **Notes** | Three validation checks: (1) Row count in expected range, (2) All required columns present, (3) Column types match (if specified). Reports all checks separately in 'checks' dict. Flexible row count parameter: int for exact, tuple for range. Used for validating clustering assignments, centroids, summary tables. 10/10 tests GREEN. ~117 lines implementation. 10 min development time. |
+
+### validate_plot_data_completeness
+
+| Field | Value |
+|-------|-------|
+| **Description** | Verify all domains/groups present in plot data. Checks for missing categories that would create incomplete visualizations. Used for RQ 5.10 age effects plot validation. |
+| **Inputs** | `plot_data: pd.DataFrame` (plot source data), `required_domains: List[str]` (expected domains), `required_groups: List[str]` (expected groups), `domain_col: str` (default 'domain'), `group_col: str` (default 'group') |
+| **Outputs** | `Dict[valid: bool, message: str, missing_domains: List[str], missing_groups: List[str]]` |
+| **Reference** | RQ 5.10 age effects visualization validation, tools_todo.yaml lines 352-369 |
+| **Notes** | Configurable column names for domain and group variables. Reports missing domains and missing groups separately. Lightweight validator for ensuring complete factorial design in plot data. All domains and groups must be present for valid visualization. 6/6 tests GREEN. ~32 lines implementation. 10 min development time. |
+
+### validate_cluster_assignment
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate K-means cluster assignments. Checks cluster IDs are consecutive (0, 1, ..., K-1) and enforces minimum cluster size to prevent singleton clusters. |
+| **Inputs** | `cluster_labels: Union[np.ndarray, pd.Series]` (cluster assignments), `n_expected: int` (expected number of participants), `min_cluster_size: int` (default 5, minimum participants per cluster) |
+| **Outputs** | `Dict[valid: bool, message: str, cluster_sizes: Dict[int, int], n_clusters: int]` |
+| **Reference** | RQ 5.14 clustering validation, tools_todo.yaml lines 471-486 |
+| **Notes** | Three checks: (1) All participants assigned (length = n_expected), (2) Cluster IDs consecutive starting from 0, (3) Each cluster has >= min_cluster_size members. Reports actual cluster sizes in output dict. Prevents degenerate solutions with tiny or empty clusters. 4/4 tests GREEN. ~32 lines implementation. 10 min development time. |
+
+### validate_bootstrap_stability
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate clustering stability via Jaccard coefficient. Checks Jaccard values in [0,1] range, computes mean and 95% CI from bootstrap distribution. Stability threshold typically 0.75 for reliable clustering. |
+| **Inputs** | `jaccard_values: Union[np.ndarray, List[float]]` (Jaccard coefficients from bootstrap iterations), `min_jaccard_threshold: float` (default 0.75, stability threshold) |
+| **Outputs** | `Dict[valid: bool, message: str, mean_jaccard: float, ci_lower: float, ci_upper: float, above_threshold: bool]` |
+| **Reference** | RQ 5.14 bootstrap clustering validation, tools_todo.yaml lines 488-505 |
+| **Notes** | Jaccard coefficient measures overlap between original and bootstrap clustering solutions. Values: 0 = no overlap, 1 = perfect agreement. Mean >= 0.75 indicates stable clusters. 95% CI computed via percentile method (2.5th and 97.5th percentiles). Fixed numpy boolean conversion issue during development. 4/4 tests GREEN. ~40 lines implementation. 10 min development time. |
+
+### validate_cluster_summary_stats
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate cluster summary statistics consistency. Checks mathematical constraints: min <= mean <= max, SD >= 0, N > 0. Ensures summary tables are internally consistent. |
+| **Inputs** | `summary_df: pd.DataFrame` (cluster summary table), `min_col: str` (default 'min'), `mean_col: str` (default 'mean'), `max_col: str` (default 'max'), `sd_col: str` (default 'sd'), `n_col: str` (default 'N') |
+| **Outputs** | `Dict[valid: bool, message: str, failed_checks: List[str]]` |
+| **Reference** | RQ 5.14 cluster summary tables validation, tools_todo.yaml lines 505-519 |
+| **Notes** | Flexible column naming for different summary table formats. Three mathematical checks: (1) min <= mean <= max for each row, (2) SD >= 0, (3) N > 0. Reports specific failed checks with row indices. Detects computation errors in clustering summary statistics. 4/4 tests GREEN. ~47 lines implementation. 10 min development time. |
+
 ---
 
 **End of Tools Inventory**

@@ -34,8 +34,8 @@ rq_planner:
     Validation required at every step. Cross-RQ dependency: RQ 5.7 must be complete (saved LMM with random slopes)
 
 rq_tools:
-  status: pending
-  context_dump: |
+  status: success
+  context_dump: "5 analysis + 4 validation tools cataloged for variance decomposition analysis"
 
 rq_analysis:
   status: pending

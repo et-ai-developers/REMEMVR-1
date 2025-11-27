@@ -36,15 +36,13 @@ rq_planner:
     Validation: Per-step validation mandatory (all 9 steps have 4-layer substance criteria)
 
 rq_tools:
-  status: FAIL
+  status: success
   context_dump: |
-    TOOL ERROR: Missing CTT analysis tools required by 2_plan.md
-    Required: tools.analysis_ctt.compute_cronbachs_alpha (Step 4)
-    Required: tools.analysis_ctt.compare_correlations_dependent (Step 5)
-    Found: tools_inventory.md has NO tools.analysis_ctt section
-    Found: tools/analysis_ctt.py file does NOT exist
-    Action: User + Claude must migrate CTT tools from v3.0 with TDD -> Update tools_inventory.md -> Re-run rq_tools
-    Note: rq_stats warned "40% tools, missing CTT module but well-specified" - this is the detection point
+    3 analysis + 5 validation tools cataloged for CTT-IRT methodological comparison
+    Analysis tools: compute_cronbachs_alpha, compare_correlations_dependent, fit_lmm_trajectory_tsvr
+    Validation tools: validate_numeric_range, validate_correlation_test_d068, validate_standardization, validate_lmm_convergence, validate_lmm_assumptions_comprehensive
+    All tools verified exist in tools_inventory.md (CTT module created since initial FAIL)
+    Most steps (0-3,6,8) use pandas stdlib operations (exempt from verification)
 
 rq_analysis:
   status: pending

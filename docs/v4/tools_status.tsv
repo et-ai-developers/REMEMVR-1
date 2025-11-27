@@ -63,15 +63,16 @@ tools.validation	validate_effect_sizes	YELLOW	RQ 5.9: Validate effect size bound
 tools.validation	validate_probability_range	YELLOW	RQ 5.9: Validate probability transformation	probability_df	Dict
 tools.validation	validate_hypothesis_test_dual_pvalues	YELLOW	RQ 5.10: Validates required terms AND D068 dual p-values in hypothesis tests (11/11 tests GREEN)	interaction_df, required_terms, alpha_bonferroni	Dict[valid, d068_compliant, missing_terms, missing_cols, message]
 tools.validation	validate_contrasts_dual_pvalues	YELLOW	RQ 5.10: Validates required comparisons AND D068 dual p-values in post-hoc contrasts (11/11 tests GREEN)	contrasts_df, required_comparisons	Dict[valid, d068_compliant, missing_comparisons, message]
-tools.validation	validate_plot_data_completeness	ORANGE	RQ 5.10: Verify all domains/tertiles present	plot_data, required_domains, required_groups	Dict
+tools.validation	validate_plot_data_completeness	YELLOW	RQ 5.10: Verify all domains/tertiles present	plot_data, required_domains, required_groups	Dict
 tools.validation	validate_model_convergence	YELLOW	RQ 5.13: Validate loaded model convergence	lmm_result	Dict
-tools.validation	validate_variance_positivity	ORANGE	RQ 5.13: Validate variance components positive	variance_df, component_col, value_col	Dict
-tools.validation	validate_icc_bounds	ORANGE	RQ 5.13: Validate ICC in [0,1]	icc_df, icc_col	Dict
+tools.validation	validate_variance_positivity	YELLOW	RQ 5.13: Validate variance components positive	variance_df, component_col, value_col	Dict
+tools.validation	validate_icc_bounds	YELLOW	RQ 5.13: Validate ICC in [0,1]	icc_df, icc_col	Dict
 tools.validation	validate_correlation_test_d068	YELLOW	RQ 5.13: D068 compliance for correlation tests (uncorrected + bonferroni/holm/fdr) (10/10 tests GREEN)	correlation_df, required_cols	Dict[valid, d068_compliant, missing_cols, message]
-tools.validation	validate_dataframe_structure	ORANGE	RQ 5.14: Generic dataframe validation (rows, cols, types)	file_path, expected_rows, expected_columns, column_types	Dict
-tools.validation	validate_standardization	ORANGE	RQ 5.14: Check z-scores mean~0, SD~1	df, column_names, tolerance	Dict
-tools.validation	validate_cluster_assignment	ORANGE	RQ 5.14: Check cluster IDs consecutive, sizes >= threshold	assignments_df, n_participants, min_cluster_size	Dict
-tools.validation	validate_bootstrap_stability	ORANGE	RQ 5.14: Check Jaccard values in [0,1], mean >= threshold	stability_df, min_jaccard_threshold	Dict
-tools.validation	validate_cluster_summary_stats	ORANGE	RQ 5.14: Check summary stats mathematically consistent	summary_df	Dict
+tools.validation	validate_dataframe_structure	YELLOW	RQ 5.14: Generic dataframe validation (rows, cols, types)	file_path, expected_rows, expected_columns, column_types	Dict
+tools.validation	validate_standardization	YELLOW	RQ 5.14: Check z-scores mean~0, SD~1	df, column_names, tolerance	Dict
+tools.validation	validate_cluster_assignment	YELLOW	RQ 5.14: Check cluster IDs consecutive, sizes >= threshold	assignments_df, n_participants, min_cluster_size	Dict
+tools.validation	validate_bootstrap_stability	YELLOW	RQ 5.14: Check Jaccard values in [0,1], mean >= threshold	stability_df, min_jaccard_threshold	Dict
+tools.validation	validate_cluster_summary_stats	YELLOW	RQ 5.14: Check summary stats mathematically consistent	summary_df	Dict
 tools.analysis_ctt	compute_cronbachs_alpha	YELLOW	RQ 5.12: Cronbach's alpha with bootstrap CIs (percentile method, 1000+ iterations, KR-20 equivalent for binary) (13/13 tests GREEN)	data, n_bootstrap	Dict[alpha, ci_lower, ci_upper, n_items, n_participants]
 tools.analysis_ctt	compare_correlations_dependent	YELLOW	RQ 5.12: Steiger's z-test for dependent correlations (overlapping, asymptotic covariance) (13/13 tests GREEN)	r12, r13, r23, n	Dict[z_statistic, p_value, r_difference, significant, interpretation]
+tools.analysis_lmm	extract_segment_slopes_from_lmm	ORANGE	RQ 5.8: Extract Early/Late segment slopes from piecewise LMM with delta method SE propagation for slope ratio	lmm_result, segment_col, time_col	DataFrame[metric, value, SE, CI_lower, CI_upper, interpretation]
