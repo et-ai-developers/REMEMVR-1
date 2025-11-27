@@ -35,22 +35,8 @@ rq_planner:
     Outputs: LMM model, 3-way interaction terms, domain-specific age effects, post-hoc contrasts, age effects plot data
 
 rq_tools:
-  status: fail
+  status: pending
   context_dump: |
-    FAIL: Missing 6 custom tools + 7 naming conventions
-    Required tools NOT in tools_inventory.md:
-    - LMM assumption validation (7 diagnostics per 1_concept.md)
-    - LRT random effects model selection (3 models)
-    - Hypothesis test validation (D068 dual p-values)
-    - Contrast validation (D068 Tukey correction)
-    - Age effects plot data aggregation (tertiles)
-    - Plot data validation (domain/tertile completeness)
-    Required naming NOT in names.md:
-    - Age_c (centered age variable)
-    - age_tertile (Young/Middle/Older)
-    - Step naming for assumption validation/model selection
-    - File naming for age effects/model selection outputs
-    Action: User + Claude migrate tools from v3.0 with TDD OR simplify RQ 5.10 plan
 
 rq_analysis:
   status: pending

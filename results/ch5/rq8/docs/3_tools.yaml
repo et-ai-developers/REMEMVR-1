@@ -1,0 +1,252 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.8 (Two-phase forgetting: rapid then slow)
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_time_transformed.csv"
+        required_columns: ["UID", "test", "TSVR_hours", "theta", "Time", "Time_squared", "Time_log", "Segment", "Days_within"]
+        expected_rows: "380-400 (100 participants x 4 tests)"
+        data_types:
+          UID: "string"
+          test: "string (T1/T2/T3/T4)"
+          TSVR_hours: "float64 (0-240 hours)"
+          theta: "float64 (-3 to 3)"
+          Time: "float64 (copy of TSVR_hours)"
+          Time_squared: "float64 (0 to 57600)"
+          Time_log: "float64 (0 to 5.5)"
+          Segment: "string (Early/Late)"
+          Days_within: "float64 (0 to 192)"
+
+    output_files:
+      - path: "results/step02_quadratic_model_summary.txt"
+        description: "Quadratic LMM summary (theta ~ Time + Time_squared + (Time | UID))"
+      - path: "data/step02_quadratic_predictions.csv"
+        columns: ["Time", "predicted_theta", "CI_lower", "CI_upper"]
+        description: "Quadratic model predictions for visualization"
+      - path: "results/step03_piecewise_model_summary.txt"
+        description: "Piecewise LMM summary (theta ~ Days_within * Segment + (Days_within | UID))"
+      - path: "data/step03_piecewise_predictions.csv"
+        columns: ["Segment", "Days_within", "TSVR_hours", "predicted_theta", "CI_lower", "CI_upper"]
+        description: "Piecewise model predictions for visualization"
+
+    parameters:
+      quadratic_formula: "theta ~ Time + Time_squared + (Time | UID)"
+      piecewise_formula: "theta ~ Days_within * Segment + (Days_within | UID)"
+      groups: "UID"
+      reml: false
+      convergence_fallbacks: ["(Time || UID)", "(1 | UID)"]
+
+    description: "Fit LMM using TSVR (actual hours) as time variable per Decision D070. Used for both quadratic model (Test 1) and piecewise model (Test 2) with convergence fallback strategy."
+    source_reference: "tools_inventory.md lines 97-103"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "Fitted LMM model object (in-memory from fit_lmm_trajectory_tsvr)"
+        source: "Step 2 or Step 3 LMM fitting"
+
+    output_files:
+      - path: "Embedded in step02_quadratic_model_summary.txt"
+        columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+        description: "Fixed effects table for quadratic model"
+      - path: "Embedded in step03_piecewise_model_summary.txt"
+        columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+        description: "Fixed effects table for piecewise model"
+
+    parameters:
+      bonferroni_threshold: 0.0033
+      bonferroni_n_tests: 15
+
+    description: "Extract fixed effects coefficients, SE, z-values, and p-values from fitted LMM for hypothesis testing. Bonferroni correction applied (15 tests in Chapter 5)."
+    source_reference: "tools_inventory.md lines 113-119"
+
+  extract_segment_slopes_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_segment_slopes_from_lmm"
+    signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "Fitted piecewise LMM model object (in-memory from Step 3)"
+        source: "Step 3 piecewise model fitting"
+
+    output_files:
+      - path: "results/step05_slope_comparison.csv"
+        columns: ["metric", "value", "SE", "CI_lower", "CI_upper", "interpretation"]
+        description: "Early slope, Late slope, Late/Early ratio with delta method SEs"
+
+    parameters:
+      segment_col: "Segment"
+      time_col: "Days_within"
+      ratio_threshold: 0.5
+
+    description: "Extract Early/Late segment slopes from piecewise LMM with delta method SE propagation for Late/Early ratio. Test 4: ratio < 0.5 indicates robust two-phase pattern."
+    source_reference: "tools_inventory.md lines 185-193"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "Fitted LMM model object (in-memory)"
+        source: "fit_lmm_trajectory_tsvr output (Steps 2, 3)"
+
+    parameters:
+      check_singularity: true
+      check_warnings: true
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        message: "str (human-readable status)"
+        warnings: "list (any statsmodels warnings)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully with no singular fit warnings. Used for both quadratic and piecewise models."
+    source_reference: "tools_inventory.md lines 227-233"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "Fitted LMM model objects (in-memory from Steps 2, 3)"
+        source: "Quadratic and piecewise models"
+      - path: "data/step01_time_transformed.csv"
+        source: "Original data for residual computation"
+
+    parameters:
+      output_dir: "results/"
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+
+    criteria:
+      - "Residual normality: Shapiro-Wilk p > 0.05"
+      - "Homoscedasticity: Breusch-Pagan p > 0.05"
+      - "Random effects normality: Shapiro-Wilk p > 0.05"
+      - "Autocorrelation: Lag-1 ACF < 0.1"
+      - "Linearity within segments: Partial residual plots show no curvature"
+      - "Outliers: Cook's D < 4/n for all observations"
+      - "Convergence diagnostics: Model converged without warnings"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all 7 diagnostics pass)"
+        diagnostics: "Dict (per-check results)"
+        plot_paths: "List[Path] (6 diagnostic plots generated)"
+        message: "str (summary of assumption checks)"
+
+    behavior_on_failure:
+      action: "Log violations + continue (assumption violations documented, not fatal)"
+      log_to: "logs/step04_assumption_validation.log"
+      invoke: "Document violations in step04_assumption_validation_report.txt"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics for both quadratic and piecewise models. Generates 6 diagnostic plots. Used in Step 4."
+    source_reference: "tools_inventory.md lines 254-262"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "Various DataFrames (fixed effects tables, plot data, etc.)"
+        source: "extract_fixed_effects_from_lmm, plot preparation"
+
+    parameters:
+      required_cols_quadratic: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+      required_cols_piecewise: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+      required_cols_plot: ["source", "TSVR_hours", "theta", "CI_lower", "CI_upper", "Segment"]
+
+    criteria:
+      - "All required columns present (case-sensitive)"
+      - "DataFrame not empty"
+      - "Column names match exactly"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        message: "str (human-readable status)"
+        missing_cols: "List[str] (missing columns, empty if valid)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame has required columns. Used for fixed effects tables (Steps 2, 3) and plot data (Step 6)."
+    source_reference: "tools_inventory.md lines 344-352"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "Numeric data columns (theta, Time_squared, slopes, ratios)"
+        source: "Time transformations (Step 1), slope extraction (Step 5)"
+
+    parameters:
+      theta_range: [-3, 3]
+      time_squared_range: [0, 57600]
+      time_log_range: [0, 5.5]
+      days_within_range: [0, 192]
+      slope_range: [-0.1, 0.0]
+      ratio_range: [0, 2.0]
+
+    criteria:
+      - "All values in [min_val, max_val] (inclusive)"
+      - "No NaN values"
+      - "No infinite values"
+      - "Value range reasonable for variable type"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (human-readable status)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate numeric values fall within expected ranges. Used for time transformations (Step 1) and slope extraction (Step 5)."
+    source_reference: "tools_inventory.md lines 332-340"
+
+summary:
+  analysis_tools_count: 3
+  validation_tools_count: 4
+  total_unique_tools: 7
+  mandatory_decisions_embedded: ["D070"]
+  rq_specific_notes: "RQ 5.8 is LMM-only (no IRT - uses DERIVED theta from RQ 5.7). Three convergent tests: (1) quadratic term significance, (2) piecewise vs continuous AIC, (3) Early/Late slope ratio. Convergence fallback strategy implemented for N=100 sample size."

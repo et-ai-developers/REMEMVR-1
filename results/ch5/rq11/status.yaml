@@ -34,13 +34,8 @@ rq_planner:
     Expected outputs: 4 correlation tests, 2 fitted LMMs, 10 assumption tests, 4 significance agreement comparisons, 6 fit metrics, 2 comparison plots. Validation required at every step.
 
 rq_tools:
-  status: success
+  status: pending
   context_dump: |
-    1 analysis + 1 validation tools cataloged for IRT-CTT convergent validity comparison
-    Primary tool: fit_lmm_trajectory_tsvr (used for both IRT and CTT parallel LMMs)
-    Standard library tools documented: pandas, scipy, statsmodels, sklearn, matplotlib (5 categories)
-    All custom tools verified exist in tools_inventory.md
-    Validation architecture: 100% coverage with tool pairing
 
 rq_analysis:
   status: pending

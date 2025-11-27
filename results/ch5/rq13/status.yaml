@@ -34,8 +34,13 @@ rq_planner:
     Validation required at every step. Cross-RQ dependency: RQ 5.7 must be complete (saved LMM with random slopes)
 
 rq_tools:
-  status: success
-  context_dump: "5 analysis + 4 validation tools cataloged for variance decomposition analysis"
+  status: FAIL
+  context_dump: |
+    MISSING NAMING CONVENTIONS: 12 column names not in names.md
+    Required: random_intercept, random_slope, total_intercept, total_slope, component, value, icc_type, icc_value, interpretation, correlation_r, p_uncorrected, p_bonferroni
+    All analysis tools FOUND in tools_inventory.md (extract_random_effects_from_lmm, compute_icc_from_variance_components, test_intercept_slope_correlation_d068)
+    All validation tools FOUND in tools_inventory.md (validate_variance_positivity, validate_icc_bounds, validate_correlation_test_d068, check_file_exists)
+    TDD detection: Add naming conventions to docs/v4/names.md then re-run rq_tools
 
 rq_analysis:
   status: pending

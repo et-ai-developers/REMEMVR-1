@@ -38,11 +38,11 @@ rq_planner:
 rq_tools:
   status: success
   context_dump: |
-    3 analysis + 5 validation tools cataloged for CTT-IRT methodological comparison
-    Analysis tools: compute_cronbachs_alpha, compare_correlations_dependent, fit_lmm_trajectory_tsvr
-    Validation tools: validate_numeric_range, validate_correlation_test_d068, validate_standardization, validate_lmm_convergence, validate_lmm_assumptions_comprehensive
-    All tools verified exist in tools_inventory.md (CTT module created since initial FAIL)
-    Most steps (0-3,6,8) use pandas stdlib operations (exempt from verification)
+    11 unique tools cataloged (5 analysis + 6 validation)
+    Analysis: compute_cronbachs_alpha, compare_correlations_dependent, fit_lmm_trajectory_tsvr, extract_fixed_effects_from_lmm
+    Validation: check_file_exists, validate_data_format, validate_numeric_range, validate_standardization, validate_lmm_convergence, validate_model_convergence, validate_plot_data_completeness
+    All tools exist in tools_inventory.md (0 missing)
+    All naming conventions exist in names.md (0 missing)
 
 rq_analysis:
   status: pending

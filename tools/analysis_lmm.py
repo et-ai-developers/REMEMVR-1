@@ -1914,6 +1914,182 @@ def test_intercept_slope_correlation_d068(
     }
 
 
+def extract_segment_slopes_from_lmm(
+    lmm_result: MixedLMResults,
+    segment_col: str = 'Segment',
+    time_col: str = 'Days_within'
+) -> pd.DataFrame:
+    """
+    Extract Early/Late segment slopes from piecewise LMM with delta method SE propagation.
+
+    RQ 5.8 Test 4 (Convergent Evidence) requires Early/Late slope ratio < 0.5
+    to indicate robust two-phase forgetting pattern. Delta method SE propagation
+    is required for the ratio because ratio SE != simple quadrature due to
+    covariance between Early and Late slopes.
+
+    Piecewise LMM formula:
+        theta ~ Intercept + Days_within + Days_within:SegmentLate + (Days_within | UID)
+
+    Early slope = β_Days_within
+    Late slope = β_Days_within + β_Days_within:SegmentLate
+    Ratio = Late_slope / Early_slope
+
+    Delta method for ratio SE:
+        SE_ratio² = (∂ratio/∂β_early)²×Var(β_early) + (∂ratio/∂β_late)²×Var(β_late)
+                    + 2×(∂ratio/∂β_early)×(∂ratio/∂β_late)×Cov(β_early, β_late)
+
+        where:
+            ∂ratio/∂β_early = -β_late / β_early²
+            ∂ratio/∂β_late = 1 / β_early
+
+    Parameters
+    ----------
+    lmm_result : MixedLMResults
+        Fitted piecewise LMM result from statsmodels
+        Must contain coefficients: {time_col}, {time_col}:{segment_col}Late
+    segment_col : str, default='Segment'
+        Name of segment column (e.g., 'Segment', 'Phase')
+    time_col : str, default='Days_within'
+        Name of time-within-segment column
+
+    Returns
+    -------
+    pd.DataFrame
+        3 rows with columns: [metric, value, SE, CI_lower, CI_upper, interpretation]
+        Metrics: Early_slope, Late_slope, Ratio_Late_Early
+
+    Raises
+    ------
+    KeyError
+        If required coefficients not found in LMM result
+
+    Examples
+    --------
+    >>> lmm = fit_lmm_trajectory(data, formula='theta ~ Days_within + Days_within:SegmentLate + (Days_within | UID)')
+    >>> slopes = extract_segment_slopes_from_lmm(lmm)
+    >>> print(slopes)
+             metric     value        SE  CI_lower  CI_upper            interpretation
+    0   Early_slope -0.300000  0.040000 -0.378400 -0.221600  Forgetting (-0.30/day)...
+    1    Late_slope -0.100000  0.072111 -0.241335  0.041335  Slower forgetting (-0.10/day)...
+    2  Ratio_Late_Early  0.333333  0.240370 -0.137783  0.804449  Ratio < 0.5: robust two-phase...
+
+    References
+    ----------
+    RQ 5.8 Test 4: Convergent Evidence for two-phase forgetting pattern
+    Delta method: Casella & Berger (2002), Statistical Inference, 2nd ed., p. 240
+    """
+    # Extract coefficients
+    time_coef = f'{time_col}'
+    interaction_coef = f'{time_col}:{segment_col}Late'
+
+    try:
+        beta_early = lmm_result.params[time_coef]
+    except KeyError:
+        raise KeyError(
+            f"Required coefficient '{time_coef}' not found in LMM result. "
+            f"Available coefficients: {list(lmm_result.params.index)}"
+        )
+
+    try:
+        beta_interaction = lmm_result.params[interaction_coef]
+    except KeyError:
+        raise KeyError(
+            f"Required coefficient '{interaction_coef}' not found in LMM result. "
+            f"Available coefficients: {list(lmm_result.params.index)}"
+        )
+
+    beta_late = beta_early + beta_interaction
+
+    # Extract standard errors
+    se_early = lmm_result.bse[time_coef]
+    se_interaction = lmm_result.bse[interaction_coef]
+
+    # Extract covariance between early and interaction (for Late slope SE)
+    # Handle both real LMM results (method) and mocks (attribute)
+    cov_matrix = lmm_result.cov_params() if callable(lmm_result.cov_params) else lmm_result.cov_params
+    cov_early_interaction = cov_matrix.loc[time_coef, interaction_coef]
+
+    # Compute Late slope SE via propagation: Var(Early + Interaction) = Var(Early) + Var(Interaction) + 2*Cov
+    var_late = se_early**2 + se_interaction**2 + 2*cov_early_interaction
+    se_late = np.sqrt(var_late)
+
+    # Compute ratio
+    if beta_early == 0:
+        ratio = np.inf if beta_late != 0 else np.nan
+        se_ratio = np.nan
+    else:
+        ratio = beta_late / beta_early
+
+        # Delta method for ratio SE
+        # ∂ratio/∂β_early = -β_late / β_early²
+        d_ratio_d_early = -beta_late / (beta_early ** 2)
+        # ∂ratio/∂β_late = 1 / β_early
+        d_ratio_d_late = 1 / beta_early
+
+        # Cov(β_early, β_late) = Cov(β_early, β_early + β_interaction)
+        #                        = Var(β_early) + Cov(β_early, β_interaction)
+        cov_early_late = se_early**2 + cov_early_interaction
+
+        # SE_ratio² = (∂ratio/∂early)²×Var(early) + (∂ratio/∂late)²×Var(late) + 2×(∂ratio/∂early)×(∂ratio/∂late)×Cov(early,late)
+        var_ratio = (
+            (d_ratio_d_early ** 2) * (se_early ** 2) +
+            (d_ratio_d_late ** 2) * var_late +
+            2 * d_ratio_d_early * d_ratio_d_late * cov_early_late
+        )
+        se_ratio = np.sqrt(var_ratio)
+
+    # 95% confidence intervals
+    z_95 = 1.96
+
+    ci_early_lower = beta_early - z_95 * se_early
+    ci_early_upper = beta_early + z_95 * se_early
+
+    ci_late_lower = beta_late - z_95 * se_late
+    ci_late_upper = beta_late + z_95 * se_late
+
+    ci_ratio_lower = ratio - z_95 * se_ratio if not np.isnan(se_ratio) else np.nan
+    ci_ratio_upper = ratio + z_95 * se_ratio if not np.isnan(se_ratio) else np.nan
+
+    # Interpretations
+    def _interpret_slope(slope: float, se: float) -> str:
+        """Interpret slope direction and magnitude"""
+        if slope < 0:
+            return f"Forgetting ({slope:.3f}/day). SE={se:.3f}."
+        elif slope > 0:
+            return f"Memory improvement ({slope:.3f}/day, atypical). SE={se:.3f}."
+        else:
+            return f"No change over time ({slope:.3f}/day). SE={se:.3f}."
+
+    interp_early = _interpret_slope(beta_early, se_early)
+    interp_late = _interpret_slope(beta_late, se_late)
+
+    # Ratio interpretation
+    if np.isinf(ratio):
+        interp_ratio = "Ratio undefined (Early slope = 0). Cannot assess two-phase pattern."
+    elif np.isnan(ratio):
+        interp_ratio = "Ratio undefined (both slopes = 0). No forgetting detected."
+    elif ratio < 0.5:
+        interp_ratio = f"Ratio < 0.5 ({ratio:.3f}): Robust two-phase forgetting pattern. Late forgetting substantially slower than Early."
+    elif 0.5 <= ratio < 0.75:
+        interp_ratio = f"Ratio 0.5-0.75 ({ratio:.3f}): Moderate two-phase pattern. Late forgetting moderately slower than Early."
+    elif 0.75 <= ratio <= 1.0:
+        interp_ratio = f"Ratio 0.75-1.0 ({ratio:.3f}): Weak two-phase pattern. Late and Early forgetting similar."
+    else:
+        interp_ratio = f"Ratio > 1.0 ({ratio:.3f}): Unexpected pattern. Late forgetting faster than Early (reverse two-phase or single-phase)."
+
+    # Build output DataFrame
+    output = pd.DataFrame({
+        'metric': ['Early_slope', 'Late_slope', 'Ratio_Late_Early'],
+        'value': [beta_early, beta_late, ratio],
+        'SE': [se_early, se_late, se_ratio],
+        'CI_lower': [ci_early_lower, ci_late_lower, ci_ratio_lower],
+        'CI_upper': [ci_early_upper, ci_late_upper, ci_ratio_upper],
+        'interpretation': [interp_early, interp_late, interp_ratio]
+    })
+
+    return output
+
+
 __all__ = [
     'assign_piecewise_segments',
     'extract_segment_slopes_from_lmm',

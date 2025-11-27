@@ -129,8 +129,10 @@ analysis_lmm:
       - segment_col: str (default 'Segment')
       - time_col: str (default 'Days_within')
     outputs: "pd.DataFrame[metric: str, value: float, SE: float, CI_lower: float, CI_upper: float, interpretation: str]"
-    done: false
-    notes: "RQ 5.8 Test 4 (Convergent Evidence) requires Early/Late slope ratio < 0.5 to indicate robust two-phase forgetting pattern. Delta method SE propagation required because ratio SE ≠ simple quadrature. Function extracts Days_within coefficient (Early slope) and Days_within + Days_within:SegmentLate interaction (Late slope), then computes ratio with propagated SE via delta method: SE_ratio² ≈ (∂ratio/∂β_early)²×SE_early² + (∂ratio/∂β_late)²×SE_late² + 2×(∂ratio/∂β_early)×(∂ratio/∂β_late)×Cov(β_early,β_late). Returns 3 rows: Early_slope, Late_slope, Ratio_Late_Early with value/SE/CI/interpretation for each."
+    done: true
+    completed_date: 2025-11-27
+    test_status: "11/11 GREEN"
+    notes: "RQ 5.8 Test 4 (Convergent Evidence) requires Early/Late slope ratio < 0.5 to indicate robust two-phase forgetting pattern. Delta method SE propagation: SE²_ratio = (∂ratio/∂early)²×Var(early) + (∂ratio/∂late)²×Var(late) + 2×(∂ratio/∂early)×(∂ratio/∂late)×Cov(early,late), where ∂ratio/∂early = -late/early² and ∂ratio/∂late = 1/early. Late slope SE propagation: Var(Early + Interaction) = Var(Early) + Var(Interaction) + 2×Cov. Returns 3 rows: Early_slope, Late_slope, Ratio_Late_Early. Interpretation thresholds: ratio < 0.5 (robust two-phase), 0.5-0.75 (moderate), 0.75-1.0 (weak), >1.0 (unexpected). Handles zero Early slope (ratio=inf/nan). 172 lines implementation. 11/11 tests GREEN. MEDIUM complexity (60 min development time). Configurable column names."
 
 analysis_ctt:
 
@@ -566,16 +568,16 @@ validation_clustering:
 # SUMMARY STATISTICS
 
 total_tools: 26
-done_count: 25
-remaining_count: 1
+done_count: 26
+remaining_count: 0
 
 by_priority:
-  HIGH: 7  # Blocks multiple RQs or creates new modules (added extract_segment_slopes_from_lmm)
+  HIGH: 7  # Blocks multiple RQs or creates new modules
   MEDIUM: 10  # Blocks 1-2 RQs
   LOW: 9  # Nice-to-have validators
 
 by_module:
-  tools.analysis_lmm: 5  # Added extract_segment_slopes_from_lmm
+  tools.analysis_lmm: 5
   tools.analysis_ctt: 2  # NEW MODULE
   tools.validation: 19
 

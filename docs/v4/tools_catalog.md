@@ -36,8 +36,7 @@
 | `prepare_age_effects_plot_data` | Create age tertiles (Young/Middle/Older), aggregate observed means + predictions for Age × Domain × Time plot |
 | `compute_icc_from_variance_components` | Compute 3 ICC estimates (intercept, slope_simple, slope_conditional) with interpretation thresholds |
 | `test_intercept_slope_correlation_d068` | D068: Pearson correlation between random intercepts/slopes with dual p-values (uncorrected + Bonferroni) |
-| `assign_piecewise_segments` | Assign Early/Late segments and compute Days_within for piecewise LMM |
-| `extract_segment_slopes_from_lmm` | Extract segment-factor slopes from piecewise LMM via delta method |
+| `extract_segment_slopes_from_lmm` | Extract Early/Late slopes + ratio from piecewise LMM with delta method SE propagation (RQ 5.8 two-phase test) |
 
 ---
 
@@ -46,7 +45,12 @@
 | Function | Description |
 |----------|-------------|
 | `convert_theta_to_probability` | Transform theta to probability scale via IRT 2PL formula |
+| `plot_trajectory` | Trajectory with fitted curves + observed error bars (reusable with consistent styling) |
+| `plot_trajectory_probability` | D069: Dual-scale trajectory plotting (theta + probability scales for interpretability) |
+| `plot_histogram_by_group` | Grouped histograms with overlapping distributions |
 | `prepare_piecewise_plot_data` | Aggregate observed means + model predictions for two-panel piecewise plots |
+| `assign_piecewise_segments` | Assign Early/Late segments + compute Days_within for RQ 5.8 piecewise LMM |
+| `run_lmm_analysis` | Complete LMM pipeline wrapper (prepare → fit → compare → extract → save) |
 
 ---
 

@@ -182,6 +182,16 @@
 | **Reference** | Decision D068 (dual p-value reporting), RQ 5.13 1_concept.md Step 5, Pearson correlation via scipy.stats.pearsonr, tools_todo.yaml lines 89-105 |
 | **Notes** | Pearson correlation between random intercepts and slopes with Bonferroni correction (p_bonf = min(p_uncorr × n_tests, 1.0)). Interpretation thresholds: \|r\| < 0.30 Weak, 0.30-0.50 Moderate, ≥0.50 Strong. RQ 5.13 hypothesis: negative correlation (higher starters forget slower). 14/14 tests GREEN. Configurable column names for different random effects naming conventions. |
 
+### extract_segment_slopes_from_lmm
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract Early/Late segment slopes from piecewise LMM with delta method SE propagation for ratio. RQ 5.8 Test 4 requires Late/Early ratio < 0.5 to indicate robust two-phase forgetting pattern (consolidation-dominated Early vs decay-dominated Late). Delta method required because ratio SE ≠ simple quadrature due to covariance between slopes. |
+| **Inputs** | `lmm_result: MixedLMResults` (fitted piecewise LMM), `segment_col: str = 'Segment'` (segment variable name), `time_col: str = 'Days_within'` (time-within-segment variable) |
+| **Outputs** | `DataFrame[metric: str, value: float, SE: float, CI_lower: float, CI_upper: float, interpretation: str]` with 3 rows: Early_slope, Late_slope, Ratio_Late_Early |
+| **Reference** | RQ 5.8 Test 4 (Convergent Evidence), Delta method: Casella & Berger (2002) Statistical Inference 2nd ed. p.240, tools_todo.yaml lines 115-133 |
+| **Notes** | Piecewise LMM formula: `theta ~ Days_within + Days_within:SegmentLate + (Days_within \| UID)`. Early slope = β_Days_within, Late slope = β_Days_within + β_Days_within:SegmentLate. Delta method for ratio SE: SE²_ratio = (∂ratio/∂early)²×Var(early) + (∂ratio/∂late)²×Var(late) + 2×(∂ratio/∂early)×(∂ratio/∂late)×Cov(early,late), where ∂ratio/∂early = -late/early² and ∂ratio/∂late = 1/early. Interpretation thresholds: ratio < 0.5 (robust two-phase), 0.5-0.75 (moderate), 0.75-1.0 (weak), >1.0 (unexpected/reverse). Handles zero Early slope (ratio=inf/nan). 11/11 tests GREEN. 172 lines implementation. |
+
 ---
 
 ## Module: tools.plotting
@@ -193,6 +203,56 @@
 | **Description** | Transform theta scores to probability scale via IRT 2PL formula |
 | **Inputs** | `theta: ndarray`, `discrimination: float` (default 1.0), `difficulty: float` (default 0.0) |
 | **Outputs** | `ndarray` of probabilities in range [0, 1] |
+
+### plot_trajectory
+
+| Field | Value |
+|-------|-------|
+| **Description** | Plot trajectory with fitted curves and observed data with error bars |
+| **Inputs** | `time_pred: ndarray`, `fitted_curves: Dict[str, ndarray]`, `observed_data: DataFrame`, `time_col: str = 'Time'`, `value_col: str = 'Value'`, `group_col: str = 'Group'`, `xlabel: str`, `ylabel: str`, `title: str`, `figsize: Tuple`, `colors: Optional[Dict]`, `output_path: Optional[Path]` |
+| **Outputs** | `Tuple[Figure, Axes, DataFrame]` (figure, axes, plot data CSV) |
+| **Reference** | tools/plotting.py, generic trajectory visualization |
+| **Notes** | Reusable trajectory plotting with consistent styling. Supports grouped visualizations by domain/factor. Saves both PNG and CSV for reproducibility. |
+
+### plot_trajectory_probability
+
+| Field | Value |
+|-------|-------|
+| **Description** | Plot trajectory with theta transformed to probability scale (Decision D069 dual-scale plotting) |
+| **Inputs** | `df_thetas: DataFrame`, `item_parameters_path: Path`, `time_var: str = 'test'`, `factors: List[str]`, `title: str`, `figsize: Tuple`, `colors: Optional[Dict]`, `output_path: Optional[Path]`, `show_errorbar: bool = True` |
+| **Outputs** | `Tuple[Figure, Axes, DataFrame]` (figure, axes, plot data) |
+| **Reference** | Decision D069 (dual-scale trajectory plots), tools/plotting.py |
+| **Notes** | Implements dual-scale trajectory plotting: theta scale (statistical rigor) + probability scale (general audience interpretability). Uses IRT 2PL transformation P = 1/(1 + exp(-(a×(theta - b)))) where a = mean discrimination from Pass 2 item parameters. Enhances interpretability while preserving statistical accuracy. |
+
+### plot_histogram_by_group
+
+| Field | Value |
+|-------|-------|
+| **Description** | Create grouped histogram with overlapping distributions |
+| **Inputs** | `df: DataFrame`, `value_col: str`, `group_col: str`, `xlabel: str = 'Value'`, `ylabel: str = 'Frequency'`, `title: str`, `bins: int = 20`, `colors: Optional[Dict]`, `figsize: Tuple`, `output_path: Optional[Path]`, `vline: Optional[float]`, `vline_label: Optional[str]` |
+| **Outputs** | `Tuple[Figure, Axes]` |
+| **Reference** | tools/plotting.py, distribution visualization |
+| **Notes** | Supports grouped histograms for comparing distributions across factors/domains. Optional vertical reference line for thresholds. Publication-ready styling with 300 DPI. |
+
+### assign_piecewise_segments
+
+| Field | Value |
+|-------|-------|
+| **Description** | Assign piecewise segments (Early/Late) and compute Days_within for piecewise LMM (RQ 5.8 piecewise regression design) |
+| **Inputs** | `df: DataFrame`, `tsvr_col: str = 'TSVR_hours'`, `early_cutoff_hours: float = 24.0` |
+| **Outputs** | `DataFrame` with added columns: Segment (Early/Late), Days_within (time since segment start) |
+| **Reference** | RQ 5.8 piecewise forgetting analysis, tools/analysis_lmm.py |
+| **Notes** | Implements piecewise regression design dividing forgetting trajectory into two temporal segments: Early segment (0-24h, consolidation-dominated) and Late segment (24-168h, decay-dominated). Default cutoff 24h represents one night's sleep (consolidation window). Creates Segment column (Early/Late) and Days_within column (0-1 for Early, 0-6 for Late). Used with piecewise LMM formula: theta ~ Days_within + Days_within:SegmentLate. |
+
+### run_lmm_analysis
+
+| Field | Value |
+|-------|-------|
+| **Description** | Complete LMM analysis pipeline wrapper (prepare data, fit candidates, compare AIC, extract effects, save results) |
+| **Inputs** | `theta_scores: DataFrame`, `output_dir: Union[str, Path]`, `n_factors: int`, `reference_group: Optional[str]`, `save_models: bool = True` |
+| **Outputs** | `Dict` with keys: best_model, aic_table, fixed_effects, random_effects |
+| **Reference** | tools/analysis_lmm.py, convenience wrapper for full LMM workflow |
+| **Notes** | Convenience wrapper combining: prepare_lmm_input_from_theta → configure_candidate_models → compare_lmm_models_by_aic → extract_fixed_effects_from_lmm + extract_random_effects_from_lmm. Simplifies common workflow into single function call. Automatically saves fitted models if save_models=True. Returns all key outputs in single dict. |
 
 ---
 
