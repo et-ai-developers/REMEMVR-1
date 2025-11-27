@@ -192,6 +192,26 @@
 | **Reference** | RQ 5.8 Test 4 (Convergent Evidence), Delta method: Casella & Berger (2002) Statistical Inference 2nd ed. p.240, tools_todo.yaml lines 115-133 |
 | **Notes** | Piecewise LMM formula: `theta ~ Days_within + Days_within:SegmentLate + (Days_within \| UID)`. Early slope = β_Days_within, Late slope = β_Days_within + β_Days_within:SegmentLate. Delta method for ratio SE: SE²_ratio = (∂ratio/∂early)²×Var(early) + (∂ratio/∂late)²×Var(late) + 2×(∂ratio/∂early)×(∂ratio/∂late)×Cov(early,late), where ∂ratio/∂early = -late/early² and ∂ratio/∂late = 1/early. Interpretation thresholds: ratio < 0.5 (robust two-phase), 0.5-0.75 (moderate), 0.75-1.0 (weak), >1.0 (unexpected/reverse). Handles zero Early slope (ratio=inf/nan). 11/11 tests GREEN. 172 lines implementation. |
 
+### assign_piecewise_segments
+
+| Field | Value |
+|-------|-------|
+| **Description** | Assign piecewise segments (Early/Late) and compute Days_within for piecewise LMM (RQ 5.8 piecewise regression design) |
+| **Inputs** | `df: DataFrame`, `tsvr_col: str = 'TSVR_hours'`, `early_cutoff_hours: float = 24.0` |
+| **Outputs** | `DataFrame` with added columns: Segment (Early/Late), Days_within (time since segment start) |
+| **Reference** | RQ 5.8 piecewise forgetting analysis, tools/analysis_lmm.py lines 25-101 |
+| **Notes** | Implements piecewise regression design dividing forgetting trajectory into two temporal segments: Early segment (0-24h, consolidation-dominated) and Late segment (24-168h, decay-dominated). Default cutoff 24h represents one night's sleep (consolidation window). Creates Segment column (Early/Late) and Days_within column (0-1 for Early, 0-6 for Late). Used with piecewise LMM formula: theta ~ Days_within + Days_within:SegmentLate. |
+
+### run_lmm_analysis
+
+| Field | Value |
+|-------|-------|
+| **Description** | Complete LMM analysis pipeline wrapper (prepare data, fit candidates, compare AIC, extract effects, save results) |
+| **Inputs** | `theta_scores: DataFrame`, `output_dir: Union[str, Path]`, `n_factors: int`, `reference_group: Optional[str]`, `save_models: bool = True` |
+| **Outputs** | `Dict` with keys: best_model, aic_table, fixed_effects, random_effects |
+| **Reference** | tools/analysis_lmm.py lines 739-877, convenience wrapper for full LMM workflow |
+| **Notes** | Convenience wrapper combining: prepare_lmm_input_from_theta → configure_candidate_models → compare_lmm_models_by_aic → extract_fixed_effects_from_lmm + extract_random_effects_from_lmm. Simplifies common workflow into single function call. Automatically saves fitted models if save_models=True. Returns all key outputs in single dict. |
+
 ---
 
 ## Module: tools.plotting
@@ -234,25 +254,45 @@
 | **Reference** | tools/plotting.py, distribution visualization |
 | **Notes** | Supports grouped histograms for comparing distributions across factors/domains. Optional vertical reference line for thresholds. Publication-ready styling with 300 DPI. |
 
-### assign_piecewise_segments
+### set_plot_style_defaults
 
 | Field | Value |
 |-------|-------|
-| **Description** | Assign piecewise segments (Early/Late) and compute Days_within for piecewise LMM (RQ 5.8 piecewise regression design) |
-| **Inputs** | `df: DataFrame`, `tsvr_col: str = 'TSVR_hours'`, `early_cutoff_hours: float = 24.0` |
-| **Outputs** | `DataFrame` with added columns: Segment (Early/Late), Days_within (time since segment start) |
-| **Reference** | RQ 5.8 piecewise forgetting analysis, tools/analysis_lmm.py |
-| **Notes** | Implements piecewise regression design dividing forgetting trajectory into two temporal segments: Early segment (0-24h, consolidation-dominated) and Late segment (24-168h, decay-dominated). Default cutoff 24h represents one night's sleep (consolidation window). Creates Segment column (Early/Late) and Days_within column (0-1 for Early, 0-6 for Late). Used with piecewise LMM formula: theta ~ Days_within + Days_within:SegmentLate. |
+| **Description** | Apply consistent matplotlib and seaborn styling from config |
+| **Inputs** | `config_path: Optional[Path] = None` (optional path to plotting.yaml) |
+| **Outputs** | None |
+| **Reference** | tools/plotting.py lines 40-86 |
+| **Notes** | Loads plotting parameters from config/plotting.yaml and applies them to matplotlib rcParams. Falls back to sensible defaults if config not found. Should be called before plot generation. |
 
-### run_lmm_analysis
+### plot_diagnostics
 
 | Field | Value |
 |-------|-------|
-| **Description** | Complete LMM analysis pipeline wrapper (prepare data, fit candidates, compare AIC, extract effects, save results) |
-| **Inputs** | `theta_scores: DataFrame`, `output_dir: Union[str, Path]`, `n_factors: int`, `reference_group: Optional[str]`, `save_models: bool = True` |
-| **Outputs** | `Dict` with keys: best_model, aic_table, fixed_effects, random_effects |
-| **Reference** | tools/analysis_lmm.py, convenience wrapper for full LMM workflow |
-| **Notes** | Convenience wrapper combining: prepare_lmm_input_from_theta → configure_candidate_models → compare_lmm_models_by_aic → extract_fixed_effects_from_lmm + extract_random_effects_from_lmm. Simplifies common workflow into single function call. Automatically saves fitted models if save_models=True. Returns all key outputs in single dict. |
+| **Description** | Create 2x2 diagnostic plot grid for regression model validation |
+| **Inputs** | `df: DataFrame` (with fitted and residuals columns), `fitted_col: str = 'fitted'`, `residuals_col: str = 'residuals'`, `group_col: Optional[str] = None`, `figsize: Tuple[int, int] = (12, 10)`, `output_path: Optional[Path] = None` |
+| **Outputs** | `Tuple[Figure, np.ndarray]` (matplotlib figure and 2x2 array of axes) |
+| **Reference** | tools/plotting.py lines 215-333 |
+| **Notes** | Creates four diagnostic plots: (A) Residuals vs Fitted, (B) Q-Q Plot, (C) Scale-Location, (D) Residuals by Group. Used for LMM assumption validation. |
+
+### save_plot_with_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Save plot as PNG and optionally save associated data as CSV |
+| **Inputs** | `fig: Figure` (matplotlib figure to save), `output_path: Path` (path for PNG file), `data: Optional[DataFrame] = None` (optional DataFrame to save as CSV), `dpi: int = 300` (DPI for PNG output) |
+| **Outputs** | None |
+| **Reference** | tools/plotting.py lines 471-509 |
+| **Notes** | Saves matplotlib figure and corresponding data for reproducibility. CSV is saved with same name as PNG but .csv extension. Default 300 DPI for publication quality. |
+
+### prepare_piecewise_plot_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Prepare piecewise trajectory plot data with observed means and model predictions |
+| **Inputs** | `df_input: DataFrame` (piecewise LMM data), `lmm_result: MixedLMResults` (fitted model), `segment_col: str`, `factor_col: str`, `segment_values: List[str]` (e.g., ['Early', 'Late']), `factor_values: List[str]` (e.g., ['Common', 'Congruent', 'Incongruent']), `days_within_col: str = 'Days_within'`, `theta_col: str = 'theta'`, `early_grid_points: int = 20`, `late_grid_points: int = 60`, `ci_level: float = 0.95` |
+| **Outputs** | `Dict[str, DataFrame]` with keys 'early' and 'late', each containing DataFrame with columns: Days_within, {factor_col}, theta_observed, CI_lower_observed, CI_upper_observed, theta_predicted, Data_Type |
+| **Reference** | tools/plotting.py lines 664-838, RQ 5.8 piecewise plots |
+| **Notes** | Aggregates observed theta scores by segment and factor, computes 95% CI, and generates model predictions on a grid of Days_within values for smooth trajectory lines. Designed for piecewise LMM plots with separate Early and Late panels. |
 
 ---
 
@@ -298,6 +338,66 @@
 | **Inputs** | `file_path: Union[str, Path]`, `min_size_bytes: int` (default 0, 0 = no minimum) |
 | **Outputs** | `Dict[str, Any]` with keys: valid (bool), file_path (str), size_bytes (int, 0 if file doesn't exist), message (str) |
 | **Notes** | Returns `valid=False` if: (1) file doesn't exist, (2) path is directory not file, (3) file size < min_size_bytes. Accepts both string paths and pathlib.Path objects. |
+
+### create_lineage_metadata
+
+| Field | Value |
+|-------|-------|
+| **Description** | Create lineage metadata for a data transformation (prevents Pass 1/2 mix-ups) |
+| **Inputs** | `source_file: str` (path to source/input file), `output_file: str` (path to output file being created), `operation: str` (e.g., 'irt_calibration', 'lmm_analysis'), `parameters: Optional[Dict[str, Any]] = None` (operation parameters), `description: str = ""` (human-readable description) |
+| **Outputs** | `Dict[str, Any]` (lineage metadata dictionary with timestamp) |
+| **Reference** | tools/validation.py lines 30-82, post-RQ 5.1 safety feature |
+| **Notes** | Creates lineage metadata to track data provenance. Prevents mixing outputs from different passes or configurations. Includes timestamp, operation, parameters, and file paths. |
+
+### save_lineage_to_file
+
+| Field | Value |
+|-------|-------|
+| **Description** | Save lineage metadata to JSON file |
+| **Inputs** | `metadata: Dict[str, Any]` (lineage metadata dictionary), `lineage_file: str` (path to save JSON file) |
+| **Outputs** | None (saves to disk) |
+| **Reference** | tools/validation.py lines 85-104 |
+| **Notes** | Saves lineage metadata as JSON for persistence. Used with create_lineage_metadata and validate_lineage. |
+
+### load_lineage_from_file
+
+| Field | Value |
+|-------|-------|
+| **Description** | Load lineage metadata from JSON file |
+| **Inputs** | `lineage_file: str` (path to lineage JSON file) |
+| **Outputs** | `Dict[str, Any]` (lineage metadata dictionary) |
+| **Reference** | tools/validation.py lines 107-126 |
+| **Notes** | Loads lineage metadata from JSON file. Used to verify data provenance before analysis. |
+
+### validate_lineage
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate that data comes from expected source (checks source file and pass number) |
+| **Inputs** | `lineage_file: str` (path to lineage JSON file), `expected_source: Optional[str] = None` (expected source file name, partial match allowed), `expected_pass: Optional[int] = None` (expected pass number, 1 or 2) |
+| **Outputs** | `Dict[str, Any]` with keys: valid (bool), message (str), metadata (optional) |
+| **Reference** | tools/validation.py lines 129-190 |
+| **Notes** | Validates data provenance to prevent Pass 1/2 mix-ups (post-RQ 5.1 safety measure). Checks source file and pass number match expectations. |
+
+### check_missing_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Check for missing data in DataFrame |
+| **Inputs** | `df: DataFrame` (data to check) |
+| **Outputs** | `Dict[str, Any]` with keys: has_missing (bool), total_missing (int), total_cells (int), percent_missing (float), missing_by_column (Dict[str, int]) |
+| **Reference** | tools/validation.py lines 304-336 |
+| **Notes** | Comprehensive missing data report by column. Useful for data quality checks before analysis. |
+
+### validate_data_columns
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate that required columns exist in DataFrame |
+| **Inputs** | `df: DataFrame` (data to validate), `required_columns: List[str]` (required column names) |
+| **Outputs** | `Dict[str, Any]` with keys: valid (bool), missing_columns (List[str]), existing_columns (List[str]), n_required (int), n_missing (int) |
+| **Reference** | tools/validation.py lines 443-477 |
+| **Notes** | Simple column presence check. Case-sensitive column name matching. Returns invalid if any required columns missing. |
 
 ---
 
@@ -516,6 +616,100 @@
 | **Outputs** | `Dict[valid: bool, message: str, failed_checks: List[str]]` |
 | **Reference** | RQ 5.14 cluster summary tables validation, tools_todo.yaml lines 505-519 |
 | **Notes** | Flexible column naming for different summary table formats. Three mathematical checks: (1) min <= mean <= max for each row, (2) SD >= 0, (3) N > 0. Reports specific failed checks with row indices. Detects computation errors in clustering summary statistics. 4/4 tests GREEN. ~47 lines implementation. 10 min development time. |
+
+---
+
+## Module: tools.config
+
+### load_config_from_file
+
+| Field | Value |
+|-------|-------|
+| **Description** | Load YAML config file with caching |
+| **Inputs** | `config_name: str` (name of config: 'paths', 'plotting', 'irt', 'lmm') |
+| **Outputs** | `Dict[str, Any]` (configuration dictionary) |
+| **Reference** | tools/config.py lines 65-108 |
+| **Notes** | Loads from config/{config_name}.yaml with global caching. Raises FileNotFoundError or yaml.YAMLError on failure. |
+
+### load_config_from_yaml
+
+| Field | Value |
+|-------|-------|
+| **Description** | Get config value by dot-separated key path |
+| **Inputs** | `config_name: str` (config name), `key_path: Optional[str] = None` (dot path like 'data.master', None returns full config) |
+| **Outputs** | `Any` (configuration value at key_path) |
+| **Reference** | tools/config.py lines 111-150 |
+| **Notes** | Supports nested key access via dot notation. Raises KeyError if path doesn't exist. |
+
+### resolve_path_from_config
+
+| Field | Value |
+|-------|-------|
+| **Description** | Get path from paths.yaml, format templates, return absolute Path |
+| **Inputs** | `key_path: str` (dot path to path string), `**kwargs` (template vars, e.g., n=1 for rq{n}) |
+| **Outputs** | `Path` (absolute path object) |
+| **Reference** | tools/config.py lines 155-190 |
+| **Notes** | Resolves paths from paths.yaml with template formatting support (e.g., `rq{n}` → `rq1`). Returns absolute paths. |
+
+### load_plot_config_from_yaml
+
+| Field | Value |
+|-------|-------|
+| **Description** | Shorthand for load_config_from_yaml('plotting', key_path) |
+| **Inputs** | `key_path: Optional[str] = None` |
+| **Outputs** | `Any` (plotting config value) |
+| **Reference** | tools/config.py lines 193-195 |
+| **Notes** | Convenience function for accessing plotting configuration. |
+
+### load_irt_config_from_yaml
+
+| Field | Value |
+|-------|-------|
+| **Description** | Shorthand for load_config_from_yaml('irt', key_path) |
+| **Inputs** | `key_path: Optional[str] = None` |
+| **Outputs** | `Any` (IRT config value) |
+| **Reference** | tools/config.py lines 198-200 |
+| **Notes** | Convenience function for accessing IRT configuration. |
+
+### load_lmm_config_from_yaml
+
+| Field | Value |
+|-------|-------|
+| **Description** | Shorthand for load_config_from_yaml('lmm', key_path) |
+| **Inputs** | `key_path: Optional[str] = None` |
+| **Outputs** | `Any` (LMM config value) |
+| **Reference** | tools/config.py lines 203-205 |
+| **Notes** | Convenience function for accessing LMM configuration. |
+
+### merge_config_dicts
+
+| Field | Value |
+|-------|-------|
+| **Description** | Deep merge dicts (override takes precedence, returns new dict) |
+| **Inputs** | `base: Dict` (base dictionary), `override: Dict` (override dictionary) |
+| **Outputs** | `Dict` (merged dictionary, non-mutating) |
+| **Reference** | tools/config.py lines 246-273 |
+| **Notes** | Performs deep merge where override values replace base values recursively. Returns new dict without mutating inputs. |
+
+### load_rq_config_merged
+
+| Field | Value |
+|-------|-------|
+| **Description** | Load RQ config with 3-tier merge (global → chapter → RQ) |
+| **Inputs** | `chapter: int` (chapter number: 5, 6, 7), `rq: int` (RQ number) |
+| **Outputs** | `Dict[str, Any]` (merged configuration dictionary) |
+| **Reference** | tools/config.py lines 276-338 |
+| **Notes** | Merges config from 3 levels: global config, chapter-specific overrides, RQ-specific overrides. Enables per-RQ configuration customization. |
+
+### reset_config_cache
+
+| Field | Value |
+|-------|-------|
+| **Description** | Clear global config cache (for testing) |
+| **Inputs** | None |
+| **Outputs** | None |
+| **Reference** | tools/config.py lines 363-370 |
+| **Notes** | Resets _CONFIG_CACHE to empty dict. Used in testing to ensure clean state between tests. |
 
 ---
 
