@@ -1478,9 +1478,11 @@ def prepare_age_effects_plot_data(
 
     # Create age tertiles at subject level (not observation level)
     # Get unique Age per UID, assign tertiles, then merge back
-    subject_ages = df[['UID', 'Age']].drop_duplicates()
+    # Handle both 'Age' and 'age' column names
+    age_col = 'Age' if 'Age' in df.columns else 'age'
+    subject_ages = df[['UID', age_col]].drop_duplicates()
     subject_ages['age_tertile'] = pd.qcut(
-        subject_ages['Age'],
+        subject_ages[age_col],
         q=3,
         labels=['Young', 'Middle', 'Older']
     )
@@ -1489,11 +1491,15 @@ def prepare_age_effects_plot_data(
     df = df.merge(subject_ages[['UID', 'age_tertile']], on='UID', how='left')
 
     # ========================================================================
-    # STEP 2: Aggregate observed data by domain × tertile × timepoint
+    # STEP 2: Aggregate observed data by tertile × timepoint (or domain × tertile × timepoint)
     # ========================================================================
 
-    # Group by domain, age tertile, and timepoint
-    grouped = df.groupby(['domain_name', 'age_tertile', 'TSVR_hours'])['theta'].agg([
+    # Group by age tertile and timepoint (add domain if present)
+    group_cols = ['age_tertile', 'TSVR_hours']
+    if 'domain_name' in df.columns:
+        group_cols = ['domain_name'] + group_cols
+
+    grouped = df.groupby(group_cols)['theta'].agg([
         ('theta_observed', 'mean'),
         ('se_observed', lambda x: x.sem()),  # Standard error of the mean
         ('n', 'count')
@@ -1516,8 +1522,8 @@ def prepare_age_effects_plot_data(
     # Create DataFrame with same structure as grouped data for prediction lookup
     df['fitted_theta'] = lmm_model.fittedvalues
 
-    # Aggregate fitted values by domain × tertile × timepoint (take mean of fitted values in group)
-    predictions = df.groupby(['domain_name', 'age_tertile', 'TSVR_hours'])['fitted_theta'].mean().reset_index()
+    # Aggregate fitted values by tertile × timepoint (or domain × tertile × timepoint)
+    predictions = df.groupby(group_cols)['fitted_theta'].mean().reset_index()
     predictions.rename(columns={'fitted_theta': 'theta_predicted'}, inplace=True)
 
     # ========================================================================
@@ -1526,7 +1532,7 @@ def prepare_age_effects_plot_data(
 
     result = grouped.merge(
         predictions,
-        on=['domain_name', 'age_tertile', 'TSVR_hours'],
+        on=group_cols,
         how='left'
     )
 
@@ -1534,12 +1540,19 @@ def prepare_age_effects_plot_data(
     # STEP 6: Select final columns and save to CSV
     # ========================================================================
 
-    # Select columns for rq_plots
-    result = result[['domain_name', 'age_tertile', 'TSVR_hours', 'theta_observed',
-                     'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']]
+    # Select columns for rq_plots (include domain_name only if present)
+    output_cols = ['age_tertile', 'TSVR_hours', 'theta_observed',
+                   'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+    if 'domain_name' in result.columns:
+        output_cols = ['domain_name'] + output_cols
 
-    # Sort by domain, tertile, time for readability
-    result = result.sort_values(['domain_name', 'age_tertile', 'TSVR_hours']).reset_index(drop=True)
+    result = result[output_cols]
+
+    # Sort by tertile and time (include domain if present)
+    sort_cols = ['age_tertile', 'TSVR_hours']
+    if 'domain_name' in result.columns:
+        sort_cols = ['domain_name'] + sort_cols
+    result = result.sort_values(sort_cols).reset_index(drop=True)
 
     # Create parent directories if needed
     output_path = Path(output_path)

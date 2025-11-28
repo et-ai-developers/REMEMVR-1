@@ -27,8 +27,8 @@ from tools.plotting import set_plot_style_defaults
 # =============================================================================
 
 # Get absolute path to RQ root (plots.py is in results/ch5/rq8/plots/)
-RQ_ROOT = Path(__file__).parent.parent
-
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+RQ_ROOT = PROJECT_ROOT / "results" / "ch5" / "rq8"
 # Apply consistent plotting theme from config/plotting.yaml
 set_plot_style_defaults()
 

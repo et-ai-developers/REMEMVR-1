@@ -1,0 +1,37 @@
+[START] Step 04: Compute Effect Size (Age Impact on Day 6 Memory)
+[LOAD] Loading fitted LMM model from step02...
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/rq9/data/step02_lmm_model.pkl
+[INFO] Model formula: theta ~ (Time + Time_log) * Age_c
+[INFO] Converged: True
+[LOAD] Loading prepared data to extract SD(age)...
+[LOADED] step01_lmm_input_prepared.csv (400 rows, 10 cols)
+[INFO] Age statistics: Mean = 44.57 years, SD = 14.52 years
+[INFO] TSVR range in data: 1.0 to 246.2 hours
+[INFO] Using TSVR_day6 = 144.0 hours for effect size computation
+[COMPUTE] Defining effect size scenarios...
+[INFO] Day 6 time transformations: Time = 144.0, Time_log = 4.977
+[INFO] Scenario 1: Average age (Age_c = 0.00, Age = 44.6 years)
+[INFO] Scenario 2: Age + 1 SD (Age_c = 14.52, Age = 59.1 years)
+[COMPUTE] Computing predicted theta using LMM fixed effects...
+[INFO] Fixed effects parameters:
+  Intercept: 0.8067
+  Time: -0.0021
+  Time_log: -0.1981
+  Age_c: -0.0125
+  Time:Age_c: 0.0000
+  Time_log:Age_c: 0.0007
+[PREDICTED] Average age: theta = -0.478
+[PREDICTED] Age + 1 SD: theta = -0.576
+[COMPUTE] Computing age decline metrics...
+[RESULT] Average age theta at Day 6: -0.478
+[RESULT] Age + 1 SD theta at Day 6: -0.576
+[RESULT] Decline (theta): -0.099
+[RESULT] Decline (percent): 20.6%
+[SAVE] Saving effect size results...
+[SAVED] step04_effect_size.csv (2 rows)
+[SAVED] step04_effect_size_summary.txt
+[VALIDATION] Validating predicted theta range...
+[VALIDATION PASS] theta_predicted in [-4, 4]: theta_predicted: All values within range [-4.0, 4.0] (n=2).
+[VALIDATION] Validating Age_c range...
+[VALIDATION PASS] age_c in [-30, 30]: age_c: All values within range [-30.0, 30.0] (n=2).
+[SUCCESS] Step 04 complete - Effect size computed and validated

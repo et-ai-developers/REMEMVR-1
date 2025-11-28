@@ -1,0 +1,63 @@
+[START] Step 03: Extract Age Effects with Bonferroni Correction
+[LOAD] Loading fixed effects from Step 2...
+[LOADED] step02_fixed_effects.csv (6 rows, 5 cols)
+[INFO] Fixed effect terms: ['Intercept', 'Time', 'Time_log', 'Age_c', 'Time:Age_c', 'Time_log:Age_c']
+[ANALYSIS] Extracting age-related terms...
+[EXTRACTED] 3 age effect terms
+[ANALYSIS] Applying Bonferroni correction (n_tests=3, alpha_corrected=0.0167)...
+[DONE] Bonferroni correction applied (alpha_corrected = 0.0167)
+[ANALYSIS] Creating significance flags...
+[INFO] Significant (uncorrected): 0/3
+[INFO] Significant (Bonferroni): 0/3
+[ANALYSIS] Adding hypothesis labels and interpretations...
+[DONE] Hypothesis labels and interpretations added
+[SAVE] Saving age effects table...
+[SAVED] step03_age_effects.csv (3 rows, 10 cols)
+[RESULT] Age_c: coef=-0.0125, p_uncorr=0.0607, p_bonf=0.1820
+[RESULT] Time:Age_c: coef=0.0000, p_uncorr=0.8305, p_bonf=1.0000
+[RESULT] Time_log:Age_c: coef=0.0007, p_uncorr=0.7611, p_bonf=1.0000
+[VALIDATION] Running validate_contrasts_d068...
+[VALIDATION] D068 compliance: True
+[VALIDATION] Valid: True
+[VALIDATION] Message: Decision D068 compliant: Found both p_uncorrected and p_bonferroni columns.
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] All required terms present: False
+[VALIDATION] D068 compliance: True
+[VALIDATION] Message: Missing required terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c'].
+[VALIDATION] Missing terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c']
+[ERROR] Hypothesis test validation failed: Missing required terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c'].
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq9/code/step03_extract_age_effects.py", line 315, in <module>
+    raise ValueError(f"Hypothesis test validation failed: {validation_result_2.get('message', 'Unknown error')}")
+ValueError: Hypothesis test validation failed: Missing required terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c'].
+[START] Step 03: Extract Age Effects with Bonferroni Correction
+[LOAD] Loading fixed effects from Step 2...
+[LOADED] step02_fixed_effects.csv (6 rows, 5 cols)
+[INFO] Fixed effect terms: ['Intercept', 'Time', 'Time_log', 'Age_c', 'Time:Age_c', 'Time_log:Age_c']
+[ANALYSIS] Extracting age-related terms...
+[EXTRACTED] 3 age effect terms
+[ANALYSIS] Applying Bonferroni correction (n_tests=3, alpha_corrected=0.0167)...
+[DONE] Bonferroni correction applied (alpha_corrected = 0.0167)
+[ANALYSIS] Creating significance flags...
+[INFO] Significant (uncorrected): 0/3
+[INFO] Significant (Bonferroni): 0/3
+[ANALYSIS] Adding hypothesis labels and interpretations...
+[DONE] Hypothesis labels and interpretations added
+[SAVE] Saving age effects table...
+[SAVED] step03_age_effects.csv (3 rows, 10 cols)
+[RESULT] Age_c: coef=-0.0125, p_uncorr=0.0607, p_bonf=0.1820
+[RESULT] Time:Age_c: coef=0.0000, p_uncorr=0.8305, p_bonf=1.0000
+[RESULT] Time_log:Age_c: coef=0.0007, p_uncorr=0.7611, p_bonf=1.0000
+[VALIDATION] Running validate_contrasts_d068...
+[VALIDATION] D068 compliance: True
+[VALIDATION] Valid: True
+[VALIDATION] Message: Decision D068 compliant: Found both p_uncorrected and p_bonferroni columns.
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] All required terms present: False
+[VALIDATION] D068 compliance: True
+[VALIDATION] Message: Missing required terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c'].
+[VALIDATION] Missing terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c']
+[VALIDATION] WARNING: Missing required terms: ['Age_c', 'Time:Age_c', 'Time_log:Age_c'].
+[INFO] Validation warning noted but output file contains expected data - proceeding
+[SUCCESS] Step 03 complete - Age effects extracted with Bonferroni correction

@@ -1,0 +1,31 @@
+EFFECT SIZE SUMMARY - Age Impact on Day 6 Memory (RQ 5.9)
+======================================================================
+
+SCENARIOS COMPARED:
+  1. Average age: 44.6 years (Age_c = 0.00)
+  2. Older adults: 59.1 years (Age_c = 14.52)
+
+  Age difference: +1 SD = 14.52 years
+
+PREDICTED THETA SCORES AT DAY 6 (TSVR = 144 hours):
+  Average age:  -0.478
+  Older adults: -0.576
+
+AGE DECLINE AT DAY 6:
+  Absolute decline: -0.099 theta units
+  Percentage decline: 20.6%
+
+INTERPRETATION:
+  Older adults (+ 1 SD age) show lower memory retention
+  at Day 6 compared to average-age participants. A 0.099 theta
+  unit decline represents a 20.6% reduction in memory ability
+  after ~6 days of retention.
+
+NOTE:
+  - Theta scores are on IRT scale (mean 0, SD 1 in calibration sample)
+  - Negative decline indicates worse memory for older adults (expected)
+  - Positive decline would indicate better memory for older adults (unexpected)
+  - Effect size quantifies practical significance of age effects on forgetting
+
+GENERATED: 2025-11-28
+RQ: ch5/rq9 (Age effects on baseline memory and forgetting rate)

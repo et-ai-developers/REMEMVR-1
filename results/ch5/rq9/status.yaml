@@ -14,9 +14,9 @@ rq_builder:
 rq_concept:
   status: success
   context_dump: "RQ 5.9: Age effects on baseline memory and forgetting rate\nDomains:\
-    \ All (What/Where/When combined composite)\nAnalysis: LMM (Age \xD7 Time interaction,\
+    \ All (What/Where/When combined composite)\nAnalysis: LMM (Age × Time interaction,\
     \ Lin+Log functional form)\nData: DERIVED from RQ 5.7 theta scores + Age from\
-    \ dfData.csv\nCritical: Age grand-mean centered, Bonferroni \u03B1=0.0033, Age\
+    \ dfData.csv\nCritical: Age grand-mean centered, Bonferroni α=0.0033, Age\
     \ tertiles for visualization\n"
 rq_scholar:
   status: success
@@ -29,7 +29,7 @@ rq_scholar:
 rq_stats:
   status: success
   context_dump: "9.5/10 APPROVED. Cat1: 3.0/3 (appropriate). Cat2: 2.0/2 (100% reuse).\
-    \ Cat3: 2.0/2 (Bonferroni \u03B1=0.0033 for 3 tests should be 0.0167, overly conservative).\
+    \ Cat3: 2.0/2 (Bonferroni α=0.0033 for 3 tests should be 0.0167, overly conservative).\
     \ Cat4: 1.8/2 (convergence diagnostics missing). Cat5: 0.7/1 (6 concerns, below\
     \ 8+ target).\n"
 rq_planner:
@@ -51,16 +51,25 @@ rq_inspect:
   status: pending
   context_dump: ''
 rq_plots:
-  status: pending
-  context_dump: ''
+  status: success
+  context_dump: |
+    Plots generated: 1 (age_tertile_trajectory)
+    Data source: step05_age_tertile_plot_data.csv (12 rows, 3 tertiles x 4 timepoints)
+    Plot type: Trajectory with observed data (error bars) + LMM predictions (dashed lines)
+    Age tertiles: Young/Middle/Older with color-coded trajectories
 rq_results:
-  status: pending
-  context_dump: ''
+  status: success
+  timestamp: '2025-11-28T12:00:00Z'
+  context_dump: |
+    Results validated for scientific plausibility
+    4 anomalies flagged: 2 wrong direction (Age x Time interactions positive), 1 model violation (autocorrelation), 1 visual-statistical contradiction (LMM predictions implausible)
+    Null hypothesis: Age effects on forgetting minimal/non-significant (all p > 0.18 Bonferroni)
+    Summary documented in results/summary.md
 
 analysis_steps:
-  step00_extract_merge_data: pending
-  step01_prepare_predictors: pending
-  step02_fit_lmm: pending
-  step03_extract_age_effects: pending
-  step04_compute_effect_size: pending
-  step05_prepare_plot_data: pending
+  step00_extract_merge_data: success
+  step01_prepare_predictors: success
+  step02_fit_lmm: success
+  step03_extract_age_effects: success
+  step04_compute_effect_size: success
+  step05_prepare_plot_data: success
