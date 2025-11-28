@@ -1,0 +1,33 @@
+[START] Step 4: Validate LMM Assumptions
+[LOAD] Loading fitted models from Steps 2-3...
+[LOAD] Loading quadratic model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step02_quadratic_model.pkl
+[LOADED] Quadratic model (400 observations)
+[LOAD] Loading piecewise model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step03_piecewise_model.pkl
+[ERROR] Piecewise model not found: /home/etai/projects/REMEMVR/results/ch5/rq8/data/step03_piecewise_model.pkl
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq8/code/step04_validate_lmm_assumptions.py", line 177, in <module>
+    raise FileNotFoundError(f"Piecewise model not found: {piecewise_model_path}")
+FileNotFoundError: Piecewise model not found: /home/etai/projects/REMEMVR/results/ch5/rq8/data/step03_piecewise_model.pkl
+[START] Step 4: Validate LMM Assumptions
+[LOAD] Loading fitted models from Steps 2-3...
+[LOAD] Loading quadratic model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step02_quadratic_model.pkl
+[LOADED] Quadratic model (400 observations)
+[LOAD] Loading piecewise model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step03_piecewise_model.pkl
+[LOADED] Piecewise model (400 observations)
+[LOAD] Loading time-transformed data from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step01_time_transformed.csv
+[LOADED] Time data (400 rows, 9 cols)
+[ANALYSIS] Running assumption validation for quadratic model...
+[ERROR] 'MixedLMResults' object has no attribute 'get_influence'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq8/code/step04_validate_lmm_assumptions.py", line 203, in <module>
+    quadratic_validation = validate_lmm_assumptions_comprehensive(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 1144, in validate_lmm_assumptions_comprehensive
+    influence = lmm_result.get_influence()
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/wrapper.py", line 34, in __getattribute__
+    obj = getattr(results, attr)
+          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MixedLMResults' object has no attribute 'get_influence'

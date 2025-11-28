@@ -1,0 +1,9 @@
+RQ 5.7 Best Continuous Model Information
+============================================================
+Best model: Log
+AIC: 873.710488
+
+INTERPRETATION FOR RQ 5.8 STEP 3:
+------------------------------------------------------------
+RQ 5.7 completed successfully with Log as best model.
+AIC comparison in Step 3 uses this value as reference.

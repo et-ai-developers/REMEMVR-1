@@ -215,7 +215,7 @@ steps:
           variable_name: "time_data"
 
       output_files:
-        - path: "results/step02_quadratic_model_summary.txt"
+        - path: "data/step02_quadratic_model_summary.txt"
           variable_name: "quadratic_model"
           description: "Quadratic model summary (fixed effects, random effects, AIC, BIC, convergence status)"
         - path: "data/step02_quadratic_predictions.csv"
