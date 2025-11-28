@@ -1,0 +1,33 @@
+                   Mixed Linear Model Regression Results
+===========================================================================
+Model:                   MixedLM       Dependent Variable:       theta     
+No. Observations:        1200          Method:                   ML        
+No. Groups:              100           Scale:                    0.3799    
+Min. group size:         12            Log-Likelihood:           -1245.0651
+Max. group size:         12            Converged:                Yes       
+Mean group size:         12.0                                              
+---------------------------------------------------------------------------
+                                 Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+---------------------------------------------------------------------------
+Intercept                         0.747    0.093  8.030 0.000  0.565  0.929
+domain[T.When]                   -0.333    0.113 -2.947 0.003 -0.554 -0.112
+domain[T.Where]                   0.032    0.113  0.283 0.777 -0.189  0.253
+TSVR_hours                       -0.001    0.001 -1.261 0.207 -0.004  0.001
+TSVR_hours:domain[T.When]         0.003    0.001  2.214 0.027  0.000  0.006
+TSVR_hours:domain[T.Where]       -0.001    0.001 -0.669 0.504 -0.004  0.002
+log_TSVR                         -0.198    0.037 -5.338 0.000 -0.270 -0.125
+log_TSVR:domain[T.When]           0.070    0.052  1.344 0.179 -0.032  0.172
+log_TSVR:domain[T.Where]          0.023    0.052  0.435 0.664 -0.079  0.125
+Age_c                            -0.009    0.006 -1.448 0.147 -0.022  0.003
+Age_c:domain[T.When]              0.011    0.008  1.408 0.159 -0.004  0.026
+Age_c:domain[T.Where]            -0.003    0.008 -0.322 0.748 -0.018  0.013
+TSVR_hours:Age_c                  0.000    0.000  0.613 0.540 -0.000  0.000
+TSVR_hours:Age_c:domain[T.When]  -0.000    0.000 -0.526 0.599 -0.000  0.000
+TSVR_hours:Age_c:domain[T.Where] -0.000    0.000 -0.597 0.551 -0.000  0.000
+log_TSVR:Age_c                   -0.001    0.003 -0.369 0.712 -0.006  0.004
+log_TSVR:Age_c:domain[T.When]    -0.000    0.004 -0.117 0.907 -0.008  0.007
+log_TSVR:Age_c:domain[T.Where]    0.002    0.004  0.678 0.498 -0.005  0.010
+Group Var                         0.226    0.072                           
+Group x TSVR_hours Cov           -0.001    0.000                           
+TSVR_hours Var                    0.000    0.000                           
+===========================================================================

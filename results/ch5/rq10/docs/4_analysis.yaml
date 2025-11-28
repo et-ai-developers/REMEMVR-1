@@ -148,10 +148,10 @@ steps:
           description: "Long-format LMM input from Step 1"
 
       output_files:
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "lmm_model"
           description: "Fitted statsmodels MixedLM model object with 3-way Age x Domain x Time interaction"
-        - path: "results/step02_lmm_summary.txt"
+        - path: "data/step02_lmm_summary.txt"
           variable_name: "lmm_summary_text"
           description: "Full model summary (fixed effects table, random effects variance, AIC, BIC, log-likelihood)"
         - path: "data/step02_fixed_effects.csv"
@@ -177,10 +177,10 @@ steps:
       signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "lmm_model"
           source: "analysis call output (fit_lmm_trajectory_tsvr)"
-        - path: "results/step02_lmm_summary.txt"
+        - path: "data/step02_lmm_summary.txt"
           variable_name: "lmm_summary_text"
           source: "analysis call output (model summary)"
 
@@ -219,7 +219,7 @@ steps:
       signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[valid: bool, diagnostics: Dict, plot_paths: List[Path], message: str]"
 
       input_files:
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "lmm_model"
           description: "Fitted LMM from Step 2"
         - path: "data/step01_lmm_input.csv"
@@ -293,7 +293,7 @@ steps:
       type: "catalogued"
       module: "tools.analysis_lmm"
       function: "select_lmm_random_structure_via_lrt"
-      signature: "select_lmm_random_structure_via_lrt(data: DataFrame, formula: str, time_var: str, groups: str = 'UID', reml: bool = False) -> Dict[selected_model: str, lrt_results: DataFrame, fitted_models: Dict[str, MixedLMResults]]"
+      signature: "select_lmm_random_structure_via_lrt(data: DataFrame, formula: str, groups: str = 'UID', reml: bool = False) -> Dict[selected_model: str, lrt_results: DataFrame, fitted_models: Dict[str, MixedLMResults]]"
 
       input_files:
         - path: "data/step01_lmm_input.csv"
@@ -305,7 +305,7 @@ steps:
         - path: "results/step02c_model_selection.txt"
           variable_name: "model_selection_report"
           description: "Model selection report (3 models fit, LRT results, selected model, rationale)"
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "selected_model"
           description: "UPDATED: Selected model refit with REML=False for fixed effects inference"
         - path: "data/step02_fixed_effects.csv"
@@ -315,7 +315,6 @@ steps:
       parameters:
         data: "lmm_input"
         formula: "theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain"
-        time_var: "TSVR_hours"
         groups: "UID"
         reml: false
 
@@ -333,7 +332,7 @@ steps:
         - path: "results/step02c_model_selection.txt"
           variable_name: "model_selection_report"
           source: "analysis call output (model selection report)"
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "selected_model"
           source: "analysis call output (selected model, refit with REML=False)"
 
@@ -368,7 +367,7 @@ steps:
     analysis_call:
       type: "stdlib"
       operations:
-        - "Read results/step02_lmm_model.pkl (selected model from Step 2c)"
+        - "Read data/step02_lmm_model.pkl (selected model from Step 2c)"
         - "Read data/step02_fixed_effects.csv (fixed effects table)"
         - "Filter fixed_effects for terms containing 'TSVR_hours:Age_c:domain' and 'log_TSVR:Age_c:domain'"
         - "Expected 4 terms: TSVR_hours:Age_c:domain[Where], TSVR_hours:Age_c:domain[When], log_TSVR:Age_c:domain[Where], log_TSVR:Age_c:domain[When]"
@@ -379,7 +378,7 @@ steps:
         - "Save hypothesis_test.txt with omnibus results and decision"
 
       input_files:
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           description: "Selected LMM model from Step 2c (REML=False)"
         - path: "data/step02_fixed_effects.csv"
           required_columns: ["term", "estimate", "se", "z", "p", "CI_lower", "CI_upper"]
@@ -453,7 +452,7 @@ steps:
       signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
 
       input_files:
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "lmm_model"
           description: "Selected LMM model from Step 2c"
         - path: "data/step02_fixed_effects.csv"
@@ -534,7 +533,7 @@ steps:
           required_columns: ["UID", "age", "domain", "TSVR_hours", "theta"]
           variable_name: "lmm_input"
           description: "LMM input with age variable from Step 1"
-        - path: "results/step02_lmm_model.pkl"
+        - path: "data/step02_lmm_model.pkl"
           variable_name: "lmm_model"
           description: "Selected LMM model from Step 2c (for predictions)"
         - path: "data/step04_age_effects_by_domain.csv"

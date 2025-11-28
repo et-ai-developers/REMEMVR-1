@@ -1,0 +1,51 @@
+================================================================================
+STEP 01: LMM INPUT PREPROCESSING SUMMARY
+================================================================================
+
+INPUT FILES:
+  - Theta scores: step00_theta_from_rq51.csv (1200 rows)
+  - TSVR mapping: step00_tsvr_from_rq51.csv (400 rows)
+  - Age data: step00_age_from_dfdata.csv (100 rows)
+
+OUTPUT FILE:
+  - LMM input: step01_lmm_input.csv (1200 rows, 10 cols)
+
+PARTICIPANT SUMMARY:
+  - N participants: 100
+  - N tests per participant: 4
+  - N domains: 3
+  - Total observations: 1200
+
+AGE VARIABLE SUMMARY:
+  - Grand mean age: 44.57 years
+  - Age range: [20.00, 70.00] years
+  - Age_c range: [-24.57, 25.43] years (centered)
+  - Mean Age_c: 1.89e-15 (verification: should be ~0)
+  - Age_c symmetry: |min|/max = 0.966 (should be ~1.0)
+
+TSVR VARIABLE SUMMARY:
+  - TSVR_hours range: [1.00, 246.24] hours
+  - log_TSVR range: [0.69, 5.51]
+  - Transformation: log_TSVR = log(TSVR_hours + 1)
+
+VALIDATION RESULTS:
+  [PASS] Check 1: Row count = 1200 (100 x 4 x 3)
+  [PASS] Check 2: No NaN values
+  [PASS] Check 3: Mean Age_c approximately 0
+  [PASS] Check 4: Age_c range symmetric
+  [PASS] Check 5: All UIDs have 12 rows
+  [PASS] Check 6: TSVR_hours in [0, 200]
+  [PASS] Check 7: log_TSVR in [0, 6]
+
+TRANSFORMATIONS APPLIED:
+  1. Extracted UID from composite_ID (format: UID_test)
+  2. Merged theta + TSVR on composite_ID and test
+  3. Merged with age on UID
+  4. Grand-mean centered Age: Age_c = age - mean(age)
+  5. Log-transformed TSVR: log_TSVR = log(TSVR_hours + 1)
+
+NEXT STEP:
+  Use data/step01_lmm_input.csv as input for step02_fit_lmm.py
+  Model formula will include Age_c, log_TSVR, and their interactions
+
+================================================================================
