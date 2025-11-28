@@ -70,7 +70,7 @@ analysis_tools:
   assign_piecewise_segments:
     module: "tools.analysis_lmm"
     function: "assign_piecewise_segments"
-    signature: "assign_piecewise_segments(df: DataFrame, tsvr_col: str = 'TSVR_hours', early_cutoff_hours: float = 24.0) -> DataFrame"
+    signature: "assign_piecewise_segments(df: DataFrame, tsvr_col: str = 'TSVR_hours', early_cutoff_hours: float = 48.0) -> DataFrame"
     validation_tool: "validate_data_columns"
 
     description: |
@@ -96,7 +96,8 @@ analysis_tools:
 
     notes: |
       RQ 5.8 uses 48-hour cutoff (Day 1 after one night's sleep = consolidation window).
-      Different from default 24h in tool implementation.
+      Boundary assignment: Early = [0, 48) hours (excluding 48), Late = [48, 240] hours (including 48).
+      Standard convention: boundary point (48h) belongs to second segment (Late).
 
     source_reference: "tools_inventory.md lines 195-203"
 
@@ -123,7 +124,7 @@ analysis_tools:
       segment_col: "Segment"
       time_col: "Days_within"
       ratio_threshold: 0.5
-      bonferroni_alpha: 0.0033
+      bonferroni_alpha: 0.003333
 
     notes: |
       Delta method required for ratio SE (not simple quadrature).

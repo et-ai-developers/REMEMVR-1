@@ -45,7 +45,7 @@ Most forgetting studies use continuous models (exponential, power) that assume c
 Forgetting exhibits two distinct phases: rapid initial decline (Day 0-1, pre-consolidation) followed by slower decay (Day 1-6, post-consolidation). Evidence will come from convergence of three tests: (1) significant quadratic term (positive curvature = deceleration), (2) piecewise model fits better than continuous model (ΔAIC < -2), (3) Late/Early slope ratio < 0.5.
 
 **Secondary Hypotheses:**
-1. Quadratic term will be positive and significant (p < 0.0033 Bonferroni-corrected), indicating concave-up curvature (deceleration over time)
+1. Quadratic term will be positive and significant (p < 0.003333 Bonferroni-corrected), indicating concave-up curvature (deceleration over time)
 2. Piecewise model will have lower AIC than best continuous model from RQ 5.7 (ΔAIC < -2)
 3. Visual inspection will show clear inflection point at Day 1 (24-hour mark, one night's sleep)
 
@@ -53,7 +53,7 @@ Forgetting exhibits two distinct phases: rapid initial decline (Day 0-1, pre-con
 Consolidation theory predicts memory traces undergo time-dependent stabilization during first ~24 hours post-encoding. During this vulnerable period, forgetting is rapid. After consolidation, traces are stabilized and forgetting decelerates. Sleep plays critical role in consolidation, so inflection point should occur after first night's sleep (~Day 1). VR-based episodic memories are hippocampal-dependent and thus subject to consolidation dynamics.
 
 **Expected Effect Pattern:**
-Quadratic model: Theta ~ Time + Time² + (Time | UID) will show significant positive Time² coefficient (p < 0.0033). Piecewise model: Theta ~ Days_within × Segment + (Days_within | UID) will have AIC at least 2 points lower than best continuous model. Early segment slope (0-48 hours) will be ~4x steeper than Late segment slope (48-240 hours), yielding ratio ~0.25. Segment × Time interaction will be significant (p < 0.0033).
+Quadratic model: Theta ~ Time + Time² + (Time | UID) will show significant positive Time² coefficient (p < 0.003333). Piecewise model: Theta ~ Days_within × Segment + (Days_within | UID) will have AIC at least 2 points lower than best continuous model. Early segment slope (0-48 hours) will be ~4x steeper than Late segment slope (48-240 hours), yielding ratio ~0.25. Segment × Time interaction will be significant (p < 0.003333).
 
 ---
 
@@ -108,13 +108,13 @@ LMM (Linear Mixed Models) for trajectory modeling with three convergent tests: (
 
 **Data Preprocessing (Per Solution Section 1.4):**
 - **No IRT preprocessing:** Uses pre-computed theta scores from RQ 5.7
-- **Time Variable:** TSVR (actual hours since encoding), same as RQ 5.7
-- **Piecewise Structure:** Early segment = 0-48 hours TSVR (Day 0-1), Late segment = 48-240 hours TSVR (Day 1-6)
+- **Time Variable:** TSVR_hours (actual hours since encoding), same as RQ 5.7
+- **Piecewise Structure:** Early segment = [0, 48) hours TSVR (Day 0-1, excluding 48h), Late segment = [48, 240] hours TSVR (Day 1-6, including 48h)
 - **Days_within:** Time variable recentered within each segment (0 = segment start)
 
 **Special Methods:**
 - **Triangulation via Three Convergent Tests:** Quadratic term, AIC comparison, slope ratio - convergence strengthens inference
-- **Bonferroni Correction:** α = 0.05/15 = 0.0033 corrects for family of 15 research questions in Chapter 5 (per thesis-wide multiple testing control strategy), applies to quadratic term and Segment × Time interaction as primary hypothesis tests for this RQ, conservative approach controls experiment-wise error rate across all Chapter 5 analyses, follows Bender & Lange (2001) guidelines for pre-planned multiple comparisons in related research questions
+- **Bonferroni Correction:** α = 0.05/15 = 0.003333 corrects for family of 15 research questions in Chapter 5 (per thesis-wide multiple testing control strategy), applies to quadratic term and Segment × Time interaction as primary hypothesis tests for this RQ, conservative approach controls experiment-wise error rate across all Chapter 5 analyses, follows Bender & Lange (2001) guidelines for pre-planned multiple comparisons in related research questions
 - **AIC Decision Rule:** ΔAIC < -2 (piecewise superior), ΔAIC > +2 (continuous superior), |ΔAIC| < 2 (equivalent)
 - **Theoretical Inflection Point:** 48 hours TSVR chosen based on consolidation theory (one night's sleep + ~24 hour consolidation window)
 - **Model Comparison to RQ 5.7:** Uses best-fitting continuous model from RQ 5.7 as baseline (avoids re-fitting multiple continuous models)

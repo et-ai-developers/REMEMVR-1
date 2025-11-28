@@ -14,8 +14,8 @@ This RQ tests whether episodic memory forgetting exhibits a two-phase pattern: r
 Consolidation theory predicts memory traces undergo time-dependent stabilization during the first ~24 hours post-encoding. During this vulnerable period, forgetting is rapid. After consolidation, traces stabilize and forgetting decelerates. The inflection point should occur around Day 1 (after one night's sleep). This RQ uses three convergent tests to triangulate evidence for two-phase forgetting.
 
 **Three Convergent Tests:**
-1. **Quadratic Term Significance:** Fit Theta ~ Time + Time² + (Time | UID), test if Time² coefficient is positive and significant (p < 0.0033 Bonferroni-corrected)
-2. **Piecewise vs Continuous Model Comparison:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7 (”AIC < -2 favors piecewise)
+1. **Quadratic Term Significance:** Fit Theta ~ Time + Timeï¿½ + (Time | UID), test if Timeï¿½ coefficient is positive and significant (p < 0.003333 Bonferroni-corrected)
+2. **Piecewise vs Continuous Model Comparison:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7 (ï¿½AIC < -2 favors piecewise)
 3. **Early vs Late Slope Ratio:** Extract slopes for Early segment (0-48 hours) and Late segment (48-240 hours), compute Late/Early ratio (expect < 0.5 if two-phase robust)
 
 **Analysis Approach:**
@@ -110,22 +110,32 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
 
 **Processing:**
 
-1. **Load theta scores:**
+1. **Verify RQ 5.7 model convergence status (CRITICAL DEPENDENCY):**
+   - Load results/ch5/rq7/data/step03_best_model.pkl
+   - Check model.converged attribute (should be True)
+   - Check random effects structure via model.cov_re attribute
+   - **CRITICAL:** If RQ 5.7 used fallback to (1 | UID) random intercepts only (not (Time | UID) random slopes):
+     * RQ 5.8 piecewise models MUST use same fallback structure for valid AIC comparison
+     * Comparing models with different random structures confounds time pattern with model complexity
+   - Document RQ 5.7 convergence status in validation output
+   - If structures incompatible, flag AIC comparison (Test 2) as potentially inconclusive
+
+2. **Load theta scores:**
    - Read results/ch5/rq7/data/step02_theta_long.csv
    - Verify columns present: UID, test, domain, theta
    - Verify no NaN in theta (IRT calibration should produce theta for all participants)
 
-2. **Load TSVR mapping:**
+3. **Load TSVR mapping:**
    - Read results/ch5/rq7/data/step00_tsvr_mapping.csv
    - Verify columns present: UID, test, TSVR_hours
    - Verify no NaN in TSVR_hours (all participants have actual time data)
 
-3. **Merge theta with TSVR:**
+4. **Merge theta with TSVR:**
    - Merge on (UID, test) keys
    - Expected merge: All theta rows should match TSVR rows (left join should have 0 missing)
    - Resulting columns: UID, test, domain, theta, TSVR_hours
 
-4. **Collapse across domains:**
+5. **Collapse across domains:**
    - Group by (UID, test, TSVR_hours), compute mean(theta) across 3 domains
    - Rationale: This RQ tests general two-phase pattern, not domain-specific
    - Resulting columns: UID, test, TSVR_hours, theta_mean
@@ -196,7 +206,7 @@ Validation tools MUST be used after data loading execution. Specific validation 
 
 ### Step 1: Create Time Transformations
 
-**Purpose:** Create time transformations for quadratic model (TSVR, TSVR²) and piecewise model (Early/Late segments, Days_within)
+**Purpose:** Create time transformations for quadratic model (TSVR, TSVRï¿½) and piecewise model (Early/Late segments, Days_within)
 
 **Dependencies:** Step 0 (requires merged theta + TSVR data)
 
@@ -214,16 +224,16 @@ Validation tools MUST be used after data loading execution. Specific validation 
 
 1. **Create quadratic time variables:**
    - `Time` = TSVR_hours (continuous time variable)
-   - `Time_squared` = TSVR_hours²
+   - `Time_squared` = TSVR_hoursï¿½
 
 2. **Create log time variable:**
    - `Time_log` = log(TSVR_hours + 1)
    - Add 1 to avoid log(0) at encoding (TSVR_hours = 0)
 
 3. **Create piecewise segments (inflection at 48 hours):**
-   - `Segment` = "Early" if TSVR_hours <= 48, else "Late"
-   - Early segment: 0-48 hours (Day 0-1, pre-consolidation)
-   - Late segment: 48-240 hours (Day 1-6, post-consolidation)
+   - `Segment` = "Early" if TSVR_hours < 48, else "Late"
+   - Early segment: [0, 48) hours (Day 0-1, excluding 48h, pre-consolidation)
+   - Late segment: [48, 240] hours (Day 1-6, including 48h, post-consolidation)
    - Theoretical rationale: 48 hours = Day 1 after one night's sleep (consolidation window)
 
 4. **Create Days_within variable:**
@@ -242,7 +252,7 @@ Validation tools MUST be used after data loading execution. Specific validation 
   - `TSVR_hours` (float, original time variable)
   - `theta` (float, outcome variable)
   - `Time` (float, copy of TSVR_hours for quadratic model)
-  - `Time_squared` (float, TSVR_hours² for quadratic term)
+  - `Time_squared` (float, TSVR_hoursï¿½ for quadratic term)
   - `Time_log` (float, log(TSVR_hours + 1) for potential log model)
   - `Segment` (string, "Early" or "Late" based on 48-hour inflection)
   - `Days_within` (float, time recentered within segment)
@@ -261,7 +271,7 @@ Validation tools MUST be used after time transformation execution. Specific vali
 
 *Value Ranges:*
 - Time = TSVR_hours (identical values)
-- Time_squared in [0, 57600] (max = 240² hours)
+- Time_squared in [0, 57600] (max = 240ï¿½ hours)
 - Time_log in [0, 5.5] (log(0+1)=0, log(240+1)~5.48)
 - Segment in {"Early", "Late"} (categorical, 2 levels)
 - Days_within in [0, 192] (Early: 0-48, Late: 0-192 recentered)
@@ -289,7 +299,7 @@ Validation tools MUST be used after time transformation execution. Specific vali
 
 ### Step 2: Fit Quadratic Model (Test 1 - Quadratic Term Significance)
 
-**Purpose:** Fit Theta ~ Time + Time² + (Time | UID), test if Time² coefficient is positive and significant (p < 0.0033 Bonferroni-corrected)
+**Purpose:** Fit Theta ~ Time + Timeï¿½ + (Time | UID), test if Timeï¿½ coefficient is positive and significant (p < 0.003333 Bonferroni-corrected)
 
 **Dependencies:** Step 1 (requires time-transformed data)
 
@@ -326,9 +336,9 @@ Validation tools MUST be used after time transformation execution. Specific vali
    - Time_squared coefficient (quadratic term), SE, z-value, p-value
 
 4. **Test quadratic term significance:**
-   - Bonferroni-corrected threshold: ± = 0.05 / 15 = 0.0033 (15 RQs in Chapter 5)
-   - If Time_squared p-value < 0.0033 AND coefficient > 0: Evidence for deceleration (two-phase)
-   - If Time_squared p-value >= 0.0033 OR coefficient <= 0: No evidence for deceleration
+   - Bonferroni-corrected threshold: ï¿½ = 0.05 / 15 = 0.003333 (15 RQs in Chapter 5)
+   - If Time_squared p-value < 0.003333 AND coefficient > 0: Evidence for deceleration (two-phase)
+   - If Time_squared p-value >= 0.003333 OR coefficient <= 0: No evidence for deceleration
 
 5. **Generate model predictions:**
    - Create prediction grid: Time = [0, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240] hours
@@ -345,7 +355,7 @@ Validation tools MUST be used after time transformation execution. Specific vali
   - Fixed effects table (coefficient, SE, z, p for Intercept, Time, Time_squared)
   - Random effects variance components
   - AIC, BIC, log-likelihood
-  - Interpretation: Time_squared significance test result (p < 0.0033 or not)
+  - Interpretation: Time_squared significance test result (p < 0.003333 or not)
 
 **File 2:** data/step02_quadratic_predictions.csv
 **Format:** CSV with predicted values
@@ -386,7 +396,7 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 - Required pattern: "Fitting quadratic model: theta ~ Time + Time_squared + (Time | UID)"
 - Required pattern: "Model converged: True" OR "Convergence failed, using fallback: [fallback type]"
 - Required pattern: "Time_squared coefficient: [value], p-value: [value]"
-- Required pattern: "Bonferroni threshold (15 tests): 0.0033"
+- Required pattern: "Bonferroni threshold (15 tests): 0.003333"
 - Required pattern: "Test 1 result: [PASS/FAIL] - quadratic term [significant/not significant]"
 - Forbidden patterns: "ERROR", "Model did not converge and no fallback succeeded"
 - Acceptable warnings: "Convergence not achieved, simplifying to uncorrelated random slopes" (documented fallback)
@@ -400,7 +410,7 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 
 ### Step 3: Fit Piecewise Model (Test 2 - Piecewise vs Continuous Comparison)
 
-**Purpose:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7 (”AIC < -2 favors piecewise)
+**Purpose:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7 (ï¿½AIC < -2 favors piecewise)
 
 **Dependencies:** Step 1 (requires piecewise structure), Step 0 (requires best continuous AIC for comparison)
 
@@ -436,7 +446,7 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
    - Days_within coefficient (Early segment slope)
    - SegmentLate coefficient (Late segment intercept shift)
    - Days_within:SegmentLate coefficient (Late segment slope difference)
-   - Test interaction significance with Bonferroni threshold (p < 0.0033)
+   - Test interaction significance with Bonferroni threshold (p < 0.003333)
 
 4. **Compute segment slopes:**
    - Early segment slope = Days_within coefficient
@@ -445,11 +455,11 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 
 5. **Compare AIC to best continuous model:**
    - Load AIC from data/step00_best_continuous_aic.txt
-   - Compute ”AIC = AIC_piecewise - AIC_continuous
+   - Compute ï¿½AIC = AIC_piecewise - AIC_continuous
    - Decision rule:
-     - ”AIC < -2: Piecewise superior (evidence for two-phase)
-     - ”AIC > +2: Continuous superior (no two-phase)
-     - |”AIC| < 2: Models equivalent (inconclusive)
+     - ï¿½AIC < -2: Piecewise superior (evidence for two-phase)
+     - ï¿½AIC > +2: Continuous superior (no two-phase)
+     - |ï¿½AIC| < 2: Models equivalent (inconclusive)
 
 6. **Generate model predictions:**
    - Create prediction grid for Early segment: Days_within = [0, 6, 12, 18, 24, 30, 36, 42, 48] hours
@@ -467,9 +477,9 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
   - Fixed effects table (coefficient, SE, z, p for Intercept, Days_within, SegmentLate, interaction)
   - Random effects variance components
   - AIC, BIC, log-likelihood
-  - AIC comparison: AIC_piecewise, AIC_continuous (from RQ 5.7), ”AIC, interpretation
+  - AIC comparison: AIC_piecewise, AIC_continuous (from RQ 5.7), ï¿½AIC, interpretation
   - Segment slopes: Early slope, Late slope
-  - Interaction significance test result (p < 0.0033 or not)
+  - Interaction significance test result (p < 0.003333 or not)
 
 **File 2:** data/step03_piecewise_predictions.csv
 **Format:** CSV with predicted values per segment
@@ -502,13 +512,13 @@ Validation tools MUST be used after piecewise model fitting execution. Specific 
 - Segment in {"Early", "Late"}
 - Days_within in [0, 192] (Early: 0-48, Late: 0-192)
 - TSVR_hours in [0, 240]
-- ”AIC in [-1000, 1000] (plausible AIC difference range)
+- ï¿½AIC in [-1000, 1000] (plausible AIC difference range)
 
 *Data Quality:*
 - No NaN in fixed effects table
 - No NaN in predictions
 - AIC > 0 (typical range 10000-20000)
-- ”AIC computed correctly (AIC_piecewise - AIC_continuous)
+- ï¿½AIC computed correctly (AIC_piecewise - AIC_continuous)
 - Convergence status documented
 - Interaction p-value in [0, 1]
 
@@ -517,7 +527,7 @@ Validation tools MUST be used after piecewise model fitting execution. Specific 
 - Required pattern: "Model converged: True" OR "Convergence failed, using fallback: [fallback type]"
 - Required pattern: "Early segment slope: [value]"
 - Required pattern: "Late segment slope: [value]"
-- Required pattern: "AIC comparison: piecewise=[value], continuous=[value], ”AIC=[value]"
+- Required pattern: "AIC comparison: piecewise=[value], continuous=[value], ï¿½AIC=[value]"
 - Required pattern: "Test 2 result: [PASS/FAIL] - piecewise [superior/inferior/equivalent]"
 - Forbidden patterns: "ERROR", "AIC comparison failed", "Interaction term estimation failed"
 - Acceptable warnings: Same as Step 2 (convergence fallback documented)
@@ -672,7 +682,7 @@ Validation tools MUST be used after assumption validation execution. Specific va
 
 4. **Test Segment x Time interaction:**
    - Extract p-value for `Days_within:SegmentLate` interaction term
-   - Bonferroni threshold: p < 0.0033
+   - Bonferroni threshold: p < 0.003333
    - Significant interaction = slopes differ significantly between segments
 
 **Output:**
@@ -888,7 +898,7 @@ Validation tools MUST be used after plot data preparation execution. Specific va
 
 **New Variables (RQ 5.8-specific):**
 - `Time` - Copy of TSVR_hours for quadratic model (convention: match formula variable name)
-- `Time_squared` - TSVR_hours² for quadratic term
+- `Time_squared` - TSVR_hoursï¿½ for quadratic term
 - `Time_log` - log(TSVR_hours + 1) for potential log model
 - `Segment` - "Early" or "Late" based on 48-hour inflection
 - `Days_within` - Time recentered within segment (0 = segment start)
@@ -903,7 +913,7 @@ Validation tools MUST be used after plot data preparation execution. Specific va
 **Valid Ranges:**
 - TSVR_hours: [0, 240] hours (0 = encoding, 240 = 10 days maximum)
 - theta: [-3, 3] typical IRT range (extreme values possible but rare)
-- Time_squared: [0, 57600] (max = 240²)
+- Time_squared: [0, 57600] (max = 240ï¿½)
 - Time_log: [0, 5.5] (log(240+1))
 - Days_within: [0, 192] (Early: 0-48, Late: 0-192 recentered)
 
@@ -1006,7 +1016,7 @@ This is not optional. This is the core architectural principle preventing cascad
 - Model converged (or documented fallback used)
 - Fixed effects estimated (Intercept, Days_within, SegmentLate, interaction)
 - Predictions generated for all segment x timepoint combinations (18 rows)
-- AIC comparison computed (”AIC finite, not NaN)
+- AIC comparison computed (ï¿½AIC finite, not NaN)
 - Interaction p-value in [0, 1]
 
 **Expected Behavior on Validation Failure:**
@@ -1090,7 +1100,7 @@ This is not optional. This is the core architectural principle preventing cascad
 **Triangulation Strategy:**
 Evidence for two-phase forgetting comes from convergence of three independent tests:
 1. Significant positive quadratic term (deceleration)
-2. Piecewise model superior to continuous (”AIC < -2)
+2. Piecewise model superior to continuous (ï¿½AIC < -2)
 3. Late/Early slope ratio < 0.5 (late forgetting less than half as steep)
 
 If all three tests converge, evidence is strong. If tests diverge, interpretation is nuanced (e.g., quadratic significant but AIC inconclusive suggests weak two-phase pattern).

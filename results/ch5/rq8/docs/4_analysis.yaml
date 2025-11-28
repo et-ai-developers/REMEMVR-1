@@ -32,14 +32,18 @@ steps:
       type: "stdlib"
       operations:
         - "Check RQ 5.7 dependency files exist using check_file_exists validation"
+        - "Load results/ch5/rq7/data/step03_best_model.pkl using pickle.load() FIRST"
+        - "CRITICAL: Verify RQ 5.7 model convergence status (model.converged == True)"
+        - "CRITICAL: Check random effects structure (model.cov_re) - if fallback to (1 | UID), flag for downstream"
+        - "Document RQ 5.7 convergence status (affects validity of AIC comparison in Step 3)"
+        - "Extract AIC value from best continuous model"
         - "Load results/ch5/rq7/data/step02_theta_long.csv (theta scores)"
         - "Load results/ch5/rq7/data/step00_tsvr_mapping.csv (TSVR time variable)"
         - "Merge theta with TSVR on (UID, test) keys"
         - "Collapse across domains: group by (UID, test, TSVR_hours), compute mean(theta)"
-        - "Load results/ch5/rq7/data/step03_best_model.pkl using pickle.load()"
-        - "Extract AIC value from best continuous model"
         - "Save merged theta + TSVR to data/step00_theta_tsvr.csv"
         - "Save AIC value to data/step00_best_continuous_aic.txt"
+        - "Save RQ 5.7 convergence status to data/step00_rq57_convergence.txt"
 
       input_files:
         - path: "results/ch5/rq7/data/step02_theta_long.csv"
@@ -64,6 +68,8 @@ steps:
           description: "Merged theta + TSVR, domain-collapsed"
         - path: "data/step00_best_continuous_aic.txt"
           description: "AIC of best continuous model from RQ 5.7 (for Step 3 comparison)"
+        - path: "data/step00_rq57_convergence.txt"
+          description: "RQ 5.7 model convergence status and random effects structure (CRITICAL for AIC comparison validity)"
 
       parameters:
         merge_keys: ["UID", "test"]
@@ -234,7 +240,7 @@ steps:
           - "Uncorrelated: (Time || UID)"
           - "Intercept-only: (1 | UID)"
         prediction_grid: [0, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240]
-        bonferroni_alpha: 0.0033
+        bonferroni_alpha: 0.003333
         bonferroni_n_tests: 15
 
       returns:
@@ -326,7 +332,7 @@ steps:
         prediction_grid_late: [0, 24, 48, 72, 96, 120, 144, 168, 192]
         continuous_aic_file: "data/step00_best_continuous_aic.txt"
         aic_threshold: -2.0
-        bonferroni_alpha: 0.0033
+        bonferroni_alpha: 0.003333
 
       returns:
         type: "MixedLMResults"
@@ -475,7 +481,7 @@ steps:
         segment_col: "Segment"
         time_col: "Days_within"
         ratio_threshold: 0.5
-        bonferroni_alpha: 0.0033
+        bonferroni_alpha: 0.003333
         use_delta_method: true
 
       returns:
@@ -557,7 +563,7 @@ steps:
             - {name: "CI_lower", type: "float64", description: "Lower 95% CI"}
             - {name: "CI_upper", type: "float64", description: "Upper 95% CI"}
             - {name: "Segment", type: "string", description: "Early or Late (for Piecewise only, NA for others)"}
-          expected_rows: "~33 (4 observed + 11 quadratic + 18 piecewise)"
+          expected_rows: "33 exactly (4 observed + 11 quadratic + 18 piecewise)"
           description: "Combined plot data for two-panel piecewise vs continuous comparison"
 
       parameters:
