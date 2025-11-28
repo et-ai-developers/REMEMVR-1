@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-27 02:30 (context-manager curation)
+**Last Updated:** 2025-11-28 20:30 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -238,6 +238,24 @@
 
 ### tools_18_25_implementation_complete
 **Description:** Phase 3 TDD tool development COMPLETION - Tools 18-25 ALL COMPLETE achieving 100% tools_todo.yaml completion (25/25 tools, 247/250 tests GREEN). Sustained 10 min/tool velocity for all 8 LOW complexity validators (validate_standardization, validate_variance_positivity, validate_icc_bounds, validate_dataframe_structure, validate_plot_data_completeness, validate_cluster_assignment, validate_bootstrap_stability, validate_cluster_summary_stats). Perfect test pass rate 54/54 GREEN in session. 100% implementation milestone reached, documentation pending at session end. Superseded by Session 02:00 documentation completion.
+
+### tool_26_extract_segment_slopes_complete_rq_tools_investigation
+**Description:** Tool 26 extract_segment_slopes_from_lmm implementation complete (11/11 tests GREEN, delta method SE propagation for slope ratios). Unblocked RQ 5.8 execution. Investigation revealed rq_tools circuit breaker violation (agents invented ~20 function names instead of failing generically).
+
+### documentation_sync_complete_90_percent_coverage
+**Description:** Documentation gap fixes via g_conflict analysis. 22 undocumented functions added to tools_inventory.md, 3 CRITICAL bugs fixed (duplicate function, module mismatches). Documentation coverage improved from 57% → 90%. Root cause: documentation gap, not code gap.
+
+### rq_5_8_through_5_13_conflict_detection_resolution
+**Description:** Initial conflict detection pipeline for RQs 5.8-5.13. 5 g_conflict agents identified 50 conflicts total. RQ 5.10 fully fixed (8/8 conflicts resolved). Comprehensive fix documentation created. Remaining 5 RQs had 42 conflicts documented.
+
+### rq_5_8_through_5_13_critical_conflicts_resolved_verification_complete
+**Description:** CRITICAL conflict resolution achieving 67% readiness (4/6 RQs). 18 CRITICAL conflicts fixed across 5 RQs (15 files modified). Parallel g_conflict verification identified 4 RQs CLEAN (5.9, 5.10, 5.11, 5.13) with RQ 5.8 and 5.12 needing additional fixes.
+
+### rq_5_8_through_5_13_100_percent_ready_all_conflicts_resolved
+**Description:** Final conflict resolution achieving 100% readiness (6/6 RQs) for g_code execution. RQ 5.8 had 7 fixes (4 CRITICAL, 3 HIGH) including early_cutoff_hours default, segment boundary specification, RQ 5.7 convergence validation, exact Bonferroni alpha (0.003333). RQ 5.12 investigation revealed NOT BLOCKED (filenames already correct, 1 typo fixed). All fixes verified via parallel g_conflict agents.
+
+### rq_5_8_g_code_execution_complete_5_of_7_steps_successful
+**Description:** First v4.X g_code production execution on RQ 5.8. Parallel code generation (9 agents, 7 steps, ~15 minutes). Sequential debugging (5/7 steps successful, 2 tool bugs). 3 bugs fixed in generated code (file references, API mismatches, DataFrame.data). 2 tool bugs documented (get_influence(), categorical coefficient naming). Core scientific finding obtained: deltaAIC = +5.03 favors continuous model (evidence AGAINST two-phase forgetting). YELLOW status tools revealed bugs on first production use. Superseded by Session 17:00 publication-ready completion.
 
 ---
 
