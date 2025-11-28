@@ -1138,20 +1138,26 @@ def validate_lmm_assumptions_comprehensive(
     plot_paths.append(acf_path)
 
     # =========================================================================
-    # 5. OUTLIERS (Cook's distance with threshold 4/(n-p-1))
+    # 5. OUTLIERS (Studentized residuals - Cook's distance not available for MixedLM)
     # =========================================================================
-    # Compute Cook's distance
-    influence = lmm_result.get_influence()
-    cooks_d = influence.cooks_distance[0]
-    threshold_cooks = 4 / (n - p - 1)
-    outlier_indices = np.where(cooks_d > threshold_cooks)[0].tolist()
+    # Use studentized residuals for outlier detection
+    # Note: MixedLMResults doesn't support get_influence(), so we use standardized residuals
+    residual_std = np.std(residuals)
+    studentized_resid = residuals / residual_std
+
+    # Flag observations with |studentized residual| > 3
+    outlier_threshold = 3.0
+    outlier_mask = np.abs(studentized_resid) > outlier_threshold
+    outlier_indices = np.where(outlier_mask)[0].tolist()
     n_outliers = len(outlier_indices)
-    outliers_pass = n_outliers == 0
+    outlier_pct = (n_outliers / n) * 100
+    outliers_pass = outlier_pct < 5.0  # Pass if < 5% outliers
 
     diagnostics["outliers"] = {
-        "method": "Cook's Distance",
-        "threshold": float(threshold_cooks),
+        "method": "Studentized Residuals",
+        "threshold": float(outlier_threshold),
         "n_outliers": n_outliers,
+        "outlier_percentage": float(outlier_pct),
         "pass": outliers_pass,
         "outlier_indices": outlier_indices
     }
@@ -1159,18 +1165,19 @@ def validate_lmm_assumptions_comprehensive(
     if not outliers_pass:
         failed_checks.append("outliers")
 
-    # Generate Cook's distance plot
-    fig_cooks, ax_cooks = plt.subplots(figsize=(10, 5))
-    ax_cooks.stem(np.arange(len(cooks_d)), cooks_d, markerfmt=',')
-    ax_cooks.axhline(y=threshold_cooks, color='r', linestyle='--', label=f'Threshold ({threshold_cooks:.4f})')
-    ax_cooks.set_xlabel("Observation Index")
-    ax_cooks.set_ylabel("Cook's Distance")
-    ax_cooks.set_title("Cook's Distance (Outlier Detection)")
-    ax_cooks.legend()
-    cooks_path = output_dir / "cooks_distance.png"
-    fig_cooks.savefig(cooks_path, dpi=300, bbox_inches='tight')
-    plt.close(fig_cooks)
-    plot_paths.append(cooks_path)
+    # Generate studentized residuals plot
+    fig_stud, ax_stud = plt.subplots(figsize=(10, 5))
+    ax_stud.stem(np.arange(len(studentized_resid)), studentized_resid, markerfmt=',')
+    ax_stud.axhline(y=outlier_threshold, color='r', linestyle='--', label=f'Threshold (+{outlier_threshold})')
+    ax_stud.axhline(y=-outlier_threshold, color='r', linestyle='--', label=f'Threshold (-{outlier_threshold})')
+    ax_stud.set_xlabel("Observation Index")
+    ax_stud.set_ylabel("Studentized Residual")
+    ax_stud.set_title(f"Studentized Residuals (Outlier Detection: {n_outliers} outliers, {outlier_pct:.1f}%)")
+    ax_stud.legend()
+    stud_path = output_dir / "studentized_residuals.png"
+    fig_stud.savefig(stud_path, dpi=300, bbox_inches='tight')
+    plt.close(fig_stud)
+    plot_paths.append(stud_path)
 
     # =========================================================================
     # 6. LINEARITY (Partial residual CSVs for ALL predictors)

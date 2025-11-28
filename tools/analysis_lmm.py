@@ -1817,9 +1817,8 @@ def extract_segment_slopes_from_lmm(
     RQ 5.8 Test 4: Convergent Evidence for two-phase forgetting pattern
     Delta method: Casella & Berger (2002), Statistical Inference, 2nd ed., p. 240
     """
-    # Extract coefficients
+    # Extract time coefficient (straightforward)
     time_coef = f'{time_col}'
-    interaction_coef = f'{time_col}:{segment_col}Late'
 
     try:
         beta_early = lmm_result.params[time_coef]
@@ -1829,6 +1828,39 @@ def extract_segment_slopes_from_lmm(
             f"Available coefficients: {list(lmm_result.params.index)}"
         )
 
+    # Auto-detect interaction coefficient name to handle categorical vs numeric encoding
+    coef_names = list(lmm_result.params.index)
+
+    # Pattern 1: Categorical interaction (R-style encoding: 'Days_within:Segment[T.Late]')
+    categorical_pattern = f'{time_col}:{segment_col}[T.'
+    categorical_matches = [name for name in coef_names if name.startswith(categorical_pattern)]
+
+    # Pattern 2: Numeric interaction (simple concatenation: 'Days_within:Segment')
+    numeric_pattern = f'{time_col}:{segment_col}'
+    numeric_matches = [name for name in coef_names if name == numeric_pattern]
+
+    # Pattern 3: Alternative categorical encoding ('Days_within:C(Segment)[T.Late]')
+    alt_categorical_pattern = f'{time_col}:C({segment_col})'
+    alt_matches = [name for name in coef_names if name.startswith(alt_categorical_pattern)]
+
+    # Select interaction coefficient
+    if categorical_matches:
+        interaction_coef = categorical_matches[0]  # Use first categorical match
+    elif numeric_matches:
+        interaction_coef = numeric_matches[0]
+    elif alt_matches:
+        interaction_coef = alt_matches[0]
+    else:
+        # Provide helpful error message
+        available = ', '.join(coef_names)
+        raise KeyError(
+            f"Could not find interaction term for {time_col}:{segment_col}.\n"
+            f"Searched patterns: '{categorical_pattern}*', '{numeric_pattern}', '{alt_categorical_pattern}*'\n"
+            f"Available coefficients: {available}\n"
+            f"Ensure your LMM formula includes '{time_col} * {segment_col}' interaction."
+        )
+
+    # Extract interaction coefficient
     try:
         beta_interaction = lmm_result.params[interaction_coef]
     except KeyError:
@@ -1842,6 +1874,9 @@ def extract_segment_slopes_from_lmm(
     # Extract standard errors
     se_early = lmm_result.bse[time_coef]
     se_interaction = lmm_result.bse[interaction_coef]
+
+    # Extract interaction p-value (for significance test)
+    interaction_pval = lmm_result.pvalues[interaction_coef]
 
     # Extract covariance between early and interaction (for Late slope SE)
     # Handle both real LMM results (method) and mocks (attribute)
@@ -1916,14 +1951,22 @@ def extract_segment_slopes_from_lmm(
     else:
         interp_ratio = f"Ratio > 1.0 ({ratio:.3f}): Unexpected pattern. Late forgetting faster than Early (reverse two-phase or single-phase)."
 
-    # Build output DataFrame
+    # Interaction p-value interpretation
+    if interaction_pval < 0.001:
+        interp_interaction = f"Interaction highly significant (p={interaction_pval:.4f} < 0.001). Strong evidence for different forgetting rates across segments."
+    elif interaction_pval < 0.05:
+        interp_interaction = f"Interaction significant (p={interaction_pval:.4f} < 0.05). Evidence for different forgetting rates across segments."
+    else:
+        interp_interaction = f"Interaction not significant (p={interaction_pval:.4f} >= 0.05). No evidence for different forgetting rates across segments."
+
+    # Build output DataFrame (4 rows: Early slope, Late slope, Ratio, Interaction p-value)
     output = pd.DataFrame({
-        'metric': ['Early_slope', 'Late_slope', 'Ratio_Late_Early'],
-        'value': [beta_early, beta_late, ratio],
-        'SE': [se_early, se_late, se_ratio],
-        'CI_lower': [ci_early_lower, ci_late_lower, ci_ratio_lower],
-        'CI_upper': [ci_early_upper, ci_late_upper, ci_ratio_upper],
-        'interpretation': [interp_early, interp_late, interp_ratio]
+        'metric': ['Early_slope', 'Late_slope', 'Ratio_Late_Early', 'Interaction_p'],
+        'value': [beta_early, beta_late, ratio, interaction_pval],
+        'SE': [se_early, se_late, se_ratio, np.nan],  # p-value has no SE
+        'CI_lower': [ci_early_lower, ci_late_lower, ci_ratio_lower, np.nan],  # p-value has no CI
+        'CI_upper': [ci_early_upper, ci_late_upper, ci_ratio_upper, np.nan],
+        'interpretation': [interp_early, interp_late, interp_ratio, interp_interaction]
     })
 
     return output

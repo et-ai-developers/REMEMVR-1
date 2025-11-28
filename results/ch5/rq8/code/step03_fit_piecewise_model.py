@@ -331,31 +331,31 @@ if __name__ == "__main__":
 
         log("[PREDICT] Generating model predictions for Early and Late segments...")
 
-        # Prediction grids (within-segment time)
-        early_grid = np.linspace(0, 48, 9)  # 0, 6, 12, 18, 24, 30, 36, 42, 48 hours
-        late_grid = np.linspace(0, 192, 9)  # 0, 24, 48, 72, 96, 120, 144, 168, 192 hours
+        # Prediction grids (in HOURS, will be converted to Days_within)
+        early_grid_hours = np.linspace(0, 48, 9)  # 0, 6, 12, 18, 24, 30, 36, 42, 48 hours
+        late_grid_hours = np.linspace(0, 192, 9)  # 0, 24, 48, 72, 96, 120, 144, 168, 192 hours within-segment
 
         # Create prediction DataFrames
         predictions_list = []
 
         # Early segment predictions (Segment = "Early")
-        for days_within in early_grid:
+        for tsvr_hours in early_grid_hours:
             pred_row = pd.DataFrame({
                 'UID': ['PRED'],  # Dummy UID for prediction
                 'Segment': ['Early'],
-                'Days_within': [days_within],
-                'TSVR_hours': [days_within],  # For Early, Days_within = TSVR_hours
+                'Days_within': [tsvr_hours / 24.0],  # Convert hours to days
+                'TSVR_hours': [tsvr_hours],
                 'theta': [0]  # Placeholder (will use fittedvalues)
             })
             predictions_list.append(pred_row)
 
         # Late segment predictions (Segment = "Late")
-        for days_within in late_grid:
+        for within_hours in late_grid_hours:
             pred_row = pd.DataFrame({
                 'UID': ['PRED'],  # Dummy UID for prediction
                 'Segment': ['Late'],
-                'Days_within': [days_within],
-                'TSVR_hours': [48 + days_within],  # Late starts at 48h
+                'Days_within': [within_hours / 24.0],  # Convert hours to days
+                'TSVR_hours': [48 + within_hours],  # Late starts at 48h
                 'theta': [0]  # Placeholder
             })
             predictions_list.append(pred_row)

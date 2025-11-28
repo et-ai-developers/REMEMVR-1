@@ -2,253 +2,150 @@
 QUADRATIC LMM SUMMARY - RQ 5.8 Step 2
 ================================================================================
 
-Formula: theta ~ Time + Time_squared + (Time | UID)
+Formula: theta ~ Time + Time_squared
+Random Structure: (1 | UID)
 Estimation: ML (REML=False)
 Bonferroni alpha: 0.0033
 
-Convergence: False
-AIC: 940.32
-BIC: 968.26
-Log-Likelihood: -463.16
+Convergence: True
+AIC: 873.24
+BIC: 893.19
+Log-Likelihood: -431.62
 
 FIXED EFFECTS:
 --------------------------------------------------------------------------------
-                   Coef. Std.Err.       z  P>|z|  [0.025  0.975]
-Intercept          0.627    0.078   8.062  0.000   0.475   0.780
-Time              -0.017    0.002  -9.231  0.000  -0.020  -0.013
-Time_squared       0.000    0.000   6.106  0.000   0.000   0.000
-Group Var          0.385    0.167                               
-Group x Time Cov  -0.001    0.002                               
-Time Var           0.000                                        
+               Coef. Std.Err.       z  P>|z|  [0.025  0.975]
+Intercept      0.612    0.080   7.650  0.000   0.455   0.769
+Time          -0.016    0.002  -9.292  0.000  -0.019  -0.012
+Time_squared   0.000    0.000   5.415  0.000   0.000   0.000
+Group Var      0.373    0.129                               
 
 TIME_SQUARED SIGNIFICANCE TEST:
 --------------------------------------------------------------------------------
-Coefficient: 0.000063
+Coefficient: 0.000054
 P-value: 0.000000
 Significant (alpha=0.0033): True
 
 RANDOM EFFECTS:
 --------------------------------------------------------------------------------
-{'A010': Group    0.825290
-Time    -0.000252
-dtype: float64, 'A011': Group    0.132093
-Time    -0.001654
-dtype: float64, 'A012': Group    0.148681
-Time     0.002061
-dtype: float64, 'A013': Group   -0.322188
-Time     0.003082
-dtype: float64, 'A014': Group    0.695409
-Time    -0.003476
-dtype: float64, 'A015': Group    1.197767
-Time     0.001902
-dtype: float64, 'A016': Group    0.422502
-Time    -0.005267
-dtype: float64, 'A017': Group    0.050249
-Time     0.003677
-dtype: float64, 'A018': Group   -0.259516
-Time     0.003213
-dtype: float64, 'A019': Group   -0.879728
-Time    -0.001266
-dtype: float64, 'A020': Group   -0.409492
-Time    -0.006585
-dtype: float64, 'A021': Group    0.444751
-Time     0.004152
-dtype: float64, 'A022': Group   -0.135136
-Time     0.004007
-dtype: float64, 'A023': Group   -0.085817
-Time     0.003349
-dtype: float64, 'A024': Group   -0.058642
-Time     0.000704
-dtype: float64, 'A025': Group    0.632174
-Time    -0.006797
-dtype: float64, 'A026': Group    0.268005
-Time     0.001221
-dtype: float64, 'A027': Group    0.139891
-Time    -0.003484
-dtype: float64, 'A028': Group    0.256384
-Time    -0.003239
-dtype: float64, 'A029': Group    0.578971
-Time     0.005270
-dtype: float64, 'A030': Group    0.156630
-Time     0.003762
-dtype: float64, 'A031': Group    0.645315
-Time    -0.005236
-dtype: float64, 'A032': Group    0.042827
-Time     0.010296
-dtype: float64, 'A033': Group    0.247937
-Time     0.000858
-dtype: float64, 'A034': Group    0.676034
-Time    -0.003079
-dtype: float64, 'A035': Group   -0.061088
-Time    -0.001085
-dtype: float64, 'A036': Group    0.137580
-Time    -0.004055
-dtype: float64, 'A037': Group    0.581226
-Time    -0.001098
-dtype: float64, 'A038': Group    0.469731
-Time     0.000605
-dtype: float64, 'A039': Group    1.055435
-Time    -0.002165
-dtype: float64, 'A040': Group   -0.602118
-Time    -0.003541
-dtype: float64, 'A041': Group   -0.117541
-Time     0.003899
-dtype: float64, 'A042': Group   -0.852864
-Time     0.002574
-dtype: float64, 'A043': Group    0.384815
-Time    -0.000596
-dtype: float64, 'A044': Group   -0.387739
-Time    -0.004675
-dtype: float64, 'A045': Group   -1.037837
-Time     0.001877
-dtype: float64, 'A046': Group   -1.163378
-Time     0.002038
-dtype: float64, 'A047': Group   -0.823774
-Time    -0.001165
-dtype: float64, 'A048': Group    0.105290
-Time     0.002722
-dtype: float64, 'A049': Group    0.398607
-Time     0.000604
-dtype: float64, 'A050': Group   -0.721898
-Time     0.000931
-dtype: float64, 'A051': Group    0.054238
-Time    -0.002738
-dtype: float64, 'A052': Group    0.150041
-Time    -0.001427
-dtype: float64, 'A053': Group    0.515060
-Time    -0.001953
-dtype: float64, 'A054': Group    0.341712
-Time     0.009487
-dtype: float64, 'A055': Group    0.095365
-Time    -0.000530
-dtype: float64, 'A056': Group    0.098141
-Time    -0.002745
-dtype: float64, 'A057': Group   -0.379021
-Time    -0.001329
-dtype: float64, 'A058': Group   -0.134113
-Time    -0.002193
-dtype: float64, 'A059': Group    0.649624
-Time     0.003384
-dtype: float64, 'A060': Group    0.030672
-Time     0.003087
-dtype: float64, 'A061': Group    1.087331
-Time    -0.005525
-dtype: float64, 'A062': Group    0.433490
-Time    -0.004629
-dtype: float64, 'A063': Group    0.296857
-Time    -0.001481
-dtype: float64, 'A064': Group    0.291402
-Time    -0.000004
-dtype: float64, 'A065': Group   -1.531038
-Time    -0.001687
-dtype: float64, 'A066': Group   -0.326001
-Time    -0.002948
-dtype: float64, 'A067': Group   -0.558539
-Time    -0.002624
-dtype: float64, 'A068': Group    0.371380
-Time    -0.000734
-dtype: float64, 'A069': Group   -1.059303
-Time     0.000922
-dtype: float64, 'A070': Group   -0.049531
-Time    -0.002388
-dtype: float64, 'A071': Group    0.132830
-Time     0.000702
-dtype: float64, 'A072': Group    0.108598
-Time    -0.000378
-dtype: float64, 'A073': Group   -0.033581
-Time     0.006409
-dtype: float64, 'A074': Group    0.053769
-Time    -0.004928
-dtype: float64, 'A075': Group   -0.168489
-Time    -0.003240
-dtype: float64, 'A076': Group   -0.679281
-Time    -0.006519
-dtype: float64, 'A077': Group    0.250083
-Time     0.003602
-dtype: float64, 'A078': Group   -0.342974
-Time    -0.001770
-dtype: float64, 'A079': Group   -0.309036
-Time    -0.001885
-dtype: float64, 'A080': Group    0.062149
-Time    -0.000406
-dtype: float64, 'A081': Group   -0.000889
-Time     0.005323
-dtype: float64, 'A082': Group    0.333561
-Time     0.001054
-dtype: float64, 'A083': Group    0.740293
-Time    -0.002128
-dtype: float64, 'A084': Group   -0.267049
-Time     0.004216
-dtype: float64, 'A085': Group    0.356411
-Time    -0.001756
-dtype: float64, 'A086': Group   -0.091398
-Time    -0.003491
-dtype: float64, 'A087': Group    0.441193
-Time     0.000946
-dtype: float64, 'A088': Group    1.244204
-Time     0.001123
-dtype: float64, 'A089': Group    0.691025
-Time     0.000986
-dtype: float64, 'A090': Group   -0.490206
-Time    -0.002395
-dtype: float64, 'A091': Group   -0.257135
-Time    -0.001564
-dtype: float64, 'A092': Group   -0.633254
-Time    -0.000223
-dtype: float64, 'A093': Group    0.038005
-Time     0.006559
-dtype: float64, 'A094': Group   -0.801114
-Time    -0.000280
-dtype: float64, 'A095': Group    0.208513
-Time    -0.003744
-dtype: float64, 'A096': Group   -1.096071
-Time    -0.000979
-dtype: float64, 'A097': Group   -0.250737
-Time     0.006474
-dtype: float64, 'A098': Group    0.254499
-Time     0.000726
-dtype: float64, 'A099': Group    0.438639
-Time     0.003612
-dtype: float64, 'A100': Group   -0.037252
-Time     0.004648
-dtype: float64, 'A101': Group   -1.041441
-Time     0.001755
-dtype: float64, 'A102': Group   -0.018196
-Time     0.000428
-dtype: float64, 'A103': Group   -0.098054
-Time    -0.005486
-dtype: float64, 'A104': Group    0.509101
-Time    -0.008925
-dtype: float64, 'A105': Group    0.011103
-Time     0.003773
-dtype: float64, 'A106': Group    0.170063
-Time     0.006842
-dtype: float64, 'A107': Group   -1.130276
-Time     0.002393
-dtype: float64, 'A108': Group   -0.777768
-Time     0.001817
-dtype: float64, 'A109': Group   -0.672445
-Time     0.000675
+{'A010': Group    0.781008
+dtype: float64, 'A011': Group    0.039557
+dtype: float64, 'A012': Group    0.321048
+dtype: float64, 'A013': Group   -0.142859
+dtype: float64, 'A014': Group    0.48544
+dtype: float64, 'A015': Group    1.252017
+dtype: float64, 'A016': Group    0.106806
+dtype: float64, 'A017': Group    0.225123
+dtype: float64, 'A018': Group   -0.064408
+dtype: float64, 'A019': Group   -0.918116
+dtype: float64, 'A020': Group   -0.751638
+dtype: float64, 'A021': Group    0.645264
+dtype: float64, 'A022': Group    0.076877
+dtype: float64, 'A023': Group    0.0925
+dtype: float64, 'A024': Group   -0.016613
+dtype: float64, 'A025': Group    0.261697
+dtype: float64, 'A026': Group    0.323561
+dtype: float64, 'A027': Group   -0.053519
+dtype: float64, 'A028': Group    0.080726
+dtype: float64, 'A029': Group    0.856994
+dtype: float64, 'A030': Group    0.357548
+dtype: float64, 'A031': Group    0.338809
+dtype: float64, 'A032': Group    0.660218
+dtype: float64, 'A033': Group    0.293908
+dtype: float64, 'A034': Group    0.486459
+dtype: float64, 'A035': Group   -0.124476
+dtype: float64, 'A036': Group   -0.076091
+dtype: float64, 'A037': Group    0.501794
+dtype: float64, 'A038': Group    0.488548
+dtype: float64, 'A039': Group    0.886906
+dtype: float64, 'A040': Group   -0.765633
+dtype: float64, 'A041': Group    0.09438
+dtype: float64, 'A042': Group   -0.684647
+dtype: float64, 'A043': Group    0.339824
+dtype: float64, 'A044': Group   -0.668223
+dtype: float64, 'A045': Group   -0.897367
+dtype: float64, 'A046': Group   -1.011784
+dtype: float64, 'A047': Group   -0.855274
+dtype: float64, 'A048': Group    0.24901
+dtype: float64, 'A049': Group    0.432004
+dtype: float64, 'A050': Group   -0.640393
+dtype: float64, 'A051': Group   -0.083129
+dtype: float64, 'A052': Group    0.063373
+dtype: float64, 'A053': Group    0.385724
+dtype: float64, 'A054': Group    0.794316
+dtype: float64, 'A055': Group    0.06418
+dtype: float64, 'A056': Group   -0.056588
+dtype: float64, 'A057': Group   -0.435594
+dtype: float64, 'A058': Group   -0.240505
+dtype: float64, 'A059': Group    0.816859
+dtype: float64, 'A060': Group    0.204639
+dtype: float64, 'A061': Group    0.730864
+dtype: float64, 'A062': Group    0.1315
+dtype: float64, 'A063': Group    0.209779
+dtype: float64, 'A064': Group    0.281134
+dtype: float64, 'A065': Group   -1.577321
+dtype: float64, 'A066': Group   -0.475109
+dtype: float64, 'A067': Group   -0.679524
+dtype: float64, 'A068': Group    0.316594
+dtype: float64, 'A069': Group   -0.972695
+dtype: float64, 'A070': Group   -0.178565
+dtype: float64, 'A071': Group    0.168533
+dtype: float64, 'A072': Group    0.08336
+dtype: float64, 'A073': Group    0.339273
+dtype: float64, 'A074': Group   -0.214633
+dtype: float64, 'A075': Group   -0.359585
+dtype: float64, 'A076': Group   -1.007769
+dtype: float64, 'A077': Group    0.456289
+dtype: float64, 'A078': Group   -0.423704
+dtype: float64, 'A079': Group   -0.400923
+dtype: float64, 'A080': Group    0.036988
+dtype: float64, 'A081': Group    0.304979
+dtype: float64, 'A082': Group    0.389402
+dtype: float64, 'A083': Group    0.59949
+dtype: float64, 'A084': Group    0.002415
+dtype: float64, 'A085': Group    0.24919
+dtype: float64, 'A086': Group   -0.323586
+dtype: float64, 'A087': Group    0.473597
+dtype: float64, 'A088': Group    1.258869
+dtype: float64, 'A089': Group    0.719013
+dtype: float64, 'A090': Group   -0.607325
+dtype: float64, 'A091': Group   -0.329127
+dtype: float64, 'A092': Group   -0.62131
+dtype: float64, 'A093': Group    0.366953
+dtype: float64, 'A094': Group   -0.785362
+dtype: float64, 'A095': Group   -0.007309
+dtype: float64, 'A096': Group   -1.106853
+dtype: float64, 'A097': Group    0.09425
+dtype: float64, 'A098': Group    0.283918
+dtype: float64, 'A099': Group    0.616289
+dtype: float64, 'A100': Group    0.217017
+dtype: float64, 'A101': Group   -0.906177
+dtype: float64, 'A102': Group    0.006085
+dtype: float64, 'A103': Group   -0.398402
+dtype: float64, 'A104': Group    0.024565
+dtype: float64, 'A105': Group    0.205335
+dtype: float64, 'A106': Group    0.513463
+dtype: float64, 'A107': Group   -0.962747
+dtype: float64, 'A108': Group   -0.65042
+dtype: float64, 'A109': Group   -0.610957
 dtype: float64}
 
 FULL MODEL SUMMARY:
 --------------------------------------------------------------------------------
-           Mixed Linear Model Regression Results
-===========================================================
-Model:              MixedLM  Dependent Variable:  theta    
-No. Observations:   400      Method:              ML       
-No. Groups:         100      Scale:               0.2582   
-Min. group size:    4        Log-Likelihood:      -463.1588
-Max. group size:    4        Converged:           No       
-Mean group size:    4.0                                    
------------------------------------------------------------
-                 Coef.  Std.Err.   z    P>|z| [0.025 0.975]
------------------------------------------------------------
-Intercept         0.627    0.078  8.062 0.000  0.475  0.780
-Time             -0.017    0.002 -9.231 0.000 -0.020 -0.013
-Time_squared      0.000    0.000  6.106 0.000  0.000  0.000
-Group Var         0.385    0.167                           
-Group x Time Cov -0.001    0.002                           
-Time Var          0.000                                    
-===========================================================
+         Mixed Linear Model Regression Results
+=======================================================
+Model:            MixedLM Dependent Variable: theta    
+No. Observations: 400     Method:             ML       
+No. Groups:       100     Scale:              0.3307   
+Min. group size:  4       Log-Likelihood:     -431.6183
+Max. group size:  4       Converged:          Yes      
+Mean group size:  4.0                                  
+-------------------------------------------------------
+             Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-------------------------------------------------------
+Intercept     0.612    0.080  7.650 0.000  0.455  0.769
+Time         -0.016    0.002 -9.292 0.000 -0.019 -0.012
+Time_squared  0.000    0.000  5.415 0.000  0.000  0.000
+Group Var     0.373    0.129                           
+=======================================================
 

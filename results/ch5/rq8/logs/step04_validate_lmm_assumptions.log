@@ -31,3 +31,59 @@ Traceback (most recent call last):
     obj = getattr(results, attr)
           ^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'MixedLMResults' object has no attribute 'get_influence'
+[START] Step 4: Validate LMM Assumptions
+[LOAD] Loading fitted models from Steps 2-3...
+[LOAD] Loading quadratic model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step02_quadratic_model.pkl
+[LOADED] Quadratic model (400 observations)
+[LOAD] Loading piecewise model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step03_piecewise_model.pkl
+[LOADED] Piecewise model (400 observations)
+[LOAD] Loading time-transformed data from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step01_time_transformed.csv
+[LOADED] Time data (400 rows, 9 cols)
+[ANALYSIS] Running assumption validation for quadratic model...
+[DONE] Quadratic model assumption validation complete
+[VALIDATION] Quadratic model valid: False
+[VALIDATION] Quadratic diagnostics: 6 checks performed
+[ANALYSIS] Running assumption validation for piecewise model...
+[DONE] Piecewise model assumption validation complete
+[VALIDATION] Piecewise model valid: False
+[VALIDATION] Piecewise diagnostics: 6 checks performed
+[SAVE] Saving assumption validation report...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq8/results/step04_assumption_validation_report.txt
+[VALIDATION] Running meta-validation on assumption test results...
+[WARNING] Some assumption tests missing: ['Shapiro-Wilk', 'Breusch-Pagan', 'ACF', "Cook's D"]
+[VALIDATION] All test statistics finite
+[VALIDATION] Meta-validation results:
+  Required terms present: False
+  Test statistics finite: True
+  Quadratic model checks: 6
+  Piecewise model checks: 6
+[VALIDATION] Meta-validation FAIL - Some issues detected (see warnings above)
+[SUCCESS] Step 4 complete
+[START] Step 4: Validate LMM Assumptions
+[LOAD] Loading fitted models from Steps 2-3...
+[LOAD] Loading quadratic model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step02_quadratic_model.pkl
+[LOADED] Quadratic model (400 observations)
+[LOAD] Loading piecewise model from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step03_piecewise_model.pkl
+[LOADED] Piecewise model (400 observations)
+[LOAD] Loading time-transformed data from /home/etai/projects/REMEMVR/results/ch5/rq8/data/step01_time_transformed.csv
+[LOADED] Time data (400 rows, 9 cols)
+[ANALYSIS] Running assumption validation for quadratic model...
+[DONE] Quadratic model assumption validation complete
+[VALIDATION] Quadratic model valid: False
+[VALIDATION] Quadratic diagnostics: 6 checks performed
+[ANALYSIS] Running assumption validation for piecewise model...
+[DONE] Piecewise model assumption validation complete
+[VALIDATION] Piecewise model valid: False
+[VALIDATION] Piecewise diagnostics: 6 checks performed
+[SAVE] Saving assumption validation report...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq8/results/step04_assumption_validation_report.txt
+[VALIDATION] Running meta-validation on assumption test results...
+[WARNING] Some assumption tests missing: ['Shapiro-Wilk', 'Breusch-Pagan', 'ACF', "Cook's D"]
+[VALIDATION] All test statistics finite
+[VALIDATION] Meta-validation results:
+  Required terms present: False
+  Test statistics finite: True
+  Quadratic model checks: 6
+  Piecewise model checks: 6
+[VALIDATION] Meta-validation FAIL - Some issues detected (see warnings above)
+[SUCCESS] Step 4 complete

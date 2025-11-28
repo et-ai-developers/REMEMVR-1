@@ -35,3 +35,40 @@
 [VALIDATION] No NaN in critical columns
 [VALIDATION] Segment correctly NA for non-piecewise sources
 [SUCCESS] Step 6 complete
+[START] Step 6: Prepare Plot Data
+[LOAD] Loading observed theta scores from Step 0...
+[LOADED] step00_theta_tsvr.csv (400 rows, 4 cols)
+[INFO] Observed data columns: ['UID', 'test', 'theta', 'TSVR_hours']
+[LOAD] Loading quadratic model predictions from Step 2...
+[LOADED] step02_quadratic_predictions.csv (11 rows, 4 cols)
+[INFO] Quadratic predictions columns: ['Time', 'predicted_theta', 'CI_lower', 'CI_upper']
+[LOAD] Loading piecewise model predictions from Step 3...
+[LOADED] step03_piecewise_predictions.csv (18 rows, 6 cols)
+[INFO] Piecewise predictions columns: ['Segment', 'Days_within', 'TSVR_hours', 'predicted_theta', 'CI_lower', 'CI_upper']
+[AGGREGATE] Computing observed means per test session...
+[AGGREGATED] Observed data: 4 timepoints (4 test sessions)
+[INFO] Observed aggregated shape: (4, 6)
+[FORMAT] Formatting quadratic model predictions...
+[FORMATTED] Quadratic predictions: 11 timepoints
+[INFO] Quadratic formatted shape: (11, 6)
+[FORMAT] Formatting piecewise model predictions...
+[FORMATTED] Piecewise predictions: 18 timepoints
+[INFO] Piecewise formatted shape: (18, 6)
+[COMBINE] Stacking all data sources...
+[COMBINED] Total plot data: 33 rows
+[INFO] Expected: 33 rows (4 observed + 11 quadratic + 18 piecewise)
+[INFO] Source counts:
+  - Observed: 4 rows
+  - Quadratic: 11 rows
+  - Piecewise: 18 rows
+[SAVE] Saving combined plot data to step06_piecewise_comparison_data.csv...
+[SAVED] step06_piecewise_comparison_data.csv (33 rows, 6 cols)
+[VALIDATION] Running validate_plot_data_completeness...
+[VALIDATION] valid: True
+[VALIDATION] message: Plot data complete: 3 domains, 2 groups.
+[VALIDATION] missing_domains: []
+[VALIDATION] missing_groups: []
+[VALIDATION] Row count correct: 33 rows
+[VALIDATION] No NaN in critical columns
+[VALIDATION] Segment correctly NA for non-piecewise sources
+[SUCCESS] Step 6 complete

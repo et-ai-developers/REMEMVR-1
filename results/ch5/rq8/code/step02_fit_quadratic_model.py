@@ -169,18 +169,55 @@ if __name__ == "__main__":
         log("[ANALYSIS] Fitting quadratic model: theta ~ Time + Time_squared + (Time | UID)...")
         log("[INFO] Using ML estimation (REML=False) for valid AIC comparison")
         log("[INFO] Bonferroni alpha = 0.0033 (15 planned comparisons)")
+        log("[INFO] Fallback strategy: (Time | UID) -> (1 | UID) if convergence fails")
 
         # Fit quadratic LMM using fit_lmm_trajectory (simpler, takes data directly)
         from tools.analysis_lmm import fit_lmm_trajectory
-        quadratic_model = fit_lmm_trajectory(
-            data=time_data,
-            formula="theta ~ Time + Time_squared",  # Fixed effects
-            groups="UID",
-            re_formula="~Time",  # Random slopes: (Time | UID)
-            reml=False  # ML estimation for AIC comparison
-        )
+
+        formula = "theta ~ Time + Time_squared"  # Fixed effects
+        random_structure_used = None
+
+        try:
+            # Try maximal random structure first
+            quadratic_model = fit_lmm_trajectory(
+                data=time_data,
+                formula=formula,
+                groups="UID",
+                re_formula="~Time",  # Random slopes: (Time | UID)
+                reml=False  # ML estimation for AIC comparison
+            )
+
+            # Check if converged
+            if quadratic_model.converged:
+                log("[SUCCESS] Quadratic model converged with maximal random structure")
+                random_structure_used = "(Time | UID)"
+            else:
+                log("[WARNING] Maximal random structure did not converge")
+                raise ValueError("Non-convergence detected, trying fallback")
+
+        except Exception as e_maximal:
+            log(f"[WARNING] Maximal random structure failed: {str(e_maximal)[:100]}")
+            log("[FALLBACK] Attempting intercept-only random structure: (1 | UID)...")
+
+            # Fallback: Intercept-only random effects
+            quadratic_model = fit_lmm_trajectory(
+                data=time_data,
+                formula=formula,
+                groups="UID",
+                re_formula="~1",  # Intercept-only: (1 | UID)
+                reml=False
+            )
+
+            if quadratic_model.converged:
+                log("[SUCCESS] Quadratic model converged with intercept-only random structure")
+                random_structure_used = "(1 | UID)"
+                log("[WARNING] Random slopes removed - model assumes uniform forgetting rate across individuals")
+            else:
+                log("[ERROR] Even intercept-only model failed to converge - results unreliable")
+                random_structure_used = "(1 | UID) - NON-CONVERGED"
 
         log("[DONE] Quadratic model fitted")
+        log(f"[INFO] Random structure used: {random_structure_used}")
         log(f"[INFO] Convergence: {quadratic_model.converged}")
         log(f"[INFO] AIC: {quadratic_model.aic:.2f}")
         log(f"[INFO] BIC: {quadratic_model.bic:.2f}")
@@ -240,13 +277,16 @@ if __name__ == "__main__":
         # Get prediction standard errors (for 95% CI)
         # Note: statsmodels MixedLM doesn't have predict(return_var=True)
         # Use fixed effects standard errors as approximation
+        se_intercept = quadratic_model.bse['Intercept']
         se_time = quadratic_model.bse['Time']
         se_time_sq = quadratic_model.bse['Time_squared']
 
-        # Propagate uncertainty (simplified - assumes no covariance)
+        # Propagate uncertainty (simplified - assumes no covariance between parameters)
+        # SE = sqrt(SE_intercept^2 + (SE_time * Time)^2 + (SE_time_sq * Time^2)^2)
         pred_se = np.sqrt(
-            (se_time * prediction_grid) ** 2 +
-            (se_time_sq * prediction_grid ** 2) ** 2
+            se_intercept ** 2 +  # Intercept uncertainty (constant across all predictions)
+            (se_time * prediction_grid) ** 2 +  # Time term uncertainty
+            (se_time_sq * prediction_grid ** 2) ** 2  # Time_squared term uncertainty
         )
 
         # 95% CI (z=1.96 for normal approximation)
@@ -276,7 +316,8 @@ if __name__ == "__main__":
             f.write("=" * 80 + "\n")
             f.write("QUADRATIC LMM SUMMARY - RQ 5.8 Step 2\n")
             f.write("=" * 80 + "\n\n")
-            f.write(f"Formula: theta ~ Time + Time_squared + (Time | UID)\n")
+            f.write(f"Formula: theta ~ Time + Time_squared\n")
+            f.write(f"Random Structure: {random_structure_used}\n")
             f.write(f"Estimation: ML (REML=False)\n")
             f.write(f"Bonferroni alpha: {bonferroni_alpha}\n\n")
             f.write(f"Convergence: {quadratic_model.converged}\n")

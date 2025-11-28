@@ -47,3 +47,28 @@ Run RQ 5.7 analysis pipeline first.
   - step00_theta_tsvr.csv: 400 rows (merged theta + TSVR)
   - step00_best_continuous_aic.txt: AIC = 873.71 (for Step 3 comparison)
   - step00_rq57_convergence.txt: Convergence status (CRITICAL for interpretation)
+[START] Step 0: Get Data (Load RQ 5.7 Outputs)
+[VALIDATION] Checking RQ 5.7 dependency files exist...
+[PASS] Dependency exists: step04_lmm_input.csv (35587 bytes)
+[LOAD] Loading RQ 5.7 LMM input data...
+[LOADED] step04_lmm_input.csv (400 rows, 9 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'Theta', 'SE', 'TSVR_hours', 'Days', 'Days_squared', 'log_Days_plus1']
+[LOAD] Loading RQ 5.7 model comparison...
+[LOADED] step05_model_comparison.csv (5 models)
+[INFO] RQ 5.7 best model: Log (AIC = 873.71)
+[TRANSFORM] Selecting columns (UID, test, Theta, TSVR_hours) and renaming...
+[INFO] Extracted shape: (400, 4)
+[INFO] Columns: ['UID', 'test', 'theta', 'TSVR_hours']
+[PASS] Row count reasonable: 400 rows
+[PASS] No NaN values in theta or TSVR_hours
+[SAVE] Saving merged theta + TSVR to step00_theta_tsvr.csv...
+[SAVED] step00_theta_tsvr.csv (400 rows, 4 cols)
+[SAVE] Saving RQ 5.7 AIC to step00_best_continuous_aic.txt...
+[SAVED] step00_best_continuous_aic.txt (AIC = 873.71)
+[SAVE] Saving RQ 5.7 model info to step00_rq57_convergence.txt...
+[SAVED] step00_rq57_convergence.txt
+[SUCCESS] Step 0 complete
+[INFO] Outputs:
+  - step00_theta_tsvr.csv: 400 rows (merged theta + TSVR)
+  - step00_best_continuous_aic.txt: AIC = 873.71 (for Step 3 comparison)
+  - step00_rq57_convergence.txt: Convergence status (CRITICAL for interpretation)

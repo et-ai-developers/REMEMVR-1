@@ -1,0 +1,126 @@
+================================================================================
+LMM ASSUMPTION VALIDATION REPORT - RQ 5.8
+================================================================================
+
+OVERVIEW
+--------------------------------------------------------------------------------
+Quadratic model: FAIL
+Piecewise model: FAIL
+Total checks: 12
+
+QUADRATIC MODEL DIAGNOSTICS
+--------------------------------------------------------------------------------
+
+residual_normality:
+  test: Shapiro-Wilk
+  statistic: 0.9937597095703156
+  p_value: 0.09894710376940645
+  pass: True
+  threshold: 0.05
+
+homoscedasticity:
+  test: Breusch-Pagan
+  statistic: 6.930416701912678
+  p_value: 0.031266490344479224
+  pass: False
+  threshold: 0.05
+
+random_effects_normality:
+  intercepts: {'test': 'Shapiro-Wilk', 'statistic': 0.9753351830221575, 'p_value': 0.057317310700161564, 'pass': np.True_, 'threshold': 0.05}
+  slopes: {'test': 'Shapiro-Wilk', 'statistic': None, 'p_value': None, 'pass': True, 'threshold': 0.05, 'warning': 'No random slopes in model'}
+
+autocorrelation:
+  lag1_acf: -0.2228912064826992
+  pass: False
+  threshold: 0.1
+
+outliers:
+  method: Studentized Residuals
+  threshold: 3.0
+  n_outliers: 1
+  outlier_percentage: 0.25
+  pass: True
+  outlier_indices: [372]
+
+convergence:
+  converged: True
+  pass: True
+
+
+PIECEWISE MODEL DIAGNOSTICS
+--------------------------------------------------------------------------------
+
+residual_normality:
+  test: Shapiro-Wilk
+  statistic: 0.9939304590859189
+  p_value: 0.11093719852911593
+  pass: True
+  threshold: 0.05
+
+homoscedasticity:
+  test: Breusch-Pagan
+  statistic: 7.860838078576338
+  p_value: 0.04897704268425406
+  pass: False
+  threshold: 0.05
+
+random_effects_normality:
+  intercepts: {'test': 'Shapiro-Wilk', 'statistic': 0.9752455410996176, 'p_value': 0.056398297340681657, 'pass': np.True_, 'threshold': 0.05}
+  slopes: {'test': 'Shapiro-Wilk', 'statistic': 0.9920735512254347, 'p_value': 0.8265287023888437, 'pass': np.True_, 'threshold': 0.05}
+
+autocorrelation:
+  lag1_acf: -0.24461845050516332
+  pass: False
+  threshold: 0.1
+
+outliers:
+  method: Studentized Residuals
+  threshold: 3.0
+  n_outliers: 1
+  outlier_percentage: 0.25
+  pass: True
+  outlier_indices: [372]
+
+convergence:
+  converged: False
+  pass: False
+
+
+DIAGNOSTIC PLOTS
+--------------------------------------------------------------------------------
+Quadratic model plots:
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/qq_plot_residuals.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/residuals_vs_fitted.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/qq_plot_random_intercepts.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/acf_plot.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/studentized_residuals.png
+
+Piecewise model plots:
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/qq_plot_residuals.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/residuals_vs_fitted.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/qq_plot_random_intercepts.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/qq_plot_random_slopes.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/acf_plot.png
+  /home/etai/projects/REMEMVR/results/ch5/rq8/results/studentized_residuals.png
+
+
+OVERALL MESSAGE
+--------------------------------------------------------------------------------
+Quadratic: LMM assumption violations detected (2/7 checks failed):
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.223 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Model variance structure explicitly or use weighted least squares
+  2. Add AR(1) correlation structure to account for temporal dependencies
+
+Piecewise: LMM assumption violations detected (3/7 checks failed):
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.245 exceeds 0.1)
+  - Model convergence failed
+
+Recommended remedial actions:
+  1. Model variance structure explicitly or use weighted least squares
+  2. Add AR(1) correlation structure to account for temporal dependencies
+  3. Check for model misspecification, scaling issues, or optimization problems
+
