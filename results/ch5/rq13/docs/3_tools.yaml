@@ -35,7 +35,7 @@ analysis_tools:
   test_intercept_slope_correlation_d068:
     module: "tools.analysis_lmm"
     function: "test_intercept_slope_correlation_d068"
-    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'random_intercept', slope_col: str = 'random_slope') -> Dict"
     validation_tool: "validate_correlation_test_d068"
 
     input_files:
@@ -187,7 +187,7 @@ validation_tools:
   validate_variance_positivity:
     module: "tools.validation"
     function: "validate_variance_positivity"
-    signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+    signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'estimate') -> Dict[str, Any]"
 
     input_files:
       - path: "data/step02_variance_components.csv"

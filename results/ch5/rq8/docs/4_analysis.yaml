@@ -603,7 +603,7 @@ steps:
 
       criteria:
         - "All 3 sources present (Observed, Quadratic, Piecewise)"
-        - "Expected row count: 30-35"
+        - "Expected row count: 33 exactly"
         - "No NaN in critical columns (source, TSVR_hours, theta, CIs)"
         - "Segment can be NA for non-piecewise sources"
 

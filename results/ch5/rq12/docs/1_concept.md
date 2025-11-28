@@ -177,7 +177,7 @@ DERIVED (from RQ 5.1 outputs + raw data for CTT computation)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- **IRT Item Parameters:** `results/ch5/rq1/data/step02_purified_item_params.csv` (discrimination a and difficulty b estimates post-purification)
+- **IRT Item Parameters:** `results/ch5/rq1/data/step02_purified_items.csv` (item list with discrimination a and difficulty b estimates post-purification)
 - **IRT Theta Scores:** `results/ch5/rq1/data/step04_theta_scores.csv` (ability estimates per UID × Test × Domain)
 - **TSVR Mapping:** `results/ch5/rq1/data/step00_tsvr_mapping.csv` (UID × Test → TSVR hours)
 - **Raw Data for CTT:** `data/cache/dfData.csv` (dichotomized TQ_ item responses for CTT scoring)

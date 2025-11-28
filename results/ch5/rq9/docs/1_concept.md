@@ -59,9 +59,9 @@ Age will negatively predict both intercept (baseline memory at Day 0) and slope 
 Hippocampal aging hypothesis (Raz et al., 2005) predicts dual deficits: encoding (lower baseline) and consolidation (faster forgetting). Older adults show reduced hippocampal volume and function, impairing both initial memory formation and time-dependent consolidation processes. Logarithmic forgetting form (established in RQ 5.7) aligns with consolidation theory, where early retention interval (0-24h) is most vulnerable to age-related deficits.
 
 **Expected Effect Pattern:**
-- **Main effect of Age_c on Intercept:** β < 0, p < 0.0033 (older adults lower baseline)
-- **Age_c × log(Time+1) interaction:** β < 0, p < 0.0033 (older adults faster logarithmic decline)
-- **Age_c × Time interaction:** β < 0, but may not reach significance after Bonferroni correction (α = 0.0033)
+- **Main effect of Age_c on Intercept:** β < 0, p < 0.0167 (older adults lower baseline)
+- **Age_c × log(Time+1) interaction:** β < 0, p < 0.0167 (older adults faster logarithmic decline)
+- **Age_c × Time interaction:** β < 0, but may not reach significance after Bonferroni correction (α = 0.0167)
 - **Effect size:** Cohen's d ~ 0.2-0.5 (small-medium) for age effects on Day 6 theta
 
 ---

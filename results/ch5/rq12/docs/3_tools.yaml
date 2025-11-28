@@ -23,7 +23,7 @@ analysis_tools:
           TQ_items: "int (values: 0, 1, NaN)"
 
     output_files:
-      - path: "results/step04_ctt_reliability.csv"
+      - path: "data/step04_ctt_reliability.csv"
         columns: ["domain", "item_set", "alpha", "ci_lower", "ci_upper", "n_items"]
         description: "Cronbach's alpha with bootstrap 95% CIs for full and purified item sets"
 
@@ -51,10 +51,10 @@ analysis_tools:
         expected_rows: "~400"
 
     output_files:
-      - path: "results/step05_correlations.csv"
+      - path: "data/step05_correlations.csv"
         columns: ["domain", "correlation_pair", "r", "n"]
         description: "Pairwise correlations between Full CTT, Purified CTT, and IRT theta"
-      - path: "results/step05_steiger_tests.csv"
+      - path: "data/step05_steiger_tests.csv"
         columns: ["domain", "r_full_irt", "r_purified_irt", "delta_r", "z_statistic", "p_value", "interpretation"]
         description: "Steiger's z-test results comparing dependent correlations"
 
@@ -83,16 +83,16 @@ analysis_tools:
           z_scores: "float (range: [-4, 4])"
 
     output_files:
-      - path: "results/step07_lmm_full_ctt_summary.txt"
+      - path: "data/step07_lmm_full_ctt_summary.txt"
         description: "Full CTT LMM model summary (fixed effects, random effects, AIC, BIC)"
-      - path: "results/step07_lmm_purified_ctt_summary.txt"
+      - path: "data/step07_lmm_purified_ctt_summary.txt"
         description: "Purified CTT LMM model summary"
-      - path: "results/step07_lmm_irt_theta_summary.txt"
+      - path: "data/step07_lmm_irt_theta_summary.txt"
         description: "IRT theta LMM model summary (gold standard)"
-      - path: "results/step07_lmm_comparison.csv"
+      - path: "data/step07_lmm_comparison.csv"
         columns: ["measurement_approach", "AIC", "BIC", "delta_AIC_vs_IRT", "interpretation"]
         description: "AIC/BIC comparison across three measurement approaches"
-      - path: "results/step07_interaction_coefficients.csv"
+      - path: "data/step07_interaction_coefficients.csv"
         columns: ["measurement_approach", "interaction_term", "coefficient", "SE", "p_value"]
         description: "Domain × Time interaction coefficients for all three approaches"
 
@@ -112,7 +112,7 @@ validation_tools:
     signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
 
     input_files:
-      - path: "results/step04_ctt_reliability.csv"
+      - path: "data/step04_ctt_reliability.csv"
         required_columns: ["alpha", "ci_lower", "ci_upper"]
         source: "analysis tool output (step04_assess_reliability)"
 
@@ -159,7 +159,7 @@ validation_tools:
     signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
 
     input_files:
-      - path: "results/step05_steiger_tests.csv"
+      - path: "data/step05_steiger_tests.csv"
         required_columns: ["z_statistic", "p_value"]
         source: "analysis tool output (step05_correlation_analysis)"
 
@@ -230,11 +230,11 @@ validation_tools:
     signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
     input_files:
-      - path: "results/step07_lmm_full_ctt_summary.txt"
+      - path: "data/step07_lmm_full_ctt_summary.txt"
         source: "analysis tool output (step07_fit_parallel_lmms)"
-      - path: "results/step07_lmm_purified_ctt_summary.txt"
+      - path: "data/step07_lmm_purified_ctt_summary.txt"
         source: "analysis tool output (step07_fit_parallel_lmms)"
-      - path: "results/step07_lmm_irt_theta_summary.txt"
+      - path: "data/step07_lmm_irt_theta_summary.txt"
         source: "analysis tool output (step07_fit_parallel_lmms)"
 
     parameters:
@@ -269,7 +269,7 @@ validation_tools:
     signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
 
     input_files:
-      - path: "results/step07_lmm_full_ctt_summary.txt"
+      - path: "data/step07_lmm_full_ctt_summary.txt"
         source: "analysis tool output (step07_fit_parallel_lmms)"
       - path: "data/step06_standardized_scores.csv"
         required_columns: ["composite_ID", "UID", "domain", "TSVR_hours", "z_full_ctt", "z_purified_ctt", "z_irt_theta"]

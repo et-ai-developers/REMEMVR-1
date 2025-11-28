@@ -248,7 +248,7 @@ Validation tools MUST be used after variance component extraction. Specific vali
 **File:** data/step03_icc_estimates.csv
 **Format:** CSV with columns:
   - icc_type (string): "intercept", "slope_simple", "slope_conditional"
-  - estimate (float): ICC value in [0, 1]
+  - icc_value (float): ICC value in [0, 1]
   - interpretation (string): "Low (<0.20)", "Moderate (0.20-0.40)", "Substantial (>=0.40)"
 **Expected Rows:** 3 (one per ICC type)
 

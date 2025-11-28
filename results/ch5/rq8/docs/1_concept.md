@@ -136,9 +136,9 @@ RQ 5.7 (Which functional form best describes forgetting trajectories?)
 
 **File Paths:**
 - `results/ch5/rq7/data/step02_theta_long.csv` - Theta scores from RQ 5.7 IRT analysis
-  - Columns: UID, TEST, domain, theta
+  - Columns: UID, test, domain, theta
 - `results/ch5/rq7/data/step00_tsvr_mapping.csv` - Time Since VR mapping
-  - Columns: UID, TEST, TSVR (hours since encoding)
+  - Columns: UID, test, TSVR (hours since encoding)
 - `results/ch5/rq7/data/step03_best_model.pkl` - Pickled best-fitting continuous model from RQ 5.7 (for comparison)
 
 **Dependencies:**

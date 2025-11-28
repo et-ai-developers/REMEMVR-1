@@ -402,7 +402,7 @@ validation_tools:
 
     criteria:
       - "All 3 sources present (Observed, Quadratic, Piecewise)"
-      - "Expected row count: 30-35 (4 observed + 11 quadratic + 18 piecewise)"
+      - "Expected row count: 33 exactly (4 observed + 11 quadratic + 18 piecewise)"
       - "No NaN in critical columns (source, TSVR_hours, theta, CIs)"
 
     expected_output:

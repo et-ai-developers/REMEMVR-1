@@ -53,7 +53,7 @@ analysis_tools:
 
     input_files:
       - path: "data/step00_irt_theta_loaded.csv"
-        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
         expected_rows: "~400"
         source: "RQ 5.1 IRT theta scores"
 
@@ -87,7 +87,7 @@ analysis_tools:
 
     input_files:
       - path: "data/step00_irt_theta_loaded.csv"
-        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
         expected_rows: "~400"
 
       - path: "data/step01_ctt_scores.csv"
@@ -258,7 +258,7 @@ analysis_tools:
 
     input_files:
       - path: "data/step00_irt_theta_loaded.csv"
-        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
         expected_rows: "~400"
 
       - path: "data/step01_ctt_scores.csv"
@@ -277,9 +277,9 @@ analysis_tools:
     parameters:
       reshape_irt: true
       domain_mapping:
-        theta_common: "What"
-        theta_congruent: "Where"
-        theta_incongruent: "When"
+        theta_what: "What"
+        theta_where: "Where"
+        theta_when: "When"
       merge_keys: ["composite_ID", "domain"]
 
     description: "Reshape IRT theta to long format, merge with CTT scores, add correlation annotations for scatterplot with regression lines (Option B architecture per Decision D069)"

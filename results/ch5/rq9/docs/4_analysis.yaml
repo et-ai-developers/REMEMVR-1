@@ -350,7 +350,7 @@ steps:
         - "Create significance flags: sig_uncorrected (p < 0.05), sig_bonferroni (p < 0.0167)"
         - "Interpret direction: negative coef -> older adults worse (expected)"
         - "Create summary table with dual p-values (Decision D068)"
-        - "Save to results/step03_age_effects.csv"
+        - "Save to data/step03_age_effects.csv"
 
       input_files:
         - path: "data/step02_fixed_effects.csv"
@@ -358,7 +358,7 @@ steps:
           description: "Fixed effects from LMM"
 
       output_files:
-        - path: "results/step03_age_effects.csv"
+        - path: "data/step03_age_effects.csv"
           columns: ["term", "hypothesis", "coef", "se", "z", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni", "interpretation"]
           expected_rows: 3
           description: "Age effects with dual p-values (Decision D068)"
@@ -374,11 +374,11 @@ steps:
       signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step03_age_effects.csv"
+        - path: "data/step03_age_effects.csv"
           description: "Age effects table with dual p-values"
 
       parameters:
-        df_path: "results/step03_age_effects.csv"
+        df_path: "data/step03_age_effects.csv"
         required_p_cols: ["p_uncorrected", "p_bonferroni"]
 
       criteria:
@@ -398,11 +398,11 @@ steps:
       signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict"
 
       input_files:
-        - path: "results/step03_age_effects.csv"
+        - path: "data/step03_age_effects.csv"
           description: "Age effects table to validate"
 
       parameters:
-        df_path: "results/step03_age_effects.csv"
+        df_path: "data/step03_age_effects.csv"
         required_terms: ["Age_c", "Time:Age_c", "Time_log:Age_c"]
         alpha_bonferroni: 0.0167
 

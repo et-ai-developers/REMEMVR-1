@@ -49,16 +49,16 @@ steps:
 
       input_files:
         - path: "results/ch5/rq1/data/step03_theta_scores.csv"
-          required_columns: ["composite_ID", "theta_common", "se_common", "theta_congruent", "se_congruent", "theta_incongruent", "se_incongruent"]
+          required_columns: ["composite_ID", "theta_what", "se_what", "theta_where", "se_where", "theta_when", "se_when"]
           expected_rows: 400
           data_types:
             composite_ID: "string (format: {UID}_{test})"
-            theta_common: "float64 (IRT ability estimate)"
-            se_common: "float64 (standard error)"
-            theta_congruent: "float64"
-            se_congruent: "float64"
-            theta_incongruent: "float64"
-            se_incongruent: "float64"
+            theta_what: "float64 (IRT ability estimate)"
+            se_what: "float64 (standard error)"
+            theta_where: "float64"
+            se_where: "float64"
+            theta_when: "float64"
+            se_when: "float64"
           source: "RQ 5.1 Step 3 (IRT Pass 2 theta extraction)"
 
         - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
@@ -88,7 +88,7 @@ steps:
       output_files:
         - path: "data/step00_irt_theta_loaded.csv"
           variable_name: "irt_theta"
-          columns: ["composite_ID", "theta_common", "se_common", "theta_congruent", "se_congruent", "theta_incongruent", "se_incongruent"]
+          columns: ["composite_ID", "theta_what", "se_what", "theta_where", "se_where", "theta_when", "se_when"]
           expected_rows: 400
           description: "IRT theta scores from RQ 5.1 (local copy)"
 
@@ -127,7 +127,7 @@ steps:
 
       parameters:
         theta_df: "irt_theta"
-        theta_required_cols: ["composite_ID", "theta_common", "se_common", "theta_congruent", "se_congruent", "theta_incongruent", "se_incongruent"]
+        theta_required_cols: ["composite_ID", "theta_what", "se_what", "theta_where", "se_where", "theta_when", "se_when"]
         theta_expected_rows: 400
         raw_df: "raw_data_filtered"
         raw_required_cols: ["UID", "TEST"]
@@ -246,7 +246,7 @@ steps:
       operations:
         - "Load data/step00_irt_theta_loaded.csv"
         - "Load data/step01_ctt_scores.csv"
-        - "Map IRT dimensions to domains: theta_common->What, theta_congruent->Where, theta_incongruent->When"
+        - "Map IRT dimensions to domains: theta_what->What, theta_where->Where, theta_when->When"
         - "Reshape IRT theta to long format (composite_ID, domain, IRT_score)"
         - "Merge IRT and CTT on composite_ID + domain"
         - "Compute Pearson correlations per domain:"
@@ -262,7 +262,7 @@ steps:
 
       input_files:
         - path: "data/step00_irt_theta_loaded.csv"
-          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
           expected_rows: 400
           variable_name: "irt_theta"
 
@@ -349,7 +349,7 @@ steps:
 
       input_files:
         - path: "data/step00_irt_theta_loaded.csv"
-          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
           expected_rows: 400
           variable_name: "irt_theta"
 
@@ -741,9 +741,9 @@ steps:
         - "Load data/step01_ctt_scores.csv"
         - "Load results/step02_correlations.csv"
         - "Reshape IRT theta to long format:"
-        - "  - theta_common -> What domain"
-        - "  - theta_congruent -> Where domain"
-        - "  - theta_incongruent -> When domain"
+        - "  - theta_what -> What domain"
+        - "  - theta_where -> Where domain"
+        - "  - theta_when -> When domain"
         - "Merge IRT and CTT on composite_ID + domain"
         - "Join with correlations on domain (add r column for annotation)"
         - "Select columns: composite_ID, domain, IRT_score, CTT_score, r"
@@ -752,7 +752,7 @@ steps:
 
       input_files:
         - path: "data/step00_irt_theta_loaded.csv"
-          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
           expected_rows: 400
           variable_name: "irt_theta"
 
@@ -776,9 +776,9 @@ steps:
       parameters:
         reshape_irt: true
         domain_mapping:
-          theta_common: "What"
-          theta_congruent: "Where"
-          theta_incongruent: "When"
+          theta_what: "What"
+          theta_where: "Where"
+          theta_when: "When"
         merge_keys: ["composite_ID", "domain"]
 
     validation_call:

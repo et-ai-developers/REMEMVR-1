@@ -803,7 +803,7 @@ Validation tools MUST be used after plot data preparation execution. Specific va
 
 *Output Files:*
 - plots/step06_piecewise_comparison_data.csv exists (exact path)
-- Expected rows: 30-35 rows (4 observed + 11 quadratic + 18 piecewise)
+- Expected rows: 33 exactly rows (4 observed + 11 quadratic + 18 piecewise)
 - Expected columns: 6 (source, TSVR_hours, theta, CI_lower, CI_upper, Segment)
 - Data types: source (string), TSVR_hours (float64), theta (float64), CI_lower (float64), CI_upper (float64), Segment (string)
 
@@ -1063,7 +1063,7 @@ This is not optional. This is the core architectural principle preventing cascad
 - All 3 data sources loaded successfully
 - Observed means computed (4 timepoints)
 - Predictions formatted correctly (11 quadratic + 18 piecewise)
-- Combined data has expected row count (30-35)
+- Combined data has expected row count (33 exactly)
 - All required columns present (source, TSVR_hours, theta, CI_lower, CI_upper, Segment)
 - No NaN in critical columns (source, TSVR_hours, theta, CIs)
 

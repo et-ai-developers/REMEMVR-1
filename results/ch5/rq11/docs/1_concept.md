@@ -91,7 +91,8 @@ Convergent validity comparison using Correlation Analysis + Parallel LMM (Linear
 **High-Level Workflow:**
 
 **Step 0:** Get Data
-- Load IRT theta scores from results/ch5/rq1/data/ (step03_theta_scores.csv or equivalent)
+- Load IRT theta scores from results/ch5/rq1/data/step03_theta_scores.csv (Theta_What, Theta_Where, Theta_When per UID × Test)
+- Load purified item list from results/ch5/rq1/data/step02_purified_items.csv (filter CTT to match IRT item set)
 - Load TSVR mapping from results/ch5/rq1/data/step00_tsvr_mapping.csv (UID, Test, TSVR)
 - Load raw VR item scores from data/cache/dfData.csv for CTT computation
 
