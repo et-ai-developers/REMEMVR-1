@@ -257,6 +257,12 @@
 ### rq_5_8_g_code_execution_complete_5_of_7_steps_successful
 **Description:** First v4.X g_code production execution on RQ 5.8. Parallel code generation (9 agents, 7 steps, ~15 minutes). Sequential debugging (5/7 steps successful, 2 tool bugs). 3 bugs fixed in generated code (file references, API mismatches, DataFrame.data). 2 tool bugs documented (get_influence(), categorical coefficient naming). Core scientific finding obtained: deltaAIC = +5.03 favors continuous model (evidence AGAINST two-phase forgetting). YELLOW status tools revealed bugs on first production use. Superseded by Session 17:00 publication-ready completion.
 
+### rq_5_8_complete_publication_ready_all_bugs_fixed
+**Description:** Complete history of RQ 5.8 execution achieving publication-ready quality (Session 2025-11-28 17:00). Fixed 5 bugs total (2 tool bugs: validate_lmm_assumptions_comprehensive get_influence() → studentized residuals, extract_segment_slopes_from_lmm coefficient auto-detection; 3 g_code bugs: unit conversion, convergence fallback, CI calculation). Re-ran full analysis pipeline, achieved 100% validation PASS (rq_inspect 4-layer), generated publication-quality plots (300 DPI), created comprehensive summary with 3 anomalies transparently flagged. Scientific finding: Nuanced two-phase pattern exists but mechanism is gradual (not sharp 48h inflection). Both tools production-validated (YELLOW → GREEN). v4.X workflow completely validated end-to-end. Total efficiency: 45 minutes thesis-quality completion.
+
+### rq_5_9_complete_end_to_end_pipeline_null_results_scientifically_valid
+**Description:** Complete history of RQ 5.9 execution with scientifically valid null result (Session 2025-11-28 20:00). Full workflow: parallel g_code (6 agents, 15 minutes, 1,988 lines) → g_conflict pre-execution (5 conflicts, 4 fixed) → sequential debugging (7 bugs, 30 minutes) → rq_inspect (conditional pass, 4 anomalies) → rq_plots (300 DPI) → rq_results (comprehensive summary). First RQ after RQ 5.8 tool fixes, testing production-validated tools. Scientific finding: No significant age effects on forgetting (null result, p > 0.18, contradicts dual deficit hypothesis). Most likely explanation: practice effects from 4 repeated tests. Tool improvements made (case-insensitive age, optional domain_name). Total bugs fixed: 12 (4 pre-execution + 7 execution + 1 plotting). Total efficiency: 54 minutes end-to-end. Demonstrates null results + transparent anomaly documentation = PhD-quality scientific reporting.
+
 ---
 
 ## How to Use This Index
