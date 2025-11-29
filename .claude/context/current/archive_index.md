@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-28 20:30 (context-manager curation)
+**Last Updated:** 2025-11-29 19:50 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -262,6 +262,12 @@
 
 ### rq_5_9_complete_end_to_end_pipeline_null_results_scientifically_valid
 **Description:** Complete history of RQ 5.9 execution with scientifically valid null result (Session 2025-11-28 20:00). Full workflow: parallel g_code (6 agents, 15 minutes, 1,988 lines) → g_conflict pre-execution (5 conflicts, 4 fixed) → sequential debugging (7 bugs, 30 minutes) → rq_inspect (conditional pass, 4 anomalies) → rq_plots (300 DPI) → rq_results (comprehensive summary). First RQ after RQ 5.8 tool fixes, testing production-validated tools. Scientific finding: No significant age effects on forgetting (null result, p > 0.18, contradicts dual deficit hypothesis). Most likely explanation: practice effects from 4 repeated tests. Tool improvements made (case-insensitive age, optional domain_name). Total bugs fixed: 12 (4 pre-execution + 7 execution + 1 plotting). Total efficiency: 54 minutes end-to-end. Demonstrates null results + transparent anomaly documentation = PhD-quality scientific reporting.
+
+### rq_5_10_complete_null_result_new_tool_tdd
+**Description:** Complete execution history of RQ 5.10 (Age × Domain × Time Interaction Analysis). Parallel g_code generation (8 agents, 5 successful, 3 circuit breakers), step-by-step debugging (steps 00-02), new tool development via full TDD workflow (extract_marginal_age_slopes_by_domain, 15/15 tests GREEN, 203 lines, delta method SE propagation), remaining steps execution (02b-05), full validation pipeline (rq_inspect, rq_plots, rq_results). Scientific finding: NULL RESULT - Age effects on forgetting do NOT vary by domain (all interactions p > 0.68). Hypothesis NOT SUPPORTED (hippocampal aging theory). Scientifically valid with 3 plausible explanations: VR unified encoding, insufficient power, age range too narrow. Total bugs fixed: 21 (11 in session 20:30, 10 in session 17:30). Production-validated tools accumulated. Demonstrates TDD workflow success with real data.
+
+### rq_5_11_complete_publication_ready_critical_fixes_applied
+**Description:** Complete execution history of RQ 5.11 (IRT-CTT Convergent Validity Comparison). Circuit breaker validation (g_conflict + g_code), dichotomization critical fix (1=1, <1=0 for methodological validity), step-by-step execution (steps 00-07, 8 bugs fixed), full validation. Scientific finding: Strong convergent validity (r > 0.90 all domains), perfect significance agreement (kappa=1.0), expected coefficient discrepancies (IRT 8x more sensitive than CTT for log_TSVR). Methodology validated: dichotomization ensures fair comparison, circuit breakers prevent runtime errors, production workflow working. User domain expertise critical for catching conceptual errors.
 
 ---
 
