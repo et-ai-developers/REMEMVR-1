@@ -42,21 +42,25 @@ rq_stats:
     '
 rq_planner:
   status: success
-  context_dump: '9 analysis steps planned (Step 0 + Steps 1-8). Tool requirements:
-    CTT scoring (full + purified), Cronbach''s alpha (bootstrap), Steiger''s z-test
-    (dependent correlations), z-score standardization, 3 parallel LMMs. Expected outputs:
-    CTT scores, reliability, correlations, AIC comparison, plot data. Cross-RQ dependency:
-    RQ 5.1. Validation required every step.
+  context_dump: 'Analysis plan created: 9 steps (Step 0: data loading -> Step 8: plot
+    prep).
+
+    Tool requirements: CTT computation, Cronbach''s alpha (bootstrap), Steiger''s
+    z-test (dependent correlations), parallel LMMs (3 models), z-score standardization.
+
+    Expected outputs: Full/Purified CTT scores, reliability assessment, correlation
+    analysis, LMM comparison (7 files), 2 plot source CSVs.
+
+    Cross-RQ dependency: RQ 5.1 (purified items, theta scores, TSVR mapping). Validation
+    100% coverage (9/9 steps).
 
     '
 rq_tools:
-  status: success
-  completed: 2025-11-27
-  context_dump: '3 analysis + 5 validation tools cataloged for CTT-IRT convergence comparison. CTT module: compute_cronbachs_alpha, compare_correlations_dependent. LMM: fit_lmm_trajectory_tsvr. Stdlib operations (pandas) exempt from verification.'
+  status: pending
+  context_dump: ''
 rq_analysis:
-  status: success
-  timestamp: '2025-11-28T00:00:00Z'
-  context_dump: '9 steps specified with validation (CTT-IRT convergence: Full CTT vs Purified CTT vs IRT theta via parallel LMMs, Cronbach alpha, Steiger z-test)'
+  status: pending
+  context_dump: ''
 rq_inspect:
   status: pending
   context_dump: ''

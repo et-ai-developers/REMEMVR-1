@@ -1,964 +1,1026 @@
-# Analysis Plan: RQ 5.12 - Does Purified IRT Item Set Change CTT Conclusions?
+# Analysis Plan for RQ 5.12: Does purified IRT item set change CTT conclusions?
 
-**Research Question:** 5.12
-**Created:** 2025-11-26
-**Status:** Planning complete, ready for tool specification (rq_tools)
+**Created by:** rq_planner agent
+**Date:** 2025-11-30
+**Status:** Ready for rq_tools (Step 11 workflow)
 
 ---
 
 ## Overview
 
-This RQ examines methodological convergence between Classical Test Theory (CTT) and Item Response Theory (IRT) by comparing trajectory conclusions from three measurement approaches: (a) Full CTT (all items), (b) Purified CTT (IRT-retained items only), and (c) IRT theta scores. The analysis tests whether IRT item purification removes noise (improving CTT-IRT convergence) or signal (degrading CTT validity).
+This RQ examines methodological convergence between Classical Test Theory (CTT) and Item Response Theory (IRT) by comparing trajectory conclusions from three measurement approaches: (a) full CTT using all items, (b) purified CTT using only IRT-retained items, and (c) IRT theta scores. The analysis tests whether IRT item purification (removing poorly discriminating items with a < 0.5 or extreme difficulty |b| > 4.0 per RQ 5.1) improves CTT-IRT convergence, suggesting that purification removes measurement noise rather than signal.
 
-**Pipeline:** Hybrid CTT-IRT methodological comparison
-**Steps:** 9 analysis steps (Step 0: data loading, Steps 1-8: analyses)
-**Estimated Runtime:** Medium (~45-60 minutes total)
+**Pipeline:** CTT computation (full + purified) + Correlation analysis + Parallel LMM comparison
+
+**Steps:** 9 total analysis steps (Step 0: data loading through Step 8: plot data preparation)
+
+**Estimated Runtime:** Medium complexity (~30-45 minutes total)
+- Data loading/mapping: Low (~2 min)
+- CTT computation (2 passes): Low (~5 min)
+- Reliability assessment: Low (~3 min)
+- Correlation analysis: Low (~2 min)
+- Standardization: Low (~1 min)
+- Parallel LMM fitting (3 models): High (~20-30 min)
+- Plot data preparation: Low (~2 min)
 
 **Key Decisions Applied:**
-- Decision D039: Use RQ 5.1 purification criteria (0.5 <= a <= 4.0) to identify retained items
-- Decision D068: Dual p-value reporting in post-hoc contrasts (uncorrected + Bonferroni)
-- Decision D070: TSVR as time variable for LMM trajectories (actual hours, not nominal days)
-- NEW: Z-score standardization for valid AIC comparison across different measurement scales (Burnham & Anderson requirement)
-- NEW: Steiger's z-test for dependent correlations (correct method for overlapping samples)
-- NEW: Cronbach's alpha with bootstrap 95% CIs for CTT reliability assessment
+- Decision D068: Dual p-value reporting (Steiger's z-test for dependent correlations)
+- Decision D070: TSVR as time variable (inherited from RQ 5.1 LMM inputs)
+- Decision D069: Dual-scale trajectory plots NOT applicable (methodological comparison, not trajectory analysis per se)
+- Project-specific: Cronbach's alpha with bootstrap CIs (reliability validation)
+- Project-specific: Parallel LMM design with z-score standardization (valid AIC comparison per Burnham & Anderson)
 
-**Cross-RQ Dependencies:**
-This RQ requires completed outputs from RQ 5.1 (IRT item parameters, theta scores, TSVR mapping). Execution order: RQ 5.1 must complete before RQ 5.12.
+**Critical Methodological Notes:**
+- **Dependent Correlations:** Full CTT, Purified CTT, and IRT theta from same N=100 participants -> Steiger's z-test required (Fisher's r-to-z invalid)
+- **AIC Comparison Validity:** Different scales (CTT [0,1] vs IRT theta [logit]) -> z-score standardization mandatory before LMM fitting
+- **Purification Criteria from RQ 5.1:** Uses actual discrimination thresholds (0.5 <= a <= 4.0) applied in RQ 5.1 purification
 
 ---
 
 ## Analysis Plan
 
-### Step 0: Load Data from Multiple Sources
+### Step 0: Load Data Sources
 
 **Dependencies:** None (first step, but requires RQ 5.1 completion)
-**Complexity:** Low (~2 minutes data loading)
 
-**Purpose:** Load IRT outputs from RQ 5.1 and raw data for CTT computation
+**Complexity:** Low (file reading, no computation)
+
+**Purpose:** Load IRT item parameters, theta scores, TSVR mapping from RQ 5.1 and raw dichotomized scores from dfData.csv for CTT computation.
 
 **Input:**
 
 **File 1:** results/ch5/rq1/data/step02_purified_items.csv
-**Source:** RQ 5.1 Step 2 (item purification)
+**Source:** RQ 5.1 Step 2 (IRT purification output)
 **Format:** CSV with columns:
-  - `item_name` (string, format: VR-{paradigm}-{test}-{domain}-ANS, e.g., VR-IFR-A01-N-ANS)
-  - `dimension` (string, values: {common, congruent, incongruent} from RQ 5.1 3-factor model)
+  - `item_name` (string, format: TQ_{paradigm}-{tag}-i{N}, e.g., TQ_ICR-N-i1)
+  - `factor` (string, domain: "what", "where", "when")
   - `a` (float, discrimination parameter, range: [0.5, 4.0] after purification)
   - `b` (float, difficulty parameter, unrestricted range)
-**Expected Rows:** ~38 items (12 removed by purification, ~50 original)
-**Circuit Breaker:** If file missing -> EXPECTATIONS ERROR "RQ 5.1 must complete Step 2 (purification) before RQ 5.12 can run"
+**Expected Rows:** ~38 items (purified subset from full ~50 items)
+**Note:** This file contains IRT-retained items. Items NOT in this list were excluded by RQ 5.1 purification.
 
 **File 2:** results/ch5/rq1/data/step03_theta_scores.csv
-**Source:** RQ 5.1 Step 3 (Pass 2 theta extraction)
+**Source:** RQ 5.1 Step 3 (IRT Pass 2 theta extraction)
 **Format:** CSV with columns:
-  - `composite_ID` (string, format: {UID}_{test}, e.g., P001_T1)
-  - `theta_common` (float, range: [-3, 3] typical)
-  - `se_common` (float, standard error, range: [0.1, 1.0])
-  - `theta_congruent` (float, range: [-3, 3])
-  - `se_congruent` (float, range: [0.1, 1.0])
-  - `theta_incongruent` (float, range: [-3, 3])
-  - `se_incongruent` (float, range: [0.1, 1.0])
+  - `composite_ID` (string, format: {UID}_{test}, e.g., A010_1)
+  - `theta_what` (float, IRT ability estimate for What domain)
+  - `theta_where` (float, IRT ability estimate for Where domain)
+  - `theta_when` (float, IRT ability estimate for When domain)
 **Expected Rows:** ~400 (100 participants x 4 tests)
-**Circuit Breaker:** If file missing -> EXPECTATIONS ERROR "RQ 5.1 must complete Step 3 (theta extraction) before RQ 5.12 can run"
 
 **File 3:** results/ch5/rq1/data/step00_tsvr_mapping.csv
-**Source:** RQ 5.1 Step 0 (TSVR extraction)
+**Source:** RQ 5.1 Step 0 (TSVR time variable extraction)
 **Format:** CSV with columns:
   - `composite_ID` (string, format: {UID}_{test})
-  - `TSVR_hours` (float, range: [0, 300] hours typical, 0=encoding, 168=1 week)
-  - `test` (string, values: {T1, T2, T3, T4})
   - `UID` (string, participant identifier)
-**Expected Rows:** ~400
-**Circuit Breaker:** If file missing -> EXPECTATIONS ERROR "RQ 5.1 must complete Step 0 (TSVR extraction) before RQ 5.12 can run"
+  - `test` (int, values: {1, 2, 3, 4})
+  - `TSVR_hours` (float, actual hours since encoding)
+**Expected Rows:** ~400 (100 participants x 4 tests)
 
 **File 4:** data/cache/dfData.csv
-**Source:** Project-level raw data cache (dichotomized item responses)
+**Source:** Project-level raw data cache (dichotomized scores)
 **Format:** CSV with columns:
   - `UID` (string, participant identifier)
-  - `test` (string, values: {T1, T2, T3, T4})
-  - Item response columns: TQ_{domain}_{variant}_{number} (int, values: {0, 1, NaN})
-    - Example: TQ_N_F_01 (What domain, Face variant, item 1)
-    - What domain: TQ_N_* (18 items expected)
-    - Where domain: TQ_U_*, TQ_D_* (16 items expected - pick-up and put-down)
-    - When domain: TQ_O_* (16 items expected)
+  - `TEST` (int, values: {1, 2, 3, 4})
+  - `TQ_*` columns (int, dichotomized 0/1 item responses for all items)
 **Expected Rows:** ~400 (100 participants x 4 tests)
-**Expected Columns:** ~50 TQ_ item columns + identifier columns
-**Circuit Breaker:** If file missing -> EXPECTATIONS ERROR "dfData.csv required for CTT computation (raw item responses)"
+**Note:** This is RAW data source for CTT computation (dichotomization already applied)
 
 **Processing:**
-1. Load RQ 5.1 purified items list -> extract item_name column as retained_items
-2. Load RQ 5.1 theta scores -> keep all columns
-3. Load RQ 5.1 TSVR mapping -> keep all columns
-4. Load raw data (dfData.csv) -> filter to TQ_ columns only
-5. Validate all composite_IDs match across files (theta, TSVR, raw data)
-6. Merge TSVR with theta on composite_ID (left join - all theta rows retained)
+- Load all 4 files using pd.read_csv()
+- Verify expected column names match exactly (case-sensitive)
+- Verify row counts in expected range (380-400 rows for files 2-4)
+- Create composite_ID in dfData by merging UID and TEST (format: {UID}_{TEST})
+- No transformations yet (just loading and validation)
 
 **Output:**
 
-**File 1:** data/step00_retained_items.csv
-**Format:** CSV, one row per retained item
-**Columns:**
-  - `item_name` (string, VR tag format)
-  - `dimension` (string, factor assignment)
-  - `a` (float, discrimination)
-  - `b` (float, difficulty)
+**File 1:** data/step00_irt_purified_items.csv (copy of RQ 5.1 purified items for local reference)
+**Format:** CSV, same schema as input File 1
 **Expected Rows:** ~38 items
-**Purpose:** Identify which items to include in purified CTT computation
 
-**File 2:** data/step00_raw_ctt_data.csv
-**Format:** CSV, wide format (composite_ID x TQ_ items)
-**Columns:**
-  - `composite_ID` (string)
-  - `UID` (string)
-  - `test` (string)
-  - TQ_ item columns (int 0/1/NaN, ~50 columns)
+**File 2:** data/step00_theta_scores.csv (copy of RQ 5.1 theta for local reference)
+**Format:** CSV, same schema as input File 2
 **Expected Rows:** ~400
-**Purpose:** Raw item responses for CTT scoring
 
-**File 3:** data/step00_theta_with_tsvr.csv
-**Format:** CSV, one row per composite_ID
-**Columns:**
-  - `composite_ID` (string)
-  - `UID` (string)
-  - `test` (string)
-  - `TSVR_hours` (float)
-  - `theta_common`, `se_common` (float)
-  - `theta_congruent`, `se_congruent` (float)
-  - `theta_incongruent`, `se_incongruent` (float)
+**File 3:** data/step00_tsvr_mapping.csv (copy of RQ 5.1 TSVR for local reference)
+**Format:** CSV, same schema as input File 3
 **Expected Rows:** ~400
-**Purpose:** IRT theta scores with time variable for later LMM comparison
+
+**File 4:** data/step00_raw_scores.csv (dfData with composite_ID added)
+**Format:** CSV with columns:
+  - `composite_ID` (string, format: {UID}_{test})
+  - `UID` (string)
+  - `TEST` (int)
+  - `TQ_*` columns (int, all item responses)
+**Expected Rows:** ~400
 
 **Validation Requirement:**
-Validation tools MUST be used after data loading execution. Specific validation tools determined by rq_tools based on cross-RQ dependency checks.
+Validation tools MUST be used after data loading execution. Specific validation tools will be determined by rq_tools based on file existence and format checks.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_retained_items.csv: ~38 rows x 4 columns (item_name, dimension, a, b)
-- data/step00_raw_ctt_data.csv: ~400 rows x ~53 columns (composite_ID, UID, test, ~50 TQ_ items)
-- data/step00_theta_with_tsvr.csv: ~400 rows x 10 columns (composite_ID, UID, test, TSVR_hours, 6 theta/SE columns)
-- All data types correct (string for IDs, float for numeric)
+- data/step00_irt_purified_items.csv: 38 rows x 4 columns (item_name: object, factor: object, a: float64, b: float64)
+- data/step00_theta_scores.csv: 400 rows x 4 columns (composite_ID: object, theta_what: float64, theta_where: float64, theta_when: float64)
+- data/step00_tsvr_mapping.csv: 400 rows x 4 columns (composite_ID: object, UID: object, test: int64, TSVR_hours: float64)
+- data/step00_raw_scores.csv: 400 rows x 53+ columns (composite_ID, UID, TEST, TQ_* items)
 
 *Value Ranges:*
-- a in [0.5, 4.0] (post-purification range)
-- b unrestricted (temporal items can have |b| > 3.0)
-- TQ_ items in {0, 1, NaN} (dichotomized responses)
-- theta_* in [-3, 3] typical (allow [-5, 5] for outliers)
-- se_* in [0.1, 1.0] (standard error bounds)
-- TSVR_hours in [0, 300] (0=encoding, ~168=1 week, 300=upper bound)
+- a in [0.5, 4.0] (purified discrimination range from RQ 5.1)
+- b unrestricted (difficulty can be extreme for temporal items)
+- theta_* in [-3, 3] (typical IRT ability range)
+- TSVR_hours in [0, 200] hours (max ~8 days)
+- TQ_* in {0, 1} (dichotomized responses)
+- test in {1, 2, 3, 4} (test sessions)
 
 *Data Quality:*
-- Retained items count: 35-42 items acceptable (expected ~38, ±10% tolerance)
-- Raw CTT data: All 400 composite_IDs present (100 participants x 4 tests, no data loss)
-- Theta-TSVR merge: All 400 rows matched (no missing TSVR values)
-- No duplicate composite_IDs in any file
-- TQ_ item columns: Allow up to 30% NaN per item (missing data acceptable)
+- No NaN in item_name, factor, a, b columns (purified items complete)
+- No NaN in composite_ID, theta_* columns (all participants estimated)
+- No NaN in composite_ID, UID, test, TSVR_hours (complete TSVR mapping)
+- Expected N: All 4 files have 380-400 rows (allowing for some exclusions)
+- composite_ID format validation: matches {UID}_{test} pattern
+- No duplicate composite_IDs within any file
 
 *Log Validation:*
-- Required: "Loaded {N} retained items from RQ 5.1" where N in [35, 42]
-- Required: "All 400 composite_IDs matched across theta and TSVR files"
-- Required: "Loaded {M} TQ_ items from dfData.csv" where M in [48, 52]
-- Forbidden: "ERROR", "TSVR merge failed", "composite_ID mismatch"
-- Acceptable warnings: "Some TQ_ items have >30% missing data" (temporal items difficult)
+- Required: "Loaded 4 data sources successfully"
+- Required: "Created composite_ID in dfData: {N} rows"
+- Required: "VALIDATION - PASS: All files loaded with expected structure"
+- Forbidden: "ERROR", "FileNotFoundError", "Missing columns"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Expected 38 retained items, found 25 - RQ 5.1 purification may have failed")
+- Raise error with specific failure (e.g., "File not found: results/ch5/rq1/data/step02_purified_items.csv")
 - Log failure to logs/step00_load_data.log
-- Quit immediately (do NOT proceed to Step 1)
-- Master investigates: Check RQ 5.1 status.yaml, verify RQ 5.1 completed successfully
+- Quit immediately (cannot proceed without RQ 5.1 outputs)
+- User must ensure RQ 5.1 Steps 0-3 completed successfully before running this RQ
+
+**Cross-RQ Dependency Check:**
+This step MUST verify results/ch5/rq1/status.yaml shows step03_theta_scores = success before proceeding. If RQ 5.1 incomplete, QUIT with:
+```
+EXPECTATIONS ERROR: RQ 5.12 requires RQ 5.1 completion (Steps 0-3).
+Current RQ 5.1 status: {status from status.yaml}
+Required: rq_inspect.status = success (validates Step 3 theta extraction)
+Action: Complete RQ 5.1 before running RQ 5.12
+```
 
 ---
 
-### Step 1: Map IRT Items to CTT Items
+### Step 1: Map Items to Full vs Purified Sets
 
-**Dependencies:** Step 0 (requires retained_items and raw_ctt_data)
-**Complexity:** Low (~5 minutes item mapping)
+**Dependencies:** Step 0 (requires purified item list and raw scores)
 
-**Purpose:** Create mapping between IRT item names (VR tag format) and CTT item names (TQ_ prefix format) to identify which CTT items correspond to IRT-retained items
+**Complexity:** Low (set operations, no modeling)
+
+**Purpose:** Identify which TQ_* items in dfData.csv were retained vs excluded by RQ 5.1 purification. Create full item list (all TQ_*) and purified item list (only items in step00_irt_purified_items.csv) for downstream CTT computation.
 
 **Input:**
 
-**File 1:** data/step00_retained_items.csv (from Step 0)
-**Columns:** item_name, dimension, a, b
-**Expected Rows:** ~38 items
+**File 1:** data/step00_irt_purified_items.csv
+**Columns used:** `item_name`, `factor`
+**Purpose:** List of IRT-retained items per domain
 
-**File 2:** data/step00_raw_ctt_data.csv (from Step 0)
-**Columns:** composite_ID, UID, test, TQ_ item columns (~50)
-**Expected Rows:** ~400
+**File 2:** data/step00_raw_scores.csv
+**Columns used:** Column names matching pattern `TQ_*`
+**Purpose:** Extract full item list from dfData column names
 
 **Processing:**
-1. Parse IRT item_name format: VR-{paradigm}-{test}-{domain}-ANS
-   - Example: VR-IFR-A01-N-ANS -> paradigm=IFR, test=A01, domain=N (What)
-2. Construct corresponding CTT item name: TQ_{domain}_{variant}_{number}
-   - Domain mapping: N->N (What), U->U (Where-pickup), D->D (Where-putdown), O->O (When)
-   - Variant mapping: Derived from paradigm (IFR=F for Face, etc.)
-   - Number: Sequential within domain-variant combination
-3. For each IRT retained item, identify matching TQ_ column in raw_ctt_data
-4. Create two lists:
-   - full_ctt_items: All TQ_ columns from raw_ctt_data (~50 items)
-   - purified_ctt_items: Only TQ_ columns matching IRT retained items (~38 items)
-5. Verify all purified_ctt_items exist in raw_ctt_data (circuit breaker if missing)
+- Extract all column names from dfData matching pattern `TQ_*` -> full_item_list
+- Extract item_name values from purified_items.csv -> purified_item_list
+- Group purified items by domain (factor column): what_items, where_items, when_items
+- Group full items by domain using tag patterns:
+  - What (full): TQ_*-N-* items
+  - Where (full): TQ_*-U-* + TQ_*-D-* items (RQ 5.1 used -U- and -D-, not -L-)
+  - When (full): TQ_*-O-* items
+- Compute removed items: full_item_list - purified_item_list (set difference)
+- Count items per domain: full vs purified (for reporting)
 
 **Output:**
 
-**File 1:** data/step01_full_ctt_items.csv
-**Format:** CSV, one row per CTT item
-**Columns:**
-  - `ctt_item_name` (string, format: TQ_{domain}_{variant}_{number})
-  - `domain` (string, values: {What, Where, When})
-**Expected Rows:** ~50 items
-**Purpose:** Full CTT item list for Step 2 scoring
+**File 1:** data/step01_item_mapping.csv
+**Format:** CSV with columns:
+  - `item_name` (string, TQ_* item name)
+  - `domain` (string, "what", "where", "when")
+  - `retained` (bool, True if in purified set, False if removed)
+**Expected Rows:** ~50 items (all TQ_* items from dfData)
+**Column Details:**
+  - item_name: exact match to TQ_* column names in dfData
+  - domain: derived from tag pattern (*-N-* = what, *-U-*/*-D-* = where, *-O-* = when)
+  - retained: True for ~38 items, False for ~12 items
 
-**File 2:** data/step01_purified_ctt_items.csv
-**Format:** CSV, one row per purified CTT item
-**Columns:**
-  - `ctt_item_name` (string, TQ_ format)
-  - `irt_item_name` (string, VR tag format)
-  - `domain` (string)
-  - `a` (float, from IRT)
-  - `b` (float, from IRT)
-**Expected Rows:** ~38 items
-**Purpose:** Purified CTT item list for Step 3 scoring
+**File 2:** logs/step01_item_counts.txt
+**Format:** Text report
+**Content:**
+```
+Item Mapping Summary
+--------------------
+Full CTT Item Counts:
+  What: {N} items
+  Where: {N} items
+  When: {N} items
+  Total: {N} items
+
+Purified CTT Item Counts:
+  What: {N} items (retained)
+  Where: {N} items (retained)
+  When: {N} items (retained)
+  Total: {N} items (retained)
+
+Removed Items:
+  What: {N} items ({percent}%)
+  Where: {N} items ({percent}%)
+  When: {N} items ({percent}%)
+  Total: {N} items ({percent}%)
+
+Expected Counts (from thesis):
+  Full: 50 items (18 What, 16 Where, 16 When)
+  Purified: ~38 items (14 What, 12 Where, 12 When)
+  Removed: ~12 items (24% removal rate)
+```
 
 **Validation Requirement:**
-Validation tools MUST be used after item mapping execution. Specific validation tools determined by rq_tools based on data format validation.
+Validation tools MUST be used after item mapping execution. Specific validation tools determined by rq_tools based on set operation validation.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step01_full_ctt_items.csv: ~50 rows x 2 columns (ctt_item_name, domain)
-- data/step01_purified_ctt_items.csv: ~38 rows x 5 columns (ctt_item_name, irt_item_name, domain, a, b)
-- Data types: string (item names, domain), float (a, b)
+- data/step01_item_mapping.csv: 50 rows x 3 columns (item_name: object, domain: object, retained: bool)
+- logs/step01_item_counts.txt: Text file with counts per domain
 
 *Value Ranges:*
-- domain in {What, Where, When} (categorical)
-- a in [0.5, 4.0] (purified items only)
-- b unrestricted (temporal items can have extreme difficulty)
-- Item counts match Step 0: purified_ctt_items ~= retained_items count
+- domain in {"what", "where", "when"} (categorical)
+- retained in {True, False} (boolean)
+- Total items: 48-52 (allowing for slight variation)
+- Retained items: 36-40 (~75% retention expected)
+- Removed items: 10-14 (~25% removal expected)
 
 *Data Quality:*
-- All purified_ctt_items found in raw_ctt_data columns (no missing TQ_ items)
-- Domain distribution reasonable: What ~14, Where ~12, When ~12 (±3 items per domain)
-- No duplicate ctt_item_names in either file
-- All purified items have corresponding IRT parameters (a, b non-null)
+- No NaN in any column (complete mapping)
+- All item_name values match TQ_* pattern
+- All purified items from step00_irt_purified_items.csv have retained=True
+- No duplicate item_name values
+- All three domains represented (what, where, when)
 
 *Log Validation:*
-- Required: "Mapped {N} IRT items to {M} CTT items" where N ~= M ~= 38
-- Required: "All purified CTT items found in raw data"
-- Required: "Domain distribution - What: {W}, Where: {X}, When: {Y}"
-- Forbidden: "ERROR", "Missing TQ_ item", "Mapping failed"
-- Acceptable warnings: None expected for item mapping
+- Required: "Item mapping complete: {N} full items, {N} purified items"
+- Required: "Retention rate: {percent}% (expected ~75%)"
+- Required: "VALIDATION - PASS: Item mapping"
+- Forbidden: "ERROR", "Unexpected domain", "Missing items"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "IRT item VR-IFR-A01-N-ANS has no matching TQ_ item in raw data")
+- Raise error with specific failure (e.g., "Retention rate 45% far below expected 75%")
 - Log failure to logs/step01_map_items.log
-- Quit immediately (do NOT proceed to Step 2)
-- Master investigates: Check data/cache/dfData.csv structure, verify TQ_ column naming
+- Quit immediately (incorrect mapping will cascade to CTT computation)
 
 ---
 
 ### Step 2: Compute Full CTT Scores
 
-**Dependencies:** Step 1 (requires full_ctt_items and raw_ctt_data)
-**Complexity:** Low (~3 minutes CTT computation)
+**Dependencies:** Step 0, Step 1 (requires raw scores and full item list)
 
-**Purpose:** Calculate mean accuracy scores per participant x test x domain using ALL available items (traditional CTT approach with equal weighting)
+**Complexity:** Low (simple mean computation, no modeling)
+
+**Purpose:** Calculate Classical Test Theory scores using ALL items (full item set) per UID x Test x Domain. CTT score = mean of dichotomized item responses (0/1) within domain.
 
 **Input:**
 
-**File 1:** data/step01_full_ctt_items.csv (from Step 1)
-**Columns:** ctt_item_name, domain
-**Expected Rows:** ~50 items
+**File 1:** data/step00_raw_scores.csv
+**Columns used:** composite_ID, UID, TEST, TQ_* (all item columns)
 
-**File 2:** data/step00_raw_ctt_data.csv (from Step 0)
-**Columns:** composite_ID, UID, test, TQ_ item columns (~50)
-**Expected Rows:** ~400
+**File 2:** data/step01_item_mapping.csv
+**Columns used:** item_name, domain (all items, not filtered by retained)
 
 **Processing:**
-1. For each domain (What, Where, When):
-   - Filter full_ctt_items to domain-specific items
-   - Extract corresponding TQ_ columns from raw_ctt_data
-   - Compute mean accuracy per composite_ID (row-wise mean, ignore NaN)
-2. Reshape from wide (composite_ID x domain columns) to long (composite_ID-domain rows)
-3. Add metadata columns: UID (from composite_ID split), test (from composite_ID split)
+- For each domain (what, where, when):
+  - Select all items matching domain pattern (all items, not just retained)
+  - Group by composite_ID
+  - Compute mean of dichotomized responses (0/1) -> CTT_full_{domain}
+  - CTT score range: [0, 1] (proportion correct)
+- Merge domain scores into single DataFrame
+- Add UID and TEST columns from composite_ID parsing
 
 **Output:**
 
-**File 1:** data/step02_full_ctt_scores.csv
-**Format:** CSV, long format (one row per composite_ID x domain)
-**Columns:**
-  - `composite_ID` (string)
-  - `UID` (string)
-  - `test` (string)
-  - `domain` (string, values: {What, Where, When})
-  - `ctt_score_full` (float, range: [0, 1], mean accuracy)
-  - `n_items_full` (int, number of items used in mean)
-**Expected Rows:** ~1200 (400 composite_IDs x 3 domains)
+**File:** data/step02_ctt_full_scores.csv
+**Format:** CSV with columns:
+  - `composite_ID` (string, format: {UID}_{test})
+  - `UID` (string, participant identifier)
+  - `TEST` (int, values: {1, 2, 3, 4})
+  - `CTT_full_what` (float, range: [0, 1], mean score for What domain all items)
+  - `CTT_full_where` (float, range: [0, 1], mean score for Where domain all items)
+  - `CTT_full_when` (float, range: [0, 1], mean score for When domain all items)
+**Expected Rows:** ~400 (100 participants x 4 tests)
 
 **Validation Requirement:**
-Validation tools MUST be used after CTT scoring execution. Specific validation tools determined by rq_tools based on CTT computation validation.
+Validation tools MUST be used after CTT computation execution. Specific validation tools determined by rq_tools based on numeric range validation.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step02_full_ctt_scores.csv: ~1200 rows x 6 columns (composite_ID, UID, test, domain, ctt_score_full, n_items_full)
-- Data types: string (IDs, domain), float (ctt_score_full), int (n_items_full)
+- data/step02_ctt_full_scores.csv: 400 rows x 6 columns (composite_ID: object, UID: object, TEST: int64, CTT_full_what: float64, CTT_full_where: float64, CTT_full_when: float64)
 
 *Value Ranges:*
-- ctt_score_full in [0, 1] (mean accuracy, cannot exceed bounds)
-- n_items_full in [10, 20] per domain (What ~18, Where ~16, When ~16, allow some missing)
-- Expected mean scores: ~0.50-0.70 (episodic memory tasks moderately difficult)
+- CTT_full_* in [0, 1] (proportion correct range)
+- TEST in {1, 2, 3, 4} (test sessions)
+- No negative values (CTT is proportion)
+- No values > 1.0 (maximum proportion)
 
 *Data Quality:*
-- All 1200 rows present (400 composite_IDs x 3 domains, no data loss)
-- No NaN in ctt_score_full (if all items NaN for a participant-domain, score should be 0 or excluded)
-- No duplicate composite_ID-domain combinations
-- Domain distribution balanced: Each composite_ID appears exactly 3 times (What, Where, When)
-- n_items_full reasonable: What ~18, Where ~16, When ~16 (±5 items tolerance for missing data)
+- No NaN in composite_ID, UID, TEST (complete participant data)
+- NaN acceptable in CTT_full_* ONLY if participant missing all items for domain (rare)
+- Expected N: 400 rows (100 participants x 4 tests)
+- No duplicate composite_IDs
+- Distribution check: CTT_full_* approximately normal or slightly skewed (typical for ability measures)
 
 *Log Validation:*
-- Required: "Computed full CTT scores for 1200 composite_ID-domain combinations"
-- Required: "Mean items per domain - What: {W}, Where: {X}, When: {Y}"
-- Required: "Mean CTT scores - What: {A}, Where: {B}, When: {C}" where all in [0.3, 0.9]
-- Forbidden: "ERROR", "NaN in ctt_score_full", "Missing domain"
-- Acceptable warnings: "Some participants have <50% items for domain {X}" (temporal items difficult)
+- Required: "Computed full CTT scores for {N} observations"
+- Required: "Mean CTT_full_what: {value}, SD: {value}"
+- Required: "Mean CTT_full_where: {value}, SD: {value}"
+- Required: "Mean CTT_full_when: {value}, SD: {value}"
+- Required: "VALIDATION - PASS: CTT full scores in valid range"
+- Forbidden: "ERROR", "Values outside [0,1]", "All NaN for domain"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Expected 1200 rows, found 873 - some domains missing")
+- Raise error with specific failure (e.g., "CTT_full_what contains values > 1.0")
 - Log failure to logs/step02_compute_full_ctt.log
-- Quit immediately (do NOT proceed to Step 3)
-- Master investigates: Check raw_ctt_data for missing TQ_ columns, verify domain mapping
+- Quit immediately (invalid CTT scores cannot be compared to IRT)
 
 ---
 
 ### Step 3: Compute Purified CTT Scores
 
-**Dependencies:** Step 1 (requires purified_ctt_items and raw_ctt_data)
-**Complexity:** Low (~3 minutes CTT computation)
+**Dependencies:** Step 0, Step 1 (requires raw scores and purified item list)
 
-**Purpose:** Calculate mean accuracy scores per participant x test x domain using ONLY IRT-retained items (hybrid CTT-IRT approach testing purification benefit)
+**Complexity:** Low (filtered mean computation, no modeling)
+
+**Purpose:** Calculate Classical Test Theory scores using ONLY IRT-retained items (purified item set) per UID x Test x Domain. Same computation as Step 2, but filtered item list.
 
 **Input:**
 
-**File 1:** data/step01_purified_ctt_items.csv (from Step 1)
-**Columns:** ctt_item_name, irt_item_name, domain, a, b
-**Expected Rows:** ~38 items
+**File 1:** data/step00_raw_scores.csv
+**Columns used:** composite_ID, UID, TEST, TQ_* (all item columns)
 
-**File 2:** data/step00_raw_ctt_data.csv (from Step 0)
-**Columns:** composite_ID, UID, test, TQ_ item columns
-**Expected Rows:** ~400
+**File 2:** data/step01_item_mapping.csv
+**Columns used:** item_name, domain, retained
+**Filter:** retained == True (only purified items)
 
 **Processing:**
-1. For each domain (What, Where, When):
-   - Filter purified_ctt_items to domain-specific items
-   - Extract corresponding TQ_ columns from raw_ctt_data
-   - Compute mean accuracy per composite_ID (row-wise mean, ignore NaN)
-2. Reshape from wide to long format
-3. Add metadata columns: UID, test (from composite_ID)
-4. Expected item counts after purification: What ~14, Where ~12, When ~12 (from concept.md)
+- For each domain (what, where, when):
+  - Select ONLY items with retained=True from item_mapping
+  - Group by composite_ID
+  - Compute mean of dichotomized responses (0/1) -> CTT_purified_{domain}
+  - CTT score range: [0, 1] (proportion correct, but fewer items than full CTT)
+- Merge domain scores into single DataFrame
+- Add UID and TEST columns from composite_ID parsing
 
 **Output:**
 
-**File 1:** data/step03_purified_ctt_scores.csv
-**Format:** CSV, long format (one row per composite_ID x domain)
-**Columns:**
-  - `composite_ID` (string)
-  - `UID` (string)
-  - `test` (string)
-  - `domain` (string, values: {What, Where, When})
-  - `ctt_score_purified` (float, range: [0, 1], mean accuracy)
-  - `n_items_purified` (int, number of items used in mean)
-**Expected Rows:** ~1200 (400 composite_IDs x 3 domains)
+**File:** data/step03_ctt_purified_scores.csv
+**Format:** CSV with columns:
+  - `composite_ID` (string, format: {UID}_{test})
+  - `UID` (string, participant identifier)
+  - `TEST` (int, values: {1, 2, 3, 4})
+  - `CTT_purified_what` (float, range: [0, 1], mean score for What domain purified items)
+  - `CTT_purified_where` (float, range: [0, 1], mean score for Where domain purified items)
+  - `CTT_purified_when` (float, range: [0, 1], mean score for When domain purified items)
+**Expected Rows:** ~400 (100 participants x 4 tests)
 
 **Validation Requirement:**
-Validation tools MUST be used after purified CTT scoring execution. Specific validation tools determined by rq_tools.
+Validation tools MUST be used after purified CTT computation execution. Specific validation tools determined by rq_tools based on numeric range validation.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step03_purified_ctt_scores.csv: ~1200 rows x 6 columns (composite_ID, UID, test, domain, ctt_score_purified, n_items_purified)
-- Data types: string (IDs, domain), float (ctt_score_purified), int (n_items_purified)
+- data/step03_ctt_purified_scores.csv: 400 rows x 6 columns (composite_ID: object, UID: object, TEST: int64, CTT_purified_what: float64, CTT_purified_where: float64, CTT_purified_when: float64)
 
 *Value Ranges:*
-- ctt_score_purified in [0, 1] (mean accuracy)
-- n_items_purified in [8, 18] per domain (What ~14, Where ~12, When ~12 expected, fewer than full CTT)
-- Expected mean scores: ~0.52-0.72 (slightly higher than full CTT if purification removes noise)
+- CTT_purified_* in [0, 1] (proportion correct range)
+- TEST in {1, 2, 3, 4} (test sessions)
+- No negative values
+- No values > 1.0
 
 *Data Quality:*
-- All 1200 rows present (400 composite_IDs x 3 domains)
-- No NaN in ctt_score_purified
-- No duplicate composite_ID-domain combinations
-- n_items_purified < n_items_full (purification removes items, never adds)
-- Expected item reduction: ~20-30% fewer items than full CTT per domain
+- No NaN in composite_ID, UID, TEST
+- NaN acceptable in CTT_purified_* ONLY if participant missing all purified items for domain (rare)
+- Expected N: 400 rows (same as full CTT)
+- No duplicate composite_IDs
+- Distribution check: CTT_purified_* similar to CTT_full_* (correlation r > 0.95 expected)
 
 *Log Validation:*
-- Required: "Computed purified CTT scores for 1200 composite_ID-domain combinations"
-- Required: "Mean items per domain (purified) - What: {W}, Where: {X}, When: {Y}"
-- Required: "Item reduction vs full CTT - What: {A}%, Where: {B}%, When: {C}%" where all in [15%, 35%]
-- Required: "Mean purified CTT scores - What: {D}, Where: {E}, When: {F}"
-- Forbidden: "ERROR", "n_items_purified > n_items_full", "Missing domain"
-- Acceptable warnings: "Purified item counts lower than expected (aggressive purification)"
+- Required: "Computed purified CTT scores for {N} observations"
+- Required: "Using {N} purified items (vs {N} full items)"
+- Required: "Mean CTT_purified_what: {value}, SD: {value}"
+- Required: "Mean CTT_purified_where: {value}, SD: {value}"
+- Required: "Mean CTT_purified_when: {value}, SD: {value}"
+- Required: "VALIDATION - PASS: CTT purified scores in valid range"
+- Forbidden: "ERROR", "Values outside [0,1]", "No purified items for domain"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Purified item count exceeds full item count for What domain")
+- Raise error with specific failure (e.g., "CTT_purified_when all NaN - no retained items")
 - Log failure to logs/step03_compute_purified_ctt.log
-- Quit immediately (do NOT proceed to Step 4)
-- Master investigates: Check purified_ctt_items mapping, verify IRT purification criteria applied correctly
+- Quit immediately (cannot compare full vs purified if purified computation fails)
 
 ---
 
-### Step 4: Assess CTT Reliability (Cronbach's Alpha)
+### Step 4: CTT Reliability Assessment
 
-**Dependencies:** Step 1, 2, 3 (requires item lists and raw data for internal consistency)
-**Complexity:** Medium (~10 minutes with bootstrap CIs)
+**Dependencies:** Step 0, Step 1, Step 2, Step 3 (requires raw item responses and item mappings)
 
-**Purpose:** Compute Cronbach's alpha for both full and purified CTT item sets per domain to assess whether IRT purification maintains or improves CTT reliability
+**Complexity:** Low (Cronbach's alpha with bootstrap, ~3 min)
+
+**Purpose:** Compute Cronbach's alpha internal consistency for both full and purified CTT item sets per domain. Bootstrap 95% confidence intervals validate whether purification maintains or improves reliability. Uses tools.analysis_ctt.compute_cronbachs_alpha() per 1_concept.md specification.
 
 **Input:**
 
-**File 1:** data/step01_full_ctt_items.csv (from Step 1)
-**Columns:** ctt_item_name, domain
-**Expected Rows:** ~50 items
+**File 1:** data/step00_raw_scores.csv
+**Columns used:** TQ_* item columns (dichotomized 0/1 responses)
 
-**File 2:** data/step01_purified_ctt_items.csv (from Step 1)
-**Columns:** ctt_item_name, irt_item_name, domain, a, b
-**Expected Rows:** ~38 items
-
-**File 3:** data/step00_raw_ctt_data.csv (from Step 0)
-**Columns:** composite_ID, UID, test, TQ_ item columns
-**Expected Rows:** ~400
+**File 2:** data/step01_item_mapping.csv
+**Columns used:** item_name, domain, retained
 
 **Processing:**
-1. For each domain (What, Where, When):
-   - Extract full CTT items for domain from raw_ctt_data
-   - Compute Cronbach's alpha using tools.analysis_ctt.compute_cronbachs_alpha()
-   - Bootstrap 95% confidence intervals (1000 resamples)
-   - Extract purified CTT items for domain from raw_ctt_data
-   - Compute Cronbach's alpha with bootstrap 95% CIs
-2. Compare alpha_full vs alpha_purified per domain
-3. Interpretation logic:
-   - If alpha_purified >= alpha_full (or CIs overlap): Purification maintains/improves reliability
-   - If alpha_purified < alpha_full with non-overlapping CIs: Purification reduces reliability (requires discussion)
+- For each domain (what, where, when):
+  - **Full CTT reliability:**
+    - Select all items for domain (retained=True OR False)
+    - Extract item responses from raw_scores (rows x items matrix)
+    - Call tools.analysis_ctt.compute_cronbachs_alpha(items_matrix, n_bootstrap=1000)
+    - Returns: alpha_full, CI_lower_full, CI_upper_full
+  - **Purified CTT reliability:**
+    - Select only retained items for domain (retained=True)
+    - Extract item responses from raw_scores (rows x items matrix)
+    - Call tools.analysis_ctt.compute_cronbachs_alpha(items_matrix, n_bootstrap=1000)
+    - Returns: alpha_purified, CI_lower_purified, CI_upper_purified
+- Compare alpha_full vs alpha_purified per domain (interpretation below)
 
 **Output:**
 
-**File 1:** data/step04_ctt_reliability.csv
-**Format:** CSV, one row per domain x item_set
-**Columns:**
-  - `domain` (string, values: {What, Where, When})
-  - `item_set` (string, values: {full, purified})
-  - `alpha` (float, range: [0, 1], Cronbach's alpha point estimate)
-  - `ci_lower` (float, 95% CI lower bound)
-  - `ci_upper` (float, 95% CI upper bound)
-  - `n_items` (int, number of items in set)
-**Expected Rows:** 6 (3 domains x 2 item_sets)
+**File:** results/step04_reliability_assessment.csv
+**Format:** CSV with columns:
+  - `domain` (string, "what", "where", "when")
+  - `alpha_full` (float, Cronbach's alpha for full item set)
+  - `CI_lower_full` (float, bootstrap 95% CI lower bound)
+  - `CI_upper_full` (float, bootstrap 95% CI upper bound)
+  - `alpha_purified` (float, Cronbach's alpha for purified item set)
+  - `CI_lower_purified` (float, bootstrap 95% CI lower bound)
+  - `CI_upper_purified` (float, bootstrap 95% CI upper bound)
+  - `delta_alpha` (float, alpha_purified - alpha_full, positive = improvement)
+**Expected Rows:** 3 (one per domain: what, where, when)
+
+**Interpretation Logic (documented in log):**
+- If alpha_purified > alpha_full AND CIs non-overlapping -> "Purification improved reliability"
+- If alpha_purified >= alpha_full - 0.05 AND CIs overlapping -> "Purification maintained reliability (no significant decline)"
+- If alpha_purified < alpha_full - 0.05 AND CIs non-overlapping -> "Purification reduced reliability (removed meaningful variance from CTT perspective)"
 
 **Validation Requirement:**
-Validation tools MUST be used after Cronbach's alpha computation execution. Specific validation tools determined by rq_tools.
+Validation tools MUST be used after reliability assessment execution. Specific validation tools determined by rq_tools based on alpha value validation.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step04_ctt_reliability.csv: 6 rows x 6 columns (domain, item_set, alpha, ci_lower, ci_upper, n_items)
-- Data types: string (domain, item_set), float (alpha, CIs), int (n_items)
+- results/step04_reliability_assessment.csv: 3 rows x 8 columns (domain: object, alpha_full: float64, CI_lower_full: float64, CI_upper_full: float64, alpha_purified: float64, CI_lower_purified: float64, CI_upper_purified: float64, delta_alpha: float64)
 
 *Value Ranges:*
-- alpha in [0.5, 0.95] (episodic memory scales typically 0.7-0.9)
-- ci_lower < alpha < ci_upper (CIs must bracket point estimate)
-- CI width: (ci_upper - ci_lower) in [0.02, 0.15] (bootstrap CIs typically narrow for N=400)
-- n_items matches Step 1 counts: full ~18/16/16, purified ~14/12/12 per domain
+- alpha_* in [0, 1] (Cronbach's alpha bounds)
+- CI_lower_* in [0, 1] and <= alpha_* (lower bound)
+- CI_upper_* in [0, 1] and >= alpha_* (upper bound)
+- delta_alpha in [-1, 1] (difference bounded by alpha range)
+- Typical alpha values: [0.70, 0.95] (acceptable to excellent internal consistency)
 
 *Data Quality:*
-- All 6 rows present (3 domains x 2 item_sets)
-- No NaN values (all alphas computable)
-- ci_lower >= 0 and ci_upper <= 1 (valid alpha bounds)
-- Expected pattern: alpha_purified >= alpha_full OR CIs overlap (purification shouldn't drastically reduce reliability)
+- Exactly 3 rows (what, where, when)
+- No NaN values (all domains must have computable alpha)
+- CI_lower < alpha < CI_upper for all domains (valid bootstrap CIs)
+- domain in {"what", "where", "when"}
+- Bootstrap completed: 1000 iterations per domain (documented in log)
 
 *Log Validation:*
-- Required: "Computed Cronbach's alpha for 6 domain-itemset combinations"
-- Required: "Full CTT alpha - What: {A} [{B}, {C}]" (format: point estimate [CI_lower, CI_upper])
-- Required: "Purified CTT alpha - What: {D} [{E}, {F}]"
-- Required: "Alpha comparison - What: {increase/decrease/stable}" (based on CI overlap)
-- Forbidden: "ERROR", "Alpha computation failed", "Bootstrap failed"
-- Acceptable warnings: "Alpha slightly lower for purified set (within 95% CI)" if CIs overlap
+- Required: "Computing Cronbach's alpha with 1000 bootstrap iterations"
+- Required: "Domain what: alpha_full={value} [{CI_lower}, {CI_upper}], alpha_purified={value} [{CI_lower}, {CI_upper}]"
+- Required: "Domain where: alpha_full={value} [{CI_lower}, {CI_upper}], alpha_purified={value} [{CI_lower}, {CI_upper}]"
+- Required: "Domain when: alpha_full={value} [{CI_lower}, {CI_upper}], alpha_purified={value} [{CI_lower}, {CI_upper}]"
+- Required: "Interpretation: {interpretation per logic above}"
+- Required: "VALIDATION - PASS: All alpha values in [0,1]"
+- Forbidden: "ERROR", "Alpha outside [0,1]", "Bootstrap failed"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Cronbach's alpha = 1.2 for What domain - exceeds valid range")
+- Raise error with specific failure (e.g., "Alpha computation failed for domain what")
 - Log failure to logs/step04_assess_reliability.log
-- Quit immediately (do NOT proceed to Step 5)
-- Master investigates: Check raw_ctt_data for data quality issues, verify bootstrap function
+- Quit immediately (reliability validation is critical for CTT interpretation)
 
 ---
 
-### Step 5: Correlation Analysis with Steiger's Z-Test
+### Step 5: Correlation Analysis with Steiger's z-test
 
-**Dependencies:** Steps 0, 2, 3 (requires full CTT, purified CTT, and IRT theta scores)
-**Complexity:** Medium (~8 minutes with dependent correlation tests)
+**Dependencies:** Step 0, Step 2, Step 3 (requires theta scores, full CTT, purified CTT)
 
-**Purpose:** Test whether purified CTT correlates more strongly with IRT theta than full CTT, using Steiger's z-test for dependent correlations (correct method for overlapping samples)
+**Complexity:** Low (correlation + hypothesis test, ~2 min)
+
+**Purpose:** Test primary hypothesis that purified CTT correlates more strongly with IRT theta than full CTT. Uses Steiger's z-test for dependent correlations (Decision D068 principle applied to correlation testing). Computes three pairwise correlations per domain and tests H0: r(Full CTT, IRT) = r(Purified CTT, IRT).
 
 **Input:**
 
-**File 1:** data/step02_full_ctt_scores.csv (from Step 2)
-**Columns:** composite_ID, UID, test, domain, ctt_score_full, n_items_full
-**Expected Rows:** ~1200
+**File 1:** data/step00_theta_scores.csv
+**Columns used:** composite_ID, theta_what, theta_where, theta_when
 
-**File 2:** data/step03_purified_ctt_scores.csv (from Step 3)
-**Columns:** composite_ID, UID, test, domain, ctt_score_purified, n_items_purified
-**Expected Rows:** ~1200
+**File 2:** data/step02_ctt_full_scores.csv
+**Columns used:** composite_ID, CTT_full_what, CTT_full_where, CTT_full_when
 
-**File 3:** data/step00_theta_with_tsvr.csv (from Step 0)
-**Columns:** composite_ID, UID, test, TSVR_hours, theta_common, se_common, theta_congruent, se_congruent, theta_incongruent, se_incongruent
-**Expected Rows:** ~400
+**File 3:** data/step03_ctt_purified_scores.csv
+**Columns used:** composite_ID, CTT_purified_what, CTT_purified_where, CTT_purified_when
 
 **Processing:**
-1. Map IRT theta dimensions to domains:
-   - What domain: Use theta_common (object identity - common factor)
-   - Where domain: Use theta_congruent (spatial congruent locations)
-   - When domain: Use theta_incongruent (temporal incongruent sequences)
-   - Rationale: Domain-dimension mapping from RQ 5.1 3-factor model
-2. Reshape IRT theta to long format: composite_ID-domain rows matching CTT scores
-3. Merge full CTT, purified CTT, IRT theta on composite_ID-domain
-4. For each domain:
-   - Compute r(Full CTT, IRT)
-   - Compute r(Purified CTT, IRT)
-   - Compute r(Full CTT, Purified CTT)
-   - Test H0: r(Full CTT, IRT) = r(Purified CTT, IRT) using Steiger's z-test
-   - Use tools.analysis_ctt.compare_correlations_dependent() with all three correlations
-   - Report z-statistic, p-value (two-tailed), and delta_r = r(Purified, IRT) - r(Full, IRT)
-5. Expected pattern: r(Purified CTT, IRT) > r(Full CTT, IRT) with small delta_r ~0.02-0.05
+- Merge all three DataFrames on composite_ID
+- For each domain (what, where, when):
+  - Compute three Pearson correlations:
+    - r12 = corr(Full CTT, IRT theta)
+    - r13 = corr(Full CTT, Purified CTT)
+    - r23 = corr(Purified CTT, IRT theta)
+  - Call tools.analysis_ctt.compare_correlations_dependent(r12, r13, r23, n=400)
+    - Tests H0: r12 = r23 (Full CTT-IRT vs Purified CTT-IRT)
+    - Uses Steiger's (1980) formula for dependent correlations
+    - Returns: z_statistic, p_uncorrected, p_bonferroni (3 domains -> correction factor 3)
+  - Interpret: If p_bonferroni < 0.05 -> significant improvement from purification
 
 **Output:**
 
-**File 1:** data/step05_correlations.csv
-**Format:** CSV, one row per domain x correlation_pair
-**Columns:**
-  - `domain` (string)
-  - `correlation_pair` (string, values: {Full_CTT-IRT, Purified_CTT-IRT, Full_CTT-Purified_CTT})
-  - `r` (float, range: [-1, 1], Pearson correlation)
-  - `n` (int, sample size)
-**Expected Rows:** 9 (3 domains x 3 correlation_pairs)
-
-**File 2:** data/step05_steiger_tests.csv
-**Format:** CSV, one row per domain
-**Columns:**
-  - `domain` (string)
-  - `r_full_irt` (float)
-  - `r_purified_irt` (float)
-  - `delta_r` (float, = r_purified_irt - r_full_irt)
-  - `z_statistic` (float, Steiger's z)
-  - `p_value` (float, range: [0, 1], two-tailed)
-  - `interpretation` (string, "Purified > Full" if p < 0.05 and delta_r > 0, else "No difference")
+**File:** results/step05_correlation_analysis.csv
+**Format:** CSV with columns:
+  - `domain` (string, "what", "where", "when")
+  - `r_full_irt` (float, correlation between full CTT and IRT theta)
+  - `r_purified_irt` (float, correlation between purified CTT and IRT theta)
+  - `r_full_purified` (float, correlation between full CTT and purified CTT)
+  - `delta_r` (float, r_purified_irt - r_full_irt, positive = improvement)
+  - `steiger_z` (float, z-statistic for dependent correlation test)
+  - `p_uncorrected` (float, uncorrected p-value)
+  - `p_bonferroni` (float, Bonferroni-corrected p-value for 3 comparisons)
+  - `interpretation` (string, "Significant improvement", "No significant difference", or "Significant decline")
 **Expected Rows:** 3 (one per domain)
 
 **Validation Requirement:**
-Validation tools MUST be used after correlation analysis execution. Specific validation tools determined by rq_tools.
+Validation tools MUST be used after correlation analysis execution. Specific validation tools determined by rq_tools based on correlation validation (uses validate_correlation_test_d068 for dual p-value validation).
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step05_correlations.csv: 9 rows x 4 columns (domain, correlation_pair, r, n)
-- data/step05_steiger_tests.csv: 3 rows x 7 columns (domain, r_full_irt, r_purified_irt, delta_r, z_statistic, p_value, interpretation)
-- Data types: string (domain, correlation_pair, interpretation), float (r, delta_r, z, p), int (n)
+- results/step05_correlation_analysis.csv: 3 rows x 9 columns (domain: object, r_full_irt: float64, r_purified_irt: float64, r_full_purified: float64, delta_r: float64, steiger_z: float64, p_uncorrected: float64, p_bonferroni: float64, interpretation: object)
 
 *Value Ranges:*
-- r in [-1, 1] (correlation bounds)
-- Expected r(Full CTT, IRT) in [0.90, 0.98] (high convergence expected)
-- Expected r(Purified CTT, IRT) in [0.92, 0.99] (higher than full CTT)
-- Expected delta_r in [-0.05, 0.10] (small improvement, could be negative if purification removes signal)
-- z_statistic unrestricted (Steiger's z can be any real number)
-- p_value in [0, 1]
-- n in [390, 410] per domain (allowing some missing data)
+- r_* in [-1, 1] (correlation bounds)
+- Expected r_* in [0.85, 0.98] (high convergence expected between methods)
+- delta_r in [-0.5, 0.5] (difference in correlations)
+- Expected delta_r in [0, 0.05] (modest improvement hypothesis)
+- steiger_z unrestricted (z-statistic)
+- p_uncorrected in [0, 1] (p-value range)
+- p_bonferroni in [0, 1] (corrected p-value)
+- interpretation in {"Significant improvement", "No significant difference", "Significant decline"}
 
 *Data Quality:*
-- All 9 correlation rows present
-- All 3 Steiger test rows present
-- No NaN in correlations or p-values
-- r(Full CTT, Purified CTT) in [0.85, 0.99] (two CTT approaches should be highly correlated)
-- delta_r sign matches hypothesis (expect positive, but negative acceptable if purification harmful)
+- Exactly 3 rows (what, where, when)
+- No NaN in correlation values (all computable)
+- r_purified_irt >= r_full_irt expected (hypothesis direction)
+- r_full_purified > 0.90 expected (high overlap between full and purified CTT)
+- Dual p-values present: BOTH p_uncorrected AND p_bonferroni (Decision D068)
 
 *Log Validation:*
-- Required: "Computed 9 pairwise correlations (3 domains x 3 pairs)"
-- Required: "Steiger's z-tests completed for 3 domains"
-- Required: "Mean delta_r across domains: {X}" where X in [-0.05, 0.10]
-- Required: "Significant differences (p < 0.05): {N} domains" where N in [0, 3]
-- Forbidden: "ERROR", "Correlation computation failed", "Singular covariance matrix"
-- Acceptable warnings: "delta_r negative for {domain} (purification may have removed signal)"
+- Required: "Domain what: r(Full,IRT)={value}, r(Purified,IRT)={value}, delta_r={value}"
+- Required: "Steiger's z-test: z={value}, p_uncorrected={value}, p_bonferroni={value}"
+- Required: "Domain where: r(Full,IRT)={value}, r(Purified,IRT)={value}, delta_r={value}"
+- Required: "Steiger's z-test: z={value}, p_uncorrected={value}, p_bonferroni={value}"
+- Required: "Domain when: r(Full,IRT)={value}, r(Purified,IRT)={value}, delta_r={value}"
+- Required: "Steiger's z-test: z={value}, p_uncorrected={value}, p_bonferroni={value}"
+- Required: "VALIDATION - PASS: Dual p-values present for all domains"
+- Forbidden: "ERROR", "Correlation undefined", "Missing p-value"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Correlation r = 1.3 exceeds valid range [-1, 1]")
+- Raise error with specific failure (e.g., "Missing p_bonferroni for domain what")
 - Log failure to logs/step05_correlation_analysis.log
-- Quit immediately (do NOT proceed to Step 6)
-- Master investigates: Check merged data quality, verify all three measures aligned on composite_ID-domain
+- Quit immediately (correlation test is primary hypothesis test)
+
+**Decision D068 Application:**
+This step applies Decision D068 (dual p-value reporting) to correlation testing. Although D068 primarily addresses post-hoc contrasts, the principle extends to all hypothesis tests: report BOTH uncorrected and corrected p-values for transparent exploratory analysis. Steiger's z-test used because correlations are DEPENDENT (same N=100 participants contribute to all three correlations per domain).
 
 ---
 
-### Step 6: Standardize Outcomes for AIC Comparison
+### Step 6: Standardize Outcomes for Parallel LMM
 
-**Dependencies:** Steps 0, 2, 3 (requires full CTT, purified CTT, IRT theta)
-**Complexity:** Low (~3 minutes z-score transformation)
+**Dependencies:** Step 0, Step 2, Step 3 (requires theta, full CTT, purified CTT)
 
-**Purpose:** Standardize all three measurement approaches (Full CTT, Purified CTT, IRT theta) to z-scores to enable valid AIC comparison across different outcome scales per Burnham & Anderson
+**Complexity:** Low (z-score transformation, ~1 min)
+
+**Purpose:** Standardize all three measurement approaches (Full CTT, Purified CTT, IRT theta) to z-scores to enable valid AIC comparison per Burnham & Anderson. Different outcome scales (CTT [0,1] vs IRT theta [logit]) violate AIC identical-data requirement. Standardization ensures all three LMMs fit to comparable scales.
 
 **Input:**
 
-**File 1:** data/step02_full_ctt_scores.csv (from Step 2)
-**Expected Rows:** ~1200
+**File 1:** data/step00_theta_scores.csv
+**Columns used:** composite_ID, theta_what, theta_where, theta_when
 
-**File 2:** data/step03_purified_ctt_scores.csv (from Step 3)
-**Expected Rows:** ~1200
+**File 2:** data/step02_ctt_full_scores.csv
+**Columns used:** composite_ID, CTT_full_what, CTT_full_where, CTT_full_when
 
-**File 3:** data/step00_theta_with_tsvr.csv (from Step 0)
-**Expected Rows:** ~400 (needs reshaping to ~1200)
+**File 3:** data/step03_ctt_purified_scores.csv
+**Columns used:** composite_ID, CTT_purified_what, CTT_purified_where, CTT_purified_when
+
+**File 4:** data/step00_tsvr_mapping.csv
+**Columns used:** composite_ID, UID, TSVR_hours
 
 **Processing:**
-1. Reshape IRT theta to long format (composite_ID-domain rows) matching CTT scores
-2. Merge Full CTT, Purified CTT, IRT theta on composite_ID-domain
-3. For each measurement approach (Full CTT, Purified CTT, IRT):
-   - Compute z-score: z = (score - mean) / SD
-   - Compute within entire sample (not within domain, to preserve domain differences)
-4. Verify z-score properties: mean ~= 0, SD ~= 1
-5. Merge with TSVR_hours for LMM time variable
+- Merge all files on composite_ID
+- Reshape to long format (one row per observation):
+  - Variables: composite_ID, UID, TSVR_hours, domain, measurement_type, value
+  - measurement_type in {"Full CTT", "Purified CTT", "IRT theta"}
+  - domain in {"what", "where", "when"}
+- For each measurement_type x domain combination:
+  - Compute z-score: z = (value - mean(value)) / sd(value)
+  - Save as z_{measurement_type}_{domain}
+- Verify standardization: mean(z) approximately 0, sd(z) approximately 1 (tolerance: ±0.01 for sampling variation)
 
 **Output:**
 
-**File 1:** data/step06_standardized_scores.csv
-**Format:** CSV, long format (one row per composite_ID x domain)
-**Columns:**
-  - `composite_ID` (string)
-  - `UID` (string)
-  - `test` (string)
-  - `domain` (string)
-  - `TSVR_hours` (float)
-  - `z_full_ctt` (float, z-score of full CTT)
-  - `z_purified_ctt` (float, z-score of purified CTT)
-  - `z_irt_theta` (float, z-score of IRT theta)
+**File:** data/step06_standardized_outcomes.csv
+**Format:** CSV, long format with columns:
+  - `composite_ID` (string, format: {UID}_{test})
+  - `UID` (string, participant identifier)
+  - `TSVR_hours` (float, time variable for LMM)
+  - `domain` (string, "what", "where", "when")
+  - `z_full_ctt` (float, z-scored full CTT)
+  - `z_purified_ctt` (float, z-scored purified CTT)
+  - `z_irt_theta` (float, z-scored IRT theta)
 **Expected Rows:** ~1200 (400 composite_IDs x 3 domains)
 
 **Validation Requirement:**
-Validation tools MUST be used after z-score standardization execution. Specific validation tools determined by rq_tools.
+Validation tools MUST be used after standardization execution. Specific validation tools determined by rq_tools based on standardization validation (uses validate_standardization tool).
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step06_standardized_scores.csv: ~1200 rows x 8 columns (composite_ID, UID, test, domain, TSVR_hours, 3 z-scores)
-- Data types: string (IDs, domain), float (TSVR_hours, z-scores)
+- data/step06_standardized_outcomes.csv: 1200 rows x 7 columns (composite_ID: object, UID: object, TSVR_hours: float64, domain: object, z_full_ctt: float64, z_purified_ctt: float64, z_irt_theta: float64)
 
 *Value Ranges:*
-- z_full_ctt, z_purified_ctt, z_irt_theta in [-4, 4] (allow up to 4 SD for outliers)
-- TSVR_hours in [0, 300] (same as Step 0)
-- Expected z-score means: ~0 (within ±0.05)
-- Expected z-score SDs: ~1 (within [0.95, 1.05])
+- z_* approximately in [-3, 3] (typical z-score range, outliers possible)
+- TSVR_hours in [0, 200] (inherited from step 0)
+- domain in {"what", "where", "when"}
 
 *Data Quality:*
-- All 1200 rows present (no data loss during merge)
-- No NaN in z-scores (all participants have scores for all three approaches)
-- No duplicate composite_ID-domain combinations
-- Z-score distributions approximately normal (Shapiro-Wilk p > 0.01 acceptable)
-- All three z-scores have mean ~0 and SD ~1 (verify standardization worked)
+- Exactly 1200 rows (400 composite_IDs x 3 domains)
+- No NaN in z_* columns (all values standardizable)
+- Standardization validation per domain x measurement:
+  - mean(z_full_ctt | domain) approximately 0 (tolerance: ±0.01)
+  - sd(z_full_ctt | domain) approximately 1 (tolerance: ±0.01)
+  - Same for z_purified_ctt and z_irt_theta
+- No duplicate composite_ID x domain combinations
 
 *Log Validation:*
-- Required: "Standardized 3 measurement approaches to z-scores"
-- Required: "Z-score diagnostics - Full CTT: mean={A}, SD={B}" where A in [-0.05, 0.05], B in [0.95, 1.05]
-- Required: "Z-score diagnostics - Purified CTT: mean={C}, SD={D}"
-- Required: "Z-score diagnostics - IRT theta: mean={E}, SD={F}"
-- Required: "All 1200 rows retained (no missing values in z-scores)"
-- Forbidden: "ERROR", "NaN in z-scores", "SD = 0 (no variance)"
-- Acceptable warnings: "Some z-scores exceed ±3 SD (outliers present)"
+- Required: "Standardizing Full CTT: domain what (mean={value}, sd={value})"
+- Required: "Standardizing Purified CTT: domain what (mean={value}, sd={value})"
+- Required: "Standardizing IRT theta: domain what (mean={value}, sd={value})"
+- Required: "Post-standardization validation: all means within ±0.01 of 0, SDs within ±0.01 of 1"
+- Required: "VALIDATION - PASS: Standardization successful"
+- Forbidden: "ERROR", "Mean far from 0", "SD far from 1"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Z-score mean = 0.5, expected ~0 - standardization failed")
+- Raise error with specific failure (e.g., "z_full_ctt mean = 0.15 (exceeds tolerance ±0.01)")
 - Log failure to logs/step06_standardize_outcomes.log
-- Quit immediately (do NOT proceed to Step 7)
-- Master investigates: Check score distributions, verify z-score formula applied correctly
+- Quit immediately (invalid standardization breaks AIC comparison validity)
+
+**Critical Methodological Note:**
+Per Burnham & Anderson (2002, *Model Selection and Multimodel Inference*), AIC comparison requires identical data across models. Comparing LMMs with different outcome scales (CTT [0,1] vs IRT theta [logit]) violates this requirement because likelihood values are on different scales. Z-score standardization maps all three measurements to same scale (mean=0, SD=1), enabling valid AIC comparison while preserving relative differences within each measurement approach.
 
 ---
 
 ### Step 7: Fit Parallel LMMs to Standardized Outcomes
 
-**Dependencies:** Step 6 (requires standardized scores)
-**Complexity:** High (~30 minutes - 3 LMM models)
+**Dependencies:** Step 6 (requires standardized outcomes)
 
-**Purpose:** Fit identical LMM models to all three standardized measurement approaches (Full CTT, Purified CTT, IRT theta) to test whether purified CTT conclusions match IRT more closely than full CTT
+**Complexity:** High (3 LMM models, ~20-30 min)
+
+**Purpose:** Fit identical LMM formulas to three standardized measurement approaches (Full CTT, Purified CTT, IRT theta) and compare AIC to test which measurement approach provides best model fit. Uses LMM formula from RQ 5.1 with TSVR time variable (Decision D070). Parallel design isolates measurement method effects by holding model structure constant.
 
 **Input:**
 
-**File 1:** data/step06_standardized_scores.csv (from Step 6)
-**Columns:** composite_ID, UID, test, domain, TSVR_hours, z_full_ctt, z_purified_ctt, z_irt_theta
-**Expected Rows:** ~1200
+**File:** data/step06_standardized_outcomes.csv
+**Columns used:** UID, TSVR_hours, domain, z_full_ctt, z_purified_ctt, z_irt_theta
 
 **Processing:**
-1. For each measurement approach (Full CTT, Purified CTT, IRT):
-   - Fit LMM using tools.lmm.fit_lmm_trajectory_tsvr()
-   - Formula: z_Ability ~ (TSVR_hours + log(TSVR_hours+1)) * domain + (TSVR_hours | UID)
-   - TSVR_hours is time variable (Decision D070 - actual hours, not nominal days)
-   - Domain is categorical factor (What, Where, When)
-   - Random slope for TSVR_hours per participant (accounts for individual differences in forgetting rate)
-2. Extract model summaries:
-   - Fixed effects table: coefficients, SE, z-values, p-values
-   - Random effects: variance components, ICC
-   - Model fit: AIC, BIC, log-likelihood
-3. Compare AICs across three models:
-   - ”AIC_full = AIC_full_ctt - AIC_irt_theta
-   - ”AIC_purified = AIC_purified_ctt - AIC_irt_theta
-   - Hypothesis: ”AIC_purified < ”AIC_full (purified CTT closer to IRT)
-   - Interpret per Burnham & Anderson: ”AIC < 2 = equivalent, 2-10 = moderate support, > 10 = substantial support
-4. Compare Domain × Time interactions:
-   - Extract coefficients for domain:Where × TSVR_hours and domain:When × TSVR_hours
-   - Test if purified CTT interaction patterns match IRT more closely than full CTT
+- For each measurement approach (Full CTT, Purified CTT, IRT theta):
+  - Fit LMM: z_outcome ~ (TSVR_hours + log(TSVR_hours+1)) x domain + (TSVR_hours | UID)
+  - Formula breakdown:
+    - Fixed effects: Main effects of time (linear + log), domain, and Time x Domain interaction
+    - Random effects: Random intercepts and slopes for TSVR_hours per participant (UID)
+  - Extract AIC, BIC, log-likelihood
+  - Extract fixed effects table (coefficients, SE, z, p-values)
+  - Extract random effects variance components
+- Compare AICs: delta_AIC = AIC_measurement - AIC_IRT (IRT as reference)
+- Interpret per Burnham & Anderson:
+  - delta_AIC < 2: Equivalent fit
+  - delta_AIC 2-10: Moderate support for lower AIC model
+  - delta_AIC > 10: Substantial support for lower AIC model
 
 **Output:**
 
-**File 1:** data/step07_lmm_full_ctt_summary.txt
-**Format:** Plain text LMM summary
-**Content:** Fixed effects, random effects, AIC, BIC
-**Purpose:** Full CTT model results
+**File 1:** results/step07_lmm_model_comparison.csv
+**Format:** CSV with columns:
+  - `measurement` (string, "Full CTT", "Purified CTT", "IRT theta")
+  - `AIC` (float, Akaike Information Criterion)
+  - `BIC` (float, Bayesian Information Criterion)
+  - `logLik` (float, log-likelihood)
+  - `delta_AIC` (float, AIC - AIC_IRT, where IRT is reference)
+  - `interpretation` (string, "Equivalent", "Moderate support", "Substantial support" per Burnham & Anderson)
+**Expected Rows:** 3 (one per measurement approach)
 
-**File 2:** data/step07_lmm_purified_ctt_summary.txt
-**Format:** Plain text LMM summary
-**Content:** Fixed effects, random effects, AIC, BIC
-**Purpose:** Purified CTT model results
+**File 2:** results/step07_lmm_full_ctt_summary.txt
+**Format:** Statsmodels LMM summary text (fixed effects, random effects, fit indices)
 
-**File 3:** data/step07_lmm_irt_theta_summary.txt
-**Format:** Plain text LMM summary
-**Content:** Fixed effects, random effects, AIC, BIC
-**Purpose:** IRT theta model results (gold standard)
+**File 3:** results/step07_lmm_purified_ctt_summary.txt
+**Format:** Statsmodels LMM summary text (fixed effects, random effects, fit indices)
 
-**File 4:** data/step07_lmm_comparison.csv
-**Format:** CSV, one row per measurement approach
-**Columns:**
-  - `measurement_approach` (string, values: {Full_CTT, Purified_CTT, IRT_theta})
-  - `AIC` (float)
-  - `BIC` (float)
-  - `delta_AIC_vs_IRT` (float, = AIC - AIC_irt_theta)
-  - `interpretation` (string, per Burnham & Anderson thresholds)
-**Expected Rows:** 3
+**File 4:** results/step07_lmm_irt_theta_summary.txt
+**Format:** Statsmodels LMM summary text (fixed effects, random effects, fit indices)
 
-**File 5:** data/step07_interaction_coefficients.csv
-**Format:** CSV, one row per measurement approach x interaction term
-**Columns:**
-  - `measurement_approach` (string)
-  - `interaction_term` (string, values: {domain:Where × TSVR_hours, domain:When × TSVR_hours})
-  - `coefficient` (float)
-  - `SE` (float)
-  - `p_value` (float)
-**Expected Rows:** 6 (3 approaches x 2 interaction terms)
+**File 5:** results/step07_lmm_full_ctt_fixed_effects.csv
+**Format:** CSV with columns: term, coef, se, z, p (fixed effects table)
+
+**File 6:** results/step07_lmm_purified_ctt_fixed_effects.csv
+**Format:** CSV with columns: term, coef, se, z, p (fixed effects table)
+
+**File 7:** results/step07_lmm_irt_theta_fixed_effects.csv
+**Format:** CSV with columns: term, coef, se, z, p (fixed effects table)
 
 **Validation Requirement:**
-Validation tools MUST be used after LMM fitting execution. Specific validation tools determined by rq_tools based on LMM validation.
+Validation tools MUST be used after LMM fitting execution. Specific validation tools determined by rq_tools based on LMM convergence and fit validation.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step07_lmm_full_ctt_summary.txt: Text file, 50-100 lines
-- data/step07_lmm_purified_ctt_summary.txt: Text file, 50-100 lines
-- data/step07_lmm_irt_theta_summary.txt: Text file, 50-100 lines
-- data/step07_lmm_comparison.csv: 3 rows x 5 columns
-- data/step07_interaction_coefficients.csv: 6 rows x 5 columns
-- Data types: string (approach, term, interpretation), float (AIC, BIC, delta_AIC, coef, SE, p)
+- results/step07_lmm_model_comparison.csv: 3 rows x 6 columns (measurement: object, AIC: float64, BIC: float64, logLik: float64, delta_AIC: float64, interpretation: object)
+- results/step07_lmm_*_summary.txt: Text files (3 total, one per measurement)
+- results/step07_lmm_*_fixed_effects.csv: 3 CSV files with ~9 rows each (terms: intercept, time, log(time), domain[where], domain[when], time:domain, logtime:domain)
 
 *Value Ranges:*
-- AIC unrestricted but positive (typically 1000-5000 for N=1200)
-- BIC unrestricted but positive (typically slightly larger than AIC)
-- delta_AIC_vs_IRT in [-50, 50] (purified and full CTT should be within ±50 AIC units of IRT)
-- Expected: delta_AIC_purified < delta_AIC_full (purified closer to IRT)
-- coefficient unrestricted (interaction effects can be positive or negative)
-- p_value in [0, 1]
+- AIC unrestricted (lower is better, typical range: 3000-5000)
+- BIC unrestricted (lower is better, typical range: 3100-5100)
+- logLik unrestricted (higher is better, typical range: -1400 to -1600)
+- delta_AIC: Expected order: IRT (0.0, reference), Purified CTT (+10 to +20), Full CTT (+30 to +40)
+- Coefficients unrestricted (on z-score scale)
+- SE > 0 (all standard errors positive)
+- p in [0, 1] (p-value range)
 
 *Data Quality:*
-- All 3 LMM summaries converged (no convergence warnings in logs)
-- All 3 model comparison rows present
-- All 6 interaction coefficient rows present
-- delta_AIC_vs_IRT for IRT_theta = 0 (by definition, IRT compared to itself)
-- Expected pattern: |delta_AIC_purified| < |delta_AIC_full|
+- All 3 models converged successfully (check summary files for convergence warnings)
+- No NaN in AIC, BIC, logLik (all models fitted)
+- delta_AIC for IRT theta = 0.0 exactly (reference model)
+- delta_AIC for Full CTT >= delta_AIC for Purified CTT (hypothesis: purification improves fit)
+- Fixed effects tables have ~9 terms each (intercept + time + log(time) + 2 domains + 4 interactions)
 
 *Log Validation:*
-- Required: "Fitted 3 LMM models successfully"
-- Required: "Model convergence - Full CTT: {converged/failed}"
-- Required: "Model convergence - Purified CTT: {converged/failed}"
-- Required: "Model convergence - IRT theta: {converged/failed}"
-- Required: "AIC comparison - Full CTT: {A}, Purified CTT: {B}, IRT: {C}"
-- Required: "Delta AIC (Purified vs IRT): {D}, Delta AIC (Full vs IRT): {E}"
-- Required: "Interpretation: Purified CTT {closer to/farther from} IRT than Full CTT"
-- Forbidden: "ERROR", "Convergence failed", "Singular fit"
-- Acceptable warnings: "Model fit warning: boundary (singular)" if random effects variance near zero
+- Required: "Fitting LMM: Full CTT (z-standardized)"
+- Required: "Model converged: True"
+- Required: "AIC={value}, BIC={value}, logLik={value}"
+- Required: "Fitting LMM: Purified CTT (z-standardized)"
+- Required: "Model converged: True"
+- Required: "AIC={value}, BIC={value}, logLik={value}"
+- Required: "Fitting LMM: IRT theta (z-standardized)"
+- Required: "Model converged: True"
+- Required: "AIC={value}, BIC={value}, logLik={value}"
+- Required: "Model comparison: delta_AIC(Full CTT)={value}, delta_AIC(Purified CTT)={value}"
+- Required: "VALIDATION - PASS: All models converged, AIC comparison valid"
+- Forbidden: "ERROR", "Convergence failed", "Singular covariance"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "LMM convergence failed for Full CTT model")
+- Raise error with specific failure (e.g., "LMM Full CTT failed to converge")
 - Log failure to logs/step07_fit_parallel_lmms.log
-- Quit immediately (do NOT proceed to Step 8)
-- Master investigates: Check standardized scores distribution, verify LMM formula, check for singular fits
+- Quit immediately (non-convergent models cannot be compared via AIC)
+
+**Decision D070 Application:**
+This step uses TSVR_hours as time variable (actual hours since encoding) per Decision D070, not nominal days (0, 1, 3, 6). TSVR ensures accurate temporal modeling given participant session scheduling variability.
+
+**Methodological Notes:**
+- **Parallel LMM design:** Identical formula across all three measurements isolates measurement method effects (Full CTT vs Purified CTT vs IRT) by holding model structure constant
+- **Z-score standardization:** Enables valid AIC comparison per Burnham & Anderson (identical data requirement)
+- **Expected AIC pattern:** IRT best fit (lowest AIC), Purified CTT intermediate (delta_AIC ~10-20), Full CTT worst fit (delta_AIC ~30-40), validating that IRT purification improves measurement precision and CTT-IRT convergence
 
 ---
 
-### Step 8: Prepare Comparison Plot Data
+### Step 8: Prepare Plot Data (Methodological Comparison Visualization)
 
-**Dependencies:** Steps 2, 3, 6 (requires full CTT, purified CTT, IRT scores with TSVR)
-**Complexity:** Low (~5 minutes data aggregation)
+**Dependencies:** Step 2, Step 3, Step 4, Step 5, Step 7 (requires all CTT scores, correlations, LMM results)
 
-**Purpose:** Aggregate observed means and confidence intervals for all three measurement approaches (Full CTT, Purified CTT, IRT) to create plot source CSV for 3-way trajectory comparison visualization
+**Complexity:** Low (data aggregation for plotting, ~2 min)
 
-**Plot Description:** Three-panel trajectory plot showing forgetting curves for What/Where/When domains, with all three measurement approaches overlaid per panel to visualize methodological convergence
+**Purpose:** Create plot source CSVs for methodological comparison visualizations per Option B architecture. Two plots planned: (1) Correlation comparison showing r(Full CTT, IRT) vs r(Purified CTT, IRT) per domain, (2) AIC comparison showing model fit across three measurement approaches.
 
-**Required Data Sources:**
-- data/step02_full_ctt_scores.csv (Full CTT scores)
-- data/step03_purified_ctt_scores.csv (Purified CTT scores)
-- data/step06_standardized_scores.csv (IRT theta scores + TSVR mapping)
+**Input:**
 
-**Aggregation Logic:**
-1. For each domain (What, Where, When) and measurement approach (Full CTT, Purified CTT, IRT):
-   - Group by test (T1, T2, T3, T4)
-   - Compute mean score, 95% CI (± 1.96 * SE)
-   - Map test to TSVR_hours: T1->~0, T2->~24, T3->~72, T4->~144 (approximate means)
-2. Combine all three approaches into single plot source CSV
-3. Add approach identifier column for plotting (color/linetype grouping)
+**File 1:** results/step05_correlation_analysis.csv
+**Columns used:** domain, r_full_irt, r_purified_irt, delta_r, p_bonferroni
 
-**Output (Plot Source CSV):** plots/step08_comparison_plot_data.csv
+**File 2:** results/step07_lmm_model_comparison.csv
+**Columns used:** measurement, AIC, delta_AIC, interpretation
 
-**Required Columns:**
-- `domain` (string, values: {What, Where, When})
-- `measurement_approach` (string, values: {Full_CTT, Purified_CTT, IRT_theta})
-- `test` (string, values: {T1, T2, T3, T4})
-- `time` (float, TSVR_hours mean per test)
-- `mean_score` (float, mean across participants)
-- `CI_lower` (float, 95% CI lower bound)
-- `CI_upper` (float, 95% CI upper bound)
-- `n` (int, number of participants)
+**Processing:**
+- **Plot 1 Data (Correlation Comparison):**
+  - Reshape correlation_analysis.csv to long format:
+    - Columns: domain, measurement_type, correlation, significance
+    - measurement_type in {"Full CTT", "Purified CTT"}
+    - correlation = r_full_irt or r_purified_irt
+    - significance = "Significant" if p_bonferroni < 0.05 else "Not significant"
+  - Save to plots/step08_correlation_comparison_data.csv
 
-**Expected Rows:** 36 (3 domains x 3 approaches x 4 tests)
+- **Plot 2 Data (AIC Comparison):**
+  - Use lmm_model_comparison.csv directly
+  - Add significance marker: delta_AIC > 10 = "Substantial", 2-10 = "Moderate", <2 = "Equivalent"
+  - Save to plots/step08_aic_comparison_data.csv
+
+**Output:**
+
+**File 1:** plots/step08_correlation_comparison_data.csv
+**Format:** CSV with columns:
+  - `domain` (string, "what", "where", "when")
+  - `measurement_type` (string, "Full CTT", "Purified CTT")
+  - `correlation` (float, r with IRT theta)
+  - `significance` (string, "Significant improvement" if Steiger's test p_bonferroni < 0.05, else "Not significant")
+**Expected Rows:** 6 (3 domains x 2 measurement types)
+**Plot Description:** Grouped bar chart comparing Full CTT-IRT vs Purified CTT-IRT correlations per domain. Y-axis: correlation (r), X-axis: domain, grouped by measurement type. Error bars not needed (point estimates). Significance markers (* if p_bonferroni < 0.05).
+
+**File 2:** plots/step08_aic_comparison_data.csv
+**Format:** CSV with columns:
+  - `measurement` (string, "Full CTT", "Purified CTT", "IRT theta")
+  - `AIC` (float, Akaike Information Criterion)
+  - `delta_AIC` (float, difference from IRT reference)
+  - `interpretation` (string, "Equivalent", "Moderate support", "Substantial support")
+**Expected Rows:** 3 (one per measurement approach)
+**Plot Description:** Bar chart showing AIC values for three measurement approaches. Y-axis: delta_AIC (IRT as reference = 0), X-axis: measurement type. Lower delta_AIC = better fit. Include Burnham & Anderson thresholds (dashed lines at delta_AIC = 2 and 10).
 
 **Validation Requirement:**
-Validation tools MUST be used after plot data preparation execution. Specific validation tools determined by rq_tools.
+Validation tools MUST be used after plot data preparation execution. Specific validation tools determined by rq_tools based on plot data completeness validation.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- plots/step08_comparison_plot_data.csv: 36 rows x 8 columns (domain, measurement_approach, test, time, mean_score, CI_lower, CI_upper, n)
-- Data types: string (domain, approach, test), float (time, mean_score, CIs), int (n)
+- plots/step08_correlation_comparison_data.csv: 6 rows x 4 columns (domain: object, measurement_type: object, correlation: float64, significance: object)
+- plots/step08_aic_comparison_data.csv: 3 rows x 4 columns (measurement: object, AIC: float64, delta_AIC: float64, interpretation: object)
 
 *Value Ranges:*
-- time in [0, 168] hours (0=encoding, ~168=1 week)
-- mean_score: Full/Purified CTT in [0, 1], IRT theta in [-3, 3] (different scales OK - plot will handle)
-- CI_lower < mean_score < CI_upper (CIs must bracket mean)
-- n in [90, 100] per test (allowing some missing data)
+- correlation in [0.85, 0.98] (expected high convergence)
+- AIC unrestricted (typical range: 3000-5000)
+- delta_AIC in [0, 100] (IRT = 0, others positive)
+- significance in {"Significant improvement", "Not significant"}
+- interpretation in {"Equivalent", "Moderate support", "Substantial support"}
+- measurement_type in {"Full CTT", "Purified CTT"} (Plot 1)
+- measurement in {"Full CTT", "Purified CTT", "IRT theta"} (Plot 2)
 
 *Data Quality:*
-- All 36 rows present (3 domains x 3 approaches x 4 tests)
-- No NaN in mean_score or CIs
-- No duplicate domain-approach-test combinations
-- Expected pattern: mean_score decreases across time (forgetting trajectory)
-- CI width reasonable: (CI_upper - CI_lower) in [0.02, 0.30] depending on N and variance
+- Plot 1: Exactly 6 rows (3 domains x 2 types)
+- Plot 2: Exactly 3 rows (3 measurements)
+- All domains represented in Plot 1: what, where, when
+- All measurements represented in Plot 2: Full CTT, Purified CTT, IRT theta
+- No NaN values
+- No duplicate domain x measurement_type combinations (Plot 1)
+- No duplicate measurement values (Plot 2)
 
 *Log Validation:*
-- Required: "Prepared plot data for 36 domain-approach-test combinations"
-- Required: "All 3 measurement approaches represented per domain"
-- Required: "Time range: [0, {max}] hours" where max in [140, 170]
-- Required: "Mean participant count per test: {N}" where N in [95, 100]
-- Forbidden: "ERROR", "NaN in plot data", "Missing approach"
-- Acceptable warnings: None expected for plot data preparation
-
-**Plotting Function (rq_plots will call):** Three-panel trajectory plot with confidence bands, grouped by measurement approach
+- Required: "Prepared correlation comparison data: 6 rows (3 domains x 2 types)"
+- Required: "Prepared AIC comparison data: 3 rows (3 measurements)"
+- Required: "All domains represented: what, where, when"
+- Required: "All measurements represented: Full CTT, Purified CTT, IRT theta"
+- Required: "VALIDATION - PASS: Plot data complete"
+- Forbidden: "ERROR", "Missing domain", "Missing measurement", "NaN detected"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Expected 36 rows, found 30 - some domain-approach combinations missing")
+- Raise error with specific failure (e.g., "Missing domain when in correlation comparison data")
 - Log failure to logs/step08_prepare_plot_data.log
-- Quit immediately (plot source CSV incomplete)
-- Master investigates: Check input files (Steps 2, 3, 6), verify all domains and approaches present
+- Quit immediately (incomplete plot data cannot generate valid visualizations)
+
+**Plotting Function (rq_plots will call):**
+- Plot 1: Grouped bar chart (compare correlations)
+- Plot 2: Bar chart with reference line (compare AIC with delta_AIC = 0 as baseline)
+- rq_plots agent maps these descriptions to tools/plots.py functions
+- No data aggregation in rq_plots (visualization only per Option B)
+
+**Note:** Decision D069 (dual-scale trajectory plots) NOT applicable here. This RQ is methodological comparison (not trajectory analysis per se). Plots show method convergence, not temporal trajectories.
 
 ---
 
 ## Expected Data Formats
 
-### Wide to Long Transformations
+### Data Transformations
 
-**CTT Scores (Steps 2-3):**
-- Input: Wide format (composite_ID x domain columns)
-- Output: Long format (composite_ID-domain rows)
-- Transformation: Reshape with composite_ID as key, domain as identifier variable
+**Step 0 -> Step 1:** File loading + composite_ID creation
+- Input: 4 separate files (RQ 5.1 outputs + dfData.csv)
+- Output: Local copies with composite_ID standardized
 
-**IRT Theta (Step 6):**
-- Input: Wide format (composite_ID with theta_common, theta_congruent, theta_incongruent columns)
-- Output: Long format (composite_ID-domain rows with single theta column)
-- Transformation: Map dimensions to domains, reshape to long
+**Step 1 -> Steps 2-3:** Item filtering
+- Input: Full item list from dfData column names
+- Output: Retained (purified) vs removed item mapping
+- Transformation: Set operations (retained = items in purified_items.csv)
+
+**Steps 2-3 -> Step 4:** CTT score computation
+- Input: Raw dichotomized responses (0/1) from dfData
+- Output: Mean scores per domain (proportion correct)
+- Transformation: Group by composite_ID, compute mean within domain
+
+**Steps 2-3 -> Step 5:** Correlation testing
+- Input: CTT scores (full + purified) + IRT theta
+- Output: Pairwise correlations + Steiger's z-test
+- Transformation: Merge on composite_ID, compute correlations, test dependent correlation differences
+
+**Steps 0, 2-3 -> Step 6:** Z-score standardization
+- Input: CTT scores (full + purified) + IRT theta (different scales)
+- Output: Z-scored outcomes (mean=0, SD=1)
+- Transformation: (value - mean) / SD per measurement_type x domain
+
+**Step 6 -> Step 7:** Parallel LMM fitting
+- Input: Standardized outcomes (long format)
+- Output: 3 fitted LMMs with identical formula
+- Transformation: statsmodels MixedLM fitting per measurement approach
+
+**Steps 5, 7 -> Step 8:** Plot data preparation
+- Input: Correlation analysis + LMM comparison results
+- Output: Plot source CSVs (reshaped for visualization)
+- Transformation: Reshape to plotting format, add significance markers
 
 ### Column Naming Conventions
 
-Per names.md conventions established in RQ 5.1:
+Per names.md (populated from RQ 5.1):
 
-**Identifier Columns:**
-- `composite_ID`: Primary key (UID_test format)
-- `UID`: Participant identifier
-- `test`: Test session (T1, T2, T3, T4)
+**Core Identifiers:**
+- `composite_ID` (format: {UID}_{test}, e.g., A010_1)
+- `UID` (participant identifier)
+- `TEST` or `test` (test session: {1, 2, 3, 4})
 
 **Time Variable:**
-- `TSVR_hours`: Time Since VR in hours (Decision D070 - actual time, not nominal days)
+- `TSVR_hours` (actual hours since encoding per Decision D070)
 
-**Score Columns:**
-- `ctt_score_full`: Full CTT mean accuracy per domain
-- `ctt_score_purified`: Purified CTT mean accuracy per domain
-- `theta_*`: IRT ability estimates (dimension-specific)
-- `z_full_ctt`, `z_purified_ctt`, `z_irt_theta`: Standardized z-scores
+**IRT Outputs:**
+- `theta_what`, `theta_where`, `theta_when` (IRT ability estimates per domain)
+- `a` (item discrimination), `b` (item difficulty)
 
-**Reliability Columns:**
-- `alpha`: Cronbach's alpha point estimate
-- `ci_lower`, `ci_upper`: 95% confidence interval bounds
+**CTT Outputs (new for RQ 5.12):**
+- `CTT_full_{domain}` (full item set scores)
+- `CTT_purified_{domain}` (purified item set scores)
+- `z_full_ctt`, `z_purified_ctt`, `z_irt_theta` (standardized outcomes)
 
-**Correlation Columns:**
-- `r`: Pearson correlation coefficient
-- `z_statistic`: Steiger's z-test statistic
-- `p_value`: Two-tailed significance
+**Analysis Outputs:**
+- `alpha_full`, `alpha_purified` (Cronbach's alpha)
+- `r_full_irt`, `r_purified_irt` (correlations)
+- `delta_r` (correlation difference)
+- `delta_AIC` (AIC difference)
 
 ### Data Type Constraints
 
-**Categorical Variables:**
-- `domain`: Must be {What, Where, When} (no other values)
-- `test`: Must be {T1, T2, T3, T4}
-- `measurement_approach`: Must be {Full_CTT, Purified_CTT, IRT_theta}
-- `item_set`: Must be {full, purified}
+**Nullable vs Non-Nullable:**
+- composite_ID, UID, domain: Non-nullable (required for all rows)
+- CTT_*, theta_*: Non-nullable after computation (NaN only if missing all items, rare)
+- TSVR_hours: Non-nullable (time variable required)
+- Correlations, AIC: Non-nullable (all computable)
 
-**Continuous Variables:**
-- CTT scores: Non-nullable, range [0, 1]
-- IRT theta: Non-nullable, range [-3, 3] typical (allow [-5, 5] for outliers)
-- Z-scores: Non-nullable, range [-4, 4] (±4 SD maximum)
-- Correlations: Non-nullable, range [-1, 1]
-- P-values: Non-nullable, range [0, 1]
-- TSVR_hours: Non-nullable, range [0, 300]
+**Valid Ranges:**
+- CTT scores: [0, 1] (proportion correct)
+- IRT theta: [-3, 3] (typical ability range)
+- Z-scores: approximately [-3, 3] (outliers possible)
+- Cronbach's alpha: [0, 1] (typical: [0.70, 0.95])
+- Correlations: [-1, 1] (expected: [0.85, 0.98])
+- p-values: [0, 1]
+- AIC: unrestricted (lower is better)
 
-**Count Variables:**
-- `n_items_full`, `n_items_purified`: Positive integers
-- `n` (sample size): Positive integers, typically 90-100 per test
+**Categorical Values:**
+- domain: {"what", "where", "when"}
+- measurement: {"Full CTT", "Purified CTT", "IRT theta"}
+- test: {1, 2, 3, 4}
 
 ---
 
 ## Cross-RQ Dependencies
 
-### Dependency Type 2: DERIVED Data from Other RQs
+### Dependency Type 2: DERIVED Data from Other RQs (Dependencies Exist)
 
 **This RQ requires outputs from:**
-- **RQ 5.1** (Domain-Specific Forgetting Trajectories - IRT baseline)
-  - Files required:
-    - results/ch5/rq1/data/step02_purified_items.csv (IRT item parameters post-purification)
-    - results/ch5/rq1/data/step03_theta_scores.csv (IRT theta ability estimates)
-    - results/ch5/rq1/data/step00_tsvr_mapping.csv (Time Since VR mapping)
-  - Used in: Step 0 (load IRT outputs for comparison)
-  - Rationale: RQ 5.1 establishes IRT measurement baseline (item purification criteria, theta estimates). This RQ tests whether CTT can benefit from IRT item selection.
+- **RQ 5.1** (Domain-Specific Forgetting Trajectories)
+  - File 1: results/ch5/rq1/data/step02_purified_items.csv
+    - Used in: Step 0 (load purified item list), Step 1 (identify retained items)
+    - Rationale: RQ 5.1 IRT purification identified high-quality items (0.5 <= a <= 4.0). This RQ tests whether CTT computed on those items converges toward IRT conclusions.
+  - File 2: results/ch5/rq1/data/step03_theta_scores.csv
+    - Used in: Step 0 (load theta), Step 5 (correlation analysis), Step 6 (standardization), Step 7 (parallel LMM)
+    - Rationale: IRT theta serves as gold standard for convergent validity testing.
+  - File 3: results/ch5/rq1/data/step00_tsvr_mapping.csv
+    - Used in: Step 0 (load TSVR), Step 6 (merge time variable), Step 7 (LMM time predictor)
+    - Rationale: TSVR (actual hours since encoding) per Decision D070 ensures accurate temporal modeling in parallel LMMs.
 
 **Execution Order Constraint:**
-1. RQ 5.1 must complete Steps 0-3 (IRT calibration, purification, theta extraction)
-2. This RQ (5.12) executes after RQ 5.1 completes
+1. RQ 5.1 must complete Steps 0-3 first (provides purified items, theta scores, TSVR mapping)
+2. This RQ executes after RQ 5.1 validation complete (rq_inspect.status = success for RQ 5.1)
 
-**Data Source Boundaries (Per Best Practices):**
-- **RAW data:** dfData.csv columns extracted directly for CTT computation (TQ_ items)
-- **DERIVED data:** RQ 5.1 outputs (IRT item parameters, theta scores, TSVR mapping)
-- **Scope:** This RQ does NOT re-run IRT calibration (uses RQ 5.1 purification criteria and theta scores as fixed)
+**Data Source Boundaries (Per Specification 5.1.6):**
+- **RAW data:** data/cache/dfData.csv (dichotomized TQ_* item responses for CTT computation)
+- **DERIVED data:** Outputs from RQ 5.1 (purified items, theta, TSVR)
+- **Scope:** This RQ does NOT re-run IRT calibration (uses RQ 5.1 purification criteria as fixed). This RQ does NOT modify RQ 5.1 outputs (read-only access).
 
 **Validation:**
-- Step 0: Check results/ch5/rq1/data/step02_purified_items.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step03_theta_scores.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/rq1/data/step02_purified_items.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/rq1/data/step03_theta_scores.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/rq1/status.yaml shows step03_theta_scores = success (EXPECTATIONS ERROR if not complete)
 - If any file missing -> quit with error -> user must execute RQ 5.1 first
 
-**No other RQ dependencies** - Only RQ 5.1 required.
+**Reference:** Specification section 5.1.6 (Data Source Boundaries)
 
 ---
 
@@ -975,232 +1037,108 @@ This is not optional. This is the core architectural principle preventing cascad
 > "Validation tools MUST be used after analysis tool execution"
 
 **Implementation:**
-- rq_tools (Step 11 workflow) will read tools_catalog.md validation tools section
+- rq_tools (Step 11 workflow) will read tool_inventory.md validation tools section
 - rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
 - rq_analysis (Step 12 workflow) will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
-- g_code (Step 14 workflow) will generate stepNN_*.py scripts with validation function calls
+- g_code (Step 14 workflow) will generate stepN_name.py scripts with validation function calls
 - bash execution (Step 14 workflow) will run analysis -> validation -> error on validation failure
 
 **Downstream Agent Requirements:**
 - **rq_tools:** MUST specify validation tool for EVERY analysis step (no exceptions)
 - **rq_analysis:** MUST embed validation tool call for EVERY analysis step (no exceptions)
 - **g_code:** MUST generate code with validation function calls (no exceptions)
-- **rq_inspect:** MUST verify validation ran successfully (checks logs/stepNN_*.log for validation output)
+- **rq_inspect:** MUST verify validation ran successfully (checks logs/stepN_name.log for validation output)
 
 ### Validation Requirements By Step
 
-#### Step 0: Load Data from Multiple Sources
+**Step 0: Load Data Sources**
+- Validation Tool: validate_data_columns, check_file_exists
+- Checks: All 4 files exist, expected columns present, row counts in range
+- Failure -> QUIT: "File missing or malformed"
 
-**Analysis Tool:** (determined by rq_tools - likely pandas read_csv + merge operations)
-**Validation Tool:** (determined by rq_tools - likely custom cross-RQ dependency validation)
+**Step 1: Map Items to Full vs Purified Sets**
+- Validation Tool: validate_dataframe_structure
+- Checks: 50 items total, ~38 retained, all domains present
+- Failure -> QUIT: "Item mapping incomplete"
 
-**What Validation Checks:**
-- All RQ 5.1 dependency files exist (purified_items, theta_scores, tsvr_mapping)
-- File row counts match expected (purified_items ~38, theta_scores ~400, tsvr_mapping ~400)
-- dfData.csv contains expected TQ_ columns (~50 items)
-- All composite_IDs matched across theta and TSVR files (no missing merges)
-- Item counts reasonable: retained items 35-42, full CTT items 48-52
+**Step 2: Compute Full CTT Scores**
+- Validation Tool: validate_numeric_range
+- Checks: CTT_full_* in [0, 1], no NaN except if all items missing
+- Failure -> QUIT: "CTT full scores out of range"
 
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "RQ 5.1 dependency missing: step02_purified_items.csv not found")
-- Log failure to logs/step00_load_data.log
-- Quit immediately (do NOT proceed to Step 1)
-- Master investigates: Verify RQ 5.1 status.yaml shows rq_inspect: success
+**Step 3: Compute Purified CTT Scores**
+- Validation Tool: validate_numeric_range
+- Checks: CTT_purified_* in [0, 1], similar to full CTT (r > 0.95)
+- Failure -> QUIT: "CTT purified scores invalid"
 
----
+**Step 4: CTT Reliability Assessment**
+- Validation Tool: validate_numeric_range (alpha in [0,1])
+- Checks: alpha_* in [0, 1], CI_lower < alpha < CI_upper
+- Failure -> QUIT: "Cronbach's alpha computation failed"
 
-#### Step 1: Map IRT Items to CTT Items
+**Step 5: Correlation Analysis with Steiger's z-test**
+- Validation Tool: validate_correlation_test_d068 (dual p-values)
+- Checks: Correlations in [-1, 1], dual p-values present, r_purified >= r_full expected
+- Failure -> QUIT: "Correlation test missing dual p-values or out of range"
 
-**Analysis Tool:** (determined by rq_tools - likely pandas string parsing + filtering)
-**Validation Tool:** (determined by rq_tools - likely custom item mapping validation)
+**Step 6: Standardize Outcomes**
+- Validation Tool: validate_standardization
+- Checks: mean(z) approximately 0, sd(z) approximately 1 per measurement x domain
+- Failure -> QUIT: "Standardization failed (mean or SD out of tolerance)"
 
-**What Validation Checks:**
-- All purified IRT items successfully mapped to TQ_ columns
-- Full CTT item count ~50, purified CTT item count ~38
-- No duplicate item names in either list
-- Domain distribution reasonable (What ~14-18, Where ~12-16, When ~12-16)
+**Step 7: Fit Parallel LMMs**
+- Validation Tool: validate_model_convergence, validate_lmm_convergence
+- Checks: All 3 models converged, no singular covariance, AIC computable
+- Failure -> QUIT: "LMM convergence failed"
 
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "IRT item VR-IFR-A01-N-ANS has no matching TQ_ column")
-- Log failure to logs/step01_map_items.log
-- Quit immediately (do NOT proceed to Step 2)
-
----
-
-#### Step 2: Compute Full CTT Scores
-
-**Analysis Tool:** (determined by rq_tools - likely pandas groupby + mean)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_ctt_scores or custom)
-
-**What Validation Checks:**
-- Output row count = 1200 (400 composite_IDs x 3 domains)
-- ctt_score_full in [0, 1] (mean accuracy bounds)
-- n_items_full reasonable per domain (What ~18, Where ~16, When ~16)
-- No NaN in ctt_score_full
-- Domain balance: Each composite_ID appears exactly 3 times
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Expected 1200 rows, found 950 - some domains missing")
-- Log failure to logs/step02_compute_full_ctt.log
-- Quit immediately
-
----
-
-#### Step 3: Compute Purified CTT Scores
-
-**Analysis Tool:** (determined by rq_tools - likely pandas groupby + mean)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_ctt_scores or custom)
-
-**What Validation Checks:**
-- Output row count = 1200
-- ctt_score_purified in [0, 1]
-- n_items_purified < n_items_full (purification removes items)
-- n_items_purified reasonable per domain (What ~14, Where ~12, When ~12)
-- Item reduction 15-35% per domain
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Purified item count exceeds full item count for When domain")
-- Log failure to logs/step03_compute_purified_ctt.log
-- Quit immediately
-
----
-
-#### Step 4: Assess CTT Reliability
-
-**Analysis Tool:** (determined by rq_tools - likely tools.analysis_ctt.compute_cronbachs_alpha)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_reliability_coefficients or custom)
-
-**What Validation Checks:**
-- Output row count = 6 (3 domains x 2 item_sets)
-- alpha in [0.5, 0.95] (reasonable reliability range)
-- ci_lower < alpha < ci_upper (CIs bracket estimate)
-- CI width reasonable: [0.02, 0.15]
-- n_items matches Step 1 counts
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Cronbach's alpha = 1.2 exceeds valid range [0, 1]")
-- Log failure to logs/step04_assess_reliability.log
-- Quit immediately
-
----
-
-#### Step 5: Correlation Analysis with Steiger's Z-Test
-
-**Analysis Tool:** (determined by rq_tools - likely tools.analysis_ctt.compare_correlations_dependent)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_hypothesis_tests)
-
-**What Validation Checks:**
-- Correlations output: 9 rows (3 domains x 3 pairs)
-- Steiger tests output: 3 rows (one per domain)
-- r in [-1, 1]
-- p_value in [0, 1]
-- Expected high correlations: r(CTT, IRT) in [0.90, 0.98]
-- delta_r in [-0.05, 0.10]
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Correlation r = 1.5 exceeds valid range")
-- Log failure to logs/step05_correlation_analysis.log
-- Quit immediately
-
----
-
-#### Step 6: Standardize Outcomes for AIC Comparison
-
-**Analysis Tool:** (determined by rq_tools - likely pandas z-score transformation)
-**Validation Tool:** (determined by rq_tools - likely custom z-score validation)
-
-**What Validation Checks:**
-- Output row count = 1200
-- z-score means ~= 0 (within ±0.05)
-- z-score SDs ~= 1 (within [0.95, 1.05])
-- z-scores in [-4, 4] (allow outliers up to ±4 SD)
-- No NaN in z-scores
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Z-score mean = 0.5, expected ~0")
-- Log failure to logs/step06_standardize_outcomes.log
-- Quit immediately
-
----
-
-#### Step 7: Fit Parallel LMMs to Standardized Outcomes
-
-**Analysis Tool:** (determined by rq_tools - likely tools.lmm.fit_lmm_trajectory_tsvr)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_lmm_convergence + validate_lmm_assumptions_comprehensive)
-
-**What Validation Checks:**
-- All 3 LMM models converged (no singular fits)
-- AIC, BIC positive (typical 1000-5000 for N=1200)
-- delta_AIC_vs_IRT for IRT model = 0 (by definition)
-- Expected: |delta_AIC_purified| < |delta_AIC_full|
-- Interaction coefficients have valid SE and p-values
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "LMM convergence failed for Full CTT model")
-- Log failure to logs/step07_fit_parallel_lmms.log
-- Quit immediately
-
----
-
-#### Step 8: Prepare Comparison Plot Data
-
-**Analysis Tool:** (determined by rq_tools - likely pandas groupby + agg)
-**Validation Tool:** (determined by rq_tools - likely custom plot data validation)
-
-**What Validation Checks:**
-- Output row count = 36 (3 domains x 3 approaches x 4 tests)
-- time in [0, 168] hours
-- CI_lower < mean_score < CI_upper
-- n in [90, 100] per test
-- All domain-approach-test combinations present
-
-**Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "Expected 36 rows, found 30")
-- Log failure to logs/step08_prepare_plot_data.log
-- Quit immediately
+**Step 8: Prepare Plot Data**
+- Validation Tool: validate_plot_data_completeness
+- Checks: All domains present, all measurements present, no NaN
+- Failure -> QUIT: "Plot data incomplete"
 
 ---
 
 ## Summary
 
-**Total Steps:** 9 (Step 0: data loading, Steps 1-8: analyses)
-**Estimated Runtime:** Medium (~60 minutes total)
-  - Step 0: ~2 min (data loading)
-  - Step 1: ~5 min (item mapping)
-  - Step 2: ~3 min (full CTT scoring)
-  - Step 3: ~3 min (purified CTT scoring)
-  - Step 4: ~10 min (Cronbach's alpha with bootstrap)
-  - Step 5: ~8 min (correlation analysis + Steiger's z-test)
-  - Step 6: ~3 min (z-score standardization)
-  - Step 7: ~30 min (3 parallel LMM models)
-  - Step 8: ~5 min (plot data preparation)
+**Total Steps:** 9 (Step 0 through Step 8)
 
-**Cross-RQ Dependencies:** RQ 5.1 (requires Steps 0-3 completion)
+**Estimated Runtime:** Medium complexity (~30-45 minutes total)
+- Data loading: ~2 min
+- Item mapping: ~1 min
+- CTT computation (2 passes): ~5 min
+- Reliability assessment: ~3 min
+- Correlation analysis: ~2 min
+- Standardization: ~1 min
+- Parallel LMM fitting: ~20-30 min (3 models)
+- Plot data preparation: ~2 min
+
+**Cross-RQ Dependencies:** RQ 5.1 (must complete Steps 0-3 before this RQ can run)
 
 **Primary Outputs:**
-- CTT reliability assessment (Cronbach's alpha, 95% CIs)
-- Correlation analysis (Full CTT vs Purified CTT vs IRT, Steiger's z-tests)
-- AIC comparison (Full CTT vs Purified CTT vs IRT on standardized outcomes)
-- Domain × Time interaction comparison (do purified CTT conclusions match IRT?)
-- Three-way comparison plot source CSV (Full/Purified/IRT trajectories)
+- CTT scores (full + purified) per domain: data/step02_ctt_full_scores.csv, data/step03_ctt_purified_scores.csv
+- Reliability assessment: results/step04_reliability_assessment.csv
+- Correlation analysis with Steiger's z-test: results/step05_correlation_analysis.csv
+- Parallel LMM comparison: results/step07_lmm_model_comparison.csv + 7 additional files
+- Plot source CSVs: plots/step08_correlation_comparison_data.csv, plots/step08_aic_comparison_data.csv
 
 **Validation Coverage:** 100% (all 9 steps have validation requirements with 4-layer substance criteria)
 
-**Key Hypotheses Tested:**
-1. Purified CTT shows higher correlation with IRT theta than full CTT (Steiger's z-test)
-2. Purified CTT yields better model fit (lower AIC) than full CTT
-3. Purified CTT trajectory conclusions (Domain × Time interactions) match IRT more closely than full CTT
-4. Purified CTT maintains or improves Cronbach's alpha vs full CTT (reliability validation)
+**Key Methodological Innovations:**
+- Steiger's z-test for dependent correlations (3 overlapping correlations per domain)
+- Z-score standardization for valid AIC comparison across different outcome scales
+- Parallel LMM design isolating measurement method effects
+- Cronbach's alpha with bootstrap CIs for reliability validation
+- Hybrid CTT-IRT approach testing whether CTT benefits from IRT item selection
 
 ---
 
 **Next Steps (Workflow):**
-1. User reviews and approves this plan (Step 7 user gate in workflow)
+1. User reviews and approves this plan (Step 7 user gate)
 2. Workflow continues to Step 11: rq_tools reads this plan -> creates 3_tools.yaml
 3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml -> creates 4_analysis.yaml
-4. Workflow continues to Step 14: g_code reads 4_analysis.yaml -> generates stepNN_*.py scripts
+4. Workflow continues to Step 14: g_code reads 4_analysis.yaml -> generates stepN_name.py scripts
 
 ---
 
 **Version History:**
-- v1.0 (2025-11-26): Initial plan created by rq_planner agent for RQ 5.12
+- v1.0 (2025-11-30): Initial plan created by rq_planner agent for RQ 5.12 (methodological CTT-IRT convergence analysis)
