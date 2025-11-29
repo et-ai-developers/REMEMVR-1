@@ -251,6 +251,28 @@ if __name__ == "__main__":
         log(f"[INFO] CTT columns: {ctt_fixed.columns.tolist()}")
 
         # =========================================================================
+        # STEP 1.5: Standardize Term Names (Case Sensitivity Fix)
+        # =========================================================================
+        # Fix case mismatch: IRT has C(domain)[T.When] but CTT has C(domain)[T.when]
+        # Standardize to Title Case for consistent merging
+
+        log("[STANDARDIZE] Fixing domain case mismatch in term names...")
+
+        def standardize_domain_case(term):
+            """Standardize domain names to Title Case in coefficient terms."""
+            # Replace lowercase domain names with Title Case
+            term = term.replace('[T.what]', '[T.What]')
+            term = term.replace('[T.where]', '[T.Where]')
+            term = term.replace('[T.when]', '[T.When]')
+            return term
+
+        irt_fixed['term'] = irt_fixed['term'].apply(standardize_domain_case)
+        ctt_fixed['term'] = ctt_fixed['term'].apply(standardize_domain_case)
+
+        log(f"[STANDARDIZE] IRT terms: {irt_fixed['term'].tolist()}")
+        log(f"[STANDARDIZE] CTT terms: {ctt_fixed['term'].tolist()}")
+
+        # =========================================================================
         # STEP 2: Merge Fixed Effects on Term (Coefficient Name)
         # =========================================================================
         # Merge IRT and CTT fixed effects tables on 'term' column

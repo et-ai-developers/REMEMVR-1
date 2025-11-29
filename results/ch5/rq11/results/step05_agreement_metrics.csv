@@ -1,4 +1,4 @@
 metric,value,threshold,pass
-raw_agreement_pct,100.0,80.0,True
-kappa_all_coefficients,1.0,0.6,True
-kappa_interactions_only,,0.6,
+raw_agreement_pct,88.88888888888889,80.0,True
+kappa_all_coefficients,0.7804878048780487,0.6,True
+kappa_interactions_only,1.0,0.6,True

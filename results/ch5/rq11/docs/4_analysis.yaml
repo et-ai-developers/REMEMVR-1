@@ -884,7 +884,7 @@ steps:
           variable_name: "ctt_lmm_input"
 
       output_files:
-        - path: "plots/step08_trajectory_data.csv"
+        - path: "data/step08_trajectory_data.csv"
           variable_name: "trajectory_data"
           columns: ["TSVR_hours", "domain", "model", "mean_score", "CI_lower", "CI_upper", "n"]
           expected_rows: [20, 30]
@@ -905,7 +905,7 @@ steps:
       signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
 
       input_files:
-        - path: "plots/step08_trajectory_data.csv"
+        - path: "data/step08_trajectory_data.csv"
           variable_name: "trajectory_data"
           source: "analysis call output"
 
