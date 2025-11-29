@@ -1,0 +1,31 @@
+[START] Step 2c: Model Selection for Random Effects
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[INFO] Data shape: (1200, 10)
+[INFO] Domains: ['What', 'When', 'Where']
+[INFO] N participants: 100
+[ANALYSIS] Running random effects model selection...
+[INFO] Fixed effects formula: theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain
+[INFO] Comparing 3 random structures:
+  1. Full: random intercepts + slopes with correlation
+  2. Uncorrelated: random intercepts + slopes without correlation
+  3. Intercept-only: random intercepts only
+[INFO] Using ML estimation (REML=False) for valid LRT comparison
+[INFO] Parsimonious selection: prefer simpler if LRT p >= 0.05
+[DONE] Model selection complete
+[RESULT] Selected model: Full
+[SAVE] Saving model selection report...
+[SAVED] step02c_model_selection.txt
+[UPDATE] Updating Step 2 outputs with selected model...
+[SAVED] step02_lmm_model.pkl (selected model: Full)
+[SAVED] step02_fixed_effects.csv (21 terms)
+[VALIDATION] Running validate_model_convergence...
+[VALIDATION] Valid: True
+[VALIDATION] Converged: True
+[VALIDATION] Message: Model converged successfully.
+[VALIDATION] Checking LRT comparisons...
+[VALIDATION] Number of LRT comparisons: 3
+[VALIDATION] Checking selected model is refit with REML=False...
+[VALIDATION] Selected model correctly fit with REML=False
+[SUCCESS] Step 2c complete
+[SUCCESS] Selected random effects structure: Full

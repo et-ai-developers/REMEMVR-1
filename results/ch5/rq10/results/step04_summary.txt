@@ -1,0 +1,40 @@
+================================================================================
+STEP 04: Domain-Specific Age Effects on Forgetting Rate
+================================================================================
+
+ANALYSIS METHOD:
+  Marginal age effects extracted from 3-way Age × Domain × Time LMM
+  Evaluation timepoint: TSVR = 72.0 hours (Day 3, midpoint)
+  Standard errors: Delta method for linear combinations
+
+RESULTS:
+
+  What:
+    Age slope:  -0.000014 (theta units per 1-year age increase)
+    SE:         0.000049
+    z:          -0.280
+    p-value:    0.7794
+    95% CI:     [-0.000110, 0.000082]
+    Interpretation: Non-significant age effect (p >= 0.05)
+
+  Where:
+    Age slope:  0.000014 (theta units per 1-year age increase)
+    SE:         0.000049
+    z:          0.280
+    p-value:    0.7794
+    95% CI:     [-0.000082, 0.000110]
+    Interpretation: Non-significant age effect (p >= 0.05)
+
+  When:
+    Age slope:  -0.000014 (theta units per 1-year age increase)
+    SE:         0.000049
+    z:          -0.280
+    p-value:    0.7794
+    95% CI:     [-0.000110, 0.000082]
+    Interpretation: Non-significant age effect (p >= 0.05)
+
+OVERALL INTERPRETATION:
+  No significant age effects detected in any domain.
+  Age does not differentially affect forgetting rate across domains.
+
+================================================================================

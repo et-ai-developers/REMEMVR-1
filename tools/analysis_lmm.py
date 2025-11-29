@@ -1985,6 +1985,211 @@ def extract_segment_slopes_from_lmm(
     return output
 
 
+def extract_marginal_age_slopes_by_domain(
+    lmm_result: MixedLMResults,
+    eval_timepoint: float = 72.0,
+    domain_var: str = "domain",
+    age_var: str = "Age_c",
+    time_linear: str = "TSVR_hours",
+    time_log: str = "log_TSVR"
+) -> pd.DataFrame:
+    """
+    Extract domain-specific marginal age effects from 3-way Age×Domain×Time interaction LMM.
+
+    Computes the marginal effect of age on forgetting rate for each domain at a specific
+    timepoint, accounting for the full 3-way interaction structure. Uses delta method to
+    propagate uncertainty through linear combinations of coefficients.
+
+    Mathematical Definition
+    -----------------------
+    For a model with linear + log time terms:
+        theta ~ Time_linear + Time_log + Age_c + Domain +
+                Time_linear:Age_c + Time_log:Age_c +
+                Time_linear:Domain + Time_log:Domain +
+                Age_c:Domain +
+                Time_linear:Age_c:Domain + Time_log:Age_c:Domain
+
+    Marginal age slope = ∂(theta)/∂(Time) × ∂(Time)/∂(Age_c)
+                       = β(Time:Age_c) + β(Time_log:Age_c) × ∂(log(Time+1))/∂(Time)
+
+    For reference domain (What):
+        age_slope = β(Time_linear:Age_c) + β(Time_log:Age_c) × 1/(Time+1)
+
+    For non-reference domains (Where, When):
+        age_slope = Reference_slope +
+                    β(Time_linear:Age_c:Domain[X]) +
+                    β(Time_log:Age_c:Domain[X]) × 1/(Time+1)
+
+    Parameters
+    ----------
+    lmm_result : MixedLMResults
+        Fitted LMM with 3-way Age×Domain×Time interaction
+    eval_timepoint : float, default=72.0
+        TSVR hours at which to evaluate marginal slopes
+        Default 72h = Day 3 (midpoint of observation window 0-168h)
+    domain_var : str, default="domain"
+        Name of domain categorical variable in model
+    age_var : str, default="Age_c"
+        Name of centered age continuous variable
+    time_linear : str, default="TSVR_hours"
+        Name of linear time variable
+    time_log : str, default="log_TSVR"
+        Name of log-transformed time variable
+
+    Returns
+    -------
+    DataFrame
+        Domain-specific age slopes with columns:
+        - domain (str): Domain name (What, Where, When)
+        - age_slope (float): Marginal effect of age on forgetting rate at eval_timepoint
+        - se (float): Standard error via delta method
+        - z (float): Z-statistic (age_slope / se)
+        - p (float): Two-tailed p-value
+        - CI_lower (float): 95% confidence interval lower bound
+        - CI_upper (float): 95% confidence interval upper bound
+
+    Notes
+    -----
+    - Auto-detects reference level (domain without [T.] prefix in coefficient names)
+    - Uses delta method for SE propagation through linear combinations
+    - Derivative of log(Time+1) with respect to Time = 1/(Time+1)
+    - Assumes treatment coding (reference group coded as 0)
+
+    Example
+    -------
+    >>> result = extract_marginal_age_slopes_by_domain(
+    ...     lmm_result=fitted_model,
+    ...     eval_timepoint=72.0  # Day 3
+    ... )
+    >>> print(result)
+         domain  age_slope        se         z         p  CI_lower  CI_upper
+    0      What  -0.000123  0.000456 -0.269737  0.787328 -0.001017  0.000771
+    1     Where  -0.000185  0.000645 -0.286822  0.774265 -0.001449  0.001079
+    2      When   0.000054  0.000645  0.083721  0.933297 -0.001210  0.001318
+    """
+    # Extract fixed effects table
+    fe = extract_fixed_effects_from_lmm(lmm_result)
+    fe_dict = dict(zip(fe['Term'], fe['Coef']))
+
+    # Get variance-covariance matrix for delta method
+    vcov = lmm_result.cov_params()
+
+    # Detect reference domain (no [T.] prefix)
+    all_domains = set()
+    for term in fe['Term']:
+        if f'{domain_var}[T.' in term:
+            # Extract domain name between [T. and ]
+            domain = term.split(f'{domain_var}[T.')[1].split(']')[0]
+            all_domains.add(domain)
+
+    # Reference domain is the one NOT in the list
+    all_possible = {'What', 'Where', 'When'}
+    reference_domain = list(all_possible - all_domains)[0]
+    non_reference = sorted(all_domains)
+
+    # Compute derivative of log(time+1) at eval_timepoint
+    log_derivative = 1.0 / (eval_timepoint + 1.0)
+
+    results = []
+
+    # =========================================================================
+    # Reference Domain (e.g., What)
+    # =========================================================================
+    term_linear_age = f'{time_linear}:{age_var}'
+    term_log_age = f'{time_log}:{age_var}'
+
+    beta_linear = fe_dict.get(term_linear_age, 0.0)
+    beta_log = fe_dict.get(term_log_age, 0.0)
+
+    # Marginal age slope for reference domain
+    slope_ref = beta_linear + beta_log * log_derivative
+
+    # Delta method for SE
+    # Gradient: [∂slope/∂β_linear, ∂slope/∂β_log] = [1, log_derivative]
+    try:
+        idx_linear = fe[fe['Term'] == term_linear_age].index[0]
+        idx_log = fe[fe['Term'] == term_log_age].index[0]
+
+        gradient = np.zeros(len(fe))
+        gradient[idx_linear] = 1.0
+        gradient[idx_log] = log_derivative
+
+        # SE = sqrt(gradient' * Vcov * gradient)
+        se_ref = np.sqrt(gradient @ vcov @ gradient)
+    except (IndexError, KeyError):
+        # If terms missing, SE = 0 (shouldn't happen in well-specified model)
+        se_ref = 0.0
+
+    z_ref = slope_ref / se_ref if se_ref > 0 else 0.0
+    p_ref = 2 * (1 - stats.norm.cdf(abs(z_ref)))
+    ci_lower_ref = slope_ref - 1.96 * se_ref
+    ci_upper_ref = slope_ref + 1.96 * se_ref
+
+    results.append({
+        'domain': reference_domain,
+        'age_slope': slope_ref,
+        'se': se_ref,
+        'z': z_ref,
+        'p': p_ref,
+        'CI_lower': ci_lower_ref,
+        'CI_upper': ci_upper_ref
+    })
+
+    # =========================================================================
+    # Non-Reference Domains (e.g., Where, When)
+    # =========================================================================
+    for domain in non_reference:
+        term_3way_linear = f'{time_linear}:{age_var}:{domain_var}[T.{domain}]'
+        term_3way_log = f'{time_log}:{age_var}:{domain_var}[T.{domain}]'
+
+        beta_3way_linear = fe_dict.get(term_3way_linear, 0.0)
+        beta_3way_log = fe_dict.get(term_3way_log, 0.0)
+
+        # Marginal age slope = reference + 3-way interactions
+        slope_domain = slope_ref + beta_3way_linear + beta_3way_log * log_derivative
+
+        # Delta method for SE
+        # Gradient now includes 4 terms: reference 2 + domain-specific 2
+        try:
+            idx_3way_linear = fe[fe['Term'] == term_3way_linear].index[0]
+            idx_3way_log = fe[fe['Term'] == term_3way_log].index[0]
+
+            gradient = np.zeros(len(fe))
+            gradient[idx_linear] = 1.0
+            gradient[idx_log] = log_derivative
+            gradient[idx_3way_linear] = 1.0
+            gradient[idx_3way_log] = log_derivative
+
+            se_domain = np.sqrt(gradient @ vcov @ gradient)
+        except (IndexError, KeyError):
+            se_domain = 0.0
+
+        z_domain = slope_domain / se_domain if se_domain > 0 else 0.0
+        p_domain = 2 * (1 - stats.norm.cdf(abs(z_domain)))
+        ci_lower_domain = slope_domain - 1.96 * se_domain
+        ci_upper_domain = slope_domain + 1.96 * se_domain
+
+        results.append({
+            'domain': domain,
+            'age_slope': slope_domain,
+            'se': se_domain,
+            'z': z_domain,
+            'p': p_domain,
+            'CI_lower': ci_lower_domain,
+            'CI_upper': ci_upper_domain
+        })
+
+    # Convert to DataFrame and return
+    df = pd.DataFrame(results)
+
+    # Sort by domain (What, Where, When)
+    domain_order = {'What': 0, 'Where': 1, 'When': 2}
+    df['_sort'] = df['domain'].map(domain_order)
+    df = df.sort_values('_sort').drop(columns='_sort').reset_index(drop=True)
+
+    return df
+
+
 __all__ = [
     'assign_piecewise_segments',
     'extract_segment_slopes_from_lmm',
@@ -2001,5 +2206,6 @@ __all__ = [
     'select_lmm_random_structure_via_lrt',
     'prepare_age_effects_plot_data',
     'compute_icc_from_variance_components',
-    'test_intercept_slope_correlation_d068'
+    'test_intercept_slope_correlation_d068',
+    'extract_marginal_age_slopes_by_domain'
 ]

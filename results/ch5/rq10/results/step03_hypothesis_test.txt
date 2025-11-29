@@ -1,0 +1,77 @@
+================================================================================
+RQ 5.10 HYPOTHESIS TEST SUMMARY
+Step 03: 3-Way Age x Domain x Time Interaction
+================================================================================
+
+HYPOTHESIS:
+  Age effects on forgetting rate vary by memory domain
+  (What vs Where vs When)
+
+DECISION RULE:
+  Hypothesis supported if EITHER omnibus test p < 0.025
+  Alpha = 0.025 maintains family-wise error rate at 0.05
+
+--------------------------------------------------------------------------------
+OMNIBUS TESTS (Wald Chi-Square)
+--------------------------------------------------------------------------------
+
+Linear 3-Way Interaction (TSVR_hours:Age_c:domain):
+  Terms tested: TSVR_hours:Age_c:domain[T.When], TSVR_hours:Age_c:domain[T.Where]
+  Chi-square: 0.436
+  df: 2
+  p-value: 0.8041
+  Significant (alpha=0.025): NO
+
+Log 3-Way Interaction (log_TSVR:Age_c:domain):
+  Terms tested: log_TSVR:Age_c:domain[T.When], log_TSVR:Age_c:domain[T.Where]
+  Chi-square: 0.756
+  df: 2
+  p-value: 0.6853
+  Significant (alpha=0.025): NO
+
+--------------------------------------------------------------------------------
+DECISION
+--------------------------------------------------------------------------------
+
+Hypothesis: NOT SUPPORTED
+
+INTERPRETATION:
+  Neither omnibus test significant at alpha=0.025.
+  Insufficient evidence that age effects differ by domain.
+
+--------------------------------------------------------------------------------
+INDIVIDUAL INTERACTION TERMS (Decision D068 Dual P-Values)
+--------------------------------------------------------------------------------
+
+TSVR_hours:Age_c:domain[T.When]:
+  Estimate: -0.0001
+  SE: 0.0001
+  z: -0.533
+  p (uncorrected): 0.5942
+  p (Bonferroni): 1.0000
+  95% CI: [-0.0003, 0.0001]
+
+TSVR_hours:Age_c:domain[T.Where]:
+  Estimate: -0.0001
+  SE: 0.0001
+  z: -0.604
+  p (uncorrected): 0.5457
+  p (Bonferroni): 1.0000
+  95% CI: [-0.0003, 0.0001]
+
+log_TSVR:Age_c:domain[T.When]:
+  Estimate: -0.0004
+  SE: 0.0036
+  z: -0.118
+  p (uncorrected): 0.9061
+  p (Bonferroni): 1.0000
+  95% CI: [-0.0074, 0.0066]
+
+log_TSVR:Age_c:domain[T.Where]:
+  Estimate: 0.0025
+  SE: 0.0036
+  z: 0.687
+  p (uncorrected): 0.4921
+  p (Bonferroni): 0.9842
+  95% CI: [-0.0046, 0.0095]
+

@@ -1,0 +1,163 @@
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[ERROR] [Errno 2] No such file or directory: '/home/etai/projects/REMEMVR/results/ch5/rq10/results/step02_lmm_model.pkl'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq10/code/step05_prepare_plot_data.py", line 159, in <module>
+    lmm_model = MixedLMResults.load(str(RQ_DIR / "results" / "step02_lmm_model.pkl"))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/model.py", line 2289, in load
+    return load_pickle(fname)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/iolib/smpickle.py", line 41, in load_pickle
+    with get_file_obj(fname, "rb") as fin:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/iolib/openfile.py", line 65, in get_file_obj
+    return fname.open(mode=mode, encoding=encoding)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/etai/projects/REMEMVR/results/ch5/rq10/results/step02_lmm_model.pkl'
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[LOADED] step02_lmm_model.pkl (MixedLMResults object)
+[LOAD] Loading age effects by domain...
+[LOADED] step04_age_effects_by_domain.csv (3 rows, 7 cols)
+[ANALYSIS] Running prepare_age_effects_plot_data...
+[DONE] Analysis complete
+[SAVE] Plot data saved by analysis tool...
+[SAVED] step05_age_effects_plot_data.csv (885 rows, 7 cols)
+[INFO] Columns: ['age_tertile', 'TSVR_hours', 'theta_observed', 'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+[VALIDATION] Running validate_plot_data_completeness...
+[ERROR] 'domain'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'domain'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq10/code/step05_prepare_plot_data.py", line 214, in <module>
+    validation_result = validate_plot_data_completeness(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2877, in validate_plot_data_completeness
+    missing_domains = [d for d in required_domains if d not in plot_data[domain_col].values]
+                                                               ~~~~~~~~~^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'domain'
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[LOADED] step02_lmm_model.pkl (MixedLMResults object)
+[LOAD] Loading age effects by domain...
+[LOADED] step04_age_effects_by_domain.csv (3 rows, 7 cols)
+[ANALYSIS] Running prepare_age_effects_plot_data...
+[DONE] Analysis complete
+[SAVE] Plot data saved by analysis tool...
+[SAVED] step05_age_effects_plot_data.csv (885 rows, 7 cols)
+[INFO] Columns: ['age_tertile', 'TSVR_hours', 'theta_observed', 'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+[VALIDATION] Validating plot data structure...
+[ERROR] Plot data contains NaN values
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq10/code/step05_prepare_plot_data.py", line 229, in <module>
+    assert not plot_data.isna().any().any(), "Plot data contains NaN values"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Plot data contains NaN values
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[LOADED] step02_lmm_model.pkl (MixedLMResults object)
+[LOAD] Loading age effects by domain...
+[LOADED] step04_age_effects_by_domain.csv (3 rows, 7 cols)
+[ANALYSIS] Running prepare_age_effects_plot_data...
+[DONE] Analysis complete
+[SAVE] Plot data saved by analysis tool...
+[SAVED] step05_age_effects_plot_data.csv (885 rows, 7 cols)
+[INFO] Columns: ['age_tertile', 'TSVR_hours', 'theta_observed', 'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+[VALIDATION] Validating plot data structure...
+[ERROR] NaN values in critical column: theta_observed
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq10/code/step05_prepare_plot_data.py", line 231, in <module>
+    assert not plot_data[col].isna().any(), f"NaN values in critical column: {col}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: NaN values in critical column: theta_observed
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[LOADED] step02_lmm_model.pkl (MixedLMResults object)
+[LOAD] Loading age effects by domain...
+[LOADED] step04_age_effects_by_domain.csv (3 rows, 7 cols)
+[ANALYSIS] Running prepare_age_effects_plot_data...
+[DONE] Analysis complete
+[SAVE] Plot data saved by analysis tool...
+[SAVED] step05_age_effects_plot_data.csv (885 rows, 7 cols)
+[INFO] Columns: ['age_tertile', 'TSVR_hours', 'theta_observed', 'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+[VALIDATION] Validating plot data structure...
+[INFO] NaN counts: {'theta_observed': 584, 'se_observed': 584, 'ci_lower': 584, 'ci_upper': 584, 'theta_predicted': 584}
+[VALIDATION] PASS - Plot data structure valid
+[SUCCESS] Step 05 complete
+[INFO] Plot data ready for rq_plots agent: plots/step05_age_effects_plot_data.csv
+[INFO] Rows: 885, Domains: 3, Age tertiles: 3
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[LOADED] step02_lmm_model.pkl (MixedLMResults object)
+[LOAD] Loading age effects by domain...
+[LOADED] step04_age_effects_by_domain.csv (3 rows, 7 cols)
+[ANALYSIS] Running prepare_age_effects_plot_data...
+[FIX] Renamed 'domain' -> 'domain_name' for tool compatibility
+[DONE] Analysis complete
+[SAVE] Plot data saved by analysis tool...
+[SAVED] step05_age_effects_plot_data.csv (2655 rows, 8 cols)
+[INFO] Columns: ['domain_name', 'age_tertile', 'TSVR_hours', 'theta_observed', 'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+[VALIDATION] Validating plot data structure...
+[ERROR] Column mismatch: {'theta_observed', 'domain_name', 'se_observed', 'ci_lower', 'theta_predicted', 'age_tertile', 'ci_upper', 'TSVR_hours'}
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq10/code/step05_prepare_plot_data.py", line 226, in <module>
+    assert actual_cols == expected_cols, f"Column mismatch: {actual_cols}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Column mismatch: {'theta_observed', 'domain_name', 'se_observed', 'ci_lower', 'theta_predicted', 'age_tertile', 'ci_upper', 'TSVR_hours'}
+[START] Step 05: Prepare Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 10 cols)
+[LOAD] Loading fitted LMM model...
+[LOADED] step02_lmm_model.pkl (MixedLMResults object)
+[LOAD] Loading age effects by domain...
+[LOADED] step04_age_effects_by_domain.csv (3 rows, 7 cols)
+[ANALYSIS] Running prepare_age_effects_plot_data...
+[FIX] Renamed 'domain' -> 'domain_name' for tool compatibility
+[DONE] Analysis complete
+[SAVE] Plot data saved by analysis tool...
+[SAVED] step05_age_effects_plot_data.csv (2655 rows, 8 cols)
+[INFO] Columns: ['domain_name', 'age_tertile', 'TSVR_hours', 'theta_observed', 'se_observed', 'ci_lower', 'ci_upper', 'theta_predicted']
+[VALIDATION] Validating plot data structure...
+[INFO] NaN counts: {'theta_observed': 1752, 'se_observed': 2640, 'ci_lower': 2640, 'ci_upper': 2640, 'theta_predicted': 1752}
+[INFO] Domains: 3, Tertiles: 3
+[INFO] Data points by domain: {'What': 885, 'When': 885, 'Where': 885}
+[VALIDATION] PASS - Plot data structure valid (8 columns, domain-specific)
+[SUCCESS] Step 05 complete
+[INFO] Plot data ready for rq_plots agent: plots/step05_age_effects_plot_data.csv
+[INFO] Rows: 2655, Domains: 3, Age tertiles: 3

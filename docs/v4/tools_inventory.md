@@ -192,6 +192,16 @@
 | **Reference** | RQ 5.8 Test 4 (Convergent Evidence), Delta method: Casella & Berger (2002) Statistical Inference 2nd ed. p.240, tools_todo.yaml lines 115-133 |
 | **Notes** | Piecewise LMM formula: `theta ~ Days_within + Days_within:SegmentLate + (Days_within \| UID)`. Early slope = β_Days_within, Late slope = β_Days_within + β_Days_within:SegmentLate. Delta method for ratio SE: SE²_ratio = (∂ratio/∂early)²×Var(early) + (∂ratio/∂late)²×Var(late) + 2×(∂ratio/∂early)×(∂ratio/∂late)×Cov(early,late), where ∂ratio/∂early = -late/early² and ∂ratio/∂late = 1/early. Interpretation thresholds: ratio < 0.5 (robust two-phase), 0.5-0.75 (moderate), 0.75-1.0 (weak), >1.0 (unexpected/reverse). Handles zero Early slope (ratio=inf/nan). 11/11 tests GREEN. 172 lines implementation. |
 
+### extract_marginal_age_slopes_by_domain
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract domain-specific marginal age effects on forgetting rate from 3-way Age×Domain×Time interaction LMM. Computes marginal effect of age at specific timepoint using delta method for SE propagation through linear combinations. RQ 5.10 quantifies domain-specific age-related memory decline. |
+| **Inputs** | `lmm_result: MixedLMResults` (fitted 3-way interaction model), `eval_timepoint: float = 72.0` (TSVR hours for slope evaluation, default Day 3), `domain_var: str = "domain"`, `age_var: str = "Age_c"` (centered age), `time_linear: str = "TSVR_hours"`, `time_log: str = "log_TSVR"` |
+| **Outputs** | `DataFrame[domain: str, age_slope: float, se: float, z: float, p: float, CI_lower: float, CI_upper: float]` with 3 rows (What, Where, When) |
+| **Reference** | RQ 5.10 Step 4, tools/analysis_lmm.py lines 1988-2190, Delta method: Casella & Berger (2002) Statistical Inference p.240 |
+| **Notes** | **Model structure**: `theta ~ TSVR + log_TSVR + Age_c + Domain + TSVR:Age_c + log_TSVR:Age_c + TSVR:Domain + log_TSVR:Domain + Age_c:Domain + TSVR:Age_c:Domain + log_TSVR:Age_c:Domain`. **Marginal age slope formula**: For reference domain (What): β(TSVR:Age_c) + β(log_TSVR:Age_c) × 1/(TSVR+1). For non-reference domains (Where/When): Reference slope + β(TSVR:Age_c:Domain[X]) + β(log_TSVR:Age_c:Domain[X]) × 1/(TSVR+1). **Delta method SE**: Uses 4-term gradient [∂slope/∂β_linear_ref, ∂slope/∂β_log_ref, ∂slope/∂β_linear_3way, ∂slope/∂β_log_3way] = [1, 1/(TSVR+1), 1, 1/(TSVR+1)] with full variance-covariance matrix. **Auto-detection**: Identifies reference domain by absence of [T.] prefix in coefficient names (treatment coding). **Derivative**: ∂log(TSVR+1)/∂TSVR = 1/(TSVR+1). **Default eval_timepoint**: 72h = Day 3 (midpoint of 0-168h observation window). **15/15 tests GREEN** using real RQ 5.10 data. 203 lines implementation. |
+
 ### assign_piecewise_segments
 
 | Field | Value |

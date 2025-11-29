@@ -136,7 +136,7 @@ if __name__ == "__main__":
         # Purpose: Extract model object and original data for residual diagnostics
 
         log("[LOAD] Loading fitted LMM model from Step 2...")
-        model_path = RQ_DIR / "results" / "step02_lmm_model.pkl"
+        model_path = RQ_DIR / "data" / "step02_lmm_model.pkl"
 
         # Load statsmodels MixedLMResults object using statsmodels.load()
         # CRITICAL: Use MixedLMResults.load() method, NOT pickle.load()

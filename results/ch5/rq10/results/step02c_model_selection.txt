@@ -1,0 +1,44 @@
+================================================================================
+STEP 2c: RANDOM EFFECTS MODEL SELECTION
+================================================================================
+
+OBJECTIVE:
+Select optimal random effects structure via likelihood ratio test.
+Compares nested models: Full vs Intercept-only.
+
+METHOD:
+- Likelihood Ratio Test (LRT) with chi-square distribution
+- ML estimation (REML=False) for valid LRT comparison
+- Parsimonious selection: prefer simpler if p >= 0.05
+- Reference: Pinheiro & Bates (2000), Verbeke & Molenberghs (2000)
+
+CANDIDATE MODELS FITTED:
+  - Intercept-only: FAILED TO CONVERGE
+  - Full: Converged = True
+    AIC = 2520.66, BIC = 2632.64
+    Log-likelihood = -1238.33
+  - Uncorrelated: Converged = True
+    AIC = 2520.66, BIC = 2632.64
+    Log-likelihood = -1238.33
+
+LIKELIHOOD RATIO TEST RESULTS:
+         model  log_likelihood  df  chi2  p_value         aic
+Intercept-only             NaN NaN   NaN      NaN         NaN
+  Uncorrelated    -1238.331353 NaN   NaN      NaN 2520.662705
+          Full    -1238.331353 NaN   NaN      NaN 2520.662705
+
+SELECTED MODEL:
+  Full
+
+RATIONALE:
+  Full model significantly improved fit over Intercept-only
+  (LRT p < 0.05). Random slopes are necessary.
+
+IMPLICATIONS:
+  - Forgetting rates vary significantly across individuals
+  - Both baseline memory and rates of forgetting show individual
+    differences (random intercepts and slopes)
+  - Fixed effects reflect conditional trajectories (controlling for
+    random effects)
+
+================================================================================

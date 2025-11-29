@@ -37,6 +37,7 @@
 | `compute_icc_from_variance_components` | Compute 3 ICC estimates (intercept, slope_simple, slope_conditional) with interpretation thresholds |
 | `test_intercept_slope_correlation_d068` | D068: Pearson correlation between random intercepts/slopes with dual p-values (uncorrected + Bonferroni) |
 | `extract_segment_slopes_from_lmm` | Extract Early/Late slopes + ratio from piecewise LMM with delta method SE propagation (RQ 5.8 two-phase test) |
+| `extract_marginal_age_slopes_by_domain` | Extract domain-specific marginal age effects from 3-way Age×Domain×Time interaction LMM with delta method SEs (RQ 5.10) |
 
 ---
 
