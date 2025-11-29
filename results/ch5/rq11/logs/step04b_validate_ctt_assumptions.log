@@ -1,0 +1,55 @@
+[START] Step 04b: validate_ctt_assumptions
+[LOAD] Loading CTT model and input data...
+[LOADED] step03_ctt_lmm_model.pkl (CTT LMM model object)
+[LOADED] step03_ctt_lmm_input.csv (1200 rows, 6 cols)
+[ANALYSIS] Running validate_lmm_assumptions_comprehensive...
+[DONE] Assumption validation complete
+[SAVE] Saving assumption diagnostics report...
+[SAVED] step04b_ctt_assumptions_report.txt (2482 bytes)
+[SAVED] 6 diagnostic plots in step04b_ctt_diagnostics/
+[VALIDATION] Running check_file_exists...
+[VALIDATION] IRT report exists: False
+[VALIDATION] CTT report exists: False
+[VALIDATION] IRT plots exist: False
+[VALIDATION] CTT plots exist: False
+[ERROR] Validation failed - not all required files exist. Check that step04a completed successfully before running step04b.
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step04b_validate_ctt_assumptions.py", line 281, in <module>
+    raise FileNotFoundError(
+FileNotFoundError: Validation failed - not all required files exist. Check that step04a completed successfully before running step04b.
+[START] Step 04b: validate_ctt_assumptions
+[LOAD] Loading CTT model and input data...
+[LOADED] step03_ctt_lmm_model.pkl (CTT LMM model object)
+[LOADED] step03_ctt_lmm_input.csv (1200 rows, 6 cols)
+[ANALYSIS] Running validate_lmm_assumptions_comprehensive...
+[DONE] Assumption validation complete
+[SAVE] Saving assumption diagnostics report...
+[SAVED] step04b_ctt_assumptions_report.txt (2482 bytes)
+[SAVED] 6 diagnostic plots in step04b_ctt_diagnostics/
+[VALIDATION] Running check_file_exists...
+[VALIDATION] IRT report exists: False
+[VALIDATION] CTT report exists: False
+[VALIDATION] IRT plots exist: False
+[VALIDATION] CTT plots exist: False
+[ERROR] Validation failed - not all required files exist. Check that step04a completed successfully before running step04b.
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step04b_validate_ctt_assumptions.py", line 281, in <module>
+    raise FileNotFoundError(
+FileNotFoundError: Validation failed - not all required files exist. Check that step04a completed successfully before running step04b.
+[START] Step 04b: validate_ctt_assumptions
+[LOAD] Loading CTT model and input data...
+[LOADED] step03_ctt_lmm_model.pkl (CTT LMM model object)
+[LOADED] step03_ctt_lmm_input.csv (1200 rows, 6 cols)
+[ANALYSIS] Running validate_lmm_assumptions_comprehensive...
+[DONE] Assumption validation complete
+[SAVE] Saving assumption diagnostics report...
+[SAVED] step04b_ctt_assumptions_report.txt (2482 bytes)
+[SAVED] 6 diagnostic plots in step04b_ctt_diagnostics/
+[VALIDATION] Checking file existence with os.path...
+[VALIDATION] IRT report exists: True
+[VALIDATION] CTT report exists: True
+[VALIDATION] IRT plots exist: True
+[VALIDATION] CTT plots exist: True
+[SUCCESS] Step 04b complete

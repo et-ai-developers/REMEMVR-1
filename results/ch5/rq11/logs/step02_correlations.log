@@ -1,0 +1,51 @@
+[START] Step 02: Correlation Analysis (IRT vs CTT per Domain)
+[LOAD] Loading input data...
+[LOADED] step00_irt_theta_loaded.csv (400 rows, 4 cols)
+[LOADED] step01_ctt_scores.csv (1200 rows, 6 cols)
+[RESHAPE] Reshaping IRT theta to long format...
+[RESHAPE] IRT long format: 1200 rows
+[MERGE] Merging IRT and CTT scores...
+[MERGED] 0 rows with both IRT and CTT scores
+[WARNING] Expected 1200 rows, got 0
+[ANALYSIS] Computing Pearson correlations per domain...
+[ERROR] `x` and `y` must have length at least 2.
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step02_correlations.py", line 309, in <module>
+    r, p_uncorrected = stats.pearsonr(
+                       ^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/scipy/stats/_stats_py.py", line 4689, in pearsonr
+    raise ValueError('`x` and `y` must have length at least 2.')
+ValueError: `x` and `y` must have length at least 2.
+[START] Step 02: Correlation Analysis (IRT vs CTT per Domain)
+[LOAD] Loading input data...
+[LOADED] step00_irt_theta_loaded.csv (400 rows, 4 cols)
+[LOADED] step01_ctt_scores.csv (1200 rows, 6 cols)
+[RESHAPE] Reshaping IRT theta to long format...
+[RESHAPE] IRT long format: 1200 rows
+[MERGE] Merging IRT and CTT scores...
+[MERGED] 1200 rows with both IRT and CTT scores
+[ANALYSIS] Computing Pearson correlations per domain...
+[CORRELATION] what: r=0.906, p=0.0000, n=400
+[CORRELATION] where: r=0.970, p=0.0000, n=400
+[CORRELATION] when: r=0.919, p=0.0000, n=400
+[ANALYSIS] Computing overall correlation (all domains pooled)...
+[CORRELATION] Overall: r=0.585, p=0.0000, n=1200
+[CORRECTION] Applying Holm-Bonferroni correction (m=4 tests)...
+[CORRECTION] Holm-Bonferroni correction applied
+[D068] what: p_uncorrected=0.0000, p_holm=0.0000
+[D068] where: p_uncorrected=0.0000, p_holm=0.0000
+[D068] when: p_uncorrected=0.0000, p_holm=0.0000
+[D068] Overall: p_uncorrected=0.0000, p_holm=0.0000
+[SAVE] Saving correlation results...
+[SAVED] step02_correlations.csv (4 rows, 9 cols)
+[VALIDATION] Running validate_correlation_test_d068...
+[VALIDATION] valid: True
+[VALIDATION] d068_compliant: True
+[VALIDATION] message: Custom validation: 2 required columns.
+[VALIDATION] Checking additional criteria...
+[VALIDATION] r values in [-1, 1]: PASS
+[VALIDATION] CI_lower < r < CI_upper: PASS
+[VALIDATION] p_holm >= p_uncorrected: PASS
+[VALIDATION] Exactly 4 rows: PASS
+[SUCCESS] Step 02 complete

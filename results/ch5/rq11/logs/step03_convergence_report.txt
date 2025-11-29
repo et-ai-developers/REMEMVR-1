@@ -1,0 +1,20 @@
+================================================================================
+CONVERGENCE REPORT - Step 03 LMM Fitting
+================================================================================
+
+Final random structure: random slopes (TSVR_hours | UID)
+
+Convergence Details:
+--------------------------------------------------------------------------------
+IRT model with random slopes: converged=True
+  Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.']
+CTT model with random slopes: converged=True
+  Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.', 'The Hessian matrix at the estimated parameter values is not positive definite.']
+DECISION: BOTH converged with slopes -> Use random slopes for both
+
+================================================================================
+IRT model AIC: nan
+IRT model BIC: nan
+CTT model AIC: nan
+CTT model BIC: nan
+================================================================================

@@ -1,0 +1,33 @@
+================================================================================
+IRT LMM ASSUMPTION VALIDATION REPORT
+================================================================================
+
+Overall Status: [FAIL]
+
+LMM assumption violations detected (2/7 checks failed):
+  - Residual normality violated (Shapiro-Wilk p < 0.05)
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+
+Recommended remedial actions:
+  1. Consider using robust standard errors or transforming the outcome variable
+  2. Model variance structure explicitly or use weighted least squares
+
+
+DIAGNOSTICS SUMMARY:
+--------------------------------------------------------------------------------
+residual_normality: {'test': 'Shapiro-Wilk', 'statistic': 0.9895272353146307, 'p_value': 1.4957779686226542e-07, 'pass': np.False_, 'threshold': 0.05}
+homoscedasticity: {'test': 'Breusch-Pagan', 'statistic': 38.454505474039145, 'p_value': 6.203641286850061e-06, 'pass': np.False_, 'threshold': 0.05}
+random_effects_normality: {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9891916247494054, 'p_value': 0.5997047417098644, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.98598337319236, 'p_value': 0.3729603320885222, 'pass': np.True_, 'threshold': 0.05}}
+autocorrelation: {'lag1_acf': -0.0380204295228523, 'pass': True, 'threshold': 0.1}
+outliers: {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 5, 'outlier_percentage': 0.4166666666666667, 'pass': True, 'outlier_indices': [922, 942, 951, 1038, 1067]}
+convergence: {'converged': True, 'pass': True}
+
+--------------------------------------------------------------------------------
+DIAGNOSTIC PLOTS GENERATED (6 files):
+--------------------------------------------------------------------------------
+  - qq_plot_residuals.png
+  - residuals_vs_fitted.png
+  - qq_plot_random_intercepts.png
+  - qq_plot_random_slopes.png
+  - acf_plot.png
+  - studentized_residuals.png

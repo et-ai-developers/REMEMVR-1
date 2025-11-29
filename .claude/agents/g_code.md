@@ -103,7 +103,7 @@ Master provides the RQ path; you derive all file paths from it.
 Read these 4 files in order:
 1. `docs/v4/best_practices/universal.md` - Circuit breaker definitions (5 types: EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE)
 2. `docs/v4/best_practices/code.md` - Platform compatibility rules (UTF-8 encoding, ASCII output, Windows cp1252), safety rules (never guess, never use placeholders, always validate)
-3. `docs/tools_inventory.md` - **AUTHORITATIVE tool signatures** (MANDATORY for Layer 4b signature validation)
+3. `docs/v4/tools_inventory.md` - **AUTHORITATIVE tool signatures** (MANDATORY for Layer 4b signature validation)
 4. 4_analysis.yaml (analysis specification for the current step)
 
 **Purpose:**

@@ -1,0 +1,21 @@
+[START] Step 01: Compute CTT Mean Scores
+[LOAD] Loading input data...
+[LOADED] step00_raw_data_filtered.csv (400 rows, 71 cols)
+[LOADED] step00_purified_items.csv (69 items)
+[PARSE] Parsing domain assignments from item tags...
+[PASS] Domain assignments match RQ 5.1 'factor' column (69 items)
+[CTT] Computing domain-wise CTT mean scores...
+[CTT] Domain item counts:
+  - what: 19 items
+  - where: 45 items
+  - when: 5 items
+[CTT] Computed CTT scores: 1200 rows (UID x test x domain)
+[CTT] Score range: [0.000, 1.000]
+[SAVED] step01_ctt_scores.csv (1200 rows, 6 cols)
+[VALIDATION] Running validate_data_format...
+[VALIDATION] Column check: All required columns present (6 columns). DataFrame has 1200 rows.
+[VALIDATION] Row count check: 1200 rows (expected 1200)
+[VALIDATION] Domain check: ['what', 'when', 'where'] (expected ['what', 'when', 'where'])
+[VALIDATION] CTT_score range: [0.000, 1.000] (expected [0, 1])
+[VALIDATION] n_items range: [5, 45] (all > 0)
+[SUCCESS] Step 01 complete

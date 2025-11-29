@@ -1,0 +1,162 @@
+[START] Step 03: Fit Parallel LMMs (IRT + CTT)
+[LOAD] Loading input data...
+[LOADED] IRT theta (400 rows, 4 cols)
+[LOADED] CTT scores (1200 rows, 6 cols)
+[LOADED] TSVR data (400 rows, 4 cols)
+[PREPARE] Reshaping IRT theta to long format...
+[RESHAPED] IRT long format (1200 rows)
+[PREPARE] Extracting UID and test from composite_ID...
+[PREPARE] Merging with TSVR time variable...
+[ERROR] You are trying to merge on object and int64 columns for key 'test'. If you wish to proceed you should use pd.concat
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step03_fit_lmm.py", line 238, in <module>
+    irt_lmm_input = pd.merge(
+                    ^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 170, in merge
+    op = _MergeOperation(
+         ^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 807, in __init__
+    self._maybe_coerce_merge_keys()
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1509, in _maybe_coerce_merge_keys
+    raise ValueError(msg)
+ValueError: You are trying to merge on object and int64 columns for key 'test'. If you wish to proceed you should use pd.concat
+[START] Step 03: Fit Parallel LMMs (IRT + CTT)
+[LOAD] Loading input data...
+[LOADED] IRT theta (400 rows, 4 cols)
+[LOADED] CTT scores (1200 rows, 6 cols)
+[LOADED] TSVR data (400 rows, 4 cols)
+[PREPARE] Reshaping IRT theta to long format...
+[RESHAPED] IRT long format (1200 rows)
+[PREPARE] Extracting UID and test from composite_ID...
+[PREPARE] Merging with TSVR time variable...
+[PREPARED] IRT LMM input (1200 rows)
+[PREPARED] CTT LMM input (1200 rows)
+[SAVE] Saving LMM input datasets...
+[SAVED] data/step03_irt_lmm_input.csv (1200 rows, 6 cols)
+[SAVED] data/step03_ctt_lmm_input.csv (1200 rows, 6 cols)
+[PREPARE] Creating log-transformed time variable...
+[PREPARED] Log-transformed TSVR created
+[ANALYSIS] Fitting LMM models...
+[STRATEGY] Convergence: Attempt random slopes, simplify if either model fails
+[PHASE 1] Attempting random slopes: TSVR_hours | UID
+[FIT] IRT model with random slopes...
+[IRT SLOPES] Converged: True
+[IRT SLOPES] Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.']
+[FIT] CTT model with random slopes...
+[CTT SLOPES] Converged: True
+[CTT SLOPES] Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.', 'The Hessian matrix at the estimated parameter values is not positive definite.']
+[DECISION] BOTH models converged with random slopes -> Use random slopes
+[DONE] Analysis complete with random slopes (TSVR_hours | UID)
+[SAVE] Saving model summaries...
+[SAVED] results/step03_irt_lmm_summary.txt
+[SAVED] results/step03_ctt_lmm_summary.txt
+[EXTRACT] Extracting fixed effects...
+[ERROR] All arrays must be of the same length
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step03_fit_lmm.py", line 474, in <module>
+    irt_fe = pd.DataFrame({
+             ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 782, in __init__
+    mgr = dict_to_mgr(data, index, columns, dtype=dtype, copy=copy, typ=manager)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/construction.py", line 503, in dict_to_mgr
+    return arrays_to_mgr(arrays, columns, index, dtype=dtype, typ=typ, consolidate=copy)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/construction.py", line 114, in arrays_to_mgr
+    index = _extract_index(arrays)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/construction.py", line 677, in _extract_index
+    raise ValueError("All arrays must be of the same length")
+ValueError: All arrays must be of the same length
+[START] Step 03: Fit Parallel LMMs (IRT + CTT)
+[LOAD] Loading input data...
+[LOADED] IRT theta (400 rows, 4 cols)
+[LOADED] CTT scores (1200 rows, 6 cols)
+[LOADED] TSVR data (400 rows, 4 cols)
+[PREPARE] Reshaping IRT theta to long format...
+[RESHAPED] IRT long format (1200 rows)
+[PREPARE] Extracting UID and test from composite_ID...
+[PREPARE] Merging with TSVR time variable...
+[PREPARED] IRT LMM input (1200 rows)
+[PREPARED] CTT LMM input (1200 rows)
+[SAVE] Saving LMM input datasets...
+[SAVED] data/step03_irt_lmm_input.csv (1200 rows, 6 cols)
+[SAVED] data/step03_ctt_lmm_input.csv (1200 rows, 6 cols)
+[PREPARE] Creating log-transformed time variable...
+[PREPARED] Log-transformed TSVR created
+[ANALYSIS] Fitting LMM models...
+[STRATEGY] Convergence: Attempt random slopes, simplify if either model fails
+[PHASE 1] Attempting random slopes: TSVR_hours | UID
+[FIT] IRT model with random slopes...
+[IRT SLOPES] Converged: True
+[IRT SLOPES] Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.']
+[FIT] CTT model with random slopes...
+[CTT SLOPES] Converged: True
+[CTT SLOPES] Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.', 'The Hessian matrix at the estimated parameter values is not positive definite.']
+[DECISION] BOTH models converged with random slopes -> Use random slopes
+[DONE] Analysis complete with random slopes (TSVR_hours | UID)
+[SAVE] Saving model summaries...
+[SAVED] results/step03_irt_lmm_summary.txt
+[SAVED] results/step03_ctt_lmm_summary.txt
+[EXTRACT] Extracting fixed effects...
+[ERROR] 'DataFrame' object has no attribute 'data'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step03_fit_lmm.py", line 475, in <module>
+    irt_fe = pd.DataFrame(irt_summary.data[1:], columns=irt_summary.data[0])
+                          ^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 6321, in __getattr__
+    return object.__getattribute__(self, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DataFrame' object has no attribute 'data'. Did you mean: '_data'?
+[START] Step 03: Fit Parallel LMMs (IRT + CTT)
+[LOAD] Loading input data...
+[LOADED] IRT theta (400 rows, 4 cols)
+[LOADED] CTT scores (1200 rows, 6 cols)
+[LOADED] TSVR data (400 rows, 4 cols)
+[PREPARE] Reshaping IRT theta to long format...
+[RESHAPED] IRT long format (1200 rows)
+[PREPARE] Extracting UID and test from composite_ID...
+[PREPARE] Merging with TSVR time variable...
+[PREPARED] IRT LMM input (1200 rows)
+[PREPARED] CTT LMM input (1200 rows)
+[SAVE] Saving LMM input datasets...
+[SAVED] data/step03_irt_lmm_input.csv (1200 rows, 6 cols)
+[SAVED] data/step03_ctt_lmm_input.csv (1200 rows, 6 cols)
+[PREPARE] Creating log-transformed time variable...
+[PREPARED] Log-transformed TSVR created
+[ANALYSIS] Fitting LMM models...
+[STRATEGY] Convergence: Attempt random slopes, simplify if either model fails
+[PHASE 1] Attempting random slopes: TSVR_hours | UID
+[FIT] IRT model with random slopes...
+[IRT SLOPES] Converged: True
+[IRT SLOPES] Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.']
+[FIT] CTT model with random slopes...
+[CTT SLOPES] Converged: True
+[CTT SLOPES] Warnings: ['Maximum Likelihood optimization failed to converge. Check mle_retvals', 'Retrying MixedLM optimization with lbfgs', 'The MLE may be on the boundary of the parameter space.', 'The Hessian matrix at the estimated parameter values is not positive definite.']
+[DECISION] BOTH models converged with random slopes -> Use random slopes
+[DONE] Analysis complete with random slopes (TSVR_hours | UID)
+[SAVE] Saving model summaries...
+[SAVED] results/step03_irt_lmm_summary.txt
+[SAVED] results/step03_ctt_lmm_summary.txt
+[EXTRACT] Extracting fixed effects...
+[SAVED] results/step03_irt_lmm_fixed_effects.csv (9 coefficients)
+[SAVED] results/step03_ctt_lmm_fixed_effects.csv (9 coefficients)
+[SAVE] Saving convergence report...
+[SAVED] logs/step03_convergence_report.txt
+[SAVE] Saving model objects for assumption validation...
+[SAVED] data/step03_irt_lmm_model.pkl
+[SAVED] data/step03_ctt_lmm_model.pkl
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION IRT] Converged: True
+[VALIDATION IRT] Message: LMM converged successfully
+[VALIDATION CTT] Converged: True
+[VALIDATION CTT] Message: LMM converged successfully
+[VALIDATION] Parallel structure: random slopes (TSVR_hours | UID)
+[VALIDATION] CRITICAL: Both models use identical random structure (parallelism requirement satisfied)
+[SUCCESS] Step 03 complete
+[SUMMARY] Final models use: random slopes (TSVR_hours | UID)
+[SUMMARY] IRT: 9 fixed effects, AIC=nan
+[SUMMARY] CTT: 9 fixed effects, AIC=nan

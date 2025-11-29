@@ -1,0 +1,4 @@
+metric,value,threshold,pass
+raw_agreement_pct,100.0,80.0,True
+kappa_all_coefficients,1.0,0.6,True
+kappa_interactions_only,,0.6,

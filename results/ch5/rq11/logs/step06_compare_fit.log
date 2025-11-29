@@ -1,0 +1,39 @@
+[START] Step 6: Compare Model Fit (AIC/BIC)
+[LOAD] Loading LMM summary files...
+[PARSE] Reading summary file: step03_irt_lmm_summary.txt
+[ERROR] AIC value not found in step03_irt_lmm_summary.txt
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step06_compare_fit.py", line 206, in <module>
+    irt_stats = parse_aic_bic_from_summary(irt_summary_path)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/results/ch5/rq11/code/step06_compare_fit.py", line 145, in parse_aic_bic_from_summary
+    raise ValueError(f"AIC value not found in {summary_path.name}")
+ValueError: AIC value not found in step03_irt_lmm_summary.txt
+[START] Step 6: Compare Model Fit (AIC/BIC)
+[LOAD] Loading LMM summary files...
+[PARSE] Reading summary file: step03_irt_lmm_summary.txt
+[PARSE] AIC/BIC not in summary (REML model), computing from log-likelihood...
+[COMPUTED] LL=-1284.25, n=1200, k=4 -> AIC=2576.50, BIC=2596.86
+[PARSE] Reading summary file: step03_ctt_lmm_summary.txt
+[PARSE] AIC/BIC not in summary (REML model), computing from log-likelihood...
+[COMPUTED] LL=-188.30, n=1200, k=4 -> AIC=384.60, BIC=404.96
+[LOADED] IRT model - AIC: 2576.50, BIC: 2596.86
+[LOADED] CTT model - AIC: 384.60, BIC: 404.96
+[COMPUTE] Computing delta AIC and delta BIC...
+[COMPUTED] Delta AIC (CTT-IRT): -2191.90
+[COMPUTED] Delta BIC (CTT-IRT): -2191.90
+[INTERPRET] Interpreting delta magnitudes...
+[INTERPRET] AIC: Substantial difference (favors IRT)
+[INTERPRET] BIC: Substantial difference (favors IRT)
+[CREATE] Building model fit comparison table...
+[CREATED] Comparison table with 2 rows
+[SAVE] Saving step06_model_fit_comparison.csv...
+[SAVED] step06_model_fit_comparison.csv (2 rows, 7 cols)
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] PASS - DataFrame structure valid: 2 rows, 7 columns (required: 7).
+[VALIDATION] AIC/BIC values are positive (valid)
+[VALIDATION] Delta AIC computed correctly (CTT - IRT)
+[VALIDATION] Delta BIC computed correctly (CTT - IRT)
+[VALIDATION] Interpretation matches delta magnitude per thresholds
+[SUCCESS] Step 6 complete

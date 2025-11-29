@@ -777,7 +777,7 @@ steps:
       operations:
         - "Load data/step00_irt_theta_loaded.csv"
         - "Load data/step01_ctt_scores.csv"
-        - "Load results/step02_correlations.csv"
+        - "Load data/step02_correlations.csv"
         - "Reshape IRT theta to long format:"
         - "  - theta_what -> What domain"
         - "  - theta_where -> Where domain"
@@ -786,7 +786,7 @@ steps:
         - "Join with correlations on domain (add r column for annotation)"
         - "Select columns: composite_ID, domain, IRT_score, CTT_score, r"
         - "Sort by domain, then composite_ID"
-        - "Save to plots/step07_scatterplot_data.csv"
+        - "Save to data/step07_scatterplot_data.csv"
 
       input_files:
         - path: "data/step00_irt_theta_loaded.csv"
@@ -799,13 +799,13 @@ steps:
           expected_rows: 1200
           variable_name: "ctt_scores"
 
-        - path: "results/step02_correlations.csv"
+        - path: "data/step02_correlations.csv"
           required_columns: ["domain", "r"]
           expected_rows: 4
           variable_name: "correlations"
 
       output_files:
-        - path: "plots/step07_scatterplot_data.csv"
+        - path: "data/step07_scatterplot_data.csv"
           variable_name: "scatterplot_data"
           columns: ["composite_ID", "domain", "IRT_score", "CTT_score", "r"]
           expected_rows: 1200
@@ -826,7 +826,7 @@ steps:
       signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
 
       input_files:
-        - path: "plots/step07_scatterplot_data.csv"
+        - path: "data/step07_scatterplot_data.csv"
           variable_name: "scatterplot_data"
           source: "analysis call output"
 

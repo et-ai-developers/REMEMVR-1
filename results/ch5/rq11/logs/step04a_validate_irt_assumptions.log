@@ -1,0 +1,27 @@
+[START] Step 4a: Validate IRT LMM Assumptions
+[LOAD] Loading fitted IRT model from step03...
+[LOADED] IRT model from /home/etai/projects/REMEMVR/results/ch5/rq11/data/step03_irt_lmm_model.pkl
+[INFO] Model converged: True
+[INFO] Number of observations: 1200
+[INFO] Number of groups (UIDs): 100
+[LOAD] Loading IRT LMM input data...
+[LOADED] step03_irt_lmm_input.csv (1200 rows, 6 cols)
+[CREATED] Diagnostic plots directory: /home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04a_irt_diagnostics
+[ANALYSIS] Running validate_lmm_assumptions_comprehensive...
+[CONFIG] ACF Lag-1 threshold: 0.1
+[CONFIG] Significance level (alpha): 0.05
+[DONE] Assumption validation complete
+[SAVE] Saving assumption diagnostics report...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/rq11/results/step04a_irt_assumptions_report.txt (1961 bytes)
+[VALIDATION] Validating assumption report file...
+[VALIDATION] Assumption report exists: 1961 bytes (>500 required)
+[VALIDATION] Validating diagnostic plots directory...
+[VALIDATION] Found 6 diagnostic plots
+[VALIDATION] All outputs validated successfully
+
+[ASSUMPTION VALIDATION SUMMARY]
+  Overall Status: [FAIL]
+  Diagnostic plots: 6 generated
+  Report size: 1961 bytes
+[WARNING] Some assumptions violated - review diagnostics report
+[SUCCESS] Step 4a complete

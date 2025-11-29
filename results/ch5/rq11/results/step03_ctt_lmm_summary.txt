@@ -1,0 +1,24 @@
+                  Mixed Linear Model Regression Results
+=========================================================================
+Model:                  MixedLM       Dependent Variable:       score    
+No. Observations:       1200          Method:                   REML     
+No. Groups:             100           Scale:                    0.0303   
+Min. group size:        12            Log-Likelihood:           -188.3020
+Max. group size:        12            Converged:                Yes      
+Mean group size:        12.0                                             
+-------------------------------------------------------------------------
+                              Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+-------------------------------------------------------------------------
+Intercept                      0.820    0.023  35.950 0.000  0.776  0.865
+C(domain)[T.when]             -0.487    0.032 -15.251 0.000 -0.549 -0.424
+C(domain)[T.where]            -0.175    0.032  -5.476 0.000 -0.237 -0.112
+TSVR_hours                    -0.000    0.013  -0.025 0.980 -0.025  0.025
+TSVR_hours:C(domain)[T.when]   0.001    0.000   2.178 0.029  0.000  0.002
+TSVR_hours:C(domain)[T.where] -0.000    0.000  -0.268 0.789 -0.001  0.001
+log_TSVR                      -0.025    0.010  -2.388 0.017 -0.046 -0.004
+log_TSVR:C(domain)[T.when]    -0.015    0.015  -1.045 0.296 -0.044  0.013
+log_TSVR:C(domain)[T.where]   -0.005    0.015  -0.318 0.751 -0.034  0.024
+Group Var                      0.001    0.003                            
+Group x TSVR_hours Cov        -0.000    0.006                            
+TSVR_hours Var                 0.016                                     
+=========================================================================
