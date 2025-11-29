@@ -40,42 +40,41 @@ steps:
         - "Load results/ch5/rq1/data/step02_purified_items.csv (purified item list from RQ 5.1)"
         - "Load data/cache/dfData.csv (raw master dataset)"
         - "Filter raw data to retain ONLY items in purified_items list (same item set as IRT)"
+        - "DICHOTOMIZE item scores: 1 stays 1, all other values (<1) become 0 (same rule as RQ 5.1 IRT for fair CTT comparison)"
         - "Parse domain from item tags: What (-N-), Where (-L-/-U-/-D-), When (-O-)"
         - "Create composite_ID column: {UID}_{test} format"
-        - "Save filtered data to data/step00_raw_data_filtered.csv"
+        - "Save dichotomized filtered data to data/step00_raw_data_filtered.csv"
         - "Copy theta scores to data/step00_irt_theta_loaded.csv"
         - "Copy TSVR to data/step00_tsvr_loaded.csv"
         - "Copy purified items to data/step00_purified_items.csv"
 
       input_files:
         - path: "results/ch5/rq1/data/step03_theta_scores.csv"
-          required_columns: ["composite_ID", "theta_what", "se_what", "theta_where", "se_where", "theta_when", "se_when"]
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
           expected_rows: 400
           data_types:
             composite_ID: "string (format: {UID}_{test})"
             theta_what: "float64 (IRT ability estimate)"
-            se_what: "float64 (standard error)"
             theta_where: "float64"
-            se_where: "float64"
             theta_when: "float64"
-            se_when: "float64"
           source: "RQ 5.1 Step 3 (IRT Pass 2 theta extraction)"
 
         - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
-          required_columns: ["UID", "test", "TSVR_hours"]
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
           expected_rows: 400
           data_types:
+            composite_ID: "string (format: {UID}_{test})"
             UID: "string (participant identifier)"
             test: "string (T1, T2, T3, T4)"
             TSVR_hours: "float64 (hours since encoding)"
           source: "RQ 5.1 Step 0 (TSVR extraction)"
 
         - path: "results/ch5/rq1/data/step02_purified_items.csv"
-          required_columns: ["item_name", "dimension", "a", "b"]
+          required_columns: ["item_name", "factor", "a", "b"]
           expected_rows: [40, 60]
           data_types:
             item_name: "string (item tag)"
-            dimension: "string (common/congruent/incongruent)"
+            factor: "string (What/Where/When domain)"
             a: "float64 (discrimination)"
             b: "float64 (difficulty)"
           source: "RQ 5.1 Step 2 (item purification)"
@@ -88,19 +87,19 @@ steps:
       output_files:
         - path: "data/step00_irt_theta_loaded.csv"
           variable_name: "irt_theta"
-          columns: ["composite_ID", "theta_what", "se_what", "theta_where", "se_where", "theta_when", "se_when"]
+          columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
           expected_rows: 400
           description: "IRT theta scores from RQ 5.1 (local copy)"
 
         - path: "data/step00_tsvr_loaded.csv"
           variable_name: "tsvr_data"
-          columns: ["UID", "test", "TSVR_hours"]
+          columns: ["composite_ID", "UID", "test", "TSVR_hours"]
           expected_rows: 400
           description: "TSVR time variable from RQ 5.1 (local copy)"
 
         - path: "data/step00_purified_items.csv"
           variable_name: "purified_items"
-          columns: ["item_name", "dimension", "a", "b"]
+          columns: ["item_name", "factor", "a", "b"]
           expected_rows: [40, 60]
           description: "Purified item list from RQ 5.1 (local copy)"
 
@@ -127,7 +126,7 @@ steps:
 
       parameters:
         theta_df: "irt_theta"
-        theta_required_cols: ["composite_ID", "theta_what", "se_what", "theta_where", "se_where", "theta_when", "se_when"]
+        theta_required_cols: ["composite_ID", "theta_what", "theta_where", "theta_when"]
         theta_expected_rows: 400
         raw_df: "raw_data_filtered"
         raw_required_cols: ["UID", "TEST"]
@@ -141,10 +140,10 @@ steps:
       criteria:
         - "All 400 composite_IDs present in theta file (no data loss)"
         - "Theta values in [-3, 3] (typical IRT ability range)"
-        - "SE values in [0.1, 1.0] (standard error bounds)"
-        - "TSVR_hours in [0, 200] (hours since encoding)"
+        - "TSVR_hours in [0, 300] (hours since encoding, allowing scheduling delays)"
         - "Purified items count 40-60 (40-50% retention expected)"
         - "Raw data filtered to match purified items exactly"
+        - "CRITICAL: All item scores in raw_data_filtered are BINARY (only 0 or 1, no other values)"
 
       on_failure:
         action: "raise ValueError(validation_result['message'])"
@@ -448,11 +447,11 @@ steps:
     log_file: "logs/step03_fit_lmm.log"
 
   # --------------------------------------------------------------------------
-  # STEP 4: Validate LMM Assumptions (Both Models)
+  # STEP 4a: Validate IRT LMM Assumptions
   # --------------------------------------------------------------------------
-  - name: "step04_validate_assumptions"
-    step_number: "04"
-    description: "Perform comprehensive assumption checks for both IRT and CTT LMMs (residual normality, homoscedasticity, random effects normality, independence)"
+  - name: "step04a_validate_irt_assumptions"
+    step_number: "04a"
+    description: "Perform comprehensive assumption checks for IRT LMM (residual normality, homoscedasticity, random effects normality, independence)"
 
     analysis_call:
       type: "catalogued"
@@ -461,63 +460,33 @@ steps:
       signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step03_irt_lmm_summary.txt"
-          variable_name: "irt_model_summary"
-          source: "Step 3 fitted IRT model"
-
-        - path: "results/step03_ctt_lmm_summary.txt"
-          variable_name: "ctt_model_summary"
-          source: "Step 3 fitted CTT model"
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          source: "Step 3 fitted IRT model (pickle file)"
 
         - path: "data/step03_irt_lmm_input.csv"
           required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "IRT_score"]
           variable_name: "irt_lmm_input"
 
-        - path: "data/step03_ctt_lmm_input.csv"
-          required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "CTT_score"]
-          variable_name: "ctt_lmm_input"
-
       output_files:
-        - path: "results/step04_irt_assumptions_report.txt"
+        - path: "results/step04a_irt_assumptions_report.txt"
           variable_name: "irt_assumptions"
           description: "IRT model assumption diagnostics"
 
-        - path: "results/step04_ctt_assumptions_report.txt"
-          variable_name: "ctt_assumptions"
-          description: "CTT model assumption diagnostics"
-
-        - path: "plots/step04_irt_diagnostics.png"
-          variable_name: "irt_plots"
-          description: "IRT model diagnostic plots (2x2 grid)"
-
-        - path: "plots/step04_ctt_diagnostics.png"
-          variable_name: "ctt_plots"
-          description: "CTT model diagnostic plots (2x2 grid)"
-
-        - path: "results/step04_assumptions_comparison.csv"
-          variable_name: "assumptions_comparison"
-          columns: ["model", "residual_normality_p", "residual_normality_pass", "homoscedasticity_pass", "random_effects_normality_pass", "acf_lag1_mean", "acf_lag1_pass", "overall_pass", "remedial_action"]
-          expected_rows: 2
-          description: "Assumption test results comparison"
+        - path: "plots/step04a_irt_diagnostics/"
+          variable_name: "irt_plots_dir"
+          description: "IRT model diagnostic plots directory (6 plots generated)"
 
       parameters:
-        irt_result: "irt_model_summary"
-        ctt_result: "ctt_model_summary"
-        irt_data: "irt_lmm_input"
-        ctt_data: "ctt_lmm_input"
-        output_dir: "results/"
+        lmm_result: "irt_model"
+        data: "irt_lmm_input"
+        output_dir: "plots/step04a_irt_diagnostics/"
         acf_lag1_threshold: 0.1
         alpha: 0.05
-        parallel_remediation: true
-        diagnostics:
-          - "residual_normality"
-          - "homoscedasticity"
-          - "random_effects_normality"
-          - "autocorrelation"
 
       returns:
         type: "Dict[str, Any]"
-        variable_name: "assumptions_result"
+        variable_name: "irt_assumptions_result"
 
     validation_call:
       type: "catalogued"
@@ -529,26 +498,95 @@ steps:
 
       parameters:
         files_to_check:
-          - path: "results/step04_irt_assumptions_report.txt"
+          - path: "results/step04a_irt_assumptions_report.txt"
             min_size_bytes: 500
-          - path: "results/step04_ctt_assumptions_report.txt"
-            min_size_bytes: 500
-          - path: "plots/step04_irt_diagnostics.png"
-            min_size_bytes: 10000
-          - path: "plots/step04_ctt_diagnostics.png"
-            min_size_bytes: 10000
-          - path: "results/step04_assumptions_comparison.csv"
-            min_size_bytes: 100
+          - path: "plots/step04a_irt_diagnostics/"
+            min_size_bytes: 1
 
       returns:
         type: "Dict[str, Any]"
         variable_name: "validation_result"
 
       criteria:
-        - "All 5 output files exist (2 text reports, 2 PNG plots, 1 comparison CSV)"
+        - "IRT assumption report file exists"
+        - "Text report > 500 characters (comprehensive diagnostics)"
+        - "Diagnostic plot directory exists with 6 plots"
+
+      on_failure:
+        action: "raise FileNotFoundError(validation_result['message'])"
+        log_to: "logs/step04a_validate_irt_assumptions.log"
+
+    log_file: "logs/step04a_validate_irt_assumptions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4b: Validate CTT LMM Assumptions
+  # --------------------------------------------------------------------------
+  - name: "step04b_validate_ctt_assumptions"
+    step_number: "04b"
+    description: "Perform comprehensive assumption checks for CTT LMM (residual normality, homoscedasticity, random effects normality, independence)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          source: "Step 3 fitted CTT model (pickle file)"
+
+        - path: "data/step03_ctt_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "test", "domain", "TSVR_hours", "CTT_score"]
+          variable_name: "ctt_lmm_input"
+
+      output_files:
+        - path: "results/step04b_ctt_assumptions_report.txt"
+          variable_name: "ctt_assumptions"
+          description: "CTT model assumption diagnostics"
+
+        - path: "plots/step04b_ctt_diagnostics/"
+          variable_name: "ctt_plots_dir"
+          description: "CTT model diagnostic plots directory (6 plots generated)"
+
+      parameters:
+        lmm_result: "ctt_model"
+        data: "ctt_lmm_input"
+        output_dir: "plots/step04b_ctt_diagnostics/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "ctt_assumptions_result"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      input_files: []
+
+      parameters:
+        files_to_check:
+          - path: "results/step04a_irt_assumptions_report.txt"
+            min_size_bytes: 500
+          - path: "results/step04b_ctt_assumptions_report.txt"
+            min_size_bytes: 500
+          - path: "plots/step04a_irt_diagnostics/"
+            min_size_bytes: 1
+          - path: "plots/step04b_ctt_diagnostics/"
+            min_size_bytes: 1
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Both assumption report files exist (step04a IRT, step04b CTT)"
         - "Text reports > 500 characters (comprehensive diagnostics)"
-        - "PNG files > 10KB (not empty/corrupted)"
-        - "CSV file > 100 bytes (valid table)"
+        - "Both diagnostic plot directories exist with 6 plots each"
 
       on_failure:
         action: "raise FileNotFoundError(validation_result['message'])"
