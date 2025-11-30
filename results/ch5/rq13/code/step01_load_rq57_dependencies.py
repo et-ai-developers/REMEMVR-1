@@ -103,7 +103,8 @@ LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 # Relative paths from RQ directory to RQ 5.7 artifacts
 # These are RELATIVE paths as specified in 4_analysis.yaml
-RQ57_LMM_MODEL = RQ_DIR / "../rq7/data/lmm_Log.pkl"
+# CHANGED: Using Lin+Log model instead of Log (Log model has singular covariance, ΔAIC=0.8)
+RQ57_LMM_MODEL = RQ_DIR / "../rq7/data/lmm_Lin+Log.pkl"
 RQ57_THETA_SCORES = RQ_DIR / "../rq7/data/step03_theta_scores.csv"
 RQ57_LMM_INPUT = RQ_DIR / "../rq7/data/step04_lmm_input.csv"
 
@@ -164,7 +165,7 @@ def validate_files_exist() -> bool:
     missing_files = []
 
     if not RQ57_LMM_MODEL.exists():
-        missing_files.append(f"../rq7/data/lmm_Log.pkl (resolved: {RQ57_LMM_MODEL})")
+        missing_files.append(f"../rq7/data/lmm_Lin+Log.pkl (resolved: {RQ57_LMM_MODEL})")
     if not RQ57_THETA_SCORES.exists():
         missing_files.append(f"../rq7/data/step03_theta_scores.csv (resolved: {RQ57_THETA_SCORES})")
     if not RQ57_LMM_INPUT.exists():
@@ -427,8 +428,8 @@ if __name__ == "__main__":
 
         # Build metadata dict
         metadata = {
-            'model_source': 'results/ch5/rq7/data/lmm_Log.pkl',
-            'model_formula': 'Logarithmic (Theta ~ log(Days+1))',
+            'model_source': 'results/ch5/rq7/data/lmm_Lin+Log.pkl',
+            'model_formula': 'Lin+Log (Theta ~ Days + log(Days+1))',
             'model_type': type(lmm_model).__name__,
             'n_participants': n_groups,
             'n_observations': n_observations,

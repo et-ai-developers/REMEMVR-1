@@ -204,7 +204,7 @@ steps:
       type: "catalogued"
       module: "tools.analysis_lmm"
       function: "compute_icc_from_variance_components"
-      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, time_point: Optional[float] = None, slope_name: str = 'TSVR_hours') -> DataFrame"
 
       input_files:
         - path: "data/step02_variance_components.csv"
@@ -232,8 +232,8 @@ steps:
 
       parameters:
         variance_components_df: "variance_components"
+        time_point: null  # None triggers simple ICC (no conditional ICC)
         slope_name: "TSVR_hours"
-        timepoint: 6.0
 
       returns:
         type: "DataFrame"
@@ -385,7 +385,7 @@ steps:
           description: "Individual random effects from Step 4"
 
       output_files:
-        - path: "results/step05_intercept_slope_correlation.csv"
+        - path: "data/step05_intercept_slope_correlation.csv"
           variable_name: "correlation_results"
           columns:
             - {name: "statistic", type: "str", description: "correlation, p_uncorrected, p_bonferroni, df, alpha_corrected"}
@@ -432,7 +432,7 @@ steps:
       signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step05_intercept_slope_correlation.csv"
+        - path: "data/step05_intercept_slope_correlation.csv"
           variable_name: "correlation_results"
           source: "analysis call output (test_intercept_slope_correlation_d068 return value)"
 

@@ -1,0 +1,48 @@
+================================================================================
+RQ 5.13: Intraclass Correlation Coefficient (ICC) Estimates
+================================================================================
+
+PURPOSE:
+Quantify proportion of variance in forgetting trajectories that reflects
+stable individual differences (between-person variance) vs measurement
+noise or within-person fluctuation (residual variance).
+
+METHODOLOGY:
+ICC = Between-person variance / (Between-person + Within-person variance)
+
+INTERPRETATION THRESHOLDS:
+  - ICC < 0.20: Low (forgetting rate mostly noise)
+  - 0.20 <= ICC < 0.40: Moderate (mixed trait/state)
+  - ICC >= 0.40: Substantial (forgetting rate is trait-like)
+
+--------------------------------------------------------------------------------
+RESULTS:
+--------------------------------------------------------------------------------
+
+INTERCEPT:
+  ICC = 0.606
+  Interpretation: High clustering (0.30-0.75)
+  Implication: 60.6% of variance in baseline memory ability
+                reflects stable individual differences (trait-like)
+
+SLOPE_CONDITIONAL:
+  ICC = 0.606
+  Interpretation: High clustering (0.30-0.75)
+  Implication: 60.6% of variance in forgetting rate
+                reflects stable individual differences (trait-like)
+
+SLOPE_SIMPLE:
+  ICC = 0.001
+  Interpretation: Low clustering (<0.10)
+  Implication: 0.1% of variance in forgetting rate
+                reflects stable individual differences (trait-like)
+
+--------------------------------------------------------------------------------
+HYPOTHESIS EVALUATION:
+--------------------------------------------------------------------------------
+
+HYPOTHESIS SUPPORTED: ICC_slope = 0.606 >= 0.40
+Forgetting rates reflect substantial stable individual differences
+(trait-like property, not just measurement noise).
+
+================================================================================

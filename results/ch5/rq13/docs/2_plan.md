@@ -434,11 +434,16 @@ Validation tools MUST be used after random effects extraction. Specific validati
 
 **Output:**
 
-**File:** results/step05_intercept_slope_correlation.csv
-**Format:** CSV with columns:
-  - statistic (string): "correlation", "p_uncorrected", "p_bonferroni", "df", "alpha_corrected"
-  - value (float): correlation coefficient r, p-values, degrees of freedom (98), significance threshold (0.0033)
-**Expected Rows:** 5 (one per statistic)
+**File:** data/step05_intercept_slope_correlation.csv
+**Format:** CSV with columns (wide format for D068 validation):
+  - r (float): Pearson correlation coefficient
+  - p_uncorrected (float): Uncorrected p-value
+  - p_bonferroni (float): Bonferroni-corrected p-value
+  - df (float): Degrees of freedom (N-2 = 98)
+  - alpha_corrected (float): Family-wise alpha after Bonferroni (0.0033)
+  - significant_uncorrected (bool): Significant at alpha=0.05 uncorrected
+  - significant_bonferroni (bool): Significant at alpha=0.05 Bonferroni
+**Expected Rows:** 1 (single correlation test result)
 
 **File:** results/step05_correlation_interpretation.txt
 **Format:** Plain text interpretation

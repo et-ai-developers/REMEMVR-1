@@ -1,0 +1,179 @@
+[START] Step 4: Extract Individual Random Effects
+[LOAD] Loading model metadata from Step 1...
+[LOADED] Model metadata: step01_model_metadata.yaml
+  Model source: results/ch5/rq7/data/lmm_Log.pkl
+  Model type: MixedLMResultsWrapper
+  Participants: 100
+  Observations: 400
+  Converged: True
+[ANALYSIS] Loading LMM model from RQ 5.7...
+[ERROR] 'NoneType' object has no attribute 'f_locals'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq13/code/step04_extract_random_effects.py", line 177, in <module>
+    lmm_model = pickle.load(f)
+                ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/data.py", line 112, in __setstate__
+    _, design = dmatrices(d['formula'], data, eval_env=depth,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/highlevel.py", line 316, in dmatrices
+    eval_env = EvalEnvironment.capture(eval_env, reference=1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/eval.py", line 242, in capture
+    [frame.f_locals, frame.f_globals],
+     ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'f_locals'
+[START] Step 4: Extract Individual Random Effects
+[LOAD] Loading model metadata from Step 1...
+[LOADED] Model metadata: step01_model_metadata.yaml
+  Model source: results/ch5/rq7/data/lmm_Log.pkl
+  Model type: MixedLMResultsWrapper
+  Participants: 100
+  Observations: 400
+  Converged: True
+[ANALYSIS] Loading LMM model from RQ 5.7...
+[INFO] Using statsmodels pickle workaround for patsy compatibility
+[PASS] Model loaded successfully with patsy workaround
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/rq7/data/lmm_Log.pkl
+  Model converged: True
+[ERROR] 'MixedLMResults' object has no attribute 'n_groups'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq13/code/step04_extract_random_effects.py", line 216, in <module>
+    log(f"  Number of groups: {lmm_model.n_groups}")
+                               ^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/wrapper.py", line 34, in __getattribute__
+    obj = getattr(results, attr)
+          ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MixedLMResults' object has no attribute 'n_groups'
+[START] Step 4: Extract Individual Random Effects
+[LOAD] Loading model metadata from Step 1...
+[LOADED] Model metadata: step01_model_metadata.yaml
+  Model source: results/ch5/rq7/data/lmm_Log.pkl
+  Model type: MixedLMResultsWrapper
+  Participants: 100
+  Observations: 400
+  Converged: True
+[ANALYSIS] Loading LMM model from RQ 5.7...
+[INFO] Using statsmodels pickle workaround for patsy compatibility
+[PASS] Model loaded successfully with patsy workaround
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/rq7/data/lmm_Log.pkl
+  Model converged: True
+[EXTRACT] Extracting random effects from model...
+  Found random effects for 100 participants
+  Fixed effects:
+    Intercept: 0.6344
+    Slope (log_Days): -0.5913
+[ERROR] 'numpy.float64' object has no attribute 'iloc'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq13/code/step04_extract_random_effects.py", line 262, in <module>
+    random_intercept = re_df['Group'].iloc[0]
+                       ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'numpy.float64' object has no attribute 'iloc'
+[START] Step 4: Extract Individual Random Effects
+[LOAD] Loading model metadata from Step 1...
+[LOADED] Model metadata: step01_model_metadata.yaml
+  Model source: results/ch5/rq7/data/lmm_Log.pkl
+  Model type: MixedLMResultsWrapper
+  Participants: 100
+  Observations: 400
+  Converged: True
+[ANALYSIS] Loading LMM model from RQ 5.7...
+[INFO] Using statsmodels pickle workaround for patsy compatibility
+[PASS] Model loaded successfully with patsy workaround
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/rq7/data/lmm_Log.pkl
+  Model converged: True
+[EXTRACT] Extracting random effects from model...
+  Found random effects for 100 participants
+  Fixed effects:
+    Intercept: 0.6344
+    Slope (log_Days): -0.5913
+[ERROR] No random slope found for A010
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq13/code/step04_extract_random_effects.py", line 268, in <module>
+    raise ValueError(f"No random slope found for {uid}")
+ValueError: No random slope found for A010
+[START] Step 4: Extract Individual Random Effects
+[LOAD] Loading model metadata from Step 1...
+[LOADED] Model metadata: step01_model_metadata.yaml
+  Model source: results/ch5/rq7/data/lmm_Log.pkl
+  Model type: MixedLMResultsWrapper
+  Participants: 100
+  Observations: 400
+  Converged: True
+[ANALYSIS] Loading LMM model from RQ 5.7...
+[INFO] Using statsmodels pickle workaround for patsy compatibility
+[PASS] Model loaded successfully with patsy workaround
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/rq7/data/lmm_Log.pkl
+  Model converged: True
+[EXTRACT] Extracting random effects from model...
+  Found random effects for 100 participants
+  Fixed effects:
+    Intercept: 0.6344
+    Slope (log_Days): -0.5913
+[EXTRACTED] Random effects for 100 participants
+  Columns: ['UID', 'random_intercept', 'random_slope', 'total_intercept', 'total_slope']
+[COMPUTE] Computing descriptive statistics...
+  Random slopes distribution:
+    Mean: 0.0000
+    SD: 0.0003
+    Min: -0.0006
+    Q1: -0.0002
+    Median: -0.0000
+    Q3: 0.0002
+    Max: 0.0007
+[SAVE] Saving outputs...
+[SAVED] step04_random_effects.csv (100 rows, 5 cols)
+  CRITICAL: This file is REQUIRED INPUT for RQ 5.14 (K-means clustering)
+[SAVED] step04_random_slopes_descriptives.txt
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] Validation result: True
+[VALIDATION] All required columns present (5 columns)
+[VALIDATION] No missing columns
+[VALIDATION] Participant count correct: 100
+[VALIDATION] No NaN values in random effects
+[VALIDATION] No duplicate UIDs
+[SUCCESS] Step 4 complete
+[START] Step 4: Extract Individual Random Effects
+[LOAD] Loading model metadata from Step 1...
+[LOADED] Model metadata: step01_model_metadata.yaml
+  Model source: results/ch5/rq7/data/lmm_Lin+Log.pkl
+  Model type: MixedLMResultsWrapper
+  Participants: 100
+  Observations: 400
+  Converged: True
+[ANALYSIS] Loading LMM model from RQ 5.7...
+[INFO] Using statsmodels pickle workaround for patsy compatibility
+[PASS] Model loaded successfully with patsy workaround
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/rq7/data/lmm_Lin+Log.pkl
+  Model converged: True
+[EXTRACT] Extracting random effects from model...
+  Found random effects for 100 participants
+  Fixed effects:
+    Intercept: 0.6851
+    Slope (Days): 0.0767
+[EXTRACTED] Random effects for 100 participants
+  Columns: ['UID', 'random_intercept', 'random_slope', 'total_intercept', 'total_slope']
+[COMPUTE] Computing descriptive statistics...
+  Random slopes distribution:
+    Mean: -0.0000
+    SD: 0.0045
+    Min: -0.0103
+    Q1: -0.0028
+    Median: -0.0007
+    Q3: 0.0024
+    Max: 0.0128
+[SAVE] Saving outputs...
+[SAVED] step04_random_effects.csv (100 rows, 5 cols)
+  CRITICAL: This file is REQUIRED INPUT for RQ 5.14 (K-means clustering)
+[SAVED] step04_random_slopes_descriptives.txt
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] Validation result: True
+[VALIDATION] All required columns present (5 columns)
+[VALIDATION] No missing columns
+[VALIDATION] Participant count correct: 100
+[VALIDATION] No NaN values in random effects
+[VALIDATION] No duplicate UIDs
+[SUCCESS] Step 4 complete
