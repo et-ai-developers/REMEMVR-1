@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-29 19:50 (context-manager curation)
+**Last Updated:** 2025-11-30 21:35 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -283,6 +283,9 @@
 
 ### rq_5_13_step01_complete_specification_fixed_statsmodels_workaround
 **Description:** RQ 5.13 Step01 complete (2025-11-30 13:30). g_conflict found 7 specification conflicts (3 CRITICAL, 3 HIGH, 1 MODERATE), all fixed in 4 documents. Updated to use actual RQ 5.7 output file names (lmm_Log.pkl, step03_theta_scores.csv, step04_lmm_input.csv) not hypothetical names. Generated step01 code via g_code, encountered NEW statsmodels/patsy pickle error (f_locals None during formula re-evaluation, not seen in RQ 5.12 loading same model). Implemented monkey-patch workaround (custom __setstate__ bypasses patsy formula, safe for variance extraction). Successfully loaded RQ 5.7 Logarithmic LMM model (100 participants, 400 observations, converged, random intercepts+slopes). Statistical validity confirmed via validate_model_convergence (PASS). Total session 48 minutes. 11 issues resolved. ROI 8-12× (15 min validation prevented 2-3 hours debugging). SUPERSEDED by full Steps 01-05 RE-RUN with Lin+Log model (Session 2025-11-30 15:10).
+
+### rq_5_13_complete_rerun_linlog_model_validation_pipeline
+**Description:** Complete execution history of RQ 5.13 (Between-Person Variance in Forgetting Rates) with model switch from singular Log model to non-singular Lin+Log model (2025-11-30 15:10). Includes root cause investigation of Log model singular covariance matrix (statsmodels warning, slope var = 9.07e-08 despite raw data SD = 0.396), comparison of all 5 RQ 5.7 models (Log/Quadratic singular, Linear/Lin+Log/Quad+Log non-singular), model selection decision (ΔAIC = 0.8, statistically equivalent, Burnham & Anderson threshold), full Steps 01-05 re-execution with Lin+Log model (1,729× increase in slope variance, ICC_slope 0.05% vs 0.00003%, correlation r = -0.973 vs -1.000), and comprehensive validation pipeline (rq_inspect 100% PASS, rq_plots 2 diagnostic plots, rq_results comprehensive summary). Hypothesis REJECTED (ICC_slope = 0.05% << 0.40 threshold). Scientific finding: Forgetting rate is STATE-DEPENDENT (situational) not TRAIT-LIKE (stable), contradicts literature. Three residual anomalies documented (slope variance 3,000× smaller than intercept, r = -0.973 still 2-5× higher than literature norms, random slope SD only 2.1% of population mean). Publication-ready with transparent model selection documentation. Total 55 minutes (investigation 15min, model switch 5min, re-execution 25min, validation 10min). 23 files modified. Documents singular covariance matrix as model failure not biology, ΔAIC < 2 equivalence criterion, model choice impacts on scientific conclusions, and thesis transparency requirements.
 
 ---
 
