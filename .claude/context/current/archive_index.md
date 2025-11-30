@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-11-30 21:35 (context-manager curation)
+**Last Updated:** 2025-12-01 02:45 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -286,6 +286,9 @@
 
 ### rq_5_13_complete_rerun_linlog_model_validation_pipeline
 **Description:** Complete execution history of RQ 5.13 (Between-Person Variance in Forgetting Rates) with model switch from singular Log model to non-singular Lin+Log model (2025-11-30 15:10). Includes root cause investigation of Log model singular covariance matrix (statsmodels warning, slope var = 9.07e-08 despite raw data SD = 0.396), comparison of all 5 RQ 5.7 models (Log/Quadratic singular, Linear/Lin+Log/Quad+Log non-singular), model selection decision (ΔAIC = 0.8, statistically equivalent, Burnham & Anderson threshold), full Steps 01-05 re-execution with Lin+Log model (1,729× increase in slope variance, ICC_slope 0.05% vs 0.00003%, correlation r = -0.973 vs -1.000), and comprehensive validation pipeline (rq_inspect 100% PASS, rq_plots 2 diagnostic plots, rq_results comprehensive summary). Hypothesis REJECTED (ICC_slope = 0.05% << 0.40 threshold). Scientific finding: Forgetting rate is STATE-DEPENDENT (situational) not TRAIT-LIKE (stable), contradicts literature. Three residual anomalies documented (slope variance 3,000× smaller than intercept, r = -0.973 still 2-5× higher than literature norms, random slope SD only 2.1% of population mean). Publication-ready with transparent model selection documentation. Total 55 minutes (investigation 15min, model switch 5min, re-execution 25min, validation 10min). 23 files modified. Documents singular covariance matrix as model failure not biology, ΔAIC < 2 equivalence criterion, model choice impacts on scientific conclusions, and thesis transparency requirements.
+
+### chapter_5_reorganization_hierarchical_numbering_implemented
+**Description:** Complete history of Chapter 5 RQ reorganization implementing hierarchical 5.X.X numbering system to address When domain floor effects and create logical categorical structure (2025-11-30 19:20). Comprehensive audit of RQs 5.1-5.13 via 13 parallel context_finder agents identified When domain floor effects (6-9% probability, 77% attrition, cascading effects). Designed 4-type structure: General (5.1.x, 6 RQs), Domains (5.2.x, 8 RQs), Paradigms (5.3.x, 9 RQs), Congruence (5.4.x, 8 RQs) = 31 total RQs. Created rq_refactor.tsv tracking table. Created 31 hierarchical folders, migrated 15 existing RQs (710 files), 16 TODO RQs ready for creation. Updated rq_builder agent and 4 template files (build_folder, concept, plan, plots) with hierarchical path format (chX/Y.Z.W). Organizational benefits: clear conceptual grouping, When handled elegantly (present in General, absent from Domains), consistent analytical treatment, easy cross-type comparisons. Migration preserves rollback safety via git. TODO RQs can reuse 80% of code via factor swaps. Total 135 minutes. v4.X architecture validated by audit (100% validation success, bugs decreasing, null results scientifically valid).
 
 ---
 
