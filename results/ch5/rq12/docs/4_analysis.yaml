@@ -1,0 +1,839 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-11-30
+# RQ: ch5/rq12
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/rq12"
+  total_steps: 9
+  analysis_type: "CTT-IRT methodological convergence analysis (hybrid classical + modern psychometric methods)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-11-30T12:00:00Z"
+  cross_rq_dependencies:
+    - "RQ 5.1 (requires completion of Steps 0-3: purified items, theta scores, TSVR mapping)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Data Sources
+  # --------------------------------------------------------------------------
+  - name: "step00_load_data"
+    step_number: "00"
+    description: "Load IRT item parameters, theta scores, TSVR mapping from RQ 5.1 and raw dichotomized scores from dfData.csv for CTT computation"
+
+    # Analysis call specification (STDLIB - pandas operations, NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.1 completion: read results/ch5/rq1/status.yaml and verify step03_theta_scores = success"
+        - "Load results/ch5/rq1/data/step02_purified_items.csv -> df_purified_items"
+        - "Load results/ch5/rq1/data/step03_theta_scores.csv -> df_theta"
+        - "Load results/ch5/rq1/data/step00_tsvr_mapping.csv -> df_tsvr"
+        - "Load data/cache/dfData.csv -> df_raw"
+        - "Create composite_ID in df_raw: UID + '_' + TEST.astype(str) -> composite_ID column"
+        - "Verify expected columns: purified_items (item_name, factor, a, b), theta (composite_ID, theta_what, theta_where, theta_when), tsvr (composite_ID, UID, test, TSVR_hours), raw (composite_ID, UID, TEST, TQ_* columns)"
+        - "Copy to local results/ch5/rq12/data/ for reference: step00_irt_purified_items.csv, step00_theta_scores.csv, step00_tsvr_mapping.csv, step00_raw_scores.csv"
+
+      input_files:
+        - path: "results/ch5/rq1/data/step02_purified_items.csv"
+          required_columns: ["item_name", "factor", "a", "b"]
+          description: "IRT purified items from RQ 5.1 Step 2 (retained items after purification)"
+          expected_rows: "~38 items"
+        - path: "results/ch5/rq1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
+          description: "IRT theta scores from RQ 5.1 Step 3 (Pass 2 calibration)"
+          expected_rows: "~400 (100 participants x 4 tests)"
+        - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+          description: "TSVR time variable from RQ 5.1 Step 0 (actual hours since encoding)"
+          expected_rows: "~400"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "TEST"]
+          description: "Raw dichotomized item responses for CTT computation (TQ_* columns)"
+          expected_rows: "~400"
+
+      output_files:
+        - path: "data/step00_irt_purified_items.csv"
+          description: "Local copy of RQ 5.1 purified items for reference"
+          expected_rows: "~38"
+        - path: "data/step00_theta_scores.csv"
+          description: "Local copy of RQ 5.1 theta scores for reference"
+          expected_rows: "~400"
+        - path: "data/step00_tsvr_mapping.csv"
+          description: "Local copy of RQ 5.1 TSVR mapping for reference"
+          expected_rows: "~400"
+        - path: "data/step00_raw_scores.csv"
+          description: "dfData with composite_ID added (UID_test format)"
+          expected_rows: "~400"
+          columns: ["composite_ID", "UID", "TEST", "TQ_*"]
+
+      parameters:
+        cross_rq_check: "Verify results/ch5/rq1/status.yaml shows step03_theta_scores = success before proceeding"
+        composite_id_format: "UID + '_' + TEST (e.g., A010_1)"
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_irt_purified_items.csv"
+          source: "analysis call output (copy of RQ 5.1 purified items)"
+        - path: "data/step00_theta_scores.csv"
+          source: "analysis call output (copy of RQ 5.1 theta)"
+        - path: "data/step00_tsvr_mapping.csv"
+          source: "analysis call output (copy of RQ 5.1 TSVR)"
+        - path: "data/step00_raw_scores.csv"
+          source: "analysis call output (dfData with composite_ID)"
+
+      parameters:
+        file_paths:
+          - "data/step00_irt_purified_items.csv"
+          - "data/step00_theta_scores.csv"
+          - "data/step00_tsvr_mapping.csv"
+          - "data/step00_raw_scores.csv"
+        min_size_bytes: 100
+
+      criteria:
+        - "All 4 output files exist"
+        - "Each file size >= 100 bytes (not empty)"
+        - "Validate columns using validate_data_columns for each file"
+
+      on_failure:
+        action: "raise FileNotFoundError"
+        message: "Step 0 data loading failed - missing RQ 5.1 outputs or dfData.csv"
+        log_to: "logs/step00_load_data.log"
+
+      description: "Validate all 4 data source files loaded successfully"
+
+    log_file: "logs/step00_load_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Map Items to Full vs Purified Sets
+  # --------------------------------------------------------------------------
+  - name: "step01_map_items"
+    step_number: "01"
+    description: "Identify which TQ_* items in dfData.csv were retained vs excluded by RQ 5.1 purification"
+
+    # Analysis call specification (STDLIB - set operations, NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Extract all column names from df_raw matching pattern 'TQ_*' -> full_item_list"
+        - "Extract item_name values from df_purified_items -> purified_item_list"
+        - "Group purified items by domain (factor column): what_items, where_items, when_items"
+        - "Group full items by domain using tag patterns: What (TQ_*-N-*), Where (TQ_*-U-* + TQ_*-D-*), When (TQ_*-O-*)"
+        - "Create mapping DataFrame: item_name, domain, retained (True if in purified_item_list)"
+        - "Compute removed items: full_item_list - purified_item_list (set difference)"
+        - "Generate item count report: full vs purified counts per domain"
+
+      input_files:
+        - path: "data/step00_irt_purified_items.csv"
+          required_columns: ["item_name", "factor"]
+          description: "Purified item list from RQ 5.1"
+        - path: "data/step00_raw_scores.csv"
+          required_columns: ["TQ_*"]
+          description: "Raw scores with all TQ_* item columns"
+
+      output_files:
+        - path: "data/step01_item_mapping.csv"
+          description: "Item mapping with retention status"
+          columns: ["item_name", "domain", "retained"]
+          expected_rows: "~50 items (all TQ_* items from dfData)"
+        - path: "logs/step01_item_counts.txt"
+          description: "Text report of item counts (full vs purified per domain)"
+
+      parameters:
+        tag_patterns:
+          what: "TQ_*-N-*"
+          where: ["TQ_*-U-*", "TQ_*-D-*"]
+          when: "TQ_*-O-*"
+        expected_retention_rate: "~75% (expected ~38 retained from ~50 total)"
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_item_mapping.csv"
+          source: "analysis call output (item mapping)"
+
+      parameters:
+        df: "pd.read_csv('data/step01_item_mapping.csv')"
+        expected_rows: [48, 52]
+        expected_columns: ["item_name", "domain", "retained"]
+        column_types:
+          item_name: "object"
+          domain: "object"
+          retained: "bool"
+
+      criteria:
+        - "Row count in range [48, 52] items"
+        - "All 3 columns present: item_name, domain, retained"
+        - "domain values in {what, where, when}"
+        - "retained values in {True, False}"
+        - "Retention rate approximately 75% (36-40 items retained)"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "Item mapping incomplete or retention rate outside expected range"
+        log_to: "logs/step01_map_items.log"
+
+      description: "Validate item mapping structure and retention rate"
+
+    log_file: "logs/step01_map_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Full CTT Scores
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_full_ctt"
+    step_number: "02"
+    description: "Calculate Classical Test Theory scores using ALL items (full item set) per UID x Test x Domain"
+
+    # Analysis call specification (STDLIB - mean computation, NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "For each domain (what, where, when):"
+        - "  - Select all items matching domain pattern from item_mapping (all items, not filtered by retained)"
+        - "  - Group by composite_ID"
+        - "  - Compute mean of dichotomized responses (0/1) -> CTT_full_{domain}"
+        - "Merge domain scores into single DataFrame"
+        - "Add UID and TEST columns from composite_ID parsing"
+
+      input_files:
+        - path: "data/step00_raw_scores.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TQ_*"]
+          description: "Raw dichotomized item responses"
+        - path: "data/step01_item_mapping.csv"
+          required_columns: ["item_name", "domain"]
+          description: "Item-to-domain mapping (all items)"
+
+      output_files:
+        - path: "data/step02_ctt_full_scores.csv"
+          description: "Full CTT scores (all items) per domain"
+          columns: ["composite_ID", "UID", "TEST", "CTT_full_what", "CTT_full_where", "CTT_full_when"]
+          expected_rows: "~400 (100 participants x 4 tests)"
+
+      parameters:
+        scoring_method: "Mean of dichotomized responses (0/1) within domain"
+        score_range: "[0, 1] (proportion correct)"
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_ctt_full_scores.csv"
+          source: "analysis call output (full CTT scores)"
+
+      parameters:
+        data: "pd.read_csv('data/step02_ctt_full_scores.csv')['CTT_full_what']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "CTT_full_what"
+
+      criteria:
+        - "All CTT_full_* columns in [0, 1] range"
+        - "No negative values (proportion cannot be negative)"
+        - "No values > 1.0 (maximum proportion)"
+        - "NaN acceptable ONLY if participant missing all items for domain (rare)"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "CTT full scores out of valid range [0, 1]"
+        log_to: "logs/step02_compute_full_ctt.log"
+
+      description: "Validate full CTT scores in valid proportion range"
+
+    log_file: "logs/step02_compute_full_ctt.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Purified CTT Scores
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_purified_ctt"
+    step_number: "03"
+    description: "Calculate Classical Test Theory scores using ONLY IRT-retained items (purified item set) per UID x Test x Domain"
+
+    # Analysis call specification (STDLIB - filtered mean computation, NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "For each domain (what, where, when):"
+        - "  - Select ONLY items with retained=True from item_mapping"
+        - "  - Group by composite_ID"
+        - "  - Compute mean of dichotomized responses (0/1) -> CTT_purified_{domain}"
+        - "Merge domain scores into single DataFrame"
+        - "Add UID and TEST columns from composite_ID parsing"
+
+      input_files:
+        - path: "data/step00_raw_scores.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TQ_*"]
+          description: "Raw dichotomized item responses"
+        - path: "data/step01_item_mapping.csv"
+          required_columns: ["item_name", "domain", "retained"]
+          description: "Item mapping with retention status"
+
+      output_files:
+        - path: "data/step03_ctt_purified_scores.csv"
+          description: "Purified CTT scores (retained items only) per domain"
+          columns: ["composite_ID", "UID", "TEST", "CTT_purified_what", "CTT_purified_where", "CTT_purified_when"]
+          expected_rows: "~400 (100 participants x 4 tests)"
+
+      parameters:
+        scoring_method: "Mean of dichotomized responses (0/1) within domain, ONLY retained items"
+        score_range: "[0, 1] (proportion correct)"
+        item_filter: "retained == True"
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_ctt_purified_scores.csv"
+          source: "analysis call output (purified CTT scores)"
+
+      parameters:
+        data: "pd.read_csv('data/step03_ctt_purified_scores.csv')['CTT_purified_what']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "CTT_purified_what"
+
+      criteria:
+        - "All CTT_purified_* columns in [0, 1] range"
+        - "No negative values"
+        - "No values > 1.0"
+        - "Correlation with full CTT expected r > 0.95 (high overlap)"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "CTT purified scores out of valid range [0, 1]"
+        log_to: "logs/step03_compute_purified_ctt.log"
+
+      description: "Validate purified CTT scores in valid proportion range"
+
+    log_file: "logs/step03_compute_purified_ctt.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: CTT Reliability Assessment
+  # --------------------------------------------------------------------------
+  - name: "step04_assess_reliability"
+    step_number: "04"
+    description: "Compute Cronbach's alpha internal consistency for both full and purified CTT item sets per domain with bootstrap 95% CIs"
+
+    # Analysis call specification (CATALOGUED TOOL)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compute_cronbachs_alpha"
+      signature: "compute_cronbachs_alpha(data: DataFrame, n_bootstrap: int = 1000) -> Dict[str, float]"
+
+      input_files:
+        - path: "data/step00_raw_scores.csv"
+          required_columns: ["TQ_*"]
+          variable_name: "df_raw"
+          description: "Raw item responses for alpha computation"
+        - path: "data/step01_item_mapping.csv"
+          required_columns: ["item_name", "domain", "retained"]
+          variable_name: "df_mapping"
+          description: "Item-to-domain mapping with retention status"
+
+      output_files:
+        - path: "data/step04_reliability_assessment.csv"
+          variable_name: "df_reliability"
+          description: "Cronbach's alpha for full vs purified CTT with bootstrap 95% CIs"
+          columns: ["domain", "alpha_full", "CI_lower_full", "CI_upper_full", "alpha_purified", "CI_lower_purified", "CI_upper_purified", "delta_alpha"]
+          expected_rows: "3 (one per domain: what, where, when)"
+
+      parameters:
+        n_bootstrap: 1000
+        domains: ["what", "where", "when"]
+        item_sets:
+          full: "All items per domain (retained=True OR False)"
+          purified: "Only retained items per domain (retained=True)"
+
+      returns:
+        type: "Dict[str, float]"
+        fields: ["alpha", "CI_lower", "CI_upper"]
+        description: "Cronbach's alpha with bootstrap 95% confidence interval"
+
+      description: "Compute Cronbach's alpha for full and purified item sets. For dichotomous items (0/1), equals KR-20. Tests whether IRT purification maintains CTT reliability."
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_reliability_assessment.csv"
+          source: "analysis call output (reliability assessment)"
+
+      parameters:
+        data: "pd.read_csv('data/step04_reliability_assessment.csv')['alpha_full']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "alpha_full"
+
+      criteria:
+        - "All alpha values in [0, 1] range"
+        - "CI_lower < alpha < CI_upper for all domains"
+        - "Typical alpha values in [0.70, 0.95] (acceptable to excellent)"
+        - "Bootstrap completed: 1000 iterations per domain"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "Cronbach's alpha computation failed or out of range"
+        log_to: "logs/step04_assess_reliability.log"
+
+      description: "Validate Cronbach's alpha values and confidence intervals"
+
+    log_file: "logs/step04_assess_reliability.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Correlation Analysis with Steiger's z-test
+  # --------------------------------------------------------------------------
+  - name: "step05_correlation_analysis"
+    step_number: "05"
+    description: "Test primary hypothesis that purified CTT correlates more strongly with IRT theta than full CTT using Steiger's z-test for dependent correlations"
+
+    # Analysis call specification (CATALOGUED TOOL)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compare_correlations_dependent"
+      signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, float]"
+
+      input_files:
+        - path: "data/step00_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
+          variable_name: "df_theta"
+          description: "IRT theta scores from RQ 5.1"
+        - path: "data/step02_ctt_full_scores.csv"
+          required_columns: ["composite_ID", "CTT_full_what", "CTT_full_where", "CTT_full_when"]
+          variable_name: "df_ctt_full"
+          description: "Full CTT scores from Step 2"
+        - path: "data/step03_ctt_purified_scores.csv"
+          required_columns: ["composite_ID", "CTT_purified_what", "CTT_purified_where", "CTT_purified_when"]
+          variable_name: "df_ctt_purified"
+          description: "Purified CTT scores from Step 3"
+
+      output_files:
+        - path: "data/step05_correlation_analysis.csv"
+          variable_name: "df_correlations"
+          description: "Steiger's z-test results comparing Full CTT-IRT vs Purified CTT-IRT correlations"
+          columns: ["domain", "r_full_irt", "r_purified_irt", "r_full_purified", "delta_r", "steiger_z", "p_uncorrected", "p_bonferroni", "interpretation"]
+          expected_rows: "3 (one per domain)"
+
+      parameters:
+        n: 400
+        domains: ["what", "where", "when"]
+        correlations:
+          r12: "corr(Full CTT, IRT theta)"
+          r13: "corr(Full CTT, Purified CTT)"
+          r23: "corr(Purified CTT, IRT theta)"
+        hypothesis: "H0: r12 = r23 (Full CTT-IRT vs Purified CTT-IRT)"
+        correction: "Bonferroni for 3 domains (correction factor = 3)"
+
+      returns:
+        type: "Dict[str, float]"
+        fields: ["z_statistic", "p_uncorrected", "p_bonferroni"]
+        description: "Steiger's z-test result with dual p-values per Decision D068"
+
+      description: "Test if purified CTT-IRT correlation differs significantly from full CTT-IRT correlation using Steiger's (1980) formula for dependent correlations. Implements Decision D068 dual p-value reporting."
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_correlation_analysis.csv"
+          source: "analysis call output (correlation test results)"
+
+      parameters:
+        correlation_df: "pd.read_csv('data/step05_correlation_analysis.csv')"
+        required_cols: ["domain", "r_full_irt", "r_purified_irt", "steiger_z", "p_uncorrected", "p_bonferroni"]
+
+      criteria:
+        - "BOTH uncorrected and corrected p-values present (Decision D068)"
+        - "p_uncorrected column exists"
+        - "p_bonferroni column exists (Bonferroni correction)"
+        - "All p-values in [0, 1] range"
+        - "All correlations in [-1, 1] range"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "Correlation test missing dual p-values or out of range (Decision D068 violation)"
+        log_to: "logs/step05_correlation_analysis.log"
+
+      description: "Validate correlation test includes Decision D068 dual p-value reporting"
+
+    log_file: "logs/step05_correlation_analysis.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Standardize Outcomes for Parallel LMM
+  # --------------------------------------------------------------------------
+  - name: "step06_standardize_outcomes"
+    step_number: "06"
+    description: "Standardize all three measurement approaches (Full CTT, Purified CTT, IRT theta) to z-scores to enable valid AIC comparison per Burnham & Anderson"
+
+    # Analysis call specification (STDLIB - z-score transformation, NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Merge theta, full CTT, purified CTT, and TSVR on composite_ID"
+        - "Reshape to long format: composite_ID, UID, TSVR_hours, domain, measurement_type, value"
+        - "measurement_type in {Full CTT, Purified CTT, IRT theta}"
+        - "domain in {what, where, when}"
+        - "For each measurement_type x domain combination:"
+        - "  - Compute z-score: z = (value - mean(value)) / sd(value)"
+        - "  - Save as z_{measurement_type}_{domain}"
+        - "Verify standardization: mean(z) approximately 0, sd(z) approximately 1 (tolerance ±0.01)"
+
+      input_files:
+        - path: "data/step00_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when"]
+          description: "IRT theta scores"
+        - path: "data/step02_ctt_full_scores.csv"
+          required_columns: ["composite_ID", "CTT_full_what", "CTT_full_where", "CTT_full_when"]
+          description: "Full CTT scores"
+        - path: "data/step03_ctt_purified_scores.csv"
+          required_columns: ["composite_ID", "CTT_purified_what", "CTT_purified_where", "CTT_purified_when"]
+          description: "Purified CTT scores"
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "TSVR_hours"]
+          description: "TSVR time variable"
+
+      output_files:
+        - path: "data/step06_standardized_outcomes.csv"
+          description: "Z-scored outcomes in long format for parallel LMM fitting"
+          columns: ["composite_ID", "UID", "TSVR_hours", "domain", "z_full_ctt", "z_purified_ctt", "z_irt_theta"]
+          expected_rows: "~1200 (400 composite_IDs x 3 domains)"
+
+      parameters:
+        standardization_method: "z-score: (value - mean) / sd per measurement_type x domain"
+        tolerance: "±0.01 for mean=0, sd=1 validation"
+        rationale: "AIC comparison requires identical data scales per Burnham & Anderson (2002). CTT [0,1] vs IRT theta [logit] violate this requirement."
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_standardized_outcomes.csv"
+          source: "analysis call output (standardized outcomes)"
+
+      parameters:
+        df: "pd.read_csv('data/step06_standardized_outcomes.csv')"
+        column_names: ["z_full_ctt", "z_purified_ctt", "z_irt_theta"]
+        tolerance: 0.01
+
+      criteria:
+        - "mean(z) within ±0.01 of 0 for all columns"
+        - "sd(z) within ±0.01 of 1 for all columns"
+        - "Checks all 3 measurement types x 3 domains = 9 combinations"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "Standardization failed - mean or SD out of tolerance ±0.01"
+        log_to: "logs/step06_standardize_outcomes.log"
+
+      description: "Validate z-score standardization (mean ≈ 0, SD ≈ 1) for valid AIC comparison"
+
+    log_file: "logs/step06_standardize_outcomes.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Fit Parallel LMMs to Standardized Outcomes
+  # --------------------------------------------------------------------------
+  - name: "step07_fit_parallel_lmms"
+    step_number: "07"
+    description: "Fit identical LMM formulas to three standardized measurement approaches (Full CTT, Purified CTT, IRT theta) and compare AIC"
+
+    # Analysis call specification (LOOP THROUGH 3 MEASUREMENTS)
+    analysis_call:
+      type: "catalogued_loop"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step06_standardized_outcomes.csv"
+          required_columns: ["composite_ID", "UID", "TSVR_hours", "domain", "z_full_ctt", "z_purified_ctt", "z_irt_theta"]
+          variable_name: "df_standardized"
+          description: "Standardized outcomes in long format (merged TSVR + z-scores)"
+
+      output_files:
+        - path: "data/step07_lmm_model_comparison.csv"
+          variable_name: "df_model_comparison"
+          description: "AIC comparison of 3 parallel LMMs"
+          columns: ["measurement", "AIC", "BIC", "logLik", "delta_AIC", "interpretation"]
+          expected_rows: "3 (Full CTT, Purified CTT, IRT theta)"
+        - path: "data/step07_lmm_full_ctt_summary.txt"
+          variable_name: "lmm_full_summary"
+          description: "Statsmodels LMM summary for Full CTT"
+        - path: "data/step07_lmm_purified_ctt_summary.txt"
+          variable_name: "lmm_purified_summary"
+          description: "Statsmodels LMM summary for Purified CTT"
+        - path: "data/step07_lmm_irt_theta_summary.txt"
+          variable_name: "lmm_irt_summary"
+          description: "Statsmodels LMM summary for IRT theta"
+        - path: "data/step07_lmm_full_ctt_fixed_effects.csv"
+          variable_name: "lmm_full_fx"
+          description: "Fixed effects table for Full CTT"
+          columns: ["term", "coef", "se", "z", "p"]
+        - path: "data/step07_lmm_purified_ctt_fixed_effects.csv"
+          variable_name: "lmm_purified_fx"
+          description: "Fixed effects table for Purified CTT"
+          columns: ["term", "coef", "se", "z", "p"]
+        - path: "data/step07_lmm_irt_theta_fixed_effects.csv"
+          variable_name: "lmm_irt_fx"
+          description: "Fixed effects table for IRT theta"
+          columns: ["term", "coef", "se", "z", "p"]
+
+      loop_specification:
+        iterations: 3
+        loop_variable: "measurement_type"
+        loop_values:
+          - name: "Full CTT"
+            z_column: "z_full_ctt"
+            output_suffix: "full_ctt"
+          - name: "Purified CTT"
+            z_column: "z_purified_ctt"
+            output_suffix: "purified_ctt"
+          - name: "IRT theta"
+            z_column: "z_irt_theta"
+            output_suffix: "irt_theta"
+
+      operations:
+        # PREPARATION (outside loop, executed once)
+        - step: "unmerge_tsvr"
+          description: "Extract TSVR data into separate DataFrame for function signature compatibility"
+          code: |
+            df_tsvr = df_standardized[['composite_ID', 'UID', 'TSVR_hours']].drop_duplicates()
+
+        # LOOP (executed 3 times, once per measurement_type)
+        - step: "prepare_theta_scores"
+          description: "Create theta_scores DataFrame by renaming z_column to 'theta' and 'domain' to 'domain_name'"
+          code: |
+            df_theta = df_standardized[['composite_ID', 'domain', '{z_column}']].copy()
+            df_theta.rename(columns={{'{z_column}': 'theta', 'domain': 'domain_name'}}, inplace=True)
+
+        - step: "fit_lmm"
+          description: "Call fit_lmm_trajectory_tsvr for this measurement type"
+          code: |
+            lmm_result = fit_lmm_trajectory_tsvr(
+                theta_scores=df_theta,
+                tsvr_data=df_tsvr,
+                formula="Theta ~ (Days + np.log(Days+1/24)) * C(Domain)",
+                groups='UID',
+                re_formula='~Days',
+                reml=False
+            )
+
+        - step: "save_summary"
+          description: "Save LMM summary text file"
+          code: |
+            with open('data/step07_lmm_{output_suffix}_summary.txt', 'w') as f:
+                f.write(str(lmm_result.summary()))
+
+        - step: "extract_fixed_effects"
+          description: "Extract fixed effects table using tools.analysis_lmm.extract_fixed_effects_from_lmm"
+          code: |
+            fx_table = extract_fixed_effects_from_lmm(lmm_result)
+            fx_table.to_csv('data/step07_lmm_{output_suffix}_fixed_effects.csv', index=False)
+
+        - step: "collect_aic"
+          description: "Collect AIC/BIC/logLik for model comparison"
+          code: |
+            results_list.append({{
+                'measurement': '{name}',
+                'AIC': lmm_result.aic,
+                'BIC': lmm_result.bic,
+                'logLik': lmm_result.llf
+            }})
+
+        # POST-LOOP (executed once after all iterations)
+        - step: "create_comparison_table"
+          description: "Create AIC comparison table with delta_AIC and interpretation"
+          code: |
+            df_comparison = pd.DataFrame(results_list)
+
+            # Calculate delta_AIC (reference = IRT theta, the last measurement)
+            aic_irt = df_comparison.loc[df_comparison['measurement'] == 'IRT theta', 'AIC'].values[0]
+            df_comparison['delta_AIC'] = df_comparison['AIC'] - aic_irt
+
+            # Interpretation per Burnham & Anderson (2002)
+            def interpret_delta_aic(delta):
+                if abs(delta) < 2:
+                    return "Equivalent fit (|ΔAICc| < 2)"
+                elif abs(delta) < 7:
+                    return "Moderate support for lower AIC (2 ≤ |ΔAICc| < 7)"
+                else:
+                    return "Substantial support for lower AIC (|ΔAICc| ≥ 7)"
+
+            df_comparison['interpretation'] = df_comparison['delta_AIC'].apply(interpret_delta_aic)
+
+            # Save comparison table
+            df_comparison.to_csv('data/step07_lmm_model_comparison.csv', index=False)
+
+      parameters:
+        formula_template: "Theta ~ (Days + np.log(Days+1/24)) * C(Domain)"
+        groups: "UID"
+        re_formula: "~Days"
+        reml: false
+        parallel_design: "Identical formula across all 3 measurements isolates measurement method effects"
+        note: "Days+1/24 offset prevents log(0) for immediate recall (TSVR_hours ≈ 0.3-2.5h)"
+
+      returns:
+        type: "Dict[str, MixedLMResults]"
+        description: "Dictionary with keys: 'full_ctt', 'purified_ctt', 'irt_theta' containing fitted LMM objects"
+
+      description: "Fit LMM using TSVR (actual hours) per Decision D070. Function signature expects separate theta_scores + tsvr_data DataFrames, so we unmerge TSVR, loop through 3 measurements, rename z_column → 'theta' for each iteration, call function, save outputs, then stitch together comparison table."
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step07_lmm_full_ctt_summary.txt"
+          source: "analysis call output (fitted LMM for Full CTT)"
+        - path: "data/step07_lmm_purified_ctt_summary.txt"
+          source: "analysis call output (fitted LMM for Purified CTT)"
+        - path: "data/step07_lmm_irt_theta_summary.txt"
+          source: "analysis call output (fitted LMM for IRT theta)"
+
+      parameters:
+        lmm_results: ["lmm_full", "lmm_purified", "lmm_irt"]
+
+      criteria:
+        - "All 3 models converged successfully (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+        - "AIC computable for all models"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "LMM convergence failed - cannot compare AICs for non-convergent models"
+        log_to: "logs/step07_fit_parallel_lmms.log"
+
+      description: "Validate all 3 parallel LMMs converged successfully before AIC comparison"
+
+    log_file: "logs/step07_fit_parallel_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Prepare Plot Data (Methodological Comparison Visualization)
+  # --------------------------------------------------------------------------
+  - name: "step08_prepare_plot_data"
+    step_number: "08"
+    description: "Create plot source CSVs for methodological comparison visualizations (correlation comparison + AIC comparison)"
+
+    # Analysis call specification (STDLIB - data reshaping, NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Plot 1 Data (Correlation Comparison):"
+        - "  - Reshape correlation_analysis.csv to long format"
+        - "  - Columns: domain, measurement_type, correlation, significance"
+        - "  - measurement_type in {Full CTT, Purified CTT}"
+        - "  - correlation = r_full_irt or r_purified_irt"
+        - "  - significance = 'Significant improvement' if p_bonferroni < 0.05 else 'Not significant'"
+        - "  - Save to plots/step08_correlation_comparison_data.csv"
+        - "Plot 2 Data (AIC Comparison):"
+        - "  - Use lmm_model_comparison.csv directly"
+        - "  - Add significance marker: delta_AIC > 10 = 'Substantial', 2-10 = 'Moderate', <2 = 'Equivalent'"
+        - "  - Save to plots/step08_aic_comparison_data.csv"
+
+      input_files:
+        - path: "data/step05_correlation_analysis.csv"
+          required_columns: ["domain", "r_full_irt", "r_purified_irt", "delta_r", "p_bonferroni"]
+          description: "Correlation analysis results from Step 5"
+        - path: "data/step07_lmm_model_comparison.csv"
+          required_columns: ["measurement", "AIC", "delta_AIC", "interpretation"]
+          description: "LMM comparison results from Step 7"
+
+      output_files:
+        - path: "plots/step08_correlation_comparison_data.csv"
+          description: "Plot source CSV for correlation comparison (Full CTT vs Purified CTT correlations with IRT)"
+          columns: ["domain", "measurement_type", "correlation", "significance"]
+          expected_rows: "6 (3 domains x 2 measurement types)"
+        - path: "plots/step08_aic_comparison_data.csv"
+          description: "Plot source CSV for AIC comparison (3 measurement approaches)"
+          columns: ["measurement", "AIC", "delta_AIC", "interpretation"]
+          expected_rows: "3 (Full CTT, Purified CTT, IRT theta)"
+
+      parameters:
+        plot1_type: "Grouped bar chart comparing Full CTT-IRT vs Purified CTT-IRT correlations per domain"
+        plot2_type: "Bar chart showing AIC values (delta_AIC with IRT as reference = 0)"
+        significance_threshold: "p_bonferroni < 0.05 for correlation comparison"
+        aic_interpretation: "Burnham & Anderson thresholds: <2 = Equivalent, 2-10 = Moderate, >10 = Substantial"
+
+    # Validation call specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "plots/step08_correlation_comparison_data.csv"
+          source: "analysis call output (correlation comparison plot data)"
+        - path: "plots/step08_aic_comparison_data.csv"
+          source: "analysis call output (AIC comparison plot data)"
+
+      parameters:
+        plot1_data: "pd.read_csv('plots/step08_correlation_comparison_data.csv')"
+        plot1_required_domains: ["what", "where", "when"]
+        plot1_required_groups: ["Full CTT", "Purified CTT"]
+        plot1_domain_col: "domain"
+        plot1_group_col: "measurement_type"
+        plot2_data: "pd.read_csv('plots/step08_aic_comparison_data.csv')"
+        plot2_required_measurements: ["Full CTT", "Purified CTT", "IRT theta"]
+
+      criteria:
+        - "Plot 1: All domains present (what, where, when)"
+        - "Plot 1: All measurements present (Full CTT, Purified CTT)"
+        - "Plot 1: Exactly 6 rows (3 domains x 2 types)"
+        - "Plot 2: All measurements present (Full CTT, Purified CTT, IRT theta)"
+        - "Plot 2: Exactly 3 rows"
+        - "No NaN values in either plot data"
+
+      on_failure:
+        action: "raise ValueError"
+        message: "Plot data incomplete - missing domains or measurements"
+        log_to: "logs/step08_prepare_plot_data.log"
+
+      description: "Validate all domains/measurements present in plot data for complete visualizations"
+
+    log_file: "logs/step08_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

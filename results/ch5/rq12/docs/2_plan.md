@@ -453,7 +453,7 @@ Validation tools MUST be used after purified CTT computation execution. Specific
 
 **Output:**
 
-**File:** results/step04_reliability_assessment.csv
+**File:** data/step04_reliability_assessment.csv
 **Format:** CSV with columns:
   - `domain` (string, "what", "where", "when")
   - `alpha_full` (float, Cronbach's alpha for full item set)
@@ -476,7 +476,7 @@ Validation tools MUST be used after reliability assessment execution. Specific v
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step04_reliability_assessment.csv: 3 rows x 8 columns (domain: object, alpha_full: float64, CI_lower_full: float64, CI_upper_full: float64, alpha_purified: float64, CI_lower_purified: float64, CI_upper_purified: float64, delta_alpha: float64)
+- data/step04_reliability_assessment.csv: 3 rows x 8 columns (domain: object, alpha_full: float64, CI_lower_full: float64, CI_upper_full: float64, alpha_purified: float64, CI_lower_purified: float64, CI_upper_purified: float64, delta_alpha: float64)
 
 *Value Ranges:*
 - alpha_* in [0, 1] (Cronbach's alpha bounds)
@@ -542,7 +542,7 @@ Validation tools MUST be used after reliability assessment execution. Specific v
 
 **Output:**
 
-**File:** results/step05_correlation_analysis.csv
+**File:** data/step05_correlation_analysis.csv
 **Format:** CSV with columns:
   - `domain` (string, "what", "where", "when")
   - `r_full_irt` (float, correlation between full CTT and IRT theta)
@@ -561,7 +561,7 @@ Validation tools MUST be used after correlation analysis execution. Specific val
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step05_correlation_analysis.csv: 3 rows x 9 columns (domain: object, r_full_irt: float64, r_purified_irt: float64, r_full_purified: float64, delta_r: float64, steiger_z: float64, p_uncorrected: float64, p_bonferroni: float64, interpretation: object)
+- data/step05_correlation_analysis.csv: 3 rows x 9 columns (domain: object, r_full_irt: float64, r_purified_irt: float64, r_full_purified: float64, delta_r: float64, steiger_z: float64, p_uncorrected: float64, p_bonferroni: float64, interpretation: object)
 
 *Value Ranges:*
 - r_* in [-1, 1] (correlation bounds)
@@ -631,7 +631,7 @@ This step applies Decision D068 (dual p-value reporting) to correlation testing.
 - For each measurement_type x domain combination:
   - Compute z-score: z = (value - mean(value)) / sd(value)
   - Save as z_{measurement_type}_{domain}
-- Verify standardization: mean(z) approximately 0, sd(z) approximately 1 (tolerance: ±0.01 for sampling variation)
+- Verify standardization: mean(z) approximately 0, sd(z) approximately 1 (tolerance: ï¿½0.01 for sampling variation)
 
 **Output:**
 
@@ -663,8 +663,8 @@ Validation tools MUST be used after standardization execution. Specific validati
 - Exactly 1200 rows (400 composite_IDs x 3 domains)
 - No NaN in z_* columns (all values standardizable)
 - Standardization validation per domain x measurement:
-  - mean(z_full_ctt | domain) approximately 0 (tolerance: ±0.01)
-  - sd(z_full_ctt | domain) approximately 1 (tolerance: ±0.01)
+  - mean(z_full_ctt | domain) approximately 0 (tolerance: ï¿½0.01)
+  - sd(z_full_ctt | domain) approximately 1 (tolerance: ï¿½0.01)
   - Same for z_purified_ctt and z_irt_theta
 - No duplicate composite_ID x domain combinations
 
@@ -672,12 +672,12 @@ Validation tools MUST be used after standardization execution. Specific validati
 - Required: "Standardizing Full CTT: domain what (mean={value}, sd={value})"
 - Required: "Standardizing Purified CTT: domain what (mean={value}, sd={value})"
 - Required: "Standardizing IRT theta: domain what (mean={value}, sd={value})"
-- Required: "Post-standardization validation: all means within ±0.01 of 0, SDs within ±0.01 of 1"
+- Required: "Post-standardization validation: all means within ï¿½0.01 of 0, SDs within ï¿½0.01 of 1"
 - Required: "VALIDATION - PASS: Standardization successful"
 - Forbidden: "ERROR", "Mean far from 0", "SD far from 1"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "z_full_ctt mean = 0.15 (exceeds tolerance ±0.01)")
+- Raise error with specific failure (e.g., "z_full_ctt mean = 0.15 (exceeds tolerance ï¿½0.01)")
 - Log failure to logs/step06_standardize_outcomes.log
 - Quit immediately (invalid standardization breaks AIC comparison validity)
 
@@ -716,7 +716,7 @@ Per Burnham & Anderson (2002, *Model Selection and Multimodel Inference*), AIC c
 
 **Output:**
 
-**File 1:** results/step07_lmm_model_comparison.csv
+**File 1:** data/step07_lmm_model_comparison.csv
 **Format:** CSV with columns:
   - `measurement` (string, "Full CTT", "Purified CTT", "IRT theta")
   - `AIC` (float, Akaike Information Criterion)
@@ -726,22 +726,22 @@ Per Burnham & Anderson (2002, *Model Selection and Multimodel Inference*), AIC c
   - `interpretation` (string, "Equivalent", "Moderate support", "Substantial support" per Burnham & Anderson)
 **Expected Rows:** 3 (one per measurement approach)
 
-**File 2:** results/step07_lmm_full_ctt_summary.txt
+**File 2:** data/step07_lmm_full_ctt_summary.txt
 **Format:** Statsmodels LMM summary text (fixed effects, random effects, fit indices)
 
-**File 3:** results/step07_lmm_purified_ctt_summary.txt
+**File 3:** data/step07_lmm_purified_ctt_summary.txt
 **Format:** Statsmodels LMM summary text (fixed effects, random effects, fit indices)
 
-**File 4:** results/step07_lmm_irt_theta_summary.txt
+**File 4:** data/step07_lmm_irt_theta_summary.txt
 **Format:** Statsmodels LMM summary text (fixed effects, random effects, fit indices)
 
-**File 5:** results/step07_lmm_full_ctt_fixed_effects.csv
+**File 5:** data/step07_lmm_full_ctt_fixed_effects.csv
 **Format:** CSV with columns: term, coef, se, z, p (fixed effects table)
 
-**File 6:** results/step07_lmm_purified_ctt_fixed_effects.csv
+**File 6:** data/step07_lmm_purified_ctt_fixed_effects.csv
 **Format:** CSV with columns: term, coef, se, z, p (fixed effects table)
 
-**File 7:** results/step07_lmm_irt_theta_fixed_effects.csv
+**File 7:** data/step07_lmm_irt_theta_fixed_effects.csv
 **Format:** CSV with columns: term, coef, se, z, p (fixed effects table)
 
 **Validation Requirement:**
@@ -750,9 +750,9 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step07_lmm_model_comparison.csv: 3 rows x 6 columns (measurement: object, AIC: float64, BIC: float64, logLik: float64, delta_AIC: float64, interpretation: object)
-- results/step07_lmm_*_summary.txt: Text files (3 total, one per measurement)
-- results/step07_lmm_*_fixed_effects.csv: 3 CSV files with ~9 rows each (terms: intercept, time, log(time), domain[where], domain[when], time:domain, logtime:domain)
+- data/step07_lmm_model_comparison.csv: 3 rows x 6 columns (measurement: object, AIC: float64, BIC: float64, logLik: float64, delta_AIC: float64, interpretation: object)
+- data/step07_lmm_*_summary.txt: Text files (3 total, one per measurement)
+- data/step07_lmm_*_fixed_effects.csv: 3 CSV files with ~9 rows each (terms: intercept, time, log(time), domain[where], domain[when], time:domain, logtime:domain)
 
 *Value Ranges:*
 - AIC unrestricted (lower is better, typical range: 3000-5000)
@@ -809,10 +809,10 @@ This step uses TSVR_hours as time variable (actual hours since encoding) per Dec
 
 **Input:**
 
-**File 1:** results/step05_correlation_analysis.csv
+**File 1:** data/step05_correlation_analysis.csv
 **Columns used:** domain, r_full_irt, r_purified_irt, delta_r, p_bonferroni
 
-**File 2:** results/step07_lmm_model_comparison.csv
+**File 2:** data/step07_lmm_model_comparison.csv
 **Columns used:** measurement, AIC, delta_AIC, interpretation
 
 **Processing:**
@@ -1116,9 +1116,9 @@ This is not optional. This is the core architectural principle preventing cascad
 
 **Primary Outputs:**
 - CTT scores (full + purified) per domain: data/step02_ctt_full_scores.csv, data/step03_ctt_purified_scores.csv
-- Reliability assessment: results/step04_reliability_assessment.csv
-- Correlation analysis with Steiger's z-test: results/step05_correlation_analysis.csv
-- Parallel LMM comparison: results/step07_lmm_model_comparison.csv + 7 additional files
+- Reliability assessment: data/step04_reliability_assessment.csv
+- Correlation analysis with Steiger's z-test: data/step05_correlation_analysis.csv
+- Parallel LMM comparison: data/step07_lmm_model_comparison.csv + 7 additional files
 - Plot source CSVs: plots/step08_correlation_comparison_data.csv, plots/step08_aic_comparison_data.csv
 
 **Validation Coverage:** 100% (all 9 steps have validation requirements with 4-layer substance criteria)

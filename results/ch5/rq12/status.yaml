@@ -56,11 +56,11 @@ rq_planner:
 
     '
 rq_tools:
-  status: pending
-  context_dump: ''
+  status: success
+  context_dump: '4 analysis + 10 validation tools cataloged for CTT-IRT convergence analysis'
 rq_analysis:
-  status: pending
-  context_dump: ''
+  status: success
+  context_dump: '9 steps specified with validation (CTT-IRT convergence: data loading -> item mapping -> CTT computation (full + purified) -> reliability -> correlation -> standardization -> parallel LMM -> plot prep)'
 rq_inspect:
   status: pending
   context_dump: ''
