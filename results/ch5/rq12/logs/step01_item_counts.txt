@@ -1,0 +1,32 @@
+======================================================================
+ITEM MAPPING REPORT - RQ 5.12 Step 1
+======================================================================
+
+Total items in test battery: 105
+Items retained by RQ 5.1 purification: 69
+Items removed by RQ 5.1 purification: 36
+Overall retention rate: 65.7%
+
+----------------------------------------------------------------------
+DOMAIN-WISE BREAKDOWN
+----------------------------------------------------------------------
+
+WHAT Domain:
+  Total items:    29
+  Retained items: 19
+  Removed items:  10
+  Retention rate: 65.5%
+
+WHERE Domain:
+  Total items:    50
+  Retained items: 45
+  Removed items:  5
+  Retention rate: 90.0%
+
+WHEN Domain:
+  Total items:    26
+  Retained items: 5
+  Removed items:  21
+  Retention rate: 19.2%
+
+======================================================================

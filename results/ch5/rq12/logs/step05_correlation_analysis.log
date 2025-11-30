@@ -1,0 +1,58 @@
+[START] Step 5: Correlation Analysis with Steiger's z-test
+[LOAD] Loading input data...
+[LOADED] step00_theta_scores.csv (400 rows, 4 cols)
+[LOADED] step02_ctt_full_scores.csv (400 rows, 6 cols)
+[LOADED] step03_ctt_purified_scores.csv (400 rows, 6 cols)
+[MERGE] Merging theta, full CTT, and purified CTT on composite_ID...
+[MERGED] Combined dataset: 400 rows, 10 cols
+[ANALYSIS] Running Steiger's z-test for each domain...
+[INFO] Sample size for correlations: n = 400
+[DOMAIN] Processing domain: what
+  Valid observations after removing NaN: 400
+  Correlations:
+    r(Full CTT, IRT) = 0.879
+    r(Full CTT, Purified CTT) = 0.956
+    r(Purified CTT, IRT) = 0.906
+  Steiger's z = 10.060
+  p (uncorrected) = 0.0000
+  Delta r (Purified - Full) = 0.027
+  p (Bonferroni) = 0.0000
+  Interpretation: Purified CTT significantly higher correlation with IRT (Bonferroni p < 0.05)
+[DOMAIN] Processing domain: where
+  Valid observations after removing NaN: 400
+  Correlations:
+    r(Full CTT, IRT) = 0.940
+    r(Full CTT, Purified CTT) = 0.986
+    r(Purified CTT, IRT) = 0.955
+  Steiger's z = 14.218
+  p (uncorrected) = 0.0000
+  Delta r (Purified - Full) = 0.015
+  p (Bonferroni) = 0.0000
+  Interpretation: Purified CTT significantly higher correlation with IRT (Bonferroni p < 0.05)
+[DOMAIN] Processing domain: when
+  Valid observations after removing NaN: 400
+  Correlations:
+    r(Full CTT, IRT) = 0.451
+    r(Full CTT, Purified CTT) = 0.536
+    r(Purified CTT, IRT) = 0.838
+  Steiger's z = 2.086
+  p (uncorrected) = 0.0370
+  Delta r (Purified - Full) = 0.388
+  p (Bonferroni) = 0.1109
+  Interpretation: No significant difference between Full and Purified CTT correlations with IRT
+[DONE] Steiger's z-test complete for all domains
+[SAVE] Saving correlation analysis results...
+[SAVED] step05_correlation_analysis.csv (3 rows, 9 cols)
+[SUMMARY] Correlation analysis results:
+  Domains analyzed: 3
+  Mean r(Full CTT, IRT): 0.757
+  Mean r(Purified CTT, IRT): 0.900
+  Mean delta_r: 0.143
+  Significant differences (Bonferroni p < 0.05): 2
+[VALIDATION] Running validate_correlation_test_d068...
+[VALIDATION] PASSED - Custom validation: 6 required columns.
+[VALIDATION] Checking value ranges...
+  [PASS] All correlations in [-1, 1] range
+  [PASS] All p-values in [0, 1] range
+  [PASS] Decision D068 compliant (dual p-value reporting)
+[SUCCESS] Step 5 complete

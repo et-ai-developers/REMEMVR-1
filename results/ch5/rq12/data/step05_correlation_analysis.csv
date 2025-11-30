@@ -1,0 +1,4 @@
+domain,r_full_irt,r_purified_irt,r_full_purified,delta_r,steiger_z,p_uncorrected,p_bonferroni,interpretation
+what,0.8788789313087595,0.9061293169635137,0.9561413400048603,0.02725038565475424,10.059914401295641,0.0,0.0,Purified CTT significantly higher correlation with IRT (Bonferroni p < 0.05)
+where,0.940221874924077,0.9553395488649171,0.9857728928510525,0.01511767394084007,14.218135240001725,0.0,0.0,Purified CTT significantly higher correlation with IRT (Bonferroni p < 0.05)
+when,0.45082745387302137,0.8384216624569252,0.5360402059004653,0.3875942085839038,2.0861739662131797,0.036962867549435785,0.11088860264830736,No significant difference between Full and Purified CTT correlations with IRT

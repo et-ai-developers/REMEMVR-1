@@ -1,0 +1,77 @@
+[START] Step 1: Map Items to Full vs Purified Sets
+[LOAD] Loading input data...
+[LOADED] step00_irt_purified_items.csv (69 rows, 4 cols)
+[LOADED] step00_raw_scores.csv (400 rows, 215 cols)
+[EXTRACT] Extracting item lists...
+[EXTRACTED] Full item list: 105 items
+[EXTRACTED] Purified item list: 69 items
+[INFO] Retention rate: 65.7% (69/105)
+[CLASSIFY] Classifying items by domain using tag patterns...
+[CLASSIFIED] Created mapping for 105 items
+[COUNTS] Item counts per domain:
+  What:  19 retained / 29 total (65.5%)
+  Where: 45 retained / 50 total (90.0%)
+  When:  5 retained / 26 total (19.2%)
+[SAVE] Saving outputs...
+[SAVED] step01_item_mapping.csv (105 rows, 3 cols)
+[SAVED] step01_item_counts.txt (item counts report)
+[VALIDATION] Running validate_dataframe_structure...
+[ERROR] 'type' object is not iterable
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq12/code/step01_map_items.py", line 279, in <module>
+    validation_result = validate_dataframe_structure(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in validate_dataframe_structure
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'type' object is not iterable
+[START] Step 1: Map Items to Full vs Purified Sets
+[LOAD] Loading input data...
+[LOADED] step00_irt_purified_items.csv (69 rows, 4 cols)
+[LOADED] step00_raw_scores.csv (400 rows, 215 cols)
+[EXTRACT] Extracting item lists...
+[EXTRACTED] Full item list: 105 items
+[EXTRACTED] Purified item list: 69 items
+[INFO] Retention rate: 65.7% (69/105)
+[CLASSIFY] Classifying items by domain using tag patterns...
+[CLASSIFIED] Created mapping for 105 items
+[COUNTS] Item counts per domain:
+  What:  19 retained / 29 total (65.5%)
+  Where: 45 retained / 50 total (90.0%)
+  When:  5 retained / 26 total (19.2%)
+[SAVE] Saving outputs...
+[SAVED] step01_item_mapping.csv (105 rows, 3 cols)
+[SAVED] step01_item_counts.txt (item counts report)
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] [FAIL] DataFrame structure validation failed: Expected 48-52 rows, found 105
+[ERROR] Validation failed: DataFrame structure validation failed: Expected 48-52 rows, found 105
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/rq12/code/step01_map_items.py", line 312, in <module>
+    raise ValueError(f"Validation failed: {validation_result['message']}")
+ValueError: Validation failed: DataFrame structure validation failed: Expected 48-52 rows, found 105
+[START] Step 1: Map Items to Full vs Purified Sets
+[LOAD] Loading input data...
+[LOADED] step00_irt_purified_items.csv (69 rows, 4 cols)
+[LOADED] step00_raw_scores.csv (400 rows, 215 cols)
+[EXTRACT] Extracting item lists...
+[EXTRACTED] Full item list: 105 items
+[EXTRACTED] Purified item list: 69 items
+[INFO] Retention rate: 65.7% (69/105)
+[CLASSIFY] Classifying items by domain using tag patterns...
+[CLASSIFIED] Created mapping for 105 items
+[COUNTS] Item counts per domain:
+  What:  19 retained / 29 total (65.5%)
+  Where: 45 retained / 50 total (90.0%)
+  When:  5 retained / 26 total (19.2%)
+[SAVE] Saving outputs...
+[SAVED] step01_item_mapping.csv (105 rows, 3 cols)
+[SAVED] step01_item_counts.txt (item counts report)
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] [PASS] DataFrame structure valid
+[VALIDATION]   Row count: 105 (expected range: [48, 52])
+[VALIDATION]   Columns: ['item_name', 'domain', 'retained']
+[VALIDATION]   Domain values: ['what', 'when', 'where']
+[VALIDATION]   Retention rate: 65.7% (expected ~75%)
+[SUCCESS] Step 1 complete
