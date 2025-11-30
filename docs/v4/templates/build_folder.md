@@ -31,11 +31,16 @@ The following 6 folders MUST be created inside `results/chX/rqY/`:
 6. **results/**
 
 **Root Path Format:**
-- `results/chX/rqY/` where:
+- `results/chX/Y.Z.W/` where:
   - `chX` = chapter number (ch5, ch6, or ch7)
-  - `rqY` = research question number (rq1-rq15 for ch5/ch6, rq1-rq20 for ch7)
+  - `Y` = type number (1=General, 2=Domains, 3=Paradigms, 4=Congruence)
+  - `Z` = subtype number (1-9 depending on type)
+  - `W` = optional sub-analysis letter (future extension)
 
-**Example:** `results/ch5/rq1/`
+**Examples:**
+- `results/ch5/5.1.1/` (Chapter 5, General type, Functional Form)
+- `results/ch5/5.2.3/` (Chapter 5, Domains type, Age × Domain)
+- `results/ch5/5.3.7/` (Chapter 5, Paradigms type, Variance Decomposition)
 
 ---
 

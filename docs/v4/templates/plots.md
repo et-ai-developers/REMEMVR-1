@@ -147,7 +147,7 @@ def plot_trajectory(
 
 **Source Reference:** tools/plotting.py lines 92-208
 
-**Used By RQs:** ch5/rq1, rq2, rq3, rq4, rq5, rq6, rq8, rq11, rq15 (9 RQs documented in tools_inventory.md)
+**Used By RQs:** 5.2.1, 5.2.2, 5.3.1, 5.3.2, 5.4.1, 5.4.2, 5.1.2, 5.2.4, 5.1.6 (9 RQs documented in tools_inventory.md)
 
 ---
 

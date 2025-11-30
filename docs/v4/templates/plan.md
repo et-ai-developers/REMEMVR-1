@@ -571,29 +571,29 @@ No intermediate outputs from other RQs required.
 ### Dependency Type 2: DERIVED Data from Other RQs (Dependencies Exist)
 
 **This RQ requires outputs from:**
-- **RQ 5.1** (IRT calibration baseline)
-  - File: results/ch5/rq1/data/item_parameters_calibrated.csv
+- **RQ 5.2.1** (IRT calibration baseline - Domain-Specific Trajectories)
+  - File: results/ch5/5.2.1/data/item_parameters_calibrated.csv
   - Used in: Step 2 (apply baseline item parameters to new data)
-  - Rationale: RQ 5.1 establishes item difficulty/discrimination parameters. This RQ uses those fixed parameters to estimate theta for different participant subgroups.
+  - Rationale: RQ 5.2.1 establishes item difficulty/discrimination parameters. This RQ uses those fixed parameters to estimate theta for different participant subgroups.
 
-- **RQ 5.3** (Purification thresholds)
-  - File: results/ch5/rq3/data/retained_items.csv
+- **RQ 5.3.1** (Paradigm-Specific Trajectories - provides purification thresholds)
+  - File: results/ch5/5.3.1/data/retained_items.csv
   - Used in: Step 1 (filter item set to only retained items)
-  - Rationale: RQ 5.3 identifies well-performing items. This RQ analyzes only those items to avoid misfit contamination.
+  - Rationale: RQ 5.3.1 identifies well-performing items. This RQ analyzes only those items to avoid misfit contamination.
 
 **Execution Order Constraint:**
-1. RQ 5.1 must complete first (provides item_parameters_calibrated.csv)
-2. RQ 5.3 must complete second (provides retained_items.csv)
+1. RQ 5.2.1 must complete first (provides item_parameters_calibrated.csv)
+2. RQ 5.3.1 must complete second (provides retained_items.csv)
 3. This RQ executes third (uses both outputs)
 
 **Data Source Boundaries (Per Specification 5.1.6):**
 - **RAW data:** master.xlsx columns extracted directly (no RQ dependencies)
-- **DERIVED data:** Outputs from other RQs (RQ 5.1 and RQ 5.3 above)
-- **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.1 parameters as fixed)
+- **DERIVED data:** Outputs from other RQs (RQ 5.2.1 and RQ 5.3.1 above)
+- **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.2.1 parameters as fixed)
 
 **Validation:**
-- Step 1: Check results/ch5/rq1/data/item_parameters_calibrated.csv exists (circuit breaker: FILE_MISSING if absent)
-- Step 1: Check results/ch5/rq3/data/retained_items.csv exists (circuit breaker: FILE_MISSING if absent)
+- Step 1: Check results/ch5/5.2.1/data/item_parameters_calibrated.csv exists (circuit breaker: FILE_MISSING if absent)
+- Step 1: Check results/ch5/5.3.1/data/retained_items.csv exists (circuit breaker: FILE_MISSING if absent)
 - If either file missing  ->  quit with error  ->  user must execute dependency RQs first
 
 **Reference:** Specification section 5.1.6 (Data Source Boundaries)

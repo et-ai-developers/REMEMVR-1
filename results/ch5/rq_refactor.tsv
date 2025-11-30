@@ -1,0 +1,32 @@
+Number	Type	Subtype	Old	Audited
+5.1.1	General	Functional Form Comparison	5.7	No
+5.1.2	General	Two-Phase Forgetting Test	5.8	No
+5.1.3	General	Age Effects	5.9	No
+5.1.4	General	Variance Decomposition	5.13	No
+5.1.5	General	Individual Clustering	5.14	No
+5.1.6	General	Item Difficulty Interaction	5.15	No
+5.2.1	Domains	Domain-Specific Trajectories	5.1	No
+5.2.2	Domains	Consolidation Window	5.2	No
+5.2.3	Domains	Age × Domain Interactions	5.10	No
+5.2.4	Domains	IRT-CTT Convergence	5.11	No
+5.2.5	Domains	Purified CTT Effects	5.12	No
+5.2.6	Domains	Domain-Specific Variance Decomposition	TODO	No
+5.2.7	Domains	Domain-Based Clustering	TODO	No
+5.2.8	Domains	Domain × Item Difficulty Interaction	TODO	No
+5.3.1	Paradigms	Paradigm-Specific Trajectories	5.3	No
+5.3.2	Paradigms	Retrieval Support Gradient Test	5.4	No
+5.3.3	Paradigms	Paradigm Consolidation Window	TODO	No
+5.3.4	Paradigms	Age × Paradigm Interactions	TODO	No
+5.3.5	Paradigms	IRT-CTT Convergence	TODO	No
+5.3.6	Paradigms	Purified CTT Effects	TODO	No
+5.3.7	Paradigms	Paradigm-Specific Variance Decomposition	TODO	No
+5.3.8	Paradigms	Paradigm-Based Clustering	TODO	No
+5.3.9	Paradigms	Paradigm × Item Difficulty Interaction	TODO	No
+5.4.1	Congruence	Schema-Specific Trajectories	5.5	No
+5.4.2	Congruence	Schema Consolidation Benefit	5.6	No
+5.4.3	Congruence	Age × Schema Interactions	TODO	No
+5.4.4	Congruence	IRT-CTT Convergence	TODO	No
+5.4.5	Congruence	Purified CTT Effects	TODO	No
+5.4.6	Congruence	Schema-Specific Variance Decomposition	TODO	No
+5.4.7	Congruence	Schema-Based Clustering	TODO	No
+5.4.8	Congruence	Congruence × Item Difficulty Interaction	TODO	No

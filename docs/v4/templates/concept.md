@@ -412,7 +412,7 @@ rq_stats agent will validate analysis approach is appropriate and feasible with 
 [Which RQ outputs are inputs? E.g., "RQ 5.1"]
 
 **File Paths:**
-[Exact file paths, e.g., "results/ch5/rq1/data/step03_theta_scores.csv"]
+[Exact file paths, e.g., "results/ch5/5.2.1/data/step03_theta_scores.csv"]
 
 **Dependencies:**
 [What must complete before this RQ can run?]
@@ -481,11 +481,11 @@ DERIVED (from RQ 5.1 outputs)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq1/data/step03_theta_scores.csv` (IRT ability estimates)
+- `results/ch5/5.2.1/data/step03_theta_scores.csv` (IRT ability estimates)
 - Columns: composite_ID, domain, test, theta
 
 **Dependencies:**
-RQ 5.1 must complete Steps 1-3 (IRT calibration, purification, theta extraction) before this RQ can run.
+RQ 5.2.1 must complete Steps 1-3 (IRT calibration, purification, theta extraction) before this RQ can run.
 
 **Usage:**
 This RQ uses theta scores from RQ 5.1 as outcome variable for advanced trajectory modeling with covariates.
