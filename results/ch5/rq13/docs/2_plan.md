@@ -42,39 +42,44 @@ This RQ requires 5 analysis steps:
 
 **Input:**
 
-**File 1:** results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl
-**Source:** RQ 5.7 Step 5 (LMM trajectory modeling with random slopes)
+**File 1:** results/ch5/rq7/data/lmm_Log.pkl
+**Source:** RQ 5.7 Step 5 (best-fitting Logarithmic LMM model, AIC=873.71, weight=0.482)
 **Format:** Python pickle file (statsmodels MixedLMResults object)
-**Expected Content:** Fitted LMM with random intercepts and random slopes for time variable, converged model with variance-covariance matrix
+**Expected Content:** Fitted LMM with random intercepts and random slopes for log(Days+1), converged model with variance-covariance matrix
 
-**File 2:** results/ch5/rq7/data/step04_theta_scores_allitems.csv
-**Source:** RQ 5.7 Step 4 (theta extraction after Pass 2 IRT calibration)
+**File 2:** results/ch5/rq7/data/step03_theta_scores.csv
+**Source:** RQ 5.7 Step 3 (theta extraction after Pass 2 IRT calibration, purified items)
 **Format:** CSV with columns:
-  - UID (string, participant identifier, format: P###)
-  - TEST (string, test session: T1, T2, T3, T4)
-  - theta (float, IRT ability estimate for "All" factor)
-  - SE (float, standard error of theta estimate)
-**Expected Rows:** ~400 (100 participants x 4 tests)
+  - UID (string, participant identifier, format: A###)
+  - test (integer, test session: 1, 2, 3, 4)
+  - Theta_All (float, IRT ability estimate for "All" factor)
+**Expected Rows:** 380-400 (100 participants x 4 tests, allowing for minor data loss from RQ 5.7)
 
-**File 3:** results/ch5/rq7/data/step00_tsvr_mapping.csv
-**Source:** RQ 5.7 Step 0 (TSVR extraction from master.xlsx)
+**File 3:** results/ch5/rq7/data/step04_lmm_input.csv
+**Source:** RQ 5.7 Step 4 (LMM input preparation with time variable TSVR_hours)
 **Format:** CSV with columns:
+  - composite_ID (string, format: UID_test)
   - UID (string, participant identifier)
-  - TEST (string, test session)
-  - TSVR (float, time since VR session in hours per Decision D070)
-**Expected Rows:** ~400 (100 participants x 4 tests)
+  - test (integer, test session: 1, 2, 3, 4)
+  - Theta (float, IRT ability estimate)
+  - SE (float, standard error of theta estimate)
+  - TSVR_hours (float, time since VR session in hours per Decision D070)
+  - Days (float, TSVR_hours / 24)
+  - Days_squared (float, Days^2)
+  - log_Days_plus1 (float, log(Days + 1))
+**Expected Rows:** 380-400 (100 participants x 4 tests, allowing for minor data loss from RQ 5.7)
 
 **Circuit Breaker Check:**
 If ANY of the three required files from RQ 5.7 are missing, trigger EXPECTATIONS ERROR:
 ```
 EXPECTATIONS ERROR: To perform Step 1 (Load RQ 5.7 Dependencies) I expect:
-  - results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl (saved LMM model)
-  - results/ch5/rq7/data/step04_theta_scores_allitems.csv (theta scores)
-  - results/ch5/rq7/data/step00_tsvr_mapping.csv (TSVR mapping)
+  - results/ch5/rq7/data/lmm_Log.pkl (best-fitting LMM model)
+  - results/ch5/rq7/data/step03_theta_scores.csv (theta scores)
+  - results/ch5/rq7/data/step04_lmm_input.csv (LMM input with TSVR_hours)
 
 But missing: [list missing files]
 
-Action: RQ 5.7 must complete Steps 0-5 before RQ 5.13 can execute.
+Action: RQ 5.7 must complete Steps 1-5 before RQ 5.13 can execute.
 Run RQ 5.7 workflow first, then retry RQ 5.13.
 ```
 
@@ -89,7 +94,8 @@ Run RQ 5.7 workflow first, then retry RQ 5.13.
 **File 1:** data/step01_model_metadata.yaml
 **Format:** YAML metadata documenting loaded model
 **Content:**
-  - model_source: "results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl"
+  - model_source: "results/ch5/rq7/data/lmm_Log.pkl"
+  - model_formula: "Logarithmic (Theta ~ log(Days+1))"
   - model_type: "MixedLM"
   - n_participants: 100
   - n_observations: ~400
@@ -102,6 +108,9 @@ Run RQ 5.7 workflow first, then retry RQ 5.13.
 
 **Validation Requirement:**
 Validation tools MUST be used after data loading. Specific validation tools will be determined by rq_tools based on file format requirements (check_file_exists, validate_data_columns, validate_model_convergence).
+
+**Log Validation Required:**
+After Step 1 execution, the log file (logs/step01_load_dependencies.log) MUST be validated to ensure critical patterns are present and error patterns are absent. This prevents silent failures from propagating to downstream steps.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -268,12 +277,12 @@ Validation tools MUST be used after ICC computation. Specific validation tools w
 *Output Files:*
 - data/step03_icc_estimates.csv exists (exact path)
 - Expected rows: exactly 3 (intercept, slope_simple, slope_conditional)
-- Expected columns: 3 (icc_type: string, estimate: float, interpretation: string)
+- Expected columns: 3 (icc_type: string, icc_value: float, interpretation: string)
 - results/step03_icc_summary.txt exists
-- Data types: icc_type (string), estimate (float64), interpretation (string)
+- Data types: icc_type (string), icc_value (float64), interpretation (string)
 
 *Value Ranges:*
-- estimate in [0, 1] for ALL three ICC types (mathematical constraint)
+- icc_value in [0, 1] for ALL three ICC types (mathematical constraint)
 - ICC_intercept expected > 0.40 (high stability in baseline per hypothesis)
 - ICC_slope_simple expected 0.30-0.60 (moderate-to-high stability per hypothesis)
 - ICC_slope_conditional typically close to ICC_slope_simple (unless strong intercept-slope covariance)
@@ -765,7 +774,7 @@ This is not optional. This is the core architectural principle preventing cascad
 
 #### Step 5: Test Intercept-Slope Correlation and Visualize Distribution
 
-**Analysis Tools:** scipy.stats.pearsonr (standard library), matplotlib/seaborn (plotting)
+**Analysis Tools:** test_intercept_slope_correlation_d068 (tools.analysis_lmm), matplotlib/seaborn (plotting)
 **Validation Tools:** (determined by rq_tools - likely validate_correlation_test_d068, check_file_exists)
 
 **What Validation Checks:**

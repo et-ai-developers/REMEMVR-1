@@ -1,0 +1,10 @@
+converged: true
+loaded_timestamp: '2025-11-30T13:30:31.834232'
+model_formula: Logarithmic (Theta ~ log(Days+1))
+model_source: results/ch5/rq7/data/lmm_Log.pkl
+model_type: MixedLMResultsWrapper
+n_observations: 400
+n_participants: 100
+random_effects:
+- Group
+- log_Days

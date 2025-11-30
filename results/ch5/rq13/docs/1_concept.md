@@ -92,35 +92,33 @@ Variance Decomposition of LMM Random Effects (from RQ 5.7 best-fitting model)
 
 **High-Level Workflow:**
 
-**Step 0:** Get Data
+**Step 1:** Load RQ 5.7 Dependencies
 - Load best-fitting LMM model object from RQ 5.7 (`results/ch5/rq7/`)
 - Load theta scores from RQ 5.7 (`step04_theta_scores_allitems.csv`)
 - Load TSVR mapping from RQ 5.7 (`step00_tsvr_mapping.csv`)
 
-**Step 1:** Extract Variance Components
+**Step 2:** Extract Variance Components
 - Extract random effects covariance matrix from saved LMM
 - Compute variance components: var_intercept, var_slope, cov_int_slope
 - Extract residual variance (within-person error)
 
-**Step 2:** Compute Intraclass Correlation Coefficients (ICC)
+**Step 3:** Compute Intraclass Correlation Coefficients (ICC)
 - ICC for intercepts: var_intercept / (var_intercept + var_residual)
 - ICC for slopes (Method 1): var_slope / (var_slope + var_residual) [simple ratio]
 - ICC for slopes (Method 2): Conditional ICC at Day 6 [accounts for intercept-slope covariance]
 - Interpret magnitude: ICC > 0.40 = substantial, 0.20-0.40 = moderate, <0.20 = low
 
-**Step 3:** Extract Individual Random Effects
+**Step 4:** Extract Individual Random Effects
 - Extract person-specific random intercepts and slopes
 - Compute total intercept and slope per person (fixed + random effects)
 - Generate descriptive statistics for random slopes distribution (mean, SD, min, max, quartiles)
 - Save random effects CSV for use in RQ 5.14 (clustering analysis)
 
-**Step 4:** Test Intercept-Slope Correlation
+**Step 5:** Test Intercept-Slope Correlation and Visualize Distribution
 - Compute Pearson correlation between baseline ability (intercept) and forgetting rate (slope)
-- Test significance using t-test
-- Apply Bonferroni correction (± = 0.0033)
+- Test significance using t-test with Decision D068 dual p-value reporting
+- Apply Bonferroni correction (Î± = 0.0033)
 - Interpret direction: negative = high performers maintain advantage
-
-**Step 5:** Visualize Random Slopes Distribution
 - Generate histogram showing distribution of individual forgetting rates
 - Create Q-Q plot to assess normality assumption for random effects
 - Include population mean reference line on histogram
@@ -132,7 +130,7 @@ Variance Decomposition of LMM Random Effects (from RQ 5.7 best-fitting model)
 
 **Special Methods:**
 - **ICC Methods:** Two ICC computations for slopes (simple ratio vs conditional at Day 6) to account for intercept-slope covariance
-- **Bonferroni Correction:** ± = 0.0033 for intercept-slope correlation test (conservative threshold)
+- **Bonferroni Correction:** ï¿½ = 0.0033 for intercept-slope correlation test (conservative threshold)
 - **Normality Check:** Q-Q plot validates LMM assumption that random effects are normally distributed
 - **Dependency:** Requires RQ 5.7 to complete Steps 0-5 (IRT calibration, purification, theta extraction, TSVR merge, LMM trajectory modeling with random slopes)
 

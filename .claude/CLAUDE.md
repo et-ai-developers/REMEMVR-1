@@ -11,13 +11,14 @@
 
 1. **Agents MUST be in `.claude/agents/`** (per Anthropic specification)
 2. **Check `/context` every 5 messages** - Recommend /save at 140-150k tokens
-3. **Use `/save` before `/clear`** - Creates git rollback points
-4. **Use `/refresh` after `/clear`** - Loads ~15-20k tokens in <30 seconds
-5. **Update `docs_index.md` when creating/modifying ANY documentation** (MANDATORY)
-6. **Never manually update state.md** - Append verbose summaries in memory, let /save + context-manager handle persistence
-7. **Topic names must be descriptive** - Format: `[topic][task][subtopic]` (e.g., `irt_calibration_model_selection_debugging`)
-8. **BEFORE responding to ANY user request:** Think questions → invoke context-finder agent → ask user ONLY remaining questions (MANDATORY - no exceptions)
-9. **NEVER answer user questions without context-finder first** - If you skip context-finding, you're violating core principles
+3. **Use `/save` before `/clear`** - Creates git rollback points, searches archives with context_finder
+4. **Use `/refresh` after `/clear`** - Loads ~5-10k tokens in <10 seconds (state.md only)
+5. **Indexes NOT auto-loaded** - archive_index.md and docs_index.md exist but use context_finder to search them
+6. **Update `docs_index.md` when creating/modifying ANY documentation** (MANDATORY)
+7. **Never manually update state.md** - Append verbose summaries in memory, let /save + context-manager handle persistence
+8. **Topic names must be descriptive** - Format: `[topic][task][subtopic]` (e.g., `irt_calibration_model_selection_debugging`)
+9. **BEFORE responding to ANY user request:** Think questions → invoke context-finder agent → ask user ONLY remaining questions (MANDATORY - no exceptions)
+10. **NEVER answer user questions without context-finder first** - If you skip context-finding, you're violating core principles
 
 ---
 
@@ -75,14 +76,15 @@ I am a PhD thesis assistant for the REMEMVR project - a longitudinal episodic me
    - .claude/CLAUDE.md (this file, ~5k tokens - auto-loaded by system)
 4. /refresh loads:
    - .claude/context/current/state.md (current work, ≤20k tokens)
-   - .claude/context/current/archive_index.md (available history)
-   - docs/docs_index.md (available documentation)
+   - I know these exist but do NOT read them (available on-demand via context_finder):
+     - .claude/context/current/archive_index.md (available history)
+     - docs/docs_index.md (available documentation)
 5. I use TodoWrite to restore task list from state.md
 6. I announce: Current task, progress summary, next 3 actions
 7. Work continues seamlessly
 ```
 
-**Context Savings:** ~10-15k tokens after /refresh (vs 150k+ before /clear)
+**Context Savings:** ~5-10k tokens after /refresh (vs 150k+ before /clear)
 
 **No manual reconstruction needed** - Everything automated via memory system
 
@@ -369,33 +371,39 @@ These agents are flexible tools that need explicit task specifications:
 
 ### /refresh
 **Purpose:** Load context after /clear
-**Time:** <30 seconds
+**Time:** <10 seconds
 **Loads:**
 1. .claude/context/current/state.md (≤20k tokens)
-2. .claude/context/current/archive_index.md
-3. docs/docs_index.md
+
+**Knows exist (but does NOT load):**
+- .claude/context/current/archive_index.md (use context_finder to search if needed)
+- docs/docs_index.md (use context_finder to search if needed)
 
 **Note:** CLAUDE.md is automatically loaded by Claude Code (not read explicitly)
 
 **Then I:**
 - Announce current task, progress, next 3 actions
 - Restore TodoWrite task list from state.md
-- Report token budget reset (~10-15k after load)
+- Report token budget reset (~5-10k after load)
+- Remind user: Archive and docs indexes available via context_finder if needed
 
-**Result:** Seamless resume, ready to work immediately
+**Result:** Seamless resume with minimal token usage, ready to work immediately
 
 ### /save
 **Purpose:** Save & curate context before /clear with git safety
-**Time:** 1-2 minutes
+**Time:** 2-3 minutes
 **Steps:**
-1. I append verbose summary to state.md (in memory) with session timestamp header: `## Session (YYYY-MM-DD HH:MM)` (e.g., `## Session (2025-11-11 17:30)`)
-2. I include "Active Topics" section for context-manager
-3. Git commit with `git add -A` (BEFORE context-manager) ← Rollback point + **ALL files committed**
-4. I invoke context-manager agent (archives old content from 3+ sessions ago, never touches last 2 sessions)
-5. Git commit with `git add -A` (AFTER context-manager) ← Curated state + **ALL files committed**
-6. I report to user: Token reduction, topics archived, files committed, rollback available
+1. I re-read state.md (get current state, may have changed since /refresh)
+2. I invoke context_finder to search archives for topics relevant to current work
+3. I append verbose summary to state.md (in memory) with session timestamp header: `## Session (YYYY-MM-DD HH:MM)` (e.g., `## Session (2025-11-11 17:30)`)
+4. I reference relevant archived topics found by context_finder (so future sessions can find them easily)
+5. I include "Active Topics" section for context-manager
+6. Git commit with `git add -A` (BEFORE context-manager) ← Rollback point + **ALL files committed**
+7. I invoke context-manager agent (archives old content from 3+ sessions ago, never touches last 2 sessions)
+8. Git commit with `git add -A` (AFTER context-manager) ← Curated state + **ALL files committed**
+9. I report to user: Token reduction, topics archived, files committed, rollback available
 
-**Result:** state.md curated to ≤20k, old content archived by topic with timestamps, last 2 sessions verbatim, **ALL uncommitted work saved** (tools, agents, docs, tests), git rollback available
+**Result:** state.md curated to ≤20k, old content archived by topic with timestamps, last 2 sessions verbatim, **ALL uncommitted work saved** (tools, agents, docs, tests), git rollback available, relevant archived topics referenced in state.md
 
 **state.md Structure:**
 ```markdown
@@ -423,14 +431,18 @@ These agents are flexible tools that need explicit task specifications:
 ```
 ┌──────────────────────────────────────────────┐
 │ 1. User runs /refresh (after /clear)        │
-│    → I load ~10-15k tokens in <30s          │
+│    → I load ~5-10k tokens in <10s           │
 │    → Announce current state                 │
 │    → Restore TodoWrite tasks                │
+│    → Remind: indexes available via          │
+│      context_finder if needed               │
 └──────────────────────────────────────────────┘
                     ↓
 ┌──────────────────────────────────────────────┐
 │ 2. Work on tasks                             │
 │    → I check /context every 5 messages      │
+│    → I use context_finder for archives/docs │
+│      when needed (not loaded by default)    │
 │    → I append notes to state.md (in memory) │
 └──────────────────────────────────────────────┘
                     ↓
@@ -441,6 +453,8 @@ These agents are flexible tools that need explicit task specifications:
                     ↓
 ┌──────────────────────────────────────────────┐
 │ 4. User runs /save                           │
+│    → Re-read state.md                       │
+│    → context_finder searches archives       │
 │    → Git commit (before)                    │
 │    → context-manager curates                │
 │    → Git commit (after)                     │
@@ -543,9 +557,9 @@ poetry run python script.py
 ### After /refresh
 
 **I MUST:**
-1. Check docs_index.md to know what documentation exists
-2. Use docs_index.md as first reference for finding documentation
-3. Invoke context-finder to search docs/ if needed
+1. Know that docs_index.md exists (but do NOT read it automatically)
+2. When I need documentation, invoke context_finder to search docs/
+3. context_finder will search both docs/ and archives/ efficiently
 
 ### Integration with context-finder
 
@@ -570,8 +584,8 @@ poetry run python script.py
 ### If Confused After /clear
 1. Run /refresh again (reload context)
 2. Check state.md "What We're Doing" section
-3. Check archive_index.md (available history)
-4. Invoke context-finder if need historical context
+3. Invoke context-finder to search archives/ for historical context (archive_index.md exists but not auto-loaded)
+4. Invoke context-finder to search docs/ for documentation (docs_index.md exists but not auto-loaded)
 5. Check git log: `git log .claude/context/` (recent changes)
 
 ### If context-manager Made Mistake
@@ -594,20 +608,20 @@ poetry run python script.py
 **After /clear, when user runs /refresh:**
 
 1. ✅ CLAUDE.md loads automatically (by Claude Code system, NOT read by /refresh)
-2. ✅ /refresh loads: state.md, archive_index.md, docs_index.md
+2. ✅ /refresh loads: state.md ONLY (archive_index.md and docs_index.md exist but not loaded)
 3. ✅ I read state.md "What We're Doing" section
 4. ✅ I use TodoWrite to restore task list
-5. ✅ I announce: Current task, progress summary, next 3 actions, token budget
-6. ✅ I check docs_index.md to know available documentation
+5. ✅ I announce: Current task, progress summary, next 3 actions, token budget (~5-10k)
+6. ✅ I remind user: Archive and docs indexes available via context_finder if needed
 7. ✅ I begin work immediately
 
 ### Task Execution Checklist
 
 **For EVERY task:**
 
-1. **STOP. Think questions FIRST** → Invoke context-finder agent (MANDATORY) → Review findings → Ask user ONLY unanswered questions → THEN proceed
+1. **STOP. Think questions FIRST** → Invoke context-finder agent (MANDATORY) to search archives/ and docs/ → Review findings → Ask user ONLY unanswered questions → THEN proceed
 2. **Before coding:** Write test FIRST (Red-Green-Refactor)
-3. **Check documentation:** Context7 MCP first, then docs_index.md
+3. **Check documentation:** Context7 MCP first, then context_finder to search docs/
 4. **After coding:** Run tests until passing
 5. **After significant action:** Append summary to state.md (in memory) - will be written with session timestamp during /save
 6. **Mark complete:** TodoWrite
