@@ -158,6 +158,55 @@ Classical Test Theory (CTT) scoring comparison with IRT validation. Includes psy
 - All LMMs converge: convergence flag = TRUE for all 3 models per paradigm
 - AIC finite and positive: All models produce valid AIC values
 - Plot data: Correct row counts (6 for correlations, 3 for AIC), CI_lower < CI_upper
+- Steiger's z-test assumptions validated (see below)
+
+---
+
+## Convergence Contingency Plan
+
+If any LMM (IRT, Full CTT, or Purified CTT) fails to converge with random slopes:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only
+3. If LRT p < 0.05, retain slopes with simplified correlation structure
+4. If LRT p ≥ 0.05, use random intercepts-only model
+5. **Critical:** Apply the same simplification to ALL models being compared to ensure structural equivalence
+6. Document which random effects structure achieved convergence
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+## Steiger's Z-Test Assumptions
+
+### Prerequisites for Valid Dependent Correlation Comparison
+
+Steiger's z-test for comparing dependent correlations (Full-IRT vs Purified-IRT, sharing the IRT theta variable) requires:
+
+1. **Bivariate Normality:** The three variables (IRT theta, Full CTT, Purified CTT) should approximate bivariate normality in each paired comparison
+   - **Validation:** Inspect scatter plots for elliptical distributions; compute Mardia's test for multivariate normality
+   - **Remedial:** If violated, report bootstrap confidence intervals for delta_r as sensitivity analysis
+
+2. **Sample Size:** Steiger's z-test is asymptotic; requires sufficient N for stable estimates
+   - **Validation:** N = 1200 observations (100 participants × 4 tests × 3 paradigms) is adequate
+   - Per-paradigm tests use N = 400, still sufficient for asymptotic properties
+
+3. **Linear Relationships:** Pearson correlation assumes linear IRT-CTT relationships
+   - **Validation:** Scatter plots with lowess smoother should show approximately linear trends
+   - **Remedial:** If non-linear, consider Spearman correlations as sensitivity analysis
+
+### Cronbach's Alpha Interpretation Note
+
+Cronbach's alpha may differ between Full and Purified CTT due to:
+- Different number of items (Full has more items)
+- Spearman-Brown prophecy formula predicts alpha increases with more items (holding average inter-item correlation constant)
+- If Purified CTT shows equal or higher alpha despite fewer items, this indicates purification removed low-quality items that were reducing internal consistency
+
+**Interpretation:** Compare alpha values accounting for item count differences. The Spearman-Brown predicted alpha (adjusting Purified alpha to match Full item count) provides a fairer comparison.
+
+## Practice Effects Acknowledgment
+
+The 4-session design creates potential practice effects that affect both Full and Purified CTT scores equally. However:
+- Item purification removes items with poor discrimination, which may include items showing practice-related ceiling effects
+- The comparison between Full and Purified CTT is within-session, controlling for any session-level practice effects
+- If purification selectively removes practice-affected items, Purified CTT may show different practice effect magnitude than Full CTT
 
 ---
 

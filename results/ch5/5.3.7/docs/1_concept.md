@@ -108,6 +108,75 @@ Variance decomposition using Linear Mixed Models (LMM) with random effects extra
 - Intercept-slope correlation tests include dual p-values (Decision D068 compliance)
 - Paradigm ICC comparison interpretable (clear ordering or equivalence pattern)
 - Barplot file size > 10KB (indicates successful rendering)
+- All assumption validation checks documented (see Validation Procedures below)
+
+---
+
+## Validation Procedures
+
+### LMM Assumption Checks (Per Paradigm Model)
+
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (accept if p > 0.01)
+2. **Homoscedasticity:** Residuals vs fitted plot; Levene's test by test session
+3. **Random Effects Normality:** Q-Q plot of random intercept and slope estimates
+4. **Independence:** ACF plot of residuals (no significant autocorrelation)
+5. **Linearity:** Residuals vs Time predictor (no systematic patterns)
+6. **Outliers:** Cook's distance < 4/N threshold
+
+### Remedial Actions
+
+- If normality violated: Report robust standard errors; note impact on variance component estimates
+- If heteroscedasticity: Consider variance function by test session
+- If outliers detected: Sensitivity analysis excluding influential participants; report ICC with and without outliers
+- Document all violations and their potential impact on ICC interpretation
+
+### Convergence Contingency Plan
+
+If any paradigm-specific model fails to converge with random slopes:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only
+3. If LRT p < 0.05, retain slopes with simplified correlation structure
+4. If LRT p ≥ 0.05, use random intercepts-only model
+5. **Note:** If random slopes cannot be estimated for a paradigm, ICC_slope cannot be computed; report this limitation
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+## Practice Effects Consideration
+
+The 4-session design (Days 0, 1, 3, 6) creates potential practice effects:
+- Practice effects contribute to within-person variance if they create session-specific performance fluctuations
+- ICC estimates may underestimate trait-like stability if practice effects are large
+- IRT theta scoring partially mitigates item-level practice effects
+- The random slope variance captures both true individual differences in forgetting and individual differences in practice-related improvement
+
+**Interpretation Guidance:** ICC values should be interpreted as lower bounds of trait-like stability, given potential practice effect confounds.
+
+## ICC Scale Interpretation
+
+**Which scale for ICC?**
+- If Time uses log transformation (per RQ 5.3.1 best model): ICC computed on log-time scale
+- Interpretation is for rate of forgetting on the log-transformed time scale
+- This is appropriate because log-time is the scale on which linear forgetting assumptions hold
+
+**Threshold Interpretation (Koo & Li, 2016):**
+- ICC < 0.50: Poor reliability
+- 0.50 ≤ ICC < 0.75: Moderate reliability
+- 0.75 ≤ ICC < 0.90: Good reliability
+- ICC ≥ 0.90: Excellent reliability
+
+The ICC > 0.40 threshold used in this RQ is a lower standard reflecting substantial (not excellent) between-person variance, appropriate for exploratory individual differences research.
+
+## Key Citations to Add
+
+Recent literature (2020-2024) on variance decomposition in episodic memory:
+- [rq_scholar to search and add 5-6 high-relevance citations]
+- Focus areas: ICC in longitudinal memory studies, individual differences in forgetting, retrieval paradigm effects on variance components
+
+## Limitations
+
+1. **Ceiling Effects:** Recognition paradigm may show compressed variance due to ceiling performance, attenuating ICC estimates
+2. **Dropout Bias:** If participants with poor memory are more likely to miss sessions, ICC may be biased upward (remaining participants more homogeneous)
+3. **Practice Effects:** Cannot fully disentangle trait stability from differential practice effect magnitude
 
 ---
 

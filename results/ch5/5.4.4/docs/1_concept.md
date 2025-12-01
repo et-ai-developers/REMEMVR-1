@@ -138,6 +138,59 @@ Use REML=False for AIC comparison. If either model fails convergence, simplify b
 
 ---
 
+## Cohen's Kappa Implementation
+
+### Category Definition for Agreement Analysis
+
+Cohen's kappa requires categorical classification of fixed effects. For this RQ:
+
+**Significance Classification:**
+- Category 1: Significant (p < 0.05)
+- Category 0: Non-significant (p ≥ 0.05)
+
+**Effects to Compare:**
+- Intercept
+- Time main effect
+- Congruence main effects (2 dummy variables: Congruent, Incongruent)
+- Time × Congruence interactions (2 terms)
+- Total: ~6-8 fixed effect terms depending on model specification
+
+**Kappa Interpretation (Landis & Koch, 1977):**
+- κ < 0.00: Poor agreement
+- 0.00-0.20: Slight agreement
+- 0.21-0.40: Fair agreement
+- 0.41-0.60: Moderate agreement
+- 0.61-0.80: Substantial agreement ← Target threshold (κ > 0.60)
+- 0.81-1.00: Almost perfect agreement
+
+### Sample Size Per Congruence Category
+
+**Breakdown:**
+- Common items: ~20-30 items × 100 participants × 4 tests = ~8,000-12,000 responses
+- Congruent items: ~15-25 items × 100 participants × 4 tests = ~6,000-10,000 responses
+- Incongruent items: ~15-25 items × 100 participants × 4 tests = ~6,000-10,000 responses
+
+**Confidence Intervals:**
+Report 95% CIs for correlations using Fisher's z transformation, accounting for sample size per category. Smaller categories (Incongruent) will have wider CIs.
+
+### Random Structure Simplification Strategy
+
+If either IRT or CTT model fails to converge:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Remove random slope correlation (use diagonal covariance)
+3. If still fails, remove random slopes entirely
+4. **Critical:** Apply identical simplification to BOTH models
+5. Document simplification rationale
+
+### Practice Effects Acknowledgment
+
+The 4-session design creates potential practice effects. For convergence analysis:
+- Both IRT and CTT are affected similarly by practice effects
+- Convergence analysis tests whether measurement approaches agree, not whether they are unbiased
+- If IRT-CTT convergence is high, any practice effect bias is shared across methods
+
+---
+
 ## Data Source
 
 **Data Type:**

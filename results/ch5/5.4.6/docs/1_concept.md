@@ -145,6 +145,58 @@ Interpret ICC magnitude: <0.20 = Low, 0.20-0.40 = Moderate, >=0.40 = Substantial
 - PNG histogram and Q-Q plot files > 10KB (non-empty plots)
 - Congruence comparison interpretable (ICC rankings make theoretical sense)
 - RQ 5.4.1 dependency circuit breaker active: if RQ 5.4.1 data unavailable, QUIT with EXPECTATIONS ERROR
+- All assumption validation checks documented
+
+---
+
+## Validation Procedures
+
+### LMM Assumption Checks (Per Congruence Model)
+
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (accept if p > 0.01)
+2. **Homoscedasticity:** Residuals vs fitted plot; Levene's test by test session
+3. **Random Effects Normality:** Q-Q plot of random intercept and slope estimates
+4. **Independence:** ACF plot of residuals (no significant autocorrelation)
+5. **Linearity:** Residuals vs Time predictor (no systematic patterns)
+6. **Outliers:** Cook's distance < 4/N threshold
+
+### Homoscedasticity Testing Procedure
+
+**Specific Tests:**
+1. **Visual:** Plot residuals vs fitted values for each congruence-stratified model
+2. **Levene's Test:** Test variance equality across test sessions within each congruence model
+3. **Breusch-Pagan Test:** Formal test for heteroscedasticity in residuals
+
+**Threshold:** Levene's p > 0.05 indicates acceptable homoscedasticity
+
+**Remedial:** If heteroscedasticity detected, consider:
+- Variance function allowing different residual variance by test session
+- Report robust standard errors for variance components
+
+### Convergence Contingency Plan
+
+If any congruence-stratified model fails to converge with random slopes:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only
+3. If LRT p < 0.05, retain slopes with simplified correlation structure
+4. If LRT p ≥ 0.05, use random intercepts-only model
+5. **Note:** If random slopes cannot be estimated, ICC_slope cannot be computed; report this limitation explicitly
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+## Practice Effects Consideration
+
+The 4-session design (Days 0, 1, 3, 6) creates potential practice effects:
+- Practice effects contribute to within-person variance if they create session-specific fluctuations
+- ICC estimates may underestimate trait-like stability if practice effects are large
+- Schema congruence may interact with practice effects (e.g., congruent items may show larger practice gains due to schema-supported retrieval improvement)
+
+**Interpretation Guidance:**
+ICC values should be interpreted as lower bounds of trait-like stability. The random slope variance captures both:
+1. True individual differences in forgetting rate
+2. Individual differences in practice effect magnitude
+
+This confound applies equally across all three congruence levels, so relative comparisons remain valid.
 
 ---
 

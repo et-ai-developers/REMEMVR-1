@@ -137,6 +137,47 @@ Methodological convergence analysis: Pearson correlations, parallel Linear Mixed
 
 ---
 
+## Practice Effects Consideration
+
+### Repeated Testing Design
+
+The 4-session design (Days 0, 1, 3, 6) creates potential practice effects that affect both IRT and CTT scores:
+- Literature documents 13.3% improvement in episodic memory with repeated testing (Goldberg et al., BMC Neuroscience)
+- Practice effects may differentially affect IRT vs CTT if item-level learning occurs
+
+### Differential Item Functioning (DIF) by Test Session
+
+**Consideration:** Items may function differently across test sessions if practice effects create item-specific learning. This could manifest as DIF by session.
+
+**Mitigation:**
+- IRT calibration in RQ 5.3.1 uses all sessions pooled, assuming measurement invariance across time
+- If DIF suspected, future analyses could test measurement invariance via multi-group IRT
+- For this convergence RQ, the key question is whether IRT and CTT yield the same conclusions regardless of any shared practice effects bias
+
+### Interpretation Guidance
+
+If IRT-CTT convergence is high (r > 0.70, kappa > 0.60), this indicates:
+- Both measurement approaches capture the same underlying construct
+- Conclusions about paradigm-specific forgetting are robust to scaling method
+- Any practice effects affect both IRT and CTT similarly
+
+If convergence is low for specific paradigms, this would suggest:
+- Paradigm-specific measurement artifacts requiring further investigation
+- Potential DIF by test session within that paradigm
+- Cautious interpretation of paradigm findings pending measurement validation
+
+### Correlation Threshold Justification
+
+The r > 0.70 threshold for "strong" convergence is based on:
+- Cohen's (1988) guidelines for correlation magnitude interpretation
+- Convergent validity standards in psychometrics (Campbell & Fiske, 1959)
+- Fornell & Larcker (1981) AVE criterion suggesting r > 0.70 for discriminant validity
+- Prior IRT-CTT convergence literature showing r = 0.85-0.95 for well-constructed scales
+
+The exceptional threshold (r > 0.90) indicates near-identical rank ordering of participants.
+
+---
+
 ## Data Source
 
 **Data Type:**

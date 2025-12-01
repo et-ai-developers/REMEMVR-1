@@ -24,7 +24,7 @@ rq_scholar:
 rq_stats:
   status: success
   context_dump: |
-    9.15/10 CONDITIONAL. Cat1: 2.8/3 (3-way interaction appropriate; convergence risk N=100). Cat2: 2.0/2 (100% tool reuse, all GREEN). Cat3: 1.9/2 (log transform rationale missing). Cat4: 1.8/2 (assumption diagnostics unspecified). Cat5: 0.75/1 (11 devil's advocate concerns; critical gaps: random slopes strategy, assumption testing, model selection). 4 REQUIRED changes (assumption diagnostics, model selection LRT, log transform docs, Bonferroni family); 4 suggested improvements. Validation report: 1_stats.md
+    9.55/10 APPROVED (re-validation after concept.md updates). Cat1: 2.8/3 (appropriate). Cat2: 2.0/2 (100% reuse). Cat3: 1.95/2 (log transform NOW documented). Cat4: 1.95/2 (6 assumption tests NOW specified + convergence LRT contingency). Cat5: 0.85/1 (11 concerns; ~82% resolved including critical gaps). All 4 prior required changes implemented: assumption diagnostics, model selection LRT, log transform rationale, Bonferroni family clarification. Ready for rq_planner.
 
 rq_planner:
   status: pending

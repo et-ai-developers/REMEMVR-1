@@ -183,6 +183,81 @@ Cross-classified Linear Mixed Model (LMM) with item-level responses as dependent
 - **Plot validation:** 6 distinct trajectories visible; if interaction significant, trajectories show divergence (easy vs hard items separate over time); if interaction non-significant, trajectories parallel
 - **Predicted probabilities valid:** All values in [0, 1], no NaN or infinite values
 - **Replicability:** Results replicate with same data inputs (no random seed dependency beyond model initialization)
+- All assumption validation checks documented
+
+---
+
+## Statistical Model Specification
+
+### Binary Response → GLMM Justification
+
+**Critical Issue:** Item-level responses are binary (correct = 1, incorrect = 0). Standard LMM assumes normally distributed residuals, which is violated with binary data.
+
+**Solution:** Generalized Linear Mixed Model (GLMM) with binomial family and logit link.
+
+**Model Specification:**
+```
+Response ~ Time × Difficulty_c × Congruence + (Time | UID) + (1 | ItemID)
+Family: binomial (link = "logit")
+```
+
+**Implementation:** pymer4 Lmer() with `family='binomial'` parameter, or direct R lme4::glmer() call via rpy2.
+
+**Coefficient Interpretation:**
+- Coefficients are log-odds (logit scale)
+- Exponentiate for odds ratios: OR = exp(β)
+- Report both log-odds and odds ratios with 95% CIs
+
+**Note:** If GLMM convergence fails, document the issue and consider:
+1. Simplifying random effects (remove random slopes)
+2. Using penalized quasi-likelihood (PQL) approximation
+3. Reporting the convergence limitation
+
+### Validation Procedures for GLMM
+
+1. **Overdispersion Check:** Residual deviance / residual df should be ~1; if > 1.5, overdispersion present
+2. **Link Function Adequacy:** Check linearity of logit vs predictors using partial residual plots
+3. **Random Effects Distribution:** Q-Q plot of random effects (should be approximately normal)
+4. **Influential Observations:** DFBETAS and Cook's distance for extreme values
+
+**Remedial Actions:**
+- If overdispersion: Add observation-level random effect or use quasi-binomial
+- If link function inadequate: Consider probit link as sensitivity analysis
+- If random effects non-normal: Report as limitation; inference is still valid asymptotically
+
+### Convergence Contingency Plan
+
+If the full cross-classified GLMM fails to converge:
+1. Try alternative optimizers (bobyqa, nloptwrap)
+2. Simplify random effects: Remove random slopes, use (1 | UID) + (1 | ItemID)
+3. If still fails: Fit participant-level aggregated model (mean accuracy per participant × test × congruence)
+4. Document which specification achieved convergence
+
+### Power Analysis for 3-Way Interaction
+
+**Concern:** 3-way interactions require substantial power to detect.
+
+**Sample Size Considerations:**
+- N = 100 participants × 4 tests × ~60-80 items = ~24,000-32,000 observations
+- This provides adequate power for main effects and 2-way interactions
+- 3-way interaction power depends on effect size
+
+**Expected Effect Sizes:**
+- Based on prior literature, Time × Difficulty interactions typically show small-medium effects (Cohen's f² = 0.02-0.08)
+- 3-way interactions are typically smaller (Cohen's f² = 0.01-0.05)
+
+**Power Interpretation:**
+- If 3-way interaction is non-significant, this could reflect:
+  1. No true effect (difficulty effect is uniform across congruence levels)
+  2. Insufficient power to detect a small effect
+- Report observed effect size regardless of significance to inform future research
+
+### Practice Effects Acknowledgment
+
+The 4-session design creates potential practice effects. For item-level analysis:
+- Practice effects may differentially affect easy vs hard items (ceiling effects on easy items)
+- Item difficulty parameters are estimated across all sessions, so extreme difficulty items may show practice-related DIF
+- The Time × Difficulty interaction may partly reflect differential practice effects by difficulty level
 
 ---
 

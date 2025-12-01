@@ -131,6 +131,61 @@ Random effects: Random intercepts and slopes for TSVR_hours by participant (UID)
 - Bonferroni correction applied correctly (alpha = 0.05/2 = 0.025)
 - Tukey HSD post-hoc tests complete for 3 congruence levels
 - Plot data structure correct: 36 rows, CI_upper > CI_lower, theta values in plausible range [-4, 4]
+- All assumption validation checks documented (see Validation Procedures below)
+
+---
+
+## Validation Procedures
+
+### LMM Assumption Checks
+
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (accept if p > 0.01)
+2. **Homoscedasticity:** Residuals vs fitted plot; Levene's test by congruence × age tertile
+3. **Random Effects Normality:** Q-Q plot of random intercept and slope estimates
+4. **Independence:** ACF plot of residuals (no significant autocorrelation)
+5. **Linearity:** Residuals vs TSVR_hours and log_TSVR (no systematic patterns)
+6. **Outliers:** Cook's distance < 4/N threshold
+
+### Remedial Actions
+
+- If normality violated: Report robust standard errors or use bootstrap confidence intervals
+- If heteroscedasticity: Use weighted LMM or variance function by congruence level
+- If outliers detected: Sensitivity analysis with/without outliers; report both results
+
+### Convergence Contingency Plan
+
+If the full model (random slopes for TSVR_hours) fails to converge:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only
+3. If LRT p < 0.05, retain slopes with simplified correlation structure
+4. If LRT p ≥ 0.05, use random intercepts-only model
+5. Document which structure achieved convergence in results
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+### Congruence Reference Category and Contrast Coding
+
+**Reference Category:** Common (schema-neutral)
+- This choice provides interpretable contrasts: Congruent vs Common, Incongruent vs Common
+- Alternative: effect coding (deviation from grand mean) if comparing all pairwise differences
+
+**Contrast Interpretation:**
+- Congruent coefficient: Difference between Congruent and Common congruence effect on Age × Time interaction
+- Incongruent coefficient: Difference between Incongruent and Common congruence effect on Age × Time interaction
+- If Incongruent shows larger positive coefficient than Congruent: Age accelerates forgetting more for incongruent items
+
+**Post-hoc Contrasts:**
+Tukey HSD tests all three pairwise comparisons with family-wise error control:
+1. Congruent vs Common
+2. Incongruent vs Common
+3. Incongruent vs Congruent
+
+### Practice Effects Acknowledgment
+
+The 4-session design creates potential practice effects that may interact with schema congruence:
+- Schema-congruent items may show different practice effect trajectories than incongruent items
+- IRT theta scoring partially mitigates item-level practice effects
+- The Age × Congruence × Time interaction is interpretable relative to these confounds
 
 ---
 

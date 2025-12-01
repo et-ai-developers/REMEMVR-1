@@ -114,6 +114,53 @@ Classical Test Theory (CTT) score computation with correlation analysis and Line
 - Z-standardization correct (mean ~ 0, SD ~ 1 for all measurements)
 - All 3 LMMs converge (IRT, Full CTT, Purified CTT) for each congruence level
 - Plot data complete: 6 rows for correlation comparison (3 congruence x 2 CTT types), 3 rows for AIC comparison
+- Steiger's z-test assumptions validated
+
+---
+
+## Z-Standardization Rationale
+
+### Why Z-Standardize?
+
+IRT theta scores and CTT mean scores are on different scales:
+- **IRT theta:** Logit scale, typically ranging -3 to +3, mean = 0 at average ability
+- **CTT mean:** Proportion correct scale, ranging 0 to 1
+
+**For LMM Coefficient Comparison:**
+Z-standardization (mean = 0, SD = 1 for each score type) enables:
+1. Direct comparison of regression coefficients across measurement types
+2. Effect sizes interpretable in standard deviation units
+3. AIC comparison across models with identical scaling
+
+**Procedure:**
+- Grand-mean center each score type: score_c = score - mean(score)
+- Scale to unit variance: score_z = score_c / SD(score_c)
+- Verify: mean(score_z) ~ 0, SD(score_z) ~ 1
+
+### Bivariate Normality Check for Steiger's Z-Test
+
+Steiger's z-test for comparing dependent correlations assumes bivariate normality. To validate:
+
+1. **Scatter Plot Inspection:** IRT theta vs CTT (Full and Purified) should show elliptical point clouds
+2. **Mardia's Test:** Compute multivariate skewness and kurtosis; significant values indicate violation
+3. **Sensitivity Analysis:** If violated, report bootstrap CIs for delta_r as alternative
+
+### Missing Data Handling
+
+**Specification:**
+- Complete case analysis: Exclude any participant × test × congruence observation with missing IRT theta OR CTT score
+- Expected missingness: 0% (all participants completed all tests, IRT provides estimates for all)
+- If missingness occurs: Document count and pattern; assess whether MCAR/MAR/MNAR
+
+**Reporting:**
+- Report N for each correlation (should be ~400 per congruence if complete)
+- Note any exclusions due to missing data
+
+### Practice Effects Acknowledgment
+
+Practice effects affect both Full and Purified CTT. The key comparison is:
+- Does purification (removing poor-quality items) improve CTT convergence with IRT?
+- This is independent of practice effect magnitude
 
 ---
 

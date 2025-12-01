@@ -19,12 +19,12 @@ rq_concept:
 rq_scholar:
   status: success
   context_dump: |
-    9.1/10.0 CONDITIONAL. Strengths: solid theory (2.8/3.0), perfect interpretation guidelines (2.0/2.0). Gaps: practice effects omission (CRITICAL), ceiling effects (CRITICAL), VR sickness dropout (CRITICAL). Required: add practice effect mitigation + 3 suggestions. Validation report: 1_scholar.md
+    9.4/10.0 APPROVED (RE-VALIDATED 2025-12-02). Critical practice effects omission now resolved via explicit Consideration section. Upgraded from 9.1 CONDITIONAL. Scores improved: Theoretical Grounding 2.8→2.9, Literature Support 1.7→1.8, Theoretical Implications 1.8→1.9. Ready for rq_planner. Optional: ceiling effects parallel section for 9.5+ quality.
 
 rq_stats:
   status: success
   context_dump: |
-    9.1/10.0 CONDITIONAL. Cat1: 2.9/3.0 (method appropriate, convergence strategy gap). Cat2: 2.0/2.0 (100% tool reuse). Cat3: 1.8/2.0 (parameters specified, citations needed). Cat4: 1.8/2.0 (validation present, missing homoscedasticity + ACF + singularity). Cat5: 0.6/1.0 (8 concerns, critical: convergence failure handling). REQUIRED: (1) Document LRT-based convergence mitigation, (2) Add homoscedasticity testing procedure. Validation report: results/ch5/5.4.6/docs/1_stats.md
+    9.7/10.0 APPROVED (RE-VALIDATED 2025-12-02 after concept update). Cat1: 3.0/3.0 (convergence strategy complete). Cat2: 2.0/2.0 (100% tool reuse, 9 tools). Cat3: 1.8/2.0 (parameters adequate, Breusch-Pagan ambiguity minor). Cat4: 2.0/2.0 (comprehensive validation: convergence contingency + homoscedasticity Levene/BP + independence ACF + practice effects). Cat5: 0.9/1.0 (7 concerns, critical omissions RESOLVED). All required changes addressed: (1) LRT-based convergence fallback documented, (2) Homoscedasticity testing procedure complete. Report: results/ch5/5.4.6/docs/1_stats.md
 
 rq_planner:
   status: pending

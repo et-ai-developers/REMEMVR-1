@@ -151,6 +151,48 @@ Piecewise Linear Mixed Model (LMM) with 3-way interaction (Days_within x Segment
 - Plot data structured correctly with 12 rows per file (2 segments x 3 paradigms x 2 timepoints per segment)
 - All output files created with expected structure
 - No missing data or computation errors
+- All assumption validation checks documented (see Validation Procedures below)
+
+---
+
+## Validation Procedures
+
+### LMM Assumption Checks
+
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (accept if p > 0.01)
+2. **Homoscedasticity:** Residuals vs fitted plot; Levene's test by group (segment × paradigm)
+3. **Random Effects Normality:** Q-Q plot of random effect estimates (intercepts and slopes)
+4. **Independence:** ACF plot of residuals (no significant autocorrelation at lags 1-5)
+5. **Linearity:** Residuals vs Days_within predictor (no systematic patterns)
+6. **Outliers:** Cook's distance < 4/N threshold; identify and document any influential observations
+
+### Remedial Actions
+
+- If normality violated (Shapiro-Wilk p < 0.01): Report robust standard errors via sandwich estimator
+- If heteroscedasticity detected: Use weighted LMM or variance function by segment
+- If outliers detected: Conduct sensitivity analysis with/without outliers; report both results
+- If autocorrelation present: Consider AR(1) correlation structure for residuals
+
+### Convergence Contingency Plan
+
+If the full model (random slopes for Days_within) fails to converge:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only model
+3. If LRT p < 0.05, retain slopes with simplified correlation structure (diagonal covariance)
+4. If LRT p ≥ 0.05, use random intercepts-only model
+5. Document which random effects structure achieved convergence in results
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+### Practice Effects Consideration
+
+The 4-session design (Days 0, 1, 3, 6) creates potential practice effects:
+- Literature documents 13.3% improvement in episodic memory with repeated testing (Goldberg et al., BMC Neuroscience)
+- IRT theta scoring partially mitigates item-level practice effects through ability estimation
+- The piecewise model structure (Early vs Late segments) implicitly captures practice effects in intercepts
+- Segment × paradigm interactions will reveal whether practice effects differ by retrieval type
+
+This design cannot fully disentangle consolidation from practice effects, but the relative comparison across paradigms within each segment provides valid inference about differential consolidation benefits.
 
 ---
 

@@ -128,6 +128,49 @@ Linear Mixed Models (LMM) with 3-way Age x Paradigm x Time interaction
 - 3 paradigms with age effect estimates and confidence intervals
 - Plot data complete: 36 rows (3 paradigms x 3 tertiles x 4 tests), no NaN values
 - Random slopes variance positive (indicates between-person variability in time effects)
+- All assumption validation checks documented (see Validation Procedures below)
+
+---
+
+## Validation Procedures
+
+### LMM Assumption Checks
+
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (accept if p > 0.01)
+2. **Homoscedasticity:** Residuals vs fitted plot; Levene's test by paradigm × age tertile
+3. **Random Effects Normality:** Q-Q plot of random effect estimates
+4. **Independence:** ACF plot of residuals (no significant autocorrelation)
+5. **Linearity:** Residuals vs TSVR_hours and log_TSVR (no systematic patterns)
+6. **Outliers:** Cook's distance < 4/N threshold
+
+### Remedial Actions
+
+- If normality violated: Report robust standard errors or use bootstrap confidence intervals
+- If heteroscedasticity: Use weighted LMM or variance function by paradigm
+- If outliers detected: Sensitivity analysis with/without outliers
+
+### Convergence Contingency Plan
+
+If the full model (random slopes for TSVR_hours) fails to converge:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only
+3. If LRT p < 0.05, retain slopes with simplified correlation structure
+4. If LRT p ≥ 0.05, use random intercepts-only model
+5. Document which structure achieved convergence in results
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+### Log Transformation Rationale
+
+**Why log(TSVR_hours + 1):**
+- The +1 constant ensures log transformation is defined for Day 0 (TSVR_hours = 0 at immediate test)
+- Logarithmic time captures the well-established non-linear forgetting pattern where forgetting rate decelerates over time (Ebbinghaus, 1885; Wixted & Ebbesen, 1991)
+- Chapter 5 model selection (RQs 5.1.1, 5.3.1) consistently identifies logarithmic or Lin+Log models as best-fitting
+- Including both linear (TSVR_hours) and logarithmic (log_TSVR) terms allows the model to capture both early rapid forgetting and later asymptotic retention
+
+### Multiple Testing Correction
+
+Bonferroni alpha = 0.025 corrects for 2 time transformation terms (linear and logarithmic). This is a conservative approach ensuring family-wise error rate control. Both uncorrected and corrected p-values reported per Decision D068 to allow readers to assess effect robustness under different correction assumptions.
 
 ---
 

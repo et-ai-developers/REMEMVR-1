@@ -130,6 +130,62 @@ K-means clustering on paradigm-specific random effects (unsupervised machine lea
 - Cluster centers interpretable: clear paradigm-specific patterns
 - Plot shows clear separation: distinct clusters visible in scatter matrix
 - Replicates with random_state=42
+- Cluster validation metrics meet quality thresholds (see below)
+
+---
+
+## Clustering Method Selection
+
+### K-means vs Latent Profile Analysis (LPA) Justification
+
+**Method Selected:** K-means clustering with BIC-based model selection (K=2-6)
+
+**Justification for K-means over Latent Profile Analysis (LPA):**
+1. **Exploratory Nature:** This analysis discovers patterns in individual differences, not testing a priori structural hypotheses. K-means is appropriate for exploratory pattern discovery.
+2. **Interpretability:** K-means cluster centroids directly show mean intercepts and slopes per paradigm, facilitating clinical translation and theoretical interpretation.
+3. **Computational Efficiency:** K-means supports rapid sensitivity analyses (varying K, subsampling) without computational burden of GMM estimation.
+4. **Sample Size:** N=100 is at the lower bound for stable LPA estimation with 6 continuous indicators; K-means is more robust to small samples.
+5. **No Mixture Assumptions:** K-means does not assume multivariate normality within clusters, which may be violated with paradigm-specific random effects.
+
+**Alternative Method Consideration:**
+If K-means shows poor cluster quality metrics (silhouette < 0.40, instability > 0.25), Gaussian Mixture Models (GMM) will be tested as sensitivity analysis to assess whether soft clustering improves fit.
+
+## Cluster Validation Metrics
+
+### Model Selection
+**BIC across K=2-6** (select minimum)
+- Parsimony rule: If BIC difference between K and K+1 is < 2, prefer simpler K (fewer clusters)
+
+### Quality Metrics
+- **Silhouette Score:** Target ≥ 0.40 (acceptable cluster cohesion)
+  - Range: -1 to +1; higher = better defined clusters
+  - < 0.25 = no substantial structure; 0.25-0.50 = weak structure; 0.51-0.70 = reasonable structure; > 0.70 = strong structure
+- **Davies-Bouldin Index:** Target < 1.5 (acceptable cluster separation)
+  - Lower = better; measures ratio of within-cluster to between-cluster distances
+- **Dunn Index:** Higher = better (ratio of minimum inter-cluster to maximum intra-cluster distance)
+
+### Stability Assessment
+- **Bootstrap Resampling:** 100 iterations, 80% subsampling
+- **Jaccard Index Threshold:** > 0.75 for stable clusters
+- **Interpretation:** If stability < 0.75, report as "tentative clustering" and interpret cautiously
+
+### Cluster Size Constraint
+Each cluster must contain ≥ 10% of sample (N ≥ 10) to ensure interpretability and avoid singleton clusters driven by outliers.
+
+## Sphericity Assumption Check
+
+K-means assumes spherical (isotropic) clusters. To validate:
+1. **Visual Check:** Scatter plot matrix colored by cluster should show approximately circular (not elongated) clusters
+2. **PCA Variance:** If first PC explains > 70% of variance, data may have dominant axis violating sphericity
+3. **Remedial:** If elongated clusters detected, consider GMM with unconstrained covariance as sensitivity analysis
+
+## If Cluster Quality Fails
+
+If cluster validation metrics are poor (silhouette < 0.40, stability < 0.75):
+1. Report metrics transparently
+2. Interpret clusters as "tentative" patterns requiring replication
+3. Consider: (a) Gaussian Mixture Model with flexible covariance, (b) hierarchical clustering for alternative structure, (c) reporting that paradigm-specific individual differences may not form discrete clusters
+4. Theoretical conclusion: Individual differences in paradigm-specific forgetting may be continuously distributed rather than clustered into discrete profiles
 
 ---
 
