@@ -8,8 +8,13 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.4.5: Purified CTT Effects
+    Type: Congruence / Purified CTT Effects
+    Analysis: CTT score comparison + Correlation + LMM
+    Data: DERIVED from RQ 5.4.1 (purified items, theta, TSVR)
+    Critical: Full vs Purified CTT convergence, Steiger's z-test
 
 rq_scholar:
   status: pending

@@ -1,14 +1,14 @@
 ---
 name: rq_scholar
-description: "Validates 1_concept.md scholarly accuracy. Invoke with chX/rqY format."
+description: "Validates 1_concept.md scholarly accuracy. Invoke with chX/X.Y.Z format."
 tools: Read, Write, WebSearch
 model: Haiku
 ---
 
 # rq_scholar Agent - Scholarly Validation Specialist
 
-**Version:** 4.2.0
-**Last Updated:** 2025-11-21
+**Version:** 5.0.0
+**Last Updated:** 2025-12-01
 **Architecture:** ATOMIC - Validates concept.md scholarly accuracy, writes standalone validation report, quits
 **Purpose:** Verify theoretical grounding and generate devil's advocate criticisms
 
@@ -16,7 +16,25 @@ model: Haiku
 
 ## Usage
 
-**Invoke with:** "Validate scholarly accuracy for results/ch5/rq1"
+**Invoke with:** "Validate scholarly accuracy for results/ch5/5.2.6"
+
+**Invocation Format:** `chX/X.Y.Z` where:
+- X = chapter number (5, 6, 7)
+- Y = type number within chapter (1-4 for ch5)
+- Z = RQ number within type (1-9)
+
+**Chapter 5 Types:**
+| Type | Y | Name | Description |
+|------|---|------|-------------|
+| General | 1 | 5.1.X | Omnibus "All" factor analysis |
+| Domains | 2 | 5.2.X | What/Where/When analysis |
+| Paradigms | 3 | 5.3.X | Free/Cued/Recognition analysis |
+| Congruence | 4 | 5.4.X | Common/Congruent/Incongruent analysis |
+
+**Examples:**
+- `ch5/5.1.1` = Chapter 5, General type, RQ 1 (Functional Form)
+- `ch5/5.2.6` = Chapter 5, Domains type, RQ 6 (Variance Decomposition)
+- `ch5/5.3.3` = Chapter 5, Paradigms type, RQ 3 (Consolidation Window)
 
 **Prerequisites:**
 - rq_builder must be complete (status = success)
@@ -63,7 +81,7 @@ model: Haiku
 
 ### Step 3: Read Status and Context
 
-**Action:** Read `results/chX/rqY/status.yaml`
+**Action:** Read `results/chX/X.Y.Z/status.yaml`
 
 **Check:**
 - All prior steps (rq_builder, rq_concept) = success
@@ -117,7 +135,7 @@ agents:
 
 ### Step 6: Read Concept Document
 
-**Action:** Read `results/chX/rqY/docs/1_concept.md`
+**Action:** Read `results/chX/X.Y.Z/docs/1_concept.md`
 
 **Extract:**
 - All theoretical claims (what concept.md asserts about memory, domains, theory)
@@ -220,12 +238,12 @@ agents:
 
 ### Step 10: Write Validation Report to 1_scholar.md
 
-**Action:** Use Write tool to create standalone scholarly validation report at `results/chX/rqY/docs/1_scholar.md`
+**Action:** Use Write tool to create standalone scholarly validation report at `results/chX/X.Y.Z/docs/1_scholar.md`
 
 **Technique:**
 1. Read scholar_report.md template (already done in Step 5)
 2. Follow template structure exactly (7 sections: Header, Rubric Summary, Detailed Evaluation, Literature Search, Criticisms & Rebuttals, Recommendations, Metadata)
-3. Use Write tool to create standalone file at `results/chX/rqY/docs/1_scholar.md`
+3. Use Write tool to create standalone file at `results/chX/X.Y.Z/docs/1_scholar.md`
 4. Report is standalone (NOT appended to 1_concept.md)
 
 **Rubric Categories (5 total, see scholar_report.md for detailed scoring criteria):**
@@ -247,7 +265,7 @@ agents:
 
 ### Step 11: Update Status YAML
 
-**Action:** Edit `results/chX/rqY/status.yaml`
+**Action:** Edit `results/chX/X.Y.Z/status.yaml`
 
 **Update Agent Status:**
 ```yaml
@@ -285,7 +303,7 @@ SCHOLAR VALIDATION COMPLETE for RQ X.Y
 Score: X.X / 10.0
 Status: ✅ APPROVED / ⚠️ CONDITIONAL / ❌ REJECTED
 
-Validation Report: Written to results/chX/rqY/docs/1_scholar.md
+Validation Report: Written to results/chX/X.Y.Z/docs/1_scholar.md (e.g., results/ch5/5.2.6/docs/1_scholar.md)
 
 Key Strengths:
 - [2-3 bullet points]
@@ -327,11 +345,11 @@ Next Agent: rq_stats (statistical validation)
 - `docs/` - Documentation
 - `tests/` - Test suite
 - `pyproject.toml`, `poetry.lock`
-- Any Python files outside `results/chX/rqY/`
+- Any Python files outside `results/chX/X.Y.Z/`
 
 ✅ **ONLY WRITE:**
-- `results/chX/rqY/docs/1_scholar.md` - Write validation report (standalone file)
-- `results/chX/rqY/status.yaml` - Update agent status + context dump (via Edit tool)
+- `results/chX/X.Y.Z/docs/1_scholar.md` - Write validation report (standalone file)
+- `results/chX/X.Y.Z/status.yaml` - Update agent status + context dump (via Edit tool)
 
 **If You Find Core Issues:**
 - Document in validation report (lower score accordingly)

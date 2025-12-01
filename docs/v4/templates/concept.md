@@ -1,9 +1,9 @@
 # 1_concept.md Format Specification
 
-**Last Updated:** 2025-11-16
-**Version:** 4.0
+**Last Updated:** 2025-12-01
+**Version:** 5.0
 **Purpose:** Defines the mandatory structure for 1_concept.md (RQ concept document)
-**Audience:** rq_concept agent when creating 1_concept.md from thesis
+**Audience:** rq_concept agent when creating 1_concept.md from rq_refactor.tsv
 
 ---
 
@@ -26,31 +26,43 @@
 
 **Required Content:**
 - Chapter number (5, 6, or 7)
-- RQ number within chapter (1-15 for ch5/ch6, 1-20 for ch7)
+- Type number within chapter (1-4 for ch5)
+- RQ number within type (1-9)
+- Type name (General, Domains, Paradigms, Congruence)
+- Subtype name (specific analysis focus)
 - Descriptive title summarizing the RQ focus
 
 **Format:**
 ```markdown
-# RQ X.Y: [Descriptive Title]
+# RQ X.Y.Z: [Descriptive Title]
 
 **Chapter:** X
-**RQ Number:** Y
-**Full ID:** X.Y
+**Type:** [Type Name]
+**Subtype:** [Subtype Name]
+**Full ID:** X.Y.Z
 ```
 
 **Example:**
 ```markdown
-# RQ 5.1: Domain-Specific Forgetting Trajectories (What/Where/When)
+# RQ 5.1.1: Functional Form Comparison
 
 **Chapter:** 5
-**RQ Number:** 1
-**Full ID:** 5.1
+**Type:** General
+**Subtype:** Functional Form Comparison
+**Full ID:** 5.1.1
 ```
 
+**Hierarchical Numbering (Chapter 5):**
+- **5.1.X** = General (omnibus "All" factor analysis)
+- **5.2.X** = Domains (What/Where/When analysis)
+- **5.3.X** = Paradigms (Free/Cued/Recognition analysis)
+- **5.4.X** = Congruence (Common/Congruent/Incongruent analysis)
+
 **Extraction Guidance for rq_concept:**
-- Read ANALYSES_CHX.md TABLE OF CONTENTS
-- Locate RQ X.Y entry
-- Extract chapter, number, and title
+- Read rq_refactor.tsv Number column
+- Parse hierarchical format: "5.1.1" -> Chapter 5, Type 1, RQ 1
+- Extract Type and Subtype from TSV columns
+- Extract Title from TSV Title column
 - Format according to template
 
 ---
@@ -83,20 +95,19 @@
 ## Research Question
 
 **Primary Question:**
-Do episodic memory domains (What, Where, When) show differential forgetting trajectories across a 6-day retention interval?
+Which functional form best describes episodic forgetting trajectories across a 6-day retention interval?
 
 **Scope:**
-This RQ examines forgetting rates for three episodic memory components using IRT-derived ability estimates across four test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6). Time variable uses TSVR (actual hours since encoding), not nominal days. Focuses on VR-based memory test items requiring binding of object identity, spatial location, and temporal order.
+This RQ examines forgetting rates using IRT-derived ability estimates across four test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6). Time variable uses TSVR (actual hours since encoding), not nominal days. Compares 5 candidate models (Linear, Quadratic, Logarithmic, Linear+Logarithmic, Quadratic+Logarithmic). N=100 participants x 4 tests = 400 observations.
 
 **Theoretical Framing:**
-Dual-process theory predicts domain-specific forgetting patterns due to differential reliance on familiarity vs. recollection processes. Understanding domain-specific trajectories informs theoretical models of episodic memory consolidation and retrieval.
+Exploratory analysis to determine optimal functional form for subsequent analyses. Best model selected via AIC and Akaike weights. Foundation for all trajectory analyses in Chapter 5.
 ```
 
 **Extraction Guidance for rq_concept:**
-- Read RQ section from ANALYSES_CHX.md
-- Extract primary research question (usually first paragraph)
-- Identify scope elements (variables, population, timeframe)
-- Extract theoretical context (why this matters)
+- Read rq_refactor.tsv Title column for primary question
+- Extract scope from Data_Required column (sample size, observations)
+- Extract theoretical context from Hypothesis column
 - Format according to template
 
 ---
@@ -137,23 +148,18 @@ Dual-process theory predicts domain-specific forgetting patterns due to differen
 - **Consolidation Theory** (Dudai, 2004): Hippocampal-dependent memories (Where, When) consolidate more slowly and show greater vulnerability during consolidation compared to perirhinal-dependent memories (What).
 
 **Key Citations:**
-- Tulving (1972): Episodic memory as "mental time travel" requiring binding of What/Where/When
-- Baddeley (2000): Working memory model with distinct visuospatial and phonological components
-- Eichenbaum (1999): Hippocampal role in spatial and temporal binding
+[To be added by rq_scholar]
 
 **Theoretical Predictions:**
-Dual-process theory predicts What will show slowest forgetting (familiarity-based), Where intermediate, and When fastest (recollection-dependent). Consolidation theory predicts divergence increases after ~24 hours (consolidation period, T2 nominal Day 1).
+[Extracted from Hypothesis column]
 
 **Literature Gaps:**
-Most episodic memory studies examine What and Where separately. Few studies test all three WWW domains together in immersive VR with longitudinal trajectories. This RQ fills the gap.
+[To be identified by rq_scholar]
 ```
 
 **Extraction Guidance for rq_concept:**
-- Read RQ section from ANALYSES_CHX.md for theoretical context
-- Extract theory names and brief descriptions
-- Identify key citations mentioned
-- Extract theoretical predictions for this RQ
-- Identify what makes this RQ novel/needed
+- Extract theory mentions from rq_refactor.tsv Hypothesis column
+- Note: This section may be minimal - rq_scholar will enhance later
 - Format according to template
 
 **Validation Note:**
@@ -193,24 +199,22 @@ rq_scholar agent will validate this section, check citations, and append feedbac
 ## Hypothesis
 
 **Primary Hypothesis:**
-Memory domains will show differential forgetting trajectories, with What showing slowest forgetting (shallowest slope), Where intermediate, and When fastest forgetting (steepest slope).
+Exploratory analysis comparing 5 candidate models (Linear, Quadratic, Logarithmic, Linear+Logarithmic, Quadratic+Logarithmic). No directional prediction. Expected: best model Akaike weight > 0.30.
 
 **Secondary Hypotheses:**
-1. Divergence will increase after ~24 hours (consolidation period, T2)
-2. All domains will show non-linear forgetting (logarithmic or quadratic better than linear)
+None - exploratory analysis.
 
 **Theoretical Rationale:**
-Dual-process theory suggests What can rely on familiarity (perirhinal cortex), while Where and When require hippocampal binding. Consolidation theory predicts hippocampal-dependent memories are more vulnerable during early consolidation (T1→T2, ~0-24h). Non-linear forgetting reflects consolidation + retrieval dynamics.
+Functional form determination is prerequisite for subsequent trajectory analyses. Non-linear forms (logarithmic) often fit forgetting data better than linear forms based on empirical forgetting curves.
 
 **Expected Effect Pattern:**
-Significant Domain × Time interaction in LMM analysis. Post-hoc contrasts should show: What ≠ When (p < 0.001), Where intermediate. Quadratic or log time terms should improve model fit (ΔAIC > 10).
+Best model identified by lowest AIC. Akaike weights sum to 1.0 +/- 0.01. Best model weight > 0.30 indicates clear winner.
 ```
 
 **Extraction Guidance for rq_concept:**
-- Read RQ section from ANALYSES_CHX.md for hypothesis statements
-- Extract primary and secondary hypotheses
-- Identify theoretical justification from Section 3
-- Extract expected statistical patterns
+- Extract from rq_refactor.tsv Hypothesis column
+- Identify primary vs secondary predictions
+- Extract expected statistical patterns (p-values, effect sizes, thresholds)
 - Format according to template
 
 **Validation Note:**
@@ -255,42 +259,21 @@ rq_stats agent will validate hypotheses are testable and statistically appropria
 [Explain why any domains or sub-tags excluded]
 ```
 
-**Example:**
-```markdown
-## Memory Domains
+**Domain Selection by Type (Chapter 5):**
 
-**Domains Examined:**
-
-- [x] **What** (Object Identity)
-  - Tag Code: `-N-`
-  - Description: Object identity / naming
-
-- [x] **Where** (Spatial Location)
-  - [x] `-L-` tags (general location, legacy)
-  - [x] `-U-` tags (pick-up location)
-  - [x] `-D-` tags (put-down location)
-  - Disambiguation: **ALL Where tags included** because some items only have -L- (e.g., Room Free Recall). Excluding -L- would lose spatial items. Complete spatial coverage needed.
-
-- [x] **When** (Temporal Order)
-  - Tag Code: `-O-`
-  - Description: Temporal order / sequence
-
-**Inclusion Rationale:**
-This RQ examines all three WWW episodic memory components to test differential forgetting trajectories. Complete coverage of What/Where/When binding is theoretically necessary per Tulving's episodic memory definition.
-
-**Exclusion Rationale:**
-None - all WWW domains included for comprehensive episodic memory assessment.
-```
+| Type | Domains/Factors |
+|------|-----------------|
+| **5.1.X General** | Single "All" omnibus factor (all items combined) |
+| **5.2.X Domains** | What (-N-), Where (-L-/-U-/-D-), When (-O-) |
+| **5.3.X Paradigms** | Free Recall (IFR), Cued Recall (ICR), Recognition (IRE) |
+| **5.4.X Congruence** | Common (i1/i2), Congruent (i3/i4), Incongruent (i5/i6) |
 
 **Extraction Guidance for rq_concept:**
-- Read RQ section from ANALYSES_CHX.md for domain mentions
-- Identify which domains (What, Where, When)
+- Read rq_refactor.tsv Data_Required column for domain mentions
+- Infer from Type column if Data_Required unclear
 - For Where: Determine if -L-, -U-, -D- disambiguation needed
 - Extract rationale for inclusions/exclusions
 - Format as checkboxes (checked = included, unchecked = excluded)
-
-**Critical Note:**
-Where domain requires explicit -L-/-U-/-D- clarification to prevent ambiguity. If thesis doesn't specify, rq_concept should trigger CLARITY ERROR circuit breaker (per agent_best_practices.md).
 
 ---
 
@@ -301,8 +284,8 @@ Where domain requires explicit -L-/-U-/-D- clarification to prevent ambiguity. I
 **Required Content:**
 - Analysis type (IRT, LMM, CTT, other)
 - Step-by-step analysis workflow (user's understanding)
-- Special methods (2-pass IRT, covariates, transformations, etc.)
-- Expected tools from tools_inventory.md
+- Expected outputs and file specifications
+- Success criteria for validation
 
 **Format:**
 ```markdown
@@ -313,21 +296,18 @@ Where domain requires explicit -L-/-U-/-D- clarification to prevent ambiguity. I
 
 **High-Level Workflow:**
 
+**Step 0:** [Data extraction if applicable]
 **Step 1:** [First analysis step in plain language]
 **Step 2:** [Second step]
 **Step 3:** [Third step]
 **Step 4:** [Fourth step]
 [Additional steps as needed]
 
-**Data Preprocessing (Per Solution Section 1.4):**
-[Document preprocessing requirements for this RQ]
-- **Accuracy Scores (-ANS tags):** Dichotomize before IRT: 1 = 1, all <1 = 0 (no partial credit)
-- **Confidence Ratings:** Use raw 1-5 Likert scale (no bias correction, preserves interpretability)
-- **IRT Model:** GRM (Graded Response Model - handles both dichotomous and polytomous items)
-- **Likert Response Bias:** Document response style patterns (% using full range vs extremes), do NOT correct
+**Expected Outputs:**
+[From Expected_Output - file names and structure]
 
-**Special Methods:**
-[Any unusual or project-specific methods mentioned in thesis? E.g., 2-pass IRT purification, TSVR time variable, dual reporting]
+**Success Criteria:**
+[From Success_Criteria - validation requirements]
 ```
 
 **Example:**
@@ -339,41 +319,39 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 
 **High-Level Workflow:**
 
-**Step 1:** IRT Pass 1 - Calibrate GRM on all VR items (What/Where/When combined)
-**Step 2:** Item Purification - Remove items with extreme difficulty (|b| > 3.0) or low discrimination (a < 0.4)
-**Step 3:** IRT Pass 2 - Re-calibrate GRM on purified items
-**Step 4:** Theta Extraction - Extract ability estimates per participant × test × domain
-**Step 5:** TSVR Merge - Merge theta scores with Time Since VR (actual hours, not nominal days)
-**Step 6:** LMM Trajectory Modeling - Fit Domain × Time interaction with random slopes
+**Step 1:** IRT Pass 1 calibration with single omnibus "All" factor on all items using GRM, p1_med prior
+**Step 2:** Item purification (Decision D039): exclude items with |b| > 3.0 OR a < 0.4
+**Step 3:** IRT Pass 2 re-calibration on purified items
+**Step 4:** Merge theta with TSVR, create time transformations
+**Step 5:** Fit 5 LMMs with REML=False: Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log; all with random slopes by UID
+**Step 6:** Model selection via AIC, compute Akaike weights
+**Step 7:** Prepare plot data: observed means + model predictions, theta and probability scales (Decision D069)
 
-**Data Preprocessing (Per Solution Section 1.4):**
-- **Accuracy Scores:** Dichotomize before IRT (1 = 1, <1 = 0) - items with partial scores converted to binary
-- **Confidence Ratings:** Use raw 1-5 Likert (no bias correction) - preserves direct interpretability
-- **IRT Model:** GRM handles both dichotomous (accuracy: 2 categories) and polytomous (confidence: 5 categories) in single calibration
-- **Likert Response Bias:** Document % participants using full 1-5 range vs extremes only, do NOT correct
+**Expected Outputs:**
+- data/step01_theta_scores.csv
+- data/step02_purified_items.csv (40-60 items)
+- data/step03_theta_scores.csv (final)
+- data/step04_lmm_input.csv (400 rows)
+- results/step05_model_comparison.csv (5 models)
+- data/step06_best_model.pkl
+- results/step06_aic_comparison.csv
+- plots/step07_functional_form_theta_data.csv
+- plots/step07_functional_form_probability_data.csv
 
-**Special Methods:**
-- **2-Pass IRT Purification:** Mandatory for all IRT analyses to remove psychometrically problematic items
-- **TSVR Time Variable:** Use actual hours since encoding, not nominal days (0, 1, 3, 6)
-- **Dual-Scale Trajectory Plots:** Plot theta + probability scales for interpretability
-- **GRM Model Clarification:** GRM (Graded Response Model) handles BOTH dichotomous (2 categories: 0, 1) and polytomous (5 categories: 1-5) items. For dichotomized accuracy, GRM reduces to 2PL dichotomous IRT mathematically. No conflict with thesis "dichotomous IRT" terminology - same model.
+**Success Criteria:**
+- IRT convergence: theta in [-4,4], SE in [0.1,1.5]
+- Purification: 30-70% retention
+- LMM: all 5 models converge, AIC finite
+- Akaike weights sum to 1.0 +/- 0.01
+- Best model weight > 0.30
+- Plot data: probability in [0,1], no NaN
 ```
 
 **Extraction Guidance for rq_concept:**
-- Read RQ section from ANALYSES_CHX.md for analysis approach
-- Extract analysis type (IRT, LMM, etc.)
-- Identify step-by-step workflow
-- Extract any special methods or project-wide requirements mentioned in thesis
+- Read rq_refactor.tsv Analysis_Specification column for workflow steps
+- Read Expected_Output column for file specifications
+- Read Success_Criteria column for validation requirements
 - Format according to template
-
-**WARNING: Avoid Template Contamination**
-- Extract ONLY factual information from ANALYSES_CHX.md thesis section
-- Do NOT copy timing examples from this template (e.g., test timing may vary per RQ)
-- Do NOT invent details not present in thesis
-- If thesis unclear → Trigger CLARITY ERROR (per agent_best_practices.md)
-
-**Validation Note:**
-rq_stats agent will validate analysis approach is appropriate and feasible with existing tools.
 
 ---
 
@@ -382,8 +360,8 @@ rq_stats agent will validate analysis approach is appropriate and feasible with 
 **Purpose:** Specify exactly where data comes from (RAW vs DERIVED)
 
 **Required Content:**
-- Data type (RAW from master.xlsx OR DERIVED from other RQs/steps)
-- If RAW: Tag patterns from master.xlsx
+- Data type (RAW from dfData.csv OR DERIVED from other RQs/steps)
+- If RAW: Source file and extraction method
 - If DERIVED: Source RQ and file paths
 - Participant inclusion/exclusion criteria
 - Item inclusion/exclusion criteria
@@ -394,25 +372,27 @@ rq_stats agent will validate analysis approach is appropriate and feasible with 
 ## Data Source
 
 **Data Type:**
-[RAW (from master.xlsx) OR DERIVED (from other RQ outputs)]
+[RAW (from dfData.csv) OR DERIVED (from other RQ outputs)]
 
 ### If RAW Data:
+
+**Source File:**
+[e.g., data/cache/dfData.csv]
 
 **Tag Patterns:**
 - Domain tags: [e.g., -N-, -L-/-U-/-D-, -O-]
 - Paradigm codes: [e.g., IFR, ICR, IRE, RFR, etc.]
-- Complete pattern: [e.g., "RVR-X-N-IFR-" for What + Interactive Free Recall]
 
 **Extraction Method:**
-[How data_prep agent extracts from master.xlsx]
+[How Step 0 extracts from source]
 
 ### If DERIVED Data:
 
 **Source RQ:**
-[Which RQ outputs are inputs? E.g., "RQ 5.1"]
+[Which RQ outputs are inputs? E.g., "RQ 5.1.1"]
 
 **File Paths:**
-[Exact file paths, e.g., "results/ch5/5.2.1/data/step03_theta_scores.csv"]
+[Exact file paths, e.g., "results/ch5/5.1.1/data/step03_theta_scores.csv"]
 
 **Dependencies:**
 [What must complete before this RQ can run?]
@@ -421,38 +401,40 @@ rq_stats agent will validate analysis approach is appropriate and feasible with 
 
 **Participants:**
 - [ ] All 100 participants
-- [ ] Subset: [Criteria if subset, e.g., "≥3 test sessions"]
-- [ ] Exclude: [Criteria if exclusions, e.g., ">30% missing VR data"]
+- [ ] Subset: [Criteria if subset]
+- [ ] Exclude: [Criteria if exclusions]
 
 **Items:**
 - [ ] All VR items
-- [ ] Subset: [Criteria if subset, e.g., "Interactive items only (IFR, ICR, IRE)"]
-- [ ] Exclude: [Criteria if exclusions, e.g., "Room Free Recall (RFR)"]
+- [ ] Subset: [Criteria if subset]
+- [ ] Exclude: [Criteria if exclusions]
 
 **Tests:**
 - [ ] All 4 tests (T1, T2, T3, T4)
-- [ ] Subset: [Criteria if subset, e.g., "T1, T3, T4 only (exclude T2 - same day)"]
+- [ ] Subset: [Criteria if subset]
 ```
 
-**Example (RAW Data):**
+**Example (RAW Data - Root RQ):**
 ```markdown
 ## Data Source
 
 **Data Type:**
-RAW (extracted from master.xlsx)
+RAW (extracts directly from dfData.csv)
 
 ### RAW Data Extraction:
 
+**Source File:**
+data/cache/dfData.csv
+
 **Tag Patterns:**
-- Domain tags: `-N-` (What), `-L-/-U-/-D-` (Where), `-O-` (When)
-- Paradigm codes: IFR, ICR, IRE (interactive paradigms only)
-- Complete patterns:
-  - What: `RVR-X-N-{IFR|ICR|IRE}-`
-  - Where: `RVR-X-{L|U|D}-{IFR|ICR|IRE}-`
-  - When: `RVR-X-O-{IFR|ICR|IRE}-`
+- All interactive paradigm items (IFR, ICR, IRE)
+- Excludes RFR, TCR, RRE
 
 **Extraction Method:**
-data_prep agent uses `tools.data.extract_vr_items_wide` with tag patterns above, stacks by composite_ID (UID-Test-Domain), yields long-format CSV with columns: composite_ID, item_code, response (0-3).
+Step 0 extracts from dfData.csv, creates:
+- data/step00_irt_input.csv (wide format binary responses)
+- data/step00_tsvr_mapping.csv (time mapping)
+- data/step00_q_matrix.csv (single "All" factor)
 
 ### Inclusion/Exclusion Criteria:
 
@@ -461,11 +443,10 @@ data_prep agent uses `tools.data.extract_vr_items_wide` with tag patterns above,
 
 **Items:**
 - [x] Interactive paradigms only (IFR, ICR, IRE)
-- [ ] Room Free Recall (RFR) - EXCLUDED (different response format)
+- [ ] Room Free Recall (RFR) - EXCLUDED
 
 **Tests:**
 - [x] All 4 tests (T1, T2, T3, T4)
-- Note: Time variable uses TSVR (actual hours since encoding), not nominal days
 ```
 
 **Example (DERIVED Data):**
@@ -473,44 +454,43 @@ data_prep agent uses `tools.data.extract_vr_items_wide` with tag patterns above,
 ## Data Source
 
 **Data Type:**
-DERIVED (from RQ 5.1 outputs)
+DERIVED (from RQ 5.1.1 outputs)
 
 ### DERIVED Data Source:
 
 **Source RQ:**
-RQ 5.1 (Domain-Specific Forgetting Trajectories)
+RQ 5.1.1 (Functional Form Comparison)
 
 **File Paths:**
-- `results/ch5/5.2.1/data/step03_theta_scores.csv` (IRT ability estimates)
-- Columns: composite_ID, domain, test, theta
+- results/ch5/5.1.1/data/step06_best_model.pkl (saved LMM model)
+- results/ch5/5.1.1/data/step03_theta_scores.csv (IRT ability estimates)
+- results/ch5/5.1.1/data/step04_lmm_input.csv (merged data)
 
 **Dependencies:**
-RQ 5.2.1 must complete Steps 1-3 (IRT calibration, purification, theta extraction) before this RQ can run.
-
-**Usage:**
-This RQ uses theta scores from RQ 5.1 as outcome variable for advanced trajectory modeling with covariates.
+RQ 5.1.1 must complete Steps 1-6 (IRT calibration, LMM fitting, model selection) before this RQ can run.
 
 ### Inclusion/Exclusion Criteria:
 
 **Participants:**
-- [x] All participants from RQ 5.1 (inherited inclusion criteria)
+- [x] All participants from RQ 5.1.1 (inherited inclusion criteria)
 
 **Items:**
-- N/A (theta scores already aggregated per domain)
+- N/A (theta scores already aggregated)
 
 **Tests:**
-- [x] All 4 tests (inherited from RQ 5.1)
+- [x] All 4 tests (inherited from RQ 5.1.1)
 ```
 
 **Extraction Guidance for rq_concept:**
-- Read RQ section from ANALYSES_CHX.md for data source mentions
-- Determine RAW (from master.xlsx) vs DERIVED (from other RQs)
-- If RAW: Extract tag patterns and inclusion/exclusion criteria
-- If DERIVED: Extract source RQ and file paths
+- Read rq_refactor.tsv Data_Required column
+- Determine RAW vs DERIVED:
+  - If mentions "dfData.csv" or "data/cache" -> RAW
+  - If mentions "results/ch5/X.Y.Z" or "from RQ X.Y.Z" -> DERIVED
+- Extract file paths and inclusion/exclusion criteria
 - Format according to template
 
 **Critical Note:**
-Data source ambiguity triggers CLARITY ERROR circuit breaker (per agent_best_practices.md). If thesis doesn't clearly specify RAW vs DERIVED, rq_concept must FAIL and report.
+Data source ambiguity triggers CLARITY ERROR circuit breaker. If TSV doesn't clearly specify RAW vs DERIVED, rq_concept must FAIL and report.
 
 ---
 

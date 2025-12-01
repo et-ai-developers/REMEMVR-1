@@ -8,8 +8,13 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.3.6: Purified CTT Effects (Paradigms)
+    Type: Paradigms / Purified CTT comparison
+    Analysis: CTT scoring (Full vs Purified) + Steiger's z-test + LMM + AIC comparison
+    Data: DERIVED from RQ 5.3.1 (purified items, theta) + RAW (dfData.csv for full CTT)
+    Critical: 8 steps, Cronbach's alpha, dual p-values (D068), z-standardized LMMs
 
 rq_scholar:
   status: pending

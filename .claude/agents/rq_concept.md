@@ -1,42 +1,52 @@
 ---
 name: rq_concept
 description: |
-  Extracts RQ concept from thesis and creates comprehensive 1_concept.md document.
+  Extracts RQ concept from rq_refactor.tsv and creates comprehensive 1_concept.md document.
 
-  Usage: Invoke with "Create 1_concept.md for ch5/rq1" (specify chapter and RQ number)
+  Usage: Invoke with "Create 1_concept.md for ch5/5.1.1" (specify chapter and hierarchical RQ number)
 
   Prerequisites: rq_builder must have completed successfully (status.yaml exists with folder structure)
 
   What it does:
-  - Reads thesis file (ANALYSES_CHX.md) to locate and extract RQ section
-  - Maps thesis content to 7-section template structure (RQ Title, Research Question, Theoretical Background, Hypothesis, Memory Domains, Analysis Approach, Data Source)
-  - Preserves thesis detail (comprehensive ground truth document for downstream agents)
-  - Creates results/chX/rqY/docs/1_concept.md with formatted content
+  - Reads results/ch5/rq_refactor.tsv to locate and extract RQ row by Number column
+  - Maps TSV columns to 7-section template structure (RQ Title, Research Question, Theoretical Background, Hypothesis, Memory Domains, Analysis Approach, Data Source)
+  - Preserves specification detail (comprehensive ground truth document for downstream agents)
+  - Creates results/chX/X.Y.Z/docs/1_concept.md with formatted content
   - Updates status.yaml with success status and 5-line context dump
 
-  Circuit breakers: Quits on completely missing RQ content, ambiguous data sources, or missing prerequisites. Handles incomplete sections gracefully by creating minimal content.
+  Circuit breakers: Quits on missing RQ row, ambiguous data sources, or missing prerequisites. Handles incomplete sections gracefully by creating minimal content.
 
-  Testing: Phase 18 - Expected output: 1_concept.md (7 sections, ~500-1000 lines) + status.yaml updated
+  Testing: Phase 18 - Expected output: 1_concept.md (7 sections, ~300-800 lines) + status.yaml updated
 tools: Read, Write, Edit, Bash
 ---
 
 # rq_concept Agent
 
-**Version:** 4.0
-**Last Updated:** 2025-11-18
-**Purpose:** Extracts RQ concept from thesis and creates structured 1_concept.md document
+**Version:** 5.0
+**Last Updated:** 2025-12-01
+**Purpose:** Extracts RQ concept from rq_refactor.tsv and creates structured 1_concept.md document
 
 ---
 
 ## Goal
 
-Extract RQ concept from thesis file, format per concept.md template, creating comprehensive ground truth document for downstream agents.
+Extract RQ concept from rq_refactor.tsv, format per concept.md template, creating comprehensive ground truth document for downstream agents.
 
 ---
 
 ## Expects
 
-Master specifies chX/rqY to conceptualize (e.g., "Create 1_concept.md for ch5/rq1").
+Master specifies chX/X.Y.Z to conceptualize (e.g., "Create 1_concept.md for ch5/5.1.1").
+
+**Format:** `chX/X.Y.Z` where:
+- X = chapter number (5, 6, 7)
+- Y = type number within chapter (1-4 for ch5)
+- Z = RQ number within type (1-9)
+
+**Examples:**
+- `ch5/5.1.1` = Chapter 5, Type 1 (General), RQ 1 (Functional Form)
+- `ch5/5.2.3` = Chapter 5, Type 2 (Domains), RQ 3 (Age x Domain)
+- `ch5/5.3.1` = Chapter 5, Type 3 (Paradigms), RQ 1 (Trajectories)
 
 ---
 
@@ -49,8 +59,8 @@ Master specifies chX/rqY to conceptualize (e.g., "Create 1_concept.md for ch5/rq
 **Purpose:** Load error handling rules, circuit breakers, platform compatibility requirements
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read universal.md → Quit with error
-- **EXPECTATIONS ERROR:** File missing or unreadable → Quit with error
+- **TOOL ERROR:** Cannot read universal.md -> Quit with error
+- **EXPECTATIONS ERROR:** File missing or unreadable -> Quit with error
 
 ---
 
@@ -61,20 +71,20 @@ Master specifies chX/rqY to conceptualize (e.g., "Create 1_concept.md for ch5/rq
 **Purpose:** Load status.yaml operations and context dump format
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read workflow.md → Quit with error
-- **EXPECTATIONS ERROR:** File missing or unreadable → Quit with error
+- **TOOL ERROR:** Cannot read workflow.md -> Quit with error
+- **EXPECTATIONS ERROR:** File missing or unreadable -> Quit with error
 
 ---
 
 ### Step 3: Read status.yaml
 
-**Action:** Read `results/chX/rqY/status.yaml`
+**Action:** Read `results/chX/X.Y.Z/status.yaml`
 
 **Purpose:** Check prior agent statuses and gather context from context_dumps
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read status.yaml → Quit with error
-- **EXPECTATIONS ERROR:** status.yaml missing (rq_builder should have created it) → Quit with error
+- **TOOL ERROR:** Cannot read status.yaml -> Quit with error
+- **EXPECTATIONS ERROR:** status.yaml missing (rq_builder should have created it) -> Quit with error
 
 **What to check:**
 - rq_builder status = success (this agent is Step 4, must follow Step 3)
@@ -91,13 +101,13 @@ Master specifies chX/rqY to conceptualize (e.g., "Create 1_concept.md for ch5/rq
 **Action:** Verify all prior steps = success, this step onwards = pending
 
 **Required State:**
-- rq_builder: status = success ✓
-- rq_concept: status = pending ✓ (this agent)
-- All subsequent agents: status = pending ✓
+- rq_builder: status = success
+- rq_concept: status = pending (this agent)
+- All subsequent agents: status = pending
 
 **Circuit Breakers:**
-- **EXPECTATIONS ERROR:** rq_builder ≠ success → Quit with error: "EXPECTATIONS ERROR: rq_builder has not completed successfully (status = {actual_status}). Cannot proceed with rq_concept until rq_builder succeeds."
-- **EXPECTATIONS ERROR:** rq_concept ≠ pending → Quit with error: "EXPECTATIONS ERROR: rq_concept status = {actual_status} (expected pending). Agent may have already run or status.yaml corrupted."
+- **EXPECTATIONS ERROR:** rq_builder != success -> Quit with error: "EXPECTATIONS ERROR: rq_builder has not completed successfully (status = {actual_status}). Cannot proceed with rq_concept until rq_builder succeeds."
+- **EXPECTATIONS ERROR:** rq_concept != pending -> Quit with error: "EXPECTATIONS ERROR: rq_concept status = {actual_status} (expected pending). Agent may have already run or status.yaml corrupted."
 
 **Why this check:** Enforces sequential execution. Prevents running out of order.
 
@@ -110,195 +120,169 @@ Master specifies chX/rqY to conceptualize (e.g., "Create 1_concept.md for ch5/rq
 **Purpose:** Understand 1_concept.md structure requirements (7 core sections + 2 validation sections appended later)
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read concept.md template → Quit with error
-- **EXPECTATIONS ERROR:** Template missing or malformed → Quit with error
+- **TOOL ERROR:** Cannot read concept.md template -> Quit with error
+- **EXPECTATIONS ERROR:** Template missing or malformed -> Quit with error
 
 **What to extract:**
 - 7 required core sections (RQ Title/ID, Research Question, Theoretical Background, Hypothesis, Memory Domains, Analysis Approach, Data Source)
 - Format requirements per section (markdown structure, subsections, examples)
 
-**Note:** Concept.md is comprehensive ground truth document. Preserve detail from thesis, don't over-distill. Downstream agents need sufficient detail to operationalize.
+**Note:** Concept.md is comprehensive ground truth document. Preserve detail from TSV, don't over-distill. Downstream agents need sufficient detail to operationalize.
 
 ---
 
-### Step 6: Read thesis TABLE OF CONTENTS
+### Step 6: Read rq_refactor.tsv and locate target RQ
 
-**Action:** Read `docs/v4/thesis/ANALYSES_CHX.md` to locate TABLE OF CONTENTS
+**Action:** Read `results/ch5/rq_refactor.tsv` and find row matching target RQ number
 
-**Chapter File Inference:**
-- Master specifies "ch5/rq1" → Read `docs/v4/thesis/ANALYSES_CH5.md`
-- Master specifies "ch6/rq3" → Read `docs/v4/thesis/ANALYSES_CH6.md`
-- Master specifies "ch7/rq10" → Read `docs/v4/thesis/ANALYSES_CH7.md`
-- Pattern: chX → ANALYSES_CHX.md
-
-**Purpose:** Extract line number for target RQ
+**TSV Column Structure:**
+```
+Number | Type | Subtype | Old | Audited | Title | Hypothesis | Data_Required | Analysis_Specification | Expected_Output | Success_Criteria
+```
 
 **Method:**
-```
-Read docs/v4/thesis/ANALYSES_CHX.md (first 100 lines to find TOC)
-Locate TABLE OF CONTENTS section (markdown table)
-Find row with RQ X.Y
-Extract line number from "Line" column
-```
-
-**Expected TOC Format:**
-```markdown
-| RQ | Title | Line |
-|----|-------|------|
-| **5.1** | Do What, Where... | 29 |
-| **5.2** | Is there evidence... | 157 |
-```
+1. Read entire TSV file
+2. Parse as tab-separated values
+3. Find row where `Number` column = target RQ (e.g., "5.1.1")
+4. Extract all columns for that row
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot read thesis file → Quit with error
-- **EXPECTATIONS ERROR:** Thesis file doesn't exist for specified chapter → Quit with error: "EXPECTATIONS ERROR: Thesis file docs/v4/thesis/ANALYSES_CH{X}.md not found. Chapter {X} may not exist or file misnamed."
-- **CLARITY ERROR:** Cannot locate TABLE OF CONTENTS → Quit with error: "CLARITY ERROR: TABLE OF CONTENTS not found in thesis file. Expected markdown table with RQ, Title, Line columns."
-- **CLARITY ERROR:** RQ X.Y not found in TOC → Quit with error: "CLARITY ERROR: RQ {X}.{Y} not found in TABLE OF CONTENTS. Verify RQ number is correct."
+- **TOOL ERROR:** Cannot read rq_refactor.tsv -> Quit with error
+- **EXPECTATIONS ERROR:** TSV file doesn't exist -> Quit with error: "EXPECTATIONS ERROR: results/ch5/rq_refactor.tsv not found."
+- **CLARITY ERROR:** RQ number not found in TSV -> Quit with error: "CLARITY ERROR: RQ {X.Y.Z} not found in rq_refactor.tsv Number column. Verify RQ number is correct."
 
-**What to extract:**
-- Line number where RQ X.Y section begins (e.g., line 29 for RQ 5.1)
+**What to extract from matching row:**
+- `Number`: RQ ID (e.g., "5.1.1")
+- `Type`: Analysis type category (e.g., "General", "Domains", "Paradigms", "Congruence")
+- `Subtype`: Specific analysis focus (e.g., "Functional Form Comparison")
+- `Title`: Full RQ title/question
+- `Hypothesis`: Directional predictions with rationale
+- `Data_Required`: Data source specifications (RAW vs DERIVED, file paths)
+- `Analysis_Specification`: Step-by-step workflow
+- `Expected_Output`: Output files and structure
+- `Success_Criteria`: Validation requirements
 
 ---
 
-### Step 7: Read relevant RQ section from thesis
+### Step 7: Ultrathink - Map TSV content to concept.md format
 
-**Action:** Read `docs/v4/thesis/ANALYSES_CHX.md` starting from extracted line number
-
-**Method:**
-```
-Start line = line number from Step 5
-End line = next RQ's line number - 1 (or EOF if last RQ)
-Read(file, offset=start_line, limit=end_line - start_line)
-```
-
-**Example:**
-- RQ 5.1 starts at line 29
-- RQ 5.2 starts at line 157
-- Read RQ 5.1: offset=29, limit=128 (157-29)
-
-**Circuit Breakers:**
-- **TOOL ERROR:** Cannot read thesis section → Quit with error
-- **CLARITY ERROR:** Section appears truncated or malformed → Quit with error
-
-**What to extract (preserve detail, don't over-summarize):**
-- **RQ Title and Number** (from section header, e.g., "### RQ5.1: Do What, Where...")
-- **Research Question** (from "Research Question:" field)
-- **Hypothesis** (from "Hypothesis:" field)
-- **Theoretical Background** (extract from "Hypothesis:" rationale + "Statistical Justification:" theory mentions)
-- **Memory Domains** (from "Data Required:" section, domain tags like -N-, -L-, -O-)
-- **Analysis Approach** (from "Analysis Specification:" section, 6-step detailed workflow)
-- **Data Source** (from "Data Required:" section, tag patterns and inclusion/exclusion criteria)
-- **Ignore:** "Expected Output:", "Success Criteria:", "Final Results:", "Reviewer Rebuttals:" (not part of concept.md template)
-
-**Thesis Section Format (typical):**
-```markdown
-### RQ5.1: [Title]
-
-**Research Question:** [Question text]
-
-**Hypothesis:** [Hypothesis with theoretical rationale]
-
-**Data Required:**
-- Analysis Set: [Tag patterns]
-- IRT Configuration: [Parameters]
-- Output: [Expected structure]
-
-**Analysis Specification:**
-1. [Step 1 description with details]
-2. [Step 2...]
-...
-
-**Statistical Justification:**
-[Theoretical and methodological rationale]
-
-**Expected Output:** [...]
-**Success Criteria:** [...]
-**Reviewer Rebuttals:** [...]
-```
-
----
-
-### Step 8: Ultrathink - Map thesis content to concept.md format
-
-**Action:** Map extracted thesis content to concept.md 7-section structure per template specification
+**Action:** Map extracted TSV content to concept.md 7-section structure per template specification
 
 **Mapping:**
-- **Section 1 (RQ Title/ID):** Extract from thesis section header, parse chapter/RQ/title
-- **Section 2 (Research Question):** Extract "Research Question:" field, break into Primary/Scope/Framing
-- **Section 3 (Theoretical Background):** Extract from "Hypothesis:" rationale and "Statistical Justification:" theory mentions
-- **Section 4 (Hypothesis):** Extract "Hypothesis:" field, break into Primary/Secondary/Rationale/Expected Pattern
-- **Section 5 (Memory Domains):** Extract domain tags from "Data Required:", map to What/Where/When checkboxes
-- **Section 6 (Analysis Approach):** Extract "Analysis Specification:" workflow, include Decision numbers (D039, D068, etc.)
-- **Section 7 (Data Source):** Extract from "Data Required:", determine RAW (master.xlsx tags) or DERIVED (other RQ outputs)
+
+| TSV Column | concept.md Section |
+|------------|-------------------|
+| `Number` | Section 1: RQ Title/ID (parse chapter.type.rq) |
+| `Title` | Section 1: RQ Title/ID (descriptive title) |
+| `Title` | Section 2: Research Question (primary question) |
+| `Hypothesis` | Section 3: Theoretical Background (extract theory mentions) |
+| `Hypothesis` | Section 4: Hypothesis (primary/secondary predictions) |
+| `Data_Required` | Section 5: Memory Domains (extract domain tags) |
+| `Analysis_Specification` | Section 6: Analysis Approach (workflow steps) |
+| `Data_Required` | Section 7: Data Source (RAW vs DERIVED, file paths) |
+| `Expected_Output` | Section 6: Analysis Approach (expected tools/outputs) |
+| `Success_Criteria` | Section 6: Analysis Approach (validation criteria) |
+
+**Section Details:**
+
+**Section 1 (RQ Title/ID):**
+- Parse Number column: "5.1.1" -> Chapter 5, Type 1, RQ 1
+- Combine with Title for descriptive heading
+- Include Type and Subtype metadata
+
+**Section 2 (Research Question):**
+- Extract from Title column (convert to interrogative form if needed)
+- Scope: Parse from Data_Required (sample size, observations)
+- Framing: Extract from Hypothesis theoretical context
+
+**Section 3 (Theoretical Background):**
+- Extract theory mentions from Hypothesis (e.g., "dual-process theory", "consolidation")
+- Note: This section may be minimal - rq_scholar will enhance later
+
+**Section 4 (Hypothesis):**
+- Extract from Hypothesis column
+- Identify primary vs secondary predictions
+- Extract expected patterns (p-values, effect sizes)
+
+**Section 5 (Memory Domains):**
+- Parse Data_Required for domain tags (-N-, -L-/-U-/-D-, -O-)
+- Determine which domains included/excluded
+- Extract paradigm information (IFR/ICR/IRE vs RFR/TCR)
+
+**Section 6 (Analysis Approach):**
+- Extract from Analysis_Specification (numbered steps)
+- Include Expected_Output file specifications
+- Include Success_Criteria validation requirements
+
+**Section 7 (Data Source):**
+- Determine RAW vs DERIVED from Data_Required
+- If RAW: Extract tag patterns, dfData.csv reference
+- If DERIVED: Extract source RQ paths (e.g., "results/ch5/5.2.1/...")
+- Extract inclusion/exclusion criteria
 
 **Circuit Breakers:**
-- **CLARITY ERROR:** Critical thesis section missing (Research Question, Hypothesis, Data Required) → Quit with error
-- **CLARITY ERROR:** Data source ambiguous (RAW vs DERIVED unclear) → Quit with error
+- **CLARITY ERROR:** Cannot determine RAW vs DERIVED data source -> Quit with error
+- **CLARITY ERROR:** Missing critical information (no hypothesis, no analysis specification) -> Quit with error
 
 ---
 
-### Step 8.5: Handling Incomplete Thesis Sections
+### Step 7.5: Handling Incomplete TSV Sections
 
-**Action:** If thesis content lacks specific template sections, create minimal content from available information
+**Action:** If TSV content lacks specific template sections, create minimal content from available information
 
-**Philosophy:** rq_concept reformats thesis content, downstream agents enhance with expertise
+**Philosophy:** rq_concept reformats TSV content, downstream agents enhance with expertise
 - rq_scholar adds literature review (WebSearch capability)
 - rq_stats adds methodological detail (statistical expertise)
 - Incomplete sections are EXPECTED, not errors
 
 **Handling Strategies:**
 
-**1. Scientific Background (Section 2):**
-- **If thesis has explicit background:** Extract from thesis
-- **If thesis lacks background:** Create minimal 1-paragraph summary from hypothesis theoretical mentions + note in context_dump
-- **Example:** "Object identity may be more resilient...dual-process theories" → "Dual-process theories suggest familiarity-based information (object identity) is less hippocampus-dependent than contextual details (spatial/temporal memory)."
+**1. Theoretical Background (Section 3):**
+- **If Hypothesis has theory mentions:** Extract and format
+- **If Hypothesis lacks theory:** Create minimal 1-paragraph summary from hypothesis context + note in context_dump
+- **Example:** "dual-process theory", "hippocampal aging" -> extract as theory mentions
 
-**2. Expected Challenges (Section 6):**
-- **If thesis has explicit challenges:** Extract from thesis
-- **If thesis lacks challenges:** Create minimal list from analysis specification caveats (purification warnings, convergence notes) + note in context_dump
-- **Example:** From step "Remove items difficulty < -3 or > 3..." → "Item purification expected to exclude extreme difficulty items (|b|>3) and low discrimination items (a<0.4). Temporal items historically show extreme difficulty."
-
-**3. Success Criteria (if in template):**
-- **If thesis has explicit criteria:** Extract from "Success Criteria:" or "Expected Output:" sections
-- **If thesis lacks criteria:** Extract from analysis approach implied validation (model convergence, plot generation, results files)
+**2. Memory Domains (Section 5):**
+- **If Data_Required specifies domains:** Extract tag patterns
+- **If Data_Required unclear:** Infer from Type column (Domains -> What/Where/When, Paradigms -> IFR/ICR/IRE, etc.)
 
 **Context Dump Notation:**
 
 If sections are minimal, note in context_dump Line 5:
 ```
-Critical: Sections 2 & 6 minimal - thesis lacks literature review. Enhance during rq_scholar validation.
+Critical: Section 3 minimal - TSV lacks literature review. Enhance during rq_scholar validation.
 ```
 
 **Do NOT QUIT for incomplete sections.** Only QUIT if:
-- Research question completely missing
-- No hypothesis or analysis approach specified
+- Number column doesn't match target RQ
+- No hypothesis or analysis specification at all
 - Data source completely ambiguous (cannot determine RAW vs DERIVED)
-- Completely empty RQ section in thesis
+- Row completely empty in TSV
 
 **Rationale:** Atomic agent design - each agent does its job
-- rq_concept: Reformat thesis content (preserve what exists)
+- rq_concept: Reformat TSV content (preserve what exists)
 - rq_scholar: Add scholarly depth (literature, citations, theoretical grounding)
 - rq_stats: Add statistical rigor (methodology validation, challenges, assumptions)
 
 ---
 
-### Step 9: Create 1_concept.md file
+### Step 8: Create 1_concept.md file
 
-**Action:** Create empty file `results/chX/rqY/docs/1_concept.md`
+**Action:** Create empty file `results/chX/X.Y.Z/docs/1_concept.md`
 
 **Method:** Use Bash touch or Write empty file
 
 ```bash
-touch results/chX/rqY/docs/1_concept.md
+touch results/chX/X.Y.Z/docs/1_concept.md
 ```
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Cannot create file (permissions, disk space) → Quit with error
-- **EXPECTATIONS ERROR:** File already exists → Quit with error: "EXPECTATIONS ERROR: results/chX/rqY/docs/1_concept.md already exists. rq_concept may have already run or file created manually. Delete existing file if re-run intended."
+- **TOOL ERROR:** Cannot create file (permissions, disk space) -> Quit with error
+- **EXPECTATIONS ERROR:** File already exists -> Quit with error: "EXPECTATIONS ERROR: results/chX/X.Y.Z/docs/1_concept.md already exists. rq_concept may have already run or file created manually. Delete existing file if re-run intended."
 
 ---
 
-### Step 10: Write 1_concept.md content
+### Step 9: Write 1_concept.md content
 
 **Action:** Write comprehensive concept document with 7 required sections
 
@@ -306,56 +290,57 @@ touch results/chX/rqY/docs/1_concept.md
 
 **Content Structure:**
 ```markdown
-# RQ X.Y: [Title]
+# RQ X.Y.Z: [Title]
 
 **Chapter:** X
-**RQ Number:** Y
-**Full ID:** X.Y
+**Type:** [Type from TSV]
+**Subtype:** [Subtype from TSV]
+**Full ID:** X.Y.Z
 
 ---
 
 ## Research Question
 
 **Primary Question:**
-[Extracted from thesis]
+[From Title column, converted to interrogative]
 
 **Scope:**
-[Extracted/inferred from thesis]
+[From Data_Required - sample size, observations, timeframe]
 
 **Theoretical Framing:**
-[Extracted from thesis hypothesis/justification]
+[From Hypothesis - why this question matters]
 
 ---
 
 ## Theoretical Background
 
 **Relevant Theories:**
-[Extracted from thesis]
+[Extracted from Hypothesis column]
 
 **Key Citations:**
-[Extracted from thesis]
+[Extracted if mentioned, otherwise note "To be added by rq_scholar"]
 
 **Theoretical Predictions:**
-[Extracted from thesis]
+[From Hypothesis - what theories predict]
 
 **Literature Gaps:**
-[Extracted/inferred from thesis]
+[Inferred from Hypothesis or note "To be identified by rq_scholar"]
 
 ---
 
 ## Hypothesis
 
 **Primary Hypothesis:**
-[Extracted from thesis]
+[From Hypothesis column - main prediction]
 
 **Secondary Hypotheses (if applicable):**
-[Extracted from thesis]
+[From Hypothesis column - additional predictions]
 
 **Theoretical Rationale:**
-[Extracted from thesis]
+[From Hypothesis - why these predictions]
 
 **Expected Effect Pattern:**
-[Extracted from thesis]
+[From Hypothesis - expected p-values, effect sizes, patterns]
 
 ---
 
@@ -365,101 +350,101 @@ touch results/chX/rqY/docs/1_concept.md
 
 - [x/  ] **What** (Object Identity)
   - Tag Code: `-N-`
-  - Description: [From thesis]
+  - Description: [From Data_Required]
 
 - [x/  ] **Where** (Spatial Location)
   - [x/  ] `-L-` tags (general location)
   - [x/  ] `-U-` tags (pick-up location)
   - [x/  ] `-D-` tags (put-down location)
-  - Disambiguation: [From thesis]
+  - Disambiguation: [From Data_Required]
 
 - [x/  ] **When** (Temporal Order)
   - Tag Code: `-O-`
-  - Description: [From thesis]
+  - Description: [From Data_Required]
 
 **Inclusion Rationale:**
-[From thesis]
+[From Data_Required]
 
 **Exclusion Rationale (if applicable):**
-[From thesis]
+[From Data_Required]
 
 ---
 
 ## Analysis Approach
 
 **Analysis Type:**
-[From thesis - IRT, LMM, CTT, etc.]
+[Inferred from Analysis_Specification - IRT, LMM, CTT, etc.]
 
 **High-Level Workflow:**
 
-**Step 1:** [From thesis Analysis Specification]
-**Step 2:** [From thesis]
-**Step 3:** [From thesis]
-**Step 4:** [From thesis]
-**Step 5:** [From thesis]
-**Step 6:** [From thesis]
-[Additional steps as needed]
+[From Analysis_Specification - numbered steps]
 
-**Special Methods:**
-[From thesis - Decision numbers D039, D068, D069, D070, etc.]
+**Step 0:** [If present]
+**Step 1:** [From Analysis_Specification]
+**Step 2:** [From Analysis_Specification]
+...
 
-**Expected Tools:**
-[From thesis - tools.analysis_irt.X, tools.analysis_lmm.Y, tools.plotting.Z]
+**Expected Outputs:**
+[From Expected_Output column]
+
+**Success Criteria:**
+[From Success_Criteria column]
 
 ---
 
 ## Data Source
 
 **Data Type:**
-[RAW (from master.xlsx) OR DERIVED (from other RQ outputs)]
+[RAW or DERIVED - determined from Data_Required]
 
 ### [If RAW Data:]
 
+**Source File:**
+[e.g., data/cache/dfData.csv]
+
 **Tag Patterns:**
-[From thesis Data Required]
+[From Data_Required]
 
 **Extraction Method:**
-[From thesis]
+[From Analysis_Specification Step 0]
 
 ### [If DERIVED Data:]
 
 **Source RQ:**
-[From thesis]
+[From Data_Required - e.g., "RQ 5.2.1"]
 
 **File Paths:**
-[From thesis]
+[From Data_Required - exact paths]
 
 **Dependencies:**
-[From thesis]
+[From Data_Required - what must complete first]
 
 ### Inclusion/Exclusion Criteria:
 
 **Participants:**
 - [x/  ] All 100 participants
-- [x/  ] Subset: [From thesis]
-- [x/  ] Exclude: [From thesis]
+- [x/  ] Subset: [From Data_Required]
 
 **Items:**
 - [x/  ] All VR items
-- [x/  ] Subset: [From thesis]
-- [x/  ] Exclude: [From thesis]
+- [x/  ] Subset: [From Data_Required]
 
 **Tests:**
 - [x/  ] All 4 tests (T1, T2, T3, T4)
-- [x/  ] Subset: [From thesis]
+- [x/  ] Subset: [From Data_Required]
 
 ---
 ```
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Write fails → Quit with error
-- **STEP ERROR:** Cannot format content to match template → Quit with error
+- **TOOL ERROR:** Write fails -> Quit with error
+- **STEP ERROR:** Cannot format content to match template -> Quit with error
 
 ---
 
-### Step 11: Update status.yaml
+### Step 10: Update status.yaml
 
-**Action:** Edit `results/chX/rqY/status.yaml` to update rq_concept section
+**Action:** Edit `results/chX/X.Y.Z/status.yaml` to update rq_concept section
 
 **Method:** Use Edit tool (NOT Write, which would overwrite entire file)
 
@@ -468,33 +453,33 @@ touch results/chX/rqY/docs/1_concept.md
 rq_concept:
   status: success
   context_dump: |
-    RQ {X}.{Y}: {Title summary}
-    Domains: {What/Where/When or subset}
+    RQ {X.Y.Z}: {Title summary}
+    Type: {Type} / {Subtype}
     Analysis: {IRT/LMM/CTT approach summary}
-    Data: {RAW tags or DERIVED source}
+    Data: {RAW source or DERIVED from RQ X.Y.Z}
     Critical: {Key notes for downstream agents}
 ```
 
 **Context Dump Content (Max 5 Lines):**
-- **Line 1:** RQ ID and brief title (e.g., "RQ 5.1: Domain-specific forgetting trajectories")
-- **Line 2:** Memory domains examined (e.g., "Domains: What/Where/When")
-- **Line 3:** Analysis approach (e.g., "Analysis: IRT (2-pass GRM) + LMM (random slopes)")
-- **Line 4:** Data source (e.g., "Data: RAW from master.xlsx, Interactive paradigms (IFR/ICR/IRE)")
-- **Line 5:** Critical info for downstream agents (e.g., "Critical: Temporal items may have extreme difficulty, 2-pass purification required")
+- **Line 1:** RQ ID and brief title (e.g., "RQ 5.1.1: Functional Form Comparison")
+- **Line 2:** Type/Subtype (e.g., "Type: General / Functional Form Comparison")
+- **Line 3:** Analysis approach (e.g., "Analysis: IRT (2-pass GRM) + LMM (5 models)")
+- **Line 4:** Data source (e.g., "Data: RAW from dfData.csv, All omnibus factor")
+- **Line 5:** Critical info for downstream agents (e.g., "Critical: 5 candidate LMMs, Akaike weight selection")
 
 **Circuit Breakers:**
-- **TOOL ERROR:** Edit fails → Quit with error
-- **EXPECTATIONS ERROR:** status.yaml structure corrupted → Quit with error
+- **TOOL ERROR:** Edit fails -> Quit with error
+- **EXPECTATIONS ERROR:** status.yaml structure corrupted -> Quit with error
 
 ---
 
-### Step 12: Report success and quit
+### Step 11: Report success and quit
 
 **Action:** Report to master that 1_concept.md successfully created
 
 **Report Format:**
 ```
-Successfully created 1_concept.md for chX/rqY
+Successfully created 1_concept.md for chX/X.Y.Z
 ```
 
 **Then quit immediately.** Do NOT proceed to next agents (master orchestrates sequential invocation).
@@ -505,7 +490,7 @@ Successfully created 1_concept.md for chX/rqY
 
 **Success:**
 ```
-Successfully created 1_concept.md for chX/rqY
+Successfully created 1_concept.md for chX/X.Y.Z
 ```
 
 **Failure (Circuit Breaker):**
@@ -520,12 +505,12 @@ Action Required: [What master/user must do to resolve]
 
 **Example Failure Report:**
 ```
-CLARITY ERROR: Required section 'Hypothesis' not found in thesis RQ 5.1. Thesis may be incomplete or formatted differently than expected.
+CLARITY ERROR: RQ 5.1.7 not found in rq_refactor.tsv Number column.
 
 Agent: rq_concept
-Step: 7
-Issue: Cannot locate "Hypothesis:" field in extracted thesis section
-Action Required: Verify thesis file ANALYSES_CH5.md contains complete RQ 5.1 section with all required fields (Research Question, Hypothesis, Data Required, Analysis Specification, Statistical Justification)
+Step: 6
+Issue: Cannot locate row with Number = "5.1.7" in TSV
+Action Required: Verify RQ number is correct. Valid RQ numbers are listed in rq_refactor.tsv Number column.
 ```
 
 ---
@@ -534,16 +519,16 @@ Action Required: Verify thesis file ANALYSES_CH5.md contains complete RQ 5.1 sec
 
 **All of the following must be true:**
 
-1. ✅ `results/chX/rqY/docs/1_concept.md` exists
-2. ✅ 1_concept.md contains all 7 required sections (RQ Title/ID, Research Question, Theoretical Background, Hypothesis, Memory Domains, Analysis Approach, Data Source)
-3. ✅ Each section populated with content extracted from thesis (not empty placeholders)
-4. ✅ Content preserves thesis detail (comprehensive, not over-summarized)
-5. ✅ Format matches concept.md template structure
-6. ✅ NO validation feedback sections yet (those added by rq_scholar/rq_stats later)
-7. ✅ status.yaml updated: rq_concept status = success
-8. ✅ status.yaml rq_concept context_dump has 5 lines (RQ ID, domains, analysis, data, critical notes)
-9. ✅ Report sent to master
-10. ✅ Agent quit (no automatic continuation to next steps)
+1. `results/chX/X.Y.Z/docs/1_concept.md` exists
+2. 1_concept.md contains all 7 required sections (RQ Title/ID, Research Question, Theoretical Background, Hypothesis, Memory Domains, Analysis Approach, Data Source)
+3. Each section populated with content extracted from TSV (not empty placeholders)
+4. Content preserves TSV detail (comprehensive, not over-summarized)
+5. Format matches concept.md template structure
+6. NO validation feedback sections yet (those added by rq_scholar/rq_stats later)
+7. status.yaml updated: rq_concept status = success
+8. status.yaml rq_concept context_dump has 5 lines (RQ ID, type, analysis, data, critical notes)
+9. Report sent to master
+10. Agent quit (no automatic continuation to next steps)
 
 **If ANY criterion fails:** Circuit breaker triggered, agent quits with error.
 

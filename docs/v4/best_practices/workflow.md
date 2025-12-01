@@ -1,7 +1,7 @@
 # Agent Best Practices - Workflow
 
-**Version:** 4.0
-**Last Updated:** 2025-11-21
+**Version:** 5.0
+**Last Updated:** 2025-12-01
 **Purpose:** Workflow-specific best practices for RQ-specific agents using status.yaml
 **Audience:** 10/13 workflow agents (rq_builder, rq_concept, rq_scholar, rq_stats, rq_planner, rq_tools, rq_analysis, rq_inspect, rq_plots, rq_results)
 
@@ -9,9 +9,44 @@
 
 ---
 
-## 1. YAML PARSING & STATUS CHECKING
+## 1. RQ NUMBERING FORMAT
 
-### 1.1 Reading status.yaml
+### 1.1 Hierarchical Numbering (Chapter 5)
+
+**Format:** `X.Y.Z` where:
+- X = chapter number (5, 6, 7)
+- Y = type number within chapter (1-4 for ch5)
+- Z = RQ number within type (1-9)
+
+**Chapter 5 Types:**
+| Type | Y | Name | Description |
+|------|---|------|-------------|
+| General | 1 | 5.1.X | Omnibus "All" factor analysis |
+| Domains | 2 | 5.2.X | What/Where/When analysis |
+| Paradigms | 3 | 5.3.X | Free/Cued/Recognition analysis |
+| Congruence | 4 | 5.4.X | Common/Congruent/Incongruent analysis |
+
+**Examples:**
+- `5.1.1` = Chapter 5, General type, RQ 1 (Functional Form)
+- `5.2.3` = Chapter 5, Domains type, RQ 3 (Age x Domain)
+- `5.3.1` = Chapter 5, Paradigms type, RQ 1 (Trajectories)
+- `5.4.2` = Chapter 5, Congruence type, RQ 2 (Consolidation)
+
+### 1.2 Invocation Format
+
+**When invoking agents, use:** `chX/X.Y.Z`
+
+**Examples:**
+- `ch5/5.1.1` = Chapter 5, RQ 5.1.1
+- `ch5/5.2.3` = Chapter 5, RQ 5.2.3
+
+**NOT:** `ch5/rq1` (old format - deprecated)
+
+---
+
+## 2. YAML PARSING & STATUS CHECKING
+
+### 2.1 Reading status.yaml
 
 **Method:**
 1. Use Read tool to read status.yaml file
@@ -23,8 +58,8 @@
 rq_concept:
   status: success
   context_dump: |
-    RQ 5.1: Trajectory of Forgetting - What Domain
-    Memory domains: What (object identity)
+    RQ 5.1.1: Functional Form Comparison
+    Type: General / Functional Form
 ```
 
 **How to Check:**
@@ -38,7 +73,7 @@ rq_concept:
 
 ---
 
-## 2. CONTEXT DUMP FORMAT
+## 3. CONTEXT DUMP FORMAT
 
 **Location:** status.yaml under agent name
 
@@ -61,7 +96,8 @@ agent_name:
 - Prevent file bloat
 
 **What to Include:**
-- Memory domains (What/Where/When)
+- RQ ID and title (e.g., "RQ 5.1.1: Functional Form")
+- Type/Subtype (e.g., "Type: General / Functional Form")
 - Analysis type (IRT/LMM/CTT)
 - Key decisions made
 - Critical information for downstream agents
@@ -74,52 +110,115 @@ agent_name:
 
 **Example:**
 ```yaml
-rq_planner:
+rq_concept:
   status: success
   context_dump: |
-    5 analysis steps planned
-    IRT calibration -> purification -> LMM trajectory
-    Validation tools specified for each step
+    RQ 5.1.1: Functional Form Comparison
+    Type: General / Functional Form
+    Analysis: IRT (2-pass GRM) + LMM (5 models)
+    Data: RAW from dfData.csv, All omnibus factor
+    Critical: 5 candidate LMMs, Akaike weight selection
 ```
 
 ---
 
-## 3. FILE PATH CONVENTIONS
+## 4. FILE PATH CONVENTIONS
 
-**Relative Paths:**
-- Use paths relative to `results/chX/rqY/` in specifications
+### 4.1 RQ Folder Path Format
 
-**Standard RQ Structure:**
+**Format:** `results/chX/X.Y.Z/`
+
+**Examples:**
+- `results/ch5/5.1.1/` - Chapter 5, General type, RQ 1
+- `results/ch5/5.2.3/` - Chapter 5, Domains type, RQ 3
+- `results/ch5/5.3.1/` - Chapter 5, Paradigms type, RQ 1
+
+**NOT:** `results/ch5/rq1/` (old format - deprecated)
+
+### 4.2 Standard RQ Structure
+
 ```
-results/chX/rqY/
+results/chX/X.Y.Z/
   status.yaml                (agent statuses, context dumps)
+  audit.md                   (audit results from rq_audit)
+  fix_report.md              (fix results from rq_fixer)
   docs/                      (specifications)
     1_concept.md
     2_plan.md
     3_tools.yaml
     4_analysis.yaml
   data/                      (analysis outputs)
-    stepN_name.csv
+    step00_*.csv             (Step 0 extraction outputs)
+    stepN_*.csv              (Step N data outputs)
   code/                      (generated scripts)
-    stepN_name.py
+    step00_*.py              (Step 0 extraction code)
+    stepN_*.py               (Step N analysis code)
   logs/                      (execution logs)
-    stepN_name.log
+    stepN_*.log
   plots/                     (visualizations)
     plots.py
-    plot_name.png
+    stepN_*.png
+    stepN_*_data.csv         (plot source data)
   results/                   (final summaries)
     summary.md
 ```
 
+### 4.3 Cross-RQ References
+
+**When referencing other RQs, use full hierarchical path:**
+
+```
+results/ch5/5.1.1/data/step03_theta_scores.csv
+results/ch5/5.2.1/data/step00_irt_input.csv
+```
+
+**NOT:** `results/ch5/rq1/...` (old format)
+
+### 4.4 Relative vs Absolute Paths
+
+**Relative Paths:**
+- Use paths relative to `results/chX/X.Y.Z/` within that RQ's specifications
+
 **Absolute Paths:**
 - Use when referencing files outside RQ folder
-- Examples: `docs/v4/templates/`, `docs/data_structure.md`
+- Examples: `docs/v4/templates/`, `data/cache/dfData.csv`
 
 ---
 
-## 4. VALIDATION GATES
+## 5. DATA SOURCE CONVENTIONS
 
-### 4.1 When to Validate
+### 5.1 Root RQs (Extract from Raw Data)
+
+**Root RQs by type:**
+- **5.1.1** - General ROOT (extracts from dfData.csv with "All" factor)
+- **5.2.1** - Domains ROOT (extracts from dfData.csv with What/Where/When)
+- **5.3.1** - Paradigms ROOT (extracts from dfData.csv with IFR/ICR/IRE)
+- **5.4.1** - Congruence ROOT (extracts from dfData.csv with Common/Congruent/Incongruent)
+
+**Root RQs have:**
+- Step 0 that extracts from `data/cache/dfData.csv`
+- No dependencies on other RQs
+- Create foundational outputs for downstream RQs
+
+### 5.2 Derived RQs (Use Outputs from Root/Prior RQs)
+
+**Derived RQs:**
+- Source data from root RQ or prior RQ outputs
+- Reference using full hierarchical path: `results/ch5/5.1.1/data/...`
+- Must specify dependencies in 1_concept.md
+
+**Example Dependencies:**
+```
+RQ 5.1.2 depends on RQ 5.1.1 outputs:
+- results/ch5/5.1.1/data/step03_theta_scores.csv
+- results/ch5/5.1.1/data/step06_best_model.pkl
+```
+
+---
+
+## 6. VALIDATION GATES
+
+### 6.1 When to Validate
 
 **Before Any Step:**
 - Read status.yaml
@@ -134,7 +233,7 @@ results/chX/rqY/
 
 ---
 
-### 4.2 How to Validate
+### 6.2 How to Validate
 
 **Status Check:**
 ```
@@ -159,6 +258,43 @@ results/chX/rqY/
 3. If ANY information missing -> CLARITY ERROR
 4. If ANY information ambiguous -> CLARITY ERROR
 ```
+
+---
+
+## 7. TSV REFERENCE
+
+### 7.1 rq_refactor.tsv Location
+
+**File:** `results/ch5/rq_refactor.tsv`
+
+**Purpose:** Authoritative specification database for all Chapter 5 RQs
+
+### 7.2 TSV Columns
+
+| Column | Description |
+|--------|-------------|
+| Number | Hierarchical RQ ID (e.g., "5.1.1") |
+| Type | Analysis category (General, Domains, Paradigms, Congruence) |
+| Subtype | Specific analysis focus |
+| Old | Old RQ number (for migration reference) |
+| Audited | Whether RQ has been audited |
+| Title | Full RQ title/question |
+| Hypothesis | Directional predictions with rationale |
+| Data_Required | Data source specifications |
+| Analysis_Specification | Step-by-step workflow |
+| Expected_Output | Output files and structure |
+| Success_Criteria | Validation requirements |
+
+### 7.3 Using rq_refactor.tsv
+
+**Agents should:**
+1. Read entire TSV file
+2. Parse as tab-separated values
+3. Find row where `Number` column matches target RQ
+4. Extract relevant columns for their task
+
+**Circuit Breaker:**
+- If RQ number not found in Number column -> CLARITY ERROR
 
 ---
 
