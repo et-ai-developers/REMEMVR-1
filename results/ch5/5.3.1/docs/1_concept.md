@@ -99,13 +99,14 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 **High-Level Workflow:**
 
 **Step 0:** Data Preparation
-- Get raw scores from RQ 5.2.1 output: `./results/ch5/5.2.1/data/step00_irt_input.csv`
-- Filter to keep only IFR, ICR, IRE columns (remove non-item paradigms)
-- Get TSVR mapping from: `./results/ch5/5.2.1/data/step00_tsvr_mapping.csv`
+- Extract raw VR data from `data/cache/dfData.csv`
+- Filter to keep only IFR, ICR, IRE columns (interactive paradigms)
+- Dichotomize responses (>= 1 -> 1, < 1 -> 0)
 - Create Q-matrix with paradigm factor structure:
   - free_recall = *IFR*
   - cued_recall = *ICR*
   - recognition = *IRE*
+- Generate step00_irt_input.csv, step00_tsvr_mapping.csv, step00_q_matrix.csv
 
 **Step 1:** IRT Analysis
 - Execute IRT pipeline with correlated factors, 2-category GRM
@@ -164,22 +165,23 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 ## Data Source
 
 **Data Type:**
-DERIVED (from RQ 5.1 outputs) + Subset/Regroup
+RAW (extracts directly from dfData.csv)
 
-### DERIVED Data Source:
+### RAW Data Source:
 
-**Source RQ:**
-RQ 5.2.1 (Domain-Specific Forgetting Trajectories)
+**Primary Source:**
+`data/cache/dfData.csv` (VR test item responses)
 
-**File Paths:**
-- `results/ch5/5.2.1/data/step00_irt_input.csv` (raw dichotomized VR item scores)
-- `results/ch5/5.2.1/data/step00_tsvr_mapping.csv` (TSVR time variable mapping)
+**File Paths Generated (Step 0):**
+- `data/step00_irt_input.csv` - Wide-format binary item responses (IFR/ICR/IRE items only)
+- `data/step00_tsvr_mapping.csv` - Time mapping (composite_ID, UID, test, TSVR_hours)
+- `data/step00_q_matrix.csv` - Q-matrix with paradigm factors (free_recall, cued_recall, recognition)
 
 **Dependencies:**
-RQ 5.2.1 must complete Step 0 (data preparation, TSVR mapping) before this RQ can begin. This RQ uses the same base data but creates new IRT factors (paradigm-based instead of domain-based).
+None. This is a ROOT RQ for the Paradigms type (5.3.X). Extracts independently from raw data - no cross-type dependencies.
 
 **Usage:**
-This RQ filters the RQ 5.1 input data to Item paradigms only (IFR, ICR, IRE), then creates a new Q-matrix that groups items by paradigm instead of domain. A fresh IRT calibration is run with paradigm factors.
+Step 0 extracts from dfData.csv, filters to interactive paradigm items (IFR/ICR/IRE), dichotomizes responses, and creates Q-matrix with paradigm-based factors. A fresh IRT calibration is run with paradigm factors.
 
 ### Tag Patterns (for filtering):
 

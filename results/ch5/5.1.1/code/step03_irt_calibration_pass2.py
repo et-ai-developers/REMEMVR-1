@@ -144,11 +144,11 @@ if __name__ == "__main__":
         # Purpose: Re-calibrate IRT model with high-quality items only
 
         log("[LOAD] Loading raw VR item responses...")
-        irt_input_path = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data" / "step00_irt_input.csv"
+        irt_input_path = RQ_DIR / "data" / "step00_irt_input.csv"
 
         if not irt_input_path.exists():
             raise FileNotFoundError(f"IRT input data missing: {irt_input_path}\n"
-                                     "Expected from RQ 5.1 step00")
+                                     "Expected from Step 00")
 
         irt_data_raw = pd.read_csv(irt_input_path, encoding='utf-8')
         log(f"[LOADED] {irt_input_path.name} ({len(irt_data_raw)} rows, {len(irt_data_raw.columns)} cols)")

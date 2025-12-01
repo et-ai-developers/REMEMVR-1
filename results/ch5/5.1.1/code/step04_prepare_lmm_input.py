@@ -153,11 +153,11 @@ if __name__ == "__main__":
         log(f"  Columns: {theta_data.columns.tolist()}")
 
         log("[LOAD] Loading TSVR time variable...")
-        tsvr_path = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data" / "step00_tsvr_mapping.csv"
+        tsvr_path = RQ_DIR / "data" / "step00_tsvr_mapping.csv"
 
         if not tsvr_path.exists():
             raise FileNotFoundError(f"TSVR data missing: {tsvr_path}\n"
-                                     "Expected from RQ 5.1 step00")
+                                     "Expected from Step 00")
 
         tsvr_data = pd.read_csv(tsvr_path, encoding='utf-8')
         log(f"[LOADED] {tsvr_path.name} ({len(tsvr_data)} rows, {len(tsvr_data.columns)} cols)")

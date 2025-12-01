@@ -101,7 +101,7 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 
 **High-Level Workflow:**
 
-**Step 0:** Get IRT input data from RQ 5.1 (results/ch5/5.2.1/data/step00_irt_input.csv)
+**Step 0:** Extract VR data from dfData.csv - dichotomize responses, create "All" omnibus Q-matrix, generate step00_irt_input.csv and step00_tsvr_mapping.csv
 
 **Step 1:** IRT Pass 1 - Calibrate single omnibus factor "All" (all items), p1_med prior, 2-category GRM, extract Pass 1 theta scores and item parameters
 
@@ -150,21 +150,23 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 ## Data Source
 
 **Data Type:**
-DERIVED (from RQ 5.1 outputs)
+RAW (extracts directly from dfData.csv)
 
-### DERIVED Data Source:
+### RAW Data Source:
 
-**Source RQ:**
-RQ 5.1 (Domain-Specific Forgetting Trajectories)
+**Primary Source:**
+`data/cache/dfData.csv` (VR test item responses)
 
-**File Paths:**
-- `results/ch5/5.2.1/data/step00_irt_input.csv` (IRT input data - will be processed with "All" factor instead of What/Where/When factors)
+**File Paths Generated (Step 0):**
+- `data/step00_irt_input.csv` - Wide-format binary item responses (composite_ID + TQ_* columns)
+- `data/step00_tsvr_mapping.csv` - Time mapping (composite_ID, UID, test, TSVR_hours)
+- `data/step00_q_matrix.csv` - Q-matrix with single "All" factor (all items load on one omnibus factor)
 
 **Dependencies:**
-RQ 5.1 must complete Step 0 (data preparation) before this RQ can run. RQ 5.7 uses same raw input data but processes with different IRT configuration (single omnibus factor instead of 3 domain-specific factors).
+None. This is a ROOT RQ for the General type (5.1.X). Extracts independently from raw data - no cross-type dependencies.
 
 **Usage:**
-This RQ reuses IRT input data from RQ 5.1 but calibrates with "All" analysis set (single factor aggregating all items) instead of domain-specific factors. Different IRT configuration yields different theta estimates optimized for omnibus forgetting trajectory.
+Step 0 extracts from dfData.csv and creates IRT input with "All" omnibus factor. Unlike 5.2.1 (What/Where/When factors), this RQ aggregates all items into single factor for identifying overall functional form of forgetting.
 
 ### Inclusion/Exclusion Criteria:
 

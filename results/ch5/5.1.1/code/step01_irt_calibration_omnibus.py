@@ -147,8 +147,8 @@ if __name__ == "__main__":
         # Expected: Wide-format CSV with composite_ID + 105 TQ_* item columns
         # Purpose: Raw VR item responses (0/1) for omnibus IRT calibration
 
-        log("[LOAD] Loading VR item responses from RQ 5.1...")
-        input_path = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data" / "step00_irt_input.csv"
+        log("[LOAD] Loading VR item responses from Step 00...")
+        input_path = RQ_DIR / "data" / "step00_irt_input.csv"
         df_wide = pd.read_csv(input_path, encoding='utf-8')
         log(f"[LOADED] {input_path.name} ({len(df_wide)} rows, {len(df_wide.columns)} cols)")
 
@@ -160,8 +160,8 @@ if __name__ == "__main__":
         item_cols = [col for col in df_wide.columns if col.startswith('TQ_')]
         log(f"[INFO] Found {len(item_cols)} VR item columns (TQ_* format)")
 
-        if len(item_cols) < 100:
-            raise ValueError(f"Expected ~100-200 VR items, found only {len(item_cols)}")
+        if len(item_cols) < 50:
+            raise ValueError(f"Expected ~50-150 VR items (interactive paradigms), found only {len(item_cols)}")
 
         # =========================================================================
         # STEP 2: Transform to Long Format for IRT

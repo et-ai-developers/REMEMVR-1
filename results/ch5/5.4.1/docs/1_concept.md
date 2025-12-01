@@ -100,13 +100,14 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 **High-Level Workflow:**
 
 **Step 0:** Data Preparation
-- Get raw scores from `./results/ch5/5.1.1/data/step00_irt_input.csv`
-- Remove TQ_* columns that don't include IFR, ICR, or IRE
-- Get TSVR mapping from `./results/ch5/5.1.1/data/step00_tsvr_mapping.csv`
+- Extract raw VR data from `data/cache/dfData.csv`
+- Filter to keep only IFR, ICR, IRE columns (interactive paradigms)
+- Dichotomize responses (>= 1 -> 1, < 1 -> 0)
 - Create Q-matrix with congruence factor mapping:
   - common = `*-i1` and `*-i2`
   - congruent = `*-i3` and `*-i4`
   - incongruent = `*-i5` and `*-i6`
+- Generate step00_irt_input.csv, step00_tsvr_mapping.csv, step00_q_matrix.csv
 
 **Step 1:** IRT Analysis (Pass 1)
 - Execute IRT pipeline for "Items by Congruence" analysis set
@@ -161,22 +162,23 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 ## Data Source
 
 **Data Type:**
-DERIVED (from RQ 5.1 outputs) + recoded Q-matrix
+RAW (extracts directly from dfData.csv)
 
-### DERIVED Data Source:
+### RAW Data Source:
 
-**Source RQ:**
-RQ 5.1 (Domain-Specific Forgetting Trajectories)
+**Primary Source:**
+`data/cache/dfData.csv` (VR test item responses)
 
-**File Paths:**
-- `results/ch5/5.1.1/data/step00_irt_input.csv` (raw item responses)
-- `results/ch5/5.1.1/data/step00_tsvr_mapping.csv` (TSVR time mapping)
+**File Paths Generated (Step 0):**
+- `data/step00_irt_input.csv` - Wide-format binary item responses (IFR/ICR/IRE items only)
+- `data/step00_tsvr_mapping.csv` - Time mapping (composite_ID, UID, test, TSVR_hours)
+- `data/step00_q_matrix.csv` - Q-matrix with congruence factors (common, congruent, incongruent)
 
 **Dependencies:**
-RQ 5.1 must have completed Step 0 (data extraction) before this RQ can begin. The raw item responses and TSVR mapping are reused.
+None. This is a ROOT RQ for the Congruence type (5.4.X). Extracts independently from raw data - no cross-type dependencies.
 
-**Q-Matrix Recoding:**
-Create new Q-matrix that maps items by congruence (not by WWW domain):
+**Q-Matrix Configuration:**
+Items mapped by congruence suffix (not by WWW domain):
 - common = `*-i1` and `*-i2`
 - congruent = `*-i3` and `*-i4`
 - incongruent = `*-i5` and `*-i6`
