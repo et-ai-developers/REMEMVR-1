@@ -17,12 +17,14 @@ rq_concept:
     Critical: Exploratory, 2-4 profiles expected, domain-selective patterns
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    APPROVED 9.2/10.0 - Dual-process theory solid, 4 omissions identified (practice effects CRITICAL, encoding-quality MODERATE, alternatives MODERATE, confounds MODERATE), all rebutted with literature. Ready for rq_planner.
 
 rq_stats:
-  status: pending
+  status: rejected
   context_dump: |
+    REJECTED 8.7/10.0. Cat1: 2.3/3 (method appropriate but LCA/LPA not justified). Cat2: 1.5/2 (tools assumed). Cat3: 1.7/2 (parameters specified, BIC method unclear). Cat4: 1.4/2 (spherical assumption not validated, no stability analysis). Cat5: 0.8/1 (13 concerns: 1 CRITICAL LCA omission, 6 MODERATE, 6 MINOR). Required: justify K-means vs LCA/LPA, specify BIC method, add spherical validation, add stability testing.
 
 rq_planner:
   status: pending

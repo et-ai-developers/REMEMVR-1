@@ -17,12 +17,14 @@ rq_concept:
     Critical: 3-way Time×Difficulty×Congruence, alpha=0.0033
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    5.4.8 APPROVED 9.3/10. Exploratory item-difficulty × schema-congruence interaction strong theory + adequate literature. Flag: omit practice-effects discussion + VR encoding-specificity limitations. Suggested improvements provided. Ready for rq_planner.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    8.7/10 CONDITIONAL. Cross-classified LMM appropriate, 100% tool reuse. Critical gaps: (1) no LMM assumption diagnostics (residuals, homoscedasticity, outliers); (2) binary response normality violation unaddressed; (3) no 3-way interaction power analysis; (4) convergence contingencies incomplete. Required fixes: add assumption testing procedures, binary response justification, power analysis plan, expanded convergence protocol. See 1_stats.md for detailed recommendations.
 
 rq_planner:
   status: pending

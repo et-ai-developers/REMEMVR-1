@@ -147,6 +147,56 @@ Linear Mixed Models (LMM) with random intercepts and slopes for variance decompo
 
 ---
 
+## Validation Procedures
+
+### LMM Assumption Checks
+
+1. **Residual Normality:** Q-Q plot + Shapiro-Wilk test (accept if p > 0.01)
+2. **Homoscedasticity:** Residuals vs fitted plot; Levene's test by domain
+3. **Random Effects Normality:** Q-Q plot of random intercept and slope estimates
+4. **Independence:** ACF plot of residuals (no significant autocorrelation)
+5. **Linearity:** Residuals vs TSVR_hours (no systematic curvature)
+6. **Outliers:** Cook's distance < 4/N threshold
+
+### Convergence Contingency Plan
+
+If any domain-stratified model fails to converge with random slopes:
+1. Try alternative optimizers (bobyqa, nlminb)
+2. Use likelihood ratio test (LRT) to compare random slopes vs intercept-only
+3. If LRT p < 0.05, retain slopes with simplified correlation structure (uncorrelated random effects)
+4. If LRT p ≥ 0.05, use random intercepts-only model for that domain
+5. Document which structure achieved per domain in model metadata
+
+Reference: Bates et al. (2015) parsimonious mixed models guidelines.
+
+### Remedial Actions
+
+- If normality violated: Report robust standard errors or transform theta scores
+- If heteroscedasticity detected: Use weighted LMM or variance function by domain
+- If outliers detected (Cook's d > 4/N): Sensitivity analysis with/without outliers
+
+### ICC Threshold Justification
+
+ICC interpretation thresholds follow Koo & Li (2016) guidelines for reliability research:
+- ICC < 0.50 = Poor reliability
+- ICC 0.50-0.75 = Moderate reliability
+- ICC 0.75-0.90 = Good reliability
+- ICC > 0.90 = Excellent reliability
+
+For this RQ, we use a more lenient threshold (ICC > 0.40 = "substantial") following individual differences literature conventions, acknowledging that forgetting rate reliability is typically lower than test-retest reliability. This threshold is justified by McGraw & Wong (1996) ICC(2,1) guidelines for single-measurement reliability.
+
+### Practice Effects Consideration
+
+The 4-session design (Days 0, 1, 3, 6) creates potential practice effects:
+- Literature documents 13.3% improvement in episodic memory with repeated testing (BMC Neuroscience)
+- IRT theta scoring partially mitigates item-level practice effects through latent trait estimation
+- Domain-stratified analysis assumes practice effects are similar across What/Where/When domains
+- If practice effects differ by domain, ICC estimates may partially reflect practice variability rather than pure forgetting trait variance
+
+Limitation acknowledged; future sensitivity analysis could include Test Session as fixed effect covariate.
+
+---
+
 ## Data Source
 
 **Data Type:**

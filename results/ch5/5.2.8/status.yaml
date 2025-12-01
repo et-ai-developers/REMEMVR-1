@@ -17,12 +17,14 @@ rq_concept:
     Critical: 3-way Time x Difficulty_c x domain interaction, Bonferroni alpha=0.0033
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    5.2.8 APPROVED 9.2/10. Theory strong (dual-process perirhinal-hippocampal), literature foundational. 3 moderate omissions (practice effects, ceiling effects, domain calibration clarity). Ready rq_stats. NOTE: rq_stats parallel run identified GLMM (binomial) required, not LMM.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    8.8/10 CONDITIONAL. GLMM (binomial) required not LMM (linear) - CRITICAL. Bonferroni inappropriate for exploratory analysis - CRITICAL. Random slopes with N=100 convergence risk - specify model selection strategy. 11 concerns across commission/omission/alternatives/pitfalls, all literature-cited. 3 required changes for approval.
 
 rq_planner:
   status: pending

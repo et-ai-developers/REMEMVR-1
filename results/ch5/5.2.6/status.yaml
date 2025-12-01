@@ -17,12 +17,14 @@ rq_concept:
     Critical: 300 random effects output required for RQ 5.2.7 clustering
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    5.2.6 APPROVED: 9.3/10 - Strong dual-process theory grounding, practice effects/encoding confounds identified as key concerns, all addressable via analysis refinement
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    8.95/10 CONDITIONAL. Cat1: 2.8/3 (strong—methods appropriate, sample size risk acknowledged). Cat2: 2.0/2 (100% tool reuse, 7/7 available). Cat3: 1.6/2 (parameters specified, ICC threshold 0.40 not justified vs current 0.50 standard). Cat4: 1.7/2 (validation procedures incomplete—no Q-Q plots, Shapiro-Wilk, convergence remedial actions not detailed). Cat5: 0.85/1 (14 statistical concerns: 2 CRITICAL omissions, 3 MODERATE commissions, 3 MODERATE alternatives, 4 MODERATE pitfalls). Required changes: Add validation section with assumption checks; specify convergence protocol (Bates procedure); justify or update ICC threshold. Domain-stratified LMM with random slopes appropriate for RQ, but risks (convergence, ICC complexity, small-sample ICC instability) must be explicitly addressed in concept.md.
 
 rq_planner:
   status: pending

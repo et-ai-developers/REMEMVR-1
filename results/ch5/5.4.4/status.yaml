@@ -17,12 +17,14 @@ rq_concept:
     Critical: Convergence validation, r>0.70, kappa>0.60, dual p-values D068
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.4.4 APPROVED 9.3/10. Theory solid, measurement logic sound. CRITICAL: practice effects+session covariate. MODERATE: ceiling effects, test-retest artifacts.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    8.9/10 CONDITIONAL. Cat1: 2.5/3 (appropriate, random slopes risk). Cat2: 1.8/2 (100% tools, kappa clarity). Cat3: 1.7/2 (params clear, kappa ambig). Cat4: 1.9/2 (validation comprehensive). Cat5: 0.9/1 (14 concerns, well-grounded). Required: clarify kappa implementation, specify sample size/CIs, operationalize random simplification.
 
 rq_planner:
   status: pending

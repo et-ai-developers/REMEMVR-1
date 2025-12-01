@@ -17,12 +17,14 @@ rq_concept:
     Critical: 300 random effects output required for RQ 5.3.8
 
 rq_scholar:
-  status: pending
+  status: conditional
   context_dump: |
+    RQ 5.3.7 validated: 9.1/10 CONDITIONAL. Strong theory (2.7/3) + interpretation (2.0/2) but sparse literature (1.5/2). 8 concerns: practice effects (CRITICAL), ceiling effects & dropout bias (MODERATE). Required: add 5 citations + practice effects discussion + limitations section. No re-validation needed after fixes.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    9.1/10 CONDITIONAL. Cat1: 2.8/3 (LMM+ICC appropriate, N=100 convergence risk). Cat2: 2.0/2 (100% tools). Cat3: 1.9/2 (scale ambiguity). Cat4: 2.2/2 (exceeds w/ success criteria). Cat5: 0.2/1 (12 concerns identified). Required: add residual diagnostics (CRITICAL), convergence contingency, scale clarification.
 
 rq_planner:
   status: pending

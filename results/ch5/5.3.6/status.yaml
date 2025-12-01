@@ -17,12 +17,14 @@ rq_concept:
     Critical: 8 steps, Cronbach's alpha, dual p-values (D068), z-standardized LMMs
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.3.6 validated: 9.4/10 APPROVED. Solid measurement theory, CTT/IRT convergent validity framework sound. Minor gaps on practice effects confound and IRT scale equating. 8 scholarly concerns identified (3 CRITICAL). All addressable without revision. Ready for rq_stats.
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    9.15/10 CONDITIONAL. Cat 1: 2.8/3 (appropriate methods). Cat 2: 1.9/2 (100% tools). Cat 3: 1.9/2 (params specified). Cat 4: 1.8/2 (missing diagnostics). Cat 5: 0.8/1 (11 concerns: 3 CRITICAL+MODERATE LMM/Steiger assumptions). Requires: (1) LMM random structure fallback if convergence fails, (2) Steiger's z-test assumption checks, (3) Cronbach's alpha Spearman-Brown adjustment for item count effects.
 
 rq_planner:
   status: pending

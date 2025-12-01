@@ -17,12 +17,14 @@ rq_concept:
     Critical: Bonferroni alpha=0.025, dual p-values, Tukey HSD post-hoc
 
 rq_scholar:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.4.3 APPROVED 9.3/10 - Schema compensation theory well-grounded, practice effects & encoding confounds identified via devil's advocate, 4 high-priority citations recommended, proceeding to rq_stats
 
 rq_stats:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.4.3 CONDITIONAL 9.1/10. Cat1: 2.7/3.0 (LMM appropriate). Cat2: 2.0/2.0 (100% tools). Cat3: 1.8/2.0 (parameters). Cat4: 1.8/2.0 (validation). Cat5: 0.8/1.0 (6 concerns). Required: Add remedial procedures for assumption violations, random effects contingency plan. Validation written to 1_stats.md.
 
 rq_planner:
   status: pending
