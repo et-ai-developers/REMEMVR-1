@@ -305,6 +305,9 @@
 ### cross_type_dependency_resolution_step0_creation_documentation_update
 **Description:** Complete resolution of cross-type dependencies via Step 0 creation for root RQs (Session 2025-12-01 14:00). Created new step00_extract_data.py for 5.1.1 (General ROOT, ~300 lines, omnibus "All" factor Q-matrix). Rewrote step00 scripts for 5.3.1 (Paradigms ROOT, ~345 lines, free_recall/cued_recall/recognition factors) and 5.4.1 (Congruence ROOT, ~360 lines, common/congruent/incongruent factors). All 4 root RQs now extract independently from dfData.csv with type-specific Q-matrices. Updated 3 downstream code paths in 5.1.1 to use local outputs. Updated chain.md marking dependencies RESOLVED. Updated 3 concept.md files changing Data Source from DERIVED to RAW. Clean architecture achieved: cross-type dependencies 0, root RQs extracting raw 4/4, each type fully independent.
 
+### agent_framework_v5_update_hierarchical_numbering_rq_concept_mass_execution
+**Description:** Complete history of Agent Framework v5.0 update implementing chX/X.Y.Z hierarchical numbering format and rq_refactor.tsv as authoritative specification source. Updated 4 RQ workflow agents (rq_concept major rewrite with TSV column mapping, rq_planner, rq_scholar, rq_stats). Updated templates and workflow documentation. Mass execution via rq_concept on 16 TODO RQs (all SUCCESS). ANALYSES_CH5.md deprecated. 52-minute total session with 113k token consumption. Parallel execution efficiency demonstrated (15 agents in 5 minutes). Session 2025-12-01 16:30.
+
 ---
 
 ## How to Use This Index
