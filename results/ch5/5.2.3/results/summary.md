@@ -1,4 +1,4 @@
-# Results Summary: RQ 5.10 - Domain-Specific Age Effects on Forgetting
+# Results Summary: RQ 5.2.3 - Domain-Specific Age Effects on Forgetting
 
 **Research Question:** Does the effect of age on forgetting rate vary by memory domain (What, Where, When)?
 
@@ -14,7 +14,7 @@
 
 - **Total N:** 100 participants (complete sample from RQ 5.1)
 - **Age distribution:** M = 44.57 years, SD = 14.5 years, range [20.0, 70.0]
-- **Observations:** 1200 total (100 participants × 4 tests × 3 domains)
+- **Observations:** 1200 total (100 participants ï¿½ 4 tests ï¿½ 3 domains)
 - **Missing data:** 0% (all merges successful, no NaN values)
 - **TSVR range:** [1.00, 246.24] hours (scheduling variations documented, within acceptable limits)
 
@@ -47,7 +47,7 @@ theta ~ TSVR_hours + log_TSVR + Age_c + domain +
 
 **Main Effects:**
 
-| Effect | ² | SE | z | p | 95% CI |
+| Effect | ï¿½ | SE | z | p | 95% CI |
 |--------|---|----|---|---|--------|
 | Intercept | 0.750 | 0.093 | 8.030 | <.001 | [0.563, 0.937] |
 | When vs What | -0.333 | 0.113 | -2.947 | .003 | [-0.551, -0.114] |
@@ -58,7 +58,7 @@ theta ~ TSVR_hours + log_TSVR + Age_c + domain +
 
 **2-Way Interactions:**
 
-| Effect | ² | SE | z | p | 95% CI |
+| Effect | ï¿½ | SE | z | p | 95% CI |
 |--------|---|----|---|---|--------|
 | TSVR_hours:When | 0.003 | 0.001 | 2.214 | .027 | [0.000, 0.006] |
 | TSVR_hours:Where | -0.001 | 0.001 | -0.669 | .504 | [-0.004, 0.002] |
@@ -69,9 +69,9 @@ theta ~ TSVR_hours + log_TSVR + Age_c + domain +
 
 **3-Way Interactions (PRIMARY HYPOTHESIS):**
 
-With Bonferroni correction (± = 0.025 for 2 omnibus tests):
+With Bonferroni correction (ï¿½ = 0.025 for 2 omnibus tests):
 
-| Effect | ² | SE | z | p (uncorr) | p (Bonf) | 95% CI |
+| Effect | ï¿½ | SE | z | p (uncorr) | p (Bonf) | 95% CI |
 |--------|---|----|---|---|---|--------|
 | TSVR_hours:Age_c:When | -0.00005 | 0.0001 | -0.526 | .599 | 1.000 | [-0.00026, 0.00015] |
 | TSVR_hours:Age_c:Where | -0.00006 | 0.0001 | -0.597 | .551 | 1.000 | [-0.00026, 0.00014] |
@@ -108,7 +108,7 @@ Marginal age effects on forgetting rate evaluated at Day 3 (TSVR = 72 hours, mid
 - All validation checks passed per logs
 
 **Deviation from hypothesis (NOT a validation failure):**
-- **Expected:** Significant 3-way Age × Domain × Time interaction (Bonferroni ± = 0.025)
+- **Expected:** Significant 3-way Age ï¿½ Domain ï¿½ Time interaction (Bonferroni ï¿½ = 0.025)
 - **Found:** All 3-way interactions non-significant (p > 0.4)
 - **Conclusion:** NULL RESULT - Hypothesis not supported, but scientifically valid finding
 
@@ -165,7 +165,7 @@ All three panels show remarkably SIMILAR patterns:
 **Connection to Findings:**
 
 The visual pattern CONFIRMS the statistical null result:
-- **Section 1 statistics:** 3-way Age × Domain × Time interactions non-significant (p > 0.4)
+- **Section 1 statistics:** 3-way Age ï¿½ Domain ï¿½ Time interactions non-significant (p > 0.4)
 - **Figure 1 shows:** Minimal visual separation between age tertiles across all three domains
 - **Coherence:** If age effects differed by domain, we would expect greater separation between age tertiles in hippocampal-dependent domains (Where, When) than in familiarity-based domain (What). Plot shows NO such differential pattern - separation is minimal and UNIFORM across all domains.
 
@@ -184,7 +184,7 @@ The visual pattern CONFIRMS the statistical null result:
 - **Y-axis:** Residuals (observed - predicted): -1.5 to 2.5
 - **Reference line:** Horizontal dashed line at y = 0 (perfect fit)
 - **Pattern:** Random scatter around y = 0 with approximately constant spread across fitted value range
-- **Outliers:** Few points exceed ±2.0 residuals, but within expected range for N=1200
+- **Outliers:** Few points exceed ï¿½2.0 residuals, but within expected range for N=1200
 
 **Diagnostic Assessment:**
 - **Homoscedasticity:**  SATISFIED - No obvious fanning pattern, variance appears constant
@@ -252,7 +252,7 @@ Confirms that individual differences in baseline memory ability (random intercep
 - **Pattern:** Lag 0 = 1.0 (perfect correlation with self), all other lags within confidence band
 
 **Diagnostic Assessment:**
-- **Independence:**  SATISFIED - All lags 1-20 show autocorrelation H 0 (within ±0.1)
+- **Independence:**  SATISFIED - All lags 1-20 show autocorrelation H 0 (within ï¿½0.1)
 - **No temporal dependence:** Residuals from adjacent timepoints uncorrelated
 
 **Connection to Findings:**
@@ -269,12 +269,12 @@ Independence assumption met. Observations within participants (across 4 test ses
 **Visual Description:**
 - **X-axis:** Observation index: 0 to 1200
 - **Y-axis:** Studentized residuals (standardized): -3 to 3.5
-- **Thresholds:** Red dashed lines at ±3.0 (outlier cutoff)
-- **Pattern:** Most residuals within ±2.0, 6 observations exceed ±3.0 threshold
+- **Thresholds:** Red dashed lines at ï¿½3.0 (outlier cutoff)
+- **Pattern:** Most residuals within ï¿½2.0, 6 observations exceed ï¿½3.0 threshold
 - **Outlier rate:** 6/1200 = 0.5% (well within expected range for normal distribution)
 
 **Diagnostic Assessment:**
-- **Outliers:**  ACCEPTABLE - 0.5% outliers normal for N=1200 (expected ~0.3% for strict ±3 SD threshold)
+- **Outliers:**  ACCEPTABLE - 0.5% outliers normal for N=1200 (expected ~0.3% for strict ï¿½3 SD threshold)
 - **Influence:** Outliers appear distributed across observation indices (not clustered), suggesting low influence on fixed effects
 
 **Connection to Findings:**
@@ -288,7 +288,7 @@ Minimal outlier contamination. Results in Section 1 unlikely to be driven by ext
 
 **Original Hypothesis (from 1_concept.md):**
 
-"Age × Time effects will be strongest for spatial (Where) and temporal (When) domains, which rely more heavily on hippocampal binding than object identity (What). This predicts a significant 3-way Age × Domain × Time interaction."
+"Age ï¿½ Time effects will be strongest for spatial (Where) and temporal (When) domains, which rely more heavily on hippocampal binding than object identity (What). This predicts a significant 3-way Age ï¿½ Domain ï¿½ Time interaction."
 
 **Theoretical Prediction:**
 Hippocampal aging theory suggests domains requiring hippocampal binding (Where, When) should show greater age-related vulnerability than perirhinal-dependent familiarity (What). Older adults should show disproportionate forgetting for spatial and temporal contexts compared to object identity.
@@ -296,7 +296,7 @@ Hippocampal aging theory suggests domains requiring hippocampal binding (Where, 
 **Hypothesis Status:** **NOT SUPPORTED**
 
 The statistical findings contradict the hippocampal aging hypothesis:
-- **3-way interactions:** ALL non-significant (p > 0.4, far above Bonferroni ± = 0.025)
+- **3-way interactions:** ALL non-significant (p > 0.4, far above Bonferroni ï¿½ = 0.025)
 - **Domain-specific age effects:** Virtually IDENTICAL across What, Where, When (magnitude H 0.00001, all p = 0.779)
 - **Visual pattern:** Age tertile trajectories show minimal separation and UNIFORM patterns across all three domains
 
@@ -312,14 +312,14 @@ The original hypothesis draws from studies using traditional neuropsychological 
 
 - **Immersive encoding hypothesis:** VR provides richer multimodal encoding (visual, spatial, temporal simultaneously) that may engage BOTH hippocampus and perirhinal cortex for all three domains. If What, Where, and When are all encoded via integrated hippocampal binding in VR (rather than What relying solely on perirhinal cortex), then age effects should be UNIFORM - as observed.
 
-- **Evidence for integrated encoding:** Main effect of When domain (² = -0.333, p = .003) shows temporal memory is overall WORSE than object memory, suggesting hippocampal demands. But critically, age does NOT interact with this domain difference, suggesting age affects hippocampal function uniformly rather than domain-selectively.
+- **Evidence for integrated encoding:** Main effect of When domain (ï¿½ = -0.333, p = .003) shows temporal memory is overall WORSE than object memory, suggesting hippocampal demands. But critically, age does NOT interact with this domain difference, suggesting age affects hippocampal function uniformly rather than domain-selectively.
 
 **2. Insufficient Power for Small Domain-Specific Age Effects**
 
-Age effects on forgetting were weak overall (main effect Age_c: ² = -0.009, p = .147). If domain-specific age effects are SMALL (e.g., true ² < 0.005 for 3-way interactions), this sample (N=100) may lack statistical power:
+Age effects on forgetting were weak overall (main effect Age_c: ï¿½ = -0.009, p = .147). If domain-specific age effects are SMALL (e.g., true ï¿½ < 0.005 for 3-way interactions), this sample (N=100) may lack statistical power:
 
-- **Power analysis:** With N=100 and ± = 0.025 (Bonferroni), power to detect small 3-way interactions (f² < 0.02) is likely < 0.50
-- **Observed coefficients:** 3-way interaction magnitudes (² H 0.0001-0.002) are very small, with wide confidence intervals spanning zero
+- **Power analysis:** With N=100 and ï¿½ = 0.025 (Bonferroni), power to detect small 3-way interactions (fï¿½ < 0.02) is likely < 0.50
+- **Observed coefficients:** 3-way interaction magnitudes (ï¿½ H 0.0001-0.002) are very small, with wide confidence intervals spanning zero
 - **Implication:** Domain-specific age vulnerability MAY exist, but effect too subtle to detect with current sample size. Null result should be interpreted as "insufficient evidence" rather than "evidence of absence"
 
 **3. Age Range Too Narrow to Detect Differential Vulnerability**
@@ -382,7 +382,7 @@ This hypothesis predicts older adults show disproportionate impairment in bindin
 
 Null age findings have MIXED implications for REMEMVR as cognitive assessment tool:
 
-- **Positive:** REMEMVR detects domain differences (When worse than What, ² = -0.333, p = .003), confirming sensitivity to episodic memory structure
+- **Positive:** REMEMVR detects domain differences (When worse than What, ï¿½ = -0.333, p = .003), confirming sensitivity to episodic memory structure
 - **Negative:** REMEMVR does NOT detect age-related vulnerability in hippocampal-dependent domains, limiting utility for aging research in current age range
 - **Recommendation:** Future validation should recruit older sample (70-85 age range) to test whether VR reveals age effects in pronounced hippocampal aging
 
@@ -398,7 +398,7 @@ Analysis used continuous Age_c (correct approach), but visualization split age i
 
 **3. Power Considerations for Small Interaction Effects**
 
-3-way interactions are notoriously underpowered. With N=100, only medium-to-large interactions (f² > 0.05) are reliably detectable. Null result should be interpreted as "insufficient evidence for domain-specific age effects" rather than "strong evidence of no domain-specific effects." Larger sample (N=300+) or longitudinal design would increase power.
+3-way interactions are notoriously underpowered. With N=100, only medium-to-large interactions (fï¿½ > 0.05) are reliably detectable. Null result should be interpreted as "insufficient evidence for domain-specific age effects" rather than "strong evidence of no domain-specific effects." Larger sample (N=300+) or longitudinal design would increase power.
 
 **Clinical Relevance:**
 
@@ -413,8 +413,8 @@ For cognitive assessment applications:
 ### Sample Limitations
 
 **Sample Size:**
-- N = 100 provides adequate power (0.80) for medium 3-way interactions (f² H 0.05) but underpowered for small effects (f² < 0.02, power H 0.40)
-- 3-way interaction coefficients (² H 0.0001-0.002) are very small with wide confidence intervals
+- N = 100 provides adequate power (0.80) for medium 3-way interactions (fï¿½ H 0.05) but underpowered for small effects (fï¿½ < 0.02, power H 0.40)
+- 3-way interaction coefficients (ï¿½ H 0.0001-0.002) are very small with wide confidence intervals
 - **Consequence:** Cannot distinguish "no domain-specific age effects" from "small effects we lack power to detect"
 - **Recommendation:** Larger sample (N=300+) or meta-analytic approach across multiple VR studies needed to detect subtle domain-specific age vulnerability
 
@@ -429,7 +429,7 @@ For cognitive assessment applications:
 - Sample demographics not reported in current analysis (education, sex, cognitive status unknown from available data)
 - Age centering used grand mean (44.57 years), but sample composition (e.g., % young vs old) affects interpretation
 - **Consequence:** Cannot assess whether age effects generalize across education levels, sex, or cognitive status
-- **Recommendation:** Future analyses should report full demographic table, test age × sex interactions, control for education
+- **Recommendation:** Future analyses should report full demographic table, test age ï¿½ sex interactions, control for education
 
 **Attrition:**
 - TSVR range extends to 246.24 hours (> 168h = 7 days), suggesting scheduling variations
@@ -479,7 +479,7 @@ For cognitive assessment applications:
 **3. TSVR Variability**
 - TSVR range [1, 246] hours reflects scheduling variations (not all participants tested at nominal Days 0/1/3/6)
 - Time variable assumes continuous linear (TSVR_hours) or logarithmic (log_TSVR) forgetting
-- Scheduling jitter may introduce noise, reducing power to detect age × time interactions
+- Scheduling jitter may introduce noise, reducing power to detect age ï¿½ time interactions
 - **Consequence:** If age effects emerge only at specific retention intervals (e.g., Day 6), continuous TSVR may miss discrete temporal patterns
 - **Recommendation:** Sensitivity analysis comparing TSVR (continuous) vs nominal Day (categorical) to assess whether discrete retention intervals reveal age effects hidden by continuous time modeling
 
@@ -492,9 +492,9 @@ For cognitive assessment applications:
 - **Recommendation:** Test expanded random structure with domain-specific slopes, compare AIC/BIC to current model
 
 **2. Bonferroni Correction Conservative**
-- Bonferroni ± = 0.025 for 2 omnibus tests (linear + log 3-way interactions) is conservative
+- Bonferroni ï¿½ = 0.025 for 2 omnibus tests (linear + log 3-way interactions) is conservative
 - May inflate Type II error (false negatives) if domain-specific age effects are small
-- All observed p-values > 0.4, so even liberal correction (± = 0.05 uncorrected) would not change conclusions
+- All observed p-values > 0.4, so even liberal correction (ï¿½ = 0.05 uncorrected) would not change conclusions
 - **Consequence:** Not a concern for current null result (effects far from any reasonable threshold), but relevant for future studies with marginal p-values
 - **Recommendation:** Pre-register family-wise error rate definition for future hypothesis tests to avoid post-hoc justification
 
@@ -553,7 +553,7 @@ For cognitive assessment applications:
 
 Despite constraints, findings are **robust within scope:**
 - Null 3-way interactions consistent across multiple specifications (linear + log time)
-- Effect sizes very small (² H 0.0001-0.002) with CIs tightly bracketing zero
+- Effect sizes very small (ï¿½ H 0.0001-0.002) with CIs tightly bracketing zero
 - Visual patterns confirm statistical null (age tertiles overlap across domains)
 - Model diagnostics acceptable (convergence, assumptions met)
 
@@ -569,7 +569,7 @@ Despite constraints, findings are **robust within scope:**
 
 **1. Test Discrete Retention Interval Effects**
 - **Why:** Continuous TSVR may obscure age effects emerging only at specific retention intervals
-- **How:** Refit LMM with categorical Day variable (0/1/3/6) instead of continuous TSVR, test Age × Domain × Day interaction
+- **How:** Refit LMM with categorical Day variable (0/1/3/6) instead of continuous TSVR, test Age ï¿½ Domain ï¿½ Day interaction
 - **Expected Insight:** Determine whether age effects on domain-specific forgetting emerge at longer retention intervals (Day 6) but not earlier timepoints
 - **Timeline:** Immediate (same data, alternative model specification, ~30 minutes)
 
@@ -594,7 +594,7 @@ Despite constraints, findings are **robust within scope:**
 - **Expected Timeline:** Follow-up RQ (not currently planned, but logical extension)
 
 **RQ 5.12 (Hypothetical):** VR vs 2D Age Effects Comparison
-- **Focus:** Compare age × domain × time interactions in VR vs 2D slideshow condition
+- **Focus:** Compare age ï¿½ domain ï¿½ time interactions in VR vs 2D slideshow condition
 - **Why:** Null VR result may reflect immersive encoding compensation. 2D control would test whether traditional paradigms reveal domain-specific age effects
 - **Builds On:** Requires new data collection (N=100 matched controls, 2D task development)
 - **Expected Timeline:** Future study (~6 months for data collection)

@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: step04_compute_contrasts
-RQ: results/ch5/rq10
+RQ: results/ch5/5.2.3
 Generated: 2025-11-28
 FIXED: 2025-11-29 (replaced compute_contrasts_pairwise with extract_marginal_age_slopes_by_domain)
 

@@ -231,7 +231,7 @@ Adequate devil's advocate analysis with 9 well-cited concerns. Coverage good but
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 0: Get IRT Input | RQ 5.1 dependency | ✅ Available | `results/ch5/rq1/data/step00_irt_input.csv` |
+| Step 0: Get IRT Input | RQ 5.1 dependency | ✅ Available | `results/ch5/5.2.1/data/step00_irt_input.csv` |
 | Step 1: IRT Calibration | `calibrate_irt` | ✅ Available | Single "All" factor, p1_med prior, GRM |
 | Step 2: Data Prep | pandas (stdlib) | ✅ Available | Time transformations, validation |
 | Step 3: Fit 5 LMMs | `fit_lmm_trajectory_tsvr` | ✅ Available | D070 compliant, TSVR time variable |

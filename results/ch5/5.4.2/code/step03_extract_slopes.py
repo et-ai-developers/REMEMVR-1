@@ -5,7 +5,7 @@
 """
 Step ID: step03
 Step Name: Extract Segment-Specific Slopes
-RQ: results/ch5/rq6
+RQ: 5.4.2
 Generated: 2025-11-25
 
 PURPOSE:

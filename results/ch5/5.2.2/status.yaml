@@ -1,6 +1,8 @@
+rq_id: "ch5/5.2.2"
+
 rq_builder:
   status: success
-  context_dump: 'Created results/ch5/rq2/ with 6 folders
+  context_dump: 'Created results/ch5/5.2.2/ (formerly rq2) with 6 folders
 
     Folders: docs/, data/, code/, logs/, plots/, results/
 
@@ -13,7 +15,7 @@ rq_builder:
     '
 rq_concept:
   status: success
-  context_dump: 'RQ 5.2: Differential consolidation across memory domains
+  context_dump: 'RQ 5.2.2: Differential consolidation across memory domains
 
     Domains: What/Where/When (all three)
 

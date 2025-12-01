@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: Item Purification
-RQ: ch5/rq3
+RQ: ch5/5.3.1
 Generated: 2025-11-24
 
 PURPOSE:
@@ -77,7 +77,7 @@ from tools.validation import validate_irt_parameters
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq3
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.1
 LOG_FILE = RQ_DIR / "logs" / "step02_purify_items.log"
 
 # =============================================================================

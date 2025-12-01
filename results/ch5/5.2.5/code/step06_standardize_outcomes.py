@@ -5,7 +5,7 @@
 """
 Step ID: step06
 Step Name: Standardize Outcomes for Parallel LMM
-RQ: results/ch5/rq12
+RQ: ch5/5.2.5
 Generated: 2025-11-30
 
 PURPOSE:
@@ -89,7 +89,7 @@ from tools.validation import validate_standardization
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq12 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.5 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step06_standardize_outcomes.log"
 
 # =============================================================================

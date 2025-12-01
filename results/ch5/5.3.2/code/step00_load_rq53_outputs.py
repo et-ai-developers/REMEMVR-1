@@ -5,23 +5,23 @@
 """
 Step ID: step00
 Step Name: Load RQ 5.3 Outputs
-RQ: results/ch5/rq4
+RQ: results/ch5/5.3.2
 Generated: 2025-11-24
 
 PURPOSE:
 Load fitted LMM model and theta data from RQ 5.3 for contrast analysis.
-This step establishes the foundation for RQ 5.4's linear trend contrast by
+This step establishes the foundation for RQ 5.3.2's linear trend contrast by
 loading the best-fitting model (Log model) from RQ 5.3.
 
 EXPECTED INPUTS:
-  - results/ch5/rq3/data/step05_lmm_fitted_model.pkl
+  - results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl
     Description: Fitted MixedLM model object (Log model, best AIC)
     Source: RQ 5.3 Step 5
-  - results/ch5/rq3/data/step04_lmm_input.csv
+  - results/ch5/5.3.1/data/step04_lmm_input.csv
     Columns: [composite_ID, UID, test, TSVR_hours, TSVR_hours_sq, TSVR_hours_log, paradigm, theta]
     Expected rows: ~1200 (100 participants x 4 tests x 3 paradigms)
     Source: RQ 5.3 Step 4
-  - results/ch5/rq3/data/step05_model_comparison.csv
+  - results/ch5/5.3.1/data/step05_model_comparison.csv
     Columns: [model_name, AIC, delta_AIC, AIC_weight, converged]
     Source: RQ 5.3 Step 5
 
@@ -39,7 +39,7 @@ VALIDATION CRITERIA:
 
 g_code REASONING:
 - Approach: Load pre-fitted LMM from pickle, validate attributes before proceeding
-- Why this approach: RQ 5.4 is a SECONDARY analysis on RQ 5.3's model - we don't refit
+- Why this approach: RQ 5.3.2 is a SECONDARY analysis on RQ 5.3's model - we don't refit
 - Data flow: RQ 5.3 outputs -> load -> validate -> proceed to contrast analysis
 - Expected performance: ~1-2 seconds (just file loading, no computation)
 
@@ -73,8 +73,8 @@ from statsmodels.regression.mixed_linear_model import MixedLMResults
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq4
-RQ3_DIR = RQ_DIR.parent / "rq3"  # results/ch5/rq3 (dependency)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.2
+RQ3_DIR = RQ_DIR.parent / "5.3.1"  # results/ch5/5.3.1 (dependency)
 LOG_FILE = RQ_DIR / "logs" / "step00_load_rq53_outputs.log"
 
 # =============================================================================
@@ -221,8 +221,8 @@ if __name__ == "__main__":
         confirmation_path = RQ_DIR / "data" / "step00_model_loaded.txt"
         confirmation_path.parent.mkdir(parents=True, exist_ok=True)
 
-        confirmation_text = f"""RQ 5.4 - Step 00: Model Load Confirmation
-==========================================
+        confirmation_text = f"""RQ 5.3.2 - Step 00: Model Load Confirmation
+==============================================
 
 Source Files:
 - Model: {model_path}

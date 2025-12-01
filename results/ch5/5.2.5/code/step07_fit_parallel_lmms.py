@@ -5,7 +5,7 @@
 """
 Step ID: step07
 Step Name: Fit Parallel LMMs to Standardized Outcomes
-RQ: results/ch5/rq12
+RQ: ch5/5.2.5
 Generated: 2025-11-30
 
 PURPOSE:
@@ -106,7 +106,7 @@ from tools.validation import validate_lmm_convergence
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq12 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.5 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step07_fit_parallel_lmms.log"
 
 # =============================================================================

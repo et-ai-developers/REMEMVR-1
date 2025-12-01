@@ -5,7 +5,7 @@
 """
 Step ID: step01
 Step Name: Extract Marginal Means at Day 3 Midpoint
-RQ: results/ch5/rq4
+RQ: results/ch5/5.3.2
 Generated: 2025-11-24
 
 PURPOSE:
@@ -63,8 +63,8 @@ from statsmodels.regression.mixed_linear_model import MixedLMResults
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq4
-RQ3_DIR = RQ_DIR.parent / "rq3"  # results/ch5/rq3 (dependency)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.2
+RQ3_DIR = RQ_DIR.parent / "5.3.1"  # results/ch5/5.3.1 (dependency)
 LOG_FILE = RQ_DIR / "logs" / "step01_extract_marginal_means.log"
 
 # Timepoint for marginal means: Day 3 (72 hours)

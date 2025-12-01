@@ -1,4 +1,4 @@
-# Results Summary: RQ 5.9 - Age Effects on Baseline Memory and Forgetting Rate
+# Results Summary: RQ 5.1.3 - Age Effects on Baseline Memory and Forgetting Rate
 
 **Research Question:** Do older adults show lower baseline episodic memory (intercept) and/or faster forgetting (steeper slope) compared to younger adults?
 
@@ -35,7 +35,7 @@
 
 **Fixed Effect Estimates:**
 
-| Effect | ² | SE | z | p (uncorr) | p (Bonf) | Interpretation |
+| Effect | ï¿½ | SE | z | p (uncorr) | p (Bonf) | Interpretation |
 |--------|------|------|------|------------|----------|----------------|
 | Intercept | 0.807 | 0.096 | 8.39 | <.001 | <.001 | Baseline memory for average-aged adult (44.6 yrs) at encoding |
 | Time (linear) | -0.002 | 0.001 | -2.14 | .033 | .098 | Linear forgetting component (significant uncorrected) |
@@ -44,7 +44,7 @@
 | **Time:Age_c** | **0.000** | **0.000** | **0.21** | **.831** | **1.000** | **Age effect on linear forgetting (n.s., wrong direction)** |
 | **Time_log:Age_c** | **0.001** | **0.002** | **0.30** | **.761** | **1.000** | **Age effect on log forgetting (n.s., wrong direction)** |
 
-**Bonferroni Correction:** ± = 0.0167 for 3 age-related tests (intercept + 2 slope interactions)
+**Bonferroni Correction:** ï¿½ = 0.0167 for 3 age-related tests (intercept + 2 slope interactions)
 
 **Variance Components:**
 - Random intercept variance: 0.664 (substantial individual differences in baseline ability)
@@ -54,17 +54,17 @@
 ### Hypothesis Testing Summary
 
 **Hypothesis 1 (Baseline Memory):** Age negatively predicts intercept
-- **Result:** ² = -0.012, p = 0.061 (uncorrected), p = 0.182 (Bonferroni)
+- **Result:** ï¿½ = -0.012, p = 0.061 (uncorrected), p = 0.182 (Bonferroni)
 - **Status:** **NOT SUPPORTED** - Effect in predicted direction but non-significant
 - **Interpretation:** 1 SD increase in age (~14.5 years) predicts 0.012 lower theta at baseline (trivial effect size)
 
 **Hypothesis 2 (Linear Forgetting Rate):** Age negatively predicts Time slope
-- **Result:** ² = 0.000015, p = 0.831
+- **Result:** ï¿½ = 0.000015, p = 0.831
 - **Status:** **NOT SUPPORTED** - Near-zero effect, wrong direction (positive)
 - **Interpretation:** No evidence age affects constant-rate forgetting component
 
 **Hypothesis 3 (Logarithmic Forgetting Rate):** Age negatively predicts Time_log slope
-- **Result:** ² = 0.001, p = 0.761
+- **Result:** ï¿½ = 0.001, p = 0.761
 - **Status:** **NOT SUPPORTED** - Near-zero effect, wrong direction (positive)
 - **Interpretation:** No evidence age affects early rapid forgetting component
 
@@ -75,7 +75,7 @@
 - **Age + 1 SD (59.1 years):** Predicted theta at Day 6 = -0.576
 
 **Age-related decline:**
-- Absolute decline: 0.098 theta units (1 SD age increase ’ 0.10 lower theta)
+- Absolute decline: 0.098 theta units (1 SD age increase ï¿½ 0.10 lower theta)
 - Percentage decline: 20.6% relative to average-aged adult at Day 6
 - Cohen's d-equivalent: 0.10 (trivial effect size on theta scale)
 
@@ -117,21 +117,21 @@ The plot displays episodic memory trajectories (theta scores) across the full re
 
 **LMM Prediction Patterns (Dashed Lines):**
 
-- **Young (green dashed):** Starts at ¸ H 1.0, declines to ¸ H 0.0 by 100 hours, then shows **slight upturn** to ¸ H 0.3 by 250 hours (counterintuitive)
-- **Middle (orange dashed):** Starts at ¸ H 0.5, shows **extreme dip** to ¸ H -2.3 around 150-200 hours (implausible), then recovers
-- **Older (red dashed):** Starts at ¸ H 0.5, shows steady decline to ¸ H -1.0 by 250 hours (most monotonic pattern)
+- **Young (green dashed):** Starts at ï¿½ H 1.0, declines to ï¿½ H 0.0 by 100 hours, then shows **slight upturn** to ï¿½ H 0.3 by 250 hours (counterintuitive)
+- **Middle (orange dashed):** Starts at ï¿½ H 0.5, shows **extreme dip** to ï¿½ H -2.3 around 150-200 hours (implausible), then recovers
+- **Older (red dashed):** Starts at ï¿½ H 0.5, shows steady decline to ï¿½ H -1.0 by 250 hours (most monotonic pattern)
 
 **Anomalous Features:**
 - Young trajectory upturn after 100 hours contradicts forgetting theory (no mechanism for memory improvement without retrieval practice)
 - Middle trajectory extreme dip (-2.3 theta) far exceeds observed data scatter (no individual data points below -2.0 in that timeframe)
-- Prediction instability suggests overfitting or interaction term issues (Age_c × Time interactions near-zero but producing erratic tertile-level predictions)
+- Prediction instability suggests overfitting or interaction term issues (Age_c ï¿½ Time interactions near-zero but producing erratic tertile-level predictions)
 
 **Connection to Statistical Findings:**
 
-- **Visual overlap ’ Non-significant age effects:** The lack of clear tertile separation directly supports statistical finding that age effects on forgetting are negligible (² H 0.0001-0.001, p > 0.76)
-- **High scatter ’ Large residual variance:** Individual differences dominate age-related variance (residual Ã² = 0.223 vs. tiny age interaction coefficients)
-- **Implausible LMM predictions ’ Model diagnostics:** Visual anomalies (upturn, extreme dip) align with autocorrelation violation flagged in validation (Lag-1 ACF = -0.237)
-- **Error bars absent:** Plot shows raw individual observations rather than aggregated means, making visual assessment of age differences challenging (future plots should aggregate by tertile × timepoint bins with 95% CIs)
+- **Visual overlap ï¿½ Non-significant age effects:** The lack of clear tertile separation directly supports statistical finding that age effects on forgetting are negligible (ï¿½ H 0.0001-0.001, p > 0.76)
+- **High scatter ï¿½ Large residual variance:** Individual differences dominate age-related variance (residual Ã² = 0.223 vs. tiny age interaction coefficients)
+- **Implausible LMM predictions ï¿½ Model diagnostics:** Visual anomalies (upturn, extreme dip) align with autocorrelation violation flagged in validation (Lag-1 ACF = -0.237)
+- **Error bars absent:** Plot shows raw individual observations rather than aggregated means, making visual assessment of age differences challenging (future plots should aggregate by tertile ï¿½ timepoint bins with 95% CIs)
 
 **Interpretation:**
 Visual inspection corroborates statistical conclusion: age effects on memory trajectories are minimal in this healthy adult sample (ages 20-70). If dual deficit hypothesis held, we would expect clear vertical separation with Older < Middle < Young at all timepoints, which is not observed.
@@ -149,9 +149,9 @@ Visual inspection corroborates statistical conclusion: age effects on memory tra
 
 All three age-related hypotheses failed to reach significance after Bonferroni correction:
 
-1. **H1 (Baseline memory):** ² = -0.012, p = 0.182 - marginal effect in predicted direction but non-significant
-2. **H2 (Linear forgetting):** ² = 0.000015, p = 1.000 - near-zero effect, wrong direction
-3. **H3 (Logarithmic forgetting):** ² = 0.001, p = 1.000 - near-zero effect, wrong direction
+1. **H1 (Baseline memory):** ï¿½ = -0.012, p = 0.182 - marginal effect in predicted direction but non-significant
+2. **H2 (Linear forgetting):** ï¿½ = 0.000015, p = 1.000 - near-zero effect, wrong direction
+3. **H3 (Logarithmic forgetting):** ï¿½ = 0.001, p = 1.000 - near-zero effect, wrong direction
 
 **Critical finding:** Age effects on forgetting rate (slopes) are not merely non-significant - they are in the OPPOSITE direction predicted by dual deficit hypothesis (positive coefficients suggest older adults forget SLOWER, contradicting hippocampal aging literature).
 
@@ -161,8 +161,8 @@ All three age-related hypotheses failed to reach significance after Bonferroni c
 
 The dual deficit hypothesis predicts older adults exhibit: (1) lower baseline encoding ability, and (2) faster forgetting due to impaired consolidation/retrieval. This RQ's findings challenge both predictions:
 
-- **Encoding deficit:** Marginal evidence (² = -0.012, p = 0.061 uncorrected) suggests a weak baseline disadvantage for older adults, but effect size is trivial (0.012 theta per 14.5-year age increase H 0.00083 theta/year)
-- **Consolidation/retrieval deficit:** No evidence - Age × Time interactions near-zero and positive (opposite predicted direction)
+- **Encoding deficit:** Marginal evidence (ï¿½ = -0.012, p = 0.061 uncorrected) suggests a weak baseline disadvantage for older adults, but effect size is trivial (0.012 theta per 14.5-year age increase H 0.00083 theta/year)
+- **Consolidation/retrieval deficit:** No evidence - Age ï¿½ Time interactions near-zero and positive (opposite predicted direction)
 
 **Hippocampal Aging Hypothesis (Raz et al., 2005):**
 
@@ -190,7 +190,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 
 **1. Wrong-Direction Age Effects on Forgetting (CRITICAL ANOMALY):**
 
-**Observation:** Both Age × Time interactions are POSITIVE (² = 0.000015 and 0.001), suggesting older adults forget SLOWER than younger adults.
+**Observation:** Both Age ï¿½ Time interactions are POSITIVE (ï¿½ = 0.000015 and 0.001), suggesting older adults forget SLOWER than younger adults.
 
 **Why unexpected:** Contradicts 40+ years of aging literature showing accelerated forgetting in older adults (e.g., Craik & Rose, 2012; Uttl & Graf, 1993)
 
@@ -200,8 +200,8 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 - Participants complete identical VR test 4 times (Days 0, 1, 3, 6)
 - Practice benefits documented in longitudinal memory studies (mean retest effect ~0.60 SD, BMC Neuroscience 2010)
 - If younger adults benefit MORE from practice (steeper learning curves), their trajectories would show attenuated decline or even improvement, creating spurious "faster forgetting" appearance relative to older adults
-- Older adults' smaller practice benefits ’ more genuine forgetting visible ’ appears as "slower forgetting" when compared to practice-inflated younger trajectories
-- **Test:** Age × Session interaction in practice effect literature (need to examine whether younger adults show larger retest gains)
+- Older adults' smaller practice benefits ï¿½ more genuine forgetting visible ï¿½ appears as "slower forgetting" when compared to practice-inflated younger trajectories
+- **Test:** Age ï¿½ Session interaction in practice effect literature (need to examine whether younger adults show larger retest gains)
 
 **(b) Sample Selection Bias:**
 - Sample restricted to cognitively healthy community-dwelling adults (no dementia, MCI)
@@ -211,7 +211,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 - **Result:** Older subsample may have comparable or superior memory strategies/motivation relative to unselected younger subsample
 
 **(c) Null Effect (True Absence of Age Differences):**
-- Effect sizes near-zero (² = 0.0001-0.001) with tight standard errors (SE = 0.0001-0.002)
+- Effect sizes near-zero (ï¿½ = 0.0001-0.001) with tight standard errors (SE = 0.0001-0.002)
 - Not merely underpowered (N=400 observations, 100 participants) - coefficients are trivially small
 - VR paradigm may genuinely equalize forgetting rates through contextual support (hypothesis above)
 - Age affects encoding (marginal baseline deficit) but not consolidation/retrieval in this task
@@ -222,7 +222,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 - If older adults fail harder items (higher difficulty b parameters) but at same rate as younger adults, theta trajectories could appear parallel despite different raw accuracy declines
 - **Check:** Compare raw accuracy trajectories to theta trajectories by age tertile in follow-up RQ
 
-**Recommendation:** Flag for manual investigation. Practice effect confound is most theoretically plausible and has precedent in retest literature. Consider analyzing only T1’T2 (first retest) to minimize accumulated practice, or use T1-only age differences as baseline (cross-sectional) comparison.
+**Recommendation:** Flag for manual investigation. Practice effect confound is most theoretically plausible and has precedent in retest literature. Consider analyzing only T1ï¿½T2 (first retest) to minimize accumulated practice, or use T1-only age differences as baseline (cross-sectional) comparison.
 
 ---
 
@@ -233,11 +233,11 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 **Why unexpected:** LMM should smooth trajectories, not create new features absent in observations.
 
 **Explanation:**
-- Age × Time interaction terms (though non-significant) interact with random slopes (Time | UID) to produce tertile-specific predictions
+- Age ï¿½ Time interaction terms (though non-significant) interact with random slopes (Time | UID) to produce tertile-specific predictions
 - When aggregating participant-level predictions to tertile means, small interaction coefficients can amplify into erratic patterns due to:
   - Unbalanced TSVR distribution (sparse data >170 hours)
-  - Age × Time × Time_log three-way interplay creating local minima/maxima
-  - Autocorrelation violation (ACF = -0.237) ’ residuals' temporal dependencies not modeled ’ predictions overcompensate
+  - Age ï¿½ Time ï¿½ Time_log three-way interplay creating local minima/maxima
+  - Autocorrelation violation (ACF = -0.237) ï¿½ residuals' temporal dependencies not modeled ï¿½ predictions overcompensate
 
 **Implication:** Tertile-level LMM predictions unreliable for this model. Age effects should be interpreted from fixed effect coefficients only, not from tertile trajectory visualizations.
 
@@ -254,7 +254,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 - Once logarithmic component (rapid early decline) and linear component (constant decay) are included, little residual variance in slopes remains
 - Suggests forgetting follows universal trajectory shape (consolidation theory), with individual differences primarily in starting point (baseline ability), not decay rate
 
-**Implication:** Age predicting slope (our RQ hypothesis) is challenging when slopes themselves show minimal between-person variation. Even if age affected forgetting, the signal would be tiny (² < 0.001) because the total slope variance to explain is tiny.
+**Implication:** Age predicting slope (our RQ hypothesis) is challenging when slopes themselves show minimal between-person variation. Even if age affected forgetting, the signal would be tiny (ï¿½ < 0.001) because the total slope variance to explain is tiny.
 
 ---
 
@@ -265,7 +265,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 **Why unexpected:** Positive autocorrelation common in longitudinal data (adjacent timepoints more similar), but negative autocorrelation suggests overcorrection.
 
 **Explanation:**
-- Model predicts too much decline from Time 1’2, then actual performance rebounds (residual positive at T2)
+- Model predicts too much decline from Time 1ï¿½2, then actual performance rebounds (residual positive at T2)
 - Next prediction overcorrects upward, then performance declines again (residual negative at T3)
 - Creates zigzag pattern in residuals characteristic of model misspecification
 - Lin+Log form inherited from RQ 5.7 may not be optimal with Age interactions (Age may alter functional form, not just intercept/slope)
@@ -284,7 +284,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 
 **Methodological Insights:**
 
-1. **Practice effects in longitudinal designs:** Critical confound when testing age differences in trajectories. Four repeated assessments (T1-T4) introduce unknown practice × age interactions.
+1. **Practice effects in longitudinal designs:** Critical confound when testing age differences in trajectories. Four repeated assessments (T1-T4) introduce unknown practice ï¿½ age interactions.
 2. **IRT theta vs. raw accuracy:** Latent ability estimates may obscure age effects present in raw performance. Recommend dual reporting.
 3. **Age as continuous predictor:** More powerful than group comparisons, but assumes linear age effects (may miss nonlinear accelerations after age 60)
 4. **Bonferroni correction impact:** Uncorrected Age_c main effect p = 0.061 (marginal); corrected p = 0.182 (non-significant). Conservative correction appropriate for exploratory thesis, but may inflate Type II error.
@@ -309,7 +309,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 - **Implication:** Findings may not generalize to (a) very old adults (70+), (b) cognitively declining populations, or (c) unscreened community samples
 
 **Sample Size for Age Effects:**
-- N=100 participants provides adequate power (0.80) for medium effects (² e 0.03 on theta scale), but observed effects are trivial (² = 0.000-0.012)
+- N=100 participants provides adequate power (0.80) for medium effects (ï¿½ e 0.03 on theta scale), but observed effects are trivial (ï¿½ = 0.000-0.012)
 - Post-hoc power for observed effect sizes: <0.20 (severely underpowered for tiny effects)
 - **However:** Tight confidence intervals (SE = 0.001-0.007) suggest effects are precisely estimated as near-zero, not merely underpowered
 - **Conclusion:** Null findings reflect true negligible effects, not insufficient sample size
@@ -326,9 +326,9 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 
 1. **Practice Effects Confound:**
    - Four repeated VR tests introduce practice (learning how to navigate, remember spatial cues)
-   - Practice × age interaction unknown (do younger adults benefit more from repeated testing?)
+   - Practice ï¿½ age interaction unknown (do younger adults benefit more from repeated testing?)
    - Cannot separate true forgetting from practice-attenuated decline
-   - **Impact:** Age × Time interactions (forgetting rate differences) confounded with age × practice interactions
+   - **Impact:** Age ï¿½ Time interactions (forgetting rate differences) confounded with age ï¿½ practice interactions
    - **Mitigation:** Random slopes (Time | UID) account for individual practice trajectories, but not age-moderated practice
 
 2. **No Control Condition:**
@@ -347,7 +347,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
    - Lag-1 ACF = -0.237 (exceeds threshold 0.1), indicating model misspecification
    - Standard errors may be underestimated (inflating Type I error) or overestimated (inflating Type II error)
    - **Recommended remedial action:** AR(1) correlation structure (per validation output)
-   - **Impact:** P-values and confidence intervals not fully trustworthy (though effects are so small that even 2× SE would not change conclusions)
+   - **Impact:** P-values and confidence intervals not fully trustworthy (though effects are so small that even 2ï¿½ SE would not change conclusions)
 
 2. **Lin+Log Functional Form Assumption:**
    - Inherited from RQ 5.7 as best-fitting model for overall sample
@@ -359,7 +359,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
    - Random slopes for Time only (not Time_log) to avoid overparameterization
    - Assumes individual differences in logarithmic forgetting are fixed (no random variation)
    - May oversimplify participant heterogeneity
-   - **Impact:** Age × Time_log interaction forced to explain variance that could be random individual differences
+   - **Impact:** Age ï¿½ Time_log interaction forced to explain variance that could be random individual differences
 
 **Measurement:**
 
@@ -367,13 +367,13 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
    - Theta scores are latent ability estimates, not raw performance
    - Transformation may obscure age effects present in raw accuracy (if older adults fail harder items at same rate)
    - **Check needed:** Compare age effects in raw accuracy vs. theta scores
-   - **Impact:** Null age × forgetting findings may be artifact of IRT scaling assumptions
+   - **Impact:** Null age ï¿½ forgetting findings may be artifact of IRT scaling assumptions
 
 2. **Composite "All" Factor:**
    - Uses combined What/Where/When theta scores (from RQ 5.7)
    - Assumes age effects on forgetting are domain-general (same across What/Where/When)
    - Cannot test whether age differentially affects spatial vs. temporal vs. object memory forgetting
-   - **Impact:** May miss domain-specific age × forgetting interactions
+   - **Impact:** May miss domain-specific age ï¿½ forgetting interactions
 
 3. **TSVR Time Variable:**
    - Actual hours since encoding (1-246 hours range), not nominal days
@@ -410,9 +410,9 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 ### Technical Limitations
 
 **LMM Specification:**
-- Lin+Log form may not capture age × functional form interactions
+- Lin+Log form may not capture age ï¿½ functional form interactions
 - AR(1) correlation structure not implemented (autocorrelation unmodeled)
-- Three-way interaction (Age × Time × Time_log) not tested (current model assumes age effects additive across linear and log components)
+- Three-way interaction (Age ï¿½ Time ï¿½ Time_log) not tested (current model assumes age effects additive across linear and log components)
 - **Impact:** Model misspecification may obscure age effects present in different form
 
 **Effect Size Interpretation:**
@@ -422,7 +422,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 - **Impact:** Cannot interpret whether 0.10 theta difference is clinically meaningful
 
 **Decision D068 Dual P-Value Reporting:**
-- Bonferroni correction (± = 0.0167) very conservative for exploratory thesis context
+- Bonferroni correction (ï¿½ = 0.0167) very conservative for exploratory thesis context
 - Uncorrected Age_c main effect p = 0.061 suggestive, but corrected p = 0.182 non-significant
 - **Transparency achieved** (both p-values reported), but interpretation ambiguous
 - **Impact:** Readers must judge whether marginal baseline age effect (p = 0.061) is scientifically meaningful despite Bonferroni rejection
@@ -430,7 +430,7 @@ An alternative interpretation: Immersive VR provides rich spatial/temporal conte
 ### Limitations Summary
 
 Despite constraints, findings are **robust within scope:**
-- Age effects on forgetting consistently near-zero across multiple metrics (², p-values, visual plots)
+- Age effects on forgetting consistently near-zero across multiple metrics (ï¿½, p-values, visual plots)
 - Effect sizes trivial even with generous interpretation (uncorrected p-values)
 - Null findings unlikely due to low power (tight CIs, large N)
 
@@ -443,19 +443,19 @@ Limitations primarily affect **generalizability** (healthy adults, VR context, p
 ### Immediate Follow-Ups (Current Data)
 
 **1. Practice Effect Decomposition (HIGH PRIORITY):**
-- **Why:** Practice effects are most plausible explanation for wrong-direction age × forgetting interactions
+- **Why:** Practice effects are most plausible explanation for wrong-direction age ï¿½ forgetting interactions
 - **How:**
-  - Analyze T1’T2 transition only (first retest, minimal accumulated practice)
-  - Test Age × Session interaction (does practice magnitude vary by age?)
+  - Analyze T1ï¿½T2 transition only (first retest, minimal accumulated practice)
+  - Test Age ï¿½ Session interaction (does practice magnitude vary by age?)
   - Compare cross-sectional age differences at T1 (no practice) vs. T4 (maximum practice)
-- **Expected Insight:** If younger adults show larger T1’T4 gains, this inflates their apparent "forgetting resistance" and masks true age effects
+- **Expected Insight:** If younger adults show larger T1ï¿½T4 gains, this inflates their apparent "forgetting resistance" and masks true age effects
 - **Timeline:** Immediate (use existing data, subset to T1-T2 or T1-only)
 
 **2. Raw Accuracy vs. Theta Comparison (MEDIUM PRIORITY):**
 - **Why:** IRT theta scaling may obscure age effects present in raw performance
 - **How:**
   - Re-run LMM with raw accuracy (proportion correct) as DV instead of theta
-  - Compare Age × Time interactions for accuracy vs. theta
+  - Compare Age ï¿½ Time interactions for accuracy vs. theta
   - Check whether older adults fail harder items (high b parameters) at higher rates
 - **Expected Insight:** If age effects emerge in raw accuracy but not theta, IRT correction is removing genuine age variance
 - **Timeline:** 2-3 days (requires re-extracting raw accuracy from master.xlsx, merging with TSVR/Age)
@@ -469,9 +469,9 @@ Limitations primarily affect **generalizability** (healthy adults, VR context, p
 - **Timeline:** 1-2 days (requires switching to nlme package or GEE framework)
 
 **4. Alternative Functional Forms (LOW PRIORITY - EXPLORATORY):**
-- **Why:** Lin+Log form may not capture age × functional form interactions
+- **Why:** Lin+Log form may not capture age ï¿½ functional form interactions
 - **How:**
-  - Test Age × Time² (quadratic age effect on curvature)
+  - Test Age ï¿½ Timeï¿½ (quadratic age effect on curvature)
   - Test piecewise linear (different age slopes 0-24h vs. 24-144h)
   - Compare AIC/BIC across functional forms
 - **Expected Insight:** Age effects may manifest as altered trajectory shape (e.g., older adults' forgetting curves flatten earlier) rather than constant slope differences
@@ -481,7 +481,7 @@ Limitations primarily affect **generalizability** (healthy adults, VR context, p
 
 **RQ 5.10 (Hypothetical - Domain-Specific Age Effects):**
 - **Focus:** Does age differentially affect forgetting rates for What/Where/When domains?
-- **Rationale:** This RQ used composite "All" theta scores; domain-specific analyses could reveal age × domain × time three-way interactions
+- **Rationale:** This RQ used composite "All" theta scores; domain-specific analyses could reveal age ï¿½ domain ï¿½ time three-way interactions
 - **Hypothesis:** Age effects may be stronger for temporal memory (When) vs. spatial memory (Where), given frontal lobe aging's impact on temporal sequencing
 - **Builds On:** Uses RQ 5.7 domain-specific theta scores (theta_what, theta_where, theta_when) instead of theta_all
 - **Expected Timeline:** If prioritized, ~1 week (similar LMM approach with domain as within-subjects factor)
@@ -497,15 +497,15 @@ Limitations primarily affect **generalizability** (healthy adults, VR context, p
 **1. VR vs. 2D Control Comparison:**
 - **Current Limitation:** Cannot isolate VR-specific contextual scaffolding effects
 - **Extension:** Recruit N=50 matched controls, administer 2D slideshow version of REMEMVR task (same items, no navigation)
-- **Hypothesis:** Age × forgetting interactions will emerge in 2D condition (lacking contextual cues) but remain null in VR
+- **Hypothesis:** Age ï¿½ forgetting interactions will emerge in 2D condition (lacking contextual cues) but remain null in VR
 - **Expected Insight:** Test whether VR's spatial richness equalizes forgetting across ages
 - **Feasibility:** Requires 2D task development and new data collection (~6 months)
 
 **2. Single-Session Design (Eliminate Practice Effects):**
 - **Current Limitation:** Four repeated tests confound forgetting with practice
 - **Extension:** Between-subjects design with random assignment to test at Day 0, 1, 3, or 6 (each participant tested once)
-- **Hypothesis:** Age × Time interactions will emerge without practice confound
-- **Trade-off:** Loses statistical power (no within-subject pairing), requires 4× sample size for equivalent power
+- **Hypothesis:** Age ï¿½ Time interactions will emerge without practice confound
+- **Trade-off:** Loses statistical power (no within-subject pairing), requires 4ï¿½ sample size for equivalent power
 - **Feasibility:** Requires N=400 new participants (~2 years data collection)
 
 **3. Expanded Age Range (70-90 years):**
@@ -526,13 +526,13 @@ Limitations primarily affect **generalizability** (healthy adults, VR context, p
 
 **1. Does Contextual Richness Modulate Age Effects on Forgetting?**
 - **Question:** Are age-related forgetting differences attenuated in spatially rich VR environments vs. decontextualized lab tasks?
-- **Next Steps:** Meta-analysis comparing age effect sizes (² for Age × Time) across VR vs. non-VR episodic memory studies
+- **Next Steps:** Meta-analysis comparing age effect sizes (ï¿½ for Age ï¿½ Time) across VR vs. non-VR episodic memory studies
 - **Expected Insight:** If VR studies show consistently smaller age effects, supports environmental support hypothesis (Craik, 1986)
 - **Feasibility:** Literature review feasible (~1 month), empirical test requires VR vs. 2D comparison study
 
 **2. Are Practice Effects Age-Dependent in Episodic Memory?**
 - **Question:** Do younger adults show larger retest gains (practice effects) than older adults in episodic memory tasks?
-- **Next Steps:** Systematic review of age × retest session interactions in longitudinal memory studies
+- **Next Steps:** Systematic review of age ï¿½ retest session interactions in longitudinal memory studies
 - **Expected Insight:** If younger adults benefit more from practice, current RQ's wrong-direction age effects are explained
 - **Feasibility:** Literature review immediate; empirical test requires controlled practice manipulation
 
@@ -545,7 +545,7 @@ Limitations primarily affect **generalizability** (healthy adults, VR context, p
 **4. Is the Dual Deficit Hypothesis Paradigm-Specific?**
 - **Question:** Do older adults show dual deficits (encoding + forgetting) in verbal tasks but not spatial VR tasks?
 - **Next Steps:** Within-subjects design with both verbal memory test (word lists) and VR spatial memory test in same participants
-- **Expected Insight:** Task × age × time three-way interaction would reveal domain-specificity of aging effects
+- **Expected Insight:** Task ï¿½ age ï¿½ time three-way interaction would reveal domain-specificity of aging effects
 - **Feasibility:** Feasible within thesis scope (~1 month data collection, N=100)
 
 ### Priority Ranking
@@ -572,7 +572,7 @@ The null findings (minimal age effects on forgetting) raise a critical question:
 **Three immediate investigations:**
 1. **T1-T2 analysis:** Test whether age effects emerge when limiting to first retest (minimal practice)
 2. **Raw accuracy analysis:** Test whether IRT theta scaling removes genuine age variance
-3. **Practice × age interaction:** Test whether younger adults show larger retest gains
+3. **Practice ï¿½ age interaction:** Test whether younger adults show larger retest gains
 
 If all three investigations confirm null age effects, findings have important theoretical implications: **VR's contextual richness may equalize forgetting across ages**, challenging the generality of the dual deficit hypothesis and suggesting environmental support as a viable intervention for age-related memory decline.
 

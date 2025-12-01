@@ -1,6 +1,8 @@
+rq_id: "ch5/5.4.2"
+
 rq_builder:
   status: success
-  context_dump: 'Created results/ch5/rq6/ with 6 folders
+  context_dump: 'Created results/ch5/5.4.2/ with 6 folders
 
     Folders: docs/, data/, code/, logs/, plots/, results/
 
@@ -13,14 +15,14 @@ rq_builder:
     '
 rq_concept:
   status: success
-  context_dump: 'RQ 5.6: Schema congruence consolidation vs decay
+  context_dump: 'RQ 5.4.2: Schema congruence consolidation vs decay
 
     Domains: N/A - items categorized by congruence (Congruent/Common/Incongruent),
     not WWW
 
     Analysis: Piecewise LMM (Early Days 0-1, Late Days 1-6) + 3-way interaction
 
-    Data: DERIVED from RQ 5.5 theta scores (results/ch5/rq5/data/step03_theta_scores.csv)
+    Data: DERIVED from RQ 5.4.1 theta scores (results/ch5/5.4.1/data/step03_theta_scores.csv)
 
     Critical: Tests sleep consolidation theory - congruent benefit during Early segment
     (one night sleep)
@@ -44,10 +46,10 @@ rq_stats:
     '
 rq_planner:
   status: success
-  context_dump: '7 analysis steps planned (Step 0: RQ 5.5 theta extraction + Steps
+  context_dump: '7 analysis steps planned (Step 0: RQ 5.4.1 theta extraction + Steps
     1-6: piecewise LMM)
 
-    Pipeline: LMM-only (uses DERIVED theta from RQ 5.5, no IRT calibration)
+    Pipeline: LMM-only (uses DERIVED theta from RQ 5.4.1, no IRT calibration)
 
     Key analysis: Piecewise LMM with 3-way interaction (Days_within x Segment x Congruence)
     tests consolidation vs decay
@@ -72,7 +74,7 @@ rq_tools:
     assumption validation, sensitivity analyses, plot data prep)
 
     Strategy: Inline implementation per RQ 5.2 pattern, extract to tools/ after RQ
-    5.6 validation
+    5.4.2 validation
 
     All signatures documented in 3_tools.yaml for g_code reference
 

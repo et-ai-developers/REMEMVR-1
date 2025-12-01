@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: Merge Theta Scores with TSVR (Decision D070)
-RQ: ch5/rq1
+RQ: ch5/5.2.1
 Generated: 2025-11-22
 
 PURPOSE:
@@ -62,7 +62,7 @@ import traceback
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path("/home/etai/projects/REMEMVR/results/ch5/rq1")
+RQ_DIR = Path(__file__).resolve().parents[1]
 LOG_FILE = RQ_DIR / "logs" / "step04_merge_theta_tsvr.log"
 
 # =============================================================================

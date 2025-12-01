@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: extract_variance_components
-RQ: results/ch5/rq13
+RQ: results/ch5/5.1.4
 Generated: 2025-11-30
 
 PURPOSE:
@@ -87,7 +87,7 @@ from tools.validation import validate_variance_positivity
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq13 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.4 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step02_variance_extraction.log"
 
 # =============================================================================

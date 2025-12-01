@@ -5,7 +5,7 @@
 """
 Step ID: step07
 Step Name: Prepare Trajectory Plot Data (Decision D069)
-RQ: results/ch5/rq1
+RQ: ch5/5.2.1
 Generated: 2025-11-22
 
 PURPOSE:
@@ -74,7 +74,7 @@ import pickle
 import statsmodels.api as sm
 
 # Add project root to path for imports
-# parents[4] = REMEMVR/ (code -> rq1 -> ch5 -> results -> REMEMVR)
+# parents[4] = REMEMVR/ (code -> 5.2.1 -> ch5 -> results -> REMEMVR)
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -85,7 +85,7 @@ from tools.plotting import convert_theta_to_probability
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq1
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.1
 LOG_FILE = RQ_DIR / "logs" / "step07_prepare_trajectory_plot_data.log"
 
 # Ensure directories exist

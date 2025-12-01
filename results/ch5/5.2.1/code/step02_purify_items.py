@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: Purify Items (Decision D039)
-RQ: ch5/rq1
+RQ: ch5/5.2.1
 Generated: 2025-11-22
 
 PURPOSE:
@@ -77,7 +77,7 @@ from tools.validation import validate_irt_parameters
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path("/home/etai/projects/REMEMVR/results/ch5/rq1")
+RQ_DIR = Path(__file__).resolve().parents[1]
 LOG_FILE = RQ_DIR / "logs" / "step02_purify_items.log"
 
 # Decision D039 thresholds

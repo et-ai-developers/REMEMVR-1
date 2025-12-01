@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: Extract Segment-by-Domain Slopes
-RQ: results/ch5/rq2
+RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
@@ -86,7 +86,7 @@ from statsmodels.regression.mixed_linear_model import MixedLMResults
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq2 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step02_extract_slopes.log"
 
 # =============================================================================

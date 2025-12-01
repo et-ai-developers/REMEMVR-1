@@ -2,22 +2,22 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-28
-# RQ: ch5/rq9 (Age effects on baseline memory and forgetting rate)
+# RQ: ch5/5.1.3 (Age effects on baseline memory and forgetting rate)
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq9"
+  rq_id: "ch5/5.1.3"
   total_steps: 6
   analysis_type: "LMM Age x Time interaction (Lin+Log functional form)"
   generated_by: "rq_analysis v4.0.0"
   timestamp: "2025-11-28T00:00:00Z"
   dependencies:
-    - rq: "ch5/rq7"
+    - rq: "ch5/5.1.1"
       files:
-        - "results/ch5/rq7/data/step03_theta_all.csv"
-        - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+        - "results/ch5/5.1.1/data/step03_theta_all.csv"
+        - "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
       rationale: "DERIVED theta scores for 'All' composite factor + TSVR time variable"
 
 # ============================================================================
@@ -30,14 +30,14 @@ steps:
   # --------------------------------------------------------------------------
   - name: "step00_extract_merge_data"
     step_number: "00"
-    description: "Load theta scores from RQ 5.7, merge with TSVR and Age from dfData.csv"
+    description: "Load theta scores from RQ 5.1.1, merge with TSVR and Age from dfData.csv"
 
     analysis_call:
       type: "stdlib"
       operations:
-        - "pd.read_csv('results/ch5/rq7/data/step03_theta_all.csv') -> theta_df"
+        - "pd.read_csv('results/ch5/5.1.1/data/step03_theta_all.csv') -> theta_df"
         - "Parse composite_ID to extract UID and TEST (split on underscore)"
-        - "pd.read_csv('results/ch5/rq7/data/step00_tsvr_mapping.csv') -> tsvr_df"
+        - "pd.read_csv('results/ch5/5.1.1/data/step00_tsvr_mapping.csv') -> tsvr_df"
         - "Merge theta_df + tsvr_df on (UID, TEST) using left join"
         - "pd.read_csv('data/cache/dfData.csv') -> age_df"
         - "Merge result + age_df on UID using left join"
@@ -48,14 +48,14 @@ steps:
         - "Save to data/step00_lmm_input_raw.csv"
 
       input_files:
-        - path: "results/ch5/rq7/data/step03_theta_all.csv"
+        - path: "results/ch5/5.1.1/data/step03_theta_all.csv"
           required_columns: ["composite_ID", "theta_all", "se_all"]
-          description: "Theta scores from RQ 5.7 'All' factor analysis"
-          dependency_check: "If missing -> EXPECTATIONS ERROR: RQ 5.7 must complete first"
-        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          description: "Theta scores from RQ 5.1.1 'All' factor analysis"
+          dependency_check: "If missing -> EXPECTATIONS ERROR: RQ 5.1.1 must complete first"
+        - path: "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
           required_columns: ["UID", "TEST", "TSVR"]
-          description: "TSVR time variable from RQ 5.7"
-          dependency_check: "If missing -> EXPECTATIONS ERROR: RQ 5.7 Step 0 required"
+          description: "TSVR time variable from RQ 5.1.1"
+          dependency_check: "If missing -> EXPECTATIONS ERROR: RQ 5.1.1 Step 0 required"
         - path: "data/cache/dfData.csv"
           required_columns: ["UID", "age"]
           description: "Participant demographics (Age variable)"
@@ -79,21 +79,21 @@ steps:
 
       parameters:
         file_checks:
-          - file_path: "results/ch5/rq7/data/step03_theta_all.csv"
+          - file_path: "results/ch5/5.1.1/data/step03_theta_all.csv"
             min_size_bytes: 1000
-          - file_path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          - file_path: "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
             min_size_bytes: 1000
           - file_path: "data/cache/dfData.csv"
             min_size_bytes: 1000
 
       criteria:
-        - "All 3 source files exist (RQ 5.7 outputs + dfData)"
+        - "All 3 source files exist (RQ 5.1.1 outputs + dfData)"
         - "Each file > 1KB (not empty or corrupted)"
 
       on_failure:
         action: "raise FileNotFoundError(validation_result['message'])"
         log_to: "logs/step00_extract_merge_data.log"
-        message: "Cross-RQ dependency error - user must execute RQ 5.7 first"
+        message: "Cross-RQ dependency error - user must execute RQ 5.1.1 first"
 
       description: "Validate cross-RQ dependencies exist before data merge"
 

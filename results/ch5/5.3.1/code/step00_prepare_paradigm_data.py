@@ -5,7 +5,7 @@
 """
 Step ID: step00
 Step Name: Prepare Paradigm Data
-RQ: results/ch5/rq3
+RQ: results/ch5/5.3.1
 Generated: 2025-11-24
 
 PURPOSE:
@@ -14,12 +14,12 @@ This step prepares data for paradigm trajectory analysis (Free Recall, Cued Reca
 Recognition) by excluding Room Free Recall (RFR) and Task Cued Recall (TCR) items.
 
 EXPECTED INPUTS:
-  - results/ch5/rq1/data/step00_irt_input.csv
+  - results/ch5/5.2.1/data/step00_irt_input.csv
     Columns: composite_ID + TQ_* item columns (105 items total)
     Format: Wide format, binary responses (0/1)
     Expected rows: 400 (100 participants x 4 test sessions)
 
-  - results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - results/ch5/5.2.1/data/step00_tsvr_mapping.csv
     Columns: composite_ID, UID, test, TSVR_hours
     Format: CSV with time-since-VR-encoding mapping
     Expected rows: 400
@@ -78,11 +78,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq3
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.1
 LOG_FILE = RQ_DIR / "logs" / "step00_prepare_paradigm_data.log"
 
-# Source RQ directory (RQ 5.1)
-SOURCE_RQ_DIR = RQ_DIR.parents[1] / "ch5" / "rq1"  # results/ch5/rq1
+# Source RQ directory (RQ 5.2.1)
+SOURCE_RQ_DIR = RQ_DIR.parents[1] / "ch5" / "5.2.1"  # results/ch5/5.2.1
 
 # =============================================================================
 # FOLDER CONVENTIONS (MANDATORY - NO EXCEPTIONS)

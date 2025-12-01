@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.6: Congruent Items and Early Consolidation
+# Analysis Plan for RQ 5.4.2: Congruent Items and Early Consolidation
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-25
@@ -43,7 +43,7 @@ This RQ examines whether schema congruence effects on forgetting are driven by d
 
 **Input:**
 
-**File 1:** results/ch5/rq5/data/step03_theta_scores.csv
+**File 1:** results/ch5/5.4.1/data/step03_theta_scores.csv
 **Source:** RQ 5.5 Step 3 (IRT calibration Pass 2 theta extraction)
 **Format:** CSV with columns:
   - `composite_ID` (string, format: {UID}_{test}, e.g., P001_T1)
@@ -57,11 +57,11 @@ This RQ examines whether schema congruence effects on forgetting are driven by d
 **Expected Columns:** 7 (composite_ID + 3 theta + 3 SE)
 
 **Processing:**
-1. Check RQ 5.5 status: Read results/ch5/rq5/status.yaml, verify rq_results.status = "success"
-2. If RQ 5.5 incomplete: QUIT with EXPECTATIONS ERROR "RQ 5.5 must complete before RQ 5.6 (DERIVED data dependency)"
-3. Read results/ch5/rq5/data/step03_theta_scores.csv
+1. Check RQ 5.4.1 status: Read results/ch5/5.4.1/status.yaml, verify rq_results.status = "success"
+2. If RQ 5.4.1 incomplete: QUIT with EXPECTATIONS ERROR "RQ 5.4.1 must complete before RQ 5.4.2 (DERIVED data dependency)"
+3. Read results/ch5/5.4.1/data/step03_theta_scores.csv
 4. Validate expected structure (400 rows, 7 columns, no NaN in theta columns)
-5. Copy to results/ch5/rq6/data/step00_theta_scores_from_rq5.csv (local cache for this RQ)
+5. Copy to results/ch5/5.4.2/data/step00_theta_scores_from_rq5.csv (local cache for this RQ)
 
 **Output:**
 
@@ -894,27 +894,27 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 
 ## Cross-RQ Dependencies
 
-**Dependency Type:** DERIVED data from other RQ (RQ 5.5)
+**Dependency Type:** DERIVED data from other RQ (RQ 5.4.1)
 
 **This RQ requires outputs from:**
-- **RQ 5.5** (Schema Congruence Effects on Forgetting)
-  - File: results/ch5/rq5/data/step03_theta_scores.csv
+- **RQ 5.4.1** (Schema Congruence Effects on Forgetting)
+  - File: results/ch5/5.4.1/data/step03_theta_scores.csv
   - Used in: Step 0 (extract theta scores by congruence)
-  - Rationale: RQ 5.5 calibrated IRT models on "Items by Congruence" factor structure (Common/Congruent/Incongruent), producing theta estimates. This RQ uses those theta estimates as outcome variable for piecewise LMM, testing whether congruence effects differ between consolidation (Early segment) and decay (Late segment) phases.
+  - Rationale: RQ 5.4.1 calibrated IRT models on "Items by Congruence" factor structure (Common/Congruent/Incongruent), producing theta estimates. This RQ uses those theta estimates as outcome variable for piecewise LMM, testing whether congruence effects differ between consolidation (Early segment) and decay (Late segment) phases.
 
 **Execution Order Constraint:**
-1. RQ 5.5 must complete Steps 1-3 first (IRT calibration, purification, theta extraction)
-2. This RQ (RQ 5.6) executes second (uses RQ 5.5 theta scores)
+1. RQ 5.4.1 must complete Steps 1-3 first (IRT calibration, purification, theta extraction)
+2. This RQ (RQ 5.4.2) executes second (uses RQ 5.4.1 theta scores)
 
 **Data Source Boundaries (Per Best Practices Code.md):**
 - **RAW data:** TSVR time variable from master.xlsx (actual hours since VR encoding)
-- **DERIVED data:** Theta scores from RQ 5.5 (IRT ability estimates by congruence)
-- **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.5 parameters as fixed input)
+- **DERIVED data:** Theta scores from RQ 5.4.1 (IRT ability estimates by congruence)
+- **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.4.1 parameters as fixed input)
 
 **Validation:**
-- Step 0: Check results/ch5/rq5/status.yaml, verify rq_results.status = "success"
-- Step 0: Check results/ch5/rq5/data/step03_theta_scores.csv exists
-- If RQ 5.5 incomplete: QUIT with EXPECTATIONS ERROR "RQ 5.5 must complete before RQ 5.6 (DERIVED data dependency)"
+- Step 0: Check results/ch5/5.4.1/status.yaml, verify rq_results.status = "success"
+- Step 0: Check results/ch5/5.4.1/data/step03_theta_scores.csv exists
+- If RQ 5.4.1 incomplete: QUIT with EXPECTATIONS ERROR "RQ 5.4.1 must complete before RQ 5.4.2 (DERIVED data dependency)"
 
 **Reference:** Best Practices Code.md Section 2 (Data Source Boundaries)
 

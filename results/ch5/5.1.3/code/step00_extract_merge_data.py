@@ -5,21 +5,21 @@
 """
 Step ID: step00
 Step Name: extract_merge_data
-RQ: results/ch5/rq9
+RQ: ch5/5.1.3
 Generated: 2025-11-28
 
 PURPOSE:
-Load theta scores from RQ 5.7 (All composite factor), merge with TSVR time
+Load theta scores from RQ 5.1.1 (All composite factor), merge with TSVR time
 variable and Age from dfData.csv to create complete LMM input dataset for
 age effects analysis.
 
 EXPECTED INPUTS:
-  - results/ch5/rq7/data/step03_theta_all.csv
+  - results/ch5/5.1.1/data/step03_theta_all.csv
     Columns: ['composite_ID', 'theta_all', 'se_all']
-    Format: Theta scores from RQ 5.7 'All' composite factor
+    Format: Theta scores from RQ 5.1.1 'All' composite factor
     Expected rows: ~400 (100 participants × 4 tests)
 
-  - results/ch5/rq7/data/step00_tsvr_mapping.csv
+  - results/ch5/5.1.1/data/step00_tsvr_mapping.csv
     Columns: ['UID', 'TEST', 'TSVR']
     Format: Time Since VR (actual hours since encoding)
     Expected rows: ~400 (100 participants × 4 tests)
@@ -41,16 +41,16 @@ VALIDATION CRITERIA:
   - Zero NaN values tolerated (complete cases only)
 
 g_code REASONING:
-- Approach: Load theta scores from RQ 5.7, merge with TSVR time variable
+- Approach: Load theta scores from RQ 5.1.1, merge with TSVR time variable
   (actual hours since encoding per Decision D070), then merge with Age from
   dfData. Parse composite_ID to extract UID and TEST for merge keys.
 
-- Why this approach: RQ 5.9 analyzes Age × Time interaction effects on
+- Why this approach: RQ 5.1.3 analyzes Age × Time interaction effects on
   forgetting trajectories. Requires theta (memory outcome), TSVR_hours (time
   predictor per D070), and Age (individual differences predictor).
 
 - Data flow:
-  1. Load theta_all from RQ 5.7 (composite factor scores)
+  1. Load theta_all from RQ 5.1.1 (composite factor scores)
   2. Parse composite_ID → extract UID and TEST
   3. Merge with TSVR mapping on (UID, TEST) → adds time variable
   4. Merge with dfData on UID → adds age variable
@@ -62,7 +62,7 @@ g_code REASONING:
 IMPLEMENTATION NOTES:
 - Analysis tool: stdlib (pandas read_csv, merge, rename operations)
 - Validation tools:
-  - check_file_exists: Verify cross-RQ dependencies (RQ 5.7 outputs)
+  - check_file_exists: Verify cross-RQ dependencies (RQ 5.1.1 outputs)
   - validate_data_format: Check merged data has all required columns
   - check_missing_data: Ensure no NaN values after merge
 - Parameters: Left joins on (UID, TEST) and UID, zero NaN tolerance
@@ -97,9 +97,9 @@ from tools.validation import check_file_exists, validate_data_format, check_miss
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/chX/rqY (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step00_extract_merge_data.log"
 
-# Input file paths (cross-RQ dependencies from RQ 5.7)
-THETA_FILE = PROJECT_ROOT / "results/ch5/rq7/data/step03_theta_scores.csv"
-TSVR_FILE = PROJECT_ROOT / "results/ch5/rq7/data/step04_lmm_input.csv"
+# Input file paths (cross-RQ dependencies from RQ 5.1.1)
+THETA_FILE = PROJECT_ROOT / "results/ch5/5.1.1/data/step03_theta_all.csv"
+TSVR_FILE = PROJECT_ROOT / "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
 AGE_FILE = PROJECT_ROOT / "data/cache/dfData.csv"
 
 # Output file path
@@ -151,7 +151,7 @@ if __name__ == "__main__":
         # VALIDATION 1: Check Cross-RQ Dependencies Exist
         # =========================================================================
         # Before attempting data load, verify all source files exist
-        # RQ 5.9 depends on RQ 5.7 outputs - user must execute RQ 5.7 first
+        # RQ 5.1.3 depends on RQ 5.7 outputs - user must execute RQ 5.7 first
 
         log("[VALIDATION] Checking cross-RQ dependencies...")
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
             error_msg = (
                 f"Cross-RQ dependency error: {theta_check['message']}\n"
                 f"File: {THETA_FILE}\n"
-                f"Required: RQ 5.7 must complete successfully before running RQ 5.9\n"
+                f"Required: RQ 5.7 must complete successfully before running RQ 5.1.3\n"
                 f"Action: Execute RQ 5.7 first to generate theta scores"
             )
             log(f"[ERROR] {error_msg}")
@@ -346,7 +346,7 @@ if __name__ == "__main__":
                 f"Missing data detected: {missing_result['total_missing']} NaN values "
                 f"({missing_result['percent_missing']:.2f}% of all cells)\n"
                 f"Missing by column: {missing_cols}\n"
-                f"RQ 5.9 requires complete cases (zero NaN tolerance)\n"
+                f"RQ 5.1.3 requires complete cases (zero NaN tolerance)\n"
                 f"Check merge logic and source data completeness"
             )
             log(f"[ERROR] {error_msg}")

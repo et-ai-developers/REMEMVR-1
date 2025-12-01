@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: Extract Individual Random Effects
-RQ: results/ch5/rq13
+RQ: results/ch5/5.1.4
 Generated: 2025-11-30
 
 PURPOSE:
@@ -21,7 +21,7 @@ EXPECTED INPUTS:
                    random_effects, converged
     Purpose: Confirms Step 1 model loading succeeded
 
-  - Pickle file (from RQ 5.7): ../rq7/data/lmm_Log.pkl
+  - Pickle file (from RQ 5.1.1): ../5.1.1/data/lmm_Lin+Log.pkl
     Format: Python pickle (statsmodels MixedLMResults object)
     Purpose: Source of random effects to extract
 
@@ -58,8 +58,8 @@ g_code REASONING:
 IMPLEMENTATION NOTES:
 - Analysis tool: stdlib (pandas, pickle) - NOT a catalogued tool
 - Validation tool: tools.validation.validate_data_columns
-- Parameters: Model object from RQ 5.7 pickle file
-- CRITICAL: This CSV is REQUIRED INPUT for RQ 5.14 (K-means clustering)
+- Parameters: Model object from RQ 5.1.1 pickle file
+- CRITICAL: This CSV is REQUIRED INPUT for RQ 5.1.5 (K-means clustering)
 """
 # =============================================================================
 
@@ -88,7 +88,7 @@ from tools.validation import validate_data_columns
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq13 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.4 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step04_random_effects_extraction.log"
 
 # =============================================================================
@@ -156,23 +156,23 @@ if __name__ == "__main__":
         log(f"  Converged: {metadata['converged']}")
 
         if not metadata['converged']:
-            raise ValueError("RQ 5.7 model did not converge. Cannot extract random effects from failed model.")
+            raise ValueError("RQ 5.1.1 model did not converge. Cannot extract random effects from failed model.")
 
         # =========================================================================
-        # STEP 2: Load LMM Model from RQ 5.7 Pickle
+        # STEP 2: Load LMM Model from RQ 5.1.1 Pickle
         # =========================================================================
         # Tool: stdlib pickle.load()
         # What it does: Deserialize statsmodels MixedLMResults object from disk
         # Expected output: Python object with random_effects attribute
 
-        log("[ANALYSIS] Loading LMM model from RQ 5.7...")
+        log("[ANALYSIS] Loading LMM model from RQ 5.1.1...")
 
-        # Construct path to RQ 5.7 model pickle
+        # Construct path to RQ 5.7 model pickle (now RQ 5.1.1 in new hierarchy)
         # CHANGED: Using Lin+Log model instead of Log (Log model has singular covariance, ΔAIC=0.8)
-        rq7_model_path = RQ_DIR.parent / "rq7" / "data" / "lmm_Lin+Log.pkl"
+        rq7_model_path = RQ_DIR.parent / "5.1.1" / "data" / "lmm_Lin+Log.pkl"
 
         if not rq7_model_path.exists():
-            raise FileNotFoundError(f"RQ 5.7 model not found: {rq7_model_path}. Run RQ 5.7 first.")
+            raise FileNotFoundError(f"RQ 5.1.1 model not found: {rq7_model_path}. Run RQ 5.1.1 first.")
 
         # Statsmodels pickle workaround: manually bypass patsy formula re-evaluation
         log("[INFO] Using statsmodels pickle workaround for patsy compatibility")

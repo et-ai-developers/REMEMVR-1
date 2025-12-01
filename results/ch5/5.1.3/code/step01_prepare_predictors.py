@@ -5,7 +5,7 @@
 """
 Step ID: step01
 Step Name: prepare_predictors
-RQ: results/ch5/rq9
+RQ: ch5/5.1.3
 Generated: 2025-11-28
 
 PURPOSE:
@@ -15,7 +15,7 @@ predictors for LMM testing age effects on baseline memory and forgetting rate.
 EXPECTED INPUTS:
   - data/step00_lmm_input_raw.csv
     Columns: ['composite_ID', 'UID', 'TEST', 'TSVR_hours', 'theta', 'se_all', 'age']
-    Format: Merged theta + TSVR + Age from RQ 5.7 and dfData.csv
+    Format: Merged theta + TSVR + Age from RQ 5.1.1 and dfData.csv
     Expected rows: ~400 (100 participants x 4 tests)
 
 EXPECTED OUTPUTS:
@@ -78,7 +78,7 @@ from tools.validation import validate_standardization, validate_numeric_range
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq9 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.3 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step01_prepare_predictors.log"
 
 # =============================================================================

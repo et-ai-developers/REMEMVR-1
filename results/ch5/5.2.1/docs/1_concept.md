@@ -1,8 +1,8 @@
-# RQ 5.1: Domain-Specific Forgetting Trajectories (What/Where/When)
+# RQ 5.2.1: Domain-Specific Forgetting Trajectories (What/Where/When)
 
 **Chapter:** 5
-**RQ Number:** 1
-**Full ID:** 5.1
+**RQ Number:** 2.1
+**Full ID:** 5.2.1
 
 ---
 

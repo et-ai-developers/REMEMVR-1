@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: compute_effect_size
-RQ: results/ch5/rq9
+RQ: ch5/5.1.3
 Generated: 2025-11-28
 
 PURPOSE:
@@ -294,7 +294,7 @@ if __name__ == "__main__":
         log(f"[SAVED] {output_csv.name} ({len(df_effect_size)} rows)")
 
         # Create summary text
-        summary_text = f"""EFFECT SIZE SUMMARY - Age Impact on Day 6 Memory (RQ 5.9)
+        summary_text = f"""EFFECT SIZE SUMMARY - Age Impact on Day 6 Memory (RQ 5.1.3)
 {'=' * 70}
 
 SCENARIOS COMPARED:
@@ -324,7 +324,7 @@ NOTE:
   - Effect size quantifies practical significance of age effects on forgetting
 
 GENERATED: 2025-11-28
-RQ: ch5/rq9 (Age effects on baseline memory and forgetting rate)
+RQ: ch5/5.1.3 (Age effects on baseline memory and forgetting rate)
 """
 
         # Save summary text

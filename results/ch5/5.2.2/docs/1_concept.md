@@ -1,8 +1,8 @@
-# RQ 5.2: Differential Consolidation Across Memory Domains
+# RQ 5.2.2: Differential Consolidation Across Memory Domains
 
 **Chapter:** 5
-**RQ Number:** 2
-**Full ID:** 5.2
+**RQ Number:** 2.2
+**Full ID:** 5.2.2
 
 ---
 
@@ -93,7 +93,7 @@ LMM (Linear Mixed Models) with piecewise time structure
 **High-Level Workflow:**
 
 **Step 1:** Data Preparation
-- Use theta scores from RQ5.1 Analysis (results/ch5/rq1/...)
+- Use theta scores from RQ5.1 Analysis (results/ch5/5.1.1/...)
 - Reshape to long format (Domain as factor variable)
 - Create piecewise time structure:
   - Early segment: Days 0-1 (consolidation window, includes one night's sleep)
@@ -153,7 +153,7 @@ DERIVED (from RQ5.1 outputs)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq1/data/...` (theta scores from IRT calibration)
+- `results/ch5/5.1.1/data/...` (theta scores from IRT calibration)
 - Exact file paths determined by RQ5.1 output structure
 
 **Dependencies:**

@@ -1,6 +1,6 @@
 rq_builder:
   status: success
-  context_dump: 'Created results/ch5/rq8/ with 6 folders
+  context_dump: 'Created results/ch5/5.1.2/ with 6 folders
 
     Folders: docs/, data/, code/, logs/, plots/, results/
 
@@ -13,22 +13,22 @@ rq_builder:
     '
 rq_concept:
   status: success
-  context_dump: 'RQ 5.8: Two-phase forgetting (rapid then slow)
+  context_dump: 'RQ 5.1.2: Two-phase forgetting (rapid then slow)
 
-    Domains: All three WWW (inherited from RQ 5.7, collapsed across domains)
+    Domains: All three WWW (inherited from RQ 5.1.1, collapsed across domains)
 
     Analysis: LMM (3 convergent tests - quadratic term, piecewise vs continuous AIC,
     slope ratio)
 
-    Data: DERIVED from RQ 5.7 (theta scores, TSVR mapping, best continuous model)
+    Data: DERIVED from RQ 5.1.1 (theta scores, TSVR mapping, best continuous model)
 
     Critical: Tests consolidation theory inflection at Day 1 (48h TSVR). Requires
-    RQ 5.7 complete.
+    RQ 5.1.1 complete.
 
     '
 rq_scholar:
   status: success
-  context_dump: '5.8 validated: 9.3/10 APPROVED. Strong consolidation theory, 5 suggested
+  context_dump: '5.1.2 validated: 9.3/10 APPROVED. Strong consolidation theory, 5 suggested
     lit additions (Radvansky 2022 high priority). 10 moderate concerns identified.
     Ready for stats.
 

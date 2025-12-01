@@ -1,8 +1,8 @@
-# RQ 5.4: Linear Trend in Forgetting Rate Across Paradigms
+# RQ 5.3.2: Linear Trend in Forgetting Rate Across Paradigms
 
 **Chapter:** 5
-**RQ Number:** 4
-**Full ID:** 5.4
+**RQ Number:** 5.3.2
+**Full ID:** 5.3.2
 
 ---
 
@@ -131,8 +131,8 @@ DERIVED (from RQ5.3 outputs)
 RQ 5.3 (Paradigm-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq3/data/theta_scores_by_paradigm.csv` (theta scores long format)
-- `results/ch5/rq3/code/best_model.pkl` (best-fitting LMM pickle)
+- `results/ch5/5.3.1/data/theta_scores_by_paradigm.csv` (theta scores long format)
+- `results/ch5/5.3.1/code/best_model.pkl` (best-fitting LMM pickle)
 
 **Dependencies:**
 RQ5.3 must complete successfully before RQ5.4 can execute. Required outputs:

@@ -2,13 +2,13 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-25
-# RQ: ch5/rq7
+# RQ: ch5/5.1.1
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq7"
+  rq_id: "ch5/5.1.1"
   total_steps: 7
   analysis_type: "IRT 2-pass purification -> 5-model LMM comparison -> AIC selection"
   generated_by: "rq_analysis v4.0.0"
@@ -33,7 +33,7 @@ steps:
       signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
 
       input_files:
-        - path: "results/ch5/rq1/data/step00_irt_input.csv"
+        - path: "results/ch5/5.2.1/data/step00_irt_input.csv"
           source: "RQ 5.1 Step 0 (DERIVED data - VR item responses extracted from master.xlsx)"
           format: "CSV, wide format (composite_ID x item columns)"
           required_columns:
@@ -256,7 +256,7 @@ steps:
       signature: "calibrate_irt(df_long: DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[DataFrame, DataFrame]"
 
       input_files:
-        - path: "results/ch5/rq1/data/step00_irt_input.csv"
+        - path: "results/ch5/5.2.1/data/step00_irt_input.csv"
           source: "RQ 5.1 Step 0 (same raw data as Step 1)"
           variable_name: "irt_data_raw"
         - path: "data/step02_purified_items.csv"
@@ -369,7 +369,7 @@ steps:
       type: "stdlib"
       operations:
         - "Load data/step03_theta_scores.csv (theta scores from Pass 2)"
-        - "Load results/ch5/rq1/data/step00a_tsvr_data.csv (TSVR time variable)"
+        - "Load results/ch5/5.2.1/data/step00_tsvr_mapping.csv (TSVR time variable)"
         - "Rename: Theta_All -> Theta, SE_All -> SE"
         - "Merge theta with TSVR on composite_ID (left join, all 400 must match)"
         - "Create time transformations: Days = TSVR_hours / 24.0, Days_squared = Days^2, log_Days_plus1 = log(Days + 1)"
@@ -385,7 +385,7 @@ steps:
             - "SE_All"
           variable_name: "theta_data"
 
-        - path: "results/ch5/rq1/data/step00a_tsvr_data.csv"
+        - path: "results/ch5/5.2.1/data/step00_tsvr_mapping.csv"
           source: "RQ 5.1 Step 0 (DERIVED data - TSVR extraction)"
           required_columns:
             - "composite_ID"
@@ -529,7 +529,7 @@ steps:
         n_factors: 1
         reference_group: null
         groups: "UID"
-        save_dir: "results/ch5/rq7/data"
+        save_dir: "results/ch5/5.1.1/data"
 
       returns:
         type: "Dict"

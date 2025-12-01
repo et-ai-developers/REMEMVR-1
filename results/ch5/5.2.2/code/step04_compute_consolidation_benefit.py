@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: Compute Consolidation Benefit Indices
-RQ: results/ch5/rq2
+RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
@@ -61,7 +61,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq2 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step04_compute_consolidation_benefit.log"
 
 # =============================================================================

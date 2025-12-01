@@ -5,7 +5,7 @@
 """
 Step ID: step03
 Step Name: Extract 3-Way Interaction Terms and Test Hypothesis
-RQ: results/ch5/rq10
+RQ: results/ch5/5.2.3
 Generated: 2025-11-28
 
 PURPOSE:
@@ -372,7 +372,7 @@ if __name__ == "__main__":
         report_path = RQ_DIR / "results" / "step03_hypothesis_test.txt"
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
-            f.write("RQ 5.10 HYPOTHESIS TEST SUMMARY\n")
+            f.write("RQ 5.2.3 HYPOTHESIS TEST SUMMARY\n")
             f.write("Step 03: 3-Way Age x Domain x Time Interaction\n")
             f.write("=" * 80 + "\n\n")
 

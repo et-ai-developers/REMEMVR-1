@@ -2,25 +2,25 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-24
-# RQ: ch5/rq4
+# RQ: ch5/5.3.2
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq4"
+  rq_id: "ch5/5.3.2"
   total_steps: 4
   analysis_type: "Secondary Analysis - Linear Trend Contrast on RQ 5.3 LMM"
   generated_by: "rq_analysis v4.0.0"
   timestamp: "2025-11-24T13:30:00"
 
   dependencies:
-    - rq: "ch5/rq3"
+    - rq: "ch5/5.3.1"
       required_status: "rq_results: success"
       files:
-        - "results/ch5/rq3/data/step05_lmm_fitted_model.pkl"
-        - "results/ch5/rq3/data/step04_lmm_input.csv"
-        - "results/ch5/rq3/data/step05_model_comparison.csv"
+        - "results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl"
+        - "results/ch5/5.3.1/data/step04_lmm_input.csv"
+        - "results/ch5/5.3.1/data/step05_model_comparison.csv"
 
   decisions_applied:
     - id: "D068"
@@ -52,20 +52,20 @@ steps:
         - "Write confirmation to data/step00_model_loaded.txt"
 
       input_files:
-        - path: "../rq3/data/step05_lmm_fitted_model.pkl"
-          absolute_path: "results/ch5/rq3/data/step05_lmm_fitted_model.pkl"
+        - path: "../5.3.1/data/step05_lmm_fitted_model.pkl"
+          absolute_path: "results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl"
           description: "Fitted MixedLM model object from RQ 5.3 (Log model, best AIC)"
           variable_name: "lmm_model"
           source: "RQ 5.3 Step 5"
-        - path: "../rq3/data/step04_lmm_input.csv"
-          absolute_path: "results/ch5/rq3/data/step04_lmm_input.csv"
+        - path: "../5.3.1/data/step04_lmm_input.csv"
+          absolute_path: "results/ch5/5.3.1/data/step04_lmm_input.csv"
           description: "LMM input data with theta scores and TSVR"
           variable_name: "theta_data"
           required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "TSVR_hours_log", "paradigm", "theta"]
           expected_rows: 1200
           source: "RQ 5.3 Step 4"
-        - path: "../rq3/data/step05_model_comparison.csv"
-          absolute_path: "results/ch5/rq3/data/step05_model_comparison.csv"
+        - path: "../5.3.1/data/step05_model_comparison.csv"
+          absolute_path: "results/ch5/5.3.1/data/step05_model_comparison.csv"
           description: "Model comparison results (AIC, delta_AIC, AIC_weight)"
           variable_name: "model_comparison"
           required_columns: ["model_name", "AIC", "delta_AIC", "AIC_weight", "converged"]

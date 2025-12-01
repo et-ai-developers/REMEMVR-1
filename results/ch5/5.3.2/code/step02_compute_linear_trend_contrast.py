@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: Compute Linear Trend Contrast
-RQ: results/ch5/rq4
+RQ: results/ch5/5.3.2
 Generated: 2025-11-24
 
 PURPOSE:
@@ -68,8 +68,8 @@ from statsmodels.regression.mixed_linear_model import MixedLMResults
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq4
-RQ3_DIR = RQ_DIR.parent / "rq3"  # results/ch5/rq3 (dependency)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.2
+RQ3_DIR = RQ_DIR.parent / "5.3.1"  # results/ch5/5.3.1 (dependency)
 LOG_FILE = RQ_DIR / "logs" / "step02_compute_linear_trend_contrast.log"
 
 # Contrast weights (linear trend)
@@ -296,8 +296,8 @@ if __name__ == "__main__":
         else:
             p_display = f"= {p_value_uncorrected:.3f}"
 
-        interpretation_text = f"""RQ 5.4 - Linear Trend Contrast Analysis
-==========================================
+        interpretation_text = f"""RQ 5.3.2 - Linear Trend Contrast Analysis
+=============================================
 
 RESEARCH QUESTION:
 Is there a systematic linear trend in forgetting rates across paradigms

@@ -1,8 +1,8 @@
-# RQ 5.6: Congruent Items and Early Consolidation
+# RQ 5.4.2: Congruent Items and Early Consolidation
 
 **Chapter:** 5
-**RQ Number:** 6
-**Full ID:** 5.6
+**RQ Number:** 5.4.2
+**Full ID:** 5.4.2
 
 ---
 

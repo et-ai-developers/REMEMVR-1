@@ -5,7 +5,7 @@
 """
 Step ID: step06
 Step Name: Compute Post-hoc Pairwise Contrasts
-RQ: ch5/rq3 (Paradigm Trajectory Analysis - Free Recall, Cued Recall, Recognition)
+RQ: ch5/5.3.1 (Paradigm Trajectory Analysis - Free Recall, Cued Recall, Recognition)
 Generated: 2025-11-24
 
 PURPOSE:
@@ -96,7 +96,7 @@ from statsmodels.regression.mixed_linear_model import MixedLMResults
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq3 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.1 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step06_compute_post_hoc_contrasts.log"
 
 # =============================================================================

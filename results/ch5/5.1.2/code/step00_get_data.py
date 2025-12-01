@@ -4,30 +4,30 @@
 # =============================================================================
 """
 Step ID: step00
-Step Name: Get Data (Load RQ 5.7 Outputs)
-RQ: results/ch5/rq8
+Step Name: Get Data (Load RQ 5.1.1 Outputs)
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
-Load theta scores, TSVR mapping, and best continuous model from RQ 5.7 outputs.
-This step establishes the data dependencies for RQ 5.8 two-phase forgetting analysis.
+Load theta scores, TSVR mapping, and best continuous model from RQ 5.1.1 outputs.
+This step establishes the data dependencies for RQ 5.1.2 two-phase forgetting analysis.
 
 EXPECTED INPUTS:
-  - results/ch5/rq7/data/step02_theta_long.csv
+  - results/ch5/5.1.1/data/step02_theta_long.csv
     Columns: ['UID', 'test', 'domain', 'theta']
     Format: Long-format theta scores from IRT calibration Pass 2
     Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
-    Source: RQ 5.7 Step 2 (IRT calibration Pass 2 theta scores)
+    Source: RQ 5.1.1 Step 2 (IRT calibration Pass 2 theta scores)
 
-  - results/ch5/rq7/data/step00_tsvr_mapping.csv
+  - results/ch5/5.1.1/data/step00_tsvr_mapping.csv
     Columns: ['UID', 'test', 'TSVR_hours']
     Format: Time since VR encoding in hours (Decision D070)
     Expected rows: ~400 (100 participants x 4 tests)
-    Source: RQ 5.7 Step 0 (TSVR extraction from master.xlsx)
+    Source: RQ 5.1.1 Step 0 (TSVR extraction from master.xlsx)
 
-  - results/ch5/rq7/data/step03_best_model.pkl
+  - results/ch5/5.1.1/data/step03_best_model.pkl
     Format: Pickled MixedLMResults object
-    Source: RQ 5.7 Step 3 (best continuous model selection by AIC)
+    Source: RQ 5.1.1 Step 3 (best continuous model selection by AIC)
 
 EXPECTED OUTPUTS:
   - data/step00_theta_tsvr.csv
@@ -36,15 +36,15 @@ EXPECTED OUTPUTS:
     Expected rows: ~400 (100 participants x 4 tests)
 
   - data/step00_best_continuous_aic.txt
-    Format: Single numeric value (AIC from RQ 5.7 best continuous model)
+    Format: Single numeric value (AIC from RQ 5.1.1 best continuous model)
     Purpose: For Step 3 AIC comparison (piecewise vs continuous)
 
   - data/step00_rq57_convergence.txt
-    Format: Text report of RQ 5.7 model convergence status + random effects structure
+    Format: Text report of RQ 5.1.1 model convergence status + random effects structure
     Purpose: CRITICAL for interpreting AIC comparison validity in Step 3
 
 VALIDATION CRITERIA:
-  - All 3 RQ 5.7 dependency files exist
+  - All 3 RQ 5.1.1 dependency files exist
   - No file size = 0 (files not empty)
   - Merge produces ~400 rows (no unexpected data loss)
   - No NaN in theta or TSVR_hours after merge
@@ -52,10 +52,10 @@ VALIDATION CRITERIA:
 
 g_code REASONING:
 - Approach: Cross-RQ data dependency resolution with convergence validation
-- Why this approach: RQ 5.8 builds on RQ 5.7 continuous model results. Must validate
-  RQ 5.7 convergence status BEFORE using its AIC for comparison (Step 3). Fallback
-  random effects in RQ 5.7 would invalidate direct AIC comparison.
-- Data flow: RQ 5.7 outputs (theta, TSVR, model) -> domain collapse -> merged dataset
+- Why this approach: RQ 5.1.2 builds on RQ 5.1.1 continuous model results. Must validate
+  RQ 5.1.1 convergence status BEFORE using its AIC for comparison (Step 3). Fallback
+  random effects in RQ 5.1.1 would invalidate direct AIC comparison.
+- Data flow: RQ 5.1.1 outputs (theta, TSVR, model) -> domain collapse -> merged dataset
   for piecewise modeling (Steps 2-3)
 - Expected performance: ~seconds (file I/O only, no computation)
 
@@ -91,10 +91,10 @@ from tools.validation import check_file_exists
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq8 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.2 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step00_get_data.log"
 
-# RQ 5.7 dependency paths (absolute)
+# RQ 5.1.1 dependency paths (absolute)
 RQ7_DIR = PROJECT_ROOT / "results" / "ch5" / "rq7"
 RQ7_LMM_INPUT_FILE = RQ7_DIR / "data" / "step04_lmm_input.csv"  # Has UID, test, Theta, TSVR_hours
 RQ7_MODEL_COMPARISON_FILE = RQ7_DIR / "results" / "step05_model_comparison.csv"  # Has best model AIC
@@ -138,17 +138,17 @@ def log(msg):
 
 if __name__ == "__main__":
     try:
-        log("[START] Step 0: Get Data (Load RQ 5.7 Outputs)")
+        log("[START] Step 0: Get Data (Load RQ 5.1.1 Outputs)")
 
         # =========================================================================
-        # STEP 1: Validate RQ 5.7 Dependency Files Exist
+        # STEP 1: Validate RQ 5.1.1 Dependency Files Exist
         # =========================================================================
-        # Expected: All 3 files from RQ 5.7 (theta, TSVR, best model)
-        # Purpose: Fail-fast if RQ 5.7 incomplete (EXPECTATIONS ERROR)
+        # Expected: All 3 files from RQ 5.1.1 (theta, TSVR, best model)
+        # Purpose: Fail-fast if RQ 5.1.1 incomplete (EXPECTATIONS ERROR)
 
-        log("[VALIDATION] Checking RQ 5.7 dependency files exist...")
+        log("[VALIDATION] Checking RQ 5.1.1 dependency files exist...")
 
-        # Check RQ 5.7 LMM input file exists
+        # Check RQ 5.1.1 LMM input file exists
         validation_result = check_file_exists(
             file_path=str(RQ7_LMM_INPUT_FILE),
             min_size_bytes=1000  # Should be ~35KB
@@ -156,26 +156,26 @@ if __name__ == "__main__":
 
         if not validation_result.get('valid', False):
             raise FileNotFoundError(
-                f"EXPECTATIONS ERROR: RQ 5.7 dependency missing or invalid: {RQ7_LMM_INPUT_FILE}\n"
+                f"EXPECTATIONS ERROR: RQ 5.1.1 dependency missing or invalid: {RQ7_LMM_INPUT_FILE}\n"
                 f"Validation message: {validation_result.get('message', 'unknown')}\n"
-                f"RQ 5.7 must complete successfully before RQ 5.8 can proceed."
+                f"RQ 5.1.1 must complete successfully before RQ 5.1.2 can proceed."
             )
 
         log(f"[PASS] Dependency exists: {RQ7_LMM_INPUT_FILE.name} ({validation_result['size_bytes']} bytes)")
 
         # =========================================================================
-        # STEP 2: Load RQ 5.7 LMM Input Data
+        # STEP 2: Load RQ 5.1.1 LMM Input Data
         # =========================================================================
-        # RQ 5.7 step04_lmm_input.csv already has UID, test, Theta, TSVR_hours merged
+        # RQ 5.1.1 step04_lmm_input.csv already has UID, test, Theta, TSVR_hours merged
         # We just need to select relevant columns and rename Theta -> theta
 
-        log("[LOAD] Loading RQ 5.7 LMM input data...")
+        log("[LOAD] Loading RQ 5.1.1 LMM input data...")
         rq7_data = pd.read_csv(RQ7_LMM_INPUT_FILE, encoding='utf-8')
         log(f"[LOADED] {RQ7_LMM_INPUT_FILE.name} ({len(rq7_data)} rows, {len(rq7_data.columns)} cols)")
         log(f"[INFO] Columns: {list(rq7_data.columns)}")
 
-        # Load RQ 5.7 model comparison results (for AIC)
-        log("[LOAD] Loading RQ 5.7 model comparison...")
+        # Load RQ 5.1.1 model comparison results (for AIC)
+        log("[LOAD] Loading RQ 5.1.1 model comparison...")
         rq7_models = pd.read_csv(RQ7_MODEL_COMPARISON_FILE, encoding='utf-8')
         log(f"[LOADED] {RQ7_MODEL_COMPARISON_FILE.name} ({len(rq7_models)} models)")
 
@@ -183,13 +183,13 @@ if __name__ == "__main__":
         best_model = rq7_models[rq7_models['delta_AIC'] == 0].iloc[0]
         rq7_aic = best_model['AIC']
         rq7_model_name = best_model['model_name']
-        log(f"[INFO] RQ 5.7 best model: {rq7_model_name} (AIC = {rq7_aic:.2f})")
+        log(f"[INFO] RQ 5.1.1 best model: {rq7_model_name} (AIC = {rq7_aic:.2f})")
 
         # =========================================================================
         # STEP 3: Extract relevant columns and rename
         # =========================================================================
-        # RQ 5.7 has: composite_ID, UID, test, Theta, SE, TSVR_hours, Days, Days_squared, log_Days_plus1
-        # RQ 5.8 needs: UID, test, theta (lowercase), TSVR_hours
+        # RQ 5.1.1 has: composite_ID, UID, test, Theta, SE, TSVR_hours, Days, Days_squared, log_Days_plus1
+        # RQ 5.1.2 needs: UID, test, theta (lowercase), TSVR_hours
 
         log("[TRANSFORM] Selecting columns (UID, test, Theta, TSVR_hours) and renaming...")
         theta_tsvr = rq7_data[['UID', 'test', 'Theta', 'TSVR_hours']].copy()
@@ -218,13 +218,13 @@ if __name__ == "__main__":
         if nan_theta > 0:
             raise ValueError(
                 f"[FAIL] Merged data contains {nan_theta} NaN values in theta column\n"
-                f"Check RQ 5.7 theta scores for missing values"
+                f"Check RQ 5.1.1 theta scores for missing values"
             )
 
         if nan_tsvr > 0:
             raise ValueError(
                 f"[FAIL] Merged data contains {nan_tsvr} NaN values in TSVR_hours column\n"
-                f"Check RQ 5.7 TSVR mapping for missing values"
+                f"Check RQ 5.1.1 TSVR mapping for missing values"
             )
 
         log(f"[PASS] No NaN values in theta or TSVR_hours")
@@ -233,8 +233,8 @@ if __name__ == "__main__":
         # STEP 6: Save Outputs
         # =========================================================================
         # Save merged theta + TSVR dataset
-        # Save RQ 5.7 AIC value (for Step 3 comparison)
-        # Save RQ 5.7 convergence status (CRITICAL for interpretation)
+        # Save RQ 5.1.1 AIC value (for Step 3 comparison)
+        # Save RQ 5.1.1 convergence status (CRITICAL for interpretation)
 
         output_theta_tsvr = RQ_DIR / "data" / "step00_theta_tsvr.csv"
         log(f"[SAVE] Saving merged theta + TSVR to {output_theta_tsvr.name}...")
@@ -242,22 +242,22 @@ if __name__ == "__main__":
         log(f"[SAVED] {output_theta_tsvr.name} ({len(theta_tsvr)} rows, {len(theta_tsvr.columns)} cols)")
 
         output_aic = RQ_DIR / "data" / "step00_best_continuous_aic.txt"
-        log(f"[SAVE] Saving RQ 5.7 AIC to {output_aic.name}...")
+        log(f"[SAVE] Saving RQ 5.1.1 AIC to {output_aic.name}...")
         with open(output_aic, 'w', encoding='utf-8') as f:
             f.write(f"{rq7_aic:.6f}\n")
         log(f"[SAVED] {output_aic.name} (AIC = {rq7_aic:.2f})")
 
         output_convergence = RQ_DIR / "data" / "step00_rq57_convergence.txt"
-        log(f"[SAVE] Saving RQ 5.7 model info to {output_convergence.name}...")
+        log(f"[SAVE] Saving RQ 5.1.1 model info to {output_convergence.name}...")
         with open(output_convergence, 'w', encoding='utf-8') as f:
-            f.write(f"RQ 5.7 Best Continuous Model Information\n")
+            f.write(f"RQ 5.1.1 Best Continuous Model Information\n")
             f.write(f"=" * 60 + "\n")
             f.write(f"Best model: {rq7_model_name}\n")
             f.write(f"AIC: {rq7_aic:.6f}\n")
             f.write(f"\n")
-            f.write(f"INTERPRETATION FOR RQ 5.8 STEP 3:\n")
+            f.write(f"INTERPRETATION FOR RQ 5.1.2 STEP 3:\n")
             f.write(f"-" * 60 + "\n")
-            f.write(f"RQ 5.7 completed successfully with {rq7_model_name} as best model.\n")
+            f.write(f"RQ 5.1.1 completed successfully with {rq7_model_name} as best model.\n")
             f.write(f"AIC comparison in Step 3 uses this value as reference.\n")
         log(f"[SAVED] {output_convergence.name}")
 

@@ -5,7 +5,7 @@
 """
 Step ID: step06
 Step Name: Prepare Plot Data
-RQ: results/ch5/rq8
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
@@ -58,7 +58,7 @@ IMPLEMENTATION NOTES:
 - Validation tool: validate_plot_data_completeness from tools.validation
 - Parameters: segment_values=['Early', 'Late'], factor_values=['Observed', 'Quadratic', 'Piecewise']
 - NOTE: prepare_piecewise_plot_data designed for piecewise LMM with factors
-  (e.g., Common/Congruent/Incongruent). RQ 5.8 has NO factor dimension
+  (e.g., Common/Congruent/Incongruent). RQ 5.1.2 has NO factor dimension
   (domain-collapsed). Use 'source' as pseudo-factor to distinguish data sources.
 """
 # =============================================================================

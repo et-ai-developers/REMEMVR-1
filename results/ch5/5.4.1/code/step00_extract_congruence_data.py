@@ -5,7 +5,7 @@
 """
 Step ID: step00
 Step Name: Extract Congruence Data
-RQ: results/ch5/rq5 (RQ 5.5: Schema Congruence Effects on Forgetting Trajectories)
+RQ: results/ch5/5.4.1 (RQ 5.4.1: Schema Congruence Effects on Forgetting Trajectories)
 Generated: 2025-11-24
 
 PURPOSE:
@@ -13,12 +13,12 @@ Extract interactive paradigm items from RQ 5.1 data and create Q-matrix mapping
 items to congruence categories (common, congruent, incongruent).
 
 EXPECTED INPUTS:
-  - results/ch5/rq1/data/step00_irt_input.csv
+  - results/ch5/5.1.1/data/step00_irt_input.csv
     Columns: composite_ID + item columns (TQ_IFR-*, TQ_ICR-*, TQ_IRE-*)
     Format: Wide-format IRT input from RQ 5.1
     Expected rows: ~400 (100 participants x 4 tests)
 
-  - results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - results/ch5/5.1.1/data/step00_tsvr_mapping.csv
     Columns: composite_ID, UID, test, TSVR_hours
     Format: TSVR time mapping
     Expected rows: ~400
@@ -78,11 +78,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq5
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.4.1
 LOG_FILE = RQ_DIR / "logs" / "step00_extract_congruence_data.log"
 
 # RQ 5.1 input paths (cross-RQ dependency)
-RQ1_DIR = PROJECT_ROOT / "results" / "ch5" / "rq1"
+RQ1_DIR = PROJECT_ROOT / "results" / "ch5" / "5.1.1"
 RQ1_IRT_INPUT = RQ1_DIR / "data" / "step00_irt_input.csv"
 RQ1_TSVR_MAPPING = RQ1_DIR / "data" / "step00_tsvr_mapping.csv"
 

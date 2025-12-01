@@ -5,7 +5,7 @@
 """
 Step ID: step00_extract_vr_data
 Step Name: Extract VR Data for IRT Analysis
-RQ: ch5/rq1
+RQ: ch5/5.2.1
 Generated: 2025-11-22
 
 PURPOSE:
@@ -73,8 +73,8 @@ from typing import List, Dict
 # =============================================================================
 
 # Project root and RQ directory
-PROJECT_ROOT = Path("/home/etai/projects/REMEMVR")
-RQ_DIR = PROJECT_ROOT / "results" / "ch5" / "rq1"
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+RQ_DIR = Path(__file__).resolve().parents[1]
 LOG_FILE = RQ_DIR / "logs" / "step00_extract_vr_data.log"
 
 # Input file

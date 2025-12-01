@@ -2,14 +2,14 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-24
-# RQ: ch5/rq5 (5.5: Schema Congruence Effects on Forgetting Trajectories)
+# RQ: ch5/5.4.1 (5.4.1: Schema Congruence Effects on Forgetting Trajectories)
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq5"
-  rq_full: "5.5"
+  rq_id: "ch5/5.4.1"
+  rq_full: "5.4.1"
   title: "Schema Congruence Effects on Forgetting Trajectories"
   total_steps: 8
   analysis_type: "IRT 2-pass -> LMM trajectory (schema congruence)"
@@ -17,10 +17,10 @@ metadata:
   timestamp: "2025-11-24T15:30:00"
 
   cross_rq_dependencies:
-    - source_rq: "ch5/rq1"
+    - source_rq: "ch5/5.1.1"
       files:
-        - "results/ch5/rq1/data/step00_irt_input.csv"
-        - "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+        - "results/ch5/5.1.1/data/step00_irt_input.csv"
+        - "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
       rationale: "Reuses RQ 5.1 extraction with different grouping (congruence vs WWW)"
 
   key_decisions:
@@ -54,26 +54,26 @@ steps:
     analysis_call:
       type: "stdlib"
       operations:
-        - "Load results/ch5/rq1/data/step00_irt_input.csv (cross-RQ input)"
+        - "Load results/ch5/5.1.1/data/step00_irt_input.csv (cross-RQ input)"
         - "Filter columns to Interactive paradigms only (VR_IFR_*, VR_ICR_*, VR_IRE_*)"
         - "Remove VR_RFR_* columns (Room Free Recall - different response format)"
         - "Remove TQ_* columns if present (Text Questions not interactive paradigm)"
         - "Parse item suffixes from column names to determine congruence"
         - "Create Q-matrix: item_name x dimension (common/congruent/incongruent)"
         - "Map: *_i1, *_i2 -> common; *_i3, *_i4 -> congruent; *_i5, *_i6 -> incongruent"
-        - "Copy results/ch5/rq1/data/step00_tsvr_mapping.csv to data/step00_tsvr_mapping.csv"
+        - "Copy results/ch5/5.1.1/data/step00_tsvr_mapping.csv to data/step00_tsvr_mapping.csv"
         - "Save filtered IRT input to data/step00_irt_input.csv"
         - "Save Q-matrix to data/step00_q_matrix.csv"
 
       input_files:
-        - path: "results/ch5/rq1/data/step00_irt_input.csv"
+        - path: "results/ch5/5.1.1/data/step00_irt_input.csv"
           absolute_path: true
           required_columns: ["composite_ID"]
           description: "Wide-format IRT input from RQ 5.1 (composite_ID x item columns)"
           expected_rows: 400
           variable_name: "df_rq1_irt"
 
-        - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+        - path: "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
           absolute_path: true
           required_columns: ["composite_ID", "TSVR_hours", "test"]
           description: "TSVR time mapping from RQ 5.1"
@@ -122,7 +122,7 @@ steps:
       type: "inline"
       criteria:
         - name: "RQ 5.1 files exist"
-          check: "os.path.exists(results/ch5/rq1/data/step00_irt_input.csv)"
+          check: "os.path.exists(results/ch5/5.1.1/data/step00_irt_input.csv)"
           severity: "CRITICAL"
         - name: "Output files created"
           check: "data/step00_irt_input.csv, data/step00_q_matrix.csv, data/step00_tsvr_mapping.csv exist"

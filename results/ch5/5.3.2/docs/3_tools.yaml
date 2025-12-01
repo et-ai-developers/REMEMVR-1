@@ -1,9 +1,9 @@
-# 3_tools.yaml - Tool Catalog for RQ 5.4: Linear Trend in Paradigm Forgetting Rates
+# 3_tools.yaml - Tool Catalog for RQ 5.3.2: Linear Trend in Paradigm Forgetting Rates
 # Created by: rq_tools agent
 # Date: 2025-11-24
 # Architecture: Tool Catalog (v4.X) - Each tool listed once, deduplication
 
-# SPECIAL NOTE: RQ 5.4 is a Secondary Analysis
+# SPECIAL NOTE: RQ 5.3.2 is a Secondary Analysis
 # This RQ operates on outputs from RQ 5.3 (fitted LMM model) and performs
 # contrast testing within that model. The analysis uses primarily STDLIB
 # operations (pickle, pandas, statsmodels, scipy) rather than custom tools/
@@ -29,7 +29,7 @@ analysis_tools:
     validation_tool: "validate_lmm_convergence"
 
     input_files:
-      - path: "../rq3/data/step05_lmm_fitted_model.pkl"
+      - path: "../5.3.1/data/step05_lmm_fitted_model.pkl"
         description: "Fitted MixedLM model object from RQ 5.3"
         source: "RQ 5.3 Step 5"
 
@@ -197,7 +197,7 @@ summary:
   mandatory_decisions_embedded: ["D068", "D070"]
 
   notes:
-    - "RQ 5.4 is a secondary analysis operating on RQ 5.3 outputs"
+    - "RQ 5.3.2 is a secondary analysis operating on RQ 5.3 outputs"
     - "Most operations use stdlib (pickle, pandas, statsmodels, scipy, numpy)"
     - "Only custom tool required: validate_lmm_convergence from tools.validation"
     - "Linear trend contrast computed manually (not using compute_contrasts_pairwise)"

@@ -1,4 +1,4 @@
-# 3_tools.yaml - Tool Catalog for RQ 5.8
+# 3_tools.yaml - Tool Catalog for RQ 5.1.2
 # Created by: rq_tools agent
 # Date: 2025-11-27
 # Architecture: Tool Catalog (each tool listed ONCE, deduplication across steps)
@@ -95,7 +95,7 @@ analysis_tools:
         late: "Late"
 
     notes: |
-      RQ 5.8 uses 48-hour cutoff (Day 1 after one night's sleep = consolidation window).
+      RQ 5.1.2 uses 48-hour cutoff (Day 1 after one night's sleep = consolidation window).
       Boundary assignment: Early = [0, 48) hours (excluding 48), Late = [48, 240] hours (including 48).
       Standard convention: boundary point (48h) belongs to second segment (Late).
 
@@ -167,7 +167,7 @@ analysis_tools:
       ci_level: 0.95
 
     notes: |
-      RQ 5.8 visualization: two-panel plot comparing piecewise vs continuous models.
+      RQ 5.1.2 visualization: two-panel plot comparing piecewise vs continuous models.
       Inflection at 48 hours highlighted with vertical dashed line.
 
     source_reference: "tools_inventory.md lines 287-295"
@@ -218,9 +218,9 @@ validation_tools:
     description: "Validate RQ 5.7 dependency files exist before Step 0 execution"
 
     input_files:
-      - "results/ch5/rq7/data/step02_theta_long.csv"
-      - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
-      - "results/ch5/rq7/data/step03_best_model.pkl"
+      - "results/ch5/5.1.1/data/step02_theta_long.csv"
+      - "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
+      - "results/ch5/5.1.1/data/step03_best_model.pkl"
 
     parameters:
       min_size_bytes: 0
@@ -244,7 +244,7 @@ validation_tools:
 
     notes: |
       Step 0 has hard dependency on RQ 5.7 completion.
-      If ANY file missing, cannot proceed with RQ 5.8.
+      If ANY file missing, cannot proceed with RQ 5.1.2.
 
     source_reference: "tools_inventory.md lines 334-340"
 
@@ -437,7 +437,7 @@ summary:
   cross_rq_dependencies: ["RQ 5.7"]
   mandatory_decisions_embedded: ["D070 (TSVR time variable)", "D068 (dual p-values)"]
   notes: |
-    RQ 5.8 is unique: LMM-only analysis with comprehensive assumption validation.
+    RQ 5.1.2 is unique: LMM-only analysis with comprehensive assumption validation.
     No IRT calibration (theta scores inherited from RQ 5.7).
     Three convergent tests for two-phase forgetting hypothesis.
     Step 4 is validation-as-analysis (assumption checking IS the analysis step).

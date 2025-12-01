@@ -1,6 +1,6 @@
-# Analysis Plan: RQ 5.7 - Functional Form of Forgetting Trajectories
+# Analysis Plan: RQ 5.1.1 - Functional Form of Forgetting Trajectories
 
-**Research Question:** 5.7
+**Research Question:** 5.1.1
 **Created:** 2025-11-25
 **Status:** Planning complete, ready for tool specification (rq_tools)
 
@@ -39,7 +39,7 @@ This RQ requires 7 steps (2-pass IRT with purification):
 
 **Input:**
 
-**File:** results/ch5/rq1/data/step00_irt_input.csv (from RQ 5.1 data extraction)
+**File:** results/ch5/5.2.1/data/step00_irt_input.csv (from RQ 5.1 data extraction)
 **Source:** RQ 5.1 Step 0 (data preparation)
 **Format:** CSV, wide format (one row per composite_ID, one column per item)
 **Columns:**
@@ -202,7 +202,7 @@ Validation tools MUST be used after purification. The rq_analysis agent will emb
 
 **Input:**
 
-**File 1:** results/ch5/rq1/data/step00_irt_input.csv (same raw data as Step 1)
+**File 1:** results/ch5/5.2.1/data/step00_irt_input.csv (same raw data as Step 1)
 **Source:** RQ 5.1 Step 0
 **Format:** CSV, wide format
 **Expected Rows:** 400
@@ -310,7 +310,7 @@ Validation tools MUST be used after Pass 2 calibration. The rq_analysis agent wi
 **Columns:** composite_ID, Theta_All, SE_All
 **Expected Rows:** 400
 
-**File 2:** results/ch5/rq1/data/step00a_tsvr_data.csv (from RQ 5.1 TSVR extraction)
+**File 2:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv (from RQ 5.1 TSVR extraction)
 **Format:** CSV, one row per composite_ID
 **Columns:** composite_ID, TSVR_hours (time since VR session in actual hours)
 **Expected Rows:** 400
@@ -322,7 +322,7 @@ Validation tools MUST be used after Pass 2 calibration. The rq_analysis agent wi
 - Keep `SE_All` as `SE` (standard error of theta)
 
 **Transformation 2: Merge TSVR time variable**
-- Merge step01_theta_scores.csv with step00a_tsvr_data.csv on composite_ID
+- Merge step01_theta_scores.csv with step00_tsvr_mapping.csv on composite_ID
 - Left join (keep all theta scores, add TSVR_hours)
 - Validation: All composite_IDs must match (no missing TSVR values tolerated)
 
@@ -796,26 +796,26 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 **This RQ requires outputs from:**
 
 **RQ 5.1 (Domain-Specific Forgetting Trajectories)**
-  - **File 1:** results/ch5/rq1/data/step00_irt_input.csv
+  - **File 1:** results/ch5/5.2.1/data/step00_irt_input.csv
   - **Used in:** Step 1 (IRT calibration with "All" factor)
   - **Rationale:** RQ 5.7 reprocesses RQ 5.1 IRT input data with different factor structure (single omnibus "All" factor instead of What/Where/When factors) to estimate overall forgetting trajectory rather than domain-specific patterns
 
-  - **File 2:** results/ch5/rq1/data/step00a_tsvr_data.csv
+  - **File 2:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv
   - **Used in:** Step 2 (merge TSVR time variable with theta scores)
   - **Rationale:** TSVR (actual hours since encoding) required per Decision D070 for accurate temporal modeling
 
 **Execution Order Constraint:**
-1. RQ 5.1 Step 0 must complete first (provides step00_irt_input.csv and step00a_tsvr_data.csv)
+1. RQ 5.1 Step 0 must complete first (provides step00_irt_input.csv and step00_tsvr_mapping.csv)
 2. RQ 5.7 executes (reprocesses RQ 5.1 data with different IRT configuration)
 
 **Data Source Boundaries:**
 - **RAW data:** None (RQ 5.7 does NOT extract from master.xlsx directly)
-- **DERIVED data:** step00_irt_input.csv and step00a_tsvr_data.csv from RQ 5.1
+- **DERIVED data:** step00_irt_input.csv and step00_tsvr_mapping.csv from RQ 5.1
 - **Scope:** RQ 5.7 does NOT re-extract data, only re-calibrates IRT with different factor structure
 
 **Validation:**
-- Step 1: Check results/ch5/rq1/data/step00_irt_input.csv exists (EXPECTATIONS ERROR if absent)
-- Step 2: Check results/ch5/rq1/data/step00a_tsvr_data.csv exists (EXPECTATIONS ERROR if absent)
+- Step 1: Check results/ch5/5.2.1/data/step00_irt_input.csv exists (EXPECTATIONS ERROR if absent)
+- Step 2: Check results/ch5/5.2.1/data/step00_tsvr_mapping.csv exists (EXPECTATIONS ERROR if absent)
 - If either file missing -> quit with error -> user must execute RQ 5.1 Step 0 first
 
 **Why This Dependency Exists:**
@@ -954,7 +954,7 @@ This is not optional. This is the core architectural principle preventing cascad
 
 ## Summary
 
-**Total Steps:** 5
+**Total Steps:** 7 (Steps 1-5 completed, Steps 6-7 skipped due to pickle unpickling issues; rq_plots generates visualizations directly)
 
 **Estimated Runtime:**
 - Step 1: 30-60 min (IRT calibration, High complexity)
@@ -965,7 +965,7 @@ This is not optional. This is the core architectural principle preventing cascad
 - **Total:** 40-82 minutes (dominated by Step 1 IRT calibration)
 
 **Cross-RQ Dependencies:**
-- RQ 5.1 Step 0 (requires step00_irt_input.csv and step00a_tsvr_data.csv)
+- RQ 5.1 Step 0 (requires step00_irt_input.csv and step00_tsvr_mapping.csv)
 
 **Primary Outputs:**
 - data/step01_theta_scores.csv (theta estimates with single omnibus "All" factor)
@@ -979,7 +979,7 @@ This is not optional. This is the core architectural principle preventing cascad
 **Key Decisions Implemented:**
 - Decision D070: TSVR as time variable (actual hours, not nominal days)
 - Decision D069: Dual-scale trajectory plots (theta + probability)
-- Decision D039: NOT applied (single-factor IRT, no purification needed for exploratory omnibus analysis)
+- Decision D039: Applied (2-pass IRT purification with |b|≤3.0, a≥0.4 thresholds per Step 2. Purification improves measurement quality regardless of dimensionality)
 
 **Scientific Question Answered:**
 Which mathematical function (Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log) best approximates episodic forgetting trajectories? AIC-based model selection quantifies relative evidence for competing theoretical predictions (Ebbinghaus logarithmic vs power-law vs two-phase consolidation).

@@ -1,8 +1,8 @@
-# RQ 5.11: IRT-CTT Convergent Validity
+# RQ 5.2.4: IRT-CTT Convergent Validity
 
 **Chapter:** 5
-**RQ Number:** 11
-**Full ID:** 5.11
+**RQ Number:** 2.4
+**Full ID:** 5.2.4
 
 ---
 
@@ -91,9 +91,9 @@ Convergent validity comparison using Correlation Analysis + Parallel LMM (Linear
 **High-Level Workflow:**
 
 **Step 0:** Get Data
-- Load IRT theta scores from results/ch5/rq1/data/step03_theta_scores.csv (Theta_What, Theta_Where, Theta_When per UID × Test)
-- Load purified item list from results/ch5/rq1/data/step02_purified_items.csv (filter CTT to match IRT item set)
-- Load TSVR mapping from results/ch5/rq1/data/step00_tsvr_mapping.csv (UID, Test, TSVR)
+- Load IRT theta scores from results/ch5/5.2.1/data/step03_theta_scores.csv (Theta_What, Theta_Where, Theta_When per UID × Test)
+- Load purified item list from results/ch5/5.2.1/data/step02_purified_items.csv (filter CTT to match IRT item set)
+- Load TSVR mapping from results/ch5/5.2.1/data/step00_tsvr_mapping.csv (UID, Test, TSVR)
 - Load raw VR item scores from data/cache/dfData.csv for CTT computation
 
 **Step 1:** Data Preparation
@@ -156,9 +156,9 @@ DERIVED (from RQ 5.1 IRT outputs + raw data for CTT computation)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- **IRT Scores:** `results/ch5/rq1/data/step03_theta_scores.csv` (or equivalent theta output file)
+- **IRT Scores:** `results/ch5/5.2.1/data/step03_theta_scores.csv` (or equivalent theta output file)
   - Columns: UID, Test, Domain, Theta (IRT ability estimates)
-- **TSVR Mapping:** `results/ch5/rq1/data/step00_tsvr_mapping.csv`
+- **TSVR Mapping:** `results/ch5/5.2.1/data/step00_tsvr_mapping.csv`
   - Columns: UID, Test, TSVR (actual hours since encoding)
 - **Raw Data for CTT:** `data/cache/dfData.csv` (master dataset)
   - Columns: UID, TEST, TQ_* (all VR item scores for domain-specific aggregation)

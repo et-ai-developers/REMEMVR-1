@@ -5,7 +5,7 @@
 """
 Step ID: step01
 Step Name: IRT Calibration with Omnibus Factor
-RQ: results/ch5/rq7
+RQ: ch5/5.1.1
 Generated: 2025-11-25
 
 PURPOSE:
@@ -96,7 +96,7 @@ from tools.validation import validate_irt_convergence, validate_irt_parameters
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq7
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.1
 LOG_FILE = RQ_DIR / "logs" / "step01_calibration.log"
 
 # =============================================================================
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         # Purpose: Raw VR item responses (0/1) for omnibus IRT calibration
 
         log("[LOAD] Loading VR item responses from RQ 5.1...")
-        input_path = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data" / "step00_irt_input.csv"
+        input_path = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data" / "step00_irt_input.csv"
         df_wide = pd.read_csv(input_path, encoding='utf-8')
         log(f"[LOADED] {input_path.name} ({len(df_wide)} rows, {len(df_wide.columns)} cols)")
 

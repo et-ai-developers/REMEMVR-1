@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: step02_fit_lmm
-RQ: results/ch5/rq9
+RQ: ch5/5.1.3
 Generated: 2025-11-28
 
 PURPOSE:
@@ -99,7 +99,7 @@ from tools.validation import validate_model_convergence, validate_lmm_assumption
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq9 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.3 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step02_fit_lmm.log"
 
 # =============================================================================

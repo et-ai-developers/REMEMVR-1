@@ -5,7 +5,7 @@
 """
 Step ID: step01
 Step Name: Fit Piecewise LMM with 3-Way Interaction
-RQ: results/ch5/rq2
+RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
@@ -76,7 +76,7 @@ from tools.validation import validate_lmm_convergence
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq2 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step01_fit_piecewise_lmm.log"
 
 # =============================================================================

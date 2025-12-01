@@ -2,13 +2,13 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-24
-# RQ: ch5/rq3
+# RQ: ch5/5.3.1
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq3"
+  rq_id: "ch5/5.3.1"
   total_steps: 8
   analysis_type: "IRT -> LMM paradigm trajectory analysis (Free Recall, Cued Recall, Recognition)"
   generated_by: "rq_analysis v4.0.0"
@@ -21,10 +21,10 @@ metadata:
     - "D070: TSVR as continuous time variable (actual hours since encoding)"
 
   cross_rq_dependencies:
-    - source_rq: "ch5/rq1"
+    - source_rq: "ch5/5.2.1"
       files:
-        - "results/ch5/rq1/data/step00_irt_input.csv"
-        - "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+        - "results/ch5/5.2.1/data/step00_irt_input.csv"
+        - "results/ch5/5.2.1/data/step00_tsvr_mapping.csv"
       reason: "Reuse extracted VR data with new paradigm-based Q-matrix"
 
 # ============================================================================
@@ -42,27 +42,27 @@ steps:
     analysis_call:
       type: "stdlib"
       operations:
-        - "Load RQ 5.1 IRT input: pd.read_csv('results/ch5/rq1/data/step00_irt_input.csv')"
+        - "Load RQ 5.2.1 IRT input: pd.read_csv('results/ch5/5.2.1/data/step00_irt_input.csv')"
         - "Filter columns: Keep composite_ID + columns matching *IFR-*ANS, *ICR-*ANS, *IRE-*ANS patterns"
         - "Exclude columns: *RFR-* (Room Free Recall), *TCR-* (Task Cued Recall)"
         - "Create Q-matrix DataFrame with columns: item_name, free_recall, cued_recall, recognition"
         - "For each item: set factor column to 1 based on pattern (*IFR*->free_recall, *ICR*->cued_recall, *IRE*->recognition)"
-        - "Copy TSVR mapping: shutil.copy from results/ch5/rq1/data/step00_tsvr_mapping.csv"
+        - "Copy TSVR mapping: shutil.copy from results/ch5/5.2.1/data/step00_tsvr_mapping.csv"
         - "Save filtered IRT input to data/step00_irt_input.csv"
         - "Save Q-matrix to data/step00_q_matrix.csv"
         - "Save TSVR mapping copy to data/step00_tsvr_mapping.csv"
 
     input_files:
-      - path: "results/ch5/rq1/data/step00_irt_input.csv"
+      - path: "results/ch5/5.2.1/data/step00_irt_input.csv"
         format: "CSV with UTF-8 encoding"
         columns:
           - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
           - {name: "TQ_*", type: "int", description: "VR item columns (0 or 1)"}
         row_count: 400
         variable_name: "df_rq1_input"
-        description: "Source IRT input from RQ 5.1 (all paradigms, all domains)"
+        description: "Source IRT input from RQ 5.2.1 (all paradigms, all domains)"
 
-      - path: "results/ch5/rq1/data/step00_tsvr_mapping.csv"
+      - path: "results/ch5/5.2.1/data/step00_tsvr_mapping.csv"
         format: "CSV with UTF-8 encoding"
         columns:
           - {name: "composite_ID", type: "str", description: "UID_test concatenation"}
@@ -70,7 +70,7 @@ steps:
           - {name: "test", type: "str", description: "Test session T1/T2/T3/T4"}
         row_count: 400
         variable_name: "df_tsvr"
-        description: "TSVR time variable mapping from RQ 5.1"
+        description: "TSVR time variable mapping from RQ 5.2.1"
 
     output_files:
       - path: "data/step00_irt_input.csv"
@@ -113,7 +113,7 @@ steps:
       exclude_patterns:
         - "*RFR-*"
         - "*TCR-*"
-      source_rq: "ch5/rq1"
+      source_rq: "ch5/5.2.1"
 
     validation_call:
       type: "inline"

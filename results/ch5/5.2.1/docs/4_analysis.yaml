@@ -2,13 +2,13 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-22
-# RQ: ch5/rq1
+# RQ: ch5/5.2.1
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq1"
+  rq_id: "ch5/5.2.1"
   total_steps: 8
   analysis_type: "IRT 2-pass (D039) -> LMM trajectory (D070) -> post-hoc contrasts (D068) -> dual-scale plots (D069)"
   generated_by: "rq_analysis v4.0.0"

@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.5: Schema Congruence Effects on Forgetting Trajectories
+# Analysis Plan for RQ 5.4.1: Schema Congruence Effects on Forgetting Trajectories
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-24
@@ -8,7 +8,7 @@
 
 ## Overview
 
-RQ 5.5 examines whether schema congruence (Common, Congruent, Incongruent) affects the trajectory of episodic forgetting over 6 days. This analysis uses IRT-derived ability estimates (theta) from a 3-dimensional Graded Response Model where dimensions represent congruence categories, followed by Linear Mixed Models to test differential forgetting rates.
+RQ 5.4.1 examines whether schema congruence (Common, Congruent, Incongruent) affects the trajectory of episodic forgetting over 6 days. This analysis uses IRT-derived ability estimates (theta) from a 3-dimensional Graded Response Model where dimensions represent congruence categories, followed by Linear Mixed Models to test differential forgetting rates.
 
 **Key Theoretical Question:** Does schema-congruent information benefit from consolidation processes, resulting in slower forgetting compared to schema-violating (incongruent) information?
 
@@ -38,22 +38,22 @@ RQ 5.5 examines whether schema congruence (Common, Congruent, Incongruent) affec
 
 **This RQ requires outputs from:**
 - **RQ 5.1** (Domain-Specific Forgetting Trajectories)
-  - File: `results/ch5/rq1/data/step00_irt_input.csv` (raw VR item responses)
-  - File: `results/ch5/rq1/data/step00_tsvr_mapping.csv` (TSVR time mapping)
+  - File: `results/ch5/5.1.1/data/step00_irt_input.csv` (raw VR item responses)
+  - File: `results/ch5/5.1.1/data/step00_tsvr_mapping.csv` (TSVR time mapping)
   - Used in: Step 00 (data preparation)
-  - Rationale: RQ 5.1 already extracted VR item data from master.xlsx. RQ 5.5 reuses this extraction but applies different grouping (congruence instead of WWW domain).
+  - Rationale: RQ 5.1 already extracted VR item data from master.xlsx. RQ 5.4.1 reuses this extraction but applies different grouping (congruence instead of WWW domain).
 
 **Execution Order Constraint:**
 1. RQ 5.1 must have completed at least Step 00 (provides step00_irt_input.csv, step00_tsvr_mapping.csv)
-2. This RQ (5.5) can execute after RQ 5.1 Step 00 completes
+2. This RQ (5.4.1) can execute after RQ 5.1 Step 00 completes
 
 **Data Source Boundaries:**
 - **RAW data:** None directly from master.xlsx (uses RQ 5.1 extraction)
 - **DERIVED data:** step00_irt_input.csv, step00_tsvr_mapping.csv from RQ 5.1
 
 **Validation:**
-- Step 00: Check results/ch5/rq1/data/step00_irt_input.csv exists
-- Step 00: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists
+- Step 00: Check results/ch5/5.1.1/data/step00_irt_input.csv exists
+- Step 00: Check results/ch5/5.1.1/data/step00_tsvr_mapping.csv exists
 - If either file missing -> QUIT with "EXPECTATIONS ERROR: RQ 5.1 Step 00 outputs required"
 
 ---
@@ -69,12 +69,12 @@ RQ 5.5 examines whether schema congruence (Common, Congruent, Incongruent) affec
 
 **Input:**
 
-**File 1:** `results/ch5/rq1/data/step00_irt_input.csv`
+**File 1:** `results/ch5/5.1.1/data/step00_irt_input.csv`
 - Format: Wide format (composite_ID x item columns)
 - Columns: composite_ID, VR item tags (e.g., VR_IFR_A01_N_ANS_i1)
 - Expected Rows: ~400 (100 participants x 4 tests)
 
-**File 2:** `results/ch5/rq1/data/step00_tsvr_mapping.csv`
+**File 2:** `results/ch5/5.1.1/data/step00_tsvr_mapping.csv`
 - Format: Long format (one row per composite_ID)
 - Columns: composite_ID, TSVR_hours, test
 - Expected Rows: ~400

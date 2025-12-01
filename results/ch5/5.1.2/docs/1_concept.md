@@ -1,8 +1,8 @@
-# RQ 5.8: Evidence for Two-Phase Forgetting (Rapid then Slow)
+# RQ 5.1.2: Evidence for Two-Phase Forgetting (Rapid then Slow)
 
 **Chapter:** 5
-**RQ Number:** 8
-**Full ID:** 5.8
+**RQ Number:** 1.2
+**Full ID:** 5.1.2
 
 ---
 
@@ -12,7 +12,7 @@
 Do data support a two-phase model with rapid initial decline (Day 0-1) followed by slower decay (Day 1-6)?
 
 **Scope:**
-This RQ examines forgetting rate changes across the 6-day retention interval using IRT-derived theta scores from RQ 5.7. Tests whether forgetting exhibits two distinct phases: rapid pre-consolidation (0-48 hours TSVR) and slower post-consolidation (48-240 hours TSVR). Analysis uses three convergent tests: (1) quadratic term significance, (2) piecewise vs continuous model comparison via AIC, (3) early vs late slope ratio.
+This RQ examines forgetting rate changes across the 6-day retention interval using IRT-derived theta scores from RQ 5.1.1. Tests whether forgetting exhibits two distinct phases: rapid pre-consolidation (0-48 hours TSVR) and slower post-consolidation (48-240 hours TSVR). Analysis uses three convergent tests: (1) quadratic term significance, (2) piecewise vs continuous model comparison via AIC, (3) early vs late slope ratio.
 
 **Theoretical Framing:**
 Consolidation theory predicts rapid forgetting during pre-consolidation (before memory stabilization) followed by slower forgetting after consolidation. If episodic memories undergo consolidation primarily during first 24 hours (one night's sleep), forgetting trajectory should show inflection point around Day 1, with steeper initial slope transitioning to shallower slope post-consolidation.
@@ -46,7 +46,7 @@ Forgetting exhibits two distinct phases: rapid initial decline (Day 0-1, pre-con
 
 **Secondary Hypotheses:**
 1. Quadratic term will be positive and significant (p < 0.003333 Bonferroni-corrected), indicating concave-up curvature (deceleration over time)
-2. Piecewise model will have lower AIC than best continuous model from RQ 5.7 (ΔAIC < -2)
+2. Piecewise model will have lower AIC than best continuous model from RQ 5.1.1 (ΔAIC < -2)
 3. Visual inspection will show clear inflection point at Day 1 (24-hour mark, one night's sleep)
 
 **Theoretical Rationale:**
@@ -59,9 +59,9 @@ Quadratic model: Theta ~ Time + Time² + (Time | UID) will show significant posi
 
 ## Memory Domains
 
-**Note:** This RQ uses aggregate theta scores from RQ 5.7. Domain information inherited from RQ 5.7 analysis.
+**Note:** This RQ uses aggregate theta scores from RQ 5.1.1. Domain information inherited from RQ 5.1.1 analysis.
 
-**Domains Examined (from RQ 5.7):**
+**Domains Examined (from RQ 5.1.1):**
 
 - [x] **What** (Object Identity)
   - Tag Code: `-N-`
@@ -78,10 +78,10 @@ Quadratic model: Theta ~ Time + Time² + (Time | UID) will show significant posi
   - Description: Temporal order / sequence
 
 **Inclusion Rationale:**
-This RQ uses theta scores from RQ 5.7, which examined all three WWW domains. Analysis collapses across domains to test whether forgetting trajectory shows two-phase pattern regardless of domain. Domain-specific two-phase patterns could be examined in future RQ, but this RQ focuses on general two-phase evidence.
+This RQ uses theta scores from RQ 5.1.1, which examined all three WWW domains. Analysis collapses across domains to test whether forgetting trajectory shows two-phase pattern regardless of domain. Domain-specific two-phase patterns could be examined in future RQ, but this RQ focuses on general two-phase evidence.
 
 **Exclusion Rationale:**
-None - inherits all domains from RQ 5.7.
+None - inherits all domains from RQ 5.1.1.
 
 ---
 
@@ -92,7 +92,7 @@ LMM (Linear Mixed Models) for trajectory modeling with three convergent tests: (
 
 **High-Level Workflow:**
 
-**Step 0:** Get Data - Load theta scores and best-fitting continuous model from results/ch5/rq7/, load TSVR mapping
+**Step 0:** Get Data - Load theta scores and best-fitting continuous model from results/ch5/5.1.1/, load TSVR mapping
 
 **Step 1:** Data Preparation - Create time transformations (TSVR, TSVR², log(TSVR+1)), create piecewise time structure (Early: 0-48 hours, Late: 48-240 hours) with Days_within variable for each segment
 
@@ -127,43 +127,43 @@ LMM (Linear Mixed Models) for trajectory modeling with three convergent tests: (
 ## Data Source
 
 **Data Type:**
-DERIVED (from RQ 5.7 outputs)
+DERIVED (from RQ 5.1.1 outputs)
 
 ### DERIVED Data Source:
 
 **Source RQ:**
-RQ 5.7 (Which functional form best describes forgetting trajectories?)
+RQ 5.1.1 (Which functional form best describes forgetting trajectories?)
 
 **File Paths:**
-- `results/ch5/rq7/data/step02_theta_long.csv` - Theta scores from RQ 5.7 IRT analysis
+- `results/ch5/5.1.1/data/step02_theta_long.csv` - Theta scores from RQ 5.1.1 IRT analysis
   - Columns: UID, test, domain, theta
-- `results/ch5/rq7/data/step00_tsvr_mapping.csv` - Time Since VR mapping
+- `results/ch5/5.1.1/data/step00_tsvr_mapping.csv` - Time Since VR mapping
   - Columns: UID, test, TSVR (hours since encoding)
-- `results/ch5/rq7/data/step03_best_model.pkl` - Pickled best-fitting continuous model from RQ 5.7 (for comparison)
+- `results/ch5/5.1.1/data/step03_best_model.pkl` - Pickled best-fitting continuous model from RQ 5.1.1 (for comparison)
 
 **Dependencies:**
-RQ 5.7 must complete all steps (IRT calibration, purification, theta extraction, LMM trajectory modeling with 5 candidate models, best model selection) before this RQ can run. Specifically requires:
+RQ 5.1.1 must complete all steps (IRT calibration, purification, theta extraction, LMM trajectory modeling with 5 candidate models, best model selection) before this RQ can run. Specifically requires:
 - Step 2 output (theta scores)
 - Step 0 output (TSVR mapping)
 - Step 3 output (best continuous model for AIC comparison)
 
 **Usage:**
-This RQ uses aggregate theta scores (collapsed across domains) from RQ 5.7 as outcome variable. Tests whether forgetting trajectory shows two-phase pattern (rapid then slow) using quadratic term, piecewise model, and slope ratio. Best continuous model from RQ 5.7 serves as baseline for piecewise model comparison.
+This RQ uses aggregate theta scores (collapsed across domains) from RQ 5.1.1 as outcome variable. Tests whether forgetting trajectory shows two-phase pattern (rapid then slow) using quadratic term, piecewise model, and slope ratio. Best continuous model from RQ 5.1.1 serves as baseline for piecewise model comparison.
 
 ### Inclusion/Exclusion Criteria:
 
 **Participants:**
-- [x] All participants from RQ 5.7 (inherited inclusion criteria - all 100 participants)
+- [x] All participants from RQ 5.1.1 (inherited inclusion criteria - all 100 participants)
 
 **Items:**
 - N/A (theta scores already aggregated per participant × test, collapsed across items)
 
 **Tests:**
-- [x] All 4 tests (T1, T2, T3, T4 - inherited from RQ 5.7)
+- [x] All 4 tests (T1, T2, T3, T4 - inherited from RQ 5.1.1)
 - Note: TSVR values vary by participant (actual hours since encoding), not nominal days
 
 **Domains:**
 - Note: Analysis collapses across What/Where/When domains (uses aggregate theta, not domain-specific)
-- Inherited domain inclusion from RQ 5.7 (all three WWW domains)
+- Inherited domain inclusion from RQ 5.1.1 (all three WWW domains)
 
 ---

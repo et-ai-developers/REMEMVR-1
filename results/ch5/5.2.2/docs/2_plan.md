@@ -38,7 +38,7 @@ This plan specifies the complete analysis workflow for RQ 5.2, which examines wh
 
 **Input:**
 
-**File 1:** results/ch5/rq1/data/step04_lmm_input.csv
+**File 1:** results/ch5/5.1.1/data/step04_lmm_input.csv
 **Format:** CSV, long format (one row per observation = composite_ID x domain)
 **Columns:** composite_ID, UID, test, TSVR_hours, domain, theta, se
 **Expected Rows:** ~1200 (400 composite_IDs x 3 domains)
@@ -456,7 +456,7 @@ Validation tools MUST be used after consolidation benefit computation tool execu
 **Required Data Sources:**
 - data/step00_piecewise_lmm_input.csv (observed data with segments)
 - data/step01_piecewise_lmm_model.pkl (for model predictions per segment)
-- results/ch5/rq1/data/step03_item_parameters.csv (for theta-to-probability conversion)
+- results/ch5/5.1.1/data/step03_item_parameters.csv (for theta-to-probability conversion)
 
 **Processing (Theta Scale Plot Data):**
 
@@ -610,12 +610,12 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 **This RQ requires outputs from:**
 
 **RQ 5.1** (Domain-Specific Forgetting Trajectories)
-- **File:** results/ch5/rq1/data/step04_lmm_input.csv
+- **File:** results/ch5/5.1.1/data/step04_lmm_input.csv
   - Used in: Step 0 (base data for piecewise transformation)
   - Rationale: RQ 5.1 produces theta scores merged with TSVR in long format. RQ 5.2 adds segment structure.
   - Required columns: composite_ID, UID, test, TSVR_hours, domain, theta, se
 
-- **File:** results/ch5/rq1/data/step03_item_parameters.csv
+- **File:** results/ch5/5.1.1/data/step03_item_parameters.csv
   - Used in: Step 5 (theta-to-probability transformation for Decision D069)
   - Rationale: Need domain-specific item parameters for probability scale conversion.
   - Required columns: item_name, dimension, a, b
@@ -630,8 +630,8 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 - **Scope:** RQ 5.2 adds piecewise structure but does not re-estimate theta
 
 **Validation (Step 0):**
-- Check results/ch5/rq1/data/step04_lmm_input.csv exists
-- Check results/ch5/rq1/data/step03_item_parameters.csv exists
+- Check results/ch5/5.1.1/data/step04_lmm_input.csv exists
+- Check results/ch5/5.1.1/data/step03_item_parameters.csv exists
 - If either file missing -> QUIT with EXPECTATIONS ERROR -> user must execute RQ 5.1 first
 
 ---

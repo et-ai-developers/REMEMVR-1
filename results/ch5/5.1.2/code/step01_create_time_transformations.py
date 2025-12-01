@@ -5,13 +5,13 @@
 """
 Step ID: step01
 Step Name: create_time_transformations
-RQ: results/ch5/rq8
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
 Create time variables for quadratic model (Time, Time_squared, Time_log) and
 piecewise model (Segment, Days_within). This step prepares the temporal
-predictors needed for RQ 5.8's two-phase forgetting analysis (Test 1: quadratic
+predictors needed for RQ 5.1.2's two-phase forgetting analysis (Test 1: quadratic
 term significance, Test 2: piecewise vs continuous comparison).
 
 EXPECTED INPUTS:
@@ -46,7 +46,7 @@ g_code REASONING:
 IMPLEMENTATION NOTES:
 - Analysis tool: assign_piecewise_segments from tools.analysis_lmm
 - Validation tool: validate_data_columns from tools.validation
-- Parameters: tsvr_col='TSVR_hours', early_cutoff_hours=48.0 (RQ 5.8 uses 48h
+- Parameters: tsvr_col='TSVR_hours', early_cutoff_hours=48.0 (RQ 5.1.2 uses 48h
   inflection point, not default 24h)
 - Quadratic transformations: Time = copy of TSVR_hours, Time_squared = TSVR_hours^2
 - Log transformation: Time_log = log(TSVR_hours + 1) to handle TSVR=0
@@ -83,7 +83,7 @@ from tools.validation import validate_data_columns
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq8 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.2 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step01_create_time_transformations.log"
 
 # =============================================================================
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         time_transformed_data = assign_piecewise_segments(
             df=theta_tsvr_data,
             tsvr_col='TSVR_hours',
-            early_cutoff_hours=48.0  # RQ 5.8 uses 48h inflection (one night's sleep)
+            early_cutoff_hours=48.0  # RQ 5.1.2 uses 48h inflection (one night's sleep)
         )
         log("[DONE] Piecewise segment assignment complete")
         log(f"[INFO] Segments created: {time_transformed_data['Segment'].unique().tolist()}")

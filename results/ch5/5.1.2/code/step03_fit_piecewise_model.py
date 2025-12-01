@@ -5,14 +5,14 @@
 """
 Step ID: step03
 Step Name: Fit Piecewise Model
-RQ: results/ch5/rq8
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
 Fit piecewise LMM (theta ~ Days_within * Segment + (Days_within | UID)) to test
 if two-segment model (Early 0-48h, Late 48-240h) provides better fit than best
 continuous model from RQ 5.7. This is Test 2 of the two-phase forgetting hypothesis
-(RQ 5.8). AIC comparison: deltaAIC < -2 favors piecewise model (segmented forgetting).
+(RQ 5.1.2). AIC comparison: deltaAIC < -2 favors piecewise model (segmented forgetting).
 
 EXPECTED INPUTS:
   - data/step01_time_transformed.csv
@@ -366,7 +366,7 @@ if __name__ == "__main__":
         # Get predictions from model (marginal predictions at population level)
         # Note: This is a simplified approach - marginal effects would be more rigorous
         # but require additional dependencies (statsmodels.api.PredictionResults)
-        # For RQ 5.8, we use fixed effects predictions as approximation
+        # For RQ 5.1.2, we use fixed effects predictions as approximation
 
         log("[INFO] Computing fixed effects predictions (population-level trends)...")
 
@@ -416,7 +416,7 @@ if __name__ == "__main__":
         summary_file = RQ_DIR / "results" / "step03_piecewise_model_summary.txt"
         with open(summary_file, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
-            f.write("PIECEWISE LMM SUMMARY - RQ 5.8 TEST 2 (Two-Phase Forgetting)\n")
+            f.write("PIECEWISE LMM SUMMARY - RQ 5.1.2 TEST 2 (Two-Phase Forgetting)\n")
             f.write("=" * 80 + "\n\n")
 
             f.write(f"Formula: {formula}\n")

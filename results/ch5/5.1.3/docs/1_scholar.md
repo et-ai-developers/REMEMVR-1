@@ -396,7 +396,7 @@ See "Literature Search Results" section above for prioritized citation list. Hig
 - **Total Papers Reviewed:** 15
 - **High-Relevance Papers:** 8
 - **Validation Duration:** ~25 minutes
-- **Context Dump:** "RQ 5.9 validated: 9.0/10 CONDITIONAL. Theory excellent (3.0/3.0), literature dated (1.7/2.0 - all pre-2015, need 2020-2024 updates). CRITICAL omission: practice effects (4-session design, no mitigation). Add recent cites + practice discussion -> APPROVED."
+- **Context Dump:** "RQ 5.1.3 validated: 9.0/10 CONDITIONAL. Theory excellent (3.0/3.0), literature dated (1.7/2.0 - all pre-2015, need 2020-2024 updates). CRITICAL omission: practice effects (4-session design, no mitigation). Add recent cites + practice discussion -> APPROVED."
 
 ---
 
@@ -410,7 +410,7 @@ See "Literature Search Results" section above for prioritized citation list. Hig
 
 **Reasoning:**
 
-RQ 5.9 demonstrates gold-standard theoretical grounding (perfect 3.0/3.0) with sophisticated integration of hippocampal aging hypothesis, dual deficit framework, and consolidation theory. The hypothesis is well-articulated, falsifiable, and makes specific predictions about interaction patterns (logarithmic > linear age effects). Interpretation guidelines are comprehensive and actionable.
+RQ 5.1.3 demonstrates gold-standard theoretical grounding (perfect 3.0/3.0) with sophisticated integration of hippocampal aging hypothesis, dual deficit framework, and consolidation theory. The hypothesis is well-articulated, falsifiable, and makes specific predictions about interaction patterns (logarithmic > linear age effects). Interpretation guidelines are comprehensive and actionable.
 
 The primary limitation is dated literature support (1.7/2.0) - all three citations are pre-2015 (Raz 2005, Nyberg 2012, Dudai 2004), missing a decade of critical advances in hippocampal aging research, VR memory assessment validation, and longitudinal trajectory modeling. The literature search identified 8 high-relevance 2020-2024 papers that would strengthen theoretical grounding and demonstrate current engagement with the field.
 

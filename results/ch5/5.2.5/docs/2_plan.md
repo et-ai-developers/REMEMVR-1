@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.12: Does purified IRT item set change CTT conclusions?
+# Analysis Plan for RQ 5.2.5: Does purified IRT item set change CTT conclusions?
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-30
@@ -49,7 +49,7 @@ This RQ examines methodological convergence between Classical Test Theory (CTT) 
 
 **Input:**
 
-**File 1:** results/ch5/rq1/data/step02_purified_items.csv
+**File 1:** results/ch5/5.2.1/data/step02_purified_items.csv
 **Source:** RQ 5.1 Step 2 (IRT purification output)
 **Format:** CSV with columns:
   - `item_name` (string, format: TQ_{paradigm}-{tag}-i{N}, e.g., TQ_ICR-N-i1)
@@ -59,7 +59,7 @@ This RQ examines methodological convergence between Classical Test Theory (CTT) 
 **Expected Rows:** ~38 items (purified subset from full ~50 items)
 **Note:** This file contains IRT-retained items. Items NOT in this list were excluded by RQ 5.1 purification.
 
-**File 2:** results/ch5/rq1/data/step03_theta_scores.csv
+**File 2:** results/ch5/5.2.1/data/step03_theta_scores.csv
 **Source:** RQ 5.1 Step 3 (IRT Pass 2 theta extraction)
 **Format:** CSV with columns:
   - `composite_ID` (string, format: {UID}_{test}, e.g., A010_1)
@@ -68,7 +68,7 @@ This RQ examines methodological convergence between Classical Test Theory (CTT) 
   - `theta_when` (float, IRT ability estimate for When domain)
 **Expected Rows:** ~400 (100 participants x 4 tests)
 
-**File 3:** results/ch5/rq1/data/step00_tsvr_mapping.csv
+**File 3:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv
 **Source:** RQ 5.1 Step 0 (TSVR time variable extraction)
 **Format:** CSV with columns:
   - `composite_ID` (string, format: {UID}_{test})
@@ -149,13 +149,13 @@ Validation tools MUST be used after data loading execution. Specific validation 
 - Forbidden: "ERROR", "FileNotFoundError", "Missing columns"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure (e.g., "File not found: results/ch5/rq1/data/step02_purified_items.csv")
+- Raise error with specific failure (e.g., "File not found: results/ch5/5.2.1/data/step02_purified_items.csv")
 - Log failure to logs/step00_load_data.log
 - Quit immediately (cannot proceed without RQ 5.1 outputs)
 - User must ensure RQ 5.1 Steps 0-3 completed successfully before running this RQ
 
 **Cross-RQ Dependency Check:**
-This step MUST verify results/ch5/rq1/status.yaml shows step03_theta_scores = success before proceeding. If RQ 5.1 incomplete, QUIT with:
+This step MUST verify results/ch5/5.2.1/status.yaml shows step03_theta_scores = success before proceeding. If RQ 5.1 incomplete, QUIT with:
 ```
 EXPECTATIONS ERROR: RQ 5.12 requires RQ 5.1 completion (Steps 0-3).
 Current RQ 5.1 status: {status from status.yaml}
@@ -994,13 +994,13 @@ Per names.md (populated from RQ 5.1):
 
 **This RQ requires outputs from:**
 - **RQ 5.1** (Domain-Specific Forgetting Trajectories)
-  - File 1: results/ch5/rq1/data/step02_purified_items.csv
+  - File 1: results/ch5/5.2.1/data/step02_purified_items.csv
     - Used in: Step 0 (load purified item list), Step 1 (identify retained items)
     - Rationale: RQ 5.1 IRT purification identified high-quality items (0.5 <= a <= 4.0). This RQ tests whether CTT computed on those items converges toward IRT conclusions.
-  - File 2: results/ch5/rq1/data/step03_theta_scores.csv
+  - File 2: results/ch5/5.2.1/data/step03_theta_scores.csv
     - Used in: Step 0 (load theta), Step 5 (correlation analysis), Step 6 (standardization), Step 7 (parallel LMM)
     - Rationale: IRT theta serves as gold standard for convergent validity testing.
-  - File 3: results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - File 3: results/ch5/5.2.1/data/step00_tsvr_mapping.csv
     - Used in: Step 0 (load TSVR), Step 6 (merge time variable), Step 7 (LMM time predictor)
     - Rationale: TSVR (actual hours since encoding) per Decision D070 ensures accurate temporal modeling in parallel LMMs.
 
@@ -1014,10 +1014,10 @@ Per names.md (populated from RQ 5.1):
 - **Scope:** This RQ does NOT re-run IRT calibration (uses RQ 5.1 purification criteria as fixed). This RQ does NOT modify RQ 5.1 outputs (read-only access).
 
 **Validation:**
-- Step 0: Check results/ch5/rq1/data/step02_purified_items.csv exists (EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step03_theta_scores.csv exists (EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists (EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/status.yaml shows step03_theta_scores = success (EXPECTATIONS ERROR if not complete)
+- Step 0: Check results/ch5/5.2.1/data/step02_purified_items.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.2.1/data/step03_theta_scores.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.2.1/data/step00_tsvr_mapping.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.2.1/status.yaml shows step03_theta_scores = success (EXPECTATIONS ERROR if not complete)
 - If any file missing -> quit with error -> user must execute RQ 5.1 first
 
 **Reference:** Specification section 5.1.6 (Data Source Boundaries)

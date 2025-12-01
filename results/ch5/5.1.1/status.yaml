@@ -1,7 +1,9 @@
+rq_id: "ch5/5.1.1"
+
 rq_builder:
   status: success
   context_dump: |
-    Created results/ch5/rq7/ with 6 folders
+    Created results/ch5/5.1.1/ with 6 folders
     Folders: docs/, data/, code/, logs/, plots/, results/
     All folders empty, ready for agents
     status.yaml initialized with 10 RQ-specific agents

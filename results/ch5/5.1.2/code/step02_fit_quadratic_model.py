@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: fit_quadratic_model
-RQ: results/ch5/rq8
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
@@ -314,7 +314,7 @@ if __name__ == "__main__":
         summary_path = RQ_DIR / "data/step02_quadratic_model_summary.txt"
         with open(summary_path, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
-            f.write("QUADRATIC LMM SUMMARY - RQ 5.8 Step 2\n")
+            f.write("QUADRATIC LMM SUMMARY - RQ 5.1.2 Step 2\n")
             f.write("=" * 80 + "\n\n")
             f.write(f"Formula: theta ~ Time + Time_squared\n")
             f.write(f"Random Structure: {random_structure_used}\n")

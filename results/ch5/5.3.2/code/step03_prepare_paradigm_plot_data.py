@@ -5,7 +5,7 @@
 """
 Step ID: step03
 Step Name: Prepare Paradigm Plot Data
-RQ: results/ch5/rq4
+RQ: results/ch5/5.3.2
 Generated: 2025-11-24
 
 PURPOSE:
@@ -64,7 +64,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq4
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.2
 LOG_FILE = RQ_DIR / "logs" / "step03_prepare_paradigm_plot_data.log"
 
 # Paradigm ordering (by retrieval support level)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
         annotation_text = f"Linear trend: b = {contrast_estimate:.3f}, z = {z_value:.2f}, p {p_display}"
 
         # Also create a more detailed version
-        detailed_annotation = f"""Plot Annotation for RQ 5.4
+        detailed_annotation = f"""Plot Annotation for RQ 5.3.2
 
 MAIN ANNOTATION (for plot subtitle):
 {annotation_text}

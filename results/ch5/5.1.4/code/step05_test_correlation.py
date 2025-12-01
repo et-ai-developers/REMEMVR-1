@@ -5,7 +5,7 @@
 """
 Step ID: step05
 Step Name: Test Intercept-Slope Correlation and Visualize Distribution
-RQ: results/ch5/rq13
+RQ: results/ch5/5.1.4
 Generated: 2025-11-30
 
 PURPOSE:
@@ -112,7 +112,7 @@ from tools.validation import validate_correlation_test_d068
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq13
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.4
 LOG_FILE = RQ_DIR / "logs" / "step05_correlation_test.log"
 
 # =============================================================================

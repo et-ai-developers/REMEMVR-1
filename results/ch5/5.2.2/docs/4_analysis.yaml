@@ -2,19 +2,19 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-23
-# RQ: ch5/rq2
+# RQ: ch5/5.2.2
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq2"
+  rq_id: "ch5/5.2.2"
   total_steps: 6
   analysis_type: "Piecewise LMM consolidation analysis (3-way interaction)"
   generated_by: "rq_analysis v4.0.0"
   timestamp: "2025-11-23T12:00:00"
   dependencies:
-    - "results/ch5/rq1 (RQ 5.1 must be complete)"
+    - "results/ch5/5.1.1 (RQ 5.1 must be complete)"
   key_decisions:
     - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
     - "D069: Dual-scale trajectory plots (theta + probability)"
@@ -35,14 +35,14 @@ steps:
     analysis_call:
       type: "stdlib"
       operations:
-        - "Load results/ch5/rq1/data/step04_lmm_input.csv (RQ 5.1 LMM input)"
+        - "Load results/ch5/5.1.1/data/step04_lmm_input.csv (RQ 5.1 LMM input)"
         - "Create Segment variable: test in {0,1} -> 'Early', test in {3,6} -> 'Late'"
         - "Create Days_within variable: For Early: TSVR_hours/24, For Late: (TSVR_hours - min_Late_TSVR)/24"
         - "Verify segment assignments: test 0,1 -> Early only; test 3,6 -> Late only"
         - "Save piecewise LMM input to data/step00_piecewise_lmm_input.csv"
 
     input_files:
-      - path: "results/ch5/rq1/data/step04_lmm_input.csv"
+      - path: "results/ch5/5.1.1/data/step04_lmm_input.csv"
         required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se"]
         variable_name: "df_rq51"
         description: "RQ 5.1 LMM input data with theta scores and TSVR"
@@ -68,7 +68,7 @@ steps:
       type: "inline"
       criteria:
         - name: "RQ 5.1 dependency exists"
-          check: "File results/ch5/rq1/data/step04_lmm_input.csv exists"
+          check: "File results/ch5/5.1.1/data/step04_lmm_input.csv exists"
           severity: "CRITICAL"
         - name: "Row count preserved"
           check: "Output has same row count as input (~1200)"
@@ -411,7 +411,7 @@ steps:
         - path: "data/step01_piecewise_lmm_model.pkl"
           variable_name: "lmm_model"
           description: "Fitted LMM for predictions"
-        - path: "results/ch5/rq1/data/step03_item_parameters.csv"
+        - path: "results/ch5/5.1.1/data/step03_item_parameters.csv"
           required_columns: ["item_name", "dimension", "a", "b"]
           variable_name: "df_items"
           description: "RQ 5.1 item parameters for theta-to-probability conversion"
@@ -432,7 +432,7 @@ steps:
       input_files:
         - path: "plots/step05_piecewise_theta_data.csv"
           variable_name: "df_theta_plot"
-        - path: "results/ch5/rq1/data/step03_item_parameters.csv"
+        - path: "results/ch5/5.1.1/data/step03_item_parameters.csv"
           variable_name: "df_items"
 
       output_files:
@@ -498,10 +498,10 @@ steps:
 dependencies:
   rq_5_1:
     files_required:
-      - path: "results/ch5/rq1/data/step04_lmm_input.csv"
+      - path: "results/ch5/5.1.1/data/step04_lmm_input.csv"
         used_in: "step00"
         purpose: "Base theta scores with TSVR for piecewise transformation"
-      - path: "results/ch5/rq1/data/step03_item_parameters.csv"
+      - path: "results/ch5/5.1.1/data/step03_item_parameters.csv"
         used_in: "step05"
         purpose: "Item parameters for theta-to-probability conversion (D069)"
     validation: "Check files exist before Step 0 execution"

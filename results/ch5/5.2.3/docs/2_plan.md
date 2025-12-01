@@ -1,6 +1,6 @@
-# Analysis Plan: RQ 5.10 - Domain-Specific Age Effects on Forgetting
+# Analysis Plan: RQ 5.2.3 - Domain-Specific Age Effects on Forgetting
 
-**Research Question:** 5.10
+**Research Question:** 5.2.3
 **Created:** 2025-11-26
 **Status:** Planning complete, ready for tool specification (rq_tools)
 
@@ -45,7 +45,7 @@ This RQ requires 6 steps (Step 0 for data extraction, Steps 1-5 for analysis):
 
 **Input:**
 
-**File 1:** results/ch5/rq1/data/step03_theta_scores.csv
+**File 1:** results/ch5/5.1.1/data/step03_theta_scores.csv
 **Source:** RQ 5.1 Step 3 (IRT Pass 2 theta extraction)
 **Format:** CSV with columns:
   - composite_ID (string, format: UID_test, e.g., P001_T1)
@@ -55,7 +55,7 @@ This RQ requires 6 steps (Step 0 for data extraction, Steps 1-5 for analysis):
 **Expected Rows:** 1200 (100 participants x 4 tests x 3 domains)
 **Note:** RQ 5.1 provides purified theta estimates for all three WWW domains
 
-**File 2:** results/ch5/rq1/data/step00_tsvr_mapping.csv
+**File 2:** results/ch5/5.1.1/data/step00_tsvr_mapping.csv
 **Source:** RQ 5.1 Step 0 (TSVR extraction)
 **Format:** CSV with columns:
   - composite_ID (string, format: UID_test)
@@ -82,12 +82,12 @@ This RQ requires 6 steps (Step 0 for data extraction, Steps 1-5 for analysis):
 **Output:**
 
 **File 1:** data/step00_theta_from_rq51.csv
-**Format:** Copy of results/ch5/rq1/data/step03_theta_scores.csv
+**Format:** Copy of results/ch5/5.1.1/data/step03_theta_scores.csv
 **Columns:** composite_ID, domain, test, theta
 **Expected Rows:** 1200 (100 participants x 4 tests x 3 domains)
 
 **File 2:** data/step00_tsvr_from_rq51.csv
-**Format:** Copy of results/ch5/rq1/data/step00_tsvr_mapping.csv
+**Format:** Copy of results/ch5/5.1.1/data/step00_tsvr_mapping.csv
 **Columns:** composite_ID, test, TSVR_hours
 **Expected Rows:** 400 (100 participants x 4 tests)
 
@@ -130,7 +130,7 @@ Validation tools MUST be used after data extraction. Specific validation tools w
 - Acceptable warnings: None expected for data extraction
 
 **Expected Behavior on Validation Failure:**
-- If RQ 5.1 files missing: Raise error "RQ 5.1 must complete before RQ 5.10 (dependency)"
+- If RQ 5.1 files missing: Raise error "RQ 5.1 must complete before RQ 5.2.3 (dependency)"
 - If row counts mismatch: Raise error with specific counts (e.g., "Expected 1200 theta rows, found 1150")
 - If NaN values detected: Raise error "Missing data in [column]: N rows affected"
 - Log failure to logs/step00_get_data.log
@@ -785,13 +785,13 @@ Extract 4 three-way interaction terms, apply Bonferroni correction (alpha = 0.02
 **Format:** Text summary
 **Content:**
   - Domain-specific age effects:
-    - What: [age_effect] ± [se], p = [p]
-    - Where: [age_effect] ± [se], p = [p]
-    - When: [age_effect] ± [se], p = [p]
+    - What: [age_effect] ï¿½ [se], p = [p]
+    - Where: [age_effect] ï¿½ [se], p = [p]
+    - When: [age_effect] ï¿½ [se], p = [p]
   - Pairwise contrasts:
-    - Where vs What: [estimate] ± [se], p_uncorrected = [p], p_tukey = [p]
-    - When vs What: [estimate] ± [se], p_uncorrected = [p], p_tukey = [p]
-    - Where vs When: [estimate] ± [se], p_uncorrected = [p], p_tukey = [p]
+    - Where vs What: [estimate] ï¿½ [se], p_uncorrected = [p], p_tukey = [p]
+    - When vs What: [estimate] ï¿½ [se], p_uncorrected = [p], p_tukey = [p]
+    - Where vs When: [estimate] ï¿½ [se], p_uncorrected = [p], p_tukey = [p]
   - Ordering hypothesis test: Age effect When > Where > What?
     - Result: [supported / not supported]
   - Interpretation: [Domain-specific vulnerability to aging]
@@ -1070,14 +1070,14 @@ Per names.md (from RQ 5.1):
 
 **This RQ requires outputs from:**
 - **RQ 5.1** (Domain-Specific Forgetting Trajectories)
-  - File 1: results/ch5/rq1/data/step03_theta_scores.csv (IRT ability estimates for What/Where/When domains)
-  - File 2: results/ch5/rq1/data/step00_tsvr_mapping.csv (TSVR actual hours mapping)
+  - File 1: results/ch5/5.1.1/data/step03_theta_scores.csv (IRT ability estimates for What/Where/When domains)
+  - File 2: results/ch5/5.1.1/data/step00_tsvr_mapping.csv (TSVR actual hours mapping)
   - Used in: Step 0 (get data from RQ 5.1)
   - Rationale: RQ 5.1 establishes domain-specific theta trajectories. This RQ tests whether age moderates those trajectories differently by domain.
 
 **Execution Order Constraint:**
 1. RQ 5.1 must complete first (provides theta_scores.csv and tsvr_mapping.csv)
-2. This RQ (5.10) executes second (uses RQ 5.1 theta as outcome variable, tests age interactions)
+2. This RQ (5.2.3) executes second (uses RQ 5.1 theta as outcome variable, tests age interactions)
 
 **Data Source Boundaries:**
 - **RAW data:** Age from data/cache/dfData.csv (extracted directly, no RQ dependencies)
@@ -1085,9 +1085,9 @@ Per names.md (from RQ 5.1):
 - **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.1 theta as-is, tests age as moderator)
 
 **Validation:**
-- Step 0: Check results/ch5/rq1/data/step03_theta_scores.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/status.yaml shows rq_results: success (circuit breaker: EXPECTATIONS ERROR if RQ 5.1 incomplete)
+- Step 0: Check results/ch5/5.1.1/data/step03_theta_scores.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/status.yaml shows rq_results: success (circuit breaker: EXPECTATIONS ERROR if RQ 5.1 incomplete)
 - If any file missing -> quit with error -> user must execute RQ 5.1 first
 
 **Reference:** Specification section 5.1.6 (Data Source Boundaries) and 1_concept.md Step 0 (Get Data from RQ 5.1)
@@ -1217,4 +1217,4 @@ Age effects on forgetting rate will be strongest for spatial (Where) and tempora
 ---
 
 **Version History:**
-- v1.0 (2025-11-26): Initial plan created by rq_planner agent for RQ 5.10
+- v1.0 (2025-11-26): Initial plan created by rq_planner agent for RQ 5.2.3

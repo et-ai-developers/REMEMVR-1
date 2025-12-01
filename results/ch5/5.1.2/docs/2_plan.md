@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.8: Evidence for Two-Phase Forgetting (Rapid then Slow)
+# Analysis Plan for RQ 5.1.2: Evidence for Two-Phase Forgetting (Rapid then Slow)
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-26
@@ -8,26 +8,26 @@
 
 ## Overview
 
-This RQ tests whether episodic memory forgetting exhibits a two-phase pattern: rapid initial decline (Day 0-1, pre-consolidation) followed by slower decay (Day 1-6, post-consolidation). The analysis uses IRT-derived theta scores from RQ 5.7 (collapsed across What/Where/When domains) as the outcome variable.
+This RQ tests whether episodic memory forgetting exhibits a two-phase pattern: rapid initial decline (Day 0-1, pre-consolidation) followed by slower decay (Day 1-6, post-consolidation). The analysis uses IRT-derived theta scores from RQ 5.1.1 (collapsed across What/Where/When domains) as the outcome variable.
 
 **Theoretical Rationale:**
 Consolidation theory predicts memory traces undergo time-dependent stabilization during the first ~24 hours post-encoding. During this vulnerable period, forgetting is rapid. After consolidation, traces stabilize and forgetting decelerates. The inflection point should occur around Day 1 (after one night's sleep). This RQ uses three convergent tests to triangulate evidence for two-phase forgetting.
 
 **Three Convergent Tests:**
 1. **Quadratic Term Significance:** Fit Theta ~ Time + Time� + (Time | UID), test if Time� coefficient is positive and significant (p < 0.003333 Bonferroni-corrected)
-2. **Piecewise vs Continuous Model Comparison:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7 (�AIC < -2 favors piecewise)
+2. **Piecewise vs Continuous Model Comparison:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.1.1 (�AIC < -2 favors piecewise)
 3. **Early vs Late Slope Ratio:** Extract slopes for Early segment (0-48 hours) and Late segment (48-240 hours), compute Late/Early ratio (expect < 0.5 if two-phase robust)
 
 **Analysis Approach:**
-This is an LMM-only analysis using DERIVED data from RQ 5.7. No IRT calibration is performed - theta scores and TSVR mapping are loaded directly from RQ 5.7 outputs. The analysis focuses on testing whether forgetting trajectory shows inflection at theoretically meaningful breakpoint (48 hours TSVR = Day 1 after one night's sleep).
+This is an LMM-only analysis using DERIVED data from RQ 5.1.1. No IRT calibration is performed - theta scores and TSVR mapping are loaded directly from RQ 5.1.1 outputs. The analysis focuses on testing whether forgetting trajectory shows inflection at theoretically meaningful breakpoint (48 hours TSVR = Day 1 after one night's sleep).
 
 **Total Steps:** 7 steps (Step 0: Get Data, Steps 1-6: Analysis + Visualization)
 **Estimated Runtime:** Medium (30-60 minutes total - LMM fitting with random slopes + comprehensive assumption validation)
-**Cross-RQ Dependencies:** RQ 5.7 must complete successfully (provides theta scores, TSVR mapping, best continuous model)
+**Cross-RQ Dependencies:** RQ 5.1.1 must complete successfully (provides theta scores, TSVR mapping, best continuous model)
 **Primary Outputs:** Quadratic model summary, piecewise model summary, assumption validation report, slope comparison, plot source CSV for visualization
 
 **Key Decisions Applied:**
-- Decision D070: TSVR as time variable (inherited from RQ 5.7 - actual hours, not nominal days)
+- Decision D070: TSVR as time variable (inherited from RQ 5.1.1 - actual hours, not nominal days)
 - Decision D069: Dual-scale trajectory plots (NOT APPLICABLE - this RQ creates plot data preparation CSV, but does not generate dual-scale plots; visualization handled by rq_plots agent)
 
 **Convergence Fallback Strategy:**
@@ -40,33 +40,33 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
 **Dependency Type:** DERIVED Data from Other RQs (Dependencies Exist)
 
 **This RQ requires outputs from:**
-- **RQ 5.7** (Forgetting trajectory functional forms)
-  - File: results/ch5/rq7/data/step02_theta_long.csv
+- **RQ 5.1.1** (Forgetting trajectory functional forms)
+  - File: results/ch5/5.1.1/data/step02_theta_long.csv
   - Used in: Step 0 (load theta scores as outcome variable)
-  - Rationale: RQ 5.7 calibrates IRT model, extracts theta scores, and merges with TSVR. This RQ uses those theta scores to test two-phase hypothesis.
+  - Rationale: RQ 5.1.1 calibrates IRT model, extracts theta scores, and merges with TSVR. This RQ uses those theta scores to test two-phase hypothesis.
 
-  - File: results/ch5/rq7/data/step00_tsvr_mapping.csv
+  - File: results/ch5/5.1.1/data/step00_tsvr_mapping.csv
   - Used in: Step 0 (load time variable for piecewise segmentation)
   - Rationale: TSVR (actual hours since encoding per Decision D070) is required to define Early (0-48h) and Late (48-240h) segments.
 
-  - File: results/ch5/rq7/data/step03_best_model.pkl
+  - File: results/ch5/5.1.1/data/step03_best_model.pkl
   - Used in: Step 3 (load best continuous model for AIC comparison)
-  - Rationale: RQ 5.7 fits 5 candidate continuous models (Linear, Quadratic, Log, Lin+Log, Quad+Log) and selects best by AIC. This RQ compares piecewise model AIC to that best continuous model to test if piecewise improves fit.
+  - Rationale: RQ 5.1.1 fits 5 candidate continuous models (Linear, Quadratic, Log, Lin+Log, Quad+Log) and selects best by AIC. This RQ compares piecewise model AIC to that best continuous model to test if piecewise improves fit.
 
 **Execution Order Constraint:**
-1. RQ 5.7 must complete all steps (IRT calibration, purification, theta extraction, TSVR merge, LMM trajectory modeling, best model selection)
-2. This RQ (RQ 5.8) executes after RQ 5.7 completes (uses Step 0, Step 2, Step 3 outputs from RQ 5.7)
+1. RQ 5.1.1 must complete all steps (IRT calibration, purification, theta extraction, TSVR merge, LMM trajectory modeling, best model selection)
+2. This RQ (RQ 5.1.2) executes after RQ 5.1.1 completes (uses Step 0, Step 2, Step 3 outputs from RQ 5.1.1)
 
 **Data Source Boundaries:**
-- **RAW data:** None - this RQ uses only DERIVED data from RQ 5.7
-- **DERIVED data:** Theta scores, TSVR mapping, best continuous model (all from RQ 5.7)
-- **Scope:** This RQ does NOT re-calibrate IRT models, does NOT re-fit continuous models. It accepts RQ 5.7 outputs as given and tests two-phase hypothesis using those outputs.
+- **RAW data:** None - this RQ uses only DERIVED data from RQ 5.1.1
+- **DERIVED data:** Theta scores, TSVR mapping, best continuous model (all from RQ 5.1.1)
+- **Scope:** This RQ does NOT re-calibrate IRT models, does NOT re-fit continuous models. It accepts RQ 5.1.1 outputs as given and tests two-phase hypothesis using those outputs.
 
 **Validation:**
-- Step 0: Check results/ch5/rq7/data/step02_theta_long.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq7/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq7/data/step03_best_model.pkl exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- If ANY file missing -> quit with error -> user must execute RQ 5.7 first
+- Step 0: Check results/ch5/5.1.1/data/step02_theta_long.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/data/step03_best_model.pkl exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- If ANY file missing -> quit with error -> user must execute RQ 5.1.1 first
 
 ---
 
@@ -74,16 +74,16 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
 
 ### Step 0: Get Data
 
-**Purpose:** Load theta scores, TSVR mapping, and best continuous model from RQ 5.7 outputs
+**Purpose:** Load theta scores, TSVR mapping, and best continuous model from RQ 5.1.1 outputs
 
-**Dependencies:** None (first step, but requires RQ 5.7 completion)
+**Dependencies:** None (first step, but requires RQ 5.1.1 completion)
 
 **Complexity:** Low (data loading only, <5 minutes)
 
 **Input:**
 
-**File 1:** results/ch5/rq7/data/step02_theta_long.csv
-**Source:** Generated by RQ 5.7 Step 2 (theta extraction after Pass 2 IRT calibration)
+**File 1:** results/ch5/5.1.1/data/step02_theta_long.csv
+**Source:** Generated by RQ 5.1.1 Step 2 (theta extraction after Pass 2 IRT calibration)
 **Format:** CSV, long format (one row per participant-test-domain combination)
 **Columns:**
   - `UID` (string, participant identifier, format: P### with leading zeros)
@@ -93,8 +93,8 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
 **Expected Rows:** ~1200 rows (100 participants x 4 tests x 3 domains)
 **Note:** This RQ collapses across domains (uses aggregate theta), but domain column retained for potential post-hoc domain-specific analyses
 
-**File 2:** results/ch5/rq7/data/step00_tsvr_mapping.csv
-**Source:** Generated by RQ 5.7 Step 0 (TSVR extraction from master.xlsx)
+**File 2:** results/ch5/5.1.1/data/step00_tsvr_mapping.csv
+**Source:** Generated by RQ 5.1.1 Step 0 (TSVR extraction from master.xlsx)
 **Format:** CSV, one row per participant-test combination
 **Columns:**
   - `UID` (string, participant identifier)
@@ -102,31 +102,31 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
   - `TSVR_hours` (float, actual time since VR encoding in hours, Decision D070)
 **Expected Rows:** ~400 rows (100 participants x 4 tests)
 
-**File 3:** results/ch5/rq7/data/step03_best_model.pkl
-**Source:** Generated by RQ 5.7 Step 3 (best continuous model selection by AIC)
+**File 3:** results/ch5/5.1.1/data/step03_best_model.pkl
+**Source:** Generated by RQ 5.1.1 Step 3 (best continuous model selection by AIC)
 **Format:** Pickled Python object (statsmodels MixedLM fitted model)
 **Contents:** Fitted LMM object with AIC, fixed effects, random effects
 **Note:** Used for AIC comparison in Step 3 (piecewise vs continuous)
 
 **Processing:**
 
-1. **Verify RQ 5.7 model convergence status (CRITICAL DEPENDENCY):**
-   - Load results/ch5/rq7/data/step03_best_model.pkl
+1. **Verify RQ 5.1.1 model convergence status (CRITICAL DEPENDENCY):**
+   - Load results/ch5/5.1.1/data/step03_best_model.pkl
    - Check model.converged attribute (should be True)
    - Check random effects structure via model.cov_re attribute
-   - **CRITICAL:** If RQ 5.7 used fallback to (1 | UID) random intercepts only (not (Time | UID) random slopes):
-     * RQ 5.8 piecewise models MUST use same fallback structure for valid AIC comparison
+   - **CRITICAL:** If RQ 5.1.1 used fallback to (1 | UID) random intercepts only (not (Time | UID) random slopes):
+     * RQ 5.1.2 piecewise models MUST use same fallback structure for valid AIC comparison
      * Comparing models with different random structures confounds time pattern with model complexity
-   - Document RQ 5.7 convergence status in validation output
+   - Document RQ 5.1.1 convergence status in validation output
    - If structures incompatible, flag AIC comparison (Test 2) as potentially inconclusive
 
 2. **Load theta scores:**
-   - Read results/ch5/rq7/data/step02_theta_long.csv
+   - Read results/ch5/5.1.1/data/step02_theta_long.csv
    - Verify columns present: UID, test, domain, theta
    - Verify no NaN in theta (IRT calibration should produce theta for all participants)
 
 3. **Load TSVR mapping:**
-   - Read results/ch5/rq7/data/step00_tsvr_mapping.csv
+   - Read results/ch5/5.1.1/data/step00_tsvr_mapping.csv
    - Verify columns present: UID, test, TSVR_hours
    - Verify no NaN in TSVR_hours (all participants have actual time data)
 
@@ -142,7 +142,7 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
    - Expected rows after collapse: ~400 rows (100 participants x 4 tests)
 
 5. **Load best continuous model:**
-   - Read results/ch5/rq7/data/step03_best_model.pkl using pickle.load()
+   - Read results/ch5/5.1.1/data/step03_best_model.pkl using pickle.load()
    - Extract AIC value for Step 3 comparison
    - Store AIC in metadata for later use
 
@@ -159,7 +159,7 @@ Both quadratic and piecewise models attempt maximal random slopes structure (Tim
 
 **File 2:** data/step00_best_continuous_aic.txt
 **Format:** Plain text file with single AIC value
-**Contents:** AIC of best continuous model from RQ 5.7 (for Step 3 comparison)
+**Contents:** AIC of best continuous model from RQ 5.1.1 (for Step 3 comparison)
 **Example:** "12345.67"
 
 **Validation Requirement:**
@@ -188,8 +188,8 @@ Validation tools MUST be used after data loading execution. Specific validation 
 - Distribution check: TSVR_hours should have 4 clusters (T1~0h, T2~24h, T3~72h, T4~144h)
 
 *Log Validation:*
-- Required pattern: "Loaded theta scores: 1200 rows from RQ 5.7"
-- Required pattern: "Loaded TSVR mapping: 400 rows from RQ 5.7"
+- Required pattern: "Loaded theta scores: 1200 rows from RQ 5.1.1"
+- Required pattern: "Loaded TSVR mapping: 400 rows from RQ 5.1.1"
 - Required pattern: "Merged theta with TSVR: 1200 rows matched"
 - Required pattern: "Collapsed across domains: 400 rows (mean theta computed)"
 - Required pattern: "Loaded best continuous model AIC: [value]"
@@ -197,7 +197,7 @@ Validation tools MUST be used after data loading execution. Specific validation 
 - Acceptable warnings: "Missing data for participant [UID] test [test]" (if <5% missing)
 
 **Expected Behavior on Validation Failure:**
-- If ANY RQ 5.7 file missing -> QUIT with EXPECTATIONS ERROR: "RQ 5.7 must complete before RQ 5.8"
+- If ANY RQ 5.1.1 file missing -> QUIT with EXPECTATIONS ERROR: "RQ 5.1.1 must complete before RQ 5.1.2"
 - If merge fails (TSVR rows don't match theta rows) -> QUIT with error, log details, invoke g_debug
 - If NaN detected in critical columns -> QUIT with error, list affected rows
 - If row count <380 (>5% data loss) -> QUIT with error, investigate data quality issue
@@ -215,7 +215,7 @@ Validation tools MUST be used after data loading execution. Specific validation 
 **Input:**
 
 **File:** data/step00_theta_tsvr.csv
-**Source:** Generated by Step 0 (merged theta + TSVR from RQ 5.7)
+**Source:** Generated by Step 0 (merged theta + TSVR from RQ 5.1.1)
 **Format:** CSV, long format
 **Columns:** UID, test, TSVR_hours, theta
 **Expected Rows:** ~400 rows (100 participants x 4 tests)
@@ -410,7 +410,7 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 
 ### Step 3: Fit Piecewise Model (Test 2 - Piecewise vs Continuous Comparison)
 
-**Purpose:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.7 (�AIC < -2 favors piecewise)
+**Purpose:** Fit Theta ~ Days_within x Segment + (Days_within | UID), compare AIC to best continuous model from RQ 5.1.1 (�AIC < -2 favors piecewise)
 
 **Dependencies:** Step 1 (requires piecewise structure), Step 0 (requires best continuous AIC for comparison)
 
@@ -425,7 +425,7 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
 **Expected Rows:** ~400 rows
 
 **File 2:** data/step00_best_continuous_aic.txt
-**Source:** Generated by Step 0 (AIC of best continuous model from RQ 5.7)
+**Source:** Generated by Step 0 (AIC of best continuous model from RQ 5.1.1)
 **Format:** Plain text with single AIC value
 
 **Processing:**
@@ -477,7 +477,7 @@ Validation tools MUST be used after LMM fitting execution. Specific validation t
   - Fixed effects table (coefficient, SE, z, p for Intercept, Days_within, SegmentLate, interaction)
   - Random effects variance components
   - AIC, BIC, log-likelihood
-  - AIC comparison: AIC_piecewise, AIC_continuous (from RQ 5.7), �AIC, interpretation
+  - AIC comparison: AIC_piecewise, AIC_continuous (from RQ 5.1.1), �AIC, interpretation
   - Segment slopes: Early slope, Late slope
   - Interaction significance test result (p < 0.003333 or not)
 
@@ -535,7 +535,7 @@ Validation tools MUST be used after piecewise model fitting execution. Specific 
 **Expected Behavior on Validation Failure:**
 - If convergence fails completely -> QUIT with error, invoke g_debug
 - If interaction term estimation fails -> QUIT with error, log details
-- If AIC comparison fails (cannot load continuous AIC) -> QUIT with error, check RQ 5.7 outputs
+- If AIC comparison fails (cannot load continuous AIC) -> QUIT with error, check RQ 5.1.1 outputs
 
 ---
 
@@ -894,9 +894,9 @@ Validation tools MUST be used after plot data preparation execution. Specific va
 - `test` - Test session identifier (T1, T2, T3, T4)
 - `TSVR_hours` - Time Since VR in hours (Decision D070)
 - `theta` - IRT latent ability estimate (domain-collapsed for this RQ)
-- `composite_ID` - NOT USED in this RQ (no IRT calibration, theta inherited from RQ 5.7)
+- `composite_ID` - NOT USED in this RQ (no IRT calibration, theta inherited from RQ 5.1.1)
 
-**New Variables (RQ 5.8-specific):**
+**New Variables (RQ 5.1.2-specific):**
 - `Time` - Copy of TSVR_hours for quadratic model (convention: match formula variable name)
 - `Time_squared` - TSVR_hours� for quadratic term
 - `Time_log` - log(TSVR_hours + 1) for potential log model
@@ -956,14 +956,14 @@ This is not optional. This is the core architectural principle preventing cascad
 **Validation Tool:** (determined by rq_tools - likely tools.validation.validate_merge_operation)
 
 **What Validation Checks:**
-- All 3 RQ 5.7 files exist (theta, TSVR, best model)
+- All 3 RQ 5.1.1 files exist (theta, TSVR, best model)
 - Merge produces expected row count (~400 rows)
 - No unexpected NaN after merge
 - Domain collapse produces single theta per (UID, test)
 - AIC value is positive and reasonable (10000-20000 range)
 
 **Expected Behavior on Validation Failure:**
-- If RQ 5.7 file missing -> QUIT with EXPECTATIONS ERROR
+- If RQ 5.1.1 file missing -> QUIT with EXPECTATIONS ERROR
 - If merge fails -> QUIT with error, log details, invoke g_debug
 - If NaN detected -> QUIT with error, list affected rows
 - If row count <380 -> QUIT with error, investigate data loss
@@ -1022,7 +1022,7 @@ This is not optional. This is the core architectural principle preventing cascad
 **Expected Behavior on Validation Failure:**
 - If convergence fails -> QUIT with error, invoke g_debug
 - If interaction estimation fails -> QUIT with error, log details
-- If AIC comparison fails -> QUIT with error, check RQ 5.7 best model AIC
+- If AIC comparison fails -> QUIT with error, check RQ 5.1.1 best model AIC
 
 ---
 
@@ -1088,7 +1088,7 @@ This is not optional. This is the core architectural principle preventing cascad
 
 **Total Steps:** 7 (Step 0: Get Data, Steps 1-6: Analysis + Visualization)
 **Estimated Runtime:** 30-60 minutes (medium complexity - LMM fitting with random slopes + comprehensive assumption validation)
-**Cross-RQ Dependencies:** RQ 5.7 must complete successfully (provides theta scores, TSVR mapping, best continuous model)
+**Cross-RQ Dependencies:** RQ 5.1.1 must complete successfully (provides theta scores, TSVR mapping, best continuous model)
 **Primary Outputs:**
   - Quadratic model summary (Test 1 results)
   - Piecewise model summary (Test 2 results)
@@ -1119,4 +1119,4 @@ With N=100 participants, complex random slopes structures may not converge. Fall
 ---
 
 **Version History:**
-- v1.0 (2025-11-26): Initial plan created by rq_planner agent for RQ 5.8
+- v1.0 (2025-11-26): Initial plan created by rq_planner agent for RQ 5.1.2

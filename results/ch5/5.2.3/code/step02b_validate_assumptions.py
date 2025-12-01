@@ -5,7 +5,7 @@
 """
 Step ID: step02b
 Step Name: Validate LMM Assumptions
-RQ: ch5/rq10
+RQ: ch5/5.2.3
 Generated: 2025-11-28
 
 PURPOSE:
@@ -85,7 +85,7 @@ from tools.validation import validate_lmm_assumptions_comprehensive
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq10 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.3 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step02b_validate_assumptions.log"
 
 # =============================================================================
@@ -210,7 +210,7 @@ if __name__ == "__main__":
             f.write("=" * 80 + "\n")
             f.write("LMM ASSUMPTION VALIDATION REPORT\n")
             f.write("=" * 80 + "\n\n")
-            f.write(f"RQ: ch5/rq10 - Age x Domain x Time Interaction (3-way)\n")
+            f.write(f"RQ: ch5/5.2.3 - Age x Domain x Time Interaction (3-way)\n")
             f.write(f"Step: 02b - Validate LMM Assumptions\n")
             f.write(f"Model: 3-way Age x Domain x Time interaction with random slopes\n\n")
 

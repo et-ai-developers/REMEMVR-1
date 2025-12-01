@@ -5,7 +5,7 @@
 """
 Step ID: step05
 Step Name: Correlation Analysis with Steiger's z-test
-RQ: results/ch5/rq12
+RQ: ch5/5.2.5
 Generated: 2025-11-30
 
 PURPOSE:
@@ -96,7 +96,7 @@ from tools.validation import validate_correlation_test_d068
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq12 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.5 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step05_correlation_analysis.log"
 
 # =============================================================================

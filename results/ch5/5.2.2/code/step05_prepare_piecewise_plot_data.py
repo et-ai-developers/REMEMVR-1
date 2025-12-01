@@ -5,7 +5,7 @@
 """
 Step ID: step05
 Step Name: Prepare Piecewise Trajectory Plot Data
-RQ: results/ch5/rq2
+RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
@@ -22,7 +22,7 @@ EXPECTED INPUTS:
     Format: Fitted LMM model object (pickle)
     Expected: MixedLMResults object
 
-  - results/ch5/rq1/data/step03_item_parameters.csv
+  - results/ch5/5.1.1/data/step03_item_parameters.csv
     Columns: [item_name, factor, a, b]
     Format: RQ 5.1 item parameters for theta-to-probability conversion
     Expected rows: ~54 items
@@ -87,11 +87,11 @@ from tools.plotting import convert_theta_to_probability
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq2
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2
 LOG_FILE = RQ_DIR / "logs" / "step05_prepare_piecewise_plot_data.log"
 
 # RQ 5.1 dependency path
-RQ51_DIR = Path(__file__).resolve().parents[2] / "rq1"  # results/ch5/rq1
+RQ51_DIR = Path(__file__).resolve().parents[2] / "5.1.1"  # results/ch5/5.1.1
 
 # =============================================================================
 # FOLDER CONVENTIONS (MANDATORY - NO EXCEPTIONS)

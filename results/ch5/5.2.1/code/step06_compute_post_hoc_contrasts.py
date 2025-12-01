@@ -5,7 +5,7 @@
 """
 Step ID: step06
 Step Name: Compute Post-Hoc Contrasts (Decision D068)
-RQ: results/ch5/rq1
+RQ: ch5/5.2.1
 Generated: 2025-11-22
 
 PURPOSE:
@@ -69,7 +69,7 @@ from typing import Dict, Any
 import traceback
 
 # Add project root to path for imports
-# parents[4] = REMEMVR/ (code -> rq1 -> ch5 -> results -> REMEMVR)
+# parents[4] = REMEMVR/ (code -> 5.2.1 -> ch5 -> results -> REMEMVR)
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -83,7 +83,7 @@ from tools.validation import validate_lmm_convergence
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq1
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.1
 LOG_FILE = RQ_DIR / "logs" / "step06_compute_post_hoc_contrasts.log"
 
 # Ensure log directory exists

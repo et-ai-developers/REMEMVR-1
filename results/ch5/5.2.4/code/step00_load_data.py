@@ -13,17 +13,17 @@ Load IRT theta scores from RQ 5.1 and extract raw VR item data for CTT computati
 This step ensures both IRT and CTT use the SAME purified item set for fair comparison.
 
 EXPECTED INPUTS:
-  - results/ch5/rq1/data/step03_theta_scores.csv
+  - results/ch5/5.2.1/data/step03_theta_scores.csv
     Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
     Format: IRT theta scores from RQ 5.1 Pass 2 calibration
     Expected rows: 400 (100 participants x 4 test sessions)
 
-  - results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - results/ch5/5.2.1/data/step00_tsvr_mapping.csv
     Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
     Format: Time since viewing retention interval in hours
     Expected rows: 400
 
-  - results/ch5/rq1/data/step02_purified_items.csv
+  - results/ch5/5.2.1/data/step02_purified_items.csv
     Columns: ['item_name', 'factor', 'a', 'b']
     Format: Purified item list from RQ 5.1 (40-50% retention expected)
     Expected rows: 40-60 items
@@ -107,7 +107,7 @@ RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq11 (derived from s
 LOG_FILE = RQ_DIR / "logs" / "step00_load_data.log"
 
 # Input paths (from RQ 5.1)
-RQ1_DIR = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data"
+RQ1_DIR = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data"
 THETA_INPUT = RQ1_DIR / "step03_theta_scores.csv"
 TSVR_INPUT = RQ1_DIR / "step00_tsvr_mapping.csv"
 PURIFIED_ITEMS_INPUT = RQ1_DIR / "step02_purified_items.csv"

@@ -1,4 +1,4 @@
-# Results Summary: RQ 5.8 - Evidence for Two-Phase Forgetting (Rapid then Slow)
+# Results Summary: RQ 5.1.2 - Evidence for Two-Phase Forgetting (Rapid then Slow)
 
 **Research Question:** Do episodic memory data support a two-phase model with rapid initial decline (Day 0-1) followed by slower decay (Day 1-6)?
 
@@ -12,9 +12,9 @@
 
 ### Sample Characteristics
 
-- **Total N:** 100 participants (inherited from RQ 5.7)
+- **Total N:** 100 participants (inherited from RQ 5.1.1)
 - **Observations:** 400 data points (100 participants x 4 test sessions)
-- **Data Source:** IRT-derived theta scores from RQ 5.7, collapsed across What/Where/When domains
+- **Data Source:** IRT-derived theta scores from RQ 5.1.1, collapsed across What/Where/When domains
 - **Time Variable:** TSVR (Time Since VR encoding) in hours, range: 1.0 to 148.0 hours
 - **Missing Data:** None (complete data for all participants across 4 test sessions)
 - **Retention Interval:** Day 0 (encoding), Day 1 (~24h), Day 3 (~72h), Day 6 (~144h)
@@ -33,7 +33,7 @@ This RQ used three independent statistical tests to triangulate evidence for two
 
 ### Test 1: Quadratic Term Significance
 
-**Model:** Theta ~ Time + Time² + (1 | UID)
+**Model:** Theta ~ Time + Timeï¿½ + (1 | UID)
 
 **Note:** Random structure used fallback to intercepts-only (1 | UID) due to convergence issues with attempted random slopes (Time | UID). With N=100 participants, complex random structures often fail to converge (Bates et al., 2015 recommend N>=200).
 
@@ -43,15 +43,15 @@ This RQ used three independent statistical tests to triangulate evidence for two
 |------|-------------|----|----|------------|----------|---------|
 | Intercept | 0.612 | 0.080 | 7.650 | <.001 | <.001 | [0.455, 0.769] |
 | Time | -0.016 | 0.002 | -9.292 | <.001 | <.001 | [-0.019, -0.012] |
-| Time² | 0.000054 | 0.000 | 5.415 | <.001 | <.001 | [0.000, 0.000] |
+| Timeï¿½ | 0.000054 | 0.000 | 5.415 | <.001 | <.001 | [0.000, 0.000] |
 
-**Bonferroni Correction:** ± = 0.05/15 = 0.0033 (correcting for 15 RQs in Chapter 5)
+**Bonferroni Correction:** ï¿½ = 0.05/15 = 0.0033 (correcting for 15 RQs in Chapter 5)
 
 **Convergence:** True
 **Model Fit:** AIC = 873.24, BIC = 893.19
 **Random Effects Variance:** Ã²(intercept) = 0.373 (substantial individual differences in baseline memory ability)
 
-**Test 1 Result:** Time² coefficient is POSITIVE (0.000054) and SIGNIFICANT (p < 0.001, well below Bonferroni ± = 0.0033). This indicates significant DECELERATION in forgetting rate over time (concave-up curvature), supporting two-phase hypothesis.
+**Test 1 Result:** Timeï¿½ coefficient is POSITIVE (0.000054) and SIGNIFICANT (p < 0.001, well below Bonferroni ï¿½ = 0.0033). This indicates significant DECELERATION in forgetting rate over time (concave-up curvature), supporting two-phase hypothesis.
 
 ---
 
@@ -79,7 +79,7 @@ This RQ used three independent statistical tests to triangulate evidence for two
 
 | Model | AIC | deltaAIC (vs Continuous) | Interpretation |
 |-------|-----|----------------------|----------------|
-| **Best Continuous (RQ 5.7)** | 873.71 | 0.00 (reference) | Log model from RQ 5.7 |
+| **Best Continuous (RQ 5.1.1)** | 873.71 | 0.00 (reference) | Log model from RQ 5.1.1 |
 | **Quadratic (Test 1)** | 873.24 | -0.47 | Equivalent to continuous |
 | **Piecewise (Test 2)** | 878.74 | +5.03 | WORSE than continuous |
 
@@ -98,7 +98,7 @@ This RQ used three independent statistical tests to triangulate evidence for two
 | **Early slope** (0-48h) | -0.432 | 0.071 | [-0.572, -0.292] | Rapid forgetting (-0.432 theta units/day) |
 | **Late slope** (48-240h) | -0.070 | 0.026 | [-0.121, -0.018] | Slow forgetting (-0.070 theta units/day) |
 | **Ratio (Late/Early)** | 0.161 | 0.066 | [0.032, 0.291] | Late forgetting only 16% of Early rate |
-| **Interaction p-value** | <0.000002 | - | - | Highly significant (p << 0.0033 Bonferroni ±) |
+| **Interaction p-value** | <0.000002 | - | - | Highly significant (p << 0.0033 Bonferroni ï¿½) |
 
 **Threshold for "Robust Two-Phase":** Ratio < 0.5 (Late forgetting less than half Early rate)
 
@@ -127,7 +127,7 @@ This RQ used three independent statistical tests to triangulate evidence for two
 
 | Test | Evidence for Two-Phase? | Strength |
 |------|-------------------------|----------|
-| **Test 1** (Quadratic term) | YES - Time² significant (p<.001) | Strong |
+| **Test 1** (Quadratic term) | YES - Timeï¿½ significant (p<.001) | Strong |
 | **Test 2** (AIC comparison) | NO - Continuous favored (deltaAIC=+5.03) | Strong (against) |
 | **Test 3** (Slope ratio) | YES - Ratio=0.161<<0.5, interaction p<.001 | Very Strong |
 
@@ -197,7 +197,7 @@ The figure presents side-by-side comparison of two competing models for forgetti
 
 **Connection to Findings:**
 
-- **Visual supports Test 1:** Quadratic curve shows clear concave-up curvature (deceleration), matching significant Time² coefficient (p<.001)
+- **Visual supports Test 1:** Quadratic curve shows clear concave-up curvature (deceleration), matching significant Timeï¿½ coefficient (p<.001)
 - **Visual supports Test 3:** Piecewise panel shows dramatically different slopes (steep blue vs shallow green), matching slope ratio 0.161
 - **Visual explains Test 2 result:** No obvious "kink" in observed data at 48h - smooth curve (left) fits data as well as piecewise (right) with fewer parameters, hence lower AIC
 
@@ -216,7 +216,7 @@ The figure presents side-by-side comparison of two competing models for forgetti
 **Hypothesis Status:** **PARTIALLY SUPPORTED**
 
 The hypothesis prediction of triangulated evidence was PARTIALLY confirmed:
-- **Test 1 (Quadratic term):** SUPPORTED - Time² significant (p < 0.001 < Bonferroni ± = 0.0033), positive coefficient indicates deceleration
+- **Test 1 (Quadratic term):** SUPPORTED - Timeï¿½ significant (p < 0.001 < Bonferroni ï¿½ = 0.0033), positive coefficient indicates deceleration
 - **Test 2 (AIC comparison):** NOT SUPPORTED - Piecewise model WORSE fit than continuous (deltaAIC = +5.03 > +2 threshold), contradicts prediction of deltaAIC < -2
 - **Test 3 (Slope ratio):** STRONGLY SUPPORTED - Ratio = 0.161 << 0.5 threshold, interaction p < 0.000002 (highly significant)
 
@@ -316,7 +316,7 @@ Re-fit piecewise model with SAME random structure as quadratic (1 | UID random i
 
 **Plan.md Warning:**
 
-This issue was anticipated. Plan.md Section "Verify RQ 5.7 model convergence status" explicitly warned: "If RQ 5.7 used fallback to (1 | UID) random intercepts only, RQ 5.8 piecewise models MUST use same fallback structure for valid AIC comparison."
+This issue was anticipated. Plan.md Section "Verify RQ 5.1.1 model convergence status" explicitly warned: "If RQ 5.1.1 used fallback to (1 | UID) random intercepts only, RQ 5.1.2 piecewise models MUST use same fallback structure for valid AIC comparison."
 
 This warning was NOT followed in execution (piecewise attempted full random slopes despite quadratic using intercepts-only). **This is investigable error, not inherent data limitation.**
 
@@ -336,7 +336,7 @@ This RQ demonstrates REMEMVR captures theoretically meaningful forgetting dynami
 **Measurement Sensitivity:**
 
 IRT-derived theta scores sensitive enough to detect:
-- Small effect sizes (Time² coefficient = 0.000054, yet p < 0.001)
+- Small effect sizes (Timeï¿½ coefficient = 0.000054, yet p < 0.001)
 - Differential forgetting rates (Early vs Late slopes significantly different)
 - Individual differences (random intercept variance Ã² = 0.373)
 
@@ -376,7 +376,7 @@ Non-convergence of piecewise model highlights critical LMM challenge:
 
 **Demographic Constraints:**
 
-- Sample characteristics inherited from RQ 5.7 (likely university undergraduates, age 18-25)
+- Sample characteristics inherited from RQ 5.1.1 (likely university undergraduates, age 18-25)
 - Restricted age range limits generalizability to older adults, where consolidation dynamics may differ
 - No demographic data reported (sex, education, sleep habits) prevents examining moderators
 
@@ -389,7 +389,7 @@ Non-convergence of piecewise model highlights critical LMM challenge:
 **1. Domain Aggregation:**
 
 - Collapsed across What/Where/When domains to increase power for general two-phase test
-- However, consolidation dynamics may differ by domain (data available from RQ 5.7 but not analyzed here)
+- However, consolidation dynamics may differ by domain (data available from RQ 5.1.1 but not analyzed here)
 
 **2. Limited Timepoints:**
 
@@ -442,8 +442,8 @@ Non-convergence of piecewise model highlights critical LMM challenge:
 
 **2. Cross-RQ Dependency:**
 
-- This RQ entirely dependent on RQ 5.7 outputs (theta scores, TSVR, best model)
-- If RQ 5.7 results change, RQ 5.8 results may change
+- This RQ entirely dependent on RQ 5.1.1 outputs (theta scores, TSVR, best model)
+- If RQ 5.1.1 results change, RQ 5.1.2 results may change
 
 ---
 
@@ -461,7 +461,7 @@ Core findings are **robust within scope:**
 - Tests 1 and 3 converge on two-phase pattern (deceleration exists, slope ratio robust)
 - Visual inspection supports smooth deceleration (both models fit observed data)
 - Effect sizes large (Early slope 6x faster than Late slope)
-- Significance margins substantial (p-values well below corrected ±)
+- Significance margins substantial (p-values well below corrected ï¿½)
 
 ---
 
@@ -494,7 +494,7 @@ Core findings are **robust within scope:**
 - Compare p-values and confidence intervals to original models
 
 **Expected Outcome:**
-- Time² significance likely holds (p < 0.001 has large margin)
+- Timeï¿½ significance likely holds (p < 0.001 has large margin)
 - Interaction significance likely holds (p < 0.000002 has huge margin)
 
 **Timeline:** Immediate (2-3 hours)
@@ -508,7 +508,7 @@ Core findings are **robust within scope:**
 **Why:** Consolidation dynamics may differ by memory domain (spatial vs temporal vs object). Current analysis collapsed across domains.
 
 **How:**
-- Load RQ 5.7 domain-specific theta scores (not aggregated)
+- Load RQ 5.1.1 domain-specific theta scores (not aggregated)
 - Fit 3 separate piecewise models (one per domain: What, Where, When)
 - Extract Early slope, Late slope, Ratio for each domain
 

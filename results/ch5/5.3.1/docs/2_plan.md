@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.3: Do Free Recall, Cued Recall, and Recognition Exhibit Different Forgetting Trajectories?
+# Analysis Plan for RQ 5.3.1: Do Free Recall, Cued Recall, and Recognition Exhibit Different Forgetting Trajectories?
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-24
@@ -35,8 +35,8 @@ This RQ requires 8 steps:
 
 **Input:**
 
-**File 1:** results/ch5/rq1/data/step00_irt_input.csv
-**Source:** RQ 5.1 Step 0 output (extracted VR item data)
+**File 1:** results/ch5/5.2.1/data/step00_irt_input.csv
+**Source:** RQ 5.2.1 Step 0 output (extracted VR item data)
 **Format:** CSV, wide format (composite_ID x item columns)
 **Columns:**
 - `composite_ID` (string, format: UID_test)
@@ -44,8 +44,8 @@ This RQ requires 8 steps:
 
 **Expected Rows:** 400 (100 participants x 4 tests)
 
-**File 2:** results/ch5/rq1/data/step00_tsvr_mapping.csv
-**Source:** RQ 5.1 Step 0 output (TSVR time variable)
+**File 2:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv
+**Source:** RQ 5.2.1 Step 0 output (TSVR time variable)
 **Format:** CSV with columns:
 - `composite_ID` (string)
 - `TSVR_hours` (float, actual hours since encoding)
@@ -55,7 +55,7 @@ This RQ requires 8 steps:
 
 **Processing:**
 
-1. Load RQ 5.1 IRT input data
+1. Load RQ 5.2.1 IRT input data
 2. Filter columns to keep only Item paradigm columns:
    - Include: *IFR-*ANS (Item Free Recall)
    - Include: *ICR-*ANS (Item Cued Recall)
@@ -66,7 +66,7 @@ This RQ requires 8 steps:
    - free_recall factor: maps to *IFR* columns
    - cued_recall factor: maps to *ICR* columns
    - recognition factor: maps to *IRE* columns
-4. Copy TSVR mapping file to local data folder
+4. Copy TSVR mapping file from RQ 5.2.1 to local data folder
 5. Save filtered IRT input and new Q-matrix
 
 **Output:**
@@ -819,30 +819,30 @@ Per names.md:
 ### Dependency Type 2: DERIVED Data from Other RQs (Dependencies Exist)
 
 **This RQ requires outputs from:**
-- **RQ 5.1** (Domain-Specific Forgetting Trajectories)
-  - File: results/ch5/rq1/data/step00_irt_input.csv
+- **RQ 5.2.1** (Domain-Specific Forgetting Trajectories)
+  - File: results/ch5/5.2.1/data/step00_irt_input.csv
   - Used in: Step 0 (filter to paradigm items, reuse dichotomized VR scores)
-  - Rationale: RQ 5.1 already extracted and dichotomized all VR items. This RQ reuses that extraction but applies different Q-matrix (paradigm factors instead of domain factors).
+  - Rationale: RQ 5.2.1 already extracted and dichotomized all VR items. This RQ reuses that extraction but applies different Q-matrix (paradigm factors instead of domain factors).
 
-  - File: results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - File: results/ch5/5.2.1/data/step00_tsvr_mapping.csv
   - Used in: Step 0 (copy TSVR time variable mapping)
   - Rationale: TSVR mapping is identical across RQs (same participants, same test sessions).
 
 **Execution Order Constraint:**
-1. RQ 5.1 must complete Step 0 (provides step00_irt_input.csv, step00_tsvr_mapping.csv)
-2. This RQ (5.3) executes after RQ 5.1 Step 0 minimum
+1. RQ 5.2.1 must complete Step 0 (provides step00_irt_input.csv, step00_tsvr_mapping.csv)
+2. This RQ (5.3.1) executes after RQ 5.2.1 Step 0 minimum
 
-**Data Source Boundaries (Per Specification 5.1.6):**
-- **RAW data:** Not directly used (reuses RQ 5.1 extraction)
-- **DERIVED data:** Outputs from RQ 5.1 Step 0 (dichotomized VR scores, TSVR mapping)
-- **Scope:** This RQ does NOT use RQ 5.1 theta scores or item parameters (runs fresh IRT with paradigm factors)
+**Data Source Boundaries (Per Specification 5.2.1.6):**
+- **RAW data:** Not directly used (reuses RQ 5.2.1 extraction)
+- **DERIVED data:** Outputs from RQ 5.2.1 Step 0 (dichotomized VR scores, TSVR mapping)
+- **Scope:** This RQ does NOT use RQ 5.2.1 theta scores or item parameters (runs fresh IRT with paradigm factors)
 
 **Validation:**
-- Step 0: Check results/ch5/rq1/data/step00_irt_input.csv exists
-- Step 0: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists
-- If either file missing -> quit with EXPECTATIONS ERROR -> user must execute RQ 5.1 Step 0 first
+- Step 0: Check results/ch5/5.2.1/data/step00_irt_input.csv exists
+- Step 0: Check results/ch5/5.2.1/data/step00_tsvr_mapping.csv exists
+- If either file missing -> quit with EXPECTATIONS ERROR -> user must execute RQ 5.2.1 Step 0 first
 
-**Reference:** Specification section 5.1.6 (Data Source Boundaries)
+**Reference:** Specification section 5.2.1.6 (Data Source Boundaries)
 
 ---
 

@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.13: Between-Person Variance in Forgetting Rates
+# Analysis Plan for RQ 5.1.4: Between-Person Variance in Forgetting Rates
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-27
@@ -42,21 +42,21 @@ This RQ requires 5 analysis steps:
 
 **Input:**
 
-**File 1:** results/ch5/rq7/data/lmm_Log.pkl
-**Source:** RQ 5.7 Step 5 (best-fitting Logarithmic LMM model, AIC=873.71, weight=0.482)
+**File 1:** results/ch5/5.1.1/data/lmm_Lin+Log.pkl
+**Source:** RQ 5.1.1 Step 5 (best-fitting Lin+Log LMM model with superior convergence, ΔAIC=0.8 vs Log)
 **Format:** Python pickle file (statsmodels MixedLMResults object)
 **Expected Content:** Fitted LMM with random intercepts and random slopes for log(Days+1), converged model with variance-covariance matrix
 
-**File 2:** results/ch5/rq7/data/step03_theta_scores.csv
-**Source:** RQ 5.7 Step 3 (theta extraction after Pass 2 IRT calibration, purified items)
+**File 2:** results/ch5/5.1.1/data/step03_theta_scores.csv
+**Source:** RQ 5.1.1 Step 3 (theta extraction after Pass 2 IRT calibration, purified items)
 **Format:** CSV with columns:
   - UID (string, participant identifier, format: A###)
   - test (integer, test session: 1, 2, 3, 4)
   - Theta_All (float, IRT ability estimate for "All" factor)
-**Expected Rows:** 380-400 (100 participants x 4 tests, allowing for minor data loss from RQ 5.7)
+**Expected Rows:** 380-400 (100 participants x 4 tests, allowing for minor data loss from RQ 5.1.1)
 
-**File 3:** results/ch5/rq7/data/step04_lmm_input.csv
-**Source:** RQ 5.7 Step 4 (LMM input preparation with time variable TSVR_hours)
+**File 3:** results/ch5/5.1.1/data/step04_lmm_input.csv
+**Source:** RQ 5.1.1 Step 4 (LMM input preparation with time variable TSVR_hours)
 **Format:** CSV with columns:
   - composite_ID (string, format: UID_test)
   - UID (string, participant identifier)
@@ -67,20 +67,20 @@ This RQ requires 5 analysis steps:
   - Days (float, TSVR_hours / 24)
   - Days_squared (float, Days^2)
   - log_Days_plus1 (float, log(Days + 1))
-**Expected Rows:** 380-400 (100 participants x 4 tests, allowing for minor data loss from RQ 5.7)
+**Expected Rows:** 380-400 (100 participants x 4 tests, allowing for minor data loss from RQ 5.1.1)
 
 **Circuit Breaker Check:**
-If ANY of the three required files from RQ 5.7 are missing, trigger EXPECTATIONS ERROR:
+If ANY of the three required files from RQ 5.1.1 are missing, trigger EXPECTATIONS ERROR:
 ```
-EXPECTATIONS ERROR: To perform Step 1 (Load RQ 5.7 Dependencies) I expect:
-  - results/ch5/rq7/data/lmm_Log.pkl (best-fitting LMM model)
-  - results/ch5/rq7/data/step03_theta_scores.csv (theta scores)
-  - results/ch5/rq7/data/step04_lmm_input.csv (LMM input with TSVR_hours)
+EXPECTATIONS ERROR: To perform Step 1 (Load RQ 5.1.1 Dependencies) I expect:
+  - results/ch5/5.1.1/data/lmm_Lin+Log.pkl (best-fitting LMM model)
+  - results/ch5/5.1.1/data/step03_theta_scores.csv (theta scores)
+  - results/ch5/5.1.1/data/step04_lmm_input.csv (LMM input with TSVR_hours)
 
 But missing: [list missing files]
 
-Action: RQ 5.7 must complete Steps 1-5 before RQ 5.13 can execute.
-Run RQ 5.7 workflow first, then retry RQ 5.13.
+Action: RQ 5.1.1 must complete Steps 1-5 before RQ 5.1.4 can execute.
+Run RQ 5.1.1 workflow first, then retry RQ 5.1.4.
 ```
 
 **Processing:**
@@ -94,8 +94,8 @@ Run RQ 5.7 workflow first, then retry RQ 5.13.
 **File 1:** data/step01_model_metadata.yaml
 **Format:** YAML metadata documenting loaded model
 **Content:**
-  - model_source: "results/ch5/rq7/data/lmm_Log.pkl"
-  - model_formula: "Logarithmic (Theta ~ log(Days+1))"
+  - model_source: "results/ch5/5.1.1/data/lmm_Lin+Log.pkl"
+  - model_formula: "Lin+Log (Theta ~ Lin + Log(Days+1))"
   - model_type: "MixedLM"
   - n_participants: 100
   - n_observations: ~400
@@ -132,7 +132,7 @@ After Step 1 execution, the log file (logs/step01_load_dependencies.log) MUST be
 - No NaN in key columns (UID, TEST must be complete)
 
 *Log Validation:*
-- Required pattern: "Successfully loaded model from results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl"
+- Required pattern: "Successfully loaded model from results/ch5/5.1.1/data/lmm_Lin+Log.pkl"
 - Required pattern: "Model converged: True"
 - Required pattern: "Loaded theta scores: 400 rows" (or actual count)
 - Required pattern: "Loaded TSVR mapping: 400 rows"
@@ -623,25 +623,25 @@ BOTH p_uncorrected and p_bonferroni MUST be reported. This enables transparent r
 ### Dependency Type: DERIVED Data from RQ 5.7 (Critical Dependency)
 
 **This RQ requires outputs from:**
-- **RQ 5.7** (Which functional form best describes forgetting trajectories?)
+- **RQ 5.1.1** (Which functional form best describes forgetting trajectories?)
 
   **Files Required:**
-  1. results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl
+  1. results/ch5/5.1.1/data/lmm_Lin+Log.pkl
      - Used in: Step 1 (load saved LMM model object)
-     - Rationale: RQ 5.7 fits LMM with random slopes for forgetting trajectories. This RQ decomposes variance from that model.
+     - Rationale: RQ 5.1.1 fits LMM with random slopes for forgetting trajectories. This RQ decomposes variance from that model.
 
-  2. results/ch5/rq7/data/step04_theta_scores_allitems.csv
+  2. results/ch5/5.1.1/data/step03_theta_scores.csv
      - Used in: Step 1 (load theta scores for context, not actively analyzed but validates dependency)
-     - Rationale: Provides participant ability estimates that fed into RQ 5.7's LMM
+     - Rationale: Provides participant ability estimates that fed into RQ 5.1.1's LMM
 
-  3. results/ch5/rq7/data/step00_tsvr_mapping.csv
+  3. results/ch5/5.1.1/data/step04_lmm_input.csv
      - Used in: Step 1 (load TSVR time variable for documentation, not actively analyzed)
-     - Rationale: Documents time variable used in RQ 5.7's LMM (Decision D070 - actual hours)
+     - Rationale: Documents time variable used in RQ 5.1.1's LMM (Decision D070 - actual hours)
 
 **Execution Order Constraint:**
-1. RQ 5.7 must complete Steps 0-5 (IRT calibration, purification, theta extraction, TSVR merge, LMM trajectory fitting with random slopes)
-2. This RQ (5.13) executes after RQ 5.7 completes
-3. RQ 5.14 executes after this RQ (uses data/step04_random_effects.csv from Step 4 of this RQ)
+1. RQ 5.1.1 must complete Steps 1-5 (IRT calibration, purification, theta extraction, TSVR merge, LMM trajectory fitting with random slopes)
+2. This RQ (5.1.4) executes after RQ 5.1.1 completes
+3. RQ 5.1.5 executes after this RQ (uses data/step04_random_effects.csv from Step 4 of this RQ)
 
 **Data Source Boundaries:**
 - **RAW data:** None directly used (all analysis uses RQ 5.7 outputs)
@@ -649,9 +649,9 @@ BOTH p_uncorrected and p_bonferroni MUST be reported. This enables transparent r
 - **Scope:** This RQ does NOT fit new models. It extracts variance components from RQ 5.7's saved model.
 
 **Circuit Breaker:**
-- Step 1: Check results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl exists
-- Step 1: Check results/ch5/rq7/data/step04_theta_scores_allitems.csv exists
-- Step 1: Check results/ch5/rq7/data/step00_tsvr_mapping.csv exists
+- Step 1: Check results/ch5/5.1.1/data/lmm_Lin+Log.pkl exists
+- Step 1: Check results/ch5/5.1.1/data/step03_theta_scores.csv exists
+- Step 1: Check results/ch5/5.1.1/data/step04_lmm_input.csv exists
 - If ANY file missing -> trigger EXPECTATIONS ERROR -> quit with error message:
   ```
   EXPECTATIONS ERROR: RQ 5.13 requires RQ 5.7 to complete first.

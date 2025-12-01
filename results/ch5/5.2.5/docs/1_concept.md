@@ -1,8 +1,8 @@
-# RQ 5.12: Does purified IRT item set change CTT conclusions?
+# RQ 5.2.5: Does purified IRT item set change CTT conclusions?
 
 **Chapter:** 5
-**RQ Number:** 12
-**Full ID:** 5.12
+**RQ Number:** 5.2.5
+**Full ID:** 5.2.5
 
 ---
 
@@ -94,8 +94,8 @@ Methodological comparison - CTT vs IRT convergence testing using correlation ana
 **High-Level Workflow:**
 
 **Step 0:** Get Data
-- Load IRT item parameters and theta scores from results/ch5/rq1/
-- Load TSVR mapping from results/ch5/rq1/data/step00_tsvr_mapping.csv
+- Load IRT item parameters and theta scores from results/ch5/5.2.1/
+- Load TSVR mapping from results/ch5/5.2.1/data/step00_tsvr_mapping.csv
 - Load raw scores from data/cache/dfData.csv for CTT computation
 
 **Step 1:** Identify IRT-Retained Items
@@ -177,9 +177,9 @@ DERIVED (from RQ 5.1 outputs + raw data for CTT computation)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- **IRT Item Parameters:** `results/ch5/rq1/data/step02_purified_items.csv` (item list with discrimination a and difficulty b estimates post-purification)
-- **IRT Theta Scores:** `results/ch5/rq1/data/step03_theta_scores.csv` (ability estimates per UID × Test × Domain)
-- **TSVR Mapping:** `results/ch5/rq1/data/step00_tsvr_mapping.csv` (UID × Test → TSVR hours)
+- **IRT Item Parameters:** `results/ch5/5.2.1/data/step02_purified_items.csv` (item list with discrimination a and difficulty b estimates post-purification)
+- **IRT Theta Scores:** `results/ch5/5.2.1/data/step03_theta_scores.csv` (ability estimates per UID × Test × Domain)
+- **TSVR Mapping:** `results/ch5/5.2.1/data/step00_tsvr_mapping.csv` (UID × Test → TSVR hours)
 - **Raw Data for CTT:** `data/cache/dfData.csv` (dichotomized TQ_ item responses for CTT scoring)
 
 **Dependencies:**

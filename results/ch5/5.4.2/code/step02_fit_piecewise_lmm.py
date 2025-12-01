@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: Fit Piecewise LMM with 3-Way Interaction
-RQ: results/ch5/rq6
+RQ: 5.4.2
 Generated: 2025-11-25
 
 PURPOSE:

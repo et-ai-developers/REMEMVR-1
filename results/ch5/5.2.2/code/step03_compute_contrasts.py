@@ -5,7 +5,7 @@
 """
 Step ID: step03
 Step Name: Compute Planned Contrasts with Bonferroni Correction (Decision D068)
-RQ: results/ch5/rq2
+RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
@@ -84,7 +84,7 @@ from tools.analysis_lmm import compute_contrasts_pairwise, compute_effect_sizes_
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq2
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2
 LOG_FILE = RQ_DIR / "logs" / "step03_compute_contrasts.log"
 
 # Ensure log directory exists

@@ -5,12 +5,12 @@
 """
 Step ID: step05
 Step Name: Extract Slopes and Compute Ratio
-RQ: results/ch5/rq8
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
 Extract Early/Late segment slopes from piecewise LMM model with delta method SE
-propagation for ratio computation. RQ 5.8 Test 4 requires Late/Early ratio < 0.5
+propagation for ratio computation. RQ 5.1.2 Test 4 requires Late/Early ratio < 0.5
 to indicate robust two-phase forgetting pattern (consolidation-dominated Early
 phase vs decay-dominated Late phase). Delta method required because ratio SE
 cannot be computed via simple quadrature due to covariance between slopes.

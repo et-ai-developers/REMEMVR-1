@@ -1,8 +1,8 @@
-# 3_tools.yaml - Tool Catalog for RQ 5.10
+# 3_tools.yaml - Tool Catalog for RQ 5.2.3
 # Created by: rq_tools agent (Step 11)
 # Consumed by: rq_analysis agent (Step 12)
 # Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
-# RQ: 5.10 - Domain-Specific Age Effects on Forgetting
+# RQ: 5.2.3 - Domain-Specific Age Effects on Forgetting
 
 analysis_tools:
   # Step 1: Data preparation (pandas/pathlib operations - no custom tool)

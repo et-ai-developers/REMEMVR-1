@@ -5,7 +5,7 @@
 """
 Step ID: step05
 Step Name: Validate LMM Assumptions
-RQ: results/ch5/rq6
+RQ: 5.4.2
 Generated: 2025-11-25
 
 PURPOSE:

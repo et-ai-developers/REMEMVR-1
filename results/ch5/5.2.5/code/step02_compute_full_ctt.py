@@ -5,7 +5,7 @@
 """
 Step ID: step02
 Step Name: Compute Full CTT Scores
-RQ: results/ch5/rq12
+RQ: ch5/5.2.5
 Generated: 2025-11-30
 
 PURPOSE:

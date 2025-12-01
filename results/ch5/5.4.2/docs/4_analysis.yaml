@@ -2,19 +2,19 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-25
-# RQ: ch5/rq6
+# RQ: ch5/5.4.2
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq6"
+  rq_id: "ch5/5.4.2"
   total_steps: 7
   analysis_type: "Piecewise LMM schema congruence consolidation analysis (3-way interaction)"
   generated_by: "rq_analysis v4.0.0"
   timestamp: "2025-11-25T11:45:00"
   dependencies:
-    - "results/ch5/rq5 (RQ 5.5 must complete Steps 1-3)"
+    - "results/ch5/5.4.1 (RQ 5.4.1 must complete Steps 1-3)"
   key_decisions:
     - "D068: Dual p-value reporting (uncorrected + Bonferroni)"
     - "D070: TSVR (actual hours) as time variable"
@@ -40,20 +40,20 @@ steps:
     analysis_call:
       type: "stdlib"
       operations:
-        - "Check RQ 5.5 status: Read results/ch5/rq5/status.yaml, verify rq_results.status = 'success'"
-        - "If RQ 5.5 incomplete: QUIT with EXPECTATIONS ERROR 'RQ 5.5 must complete before RQ 5.6'"
-        - "Read results/ch5/rq5/data/step03_theta_scores.csv"
+        - "Check RQ 5.4.1 status: Read results/ch5/5.4.1/status.yaml, verify rq_results.status = 'success'"
+        - "If RQ 5.4.1 incomplete: QUIT with EXPECTATIONS ERROR 'RQ 5.4.1 must complete before RQ 5.4.2'"
+        - "Read results/ch5/5.4.1/data/step03_theta_scores.csv"
         - "Validate structure: 400 rows x 7 columns (composite_ID, theta_common, theta_congruent, theta_incongruent, se_common, se_congruent, se_incongruent)"
         - "Validate value ranges: theta_* in [-3, 3], se_* in [0.1, 1.0]"
         - "Copy to data/step00_theta_scores_from_rq5.csv (local cache for this RQ)"
 
     input_files:
-      - path: "results/ch5/rq5/status.yaml"
+      - path: "results/ch5/5.4.1/status.yaml"
         required_columns: []
         variable_name: "rq5_status"
-        description: "RQ 5.5 execution status (verify rq_results = success)"
+        description: "RQ 5.4.1 execution status (verify rq_results = success)"
         expected_rows: 1
-      - path: "results/ch5/rq5/data/step03_theta_scores.csv"
+      - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
         required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
         variable_name: "df_rq5_theta"
         description: "RQ 5.5 theta scores by congruence (Common/Congruent/Incongruent)"
@@ -68,7 +68,7 @@ steps:
 
     parameters:
       dependency_check:
-        rq5_path: "results/ch5/rq5"
+        rq5_path: "results/ch5/5.4.1"
         rq5_theta_file: "data/step03_theta_scores.csv"
         required_status: "rq_results.status = success"
       value_ranges:
@@ -80,11 +80,11 @@ steps:
     validation_call:
       type: "inline"
       criteria:
-        - name: "RQ 5.5 dependency satisfied"
-          check: "results/ch5/rq5/status.yaml exists AND rq_results.status = 'success'"
+        - name: "RQ 5.4.1 dependency satisfied"
+          check: "results/ch5/5.4.1/status.yaml exists AND rq_results.status = 'success'"
           severity: "CRITICAL"
         - name: "Theta file exists"
-          check: "results/ch5/rq5/data/step03_theta_scores.csv exists"
+          check: "results/ch5/5.4.1/data/step03_theta_scores.csv exists"
           severity: "CRITICAL"
         - name: "Row count correct"
           check: "Output has 400 rows (100 participants x 4 tests)"
@@ -659,14 +659,14 @@ steps:
 # ============================================================================
 
 dependencies:
-  rq_5_5:
+  rq_5_4_1:
     files_required:
-      - path: "results/ch5/rq5/data/step03_theta_scores.csv"
+      - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
         used_in: "step00"
         purpose: "IRT theta scores by congruence (DERIVED data)"
-      - path: "results/ch5/rq5/status.yaml"
+      - path: "results/ch5/5.4.1/status.yaml"
         used_in: "step00"
-        purpose: "Verify RQ 5.5 completed successfully"
+        purpose: "Verify RQ 5.4.1 completed successfully"
     validation: "Check files exist and rq_results.status = 'success' before Step 0 execution"
 
 # ============================================================================

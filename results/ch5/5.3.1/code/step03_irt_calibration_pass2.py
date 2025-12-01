@@ -5,7 +5,7 @@
 """
 Step ID: step03
 Step Name: IRT Calibration Pass 2 (Purified Items)
-RQ: results/ch5/rq3
+RQ: results/ch5/5.3.1
 Generated: 2025-11-24
 
 PURPOSE:
@@ -87,7 +87,7 @@ from tools.validation import validate_irt_convergence
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq3 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.1 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step03_irt_calibration_pass2.log"
 
 # =============================================================================

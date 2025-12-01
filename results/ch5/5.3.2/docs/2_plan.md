@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.4: Linear Trend in Forgetting Rate Across Paradigms
+# Analysis Plan for RQ 5.3.2: Linear Trend in Forgetting Rate Across Paradigms
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-24
@@ -8,7 +8,7 @@
 
 ## Overview
 
-RQ 5.4 tests whether forgetting rate decreases monotonically from Free Recall -> Cued Recall -> Recognition, consistent with a retrieval support gradient hypothesis. This is a **secondary analysis** that operates on outputs from RQ 5.3 (Paradigm-Specific Forgetting Trajectories).
+RQ 5.3.2 tests whether forgetting rate decreases monotonically from Free Recall -> Cued Recall -> Recognition, consistent with a retrieval support gradient hypothesis. This is a **secondary analysis** that operates on outputs from RQ 5.3 (Paradigm-Specific Forgetting Trajectories).
 
 **Analysis Type:** Secondary Analysis (Linear Trend Contrast) on RQ 5.3 LMM model
 **Pipeline:** LMM contrast testing (no IRT calibration - uses derived data from RQ 5.3)
@@ -20,7 +20,7 @@ RQ 5.4 tests whether forgetting rate decreases monotonically from Free Recall ->
 - Decision D070: TSVR as time variable (inherited from RQ 5.3 model)
 
 **Dependencies:**
-- RQ 5.3 must complete successfully before RQ 5.4 can execute
+- RQ 5.3 must complete successfully before RQ 5.3.2 can execute
 - Required: LMM fitted model (step05_lmm_fitted_model.pkl), LMM input data (step04_lmm_input.csv)
 
 ---
@@ -38,12 +38,12 @@ This RQ requires 4 steps:
 
 **Input:**
 
-**File 1:** results/ch5/rq3/data/step05_lmm_fitted_model.pkl
+**File 1:** results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl
 **Source:** RQ 5.3 Step 5 (LMM fitting)
 **Format:** Pickle file containing fitted MixedLM model object
 **Expected Content:** Log model (best AIC per RQ 5.3 results)
 
-**File 2:** results/ch5/rq3/data/step04_lmm_input.csv
+**File 2:** results/ch5/5.3.1/data/step04_lmm_input.csv
 **Source:** RQ 5.3 Step 4 (TSVR merge)
 **Format:** CSV, long format (one row per observation)
 **Columns:**
@@ -57,7 +57,7 @@ This RQ requires 4 steps:
   - theta (float, IRT ability estimate)
 **Expected Rows:** ~1200 (100 participants x 4 tests x 3 paradigms)
 
-**File 3:** results/ch5/rq3/data/step05_model_comparison.csv
+**File 3:** results/ch5/5.3.1/data/step05_model_comparison.csv
 **Source:** RQ 5.3 Step 5 (model comparison)
 **Format:** CSV with model comparison results
 **Columns:** model_name, AIC, delta_AIC, AIC_weight, converged
@@ -362,8 +362,8 @@ Validation tools MUST be used after plot data preparation tool execution.
 ### Step-to-Step Data Flow
 
 ```
-RQ 5.3 Outputs                    RQ 5.4 Analysis
---------------                    ---------------
+RQ 5.3 Outputs                    RQ 5.3.2 Analysis
+--------------                    -----------------
 step05_lmm_fitted_model.pkl  -->  Step 0: Load model
 step04_lmm_input.csv         -->  Step 0: Load data
                                        |
@@ -412,19 +412,19 @@ step04_lmm_input.csv         -->  Step 0: Load data
 
 **This RQ requires outputs from:**
 - **RQ 5.3** (Paradigm-Specific Forgetting Trajectories)
-  - File 1: results/ch5/rq3/data/step05_lmm_fitted_model.pkl
+  - File 1: results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl
     - Used in: Step 0 (load model for contrast testing)
-    - Rationale: RQ 5.3 fits the best LMM model (Log model) comparing paradigms. RQ 5.4 tests linear trend contrast WITHIN this model.
-  - File 2: results/ch5/rq3/data/step04_lmm_input.csv
+    - Rationale: RQ 5.3 fits the best LMM model (Log model) comparing paradigms. RQ 5.3.2 tests linear trend contrast WITHIN this model.
+  - File 2: results/ch5/5.3.1/data/step04_lmm_input.csv
     - Used in: Step 0 (load data for prediction grid)
     - Rationale: Contains theta scores with paradigm labels needed for marginal means computation.
-  - File 3: results/ch5/rq3/data/step05_model_comparison.csv
+  - File 3: results/ch5/5.3.1/data/step05_model_comparison.csv
     - Used in: Step 0 (verify best model is Log)
     - Rationale: Confirms which model won AIC comparison (should be Log).
 
 **Execution Order Constraint:**
 1. RQ 5.3 must complete all steps (Step 0 through Step 7) with rq_results: success
-2. RQ 5.4 executes after RQ 5.3 completion
+2. RQ 5.3.2 executes after RQ 5.3 completion
 
 **Data Source Boundaries (Per Specification 5.1.6):**
 - **RAW data:** None - this RQ uses no raw data from master.xlsx
@@ -432,9 +432,9 @@ step04_lmm_input.csv         -->  Step 0: Load data
 - **Scope:** This RQ does NOT re-fit LMM models; it tests contrasts within RQ 5.3's best model
 
 **Validation:**
-- Step 0: Check results/ch5/rq3/status.yaml shows rq_results: success
-- Step 0: Check results/ch5/rq3/data/step05_lmm_fitted_model.pkl exists
-- Step 0: Check results/ch5/rq3/data/step04_lmm_input.csv exists
+- Step 0: Check results/ch5/5.3.1/status.yaml shows rq_results: success
+- Step 0: Check results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl exists
+- Step 0: Check results/ch5/5.3.1/data/step04_lmm_input.csv exists
 - If any file missing -> quit with error -> user must execute RQ 5.3 first
 
 ---

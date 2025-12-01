@@ -5,29 +5,29 @@
 """
 Step ID: step00
 Step Name: Load Data Sources
-RQ: results/ch5/rq12
+RQ: ch5/5.2.5
 Generated: 2025-11-30
 
 PURPOSE:
-Load IRT item parameters, theta scores, TSVR mapping from RQ 5.1 and raw
+Load IRT item parameters, theta scores, TSVR mapping from RQ 5.2.1 and raw
 dichotomized scores from dfData.csv for CTT computation. Creates composite_ID
 in raw data (UID_test format) and copies all source files to local data/ folder
 for reference.
 
 EXPECTED INPUTS:
-  - results/ch5/rq1/data/step02_purified_items.csv
+  - results/ch5/5.2.1/data/step02_purified_items.csv
     Columns: ['item_name', 'factor', 'a', 'b']
-    Format: IRT purified items from RQ 5.1 Step 2 (retained items after purification)
+    Format: IRT purified items from RQ 5.2.1 Step 2 (retained items after purification)
     Expected rows: ~38 items
 
-  - results/ch5/rq1/data/step03_theta_scores.csv
+  - results/ch5/5.2.1/data/step03_theta_scores.csv
     Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
-    Format: IRT theta scores from RQ 5.1 Step 3 (Pass 2 calibration)
+    Format: IRT theta scores from RQ 5.2.1 Step 3 (Pass 2 calibration)
     Expected rows: ~400 (100 participants x 4 tests)
 
-  - results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - results/ch5/5.2.1/data/step00_tsvr_mapping.csv
     Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
-    Format: TSVR time variable from RQ 5.1 Step 0 (actual hours since encoding)
+    Format: TSVR time variable from RQ 5.2.1 Step 0 (actual hours since encoding)
     Expected rows: ~400
 
   - data/cache/dfData.csv
@@ -82,7 +82,7 @@ IMPLEMENTATION NOTES:
 - Analysis tool: STDLIB (pandas read_csv, to_csv, string operations)
 - Validation tool: tools.validation.check_file_exists + validate_data_columns
 - Parameters: composite_ID format = UID + '_' + TEST (e.g., A010_1)
-- Cross-RQ dependency: Checks results/ch5/rq1/status.yaml for step03_theta_scores = success
+- Cross-RQ dependency: Checks results/ch5/5.2.1/status.yaml for step03_theta_scores = success
 """
 # =============================================================================
 
@@ -110,7 +110,7 @@ from tools.validation import check_file_exists, validate_data_columns
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq12
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.5
 LOG_FILE = RQ_DIR / "logs" / "step00_load_data.log"
 
 # =============================================================================
@@ -141,8 +141,8 @@ LOG_FILE = RQ_DIR / "logs" / "step00_load_data.log"
 # Input/Output Paths
 # =============================================================================
 
-# Cross-RQ dependencies (RQ 5.1 outputs)
-RQ51_DIR = PROJECT_ROOT / "results" / "ch5" / "rq1"
+# Cross-RQ dependencies (RQ 5.2.1 outputs)
+RQ51_DIR = PROJECT_ROOT / "results" / "ch5" / "5.2.1"
 RQ51_STATUS = RQ51_DIR / "status.yaml"
 RQ51_PURIFIED_ITEMS = RQ51_DIR / "data" / "step02_purified_items.csv"
 RQ51_THETA_SCORES = RQ51_DIR / "data" / "step03_theta_scores.csv"
@@ -317,7 +317,7 @@ if __name__ == "__main__":
         # =========================================================================
         # STEP 6: Copy Files to Local data/ Folder
         # =========================================================================
-        # Expected: All 4 output files written to results/ch5/rq12/data/
+        # Expected: All 4 output files written to results/ch5/5.2.5/data/
         # Purpose: Self-contained analysis with local copies (prevents cross-RQ file issues)
 
         log("[SAVE] Copying files to local data/ folder...")

@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: Prepare LMM Input Data
-RQ: results/ch5/rq7
+RQ: ch5/5.1.1
 Generated: 2025-11-25
 
 PURPOSE:
@@ -90,7 +90,7 @@ from tools.validation import validate_irt_convergence
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq7
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.1
 LOG_FILE = RQ_DIR / "logs" / "step04_prepare_lmm_input.log"
 
 # =============================================================================
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         log(f"  Columns: {theta_data.columns.tolist()}")
 
         log("[LOAD] Loading TSVR time variable...")
-        tsvr_path = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data" / "step00_tsvr_mapping.csv"
+        tsvr_path = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data" / "step00_tsvr_mapping.csv"
 
         if not tsvr_path.exists():
             raise FileNotFoundError(f"TSVR data missing: {tsvr_path}\n"

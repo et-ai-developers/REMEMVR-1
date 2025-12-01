@@ -5,7 +5,7 @@
 """
 Step ID: 03
 Step Name: step03_extract_age_effects
-RQ: results/ch5/rq9
+RQ: ch5/5.1.3
 Generated: 2025-11-28
 
 PURPOSE:

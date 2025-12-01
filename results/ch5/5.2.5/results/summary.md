@@ -95,7 +95,7 @@ When domain's catastrophic item loss (19% retention, 5 of 26 items) creates **ex
 - Full CTT: 29 What, 50 Where, 26 When (balanced coverage)
 - Purified CTT: 19 What, 45 Where, **5 When** (severe When underrepresentation)
 
-**Consequence:** LMM formula includes Domain × Time interactions. With only 5 When items, Purified CTT has:
+**Consequence:** LMM formula includes Domain ï¿½ Time interactions. With only 5 When items, Purified CTT has:
 1. **Unstable When domain estimates** (insufficient items for reliable CTT scoring)
 2. **Inflated AIC** due to poor model fit for When trajectories
 3. **Measurement noise in domain interactions** (When CTT scores based on 5-item subset unreliable)
@@ -194,8 +194,8 @@ The plot displays delta_AIC on Y-axis (relative to IRT theta = 0.0 baseline) wit
 
 **Reference lines:**
 - **Black solid line at delta_AIC = 0.0:** IRT theta reference baseline
-- **Orange dashed line at delta_AIC = ±2:** Weak evidence threshold (Burnham & Anderson 2002)
-- **Red dashed line at delta_AIC = ±10:** Strong evidence threshold
+- **Orange dashed line at delta_AIC = ï¿½2:** Weak evidence threshold (Burnham & Anderson 2002)
+- **Red dashed line at delta_AIC = ï¿½10:** Strong evidence threshold
 
 **Bar Heights and Interpretations:**
 
@@ -218,7 +218,7 @@ Visual confirms LMM model comparison paradox documented in Section 1:
 
 **Plot Interpretation (Accounting for Anomaly):**
 
-The delta_AIC pattern reflects **When domain's severe item imbalance** in Purified CTT (5 items) vs Full CTT (26 items). LMM formula includes Domain × Time interactions, which require sufficient items per domain for stable estimation. Full CTT's balanced coverage (even with noisy items) provides more reliable domain-level trajectories than Purified CTT's imbalanced pool.
+The delta_AIC pattern reflects **When domain's severe item imbalance** in Purified CTT (5 items) vs Full CTT (26 items). LMM formula includes Domain ï¿½ Time interactions, which require sufficient items per domain for stable estimation. Full CTT's balanced coverage (even with noisy items) provides more reliable domain-level trajectories than Purified CTT's imbalanced pool.
 
 **Burnham & Anderson Thresholds:**
 
@@ -324,7 +324,7 @@ Findings support convergent validity principle for What and Where domains: diffe
 
 **Investigation Recommendation:**
 
-Examine RQ 5.1 IRT calibration outputs (results/ch5/rq1/data/step02_purified_items.csv) to:
+Examine RQ 5.2.1 IRT calibration outputs (results/ch5/5.2.1/data/step02_purified_items.csv) to:
 - Identify which specific temporal items excluded (item names)
 - Review discrimination (a) and difficulty (b) estimates for excluded temporal items
 - Cross-reference with item content (temporal question types, response formats)
@@ -343,10 +343,10 @@ Examine RQ 5.1 IRT calibration outputs (results/ch5/rq1/data/step02_purified_ite
 Purified CTT's severe When domain underrepresentation (5 items) creates unstable domain-level estimates in LMM formula:
 
 ```
-Z-score ~ (TSVR_hours + log(TSVR_hours+1)) × Domain + (TSVR_hours | UID)
+Z-score ~ (TSVR_hours + log(TSVR_hours+1)) ï¿½ Domain + (TSVR_hours | UID)
 ```
 
-**Domain × Time interactions** require sufficient items per domain for reliable CTT scoring. With only 5 When items:
+**Domain ï¿½ Time interactions** require sufficient items per domain for reliable CTT scoring. With only 5 When items:
 - When CTT scores have high measurement error (unreliable 5-item mean)
 - Domain[when] coefficients poorly estimated (unstable due to noisy scores)
 - Time:Domain[when] interaction inflated (noise amplifies interaction variance)
@@ -356,7 +356,7 @@ Z-score ~ (TSVR_hours + log(TSVR_hours+1)) × Domain + (TSVR_hours | UID)
 
 Balanced domain coverage (29 What, 50 Where, 26 When) provides stable domain-level estimates even though individual items noisy:
 - More items per domain = more stable mean scores (measurement error averaged out)
-- Domain × Time interactions estimated from reliable domain scores (26 When items sufficient despite quality issues)
+- Domain ï¿½ Time interactions estimated from reliable domain scores (26 When items sufficient despite quality issues)
 - **AIC favors Full CTT:** Balanced but noisy data preferable to imbalanced data for domain-interaction models
 
 **IRT Theta's "Penalty":**
@@ -663,7 +663,7 @@ Temporal item issues may be:
 **Why:** 81% item exclusion rate indicates systemic measurement problem requiring immediate investigation.
 
 **How:**
-- Extract RQ 5.1 IRT item parameters (results/ch5/rq1/data/step02_purified_items.csv and full Pass 1 parameters)
+- Extract RQ 5.2.1 IRT item parameters (results/ch5/5.2.1/data/step02_purified_items.csv and full Pass 1 parameters)
 - Identify which 21 temporal items excluded (item names, b estimates, a estimates)
 - Classify exclusions: How many due to extreme difficulty (|b| > 4.0)? How many due to low discrimination (a < 0.5)?
 - Cross-reference with item content metadata (temporal question types: "Which first?", "Before or after?", etc.)

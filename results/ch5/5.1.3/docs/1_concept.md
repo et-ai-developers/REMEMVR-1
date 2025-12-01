@@ -1,8 +1,8 @@
-# RQ 5.9: Does age affect baseline memory ability or forgetting rate?
+# RQ 5.1.3: Does age affect baseline memory ability or forgetting rate?
 
 **Chapter:** 5
-**RQ Number:** 9
-**Full ID:** 5.9
+**RQ Number:** 1.3
+**Full ID:** 5.1.3
 
 ---
 
@@ -99,15 +99,15 @@ LMM (Linear Mixed Model) with Age × Time interaction, testing age as continuous
 
 **High-Level Workflow:**
 
-**Step 0:** Get Data - Use theta scores from RQ 5.7 "All" analysis (results/ch5/rq7/), load Age from data/cache/dfData.csv, merge TSVR mapping
+**Step 0:** Get Data - Use theta scores from RQ 5.1.1 "All" analysis (results/ch5/5.1.1/), load Age from data/cache/dfData.csv, merge TSVR mapping
 
 **Step 1:** Data Preparation - Merge Age with theta scores on UID, grand-mean center Age (Age_c = Age - mean(Age)), verify no missing Age values, create time transformations (TSVR, log(TSVR+1))
 
 **Practice Effects Acknowledgment:** Participants complete same VR test 4 times (Days 0, 1, 3, 6), introducing practice effects (mean retest effect ~0.60 SD in longitudinal memory studies, BMC Neuroscience 2010). Mitigation strategies: (1) IRT theta scoring separates item difficulty from person ability, reducing direct practice contamination, (2) Random slopes by UID in LMM model individual variation in trajectories, including practice-related improvements, (3) If practice benefits are age-invariant (all ages improve equally), they affect intercept but not Age × Time interaction. However, if younger adults benefit more from practice (age-dependent practice effects), this could confound Age × slope interaction. Note: RQ tests Age effects on forgetting (decline from Day 0 baseline), not absolute trajectories, so practice effects primarily affect interpretation of slope magnitudes rather than Age × Time interaction direction
 
-**Step 2:** Fit LMM with Age × Time Interaction - Formula: Theta ~ (Time + log(Time+1)) × Age_c + (Time | UID), using Lin+Log functional form (best model from RQ 5.7), random intercepts and slopes by UID, fit with REML=False, save model pickle
+**Step 2:** Fit LMM with Age × Time Interaction - Formula: Theta ~ (Time + log(Time+1)) × Age_c + (Time | UID), using Lin+Log functional form (best model from RQ 5.1.1), random intercepts and slopes by UID, fit with REML=False, save model pickle
 
-**Step 3:** Extract and Test Age Effects - Main effect: Age_c on intercept (baseline memory at Day 0), interactions: Age_c × Time and Age_c × log(Time+1) (forgetting rate), apply Bonferroni correction (α = 0.0033), interpret direction (negative β = older adults worse/faster forgetting)
+**Step 3:** Extract and Test Age Effects - Main effect: Age_c on intercept (baseline memory at Day 0), interactions: Age_c × Time and Age_c × log(Time+1) (forgetting rate), apply Bonferroni correction (α = 0.0167), interpret direction (negative β = older adults worse/faster forgetting)
 
 **Step 4:** Effect Size Computation - Standardized effect: How much does 1 SD increase in Age change Day 6 theta? Compute age-related decline from Day 0 to Day 6, report in theta units and as proportion of Day 0 ability
 
@@ -124,7 +124,7 @@ LMM (Linear Mixed Model) with Age × Time interaction, testing age as continuous
 - **Age × Time interaction:** Tests key hypothesis (forgetting rate varies with age)
 - **Continuous Age predictor:** More powerful than age-group comparisons, avoids arbitrary cut-points (per dual deficit hypothesis)
 - **Lin+Log functional form:** Inherits best-fitting model from RQ 5.7 (log component aligns with consolidation theory)
-- **Bonferroni correction:** α = 0.0033 for multiple comparisons (3 age effects tested: intercept, linear slope, log slope)
+- **Bonferroni correction:** α = 0.0167 for multiple comparisons (3 age effects tested: intercept, linear slope, log slope)
 - **Age tertile visualization:** Discretizes continuous age for interpretable plotting while preserving continuous analysis
 
 ---
@@ -137,12 +137,12 @@ DERIVED (from RQ 5.7 theta scores + Age from dfData.csv)
 ### DERIVED Data Source:
 
 **Source RQ:**
-RQ 5.7 (Which functional form best describes forgetting trajectories?)
+RQ 5.1.1 (Which functional form best describes forgetting trajectories?)
 
 **File Paths:**
-- `results/ch5/rq7/data/step03_theta_all.csv` (IRT theta scores for "All" factor analysis)
+- `results/ch5/5.1.1/data/step03_theta_all.csv` (IRT theta scores for "All" factor analysis)
   - Columns: composite_ID (UID-Test), theta
-- `results/ch5/rq7/data/step00_tsvr_mapping.csv` (TSVR time mapping)
+- `results/ch5/5.1.1/data/step00_tsvr_mapping.csv` (TSVR time mapping)
   - Columns: UID, TEST, TSVR (hours since encoding)
 - `data/cache/dfData.csv` (Age variable)
   - Columns: UID, age (years)

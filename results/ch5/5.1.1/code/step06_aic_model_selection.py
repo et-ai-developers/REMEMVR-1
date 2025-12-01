@@ -5,7 +5,7 @@
 """
 Step ID: step06
 Step Name: AIC Model Selection
-RQ: results/ch5/rq7
+RQ: ch5/5.1.1
 Generated: 2025-11-25
 
 PURPOSE:
@@ -98,7 +98,7 @@ from tools.validation import validate_irt_convergence
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq7
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.1
 LOG_FILE = RQ_DIR / "logs" / "step06_model_selection.log"
 
 # =============================================================================

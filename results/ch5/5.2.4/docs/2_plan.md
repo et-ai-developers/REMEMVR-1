@@ -1,4 +1,4 @@
-# Analysis Plan for RQ 5.11: IRT-CTT Convergent Validity
+# Analysis Plan for RQ 5.2.4: IRT-CTT Convergent Validity
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-27
@@ -50,7 +50,7 @@ This RQ examines convergent validity between IRT and CTT measurement approaches 
 
 **Input:**
 
-**File 1:** results/ch5/rq1/data/step03_theta_scores.csv (DERIVED from RQ 5.1)
+**File 1:** results/ch5/5.2.1/data/step03_theta_scores.csv (DERIVED from RQ 5.1)
 **Source:** RQ 5.1 Step 3 (IRT calibration Pass 2 theta extraction)
 **Format:** CSV with columns:
   - `composite_ID` (string, format: {UID}_{test}, e.g., P001_T1)
@@ -63,7 +63,7 @@ This RQ examines convergent validity between IRT and CTT measurement approaches 
 **Expected Rows:** ~400 (100 participants x 4 tests)
 **Note:** Theta scores are from purified item set (RQ 5.1 Pass 2)
 
-**File 2:** results/ch5/rq1/data/step00_tsvr_mapping.csv (DERIVED from RQ 5.1)
+**File 2:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv (DERIVED from RQ 5.1)
 **Source:** RQ 5.1 Step 0 (TSVR extraction)
 **Format:** CSV with columns:
   - `UID` (string, participant identifier, e.g., P001)
@@ -71,7 +71,7 @@ This RQ examines convergent validity between IRT and CTT measurement approaches 
   - `TSVR_hours` (float, actual hours since encoding per Decision D070)
 **Expected Rows:** ~400 (100 participants x 4 tests)
 
-**File 3:** results/ch5/rq1/data/step02_purified_items.csv (DERIVED from RQ 5.1)
+**File 3:** results/ch5/5.2.1/data/step02_purified_items.csv (DERIVED from RQ 5.1)
 **Source:** RQ 5.1 Step 2 (item purification per Decision D039)
 **Format:** CSV with columns:
   - `item_name` (string, item tag from master.xlsx, e.g., VR-IFR-A01-N-ANS)
@@ -1137,13 +1137,13 @@ Per names.md (RQ 5.1 conventions applied):
 
 **This RQ requires outputs from:**
 - **RQ 5.1** (Domain-Specific Forgetting Trajectories)
-  - File 1: results/ch5/rq1/data/step03_theta_scores.csv
+  - File 1: results/ch5/5.2.1/data/step03_theta_scores.csv
     - Used in: Step 0 (IRT theta scores for comparison)
     - Rationale: RQ 5.1 calibrated IRT models and extracted theta scores. This RQ uses those theta scores as one measurement approach.
-  - File 2: results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - File 2: results/ch5/5.2.1/data/step00_tsvr_mapping.csv
     - Used in: Step 0 (TSVR time variable for LMM per Decision D070)
     - Rationale: TSVR provides actual hours since encoding for temporal modeling (not nominal days).
-  - File 3: results/ch5/rq1/data/step02_purified_items.csv
+  - File 3: results/ch5/5.2.1/data/step02_purified_items.csv
     - Used in: Step 0 (ensures CTT uses same items as IRT for fair comparison)
     - Rationale: IRT item purification (Decision D039) removed psychometrically problematic items. CTT must use same purified set to avoid method-specific artifacts.
 
@@ -1158,9 +1158,9 @@ Per names.md (RQ 5.1 conventions applied):
 - **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.1 theta as fixed). CTT scores computed fresh from raw data.
 
 **Validation:**
-- Step 0: Check results/ch5/rq1/data/step03_theta_scores.csv exists (EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step00_tsvr_mapping.csv exists (EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq1/data/step02_purified_items.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.2.1/data/step03_theta_scores.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.2.1/data/step00_tsvr_mapping.csv exists (EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.2.1/data/step02_purified_items.csv exists (EXPECTATIONS ERROR if absent)
 - If ANY file missing -> quit with error -> user must execute RQ 5.1 first
 
 **Reference:** Specification section 5.1.6 (Data Source Boundaries)

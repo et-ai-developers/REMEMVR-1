@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: Validate LMM Assumptions
-RQ: results/ch5/rq8
+RQ: results/ch5/5.1.2
 Generated: 2025-11-28
 
 PURPOSE:
@@ -16,7 +16,7 @@ models. Executes 6 assumption checks per model (12 total): (1) Residual normalit
 (4) Autocorrelation (ACF plot + Lag-1 test), (5) Linearity (partial residual CSVs),
 (6) Outliers (Cook's distance). Includes remedial action recommendations.
 
-This is Test 3 of the two-phase forgetting convergent evidence framework (RQ 5.8).
+This is Test 3 of the two-phase forgetting convergent evidence framework (RQ 5.1.2).
 
 EXPECTED INPUTS:
   - Fitted model objects (in memory from Steps 2-3)
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")
-            f.write("LMM ASSUMPTION VALIDATION REPORT - RQ 5.8\n")
+            f.write("LMM ASSUMPTION VALIDATION REPORT - RQ 5.1.2\n")
             f.write("=" * 80 + "\n\n")
 
             f.write("OVERVIEW\n")

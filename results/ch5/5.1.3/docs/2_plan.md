@@ -1,6 +1,6 @@
-# Analysis Plan: RQ 5.9 - Age Effects on Baseline Memory and Forgetting Rate
+# Analysis Plan: RQ 5.1.3 - Age Effects on Baseline Memory and Forgetting Rate
 
-**Research Question:** 5.9
+**Research Question:** 5.1.3
 **Created:** 2025-11-27
 **Status:** Planning complete, ready for tool specification (rq_tools)
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This RQ examines age as a continuous predictor of both baseline episodic memory ability (Day 0 intercept) and forgetting rate (slope across 6-day retention interval). Analysis uses IRT-derived theta scores from RQ 5.7 "All" factor analysis (combining What/Where/When domains) as the dependent variable. Age effects are tested on both linear and logarithmic time components using the Lin+Log functional form established as best-fitting in RQ 5.7.
+This RQ examines age as a continuous predictor of both baseline episodic memory ability (Day 0 intercept) and forgetting rate (slope across 6-day retention interval). Analysis uses IRT-derived theta scores from RQ 5.1.1 "All" factor analysis (combining What/Where/When domains) as the dependent variable. Age effects are tested on both linear and logarithmic time components using the Lin+Log functional form established as best-fitting in RQ 5.1.1.
 
 **Pipeline:** DERIVED data merge -> LMM with Age x Time interaction -> Effect size computation -> Age tertile visualization
 
@@ -20,7 +20,7 @@ This RQ examines age as a continuous predictor of both baseline episodic memory 
 - Decision D070: TSVR as time variable (actual hours since encoding, not nominal days)
 - Decision D068: Dual p-value reporting (uncorrected + Bonferroni for 3 age effects tested)
 
-**Note on Dependencies:** This RQ requires completed outputs from RQ 5.7 (theta scores for "All" factor analysis). Cross-RQ dependency validation is included in Step 0.
+**Note on Dependencies:** This RQ requires completed outputs from RQ 5.1.1 (theta scores for "All" factor analysis). Cross-RQ dependency validation is included in Step 0.
 
 ---
 
@@ -32,21 +32,21 @@ This RQ examines age as a continuous predictor of both baseline episodic memory 
 
 **Complexity:** Low (~2-5 minutes - data loading and merging only)
 
-**Purpose:** Load theta scores from RQ 5.7 "All" analysis, merge with Age from dfData.csv and TSVR time mapping
+**Purpose:** Load theta scores from RQ 5.1.1 "All" analysis, merge with Age from dfData.csv and TSVR time mapping
 
 **Input:**
 
-**File 1:** results/ch5/rq7/data/step03_theta_all.csv
-**Source:** RQ 5.7 Step 3 (IRT theta extraction for "All" factor)
+**File 1:** results/ch5/5.1.1/data/step03_theta_all.csv
+**Source:** RQ 5.1.1 Step 3 (IRT theta extraction for "All" factor)
 **Format:** CSV with columns:
   - `composite_ID` (string, format: {UID}_{test}, e.g., "A010_T1")
   - `theta_all` (float, IRT ability estimate for combined What/Where/When domains)
   - `se_all` (float, standard error of theta estimate)
 **Expected Rows:** ~400 (100 participants x 4 tests)
-**Dependency Check:** If file missing -> QUIT with "EXPECTATIONS ERROR: RQ 5.7 must complete before RQ 5.9 (Step 3 outputs required)"
+**Dependency Check:** If file missing -> QUIT with "EXPECTATIONS ERROR: RQ 5.1.1 must complete before RQ 5.1.3 (Step 3 outputs required)"
 
-**File 2:** results/ch5/rq7/data/step00_tsvr_mapping.csv
-**Source:** RQ 5.7 Step 0 (TSVR time variable extraction)
+**File 2:** results/ch5/5.1.1/data/step00_tsvr_mapping.csv
+**Source:** RQ 5.1.1 Step 0 (TSVR time variable extraction)
 **Format:** CSV with columns:
   - `UID` (string, participant identifier, e.g., "A010")
   - `TEST` (string, test session, e.g., "T1", "T2", "T3", "T4")
@@ -64,9 +64,9 @@ This RQ examines age as a continuous predictor of both baseline episodic memory 
 
 **Processing:**
 
-1. Load theta scores from RQ 5.7 (results/ch5/rq7/data/step03_theta_all.csv)
+1. Load theta scores from RQ 5.1.1 (results/ch5/5.1.1/data/step03_theta_all.csv)
 2. Parse composite_ID to extract UID and TEST components (split on underscore: "A010_T1" -> UID="A010", TEST="T1")
-3. Load TSVR mapping (results/ch5/rq7/data/step00_tsvr_mapping.csv)
+3. Load TSVR mapping (results/ch5/5.1.1/data/step00_tsvr_mapping.csv)
 4. Merge theta with TSVR on (UID, TEST) using left join (keep all theta scores, add TSVR_hours)
 5. Load Age from dfData.csv (data/cache/dfData.csv)
 6. Merge theta+TSVR with Age on UID using left join (keep all observations, add age)
@@ -652,17 +652,17 @@ Validation tools MUST be used after plot data preparation. Specific validation t
 **This RQ requires outputs from:**
 
 **RQ 5.7** (Best functional form for forgetting trajectories)
-  - **File 1:** results/ch5/rq7/data/step03_theta_all.csv
+  - **File 1:** results/ch5/5.1.1/data/step03_theta_all.csv
   - **Used in:** Step 0 (theta scores for "All" factor analysis combining What/Where/When)
   - **Rationale:** This RQ tests age effects on overall episodic memory (not domain-specific). RQ 5.7 provides theta scores for "All" composite factor, which is the dependent variable for age analysis. Using existing theta scores avoids re-running IRT calibration.
 
-  - **File 2:** results/ch5/rq7/data/step00_tsvr_mapping.csv
+  - **File 2:** results/ch5/5.1.1/data/step00_tsvr_mapping.csv
   - **Used in:** Step 0 (TSVR time variable for merging with theta scores)
   - **Rationale:** Decision D070 requires TSVR (actual hours) as time variable, not nominal days. RQ 5.7 already extracted TSVR mapping from master.xlsx, so reuse to ensure consistency.
 
 **Execution Order Constraint:**
 1. RQ 5.7 must complete first (provides step03_theta_all.csv and step00_tsvr_mapping.csv)
-2. This RQ (5.9) executes second (uses both outputs from RQ 5.7)
+2. This RQ (5.1.3) executes second (uses both outputs from RQ 5.1.1)
 
 **Data Source Boundaries (Per Specification 5.1.6):**
 - **RAW data:** Age from data/cache/dfData.csv (extracted directly, no RQ dependencies)
@@ -670,8 +670,8 @@ Validation tools MUST be used after plot data preparation. Specific validation t
 - **Scope:** This RQ does NOT re-calibrate IRT models (uses RQ 5.7 theta scores as fixed)
 
 **Validation:**
-- Step 0: Check results/ch5/rq7/data/step03_theta_all.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
-- Step 0: Check results/ch5/rq7/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/data/step03_theta_all.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/data/step00_tsvr_mapping.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
 - If either file missing -> quit with error -> user must execute RQ 5.7 first
 
 **Reference:** Specification section 5.1.6 (Data Source Boundaries)

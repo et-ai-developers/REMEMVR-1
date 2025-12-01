@@ -5,7 +5,7 @@
 """
 Step ID: step02c
 Step Name: Model Selection for Random Effects
-RQ: results/ch5/rq10
+RQ: results/ch5/5.2.3
 Generated: 2025-11-28
 
 PURPOSE:

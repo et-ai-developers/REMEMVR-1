@@ -29,23 +29,23 @@
 **Criteria Checklist:**
 - [x] Statistical approach appropriate for RQ (age as continuous predictor of baseline + forgetting trajectory)
 - [x] Assumptions checkable with available data (N=100 × 4 time points = 400 observations)
-- [x] Methodological soundness (grand-mean centering, Lin+Log form from RQ 5.7, Bonferroni correction)
-- [x] Appropriate complexity (reuses best model from RQ 5.7, adds age interaction - parsimonious)
+- [x] Methodological soundness (grand-mean centering, Lin+Log form from RQ 5.1.1, Bonferroni correction)
+- [x] Appropriate complexity (reuses best model from RQ 5.1.1, adds age interaction - parsimonious)
 
 **Assessment:**
 
 The LMM approach with Age × Time interaction is **optimal** for this RQ. The concept.md correctly:
 1. Uses continuous age (more powerful than age groups, avoids arbitrary cutpoints)
-2. Inherits Lin+Log functional form from RQ 5.7 (data-driven model selection, not post-hoc fitting)
+2. Inherits Lin+Log functional form from RQ 5.1.1 (data-driven model selection, not post-hoc fitting)
 3. Grand-mean centers age for interpretable intercept (average-aged adult baseline)
 4. Tests dual deficit hypothesis (baseline + forgetting rate) via main effect + interaction
 5. Uses TSVR time variable (actual hours, consistent with Decision D070)
 
-The analysis is appropriately complex: It adds a single between-subjects predictor (Age_c) to an already-validated trajectory model (RQ 5.7 Lin+Log), testing theoretically motivated interactions without overfitting. This aligns with hippocampal aging literature's dual deficit hypothesis.
+The analysis is appropriately complex: It adds a single between-subjects predictor (Age_c) to an already-validated trajectory model (RQ 5.1.1 Lin+Log), testing theoretically motivated interactions without overfitting. This aligns with hippocampal aging literature's dual deficit hypothesis.
 
 **Strengths:**
 - Continuous age predictor maximizes statistical power (vs dichotomization/tertiles)
-- Lin+Log functional form inherited from RQ 5.7 (not fitted de novo - reduces researcher degrees of freedom)
+- Lin+Log functional form inherited from RQ 5.1.1 (not fitted de novo - reduces researcher degrees of freedom)
 - Grand-mean centering makes intercept interpretable (memory for average-aged adult)
 - Theoretical alignment: Logarithmic forgetting + consolidation theory predict early-retention-interval age effects
 - TSVR time variable ensures ecological validity (actual hours, not nominal days)
@@ -55,7 +55,7 @@ The analysis is appropriately complex: It adds a single between-subjects predict
 None. Statistical approach is methodologically sound and appropriately matched to RQ.
 
 **Score Justification:**
-**3.0 / 3.0** - Exceptional. The statistical approach is optimal for testing the dual deficit hypothesis with continuous age predictor. The inherited Lin+Log functional form from RQ 5.7 avoids post-hoc model fitting, and grand-mean centering ensures interpretable parameters. Complexity is appropriate (single predictor added to validated model). Aligns with current best practices for age-trajectory interactions in longitudinal memory research.
+**3.0 / 3.0** - Exceptional. The statistical approach is optimal for testing the dual deficit hypothesis with continuous age predictor. The inherited Lin+Log functional form from RQ 5.1.1 avoids post-hoc model fitting, and grand-mean centering ensures interpretable parameters. Complexity is appropriate (single predictor added to validated model). Aligns with current best practices for age-trajectory interactions in longitudinal memory research.
 
 ---
 
@@ -67,7 +67,7 @@ None. Statistical approach is methodologically sound and appropriately matched t
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 0: Get Data | Standard pandas operations | ✅ Available | Read CSV from RQ 5.7 + dfData.csv |
+| Step 0: Get Data | Standard pandas operations | ✅ Available | Read CSV from RQ 5.1.1 + dfData.csv |
 | Step 1: Data Prep | `pd.merge()`, grand-mean centering | ✅ Available | Standard pandas, no custom tools |
 | Step 2: Fit LMM | `tools.analysis_lmm.fit_lmm_trajectory_tsvr` | ✅ Available | D070 TSVR support, Lin+Log formula |
 | Step 3: Extract Effects | `tools.analysis_lmm.extract_fixed_effects_from_lmm` | ✅ Available | Age_c, Age_c×Time, Age_c×log(Time+1) |
@@ -87,7 +87,7 @@ None. Statistical approach is methodologically sound and appropriately matched t
 3. Missing tools identified: **0.6 / 0.6** (N/A - no missing tools)
 
 **Score Justification:**
-**2.0 / 2.0** - Exceptional. 100% tool reuse with no missing tools. All analysis steps use existing, production-tested tools from `tools/` package. This RQ benefits from the Lin+Log model infrastructure developed for RQ 5.7, requiring only the addition of a continuous predictor (Age_c) to existing workflow. No tool implementation required before analysis phase.
+**2.0 / 2.0** - Exceptional. 100% tool reuse with no missing tools. All analysis steps use existing, production-tested tools from `tools/` package. This RQ benefits from the Lin+Log model infrastructure developed for RQ 5.1.1, requiring only the addition of a continuous predictor (Age_c) to existing workflow. No tool implementation required before analysis phase.
 
 ---
 
@@ -102,7 +102,7 @@ None. Statistical approach is methodologically sound and appropriately matched t
 
 **Model Parameters:**
 1. **LMM Formula:** `Theta ~ (Time + log(Time+1)) × Age_c + (Time | UID)`
-   - Lin+Log functional form inherited from RQ 5.7 (best AIC model)
+   - Lin+Log functional form inherited from RQ 5.1.1 (best AIC model)
    - Random intercepts + slopes by UID (accounts for individual differences in baseline + trajectory)
    - REML=False for model comparison consistency (standard practice)
 
@@ -115,15 +115,15 @@ None. Statistical approach is methodologically sound and appropriately matched t
    - **NOTE:** Concept.md states α=0.0033 for 3 hypotheses (Age_c main effect, Age_c×Time, Age_c×log(Time+1))
    - **CALCULATION:** 0.05 / 3 = 0.0167, NOT 0.0033
    - **DISCREPANCY IDENTIFIED:** 0.0033 would require 15 comparisons (0.05/15), not 3
-   - **LIKELY INHERITED FROM RQ 5.7:** RQ 5.7 tests 15 pairwise comparisons (4 domains × ~3-4 time contrasts), uses α=0.0033
-   - **APPROPRIATE FOR RQ 5.9:** Should use α=0.0167 for 3 age effect tests (if family-wise correction desired)
+   - **LIKELY INHERITED FROM RQ 5.1.1:** RQ 5.1.1 tests 15 pairwise comparisons (4 domains × ~3-4 time contrasts), uses α=0.0033
+   - **APPROPRIATE FOR RQ 5.1.3:** Should use α=0.0167 for 3 age effect tests (if family-wise correction desired)
 
 4. **Effect Size Metric:** Standardized age effect on Day 6 theta
    - How much does 1 SD increase in Age change Day 6 theta?
    - Reported in theta units and as proportion of Day 0 ability (interpretable)
 
 **Strengths:**
-- Lin+Log functional form justified (inherited from data-driven RQ 5.7 selection)
+- Lin+Log functional form justified (inherited from data-driven RQ 5.1.1 selection)
 - Grand-mean centering well-justified (interpretation + multicollinearity)
 - Random slopes by UID appropriate (individual differences in forgetting trajectories)
 - TSVR time variable (actual hours, not nominal days - Decision D070)
@@ -131,12 +131,12 @@ None. Statistical approach is methodologically sound and appropriately matched t
 
 **Concerns / Gaps:**
 - **Bonferroni α = 0.0033 appears incorrect for 3 hypotheses** (should be 0.0167)
-  - Likely inherited from RQ 5.7 (15 comparisons)
+  - Likely inherited from RQ 5.1.1 (15 comparisons)
   - More conservative than necessary (reduces power)
   - Not invalidating (conservative approach protects Type I error)
 
 **Score Justification:**
-**2.0 / 2.0** - Exceptional despite Bonferroni discrepancy. All parameters clearly specified and justified. The Lin+Log functional form is data-driven (RQ 5.7), grand-mean centering is methodologically sound, and random slopes are appropriate for individual trajectory differences. The Bonferroni α=0.0033 is overly conservative but not incorrect (protects Type I error). Effect size metrics are interpretable and well-chosen.
+**2.0 / 2.0** - Exceptional despite Bonferroni discrepancy. All parameters clearly specified and justified. The Lin+Log functional form is data-driven (RQ 5.1.1), grand-mean centering is methodologically sound, and random slopes are appropriate for individual trajectory differences. The Bonferroni α=0.0033 is overly conservative but not incorrect (protects Type I error). Effect size metrics are interpretable and well-chosen.
 
 **Recommendation:** Clarify whether α=0.0033 is intentional (ultra-conservative) or should be corrected to α=0.0167 for 3 hypotheses. Either is defensible, but rationale should be stated.
 
@@ -152,7 +152,7 @@ None. Statistical approach is methodologically sound and appropriately matched t
 **Assessment:**
 
 **Validation Procedures Identified in Concept.md:**
-Concept.md inherits Lin+Log functional form from RQ 5.7, which underwent comprehensive model selection and validation. For RQ 5.9 specifically, validation should address:
+Concept.md inherits Lin+Log functional form from RQ 5.1.1, which underwent comprehensive model selection and validation. For RQ 5.1.3 specifically, validation should address:
 
 1. **Age Data Quality:**
    - Verify no missing Age values in dfData.csv (exclusion criterion stated)
@@ -172,7 +172,7 @@ Concept.md inherits Lin+Log functional form from RQ 5.7, which underwent compreh
    - Convergence with random slopes (common issue with N=100)
 
 **What's NOT Mentioned:**
-- No explicit validation checklist for LMM assumptions (unlike RQ 5.7 IRT validation)
+- No explicit validation checklist for LMM assumptions (unlike RQ 5.1.1 IRT validation)
 - No remedial actions specified if assumptions violated (e.g., robust SEs, transformation)
 - No convergence diagnostics for random slopes (critical with N=100 - WebSearch shows "convergence difficulties with small samples")
 - No multicollinearity check for Age_c × Time interactions (despite grand-mean centering)
@@ -184,10 +184,10 @@ Concept.md inherits Lin+Log functional form from RQ 5.7, which underwent compreh
 - `tools.validation.run_lmm_sensitivity_analyses` (7 alternative models)
 
 **Strengths:**
-- Inherits validated Lin+Log functional form from RQ 5.7 (reduces need for de novo validation)
+- Inherits validated Lin+Log functional form from RQ 5.1.1 (reduces need for de novo validation)
 - Age data quality check specified (exclusion criterion for missing Age)
 - Standard validation tools available in `tools/validation/`
-- TSVR time variable validated in RQ 5.7 (no need to re-validate)
+- TSVR time variable validated in RQ 5.1.1 (no need to re-validate)
 
 **Concerns / Gaps:**
 - **Missing explicit LMM assumption validation checklist** (unlike detailed IRT checklist in other RQs)
@@ -196,7 +196,7 @@ Concept.md inherits Lin+Log functional form from RQ 5.7, which underwent compreh
 - **No sensitivity analysis mentioned** (e.g., compare random intercept vs intercept+slope models)
 
 **Score Justification:**
-**1.8 / 2.0** - Strong but incomplete. Validation procedures are implicitly addressed through inheritance from RQ 5.7, and standard validation tools are available. However, concept.md lacks an explicit validation checklist for LMM assumptions specific to Age × Time interaction models. Most critically, no remedial actions are specified for assumption violations, and convergence diagnostics for random slopes (a known pitfall with N=100) are not mentioned.
+**1.8 / 2.0** - Strong but incomplete. Validation procedures are implicitly addressed through inheritance from RQ 5.1.1, and standard validation tools are available. However, concept.md lacks an explicit validation checklist for LMM assumptions specific to Age × Time interaction models. Most critically, no remedial actions are specified for assumption violations, and convergence diagnostics for random slopes (a known pitfall with N=100) are not mentioned.
 
 **Recommendation:** Add explicit LMM validation checklist to concept.md Section 7 (similar to IRT validation tables in other RQs), specifying: (1) assumption tests, (2) thresholds, (3) remedial actions if violated, (4) convergence diagnostics for random slopes.
 
@@ -231,7 +231,7 @@ Concept.md inherits Lin+Log functional form from RQ 5.7, which underwent compreh
 **1. Incorrect Bonferroni Alpha for Number of Hypotheses**
 - **Location:** Section 6: Analysis Approach - "Bonferroni correction: α = 0.0033 for multiple comparisons (3 age effects tested)"
 - **Claim Made:** α = 0.0033 for 3 hypotheses (Age_c intercept, Age_c × Time, Age_c × log(Time+1))
-- **Statistical Criticism:** Bonferroni correction for 3 hypotheses should be 0.05/3 = 0.0167, NOT 0.0033. The value 0.0033 corresponds to 15 comparisons (0.05/15), likely inherited from RQ 5.7 pairwise domain comparisons.
+- **Statistical Criticism:** Bonferroni correction for 3 hypotheses should be 0.05/3 = 0.0167, NOT 0.0033. The value 0.0033 corresponds to 15 comparisons (0.05/15), likely inherited from RQ 5.1.1 pairwise domain comparisons.
 - **Methodological Counterevidence:** Standard Bonferroni formula: α_corrected = α_family / k, where k = number of tests. For k=3: 0.05/3 ≈ 0.0167 (Statology, 2024 Bonferroni tutorial). WebSearch confirmed: "For 3 tests: 0.05/3 ≈ 0.0167, not 0.0033. The 0.0033 value would result from 15 comparisons."
 - **Strength:** MODERATE (overly conservative but not incorrect - still controls Type I error, just reduces power)
 - **Suggested Rebuttal:** "Clarify Bonferroni rationale in concept.md: Either (1) correct to α=0.0167 for 3 hypotheses, or (2) justify ultra-conservative α=0.0033 as sensitivity analysis (protects against unmeasured comparisons). Current α=0.0033 reduces power but does not invalidate findings."
@@ -284,7 +284,7 @@ Concept.md inherits Lin+Log functional form from RQ 5.7, which underwent compreh
 - **Pitfall Description:** IRT theta scores are latent ability estimates (approximate normal but not guaranteed), yet LMM assumes normally distributed residuals. Concept.md does not mention checking theta score distribution or residual normality.
 - **How It Could Affect Results:** WebSearch found: "If normality is violated, IRT models yield biased parameter estimates, and dependent quantities such as IRT score estimates will be adversely affected." Non-normal theta scores propagate to LMM residuals, potentially violating homoscedasticity and normality assumptions.
 - **Literature Evidence:** Chalmers et al. (2016, *Behavior Research Methods*): "Alternative approaches to addressing non-normal distributions in IRT" - when latent trait distribution is skewed, theta estimates are biased. Lo et al. (2012, *Applied Psychological Measurement*): IRT theta scores from skewed ability distributions may require transformation before use in downstream analyses.
-- **Why Relevant to This RQ:** Theta scores from RQ 5.7 "All" composite factor may have non-normal distribution if ceiling/floor effects present (e.g., very high performers at Day 0, very low at Day 6). Age effects could interact with non-normality (older adults may cluster near floor).
+- **Why Relevant to This RQ:** Theta scores from RQ 5.1.1 "All" composite factor may have non-normal distribution if ceiling/floor effects present (e.g., very high performers at Day 0, very low at Day 6). Age effects could interact with non-normality (older adults may cluster near floor).
 - **Strength:** MODERATE (residual diagnostics should catch this, but not proactively mentioned)
 - **Suggested Mitigation:** "Add to Section 7: Validation Procedures - 'Check theta score distribution (histogram, Q-Q plot) before LMM fitting. If severe skewness (|skew| > 1), consider: (1) Rank-based transformation (preserves order, induces normality), (2) Generalized LMM with non-normal link function, (3) Report robustness check with untransformed theta. Primary analysis uses untransformed theta for interpretability (theta scale meaningful), with sensitivity analysis if normality violated.'"
 
@@ -316,7 +316,7 @@ The concept.md would benefit from: (1) explicit convergence diagnostic plan with
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 0: Get Data | `pd.read_csv()` | ✅ Available | Read RQ 5.7 theta + dfData.csv Age |
+| Step 0: Get Data | `pd.read_csv()` | ✅ Available | Read RQ 5.1.1 theta + dfData.csv Age |
 | Step 1: Data Prep | `pd.merge()`, manual centering | ✅ Available | Standard pandas operations |
 | Step 2: Fit LMM | `fit_lmm_trajectory_tsvr` | ✅ Available | TSVR time variable, Lin+Log formula |
 | Step 3: Extract Effects | `extract_fixed_effects_from_lmm` | ✅ Available | Age_c, Age_c×Time, Age_c×log(Time+1) |
@@ -409,7 +409,7 @@ Despite omissions in validation procedures and convergence diagnostics, the over
    - **Current:** "Bonferroni correction: α = 0.0033 for multiple comparisons (3 age effects tested)"
    - **Suggested:** Either:
      - **Option A (Correct to 0.0167):** "Bonferroni correction: α = 0.05/3 = 0.0167 for 3 age effect hypotheses (Age_c intercept, Age_c × Time, Age_c × log(Time+1))"
-     - **Option B (Justify 0.0033):** "Ultra-conservative Bonferroni correction: α = 0.0033 (inherited from RQ 5.7 15-comparison threshold) as sensitivity analysis to protect against unmeasured comparisons. Standard correction would be α=0.0167 for 3 hypotheses."
+     - **Option B (Justify 0.0033):** "Ultra-conservative Bonferroni correction: α = 0.0033 (inherited from RQ 5.1.1 15-comparison threshold) as sensitivity analysis to protect against unmeasured comparisons. Standard correction would be α=0.0167 for 3 hypotheses."
    - **Benefit:** Clarifies whether 0.0033 is intentional (ultra-conservative) or error. Either choice is defensible, but rationale should be transparent. Option A increases power (α=0.0167 less stringent), Option B maximizes Type I error protection.
 
 **3. Add Convergence Diagnostic Plan with Model Simplification Strategy**

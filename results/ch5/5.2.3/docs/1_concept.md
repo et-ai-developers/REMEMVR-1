@@ -1,8 +1,8 @@
-# RQ 5.10: Domain-Specific Age Effects on Forgetting
+# RQ 5.2.3: Domain-Specific Age Effects on Forgetting
 
 **Chapter:** 5
-**RQ Number:** 10
-**Full ID:** 5.10
+**RQ Number:** 2.3
+**Full ID:** 5.2.3
 
 ---
 
@@ -93,8 +93,8 @@ LMM (Linear Mixed Models) with 3-way Age × Domain × Time interaction
 **High-Level Workflow:**
 
 **Step 0:** Get Data
-- Use theta scores from results/ch5/rq1/ (IRT ability estimates from RQ 5.1)
-- Get TSVR mapping from results/ch5/rq1/data/step00_tsvr_mapping.csv (actual hours since encoding)
+- Use theta scores from results/ch5/5.1.1/ (IRT ability estimates from RQ 5.1)
+- Get TSVR mapping from results/ch5/5.1.1/data/step00_tsvr_mapping.csv (actual hours since encoding)
 - Load Age from data/cache/dfData.csv (one value per UID, column name 'age')
 
 **Step 1:** Data Preparation
@@ -218,8 +218,8 @@ DERIVED (from RQ 5.1 outputs)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq1/data/step00_tsvr_mapping.csv` (TSVR actual hours mapping)
-- `results/ch5/rq1/data/step03_theta_scores.csv` (IRT ability estimates, purified)
+- `results/ch5/5.1.1/data/step00_tsvr_mapping.csv` (TSVR actual hours mapping)
+- `results/ch5/5.1.1/data/step03_theta_scores.csv` (IRT ability estimates, purified)
   - Columns: composite_ID, domain (What/Where/When), test (T1/T2/T3/T4), theta
 - `data/cache/dfData.csv` (Age variable)
   - Columns: UID, age (one value per participant)

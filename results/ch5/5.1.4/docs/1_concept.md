@@ -1,8 +1,8 @@
-# RQ 5.13: Between-Person Variance in Forgetting Rates
+# RQ 5.1.4: Between-Person Variance in Forgetting Rates
 
 **Chapter:** 5
-**RQ Number:** 13
-**Full ID:** 5.13
+**RQ Number:** 1.4
+**Full ID:** 5.1.4
 
 ---
 
@@ -93,7 +93,7 @@ Variance Decomposition of LMM Random Effects (from RQ 5.7 best-fitting model)
 **High-Level Workflow:**
 
 **Step 1:** Load RQ 5.7 Dependencies
-- Load best-fitting LMM model object from RQ 5.7 (`results/ch5/rq7/`)
+- Load best-fitting LMM model object from RQ 5.1.1 (`results/ch5/5.1.1/`)
 - Load theta scores from RQ 5.7 (`step04_theta_scores_allitems.csv`)
 - Load TSVR mapping from RQ 5.7 (`step00_tsvr_mapping.csv`)
 
@@ -147,9 +147,9 @@ DERIVED (from RQ 5.7 outputs)
 RQ 5.7 (Which functional form best describes forgetting trajectories?)
 
 **File Paths:**
-- `results/ch5/rq7/data/step05_lmm_all_bestmodel.pkl` (saved LMM model object with random slopes)
-- `results/ch5/rq7/data/step04_theta_scores_allitems.csv` (IRT ability estimates, columns: UID, TEST, theta)
-- `results/ch5/rq7/data/step00_tsvr_mapping.csv` (TSVR time variable, columns: UID, TEST, TSVR)
+- `results/ch5/5.1.1/data/lmm_Lin+Log.pkl` (saved LMM model object with random slopes - Lin+Log preferred model)
+- `results/ch5/5.1.1/data/step03_theta_scores.csv` (IRT ability estimates, columns: UID, test, Theta_All)
+- `results/ch5/5.1.1/data/step04_lmm_input.csv` (LMM input with TSVR_hours time variable)
 
 **Dependencies:**
 RQ 5.7 must complete all 5 steps (IRT calibration on "All" items, purification, theta extraction, TSVR merge, LMM trajectory modeling with random slopes) before this RQ can run. Specifically, RQ 5.7 must save the best-fitting LMM model object with random slopes enabled.

@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: merge_theta_tsvr
-RQ: results/ch5/rq3
+RQ: results/ch5/5.3.1
 Generated: 2025-11-24
 
 PURPOSE:
@@ -67,7 +67,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq3
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.3.1
 LOG_FILE = RQ_DIR / "logs" / "step04_merge_theta_tsvr.log"
 
 # =============================================================================

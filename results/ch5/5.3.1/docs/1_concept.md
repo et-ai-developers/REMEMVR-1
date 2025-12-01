@@ -1,8 +1,8 @@
-# RQ 5.3: Do Free Recall, Cued Recall, and Recognition Exhibit Different Forgetting Trajectories?
+# RQ 5.3.1: Do Free Recall, Cued Recall, and Recognition Exhibit Different Forgetting Trajectories?
 
 **Chapter:** 5
-**RQ Number:** 3
-**Full ID:** 5.3
+**RQ Number:** 3.1
+**Full ID:** 5.3.1
 
 ---
 
@@ -99,9 +99,9 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 **High-Level Workflow:**
 
 **Step 0:** Data Preparation
-- Get raw scores from RQ 5.1 output: `./results/ch5/rq1/data/step00_irt_input.csv`
+- Get raw scores from RQ 5.2.1 output: `./results/ch5/5.2.1/data/step00_irt_input.csv`
 - Filter to keep only IFR, ICR, IRE columns (remove non-item paradigms)
-- Get TSVR mapping from: `./results/ch5/rq1/data/step00_tsvr_mapping.csv`
+- Get TSVR mapping from: `./results/ch5/5.2.1/data/step00_tsvr_mapping.csv`
 - Create Q-matrix with paradigm factor structure:
   - free_recall = *IFR*
   - cued_recall = *ICR*
@@ -169,14 +169,14 @@ DERIVED (from RQ 5.1 outputs) + Subset/Regroup
 ### DERIVED Data Source:
 
 **Source RQ:**
-RQ 5.1 (Domain-Specific Forgetting Trajectories)
+RQ 5.2.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq1/data/step00_irt_input.csv` (raw dichotomized VR item scores)
-- `results/ch5/rq1/data/step00_tsvr_mapping.csv` (TSVR time variable mapping)
+- `results/ch5/5.2.1/data/step00_irt_input.csv` (raw dichotomized VR item scores)
+- `results/ch5/5.2.1/data/step00_tsvr_mapping.csv` (TSVR time variable mapping)
 
 **Dependencies:**
-RQ 5.1 must complete Step 0 (data preparation, TSVR mapping) before this RQ can begin. This RQ uses the same base data but creates new IRT factors (paradigm-based instead of domain-based).
+RQ 5.2.1 must complete Step 0 (data preparation, TSVR mapping) before this RQ can begin. This RQ uses the same base data but creates new IRT factors (paradigm-based instead of domain-based).
 
 **Usage:**
 This RQ filters the RQ 5.1 input data to Item paradigms only (IFR, ICR, IRE), then creates a new Q-matrix that groups items by paradigm instead of domain. A fresh IRT calibration is run with paradigm factors.

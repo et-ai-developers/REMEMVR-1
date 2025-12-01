@@ -5,7 +5,7 @@
 """
 Step ID: step00
 Step Name: Prepare Piecewise LMM Input from RQ 5.1
-RQ: results/ch5/rq2
+RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
@@ -15,7 +15,7 @@ theta data. This creates the foundation for the 3-way interaction analysis
 between Early and Late consolidation phases across memory domains.
 
 EXPECTED INPUTS:
-  - results/ch5/rq1/data/step04_lmm_input.csv
+  - results/ch5/5.1.1/data/step04_lmm_input.csv
     Columns: [composite_ID, UID, test, TSVR_hours, domain, theta]
     Format: CSV with RQ 5.1 LMM input data
     Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
@@ -71,11 +71,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq2
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2
 LOG_FILE = RQ_DIR / "logs" / "step00_prepare_piecewise_input.log"
 
 # Input from RQ 5.1
-RQ51_INPUT = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data" / "step04_lmm_input.csv"
+RQ51_INPUT = PROJECT_ROOT / "results" / "ch5" / "5.1.1" / "data" / "step04_lmm_input.csv"
 
 # Output for this step
 OUTPUT_FILE = RQ_DIR / "data" / "step00_piecewise_lmm_input.csv"
@@ -106,8 +106,8 @@ OUTPUT_FILE = RQ_DIR / "data" / "step00_piecewise_lmm_input.csv"
 # =============================================================================
 
 SEGMENT_MAPPING = {
-    "Early": [1, 2],  # T1 (Day 0) and T2 (Day 1) - consolidation window
-    "Late": [3, 4]    # T3 (Day 3) and T4 (Day 6) - decay phase
+    "Early": [0, 1],  # Test 0 (Day 0) and Test 1 (Day 1) - consolidation window
+    "Late": [3, 6]    # Test 3 (Day 3) and Test 6 (Day 6) - decay phase
 }
 
 # Note: Day 1 is in Early segment ONLY (no overlap between segments)

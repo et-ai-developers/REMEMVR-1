@@ -1,7 +1,7 @@
 rq_builder:
   status: success
   context_dump: |
-    Created results/ch5/rq1/ with 6 folders
+    Created results/ch5/5.2.1/ with 6 folders
     Folders: docs/, data/, code/, logs/, plots/, results/
     All folders empty, ready for agents
     status.yaml initialized with 10 RQ-specific agents
@@ -10,7 +10,7 @@ rq_builder:
 rq_concept:
   status: success
   context_dump: |
-    RQ 5.1: Domain-Specific Forgetting Trajectories (What/Where/When)
+    RQ 5.2.1: Domain-Specific Forgetting Trajectories (What/Where/When)
     Domains: What (-N-), Where (-L-/-U-/-D-), When (-O-)
     Analysis: IRT (2-pass GRM purification) + LMM (5 trajectory models, Domain x Time interaction)
     Data: RAW from dfData.csv (TQ_* columns), dichotomized accuracy, TSVR time variable

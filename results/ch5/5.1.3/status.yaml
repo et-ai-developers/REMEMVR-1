@@ -1,6 +1,8 @@
+rq_id: "ch5/5.1.3"
+
 rq_builder:
   status: success
-  context_dump: 'Created results/ch5/rq9/ with 6 folders
+  context_dump: 'Created results/ch5/5.1.3/ with 6 folders
 
     Folders: docs/, data/, code/, logs/, plots/, results/
 
@@ -13,10 +15,10 @@ rq_builder:
     '
 rq_concept:
   status: success
-  context_dump: "RQ 5.9: Age effects on baseline memory and forgetting rate\nDomains:\
+  context_dump: "RQ 5.1.3: Age effects on baseline memory and forgetting rate\nDomains:\
     \ All (What/Where/When combined composite)\nAnalysis: LMM (Age × Time interaction,\
-    \ Lin+Log functional form)\nData: DERIVED from RQ 5.7 theta scores + Age from\
-    \ dfData.csv\nCritical: Age grand-mean centered, Bonferroni α=0.0033, Age\
+    \ Lin+Log functional form)\nData: DERIVED from RQ 5.1.1 theta scores + Age from\
+    \ dfData.csv\nCritical: Age grand-mean centered, Bonferroni α=0.0167, Age\
     \ tertiles for visualization\n"
 rq_scholar:
   status: success
@@ -36,7 +38,7 @@ rq_planner:
   status: success
   context_dump: |
     6 analysis steps planned (Step 0: data merge + Steps 1-5: LMM analysis).
-    Pipeline: DERIVED data (RQ 5.7 theta + Age) -> Age centering -> LMM (Age x Time) -> Effect size -> Plot prep.
+    Pipeline: DERIVED data (RQ 5.1.1 theta + Age) -> Age centering -> LMM (Age x Time) -> Effect size -> Plot prep.
     Tool requirements: Data merge, grand-mean centering, Lin+Log LMM with Age x Time interactions, Bonferroni correction (α=0.0167), age tertile aggregation.
     Expected outputs: 9 files (4 data, 3 results, 2 plots source CSVs). Validation required at every step.
 rq_tools:

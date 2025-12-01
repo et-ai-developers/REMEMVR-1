@@ -5,7 +5,7 @@
 """
 Step ID: step04
 Step Name: Test Key Hypothesis - Congruent Consolidation Benefit
-RQ: results/ch5/rq6
+RQ: 5.4.2
 Generated: 2025-11-25
 
 PURPOSE:

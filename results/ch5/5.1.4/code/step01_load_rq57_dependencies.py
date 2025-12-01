@@ -5,7 +5,7 @@
 """
 Step ID: step01
 Step Name: Load RQ 5.7 Dependencies
-RQ: results/ch5/rq13
+RQ: results/ch5/5.1.4
 Generated: 2025-11-30
 
 PURPOSE:
@@ -13,24 +13,24 @@ Load saved LMM model object, theta scores, and TSVR mapping from RQ 5.7 to
 enable variance decomposition analysis. This step is the entry point for RQ 5.13,
 which decomposes variance in forgetting rates from RQ 5.7's best-fitting model.
 
-EXPECTED INPUTS (from RQ 5.7):
-  1. ../rq7/data/lmm_Log.pkl (relative from RQ directory)
-     Absolute: results/ch5/rq7/data/lmm_Log.pkl
+EXPECTED INPUTS (from RQ 5.1.1):
+  1. ../5.1.1/data/lmm_Lin+Log.pkl (relative from RQ directory)
+     Absolute: results/ch5/5.1.1/data/lmm_Lin+Log.pkl
      Format: Python pickle file (statsmodels MixedLMResults object)
      Required Attributes: cov_re, scale, random_effects, converged
-     Description: Best-fitting Logarithmic LMM (AIC=873.71) with random intercepts and slopes
+     Description: Best-fitting Lin+Log LMM (superior convergence vs Log) with random intercepts and slopes
 
-  2. ../rq7/data/step03_theta_scores.csv (relative from RQ directory)
-     Absolute: results/ch5/rq7/data/step03_theta_scores.csv
+  2. ../5.1.1/data/step03_theta_scores.csv (relative from RQ directory)
+     Absolute: results/ch5/5.1.1/data/step03_theta_scores.csv
      Columns: [UID, test, Theta_All]
      Expected rows: ~400 (100 participants × 4 sessions)
-     Description: IRT theta scores from RQ 5.7 Step 3 (Pass 2 purified, All factor)
+     Description: IRT theta scores from RQ 5.1.1 Step 3 (Pass 2 purified, All factor)
 
-  3. ../rq7/data/step04_lmm_input.csv (relative from RQ directory)
-     Absolute: results/ch5/rq7/data/step04_lmm_input.csv
+  3. ../5.1.1/data/step04_lmm_input.csv (relative from RQ directory)
+     Absolute: results/ch5/5.1.1/data/step04_lmm_input.csv
      Columns: [composite_ID, UID, test, Theta, SE, TSVR_hours, Days, Days_squared, log_Days_plus1]
      Expected rows: ~400 (100 participants × 4 sessions)
-     Description: LMM input with TSVR_hours (time variable) from RQ 5.7 Step 4
+     Description: LMM input with TSVR_hours (time variable) from RQ 5.1.1 Step 4
 
 EXPECTED OUTPUTS:
   1. data/step01_model_metadata.yaml
@@ -101,12 +101,12 @@ LOG_FILE = RQ_DIR / "logs" / "step01_load_dependencies.log"
 # Create logs directory if it doesn't exist
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-# Relative paths from RQ directory to RQ 5.7 artifacts
+# Relative paths from RQ directory to RQ 5.7 artifacts (now RQ 5.1.1 in new hierarchy)
 # These are RELATIVE paths as specified in 4_analysis.yaml
 # CHANGED: Using Lin+Log model instead of Log (Log model has singular covariance, ΔAIC=0.8)
-RQ57_LMM_MODEL = RQ_DIR / "../rq7/data/lmm_Lin+Log.pkl"
-RQ57_THETA_SCORES = RQ_DIR / "../rq7/data/step03_theta_scores.csv"
-RQ57_LMM_INPUT = RQ_DIR / "../rq7/data/step04_lmm_input.csv"
+RQ57_LMM_MODEL = RQ_DIR / "../5.1.1/data/lmm_Lin+Log.pkl"
+RQ57_THETA_SCORES = RQ_DIR / "../5.1.1/data/step03_theta_scores.csv"
+RQ57_LMM_INPUT = RQ_DIR / "../5.1.1/data/step04_lmm_input.csv"
 
 # Output paths (relative to RQ directory)
 METADATA_OUTPUT = RQ_DIR / "data" / "step01_model_metadata.yaml"
@@ -158,25 +158,25 @@ def log(msg: str) -> None:
 
 def validate_files_exist() -> bool:
     """
-    Circuit breaker check: Validate all three RQ 5.7 dependency files exist.
+    Circuit breaker check: Validate all three RQ 5.1.1 dependency files exist.
 
     If ANY file is missing, print EXPECTATIONS ERROR and return False.
     """
     missing_files = []
 
     if not RQ57_LMM_MODEL.exists():
-        missing_files.append(f"../rq7/data/lmm_Lin+Log.pkl (resolved: {RQ57_LMM_MODEL})")
+        missing_files.append(f"../5.1.1/data/lmm_Lin+Log.pkl (resolved: {RQ57_LMM_MODEL})")
     if not RQ57_THETA_SCORES.exists():
-        missing_files.append(f"../rq7/data/step03_theta_scores.csv (resolved: {RQ57_THETA_SCORES})")
+        missing_files.append(f"../5.1.1/data/step03_theta_scores.csv (resolved: {RQ57_THETA_SCORES})")
     if not RQ57_LMM_INPUT.exists():
-        missing_files.append(f"../rq7/data/step04_lmm_input.csv (resolved: {RQ57_LMM_INPUT})")
+        missing_files.append(f"../5.1.1/data/step04_lmm_input.csv (resolved: {RQ57_LMM_INPUT})")
 
     if missing_files:
         error_msg = """
-EXPECTATIONS ERROR: To perform Step 1 (Load RQ 5.7 Dependencies) I expect:
-  - ../rq7/data/lmm_Log.pkl (best-fitting LMM model)
-  - ../rq7/data/step03_theta_scores.csv (theta scores)
-  - ../rq7/data/step04_lmm_input.csv (LMM input with TSVR_hours)
+EXPECTATIONS ERROR: To perform Step 1 (Load RQ 5.1.1 Dependencies) I expect:
+  - ../5.1.1/data/lmm_Lin+Log.pkl (best-fitting LMM model)
+  - ../5.1.1/data/step03_theta_scores.csv (theta scores)
+  - ../5.1.1/data/step04_lmm_input.csv (LMM input with TSVR_hours)
 
 But missing:
 """
@@ -184,8 +184,8 @@ But missing:
             error_msg += f"  - {f}\n"
 
         error_msg += """
-Action: RQ 5.7 must complete Steps 1-5 before RQ 5.13 can execute.
-Run RQ 5.7 workflow first, then retry RQ 5.13.
+Action: RQ 5.1.1 must complete Steps 1-5 before RQ 5.1.4 can execute.
+Run RQ 5.1.1 workflow first, then retry RQ 5.1.4.
 """
         log(error_msg)
         print(error_msg, file=sys.stderr)
@@ -286,10 +286,10 @@ if __name__ == "__main__":
         log("[CHECK] Validating RQ 5.7 dependency files...")
 
         if not validate_files_exist():
-            log("[FAIL] Circuit breaker: Missing RQ 5.7 dependency files")
+            log("[FAIL] Circuit breaker: Missing RQ 5.1.1 dependency files")
             sys.exit(1)
 
-        log("[PASS] All three RQ 5.7 dependency files exist")
+        log("[PASS] All three RQ 5.1.1 dependency files exist")
 
         # =====================================================================
         # STEP 2: Load LMM Model (Pickle)
@@ -428,7 +428,7 @@ if __name__ == "__main__":
 
         # Build metadata dict
         metadata = {
-            'model_source': 'results/ch5/rq7/data/lmm_Lin+Log.pkl',
+            'model_source': 'results/ch5/5.1.1/data/lmm_Lin+Log.pkl',
             'model_formula': 'Lin+Log (Theta ~ Days + log(Days+1))',
             'model_type': type(lmm_model).__name__,
             'n_participants': n_groups,

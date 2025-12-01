@@ -5,7 +5,7 @@
 """
 Step ID: step01
 Step Name: IRT Calibration Pass 1 (All Items)
-RQ: results/ch5/rq5 (RQ 5.5: Schema Congruence Effects on Forgetting Trajectories)
+RQ: results/ch5/5.4.1 (RQ 5.4.1: Schema Congruence Effects on Forgetting Trajectories)
 Generated: 2025-11-24
 
 PURPOSE:

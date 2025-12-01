@@ -2,19 +2,19 @@
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: 2025-11-27
-# RQ: ch5/rq8
+# RQ: ch5/5.1.2
 # Agent: rq_analysis v4.0.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "ch5/rq8"
+  rq_id: "ch5/5.1.2"
   total_steps: 7
   analysis_type: "LMM-only two-phase forgetting (quadratic + piecewise + convergent tests)"
   generated_by: "rq_analysis v4.0.0"
   timestamp: "2025-11-27T00:00:00Z"
   cross_rq_dependencies:
-    - "RQ 5.7 (theta scores, TSVR mapping, best continuous model)"
+    - "RQ 5.1.1 (theta scores, TSVR mapping, best continuous model)"
 
 # ============================================================================
 # ANALYSIS STEPS - COMPLETE SPECIFICATIONS
@@ -26,36 +26,36 @@ steps:
   # --------------------------------------------------------------------------
   - name: "step00_get_data"
     step_number: "00"
-    description: "Load theta scores, TSVR mapping, and best continuous model from RQ 5.7 outputs"
+    description: "Load theta scores, TSVR mapping, and best continuous model from RQ 5.1.1 outputs"
 
     analysis_call:
       type: "stdlib"
       operations:
-        - "Check RQ 5.7 dependency files exist using check_file_exists validation"
-        - "Load results/ch5/rq7/data/step03_best_model.pkl using pickle.load() FIRST"
-        - "CRITICAL: Verify RQ 5.7 model convergence status (model.converged == True)"
+        - "Check RQ 5.1.1 dependency files exist using check_file_exists validation"
+        - "Load results/ch5/5.1.1/data/step03_best_model.pkl using pickle.load() FIRST"
+        - "CRITICAL: Verify RQ 5.1.1 model convergence status (model.converged == True)"
         - "CRITICAL: Check random effects structure (model.cov_re) - if fallback to (1 | UID), flag for downstream"
-        - "Document RQ 5.7 convergence status (affects validity of AIC comparison in Step 3)"
+        - "Document RQ 5.1.1 convergence status (affects validity of AIC comparison in Step 3)"
         - "Extract AIC value from best continuous model"
-        - "Load results/ch5/rq7/data/step02_theta_long.csv (theta scores)"
-        - "Load results/ch5/rq7/data/step00_tsvr_mapping.csv (TSVR time variable)"
+        - "Load results/ch5/5.1.1/data/step02_theta_long.csv (theta scores)"
+        - "Load results/ch5/5.1.1/data/step00_tsvr_mapping.csv (TSVR time variable)"
         - "Merge theta with TSVR on (UID, test) keys"
         - "Collapse across domains: group by (UID, test, TSVR_hours), compute mean(theta)"
         - "Save merged theta + TSVR to data/step00_theta_tsvr.csv"
         - "Save AIC value to data/step00_best_continuous_aic.txt"
-        - "Save RQ 5.7 convergence status to data/step00_rq57_convergence.txt"
+        - "Save RQ 5.1.1 convergence status to data/step00_rq51_convergence.txt"
 
       input_files:
-        - path: "results/ch5/rq7/data/step02_theta_long.csv"
+        - path: "results/ch5/5.1.1/data/step02_theta_long.csv"
           required_columns: ["UID", "test", "domain", "theta"]
           expected_rows: "~1200 (100 participants x 4 tests x 3 domains)"
-          source: "RQ 5.7 Step 2 (IRT calibration Pass 2 theta scores)"
-        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+          source: "RQ 5.1.1 Step 2 (IRT calibration Pass 2 theta scores)"
+        - path: "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
           required_columns: ["UID", "test", "TSVR_hours"]
           expected_rows: "~400 (100 participants x 4 tests)"
-          source: "RQ 5.7 Step 0 (TSVR extraction from master.xlsx)"
-        - path: "results/ch5/rq7/data/step03_best_model.pkl"
-          source: "RQ 5.7 Step 3 (best continuous model selection by AIC)"
+          source: "RQ 5.1.1 Step 0 (TSVR extraction from master.xlsx)"
+        - path: "results/ch5/5.1.1/data/step03_best_model.pkl"
+          source: "RQ 5.1.1 Step 3 (best continuous model selection by AIC)"
 
       output_files:
         - path: "data/step00_theta_tsvr.csv"
@@ -68,8 +68,8 @@ steps:
           description: "Merged theta + TSVR, domain-collapsed"
         - path: "data/step00_best_continuous_aic.txt"
           description: "AIC of best continuous model from RQ 5.7 (for Step 3 comparison)"
-        - path: "data/step00_rq57_convergence.txt"
-          description: "RQ 5.7 model convergence status and random effects structure (CRITICAL for AIC comparison validity)"
+        - path: "data/step00_rq51_convergence.txt"
+          description: "RQ 5.1.1 model convergence status and random effects structure (CRITICAL for AIC comparison validity)"
 
       parameters:
         merge_keys: ["UID", "test"]
@@ -82,18 +82,18 @@ steps:
       signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/ch5/rq7/data/step02_theta_long.csv"
-          source: "RQ 5.7 dependency (must exist before Step 0)"
-        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
-          source: "RQ 5.7 dependency (must exist before Step 0)"
-        - path: "results/ch5/rq7/data/step03_best_model.pkl"
-          source: "RQ 5.7 dependency (must exist before Step 0)"
+        - path: "results/ch5/5.1.1/data/step02_theta_long.csv"
+          source: "RQ 5.1.1 dependency (must exist before Step 0)"
+        - path: "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
+          source: "RQ 5.1.1 dependency (must exist before Step 0)"
+        - path: "results/ch5/5.1.1/data/step03_best_model.pkl"
+          source: "RQ 5.1.1 dependency (must exist before Step 0)"
 
       parameters:
         file_paths:
-          - "results/ch5/rq7/data/step02_theta_long.csv"
-          - "results/ch5/rq7/data/step00_tsvr_mapping.csv"
-          - "results/ch5/rq7/data/step03_best_model.pkl"
+          - "results/ch5/5.1.1/data/step02_theta_long.csv"
+          - "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
+          - "results/ch5/5.1.1/data/step03_best_model.pkl"
         min_size_bytes: 0
 
       returns:
@@ -101,7 +101,7 @@ steps:
         variable_name: "validation_result"
 
       criteria:
-        - "All 3 RQ 5.7 files exist"
+        - "All 3 RQ 5.1.1 files exist"
         - "No file size = 0 (files not empty)"
         - "Merge produces ~400 rows (no unexpected data loss)"
         - "No NaN in theta or TSVR_hours after merge"
@@ -110,9 +110,9 @@ steps:
       on_failure:
         action: "raise FileNotFoundError(validation_result['message'])"
         log_to: "logs/step00_get_data.log"
-        invoke: "QUIT with EXPECTATIONS ERROR - RQ 5.7 must complete before RQ 5.8"
+        invoke: "QUIT with EXPECTATIONS ERROR - RQ 5.1.1 must complete before RQ 5.1.2"
 
-      description: "Validate RQ 5.7 dependency files exist before data loading"
+      description: "Validate RQ 5.1.1 dependency files exist before data loading"
 
     log_file: "logs/step00_get_data.log"
 
@@ -302,7 +302,7 @@ steps:
           description: "AIC of best continuous model from RQ 5.7"
 
       output_files:
-        - path: "results/step03_piecewise_model_summary.txt"
+        - path: "data/step03_piecewise_model_summary.txt"
           variable_name: "piecewise_model"
           description: "Piecewise model summary (segment slopes, interaction, AIC comparison, convergence status)"
         - path: "data/step03_piecewise_predictions.csv"
@@ -346,7 +346,7 @@ steps:
       signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step03_piecewise_model_summary.txt"
+        - path: "data/step03_piecewise_model_summary.txt"
           variable_name: "piecewise_model"
           source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
 
@@ -392,7 +392,7 @@ steps:
           description: "Original data for residual computation"
 
       output_files:
-        - path: "results/step04_assumption_validation_report.txt"
+        - path: "data/step04_assumption_validation_report.txt"
           variable_name: "assumption_report"
           description: "Comprehensive assumption validation for both models (12 total checks: 6 per model)"
 
@@ -419,7 +419,7 @@ steps:
       signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step04_assumption_validation_report.txt"
+        - path: "data/step04_assumption_validation_report.txt"
           variable_name: "assumption_report"
           source: "analysis call output (validate_lmm_assumptions_comprehensive return value)"
 
@@ -459,12 +459,12 @@ steps:
       signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> DataFrame"
 
       input_files:
-        - path: "results/step03_piecewise_model_summary.txt"
+        - path: "data/step03_piecewise_model_summary.txt"
           variable_name: "piecewise_model"
           description: "Piecewise model with Days_within:SegmentLate interaction term"
 
       output_files:
-        - path: "results/step05_slope_comparison.csv"
+        - path: "data/step05_slope_comparison.csv"
           variable_name: "slope_comparison"
           columns:
             - {name: "metric", type: "string", description: "Early_slope, Late_slope, Ratio, or Interaction_p"}
@@ -496,7 +496,7 @@ steps:
       signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
 
       input_files:
-        - path: "results/step05_slope_comparison.csv"
+        - path: "data/step05_slope_comparison.csv"
           variable_name: "slope_comparison"
           source: "analysis call output (extract_segment_slopes_from_lmm return value)"
 
@@ -554,7 +554,7 @@ steps:
           description: "Piecewise model predictions"
 
       output_files:
-        - path: "plots/step06_piecewise_comparison_data.csv"
+        - path: "data/step06_piecewise_comparison_data.csv"
           variable_name: "plot_data"
           columns:
             - {name: "source", type: "string", description: "Observed, Quadratic, or Piecewise"}
@@ -592,7 +592,7 @@ steps:
       signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
 
       input_files:
-        - path: "plots/step06_piecewise_comparison_data.csv"
+        - path: "data/step06_piecewise_comparison_data.csv"
           variable_name: "plot_data"
           source: "analysis call output (prepare_piecewise_plot_data return value)"
 

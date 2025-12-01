@@ -4,8 +4,8 @@
 # =============================================================================
 """
 Step ID: step00
-Step Name: Extract Theta Scores from RQ 5.5
-RQ: results/ch5/rq6
+Step Name: Extract Theta Scores from RQ 5.4.1
+RQ: 5.4.2
 Generated: 2025-11-25
 
 PURPOSE:
@@ -14,11 +14,11 @@ This step validates that RQ 5.5 completed successfully and caches its theta
 outputs for use in RQ 5.6 piecewise LMM analysis.
 
 EXPECTED INPUTS:
-  - results/ch5/rq5/status.yaml
+  - results/ch5/5.4.1/status.yaml
     Fields: rq_results.status (must be 'success')
-    Expected: RQ 5.5 execution status file
+    Expected: RQ 5.4.1 execution status file
 
-  - results/ch5/rq5/data/step03_theta_scores.csv
+  - results/ch5/5.4.1/data/step03_theta_scores.csv
     Columns: ['composite_ID', 'theta_common', 'theta_congruent', 'theta_incongruent',
               'se_common', 'se_congruent', 'se_incongruent']
     Expected rows: 400 (100 participants x 4 test sessions)
@@ -66,8 +66,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq6
-RQ5_DIR = PROJECT_ROOT / "results" / "ch5" / "rq5"
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.4.2
+RQ5_DIR = PROJECT_ROOT / "results" / "ch5" / "5.4.1"
 LOG_FILE = RQ_DIR / "logs" / "step00_extract_theta_from_rq5.log"
 
 # =============================================================================
@@ -117,8 +117,8 @@ if __name__ == "__main__":
         rq5_status_path = RQ5_DIR / "status.yaml"
         if not rq5_status_path.exists():
             raise FileNotFoundError(
-                f"EXPECTATIONS ERROR: To extract theta from RQ 5.5 I expect "
-                f"results/ch5/rq5/status.yaml, but file missing"
+                f"EXPECTATIONS ERROR: To extract theta from RQ 5.4.1 I expect "
+                f"results/ch5/5.4.1/status.yaml, but file missing"
             )
 
         # Read status.yaml
@@ -152,8 +152,8 @@ if __name__ == "__main__":
         rq5_theta_path = RQ5_DIR / "data" / "step03_theta_scores.csv"
         if not rq5_theta_path.exists():
             raise FileNotFoundError(
-                f"EXPECTATIONS ERROR: To extract theta from RQ 5.5 I expect "
-                f"results/ch5/rq5/data/step03_theta_scores.csv, but file missing"
+                f"EXPECTATIONS ERROR: To extract theta from RQ 5.4.1 I expect "
+                f"results/ch5/5.4.1/data/step03_theta_scores.csv, but file missing"
             )
 
         df_theta = pd.read_csv(rq5_theta_path, encoding='utf-8')

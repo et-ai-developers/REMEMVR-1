@@ -5,7 +5,7 @@
 """
 Step ID: 05
 Step Name: Prepare Age Tertile Plot Data
-RQ: results/ch5/rq9 (Age effects on baseline memory and forgetting rate)
+RQ: ch5/5.1.3 (Age effects on baseline memory and forgetting rate)
 Generated: 2025-11-28
 
 PURPOSE:
@@ -215,7 +215,7 @@ if __name__ == "__main__":
         # Looking at tools_inventory.md, the function signature is:
         # validate_plot_data_completeness(plot_data, required_domains, required_groups, domain_col='domain', group_col='group')
 
-        # For RQ 5.9 age effects, we don't have domains, only age tertiles and timepoints
+        # For RQ 5.1.3 age effects, we don't have domains, only age tertiles and timepoints
         # We'll validate that all tertiles and timepoints are present
 
         # First, verify all tertiles present

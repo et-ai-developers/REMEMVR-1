@@ -1,8 +1,8 @@
-# RQ 5.7: Functional Form of Forgetting Trajectories
+# RQ 5.1.1: Functional Form of Forgetting Trajectories
 
 **Chapter:** 5
-**RQ Number:** 7
-**Full ID:** 5.7
+**RQ Number:** 1.1
+**Full ID:** 5.1.1
 
 ---
 
@@ -101,7 +101,7 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 
 **High-Level Workflow:**
 
-**Step 0:** Get IRT input data from RQ 5.1 (results/ch5/rq1/data/step00_irt_input.csv)
+**Step 0:** Get IRT input data from RQ 5.1 (results/ch5/5.2.1/data/step00_irt_input.csv)
 
 **Step 1:** IRT Pass 1 - Calibrate single omnibus factor "All" (all items), p1_med prior, 2-category GRM, extract Pass 1 theta scores and item parameters
 
@@ -158,7 +158,7 @@ DERIVED (from RQ 5.1 outputs)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq1/data/step00_irt_input.csv` (IRT input data - will be processed with "All" factor instead of What/Where/When factors)
+- `results/ch5/5.2.1/data/step00_irt_input.csv` (IRT input data - will be processed with "All" factor instead of What/Where/When factors)
 
 **Dependencies:**
 RQ 5.1 must complete Step 0 (data preparation) before this RQ can run. RQ 5.7 uses same raw input data but processes with different IRT configuration (single omnibus factor instead of 3 domain-specific factors).

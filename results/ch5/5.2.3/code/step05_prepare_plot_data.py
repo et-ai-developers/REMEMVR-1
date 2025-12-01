@@ -5,12 +5,12 @@
 """
 Step ID: step05
 Step Name: step05_prepare_plot_data
-RQ: results/ch5/rq10
+RQ: results/ch5/5.2.3
 Generated: 2025-11-28
 
 PURPOSE:
 Create plot source CSV for multi-panel age effects visualization (Option B
-architecture). Prepares data for RQ 5.10 Age × Domain × Time interaction
+architecture). Prepares data for RQ 5.2.3 Age × Domain × Time interaction
 visualization by creating age tertiles, aggregating observed means, and
 generating LMM predictions for each domain × tertile × timepoint combination.
 
@@ -93,7 +93,7 @@ from statsmodels.regression.mixed_linear_model import MixedLMResults
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq10 (derived from script location)
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.3 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step05_prepare_plot_data.log"
 
 # =============================================================================

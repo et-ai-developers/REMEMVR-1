@@ -1,8 +1,8 @@
-# RQ 5.5: Do Congruent and Incongruent Items Show Different Forgetting Rates?
+# RQ 5.4.1: Do Congruent and Incongruent Items Show Different Forgetting Rates?
 
 **Chapter:** 5
-**RQ Number:** 5
-**Full ID:** 5.5
+**RQ Number:** 4.1
+**Full ID:** 5.4.1
 
 ---
 
@@ -100,9 +100,9 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 **High-Level Workflow:**
 
 **Step 0:** Data Preparation
-- Get raw scores from `./results/ch5/rq1/data/step00_irt_input.csv`
+- Get raw scores from `./results/ch5/5.1.1/data/step00_irt_input.csv`
 - Remove TQ_* columns that don't include IFR, ICR, or IRE
-- Get TSVR mapping from `./results/ch5/rq1/data/step00_tsvr_mapping.csv`
+- Get TSVR mapping from `./results/ch5/5.1.1/data/step00_tsvr_mapping.csv`
 - Create Q-matrix with congruence factor mapping:
   - common = `*-i1` and `*-i2`
   - congruent = `*-i3` and `*-i4`
@@ -169,8 +169,8 @@ DERIVED (from RQ 5.1 outputs) + recoded Q-matrix
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- `results/ch5/rq1/data/step00_irt_input.csv` (raw item responses)
-- `results/ch5/rq1/data/step00_tsvr_mapping.csv` (TSVR time mapping)
+- `results/ch5/5.1.1/data/step00_irt_input.csv` (raw item responses)
+- `results/ch5/5.1.1/data/step00_tsvr_mapping.csv` (TSVR time mapping)
 
 **Dependencies:**
 RQ 5.1 must have completed Step 0 (data extraction) before this RQ can begin. The raw item responses and TSVR mapping are reused.

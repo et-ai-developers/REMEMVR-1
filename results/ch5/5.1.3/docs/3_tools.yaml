@@ -1,6 +1,6 @@
 # 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
 # Created by: rq_tools agent
-# RQ: 5.9 (Age effects on baseline memory and forgetting rate)
+# RQ: 5.1.3 (Age effects on baseline memory and forgetting rate)
 # Date: 2025-11-27 (Updated)
 # Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
 
@@ -21,7 +21,7 @@ analysis_tools:
           UID: "string (participant identifier)"
           age: "float (raw age in years)"
           TSVR_hours: "float (actual hours since encoding)"
-          theta: "float (IRT ability estimate from RQ 5.7 'All' factor)"
+          theta: "float (IRT ability estimate from RQ 5.1.1 'All' factor)"
       - path: "data/step02_lmm_model.pkl"
         description: "Fitted LMM for generating predictions"
 
@@ -38,7 +38,7 @@ analysis_tools:
     notes:
       - "Age tertiles created for visualization only (analysis uses continuous Age_c)"
       - "Predictions aggregated from LMM fitted values by tertile x timepoint"
-      - "Adapted for RQ 5.9 single-domain case (no domain_name column like RQ 5.10)"
+      - "Adapted for RQ 5.1.3 single-domain case (no domain_name column like RQ 5.10)"
       - "This is a CUSTOM tools/ module function, NOT stdlib (must be cataloged)"
 
     source_reference: "tools_inventory.md lines 155-164"
@@ -335,15 +335,15 @@ validation_tools:
 
     parameters:
       files_to_check:
-        - path: "results/ch5/rq7/data/step03_theta_all.csv"
+        - path: "results/ch5/5.1.1/data/step03_theta_all.csv"
           min_size_bytes: 1000
-        - path: "results/ch5/rq7/data/step00_tsvr_mapping.csv"
+        - path: "results/ch5/5.1.1/data/step00_tsvr_mapping.csv"
           min_size_bytes: 1000
         - path: "data/cache/dfData.csv"
           min_size_bytes: 1000
 
     criteria:
-      - "All 3 dependency files exist (RQ 5.7 outputs + dfData)"
+      - "All 3 dependency files exist (RQ 5.1.1 outputs + dfData)"
       - "Each file > 1KB (not empty or corrupted)"
 
     expected_output:
@@ -352,7 +352,7 @@ validation_tools:
     behavior_on_failure:
       action: "raise FileNotFoundError"
       log_to: "logs/step00_extract_merge_data.log"
-      invoke: "Report cross-RQ dependency error - user must execute RQ 5.7 first"
+      invoke: "Report cross-RQ dependency error - user must execute RQ 5.1.1 first"
 
     description: "Validate cross-RQ dependencies exist before data merge (Step 0 prerequisite check)"
     source_reference: "tools_inventory.md lines 334-341"
@@ -401,11 +401,11 @@ summary:
       requirement: "Actual time since encoding as time variable"
 
 notes:
-  - "RQ 5.9 uses DERIVED data from RQ 5.7 (theta scores for 'All' composite factor)"
+  - "RQ 5.1.3 uses DERIVED data from RQ 5.1.1 (theta scores for 'All' composite factor)"
   - "prepare_age_effects_plot_data is the ONLY custom analysis tool required"
   - "All other analysis operations use stdlib (pandas, statsmodels, numpy)"
   - "Cross-RQ dependency validated in Step 0 via check_file_exists"
   - "Age_c grand-mean centering makes intercept interpretable (average-aged adult baseline)"
-  - "Lin+Log functional form inherited from RQ 5.7 best model selection"
+  - "Lin+Log functional form inherited from RQ 5.1.1 best model selection"
   - "Bonferroni correction: alpha = 0.0167 for 3 age effects tested (baseline + 2 slopes)"
   - "Each tool listed ONCE (deduplication) - rq_analysis maps to steps in 4_analysis.yaml"

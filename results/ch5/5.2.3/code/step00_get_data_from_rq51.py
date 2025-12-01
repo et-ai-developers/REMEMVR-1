@@ -5,22 +5,22 @@
 """
 Step ID: step00
 Step Name: step00_get_data_from_rq51
-RQ: results/ch5/rq10
+RQ: results/ch5/5.2.3
 Generated: 2025-11-28
 
 PURPOSE:
 Extract theta scores, TSVR mapping, and Age variable from RQ 5.1 outputs and
 dfData.csv. CRITICAL FIX: RQ 5.1 outputs theta in WIDE format (theta_what,
-theta_where, theta_when columns) but RQ 5.10 needs LONG format (domain + theta
+theta_where, theta_when columns) but RQ 5.2.3 needs LONG format (domain + theta
 columns). This script performs the WIDE->LONG reshape.
 
 EXPECTED INPUTS:
-  - results/ch5/rq1/data/step03_theta_scores.csv
+  - results/ch5/5.1.1/data/step03_theta_scores.csv
     Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
     Format: WIDE format (one row per composite_ID)
     Expected rows: ~400 (100 participants x 4 tests)
 
-  - results/ch5/rq1/data/step00_tsvr_mapping.csv
+  - results/ch5/5.1.1/data/step00_tsvr_mapping.csv
     Columns: ['composite_ID', 'test', 'TSVR_hours']
     Format: Already correct
     Expected rows: 400 (100 participants x 4 tests)
@@ -77,7 +77,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Configuration
 # =============================================================================
 
-RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/rq10
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.3
 LOG_FILE = RQ_DIR / "logs" / "step00_get_data_from_rq51.log"
 
 # Ensure output directories exist
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         # STEP 1: Load RQ 5.1 theta scores (WIDE format)
         # =====================================================================
         log("[LOAD] Loading theta scores from RQ 5.1 (WIDE format)...")
-        rq1_theta_path = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data" / "step03_theta_scores.csv"
+        rq1_theta_path = PROJECT_ROOT / "results" / "ch5" / "5.1.1" / "data" / "step03_theta_scores.csv"
 
         if not rq1_theta_path.exists():
             raise FileNotFoundError(f"RQ 5.1 dependency missing: {rq1_theta_path}")
@@ -171,7 +171,7 @@ if __name__ == "__main__":
         # STEP 3: Load TSVR mapping (already correct format)
         # =====================================================================
         log("[LOAD] Loading TSVR mapping from RQ 5.1...")
-        tsvr_path = PROJECT_ROOT / "results" / "ch5" / "rq1" / "data" / "step00_tsvr_mapping.csv"
+        tsvr_path = PROJECT_ROOT / "results" / "ch5" / "5.1.1" / "data" / "step00_tsvr_mapping.csv"
 
         if not tsvr_path.exists():
             raise FileNotFoundError(f"RQ 5.1 dependency missing: {tsvr_path}")
