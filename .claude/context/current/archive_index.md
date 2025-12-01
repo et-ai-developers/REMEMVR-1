@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-01 02:45 (context-manager curation)
+**Last Updated:** 2025-12-01 11:30 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -289,6 +289,12 @@
 
 ### chapter_5_reorganization_hierarchical_numbering_implemented
 **Description:** Complete history of Chapter 5 RQ reorganization implementing hierarchical 5.X.X numbering system to address When domain floor effects and create logical categorical structure (2025-11-30 19:20). Comprehensive audit of RQs 5.1-5.13 via 13 parallel context_finder agents identified When domain floor effects (6-9% probability, 77% attrition, cascading effects). Designed 4-type structure: General (5.1.x, 6 RQs), Domains (5.2.x, 8 RQs), Paradigms (5.3.x, 9 RQs), Congruence (5.4.x, 8 RQs) = 31 total RQs. Created rq_refactor.tsv tracking table. Created 31 hierarchical folders, migrated 15 existing RQs (710 files), 16 TODO RQs ready for creation. Updated rq_builder agent and 4 template files (build_folder, concept, plan, plots) with hierarchical path format (chX/Y.Z.W). Organizational benefits: clear conceptual grouping, When handled elegantly (present in General, absent from Domains), consistent analytical treatment, easy cross-type comparisons. Migration preserves rollback safety via git. TODO RQs can reuse 80% of code via factor swaps. Total 135 minutes. v4.X architecture validated by audit (100% validation success, bugs decreasing, null results scientifically valid).
+
+### chapter_5_infrastructure_todo_folders_asbuilt_documentation_conflict_detection
+**Description:** Complete history of Chapter 5 infrastructure work including parallel rq_builder execution for 16 TODO RQ folders (Type 1: 2 RQs, Type 2: 3 RQs, Type 3: 7 RQs, Type 4: 6 RQs, all with 6 subfolders + status.yaml initialization, 2 minutes total), as-built documentation generation via 13 parallel context_finder agents FORBIDDEN from reading original plan (extracted from actual RQ folders only, 498 lines, standardized template, source citations, 10 minutes), and comprehensive g_conflict comparison identifying 47 discrepancies between planned (ANALYSES_CH5.md, 1426 lines) vs actual (ANALYSES_CH5_actual.md, 498 lines): 8 CRITICAL, 21 HIGH, 14 MODERATE, 4 LOW severity. Most conflicts are DOCUMENTATION GAPS not analysis errors.
+
+### rq_refactor_tsv_extended_6_columns_comprehensive_specification_database
+**Description:** Complete history of extending rq_refactor.tsv from 5 columns to 11 columns by adding Title, Hypothesis, Data_Required, Analysis_Specification, Expected_Output, and Success_Criteria. Includes parallel specification extraction from 13 completed RQs via context_finder agents (exact file names, variable names, thresholds from actual documentation), TODO RQ pattern mapping for 16 RQs based on analogous completed RQs (80% code reuse via factor swaps), and path migration from legacy rqN to hierarchical 5.X.X format. Final: 31 RQs × 11 columns = comprehensive specification database ready for rq_concept agent consumption.
 
 ---
 
