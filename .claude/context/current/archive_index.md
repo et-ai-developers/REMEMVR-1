@@ -314,6 +314,9 @@
 ### fix_13_rqs_revalidate_all_16_approved
 **Description:** Complete history of fixing remaining 13 RQs (5.3.3-5.3.8, 5.4.3-5.4.8) using stats_scholar.md templates and re-validating all CONDITIONAL RQs with 14 parallel agents (3 rq_scholar + 11 rq_stats). All 16 TODO RQs achieved APPROVED threshold (≥9.25) with average score improvements of +0.5 to +0.9 points. Documents 6 common fix templates (LMM convergence strategy, assumption validation, practice effects, GLMM for binary responses, K-means justification, cluster validation metrics), comprehensive fixes applied across paradigms and congruence types, final status table, files modified, and publication-quality standard achievement.
 
+### rq_status_creation_root_validation_pipeline_analysis
+**Description:** Root RQ pipeline analysis, rq_status.tsv creation, and When domain floor effect documentation (2025-12-02 16:30). Identified 8 unique analysis pipeline types covering 30 of 31 RQs (only 5.3.2 unique to Paradigms). Updated all 4 root RQ step00 scripts to use local step00_input_data.csv for data isolation. Comprehensive validity analysis via context_finder discovered When domain floor effect (6-9% accuracy, 77% item attrition) invalidating 5.2.X downstream analyses unless What/Where only. Created accurate rq_status.tsv tracking file (32 rows, 13 COMPLETE, 16 Partial, 2 NOT STARTED) with critical notes column documenting When exclusion requirements, clustering variable counts, and investigation priorities.
+
 ---
 
 ## How to Use This Index
