@@ -1,0 +1,5 @@
+Silhouette Coefficient: 0.5943
+Interpretation: Reasonable cluster structure found
+Detail: Clusters have moderate separation and cohesion (0.50 <= silhouette < 0.70)
+Number of Clusters: 2
+Number of Participants: 100

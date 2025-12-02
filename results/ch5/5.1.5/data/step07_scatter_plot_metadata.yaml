@@ -1,0 +1,10 @@
+silhouette_score: 0.5943
+K_final: 2
+axis_labels:
+  x: Random Intercept (z-scored)
+  y: Random Slope (z-scored)
+reference_lines:
+  x_zero: true
+  y_zero: true
+interpretation:
+  silhouette: Strong (>= 0.50)

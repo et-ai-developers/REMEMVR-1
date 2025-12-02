@@ -1,0 +1,27 @@
+Cluster Characterization - Interpretive Labels
+============================================================
+
+Cluster 0.0: High baseline, slower change
+  N participants: 69
+  Mean baseline (intercept): 1.0112
+  Mean rate of change (slope): 0.0743
+  Intercept SD: 0.3380
+  Slope SD: 0.0026
+
+Cluster 1.0: Low baseline, faster change
+  N participants: 31
+  Mean baseline (intercept): -0.0405
+  Mean rate of change (slope): 0.0821
+  Intercept SD: 0.3303
+  Slope SD: 0.0028
+
+
+Interpretation Guide:
+----------------------------------------
+Intercept: Baseline ability level (IRT theta scale)
+  - Positive = above average baseline
+  - Negative = below average baseline
+
+Slope: Rate of change over time (theta per day)
+  - Higher slope = faster increase (or slower forgetting)
+  - Lower slope = slower increase (or faster forgetting)
