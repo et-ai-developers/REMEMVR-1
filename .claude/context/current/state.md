@@ -294,3 +294,133 @@ Topic naming format: [topic][task][subtask]
 Fixed random slope specification in 3 RQs (5.2.4, 5.3.4, 5.4.3). Changed from TSVR_hours to log_TSVR per ROOT RQ model selection. **Key discovery:** IRT detects individual forgetting rate variance (0.021), CTT cannot (0.000 boundary) - supports thesis hypothesis that IRT superior for individual trajectory modeling. NULL findings for 3-way interactions remain ROBUST after correction.
 
 **Chapter 5 Progress:** 18/31 RQs complete (58%), 13 ready for execution.
+
+## Session (2025-12-03 09:15)
+
+**Task:** Chapter 5 Story Draft + Literature Comparison + ICC Investigation Plan
+
+**Major Accomplishments:**
+
+**1. Created Comprehensive Chapter 5 Story Document**
+
+Created `results/ch5/story.md` - honest assessment of Chapter 5 findings:
+
+**THE GOOD:**
+- Logarithmic forgetting confirmed (AIC weights 48-99.998% across all RQs)
+- IRT detects individual trajectory differences CTT cannot (var=0.021 vs 0.000)
+- Two-phase consolidation pattern exists (but gradual, not sharp)
+- Analysis pipeline works (258/261 tests passing)
+
+**THE BAD:**
+- Age effects completely absent (all p > 0.4 across 4 analyses)
+- What = Where domains (no differentiation)
+- Consolidation benefits domain/paradigm-invariant
+- Schema congruence does nothing
+
+**THE UGLY:**
+- When domain unusable (77% item attrition, 6-9% floor)
+- ICC paradox: ICC_slope = 0.0005 (0.05%) - 640× lower than literature
+- r = -0.97 intercept-slope correlation (2-5× higher than literature)
+- Frequent convergence failures requiring model simplification
+
+**2. Extended Literature Search (VR Episodic Memory)**
+
+Searched 15+ published VR memory studies. Key comparisons:
+
+| Finding | Literature | Our Result | Assessment |
+|---------|------------|------------|------------|
+| ICC_intercept | 0.60-0.80 | 0.606 | ✅ CONSISTENT |
+| ICC_slope | 0.30-0.50 | 0.0005 | ❌ 640× ANOMALOUS |
+| Age effects | Present | Absent | ⚠️ MIXED |
+| Log forgetting | Expected | Confirmed | ✅ CONSISTENT |
+
+Key studies referenced:
+- VR-RAVLT (Frontiers 2022): ICC retention = 0.321
+- Plancher WWW studies: Age affects binding, not forgetting rate
+- Vandemeulebroecke IRT study: 13.9 years, slope variance detected
+
+**3. CRITICAL INSIGHT: Theta Scale Artifact Hypothesis**
+
+User identified that NO VR memory study uses IRT theta for trajectory analysis - all use proportion correct (CTT-like). Our anomalous ICC_slope may be a scale transformation artifact:
+
+- IRT theta is unbounded (-3 to +3)
+- Probability is bounded (0-1)
+- Literature ICCs computed on probability/proportion scale
+- Our ICC computed on theta scale
+- **Nonlinear logit transformation may compress individual differences**
+
+**4. Created Investigation Plan: results/ch5/logit.md**
+
+Target: RQ 5.1.4 (Between-Person Variance)
+Method: Convert theta → probability via Test Characteristic Curve, re-fit LMM, recompute ICC
+
+Expected outcomes:
+- **Strong support:** ICC_slope_prob = 0.20-0.40 (matches literature)
+- **Partial support:** ICC_slope_prob = 0.01-0.10 (elevated but still low)
+- **No support:** ICC_slope_prob ≈ 0.001 (real finding, not artifact)
+
+Estimated time: ~2.5 hours
+
+**5. CORRECTION: REMEMVR Uses Oculus Pro HMD**
+
+User corrected that REMEMVR uses Oculus Pro HMD (head-mounted display), NOT desktop VR. Updated story.md to remove desktop VR speculation. The VR homogenization hypothesis makes less sense for HMD.
+
+**Files Created/Modified:**
+
+| File | Action |
+|------|--------|
+| `results/ch5/story.md` | CREATED - Comprehensive Chapter 5 narrative |
+| `results/ch5/logit.md` | CREATED - Theta→probability investigation plan |
+
+**Key Insights:**
+
+**1. The Single Anomaly:**
+ICC_slope = 0.0005 is the ONE finding dramatically inconsistent with literature. Everything else (log forgetting, ICC_intercept, null age effects on rate) has precedent or partial support.
+
+**2. Methodological Contribution:**
+If theta-to-probability transformation resolves the ICC anomaly, this is a methodological contribution: demonstrating that IRT theta-scale analyses produce fundamentally different ICC estimates than probability-scale analyses.
+
+**3. Chapter 6 Implication:**
+If confidence (metacognition) shows normal ICC_slope while accuracy doesn't, that points to accuracy measurement issues. If both show ICC ≈ 0, that strengthens homogenization hypothesis.
+
+**Session Metrics:**
+
+**Tokens:**
+- Session start: ~8k (after /refresh)
+- Session end: ~180k (at /save)
+- Delta: ~172k consumed
+
+**Context finders invoked:** 6 (parallel RQ searches)
+**Web searches:** 12+ queries
+**Web fetches:** 8 pages
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtask]
+
+- chapter_5_story_narrative_assessment (Session 2025-12-03 09:15: comprehensive_story_draft results/ch5/story.md, good_bad_ugly_framework, log_forgetting_validated_aic_weights_48_to_99.998%, icc_anomaly_0.0005_vs_literature_0.32, age_effects_null_across_4_analyses, when_domain_unusable_77%_attrition, irt_superior_to_ctt_for_trajectories)
+
+- literature_comparison_vr_memory (Session 2025-12-03 09:15: web_search_15_studies, vr_ravlt_icc_retention_0.321, plancher_www_age_binding_not_rate, vandemeulebroecke_irt_13.9_years, desktop_vs_hmd_mixed_findings, null_age_on_forgetting_rate_has_precedent)
+
+- theta_probability_scale_hypothesis (Session 2025-12-03 09:15: user_insight_no_vr_study_uses_irt, icc_computed_on_theta_unbounded, literature_uses_proportion_bounded, nonlinear_logit_may_compress_individual_differences, investigation_plan_created results/ch5/logit.md, target_rq_5.1.4_variance_decomposition, test_characteristic_curve_conversion)
+
+- chapter_6_confidence_implications (Session 2025-12-03 09:15: metacognition_1_to_5_scale_every_question, if_confidence_tracks_accuracy_no_new_info, if_confidence_diverges_miscalibration_interesting, icc_confidence_slope_critical_diagnostic, age_miscalibration_differential_possible_even_if_accuracy_null)
+
+**Relevant Archived Topics (from context-finder):**
+- chapter_5_reorganization_hierarchical_numbering_implemented.md (2025-11-30: 4 types, 31 RQs structure)
+- when_domain_anomalies.md (2025-11-23: floor effects discovery)
+- rq_5_13_complete_rerun_linlog_model_validation_pipeline.md (2025-11-30: ICC calculations, Lin+Log switch)
+- decision_d069_dual_scale_trajectory_plots.md (theta + probability mandatory)
+- decision_d039_irt_methodology via project_specific_stats_insights.md (2-pass purification)
+
+**End of Session (2025-12-03 09:15)**
+
+**Status:** ✅ **CHAPTER 5 STORY DRAFTED + ICC INVESTIGATION PLANNED**
+
+Created comprehensive story document with honest assessment of good/bad/ugly findings. Extended web search confirmed ICC_slope is the single anomalous finding. User identified critical insight: theta scale vs probability scale may explain 640× discrepancy with literature. Investigation plan ready at results/ch5/logit.md.
+
+**Next Actions:**
+1. Execute theta→probability investigation (logit.md plan, ~2.5 hours)
+2. If scale explains anomaly: Update story.md with methodological contribution
+3. If scale doesn't explain: Real finding, discuss VR/sample limitations
+4. Continue with Chapter 6 confidence analysis (ICC_confidence_slope diagnostic)
