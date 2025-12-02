@@ -317,6 +317,9 @@
 ### rq_status_creation_root_validation_pipeline_analysis
 **Description:** Root RQ pipeline analysis, rq_status.tsv creation, and When domain floor effect documentation (2025-12-02 16:30). Identified 8 unique analysis pipeline types covering 30 of 31 RQs (only 5.3.2 unique to Paradigms). Updated all 4 root RQ step00 scripts to use local step00_input_data.csv for data isolation. Comprehensive validity analysis via context_finder discovered When domain floor effect (6-9% accuracy, 77% item attrition) invalidating 5.2.X downstream analyses unless What/Where only. Created accurate rq_status.tsv tracking file (32 rows, 13 COMPLETE, 16 Partial, 2 NOT STARTED) with critical notes column documenting When exclusion requirements, clustering variable counts, and investigation priorities.
 
+### rq_5.1.5_5.1.6_concept_validation_folder_alignment
+**Description:** RQ 5.1.5 and 5.1.6 concept creation, dual-agent validation, critical fixes, and v4.2 folder structure alignment (2025-12-02 17:30). Created RQ 5.1.5 (K-means clustering) with bootstrap stability and silhouette validation (rq_scholar 9.5, rq_stats 9.3 APPROVED). Created RQ 5.1.6 (Item Difficulty) with critical LMM→binomial GLMM fix for binary responses, convergence fallback strategy, and GLMM diagnostics (score improvement +3.1, rq_scholar 9.3, rq_stats 9.4 APPROVED). Updated folder structure documentation (names.md v4.1, plan.md v4.2, rq_planner v5.1.0): all analysis outputs to data/, logs/ for .log files only, plots/results empty until final agents. Files modified: 2 concept files, 2 status files, 3 documentation files. Session efficiency: 53 minutes total.
+
 ---
 
 ## How to Use This Index
