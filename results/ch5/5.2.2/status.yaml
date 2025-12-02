@@ -124,9 +124,10 @@ rq_plots:
     '
 rq_results:
   status: success
-  timestamp: 2025-11-25
+  timestamp: 2025-12-02
   context_dump: |
-    Results validated for scientific plausibility (summary.md already existed from prior run)
-    Plausibility checks: Value ranges OK, model boundary warning noted, piecewise structure robust
-    2 anomalies documented: When domain resilience (contradicts typical temporal fragility), consolidation benefit ranking reversal (When>Where>What, not Where>When>What as predicted)
-    Dual-scale interpretation complete (theta + probability trajectories with practical significance)
+    Results validated for scientific plausibility (summary.md regenerated for When exclusion)
+    Analysis re-run Dec 2 with When excluded (800 obs, 2 domains only) per RQ 5.2.1 floor effect
+    Null consolidation hypothesis: All contrasts p>0.68, effect sizes negligible (|d|<0.06)
+    CRITICAL: Plots outdated (show 3 domains), MUST regenerate before publication (Step 16 re-run required)
+    Model boundary warning documented (random slope variance near zero, not fatal but noted)

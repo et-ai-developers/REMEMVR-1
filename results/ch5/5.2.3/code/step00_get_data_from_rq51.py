@@ -7,12 +7,18 @@ Step ID: step00
 Step Name: step00_get_data_from_rq51
 RQ: results/ch5/5.2.3
 Generated: 2025-11-28
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Extract theta scores, TSVR mapping, and Age variable from RQ 5.1 outputs and
 dfData.csv. CRITICAL FIX: RQ 5.1 outputs theta in WIDE format (theta_what,
 theta_where, theta_when columns) but RQ 5.2.3 needs LONG format (domain + theta
 columns). This script performs the WIDE->LONG reshape.
+
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- Performance at 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination
+- Only What and Where domains analyzed
 
 EXPECTED INPUTS:
   - results/ch5/5.1.1/data/step03_theta_scores.csv
@@ -33,7 +39,7 @@ EXPECTED INPUTS:
 EXPECTED OUTPUTS:
   - data/step00_theta_from_rq51.csv
     Columns: ['composite_ID', 'domain', 'test', 'theta']
-    Format: LONG format (1200 rows: 400 composite_IDs x 3 domains)
+    Format: LONG format (800 rows: 400 composite_IDs x 2 domains - When excluded)
 
   - data/step00_tsvr_from_rq51.csv
     Columns: ['composite_ID', 'test', 'TSVR_hours']
@@ -53,7 +59,7 @@ g_code REASONING:
 - Why manual fix needed: g_code agent correctly detected format mismatch and
   quit with FORMAT ERROR. This manual script implements the necessary reshape.
 
-- Data flow: WIDE theta (400 rows) -> pd.melt() -> LONG theta (1200 rows)
+- Data flow: WIDE theta (400 rows) -> pd.melt() -> LONG theta (800 rows - When excluded)
 """
 # =============================================================================
 
@@ -128,22 +134,22 @@ if __name__ == "__main__":
         # Extract test number from composite_ID (format: UID_test)
         theta_wide['test'] = theta_wide['composite_ID'].str.split('_').str[1]
 
-        # Melt from WIDE to LONG
+        # Melt from WIDE to LONG (When excluded due to floor effect)
         # Before: composite_ID, theta_what, theta_where, theta_when, test
-        # After: composite_ID, test, domain, theta
+        # After: composite_ID, test, domain, theta (What/Where only)
         theta_long = pd.melt(
             theta_wide,
             id_vars=['composite_ID', 'test'],
-            value_vars=['theta_what', 'theta_where', 'theta_when'],
+            value_vars=['theta_what', 'theta_where'],  # When excluded
             var_name='domain_raw',
             value_name='theta'
         )
 
-        # Clean domain names: theta_what -> What, theta_where -> Where, theta_when -> When
+        # Clean domain names: theta_what -> What, theta_where -> Where (When excluded)
         domain_mapping = {
             'theta_what': 'What',
-            'theta_where': 'Where',
-            'theta_when': 'When'
+            'theta_where': 'Where'
+            # theta_when excluded due to floor effect (RQ 5.2.1)
         }
         theta_long['domain'] = theta_long['domain_raw'].map(domain_mapping)
         theta_long = theta_long.drop(columns=['domain_raw'])
@@ -152,20 +158,20 @@ if __name__ == "__main__":
         theta_long = theta_long[['composite_ID', 'domain', 'test', 'theta']]
 
         log(f"[TRANSFORMED] WIDE -> LONG: {len(theta_wide)} rows -> {len(theta_long)} rows")
-        log(f"[INFO] Expected: {len(theta_wide)} x 3 domains = {len(theta_wide) * 3} rows")
+        log(f"[INFO] Expected: {len(theta_wide)} x 2 domains = {len(theta_wide) * 2} rows (When excluded)")
         log(f"[INFO] Actual: {len(theta_long)} rows")
 
-        # Validate reshape
-        expected_rows = len(theta_wide) * 3
+        # Validate reshape (2 domains now - When excluded)
+        expected_rows = len(theta_wide) * 2
         if len(theta_long) != expected_rows:
             raise ValueError(f"Reshape failed: expected {expected_rows} rows, got {len(theta_long)}")
 
-        # Validate all domains present
+        # Validate domains present (When excluded)
         domains = theta_long['domain'].unique()
-        if set(domains) != {'What', 'Where', 'When'}:
-            raise ValueError(f"Expected domains [What, Where, When], got {list(domains)}")
+        if set(domains) != {'What', 'Where'}:
+            raise ValueError(f"Expected domains [What, Where] (When excluded), got {list(domains)}")
 
-        log("[VALIDATION] PASS - All 3 domains present, row count correct")
+        log("[VALIDATION] PASS - All 2 domains present (When excluded), row count correct")
 
         # =====================================================================
         # STEP 3: Load TSVR mapping (already correct format)
@@ -229,9 +235,9 @@ if __name__ == "__main__":
         # =====================================================================
         log("[VALIDATION] Running final checks...")
 
-        # Check theta LONG format
-        if len(theta_long) != 1200:
-            log(f"[WARNING] Expected 1200 rows (400 x 3 domains), got {len(theta_long)}")
+        # Check theta LONG format (800 rows due to When exclusion)
+        if len(theta_long) != 800:
+            log(f"[WARNING] Expected 800 rows (400 x 2 domains, When excluded), got {len(theta_long)}")
 
         # Check no NaN values
         if theta_long['theta'].isna().any():
@@ -245,7 +251,7 @@ if __name__ == "__main__":
 
         log("[VALIDATION] PASS - All files created successfully")
         log("[SUCCESS] Step 00 complete")
-        log(f"[INFO] LONG format theta ready: {len(theta_long)} rows (3 domains)")
+        log(f"[INFO] LONG format theta ready: {len(theta_long)} rows (2 domains - When excluded)")
 
         sys.exit(0)
 

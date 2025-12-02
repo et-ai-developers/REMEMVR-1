@@ -6,16 +6,28 @@
 
 ---
 
+## Note on When Domain Exclusion
+
+**When domain EXCLUDED** due to floor effect discovered in RQ 5.2.1:
+- Performance at 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination in IRT calibration
+- Only 6 items retained, limiting reliability for individual differences
+- Cannot meaningfully assess age-related forgetting for When domain
+
+**Analysis focuses on What vs Where comparison only.**
+
+---
+
 ## Research Question
 
 **Primary Question:**
-Does the effect of age on forgetting rate vary by memory domain (What, Where, When)?
+Does the effect of age on forgetting rate vary by memory domain (What, Where)?
 
 **Scope:**
-This RQ examines whether age-related memory decline differs across episodic memory domains (object identity, spatial location, temporal order) using IRT-derived ability estimates across four test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6). Time variable uses TSVR (actual hours since encoding). Age is treated as a between-subjects continuous predictor, grand-mean centered. Focuses on detecting a 3-way Age × Domain × Time interaction.
+This RQ examines whether age-related memory decline differs across episodic memory domains (object identity, spatial location) using IRT-derived ability estimates across four test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6). Time variable uses TSVR (actual hours since encoding). Age is treated as a between-subjects continuous predictor, grand-mean centered. Focuses on detecting a 3-way Age × Domain × Time interaction.
 
 **Theoretical Framing:**
-Hippocampal aging theory predicts that memory domains relying on hippocampal binding (Where, When) should show greater age-related vulnerability than familiarity-based memory (What, which relies on perirhinal cortex). If this holds, older adults should show disproportionate forgetting for spatial and temporal contexts compared to object identity.
+Hippocampal aging theory predicts that memory domains relying on hippocampal binding (Where) should show greater age-related vulnerability than familiarity-based memory (What, which relies on perirhinal cortex). If this holds, older adults should show disproportionate forgetting for spatial context compared to object identity. (Note: When domain excluded due to floor effect - see above.)
 
 ---
 
@@ -43,19 +55,19 @@ Most aging studies examine What and Where separately, or use aggregate memory sc
 ## Hypothesis
 
 **Primary Hypothesis:**
-Age × Time effects will be strongest for spatial (Where) and temporal (When) domains, which rely more heavily on hippocampal binding than object identity (What). This predicts a significant 3-way Age × Domain × Time interaction.
+Age × Time effects will be stronger for spatial (Where) domain, which relies more heavily on hippocampal binding than object identity (What). This predicts a significant 3-way Age × Domain × Time interaction.
 
-**Secondary Hypotheses:**
-1. When domain will show the strongest age effect (steepest age-related slope difference)
-2. Where domain will show intermediate age effect
-3. What domain will show the weakest age effect (minimal age-related slope difference)
-4. Ordering: Age effect When > Where > What
+**Note:** When domain excluded due to floor effect (see above). Original hypothesis included When > Where > What ordering, but When cannot be tested.
+
+**Secondary Hypothesis:**
+1. Where domain will show stronger age effect than What domain
+2. Ordering: Age effect Where > What
 
 **Theoretical Rationale:**
-Dual-process theory suggests familiarity-based information (What) relies on perirhinal cortex, which is relatively preserved in aging. Recollection-dependent binding (Where, When) relies on hippocampus, which shows structural and functional decline with age. The hippocampal aging hypothesis specifically predicts that spatial and temporal binding should be more vulnerable than object identity in older adults.
+Dual-process theory suggests familiarity-based information (What) relies on perirhinal cortex, which is relatively preserved in aging. Recollection-dependent binding (Where) relies on hippocampus, which shows structural and functional decline with age. The hippocampal aging hypothesis specifically predicts that spatial binding should be more vulnerable than object identity in older adults.
 
 **Expected Effect Pattern:**
-Significant 3-way Age × Domain × Time interaction in LMM analysis (α = 0.0033 with Bonferroni correction). Post-hoc contrasts should show: Time × Age interaction significant for When domain (p < 0.001), potentially significant for Where domain (p < 0.01), non-significant or marginal for What domain. Older adults should show steeper forgetting slopes for When and Where compared to What, with divergence increasing over the retention interval.
+Significant 3-way Age × Domain × Time interaction in LMM analysis (α = 0.025 with Bonferroni correction for 2 interaction terms). Post-hoc contrasts should show: Time × Age interaction larger for Where domain than What domain. Older adults should show steeper forgetting slopes for Where compared to What, with divergence increasing over the retention interval.
 
 ---
 
@@ -73,15 +85,16 @@ Significant 3-way Age × Domain × Time interaction in LMM analysis (α = 0.0033
   - [x] `-D-` tags (put-down location)
   - Disambiguation: **ALL Where tags included** (complete spatial coverage)
 
-- [x] **When** (Temporal Order)
+- [ ] **When** (Temporal Order) - **EXCLUDED**
   - Tag Code: `-O-`
   - Description: Temporal order / sequence
+  - **Exclusion Reason:** Floor effect discovered in RQ 5.2.1 (6-9% probability, 77% item exclusion)
 
 **Inclusion Rationale:**
-This RQ examines age effects across all three WWW episodic memory components to test the hippocampal aging hypothesis. Complete domain coverage is necessary to evaluate domain-specific vulnerability to aging. Theoretical predictions require comparing hippocampal-dependent (Where, When) vs. perirhinal-dependent (What) domains.
+This RQ examines age effects across What and Where episodic memory components to test the hippocampal aging hypothesis. Theoretical predictions require comparing hippocampal-dependent (Where) vs. perirhinal-dependent (What) domains.
 
 **Exclusion Rationale:**
-None - all WWW domains included for comprehensive age-by-domain interaction test.
+When domain excluded due to floor effect discovered in RQ 5.2.1. Performance at 6-9% probability throughout study prevents meaningful analysis of age-related forgetting for temporal order memory.
 
 ---
 
@@ -100,9 +113,10 @@ LMM (Linear Mixed Models) with 3-way Age × Domain × Time interaction
 **Step 1:** Data Preparation
 - Merge Age with theta scores on UID
 - Grand-mean center Age (Age_c = Age - mean(Age))
-- Reshape to long format (Domain as factor variable: What/Where/When)
+- **FILTER: Exclude When domain** (floor effect per RQ 5.2.1)
+- Reshape to long format (Domain as factor variable: What/Where only)
 - Create time transformations: TSVR (hours), log(TSVR+1)
-- Structure: 400 observations × 3 domains with Age as between-subjects predictor
+- Structure: 400 observations × 2 domains with Age as between-subjects predictor
 
 **Step 2:** Fit LMM with 3-Way Interaction
 - Formula: Theta ~ (Time + log(Time+1)) × Age_c × Domain + (Time | UID)
@@ -164,26 +178,25 @@ Test random effects structure via likelihood ratio test (with REML=True):
 - Refit selected model with REML=False for fixed effects inference
 
 **Step 3:** Extract 3-Way Interaction Terms
-- Extract Time × Age_c × Domain[Where/When]: Linear age-by-domain interactions
-- Extract log(Time+1) × Age_c × Domain[Where/When]: Logarithmic age-by-domain interactions
+- Extract Time × Age_c × Domain[Where]: Linear age-by-domain interaction (When excluded)
+- Extract log(Time+1) × Age_c × Domain[Where]: Logarithmic age-by-domain interaction (When excluded)
 - Apply Bonferroni correction: α = 0.05 / 2 = 0.025 (for 2 three-way interaction tests: linear + log)
 - Note: Family-wise error rate defined as 2 three-way interaction terms only (primary hypothesis tests)
 - If either interaction significant: Age effects on forgetting differ by domain
 
 **Step 4:** Compute Domain-Specific Age Effects and Post-Hoc Contrasts
-- Extract age effect on forgetting rate for each domain (What/Where/When)
+- Extract age effect on forgetting rate for each domain (What/Where only - When excluded)
 - Evaluate at Day 3 (midpoint of observation window)
 - Create summary table with age slopes per domain
-- Test hypothesis: Where/When show stronger age-related decline than What
+- Test hypothesis: Where shows stronger age-related decline than What
 
-**Post-hoc pairwise comparisons** (if Step 3 interaction significant):
-- Compare age × time slopes across all domain pairs: Where vs What, When vs What, Where vs When
-- Apply Tukey HSD correction for 3 pairwise comparisons
-- Critical value: q(3 groups, df) from Tukey distribution
-- Test whether ordering is significant: Age effect When > Where > What
+**Post-hoc pairwise comparison** (if Step 3 interaction significant):
+- Compare age × time slopes: Where vs What
+- Single comparison (no multiple comparison correction needed)
+- Test whether ordering is significant: Age effect Where > What
 
 **Step 5:** Visualization
-- Generate multi-panel plot (3 panels: What, Where, When)
+- Generate multi-panel plot (2 panels: What, Where - When excluded)
 - Within each panel: Age tertiles (Young/Middle/Older) with separate trajectories
 - Include observed means with 95% CIs
 - Overlay model predictions
@@ -193,7 +206,7 @@ Test random effects structure via likelihood ratio test (with REML=True):
 - **IRT Theta Scores:** Use purified ability estimates from RQ 5.1 (no additional preprocessing)
 - **Age Variable:** Continuous, grand-mean centered (Age_c = Age - mean(Age))
 - **Time Variable:** TSVR (actual hours since encoding), plus log(TSVR+1) transformation
-- **Domain Structure:** Long format with Domain as factor (What/Where/When)
+- **Domain Structure:** Long format with Domain as factor (What/Where only - When excluded)
 
 **Special Methods:**
 - **3-Way Interaction:** Tests Age × Domain × Time to detect domain-specific age effects
@@ -201,7 +214,7 @@ Test random effects structure via likelihood ratio test (with REML=True):
 - **TSVR Time Variable:** Actual hours since encoding (not nominal days) for precise temporal resolution
 - **Random Slopes:** Account for individual differences in forgetting rates (Time | UID), with LRT model selection
 - **Bonferroni Correction:** α = 0.025 for 2 three-way interaction terms (linear + log time transformations)
-- **Post-Hoc Correction:** Tukey HSD for 3 pairwise domain comparisons (controls family-wise error rate)
+- **Post-Hoc Comparison:** Single Where vs What comparison (no multiple comparison correction needed with When excluded)
 - **Assumption Validation:** Comprehensive LMM diagnostics (residual normality, homoscedasticity, independence, linearity, outliers, convergence)
 - **Age Tertiles for Visualization:** Split Age into Young/Middle/Older groups for interpretable plotting (analysis uses continuous Age)
 

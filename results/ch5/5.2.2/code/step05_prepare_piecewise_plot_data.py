@@ -7,43 +7,49 @@ Step ID: step05
 Step Name: Prepare Piecewise Trajectory Plot Data
 RQ: results/ch5/5.2.2
 Generated: 2025-11-23
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Prepare plot data for piecewise trajectory visualization (theta + probability scales).
 Implements Decision D069: Dual-scale trajectory plots (theta + probability).
 
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination
+- Only What and Where domains analyzed
+
 EXPECTED INPUTS:
   - data/step00_piecewise_lmm_input.csv
     Columns: [composite_ID, UID, test, TSVR_hours, domain, theta, Segment, Days_within]
-    Format: Piecewise LMM input data
-    Expected rows: ~1200
+    Format: Piecewise LMM input data (What/Where only)
+    Expected rows: ~800
 
   - data/step01_piecewise_lmm_model.pkl
     Format: Fitted LMM model object (pickle)
     Expected: MixedLMResults object
 
-  - results/ch5/5.1.1/data/step03_item_parameters.csv
+  - results/ch5/5.2.1/data/step03_item_parameters.csv
     Columns: [item_name, factor, a, b]
-    Format: RQ 5.1 item parameters for theta-to-probability conversion
+    Format: RQ 5.2.1 item parameters for theta-to-probability conversion
     Expected rows: ~54 items
 
 EXPECTED OUTPUTS:
   - plots/step05_piecewise_theta_data.csv
     Columns: [time, test, domain, Segment, mean_theta, CI_lower, CI_upper, predicted_theta, n_obs]
     Format: Theta-scale plot data
-    Expected rows: 12 (3 domains x 4 tests)
+    Expected rows: 8 (2 domains x 4 tests - When excluded)
 
   - plots/step05_piecewise_probability_data.csv
     Columns: [time, test, domain, Segment, mean_probability, CI_lower, CI_upper, predicted_probability, n_obs]
     Format: Probability-scale plot data
-    Expected rows: 12 (3 domains x 4 tests)
+    Expected rows: 8 (2 domains x 4 tests - When excluded)
 
 VALIDATION CRITERIA:
-  - Theta plot data has exactly 12 rows (3 domains x 4 tests)
-  - Probability plot data has exactly 12 rows (3 domains x 4 tests)
-  - All domains present {what, where, when}
-  - All tests present {0, 1, 3, 6}
-  - Segment assignment: test 0,1 -> 'Early'; test 3,6 -> 'Late'
+  - Theta plot data has exactly 8 rows (2 domains x 4 tests - When excluded)
+  - Probability plot data has exactly 8 rows (2 domains x 4 tests - When excluded)
+  - All domains present {what, where} - When excluded
+  - All tests present {1, 2, 3, 4}
+  - Segment assignment: test 1,2 -> 'Early'; test 3,4 -> 'Late'
   - Theta range valid: mean_theta in [-3, 3]
   - Probability range valid: mean_probability in [0, 1]
   - CI structure valid: CI_lower < mean < CI_upper for all rows
@@ -54,13 +60,13 @@ g_code REASONING:
 - Why this approach: Dual-scale output (D069) provides both statistical rigor (theta) and
   interpretability (probability) for different audiences
 - Data flow: Raw theta -> aggregate by group -> compute CI -> theta-to-probability transform
-- Expected performance: ~seconds (small aggregation, 1200 rows -> 12 groups)
+- Expected performance: ~seconds (small aggregation, 800 rows -> 8 groups)
 
 IMPLEMENTATION NOTES:
 - Analysis: stdlib operations (pandas groupby, scipy stats)
 - Validation: inline criteria checks
 - Probability transform: IRT 2PL formula P = 1 / (1 + exp(-(a * (theta - b))))
-- Uses mean discrimination from RQ 5.1 item parameters
+- Uses mean discrimination from RQ 5.2.1 item parameters (domain-specific)
 - Reference difficulty b=0 (standard IRT transformation)
 """
 # =============================================================================
@@ -90,8 +96,8 @@ from tools.plotting import convert_theta_to_probability
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2
 LOG_FILE = RQ_DIR / "logs" / "step05_prepare_piecewise_plot_data.log"
 
-# RQ 5.1 dependency path
-RQ51_DIR = Path(__file__).resolve().parents[2] / "5.1.1"  # results/ch5/5.1.1
+# RQ 5.2.1 dependency path (domain-specific item parameters)
+RQ521_DIR = Path(__file__).resolve().parents[2] / "5.2.1"  # results/ch5/5.2.1
 
 # =============================================================================
 # FOLDER CONVENTIONS (MANDATORY - NO EXCEPTIONS)
@@ -152,10 +158,10 @@ if __name__ == "__main__":
         lmm_model = MixedLMResults.load(str(model_path))
         log(f"[LOADED] step01_piecewise_lmm_model.pkl (MixedLMResults object)")
 
-        # Load RQ 5.1 item parameters for theta-to-probability conversion
-        items_path = RQ51_DIR / "data" / "step03_item_parameters.csv"
+        # Load RQ 5.2.1 item parameters for theta-to-probability conversion
+        items_path = RQ521_DIR / "data" / "step03_item_parameters.csv"
         df_items = pd.read_csv(items_path)
-        log(f"[LOADED] RQ 5.1 step03_item_parameters.csv ({len(df_items)} items)")
+        log(f"[LOADED] RQ 5.2.1 step03_item_parameters.csv ({len(df_items)} items)")
 
         # Calculate mean discrimination for probability transformation
         mean_discrimination = df_items['a'].mean()
@@ -336,25 +342,25 @@ if __name__ == "__main__":
 
         validation_errors = []
 
-        # Check 1: Theta plot data row count
-        if len(df_theta_plot) != 12:
-            validation_errors.append(f"Theta plot data has {len(df_theta_plot)} rows, expected 12 (3 domains x 4 tests)")
+        # Check 1: Theta plot data row count (8 due to When exclusion)
+        if len(df_theta_plot) != 8:
+            validation_errors.append(f"Theta plot data has {len(df_theta_plot)} rows, expected 8 (2 domains x 4 tests - When excluded)")
         else:
-            log("[PASS] Theta plot data has exactly 12 rows")
+            log("[PASS] Theta plot data has exactly 8 rows (When excluded)")
 
-        # Check 2: Probability plot data row count
-        if len(df_prob_plot) != 12:
-            validation_errors.append(f"Probability plot data has {len(df_prob_plot)} rows, expected 12 (3 domains x 4 tests)")
+        # Check 2: Probability plot data row count (8 due to When exclusion)
+        if len(df_prob_plot) != 8:
+            validation_errors.append(f"Probability plot data has {len(df_prob_plot)} rows, expected 8 (2 domains x 4 tests - When excluded)")
         else:
-            log("[PASS] Probability plot data has exactly 12 rows")
+            log("[PASS] Probability plot data has exactly 8 rows (When excluded)")
 
-        # Check 3: All domains present
-        expected_domains = {'what', 'where', 'when'}
+        # Check 3: All domains present (When excluded)
+        expected_domains = {'what', 'where'}  # When excluded
         actual_domains = set(df_theta_plot['domain'].unique())
         if actual_domains != expected_domains:
             validation_errors.append(f"Domain mismatch: expected {expected_domains}, got {actual_domains}")
         else:
-            log("[PASS] All domains present: {what, where, when}")
+            log("[PASS] All domains present: {what, where} (When excluded)")
 
         # Check 4: All tests present
         expected_tests = {1, 2, 3, 4}  # T1-T4 session numbers (not nominal days)

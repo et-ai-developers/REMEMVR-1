@@ -2,13 +2,25 @@
 
 **Research Question:** 5.2.3
 **Created:** 2025-11-26
+**Updated:** 2025-12-02 (When domain excluded due to floor effect)
 **Status:** Planning complete, ready for tool specification (rq_tools)
+
+---
+
+## Note on When Domain Exclusion
+
+**When domain EXCLUDED** due to floor effect discovered in RQ 5.2.1:
+- Performance at 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination in IRT calibration
+- Cannot meaningfully assess age-related forgetting for When domain
+
+**Analysis focuses on What vs Where comparison only.**
 
 ---
 
 ## Overview
 
-This RQ examines whether age-related memory decline differs across episodic memory domains (What, Where, When) using a 3-way Age x Domain x Time interaction in LMM analysis. The analysis tests the hippocampal aging hypothesis: domains relying on hippocampal binding (Where, When) should show greater age-related vulnerability than familiarity-based memory (What, which relies on perirhinal cortex).
+This RQ examines whether age-related memory decline differs across episodic memory domains (What, Where) using a 3-way Age x Domain x Time interaction in LMM analysis. The analysis tests the hippocampal aging hypothesis: domains relying on hippocampal binding (Where) should show greater age-related vulnerability than familiarity-based memory (What, which relies on perirhinal cortex). Note: When domain excluded due to floor effect (see above).
 
 **Pipeline:** LMM-only (uses DERIVED theta scores from RQ 5.1)
 
@@ -45,15 +57,15 @@ This RQ requires 6 steps (Step 0 for data extraction, Steps 1-5 for analysis):
 
 **Input:**
 
-**File 1:** results/ch5/5.1.1/data/step03_theta_scores.csv
-**Source:** RQ 5.1 Step 3 (IRT Pass 2 theta extraction)
+**File 1:** results/ch5/5.2.1/data/step04_lmm_input.csv
+**Source:** RQ 5.2.1 Step 4 (LMM input with theta scores)
 **Format:** CSV with columns:
   - composite_ID (string, format: UID_test, e.g., P001_T1)
-  - domain (string, values: What, Where, When)
+  - domain (string, values: What, Where - When excluded)
   - test (string, values: T1, T2, T3, T4)
   - theta (float, IRT ability estimate, range typically -3 to 3)
-**Expected Rows:** 1200 (100 participants x 4 tests x 3 domains)
-**Note:** RQ 5.1 provides purified theta estimates for all three WWW domains
+**Expected Rows:** 800 (100 participants x 4 tests x 2 domains - When excluded)
+**Note:** RQ 5.2.1 provides theta estimates for What/Where domains (When excluded due to floor effect)
 
 **File 2:** results/ch5/5.1.1/data/step00_tsvr_mapping.csv
 **Source:** RQ 5.1 Step 0 (TSVR extraction)
@@ -73,18 +85,19 @@ This RQ requires 6 steps (Step 0 for data extraction, Steps 1-5 for analysis):
 **Note:** One row per participant (between-subjects variable)
 
 **Processing:**
-1. Read theta_scores.csv (1200 rows: 100 participants x 4 tests x 3 domains)
+1. Read theta from RQ 5.2.1 (800 rows: 100 participants x 4 tests x 2 domains - When excluded)
 2. Read tsvr_mapping.csv (400 rows: 100 participants x 4 tests)
 3. Read dfData.csv Age column (100 rows: one per participant)
-4. Verify all files exist (circuit breaker if RQ 5.1 incomplete)
-5. No transformations at this step (data passed to Step 1 as-is)
+4. Verify all files exist (circuit breaker if RQ 5.2.1 incomplete)
+5. **FILTER: Exclude When domain if present** (When excluded due to floor effect per RQ 5.2.1)
+6. No transformations at this step (data passed to Step 1 as-is)
 
 **Output:**
 
 **File 1:** data/step00_theta_from_rq51.csv
-**Format:** Copy of results/ch5/5.1.1/data/step03_theta_scores.csv
+**Format:** Copy of results/ch5/5.2.1/data/step04_lmm_input.csv (What/Where only)
 **Columns:** composite_ID, domain, test, theta
-**Expected Rows:** 1200 (100 participants x 4 tests x 3 domains)
+**Expected Rows:** 800 (100 participants x 4 tests x 2 domains - When excluded)
 
 **File 2:** data/step00_tsvr_from_rq51.csv
 **Format:** Copy of results/ch5/5.1.1/data/step00_tsvr_mapping.csv
@@ -102,19 +115,19 @@ Validation tools MUST be used after data extraction. Specific validation tools w
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_theta_from_rq51.csv: 1200 rows x 4 columns (composite_ID: object, domain: object, test: object, theta: float64)
+- data/step00_theta_from_rq51.csv: 800 rows x 4 columns (composite_ID: object, domain: object, test: object, theta: float64) - When excluded
 - data/step00_tsvr_from_rq51.csv: 400 rows x 3 columns (composite_ID: object, test: object, TSVR_hours: float64)
 - data/step00_age_from_dfdata.csv: ~100 rows x 2 columns (UID: object, age: float64)
 
 *Value Ranges:*
-- theta in [-3, 3] (IRT ability estimates from RQ 5.1)
+- theta in [-3, 3] (IRT ability estimates from RQ 5.2.1)
 - TSVR_hours in [0, 200] (actual time since encoding, T1=0, T4=~144-168 hours)
 - age in [18, 80] (participant age in years, typical adult range)
-- domain in {What, Where, When} (categorical, exactly 3 levels)
+- domain in {What, Where} (categorical, exactly 2 levels - When excluded)
 - test in {T1, T2, T3, T4} (categorical, exactly 4 levels)
 
 *Data Quality:*
-- Theta file: All 1200 rows present (100 participants x 4 tests x 3 domains, no missing combinations)
+- Theta file: All 800 rows present (100 participants x 4 tests x 2 domains, no missing combinations - When excluded)
 - TSVR file: All 400 rows present (100 participants x 4 tests, no missing combinations)
 - Age file: All ~100 participants present (one row per UID)
 - No NaN values in theta, TSVR_hours, or age columns (complete data required)
@@ -123,10 +136,10 @@ Validation tools MUST be used after data extraction. Specific validation tools w
 - No duplicate UIDs within age file
 
 *Log Validation:*
-- Required: "Data extraction complete: 1200 theta rows, 400 TSVR rows, ~100 age rows"
-- Required: "All domains present: What, Where, When"
+- Required: "Data extraction complete: 800 theta rows, 400 TSVR rows, ~100 age rows"
+- Required: "All domains present: What, Where (When excluded due to floor effect)"
 - Required: "All tests present: T1, T2, T3, T4"
-- Forbidden: "ERROR", "FileNotFoundError", "RQ 5.1 incomplete"
+- Forbidden: "ERROR", "FileNotFoundError", "RQ 5.2.1 incomplete"
 - Acceptable warnings: None expected for data extraction
 
 **Expected Behavior on Validation Failure:**

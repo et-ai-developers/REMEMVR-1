@@ -7,11 +7,17 @@ Step ID: step03
 Step Name: Compute Planned Contrasts with Bonferroni Correction (Decision D068)
 RQ: results/ch5/5.2.2
 Generated: 2025-11-23
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
-Compute 6 planned contrasts with dual p-value reporting (D068). These contrasts
+Compute 3 planned contrasts with dual p-value reporting (D068). These contrasts
 test specific hypotheses about domain differences in forgetting slopes within
 segments (Early/Late) and differences in slope changes between segments.
+
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination
+- Only What and Where domains analyzed
 
 EXPECTED INPUTS:
 - data/step01_piecewise_lmm_model.pkl
@@ -19,32 +25,29 @@ EXPECTED INPUTS:
   Description: Fitted piecewise LMM model with 3-way interaction
 - results/step02_segment_domain_slopes.csv
   Columns: segment, domain, slope, se, CI_lower, CI_upper
-  Description: Pre-computed slopes for each segment x domain combination
+  Description: Pre-computed slopes for each segment x domain combination (4 rows: 2 segments x 2 domains)
 
 EXPECTED OUTPUTS:
 - results/step03_planned_contrasts.csv
   Columns: comparison, beta, se, z, p_uncorrected, alpha_corrected, p_corrected, sig_uncorrected, sig_corrected
-  Description: 6 planned contrasts with dual p-values (D068)
+  Description: 3 planned contrasts with dual p-values (D068)
 - results/step03_effect_sizes.csv
   Columns: effect, f_squared, interpretation
   Description: Cohen's f-squared effect sizes for model terms
 
 VALIDATION CRITERIA:
-- Contrast count: 6 rows (6 planned contrasts)
+- Contrast count: 3 rows (3 planned contrasts - When excluded)
 - Dual p-values present: Both p_uncorrected and p_corrected columns
-- Bonferroni alpha correct: alpha_corrected = 0.0083 (0.05/6)
+- Bonferroni alpha correct: alpha_corrected = 0.0167 (0.05/3)
 - p-values valid: p_uncorrected in [0, 1]; p_corrected >= p_uncorrected
 - Effect sizes computed: df_effect_sizes has rows with f_squared and interpretation
 
 g_code REASONING:
 - Approach: Use pre-computed slopes from step02 to compute contrasts via delta method.
-  The 6 contrasts compare:
+  The 3 contrasts compare (When excluded):
   C1: Where vs What slope in Early segment (spatial consolidation advantage)
-  C2: When vs What slope in Early segment (temporal consolidation)
-  C3: Where vs What slope in Late segment (decay comparison)
-  C4: When vs What slope in Late segment (decay comparison)
-  C5: Where slope change (Late-Early) vs What slope change (consolidation benefit)
-  C6: When slope change (Late-Early) vs What slope change (consolidation benefit)
+  C2: Where vs What slope in Late segment (decay comparison)
+  C3: Where slope change (Late-Early) vs What slope change (consolidation benefit)
 
 - Why this approach: Piecewise model with 3-way interaction requires computing linear
   combinations of fixed effects. Pre-computed slopes simplify contrast calculations.
@@ -58,7 +61,7 @@ IMPLEMENTATION NOTES:
 - Analysis tool: compute_contrasts_pairwise from tools.analysis_lmm (for basic contrasts)
 - Effect sizes: compute_effect_sizes_cohens from tools.analysis_lmm
 - Custom contrasts computed via delta method using pre-computed slopes
-- Parameters: family_alpha=0.05, bonferroni_alpha=0.0083 (0.05/6)
+- Parameters: family_alpha=0.05, bonferroni_alpha=0.0167 (0.05/3)
 """
 # =============================================================================
 
@@ -216,15 +219,15 @@ def compute_all_planned_contrasts(
     family_alpha: float = 0.05
 ) -> pd.DataFrame:
     """
-    Compute all 6 planned contrasts with dual p-value reporting (D068).
+    Compute all 3 planned contrasts with dual p-value reporting (D068).
+
+    NOTE: When domain EXCLUDED due to floor effect (RQ 5.2.1).
+    Only What and Where domains analyzed.
 
     Contrasts:
     C1: Where vs What slope in Early segment (spatial consolidation advantage)
-    C2: When vs What slope in Early segment (temporal consolidation)
-    C3: Where vs What slope in Late segment (decay comparison)
-    C4: When vs What slope in Late segment (decay comparison)
-    C5: Where slope change (Late-Early) vs What slope change (consolidation benefit)
-    C6: When slope change (Late-Early) vs What slope change (consolidation benefit)
+    C2: Where vs What slope in Late segment (decay comparison)
+    C3: Where slope change (Late-Early) vs What slope change (consolidation benefit)
 
     Args:
         df_slopes: DataFrame with segment, domain, slope, se columns
@@ -233,8 +236,8 @@ def compute_all_planned_contrasts(
     Returns:
         DataFrame with contrast results and dual p-values
     """
-    k = 6  # Number of contrasts
-    alpha_corrected = family_alpha / k  # Bonferroni correction
+    k = 3  # Number of contrasts (reduced from 6 due to When exclusion)
+    alpha_corrected = family_alpha / k  # Bonferroni correction: 0.05/3 = 0.0167
 
     contrasts = []
 
@@ -244,35 +247,17 @@ def compute_all_planned_contrasts(
     c1['description'] = 'Spatial consolidation advantage (Early)'
     contrasts.append(c1)
 
-    # C2: When vs What in Early
-    c2 = compute_slope_contrast(df_slopes, 'when', 'what', 'Early')
-    c2['comparison'] = 'when-what_early'
-    c2['description'] = 'Temporal consolidation (Early)'
+    # C2: Where vs What in Late
+    c2 = compute_slope_contrast(df_slopes, 'where', 'what', 'Late')
+    c2['comparison'] = 'where-what_late'
+    c2['description'] = 'Spatial decay comparison (Late)'
     contrasts.append(c2)
 
-    # C3: Where vs What in Late
-    c3 = compute_slope_contrast(df_slopes, 'where', 'what', 'Late')
-    c3['comparison'] = 'where-what_late'
-    c3['description'] = 'Spatial decay comparison (Late)'
+    # C3: Where slope change vs What slope change
+    c3 = compute_slope_change_contrast(df_slopes, 'where', 'what')
+    c3['comparison'] = 'where_slope_change-what_slope_change'
+    c3['description'] = 'Spatial consolidation benefit'
     contrasts.append(c3)
-
-    # C4: When vs What in Late
-    c4 = compute_slope_contrast(df_slopes, 'when', 'what', 'Late')
-    c4['comparison'] = 'when-what_late'
-    c4['description'] = 'Temporal decay comparison (Late)'
-    contrasts.append(c4)
-
-    # C5: Where slope change vs What slope change
-    c5 = compute_slope_change_contrast(df_slopes, 'where', 'what')
-    c5['comparison'] = 'where_slope_change-what_slope_change'
-    c5['description'] = 'Spatial consolidation benefit'
-    contrasts.append(c5)
-
-    # C6: When slope change vs What slope change
-    c6 = compute_slope_change_contrast(df_slopes, 'when', 'what')
-    c6['comparison'] = 'when_slope_change-what_slope_change'
-    c6['description'] = 'Temporal consolidation benefit'
-    contrasts.append(c6)
 
     # Build DataFrame
     df_contrasts = pd.DataFrame(contrasts)
@@ -339,26 +324,26 @@ if __name__ == "__main__":
             raise ValueError(f"Missing columns in slopes file: {missing_cols}")
         log(f"[VALIDATION] Slopes file has all required columns")
 
-        # Verify all segment-domain combinations present
-        expected_combinations = 6  # 2 segments x 3 domains
+        # Verify all segment-domain combinations present (When excluded)
+        expected_combinations = 4  # 2 segments x 2 domains (What, Where only)
         if len(df_slopes) != expected_combinations:
-            raise ValueError(f"Expected {expected_combinations} slope rows, got {len(df_slopes)}")
-        log(f"[VALIDATION] All {expected_combinations} segment-domain combinations present")
+            raise ValueError(f"Expected {expected_combinations} slope rows (When excluded), got {len(df_slopes)}")
+        log(f"[VALIDATION] All {expected_combinations} segment-domain combinations present (When excluded)")
 
         # =========================================================================
-        # STEP 2: Compute 6 Planned Contrasts
+        # STEP 2: Compute 3 Planned Contrasts (When excluded)
         # =========================================================================
         # Tool: Custom function using delta method
-        # What it does: Computes 6 planned contrasts comparing domain slopes
+        # What it does: Computes 3 planned contrasts comparing domain slopes
         # Expected output: DataFrame with contrast estimates and dual p-values
 
-        log("\n[ANALYSIS] Computing 6 planned contrasts...")
+        log("\n[ANALYSIS] Computing 3 planned contrasts (When domain excluded)...")
         log("=" * 60)
         log("POST-HOC PAIRWISE CONTRASTS (Decision D068)")
         log("=" * 60)
 
         family_alpha = 0.05
-        k = 6
+        k = 3  # Reduced from 6 due to When exclusion
         alpha_corrected = family_alpha / k
 
         log(f"Family-wise alpha: {family_alpha}")
@@ -423,11 +408,11 @@ if __name__ == "__main__":
 
         validation_errors = []
 
-        # Check 1: Contrast count
-        if len(df_contrasts) != 6:
-            validation_errors.append(f"Expected 6 contrasts, got {len(df_contrasts)}")
+        # Check 1: Contrast count (3 due to When exclusion)
+        if len(df_contrasts) != 3:
+            validation_errors.append(f"Expected 3 contrasts (When excluded), got {len(df_contrasts)}")
         else:
-            log("[PASS] Contrast count correct: 6 rows")
+            log("[PASS] Contrast count correct: 3 rows (When excluded)")
 
         # Check 2: Dual p-values present
         required_cols = ['p_uncorrected', 'p_corrected', 'alpha_corrected']
@@ -437,8 +422,8 @@ if __name__ == "__main__":
         else:
             log("[PASS] Dual p-values present (D068 compliant)")
 
-        # Check 3: Bonferroni alpha correct
-        expected_alpha = 0.05 / 6
+        # Check 3: Bonferroni alpha correct (0.05/3 due to When exclusion)
+        expected_alpha = 0.05 / 3
         if not np.isclose(df_contrasts['alpha_corrected'].iloc[0], expected_alpha, rtol=0.001):
             validation_errors.append(f"Expected alpha_corrected={expected_alpha:.4f}, got {df_contrasts['alpha_corrected'].iloc[0]:.4f}")
         else:

@@ -1,12 +1,8 @@
 effect,f_squared,interpretation
-"C(Segment, Treatment('Early'))[T.Late]",0.05616802306012681,small
-"C(domain, Treatment('what'))[T.when]",0.007260507990810601,negligible
-"C(domain, Treatment('what'))[T.where]",0.00030292605114927727,negligible
-"C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]",0.011883324688861236,negligible
-"C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]",1.924514140276406e-08,negligible
-Days_within,0.032982958718402004,small
-"Days_within:C(Segment, Treatment('Early'))[T.Late]",0.02083613821117237,small
-"Days_within:C(domain, Treatment('what'))[T.when]",0.0017795508503190157,negligible
-"Days_within:C(domain, Treatment('what'))[T.where]",4.639643412581571e-05,negligible
-"Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.when]",0.0004902999796614823,negligible
-"Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]",0.00010266729791438013,negligible
+"C(Segment, Treatment('Early'))[T.Late]",0.12267179536160569,small
+"C(domain, Treatment('what'))[T.where]",0.0006666224547331531,negligible
+"C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]",4.2351073325151265e-08,negligible
+Days_within,0.0739795800141444,small
+"Days_within:C(Segment, Treatment('Early'))[T.Late]",0.047328672114421426,small
+"Days_within:C(domain, Treatment('what'))[T.where]",0.00010210051162788752,negligible
+"Days_within:C(Segment, Treatment('Early'))[T.Late]:C(domain, Treatment('what'))[T.where]",0.00022593080356325627,negligible

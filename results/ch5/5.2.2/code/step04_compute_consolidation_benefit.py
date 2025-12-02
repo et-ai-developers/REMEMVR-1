@@ -7,27 +7,33 @@ Step ID: step04
 Step Name: Compute Consolidation Benefit Indices
 RQ: results/ch5/5.2.2
 Generated: 2025-11-23
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Compute consolidation benefit index per domain (Early slope - Late slope).
 Positive benefit = less forgetting in Early (consolidation protected memory).
 Larger positive values indicate greater consolidation benefit.
 
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination
+- Only What and Where domains analyzed
+
 EXPECTED INPUTS:
   - results/step02_segment_domain_slopes.csv
     Columns: [segment, domain, slope, se, CI_lower, CI_upper]
-    Format: CSV with 6 rows (2 segments x 3 domains)
-    Expected rows: 6
+    Format: CSV with 4 rows (2 segments x 2 domains - When excluded)
+    Expected rows: 4
 
 EXPECTED OUTPUTS:
   - results/step04_consolidation_benefit.csv
     Columns: [domain, early_slope, late_slope, consolidation_benefit, benefit_se, benefit_CI_lower, benefit_CI_upper, rank]
-    Format: CSV with 3 rows (1 per domain)
-    Expected rows: 3
+    Format: CSV with 2 rows (1 per domain - When excluded)
+    Expected rows: 2
 
 VALIDATION CRITERIA:
-  - All domains computed: df_benefit has 3 rows (what, where, when)
-  - Ranks unique: rank values are {1, 2, 3}
+  - All domains computed: df_benefit has 2 rows (what, where - When excluded)
+  - Ranks unique: rank values are {1, 2}
   - Benefit values valid: consolidation_benefit and benefit_se are numeric
   - CI structure valid: benefit_CI_lower < consolidation_benefit < benefit_CI_upper
 
@@ -139,15 +145,15 @@ if __name__ == "__main__":
         df_early = df_slopes[df_slopes["segment"] == "Early"].set_index("domain")
         df_late = df_slopes[df_slopes["segment"] == "Late"].set_index("domain")
 
-        # Verify both segments exist for all domains
-        domains = ["what", "where", "when"]
+        # Verify both segments exist for all domains (When excluded due to floor effect)
+        domains = ["what", "where"]  # When excluded
         for domain in domains:
             if domain not in df_early.index:
                 raise ValueError(f"Missing Early segment for domain: {domain}")
             if domain not in df_late.index:
                 raise ValueError(f"Missing Late segment for domain: {domain}")
 
-        log(f"[VERIFIED] All 3 domains present in both segments")
+        log(f"[VERIFIED] All 2 domains present in both segments (When excluded)")
         log("")
 
         # =========================================================================
@@ -226,7 +232,7 @@ if __name__ == "__main__":
         #
         # For ranking:
         # - Rank 1 = BEST consolidation = most protected = LEAST negative benefit (closest to 0)
-        # - Rank 3 = WORST consolidation = least protected = MOST negative benefit
+        # - Rank 2 = WORST consolidation = least protected = MOST negative benefit
 
         df_benefit = df_benefit.sort_values("consolidation_benefit", ascending=False)
         df_benefit["rank"] = range(1, len(df_benefit) + 1)
@@ -234,7 +240,7 @@ if __name__ == "__main__":
         # Log ranking interpretation
         log("  Ranking interpretation:")
         log("    Rank 1 = Best consolidation benefit (least negative = least excess early forgetting)")
-        log("    Rank 3 = Worst consolidation benefit (most negative = most excess early forgetting)")
+        log("    Rank 2 = Worst consolidation benefit (most negative = most excess early forgetting)")
         log("")
 
         for _, row in df_benefit.iterrows():
@@ -267,21 +273,21 @@ if __name__ == "__main__":
         log("[VALIDATION] Running inline validation checks...")
         validation_passed = True
 
-        # Criterion 1: All domains computed (3 rows)
-        if len(df_benefit) != 3:
-            log(f"[FAIL] Row count: Expected 3, got {len(df_benefit)}")
+        # Criterion 1: All domains computed (2 rows - When excluded)
+        if len(df_benefit) != 2:
+            log(f"[FAIL] Row count: Expected 2 (When excluded), got {len(df_benefit)}")
             validation_passed = False
         else:
-            log("[PASS] Row count: 3 rows (what, where, when)")
+            log("[PASS] Row count: 2 rows (what, where - When excluded)")
 
-        # Criterion 2: Ranks unique {1, 2, 3}
+        # Criterion 2: Ranks unique {1, 2}
         rank_set = set(df_benefit["rank"].astype(int).tolist())
-        expected_ranks = {1, 2, 3}
+        expected_ranks = {1, 2}
         if rank_set != expected_ranks:
             log(f"[FAIL] Ranks: Expected {expected_ranks}, got {rank_set}")
             validation_passed = False
         else:
-            log("[PASS] Ranks: {1, 2, 3} (all unique)")
+            log("[PASS] Ranks: {1, 2} (all unique)")
 
         # Criterion 3: Benefit values are numeric (not NaN)
         if df_benefit["consolidation_benefit"].isna().any():

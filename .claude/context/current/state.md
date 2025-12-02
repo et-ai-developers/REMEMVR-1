@@ -399,3 +399,152 @@ Topic naming format: [topic][task][subtask]
 
 **Status:** 🔄 **RQ 5.2.2 IN PROGRESS** - Completed Steps 00-02 (data prep, LMM fit, slope extraction) with When domain exclusion. 4 bugs fixed (data source, test numbering, When filter, slope reduction). **PRELIMINARY FINDING:** Strong consolidation effect (~6× slope reduction) but no domain-specific benefit - What ≈ Where. Steps 03-05 remaining (contrasts, consolidation benefit, plot data). Session paused for /save at ~45k tokens.
 
+## Session (2025-12-03 00:15)
+
+**Task:** RQ 5.2.2 Complete Execution + RQ 5.2.3 Documentation Updates for When Domain Exclusion
+
+**Context:** User requested continuation of RQ 5.2.2 (Steps 03-05) then preparation of RQ 5.2.3 for When domain exclusion.
+
+**Major Accomplishments:**
+
+**1. RQ 5.2.2 Complete - All 6 Steps Executed**
+
+Completed remaining Steps 03-05 with When domain exclusion:
+
+| Step | Name | Output | Status |
+|------|------|--------|--------|
+| 00 | Prepare piecewise input | 800 rows (When excluded) | ✅ |
+| 01 | Fit piecewise LMM | 8 fixed effects, converged | ✅ |
+| 02 | Extract slopes | 4 segment-domain slopes | ✅ |
+| 03 | Compute contrasts | 3 contrasts (reduced from 6) | ✅ |
+| 04 | Consolidation benefit | 2 domain benefits | ✅ |
+| 05 | Prepare plot data | 8 rows (2 domains × 4 tests) | ✅ |
+
+**Code Updates for When Exclusion:**
+- `step03_compute_contrasts.py`: Reduced from 6 contrasts to 3, Bonferroni α=0.0167
+- `step04_compute_consolidation_benefit.py`: Reduced from 3 domains to 2
+- `step05_prepare_piecewise_plot_data.py`: Reduced from 12 rows to 8, updated dependency from RQ 5.1.1 to RQ 5.2.1
+
+**2. RQ 5.2.2 Statistical Results (Final)**
+
+**Key Finding: NO Domain-Specific Consolidation Effects**
+- All 3 contrasts p > 0.68 (none significant)
+- Where-What Early: β=0.023, p=0.78
+- Where-What Late: β=-0.014, p=0.68
+- Where slope change vs What: β=0.037, p=0.67
+
+**Consolidation Benefit (Both domains similar):**
+- Where: -0.348 [-0.475, -0.222] (Rank 1)
+- What: -0.385 [-0.512, -0.259] (Rank 2)
+- Both CIs overlap substantially → no significant difference
+
+**Conclusion:** Strong consolidation effect (~6× slope reduction) is domain-general, NOT domain-specific. Hypothesis NOT supported.
+
+**3. RQ 5.2.2 Validation Pipeline Complete**
+
+| Agent | Status | Key Output |
+|-------|--------|------------|
+| rq_inspect | ✅ PASS | All 4 layers validated |
+| rq_plots | ✅ PASS | Regenerated with 2 domains (316KB + 253KB) |
+| rq_results | ✅ PASS | summary.md created, plot currency fixed |
+
+**Plot Regeneration Critical:** rq_results identified plots from Nov 30 (3 domains) didn't match Dec 2 analysis (2 domains). Plots regenerated correctly.
+
+**4. RQ 5.2.3 Documentation Updated for When Domain Exclusion**
+
+Updated 3 files for When domain exclusion:
+
+**1_concept.md Updates:**
+- Added "Note on When Domain Exclusion" section
+- Changed "What, Where, When" → "What, Where" throughout
+- Updated hypothesis: When > Where > What → Where > What
+- Updated domain checkboxes: When marked as EXCLUDED
+- Reduced expected contrasts from 3 pairwise to 1 (Where vs What)
+- Updated Bonferroni correction references
+
+**2_plan.md Updates:**
+- Added When exclusion header
+- Changed row count expectations: 1200 → 800
+- Updated domain count: 3 → 2
+- Changed data source: RQ 5.1.1 → RQ 5.2.1
+- Updated validation criteria throughout
+
+**step00_get_data_from_rq51.py Updates:**
+- Excluded `theta_when` from pd.melt() value_vars
+- Updated domain_mapping to exclude When
+- Changed expected rows: 1200 → 800
+- Updated validation: domains = {'What', 'Where'} instead of {'What', 'Where', 'When'}
+
+**5. Files Created/Modified**
+
+**RQ 5.2.2 Code Files Modified (3):**
+- `results/ch5/5.2.2/code/step03_compute_contrasts.py`
+- `results/ch5/5.2.2/code/step04_compute_consolidation_benefit.py`
+- `results/ch5/5.2.2/code/step05_prepare_piecewise_plot_data.py`
+
+**RQ 5.2.2 Data Files Created (3):**
+- `results/ch5/5.2.2/results/step03_planned_contrasts.csv`
+- `results/ch5/5.2.2/results/step04_consolidation_benefit.csv`
+- `results/ch5/5.2.2/plots/step05_piecewise_theta_data.csv` + probability
+
+**RQ 5.2.2 Plots Regenerated (2):**
+- `results/ch5/5.2.2/plots/piecewise_trajectory_theta.png`
+- `results/ch5/5.2.2/plots/piecewise_trajectory_probability.png`
+
+**RQ 5.2.3 Documentation Files Modified (3):**
+- `results/ch5/5.2.3/docs/1_concept.md`
+- `results/ch5/5.2.3/docs/2_plan.md`
+- `results/ch5/5.2.3/code/step00_get_data_from_rq51.py`
+
+**Session Metrics:**
+
+**Tokens:**
+- Session start: ~5k (after /refresh)
+- Session end: ~55k (at /save)
+- Delta: ~50k consumed
+
+**Bug Fixes:** 0 new bugs this session (code updates were planned modifications)
+
+**Key Insights:**
+
+**When Domain Exclusion Pattern:**
+- Floor effect (6-9% probability) makes When domain unusable for forgetting analysis
+- All 5.2.X RQs must exclude When for valid results
+- Row counts change: N×4×3 → N×4×2 (100×4×3=1200 → 100×4×2=800)
+- Contrast counts reduce by 50% (6→3 or 3→1 depending on RQ)
+
+**Domain-General Consolidation:**
+- Strong consolidation effect exists (~6× slope reduction Early→Late)
+- Effect is domain-general (What ≈ Where)
+- Spatial memory (Where) does NOT show greater consolidation benefit
+- Challenges domain-specificity hypotheses from memory literature
+
+**RQ 5.2.3 Ready for Execution:**
+- Documentation updated for When exclusion
+- Step 00 code updated for When filter
+- Remaining code files (step01-step05) will need similar row count updates
+- Expect similar null result based on RQ 5.3.4 pattern (Age effects uniform)
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtask]
+
+- rq_5.2.2_complete_execution_when_exclusion (Session 2025-12-03 00:15: steps_03_04_05_completed step03_3_contrasts_all_ns step04_2_domain_benefits_similar step05_8_rows_plot_data, when_exclusion 2_domains_not_3 800_rows_not_1200 bonferroni_0.0167, final_results NO_DOMAIN_SPECIFIC_CONSOLIDATION all_contrasts_p_gt_0.68 what_equals_where consolidation_benefit_similar hypothesis_NOT_supported, validation rq_inspect_pass rq_plots_regenerated rq_results_summary_created, chapter_5_progress 16/31_complete_52%)
+
+- rq_5.2.3_documentation_update_when_exclusion (Session 2025-12-03 00:15: files_modified 1_concept.md 2_plan.md step00_code, updates hypothesis_reduced 3_domains_to_2 1200_rows_to_800 data_source_RQ521, ready_for_execution step00_filter_updated steps_01_05_need_row_count_updates)
+
+**Relevant Archived Topics (from context-finder):**
+- when_domain_anomalies.md (2025-11-23 04:00: floor effect discovery, 6-9% probability)
+- rq_5.3.4_complete_execution_age_paradigm_interaction.md (2025-12-02 21:45: null Age interaction pattern)
+- rq_status_creation_root_validation_pipeline_analysis.md (2025-12-02 16:30: When exclusion tracking)
+
+**End of Session (2025-12-03 00:15)**
+
+**Status:** ✅ **RQ 5.2.2 COMPLETE - PUBLICATION READY** + **RQ 5.2.3 DOCUMENTATION UPDATED**
+
+**RQ 5.2.2:** Executed all 6 steps for domain-specific consolidation with When domain exclusion. **FINAL FINDING:** Strong consolidation effect (~6× slope reduction) is domain-GENERAL, not domain-specific. What ≈ Where (all contrasts p > 0.68). Validated via rq_inspect, rq_plots (regenerated), rq_results.
+
+**RQ 5.2.3:** Documentation updated for When exclusion (1_concept.md, 2_plan.md, step00 code). Ready for execution but step01-step05 will need row count validation updates.
+
+**Chapter 5 Progress:** 16/31 RQs complete (52%), 8 ready for execution.
+
