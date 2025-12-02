@@ -139,18 +139,87 @@ Updated `1_concept.md` and `2_plan.md` to reflect When domain exclusion:
 
 ## Session (2025-12-03 00:15) - Complete Execution + RQ 5.2.3 Documentation Updates
 
-**Archived from:** Context referenced in later sessions
+**Archived from:** state.md
 **Original Date:** 2025-12-03 00:15
-**Reason:** Continuation archived with completion details
+**Reason:** 3+ sessions old, RQ 5.2.2 complete + RQ 5.2.3 docs updated
 
-**Note:** This session completed RQ 5.2.2 execution (Steps 03-05) and updated RQ 5.2.3 documentation for When domain exclusion. Full details available in Session 2025-12-03 00:15 which has NOT been archived yet (within last 2 sessions).
+**Task:** RQ 5.2.2 Complete Execution + RQ 5.2.3 Documentation Updates for When Domain Exclusion
 
-**Quick Summary for Reference:**
-- Steps 03-05 completed successfully
-- All 3 contrasts non-significant (p > 0.68)
-- Consolidation benefit similar for both domains
-- Hypothesis NOT SUPPORTED: No domain-specific consolidation
-- Full validation pipeline complete (rq_inspect, rq_plots, rq_results)
-- RQ 5.2.3 documentation updated for When exclusion
+**Context:** User requested continuation of RQ 5.2.2 (Steps 03-05) then preparation of RQ 5.2.3 for When domain exclusion.
+
+**Major Accomplishments:**
+
+**1. RQ 5.2.2 Complete - All 6 Steps Executed**
+
+Completed remaining Steps 03-05 with When domain exclusion:
+
+| Step | Name | Output | Status |
+|------|------|--------|--------|
+| 00 | Prepare piecewise input | 800 rows (When excluded) | ✅ |
+| 01 | Fit piecewise LMM | 8 fixed effects, converged | ✅ |
+| 02 | Extract slopes | 4 segment-domain slopes | ✅ |
+| 03 | Compute contrasts | 3 contrasts (reduced from 6) | ✅ |
+| 04 | Consolidation benefit | 2 domain benefits | ✅ |
+| 05 | Prepare plot data | 8 rows (2 domains × 4 tests) | ✅ |
+
+**Key Finding: NO Domain-Specific Consolidation Effects**
+
+All 3 contrasts between What and Where domains non-significant:
+- Early segment: What vs Where slope difference p = 0.698
+- Late segment: What vs Where slope difference p > 0.68
+- Consolidation benefit: What vs Where benefit difference p > 0.68
+
+**Consolidation Benefit Results:**
+
+| Domain | Early Slope | Late Slope | Benefit (Early-Late) | Benefit % |
+|--------|-------------|------------|---------------------|-----------|
+| What | -0.456 | -0.071 | 0.385 | 84.4% |
+| Where | -0.433 | -0.085 | 0.348 | 80.4% |
+
+Both domains show strong consolidation (~6× slope reduction) but benefits are statistically equivalent.
+
+**2. RQ 5.2.3 Documentation Updated for When Domain Exclusion**
+
+Updated 3 files to reflect When domain exclusion pattern:
+- `results/ch5/5.2.3/docs/1_concept.md` - Research question scope changed
+- `results/ch5/5.2.3/docs/2_plan.md` - Row counts, validation criteria updated
+- `results/ch5/5.2.3/code/step00_get_data_from_rq51.py` - When filter added
+
+**Hypothesis Status:**
+- **NOT SUPPORTED:** Spatial memory (Where) does NOT show greater consolidation benefit than object identity (What)
+- Both domains consolidate equally after Day 1
+- VR episodic memory may not follow traditional consolidation patterns seen in non-VR spatial tasks
+
+**Files Modified (RQ 5.2.2):**
+- 3 code files (steps 03-05)
+- 6 data files created
+- 3 results files created
+- Full validation pipeline executed (rq_inspect, rq_plots, rq_results)
+
+**Files Modified (RQ 5.2.3):**
+- 1 concept file
+- 1 plan file
+- 1 step00 code file
+
+**Session Metrics:**
+- Tokens consumed: ~40k
+- Steps completed: 3 (RQ 5.2.2) + 3 files updated (RQ 5.2.3)
+- Bugs fixed: 0 (all APIs correct from previous session)
+
+**Key Insights:**
+
+**Domain Consolidation Pattern:**
+- When domain cannot be analyzed (floor effect 6-9% probability, 77% attrition)
+- What and Where domains show equivalent consolidation (~80-84% slope reduction)
+- No evidence for domain-specific consolidation mechanisms in VR episodic memory
+
+**Methodological Consistency:**
+- All downstream domain RQs (5.2.X) must exclude When domain
+- Pattern documented across RQ suite for transparency
+- Statistical approach (3 contrasts, Bonferroni α = 0.0167) maintains rigor
+
+**End of Session (2025-12-03 00:15)**
+
+**Status:** ✅ **RQ 5.2.2 COMPLETE** - All 6 steps executed, NULL FINDING documented (no domain-specific consolidation), full validation pipeline passed. ✅ **RQ 5.2.3 DOCUMENTATION UPDATED** - When domain exclusion pattern applied, ready for future execution.
 
 ---
