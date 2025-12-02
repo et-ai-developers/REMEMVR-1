@@ -39,17 +39,17 @@ steps:
 
       input_files:
         - path: "results/ch5/5.3.1/data/step03_theta_scores.csv"
-          required_columns: ["composite_ID", "theta", "se", "paradigm"]
+          required_columns: ["composite_ID", "domain_name", "theta"]
           expected_rows: 1200
-          description: "Paradigm-specific theta scores from RQ 5.3.1 IRT calibration"
+          description: "Paradigm-specific theta scores from RQ 5.3.1 IRT calibration (domain_name maps to paradigm)"
         - path: "data/cache/dfData.csv"
-          required_columns: ["UID", "Age"]
-          expected_rows: 100
-          description: "Participant demographics (Age variable)"
+          required_columns: ["UID", "age"]
+          expected_rows: 400
+          description: "Participant demographics (age variable, 100 participants x 4 tests)"
 
       output_files:
         - path: "data/step00_theta_age_merged.csv"
-          expected_columns: ["composite_ID", "UID", "test", "paradigm", "theta", "se", "Age"]
+          expected_columns: ["composite_ID", "UID", "test", "paradigm", "theta", "Age"]
           expected_rows: 1200
           description: "Theta scores merged with Age (100 participants x 4 tests x 3 paradigms)"
 
@@ -59,10 +59,9 @@ steps:
         - "100 unique UIDs (all participants present)"
         - "400 observations per paradigm (balanced design)"
         - "theta in [-3, 3] (typical IRT ability range)"
-        - "se in [0.1, 1.0] (above 1.0 = unreliable, below 0.1 = suspicious)"
         - "Age in [20, 70] (study inclusion criteria)"
         - "paradigm in {IFR, ICR, IRE}"
-        - "test in {T1, T2, T3, T4}"
+        - "test in {1, 2, 3, 4}"
 
     # Validation call (inline validation for stdlib operations)
     validation_call:
@@ -75,7 +74,7 @@ steps:
           condition: "1200 rows (100 participants x 4 tests x 3 paradigms)"
           severity: "CRITICAL"
         - name: "Column count validation"
-          condition: "7 columns (composite_ID, UID, test, paradigm, theta, se, Age)"
+          condition: "6 columns (composite_ID, UID, test, paradigm, theta, Age)"
           severity: "CRITICAL"
         - name: "No missing Age values"
           condition: "All 1200 theta observations have Age (merge success)"
@@ -355,8 +354,8 @@ steps:
             type: "DataFrame"
             variable_name: "age_effects"
           output_file:
-            path: "data/step04_age_effects_by_paradigm.csv"
-            expected_columns: ["paradigm", "age_slope", "SE", "CI_lower", "CI_upper"]
+            path: "data/step04_age_effects.csv"
+            expected_columns: ["paradigm", "age_effect", "SE", "z", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
             expected_rows: 3
 
         # Function 2: Compute pairwise contrasts
@@ -366,28 +365,28 @@ steps:
           parameters:
             lmm_result: "lmm_model"
             comparisons:
-              - "IFR - ICR"
-              - "IFR - IRE"
-              - "ICR - IRE"
+              - "IFR vs ICR"
+              - "IFR vs IRE"
+              - "ICR vs IRE"
             family_alpha: 0.05
           returns:
             type: "DataFrame"
             variable_name: "contrasts"
           output_file:
-            path: "data/step04_posthoc_contrasts.csv"
-            expected_columns: ["comparison", "estimate", "SE", "z", "p_uncorrected", "p_tukey", "significant_tukey"]
+            path: "data/step04_contrasts.csv"
+            expected_columns: ["contrast", "difference", "SE", "z", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
             expected_rows: 3
 
       input_files:
-        - path: "data/step02_lmm_model.pkl"
-          variable_name: "lmm_model"
-          description: "Fitted LMM model from Step 2"
+        - path: "data/step02_fixed_effects.csv"
+          variable_name: "fixed_effects"
+          description: "Fixed effects from Step 2 LMM"
 
       output_files:
-        - path: "data/step04_age_effects_by_paradigm.csv"
-          description: "Paradigm-specific age slopes at Day 3 with 95% CI"
-        - path: "data/step04_posthoc_contrasts.csv"
-          description: "Pairwise comparisons with dual p-values (uncorrected + Tukey HSD)"
+        - path: "data/step04_age_effects.csv"
+          description: "Paradigm-specific age effects with Bonferroni correction"
+        - path: "data/step04_contrasts.csv"
+          description: "Pairwise comparisons with dual p-values (uncorrected + Bonferroni)"
 
       processing_notes:
         - "Marginal effect = beta_Age_c + beta_Age_c:paradigm + 72 x (beta_Age_c:TSVR_hours + beta_Age_c:paradigm:TSVR_hours) + log(73) x (beta_Age_c:log_TSVR + beta_Age_c:paradigm:log_TSVR)"
@@ -456,16 +455,20 @@ steps:
           description: "Fitted LMM model from Step 2 (for predictions)"
 
       output_files:
-        - path: "data/step05_age_paradigm_plot_data.csv"
+        - path: "data/step05_plot_data.csv"
           variable_name: "plot_data"
-          description: "Plot source data: 36 rows (3 paradigms x 3 tertiles x 4 timepoints) with observed + predicted theta"
-          expected_columns: ["paradigm", "age_tertile", "TSVR_hours", "observed_mean", "observed_CI_lower", "observed_CI_upper", "predicted_mean"]
+          description: "Plot source data: 36 rows (3 tertiles x 3 paradigms x 4 tests) with observed theta statistics"
+          expected_columns: ["age_tertile", "paradigm", "test", "theta_mean", "theta_SE", "N", "TSVR_hours_mean"]
           expected_rows: 36
+        - path: "data/step05_age_tertiles.csv"
+          variable_name: "age_tertiles"
+          description: "Age tertile definitions with cutpoints"
+          expected_columns: ["tertile", "label", "age_min", "age_max", "N"]
+          expected_rows: 3
 
       parameters:
         lmm_input: "lmm_data"
-        lmm_model: "lmm_model"
-        output_path: "Path('data/step05_age_paradigm_plot_data.csv')"
+        output_path: "Path('data/step05_plot_data.csv')"
 
       returns:
         type: "DataFrame"
@@ -487,9 +490,9 @@ steps:
       signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step05_age_paradigm_plot_data.csv"
+        - path: "data/step05_plot_data.csv"
           variable_name: "plot_data"
-          source: "analysis call output (prepare_age_effects_plot_data)"
+          source: "analysis call output"
 
       parameters:
         plot_data: "plot_data"
@@ -511,15 +514,16 @@ steps:
       criteria:
         - "All 3 paradigms present: IFR, ICR, IRE"
         - "All 3 age tertiles present: Young, Middle, Older"
-        - "Expected row count: 36 (3 paradigms x 3 tertiles x 4 timepoints)"
+        - "Expected row count: 36 (3 tertiles x 3 paradigms x 4 tests)"
         - "Complete factorial design (all combinations present)"
-        - "observed_CI_upper > observed_CI_lower for all rows"
+        - "theta_SE > 0 for all rows"
+        - "N >= 10 for all groups"
 
       on_failure:
         action: "raise ValueError(validation_result['message'])"
-        log_to: "logs/step05_prepare_plot_data.log"
+        log_to: "logs/step05_plot_data_age_tertiles.log"
 
-    log_file: "logs/step05_prepare_plot_data.log"
+    log_file: "logs/step05_plot_data_age_tertiles.log"
 
 # ============================================================================
 # END OF ANALYSIS RECIPE

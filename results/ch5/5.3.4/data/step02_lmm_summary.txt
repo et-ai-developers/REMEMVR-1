@@ -1,0 +1,69 @@
+================================================================================
+RQ 5.3.4 - Age x Paradigm x Time Interaction LMM Summary
+================================================================================
+
+Model Formula:
+theta ~ TSVR_hours + log_TSVR + Age_c + C(paradigm, Treatment('IFR')) + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:C(paradigm, Treatment('IFR')) + log_TSVR:C(paradigm, Treatment('IFR')) + Age_c:C(paradigm, Treatment('IFR')) + TSVR_hours:Age_c:C(paradigm, Treatment('IFR')) + log_TSVR:Age_c:C(paradigm, Treatment('IFR'))
+
+Random Structure: random_slopes
+Number of Observations: 1200
+Number of Groups: 100
+
+Model Fit Statistics:
+  Log-Likelihood: -1191.99
+  AIC: 2427.97
+  BIC: 2539.95
+
+Convergence Status:
+  Converged: True
+  Random Structure Used: random_slopes
+
+================================================================================
+STATSMODELS SUMMARY
+================================================================================
+
+                             Mixed Linear Model Regression Results
+================================================================================================
+Model:                          MixedLM              Dependent Variable:              theta     
+No. Observations:               1200                 Method:                          ML        
+No. Groups:                     100                  Scale:                           0.2245    
+Min. group size:                12                   Log-Likelihood:                  -1191.9855
+Max. group size:                12                   Converged:                       No        
+Mean group size:                12.0                                                            
+------------------------------------------------------------------------------------------------
+                                                      Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+------------------------------------------------------------------------------------------------
+Intercept                                              0.652    0.098  6.656 0.000  0.460  0.844
+C(paradigm, Treatment('IFR'))[T.ICR]                   0.087    0.087  1.003 0.316 -0.083  0.257
+C(paradigm, Treatment('IFR'))[T.IRE]                   0.082    0.087  0.950 0.342 -0.088  0.253
+TSVR_hours                                            -0.003    0.002 -1.207 0.227 -0.007  0.002
+TSVR_hours:C(paradigm, Treatment('IFR'))[T.ICR]       -0.001    0.001 -0.622 0.534 -0.003  0.002
+TSVR_hours:C(paradigm, Treatment('IFR'))[T.IRE]       -0.001    0.001 -0.825 0.409 -0.003  0.001
+log_TSVR                                              -0.132    0.029 -4.607 0.000 -0.188 -0.076
+log_TSVR:C(paradigm, Treatment('IFR'))[T.ICR]         -0.006    0.040 -0.154 0.878 -0.085  0.072
+log_TSVR:C(paradigm, Treatment('IFR'))[T.IRE]         -0.010    0.040 -0.244 0.808 -0.088  0.069
+Age_c                                                 -0.011    0.007 -1.656 0.098 -0.024  0.002
+Age_c:C(paradigm, Treatment('IFR'))[T.ICR]             0.002    0.006  0.284 0.777 -0.010  0.013
+Age_c:C(paradigm, Treatment('IFR'))[T.IRE]            -0.002    0.006 -0.318 0.750 -0.014  0.010
+TSVR_hours:Age_c                                      -0.000    0.000 -0.027 0.978 -0.000  0.000
+TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]  0.000    0.000  0.386 0.700 -0.000  0.000
+TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.IRE] -0.000    0.000 -0.232 0.817 -0.000  0.000
+log_TSVR:Age_c                                         0.001    0.002  0.604 0.546 -0.003  0.005
+log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]   -0.001    0.003 -0.374 0.708 -0.007  0.004
+log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]    0.001    0.003  0.266 0.790 -0.005  0.006
+Group Var                                              0.581    0.258                           
+Group x TSVR_hours Cov                                -0.002                                    
+TSVR_hours Var                                         0.000                                    
+================================================================================================
+
+
+================================================================================
+ASSUMPTION VALIDATION SUMMARY
+================================================================================
+
+1. Residual Normality: Shapiro-Wilk W=0.9970, p=0.0240
+2. Residual Mean: -0.000000
+3. Homoscedasticity: Variance ratio=1.03
+4. Random Effects Variance: 0.5807
+5. Outliers (>3 SD): 2 (0.2%)
+6. NaN Coefficients: 0

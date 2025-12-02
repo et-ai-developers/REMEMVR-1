@@ -1,0 +1,78 @@
+[START] Step 0: Load Theta Scores and Age Data
+[LOAD] Loading theta scores from RQ 5.3.1...
+[LOADED] Theta scores: 1200 rows, 3 columns
+[INFO] Columns: ['composite_ID', 'domain_name', 'theta']
+[INFO] Domain values: ['cued_recall', 'free_recall', 'recognition']
+[PARSE] Extracting UID and test from composite_ID...
+[PARSED] UID range: 100 unique participants
+[PARSED] Test range: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[MAP] Mapping domain names to paradigm abbreviations...
+[MAPPED] Paradigm distribution:
+  IFR: 400 observations
+  ICR: 400 observations
+  IRE: 400 observations
+[LOAD] Loading Age variable from dfData.csv...
+[LOADED] Age data: 400 participants
+[INFO] Age range: 20.0 - 70.0 years
+[INFO] Age mean: 44.6, SD: 14.5
+[MERGE] Merging theta scores with Age on UID...
+[MERGED] Output: 4800 rows, 7 columns
+[VALIDATION] Checking row count...
+[ERROR] Row count mismatch: expected 1200, got 4800
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.4/code/step00_load_theta_age.py", line 233, in <module>
+    raise ValueError(
+ValueError: Row count mismatch: expected 1200, got 4800
+[START] Step 0: Load Theta Scores and Age Data
+[LOAD] Loading theta scores from RQ 5.3.1...
+[LOADED] Theta scores: 1200 rows, 3 columns
+[INFO] Columns: ['composite_ID', 'domain_name', 'theta']
+[INFO] Domain values: ['cued_recall', 'free_recall', 'recognition']
+[PARSE] Extracting UID and test from composite_ID...
+[PARSED] UID range: 100 unique participants
+[PARSED] Test range: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[MAP] Mapping domain names to paradigm abbreviations...
+[MAPPED] Paradigm distribution:
+  IFR: 400 observations
+  ICR: 400 observations
+  IRE: 400 observations
+[LOAD] Loading Age variable from dfData.csv...
+[LOADED] Age data: 100 unique participants (deduplicated from 400 rows)
+[INFO] Age range: 20.0 - 70.0 years
+[INFO] Age mean: 44.6, SD: 14.6
+[MERGE] Merging theta scores with Age on UID...
+[MERGED] Output: 1200 rows, 7 columns
+[VALIDATION] Checking row count...
+[PASS] Row count: 1200 rows (100 participants x 4 tests x 3 paradigms)
+[VALIDATION] Checking for missing values...
+[PASS] No missing values (all 1200 theta observations matched with Age)
+[VALIDATION] Checking unique participants...
+[PASS] Unique participants: 100 UIDs
+[VALIDATION] Checking paradigm balance...
+[PASS] Paradigm balance:
+  IFR: 400 observations
+  ICR: 400 observations
+  IRE: 400 observations
+[VALIDATION] Checking value ranges...
+[INFO] Theta range: [-2.41, 2.80]
+[PASS] Theta values in typical IRT range [-3, 3]
+[INFO] Age range: [20.0, 70.0]
+[PASS] Age values within study inclusion criteria [20, 70]
+[VALIDATION] Checking categorical values...
+[PASS] Paradigm values: ['ICR', 'IFR', 'IRE']
+[PASS] Test values: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[FORMAT] Selecting output columns...
+[INFO] Output columns: ['composite_ID', 'UID', 'test', 'paradigm', 'theta', 'Age']
+[SAVE] Saving merged data...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step00_theta_age_merged.csv
+[INFO] Saved 1200 rows, 6 columns
+[SUMMARY] Data merge complete:
+  Input theta: 1200 rows (RQ 5.3.1 paradigm-specific theta scores)
+  Input Age: 100 rows (participant demographics)
+  Output: 1200 rows (theta + Age for all observations)
+  Participants: 100 unique UIDs
+  Paradigms: ICR, IFR, IRE
+  Age range: 20.0 - 70.0 years
+  Theta range: -2.41 - 2.80
+[SUCCESS] Step 0 complete

@@ -1,0 +1,78 @@
+[START] Step 04: Compute Age Effects and Post-Hoc Contrasts
+[LOAD] Loading fitted LMM model from step02...
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step02_lmm_model.pkl
+[CHECK] Model convergence: False
+[WARNING] Model did not converge - results may be unreliable
+[ANALYSIS] Extracting marginal age slopes by paradigm at Day 3 (72h)...
+[DONE] Extracted age effects for 1 paradigms
+[RESULTS] Marginal age effects by paradigm:
+[ERROR] 'paradigm'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'paradigm'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.4/code/step04_age_effects_posthoc.py", line 212, in <module>
+    log(f"  {row['paradigm']}: age_slope={row['age_slope']:.6f}, "
+             ~~~^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/series.py", line 1133, in __getitem__
+    return self._get_value(key)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/series.py", line 1249, in _get_value
+    loc = self.index.get_loc(label)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'paradigm'
+[START] Step 04: Compute Age Effects and Post-Hoc Contrasts
+[LOAD] Loading fixed effects from Step 2...
+[LOADED] 18 fixed effects from /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step02_fixed_effects.csv
+[EXTRACT] Extracting age effect components...
+[INFO] Age_c main effect: -0.011195 (SE=0.006758)
+[INFO] Age_c × ICR: 0.001702 (SE=0.006004)
+[INFO] Age_c × IRE: -0.001911 (SE=0.006004)
+[COMPUTE] Computing simple slopes (age effect by paradigm)...
+[RESULTS] Age effects by paradigm:
+  IFR: -0.011195 (SE=0.006758, z=-1.656, p=0.0976)
+  ICR: -0.009492 (SE=0.009040, z=-1.050, p=0.2937)
+  IRE: -0.013106 (SE=0.009040, z=-1.450, p=0.1471)
+[SAVE] Creating age effects dataframe...
+[COMPUTE] Computing pairwise contrasts...
+[RESULTS] Pairwise contrasts (Age effect differences):
+  IFR vs ICR: 0.001702 (SE=0.006004, z=0.284, p=0.7768)
+  IFR vs IRE: -0.001911 (SE=0.006004, z=-0.318, p=0.7502)
+  ICR vs IRE: -0.003614 (SE=0.008491, z=-0.426, p=0.6704)
+[SAVE] Creating contrasts dataframe...
+[SAVE] Saving output files...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step04_age_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step04_contrasts.csv
+[VALIDATION] Checking output format...
+[PASS] Age effects: 3 paradigms
+[PASS] All paradigms present: IFR, ICR, IRE
+[PASS] Contrasts: 3 pairwise comparisons
+[PASS] Dual p-values present (Decision D068 compliance)
+[INFO] Significant age effects (Bonferroni): 0 of 3
+[INFO] Significant contrasts (Bonferroni): 0 of 3
+[SUCCESS] Step 04 complete
+[SUMMARY]
+  Age effects computed for 3 paradigms
+  IFR age effect: -0.0112 (p=0.0976)
+  ICR age effect: -0.0095 (p=0.2937)
+  IRE age effect: -0.0131 (p=0.1471)
+  Significant contrasts: 0 of 3
+  Output: data/step04_age_effects.csv, data/step04_contrasts.csv
+  Ready for Step 5 (prepare plot data by age tertiles)
+
+[INTERPRETATION]
+  No significant age effects on memory performance at Bonferroni-corrected level
+  No significant differences in age effects between paradigms
+  Age-related memory changes are similar across IFR, ICR, and IRE

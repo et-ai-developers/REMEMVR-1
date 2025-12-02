@@ -70,13 +70,13 @@ This RQ examines whether age-related differences in forgetting rates vary system
 **Format:** CSV with columns:
   - `composite_ID` (string, from theta file)
   - `UID` (string, participant identifier)
-  - `test` (string, test session: T1, T2, T3, T4)
+  - `test` (int, test session: 1, 2, 3, 4)
   - `paradigm` (string, {IFR, ICR, IRE})
   - `theta` (float)
-  - `se` (float)
-  - `Age` (int, years)
+  - `Age` (float, years)
 **Expected Rows:** 1200 (100 participants x 4 tests x 3 paradigms)
-**Expected Columns:** 7
+**Expected Columns:** 6
+**Note:** RQ 5.3.1 theta file does not contain `se` (standard error) column
 
 **Validation Requirement:**
 Validation tools MUST be used after data loading and merging. Specific validation tools will be determined by rq_tools based on data format requirements. The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
@@ -84,16 +84,15 @@ Validation tools MUST be used after data loading and merging. Specific validatio
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_theta_age_merged.csv: 1200 rows x 7 columns
-- Columns: composite_ID (object), UID (object), test (object), paradigm (object), theta (float64), se (float64), Age (int64)
+- data/step00_theta_age_merged.csv: 1200 rows x 6 columns
+- Columns: composite_ID (object), UID (object), test (int64), paradigm (object), theta (float64), Age (float64)
 - Format: CSV, UTF-8 encoding, no index column
 
 *Value Ranges:*
 - theta in [-3, 3] (typical IRT ability range)
-- se in [0.1, 1.0] (above 1.0 = unreliable, below 0.1 = suspicious)
 - Age in [20, 70] (study inclusion criteria)
 - paradigm in {IFR, ICR, IRE} (categorical)
-- test in {T1, T2, T3, T4} (categorical)
+- test in {1, 2, 3, 4} (int)
 
 *Data Quality:*
 - Exactly 1200 rows (no data loss from merge)
@@ -155,16 +154,15 @@ Validation tools MUST be used after data loading and merging. Specific validatio
 **Columns:**
   - `composite_ID` (string)
   - `UID` (string)
-  - `test` (string, {T1, T2, T3, T4})
+  - `test` (int, {1, 2, 3, 4})
   - `paradigm` (string, {IFR, ICR, IRE})
   - `theta` (float)
-  - `se` (float)
-  - `Age` (int, original age in years)
+  - `Age` (float, original age in years)
   - `Age_c` (float, grand-mean centered age)
   - `TSVR_hours` (float, actual time since encoding)
   - `log_TSVR` (float, log-transformed time)
 **Expected Rows:** 1200
-**Expected Columns:** 10
+**Expected Columns:** 9
 
 **Validation Requirement:**
 Validation tools MUST be used after variable transformation. Specific validation tools will be determined by rq_tools based on transformation requirements (centering validation, log transformation validation). The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
@@ -172,17 +170,16 @@ Validation tools MUST be used after variable transformation. Specific validation
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step01_lmm_input.csv: 1200 rows x 10 columns
-- Columns: composite_ID (object), UID (object), test (object), paradigm (object), theta (float64), se (float64), Age (int64), Age_c (float64), TSVR_hours (float64), log_TSVR (float64)
+- data/step01_lmm_input.csv: 1200 rows x 9 columns
+- Columns: composite_ID (object), UID (object), test (int64), paradigm (object), theta (float64), Age (float64), Age_c (float64), TSVR_hours (float64), log_TSVR (float64)
 - Format: CSV, UTF-8 encoding, no index column
 
 *Value Ranges:*
 - theta in [-3, 3]
-- se in [0.1, 1.0]
 - Age in [20, 70]
 - Age_c in [-25, 25] (approximately, depends on sample age distribution)
-- TSVR_hours in [0, 168] (0 = immediate test, ~168 = 1 week for Day 6)
-- log_TSVR in [0, 5.2] (log(0+1)=0, log(168+1)~5.13)
+- TSVR_hours in [1, 250] (actual study data - some delayed tests)
+- log_TSVR in [0.7, 5.6] (log(1+1)~0.69, log(246+1)~5.51)
 
 *Data Quality:*
 - Exactly 1200 rows (no data loss from TSVR merge)
@@ -434,26 +431,28 @@ Validation tools MUST be used after interaction term extraction. Specific valida
 
 **Output:**
 
-**File 1:** data/step04_age_effects_by_paradigm.csv
+**File 1:** data/step04_age_effects.csv
 **Format:** CSV with columns:
   - `paradigm` (string, {IFR, ICR, IRE})
-  - `age_slope` (float, marginal effect of Age_c on theta at Day 3)
-  - `SE` (float, standard error from delta method)
-  - `CI_lower` (float, 95% confidence interval lower bound)
-  - `CI_upper` (float, 95% confidence interval upper bound)
+  - `age_effect` (float, simple slope of Age_c on theta)
+  - `SE` (float, standard error)
+  - `z` (float, z-statistic)
+  - `p_uncorrected` (float, uncorrected p-value)
+  - `p_bonferroni` (float, Bonferroni-adjusted p-value)
+  - `significant_bonferroni` (bool, p_bonferroni < 0.05)
 **Expected Rows:** 3 (one per paradigm)
-**Expected Columns:** 5
+**Expected Columns:** 7
 
-**File 2:** data/step04_posthoc_contrasts.csv
+**File 2:** data/step04_contrasts.csv
 **Format:** CSV with columns:
-  - `comparison` (string, e.g., "IFR - ICR")
-  - `estimate` (float, difference in age slopes)
+  - `contrast` (string, e.g., "IFR vs ICR")
+  - `difference` (float, difference in age effects)
   - `SE` (float, standard error of difference)
   - `z` (float, z-statistic)
   - `p_uncorrected` (float, uncorrected p-value)
-  - `p_tukey` (float, Tukey HSD-adjusted p-value)
-  - `significant_tukey` (bool, p_tukey < 0.05)
-**Expected Rows:** 3 (pairwise comparisons: IFR-ICR, IFR-IRE, ICR-IRE)
+  - `p_bonferroni` (float, Bonferroni-adjusted p-value)
+  - `significant_bonferroni` (bool, p_bonferroni < 0.05)
+**Expected Rows:** 3 (pairwise comparisons: IFR vs ICR, IFR vs IRE, ICR vs IRE)
 **Expected Columns:** 7
 
 **Validation Requirement:**
@@ -462,39 +461,35 @@ Validation tools MUST be used after marginal effects and contrasts computation. 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step04_age_effects_by_paradigm.csv: 3 rows x 5 columns
-- data/step04_posthoc_contrasts.csv: 3 rows x 7 columns
+- data/step04_age_effects.csv: 3 rows x 7 columns
+- data/step04_contrasts.csv: 3 rows x 7 columns
 - Format: CSV, UTF-8 encoding, no index column
 
 *Value Ranges:*
-- age_slope: Typically negative (theta declines with age), range approximately -0.5 to 0 (theta units per year)
-- SE (age effects): Positive, typically 0.01 to 0.2
-- CI_lower, CI_upper: Bounds around age_slope
-- estimate (contrasts): Difference in age slopes, typically -0.5 to 0.5
-- SE (contrasts): Positive, typically 0.01 to 0.3
+- age_effect: Typically negative (theta declines with age), range approximately -0.05 to 0 (theta units per year)
+- SE (age effects): Positive, typically 0.001 to 0.02
+- difference (contrasts): Difference in age effects, typically -0.01 to 0.01
+- SE (contrasts): Positive, typically 0.001 to 0.02
 - z: Unrestricted, typical range -5 to +5
-- p_uncorrected, p_tukey in [0, 1]
+- p_uncorrected, p_bonferroni in [0, 1]
 
 *Data Quality:*
 - Exactly 3 rows in age_effects (IFR, ICR, IRE all present)
 - Exactly 3 rows in contrasts (all pairwise comparisons present)
 - No NaN values in either file
-- Dual p-values present in contrasts (both uncorrected and Tukey-adjusted) per Decision D068
-- CI_upper > CI_lower for all age effects
-- comparison column contains all 3 pairs: "IFR - ICR", "IFR - IRE", "ICR - IRE"
+- Dual p-values present in both files (both uncorrected and Bonferroni-adjusted) per Decision D068
+- contrast column contains all 3 pairs: "IFR vs ICR", "IFR vs IRE", "ICR vs IRE"
 
 *Log Validation:*
-- Required pattern: "VALIDATION - PASS: Dual p-values present (uncorrected + tukey)"
-- Required pattern: "Computed marginal age effects at Day 3 (TSVR_hours = 72)"
-- Required pattern: "Tukey HSD contrasts: 3 pairwise comparisons"
-- Forbidden patterns: "ERROR", "Missing paradigm in age effects", "Contrast p-values missing"
-- Acceptable warnings: None expected for marginal effects computation
+- Required pattern: "Age effects by paradigm"
+- Required pattern: "Pairwise contrasts"
+- Forbidden patterns: "ERROR", "Missing paradigm"
+- Acceptable warnings: None expected
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure message (e.g., "Expected 3 paradigms in age effects, found 2 - computation failed for IRE")
-- Log failure to logs/step04_compute_age_effects_contrasts.log
+- Raise error with specific failure message
+- Log failure to logs/step04_age_effects_posthoc.log
 - Quit script immediately
-- g_debug invoked to diagnose (likely delta method SE propagation issue or contrast computation failure)
 
 ---
 
@@ -527,17 +522,27 @@ Validation tools MUST be used after marginal effects and contrasts computation. 
 
 **Output:**
 
-**File:** data/step05_age_paradigm_plot_data.csv
+**File 1:** data/step05_plot_data.csv
 **Format:** CSV with columns:
-  - `paradigm` (string, {IFR, ICR, IRE})
   - `age_tertile` (string, {Young, Middle, Older})
-  - `TSVR_hours` (float, timepoint: 0, 24, 72, 144 approximate for T1-T4)
-  - `observed_mean` (float, mean theta from raw data)
-  - `observed_CI_lower` (float, 95% CI lower bound)
-  - `observed_CI_upper` (float, 95% CI upper bound)
-  - `predicted_mean` (float, model-predicted theta)
-**Expected Rows:** 36 (3 paradigms x 3 age tertiles x 4 timepoints)
+  - `paradigm` (string, {IFR, ICR, IRE})
+  - `test` (int, {1, 2, 3, 4})
+  - `theta_mean` (float, mean theta from raw data)
+  - `theta_SE` (float, standard error of mean)
+  - `N` (int, sample size per group)
+  - `TSVR_hours_mean` (float, mean TSVR_hours for that test)
+**Expected Rows:** 36 (3 age tertiles x 3 paradigms x 4 tests)
 **Expected Columns:** 7
+
+**File 2:** data/step05_age_tertiles.csv
+**Format:** CSV with columns:
+  - `tertile` (int, {1, 2, 3})
+  - `label` (string, {Young, Middle, Older})
+  - `age_min` (float, minimum age in tertile)
+  - `age_max` (float, maximum age in tertile)
+  - `N` (int, participants per tertile)
+**Expected Rows:** 3 (one per tertile)
+**Expected Columns:** 5
 
 **Validation Requirement:**
 Validation tools MUST be used after plot data preparation. Specific validation tools will be determined by rq_tools based on plot data format requirements (completeness of factorial design, valid value ranges). The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
@@ -545,38 +550,37 @@ Validation tools MUST be used after plot data preparation. Specific validation t
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step05_age_paradigm_plot_data.csv: 36 rows x 7 columns
-- Columns: paradigm (object), age_tertile (object), TSVR_hours (float64), observed_mean (float64), observed_CI_lower (float64), observed_CI_upper (float64), predicted_mean (float64)
+- data/step05_plot_data.csv: 36 rows x 7 columns
+- data/step05_age_tertiles.csv: 3 rows x 5 columns
 - Format: CSV, UTF-8 encoding, no index column
 
 *Value Ranges:*
-- paradigm in {IFR, ICR, IRE}
 - age_tertile in {Young, Middle, Older}
-- TSVR_hours in [0, 168] (approximate range for 4 test sessions)
-- observed_mean in [-3, 3] (theta scale)
-- observed_CI_lower in [-3, 3]
-- observed_CI_upper in [-3, 3]
-- predicted_mean in [-3, 3]
+- paradigm in {IFR, ICR, IRE}
+- test in {1, 2, 3, 4}
+- theta_mean in [-3, 3] (theta scale)
+- theta_SE > 0 (positive standard errors)
+- N > 0 (sample sizes)
+- TSVR_hours_mean in [1, 250]
 
 *Data Quality:*
-- Exactly 36 rows (complete factorial design: 3 x 3 x 4)
+- Exactly 36 rows in plot_data (complete factorial design: 3 x 3 x 4)
+- Exactly 3 rows in age_tertiles (3 tertile definitions)
 - No NaN values in any column
 - All 3 paradigms represented (12 rows each)
 - All 3 age tertiles represented (12 rows each)
-- All 4 timepoints represented per paradigm x tertile combination
-- observed_CI_upper > observed_CI_lower for all rows
-- No duplicate paradigm x age_tertile x TSVR_hours combinations
+- All 4 tests represented per paradigm x tertile combination
+- N >= 10 for all groups (sufficient sample size per cell)
 
 *Log Validation:*
-- Required pattern: "Age tertiles created: Young (n=[N1]), Middle (n=[N2]), Older (n=[N3])"
-- Required pattern: "Plot data complete: 36 rows (3 paradigms x 3 tertiles x 4 timepoints)"
-- Required pattern: "VALIDATION - PASS: Complete factorial design"
-- Forbidden patterns: "ERROR", "Missing paradigm x tertile combinations", "NaN in plot data"
-- Acceptable warnings: "Unbalanced tertile sizes due to discrete age distribution" (tertiles may not be exactly equal N)
+- Required pattern: "Age tertile distribution"
+- Required pattern: "Aggregated data: 36 rows"
+- Forbidden patterns: "ERROR", "Missing"
+- Acceptable warnings: None expected
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure message (e.g., "Expected 36 rows, found 32 - missing paradigm x tertile combinations")
-- Log failure to logs/step05_prepare_plot_data.log
+- Raise error with specific failure message
+- Log failure to logs/step05_plot_data_age_tertiles.log
 - Quit script immediately
 - g_debug invoked to diagnose (likely incomplete aggregation or missing data for some combinations)
 
