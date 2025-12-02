@@ -332,6 +332,12 @@
 ### rq_5.3.4_complete_execution_age_paradigm_interaction
 **Description:** Complete RQ 5.3.4 execution (Age × Paradigm × Time 3-way interaction LMM, Session 2025-12-02 21:45). 6 steps executed (load theta, merge TSVR, fit LMM, extract interactions, age effects, plot tertiles). Fixed 6 bugs (dfData dedup, TSVR validation, pickle/patsy CSV workaround, direct computation, spec updates, plots import). NULL FINDING: No significant 3-way interactions (all p > 0.7), age effects uniform across IFR/ICR/IRE paradigms, challenges retrieval support hypothesis in VR. Validated via rq_inspect (4 layers pass), rq_plots (age_paradigm_trajectories.png 408KB), rq_results (summary.md 53KB, 0 anomalies). Publication-ready. Documents statsmodels pickle/patsy limitation and specification drift patterns.
 
+### rq_5.4.3_complete_execution_age_schema_congruence
+**Description:** Complete RQ 5.4.3 execution (Age × Schema Congruence × Time 3-way interaction LMM, Session 2025-12-02 22:20). 6 steps executed (load dependencies, prepare LMM input, fit 3-way LMM, extract interactions, age effects + Tukey, plot data by tertiles). Fixed 2 bugs (fixed effects extraction alignment, n_groups attribute). NULL FINDING: No significant 3-way interactions (all p_bonferroni > 0.025), age effects similar across Common/Congruent/Incongruent conditions, challenges schema compensation hypothesis in VR episodic memory. Validated via rq_inspect (4 layers pass, D068/D070 compliance), rq_plots (age_congruence_trajectories.png 724KB, 3-panel), rq_results (summary.md 31KB, 0 anomalies). Publication-ready. Consistent null pattern with RQ 5.3.4.
+
+### rq_5.2.2_partial_execution_when_exclusion_consolidation
+**Description:** Complete RQ 5.2.2 execution (Domain-Specific Consolidation Effects with When Domain Exclusion, Sessions 2025-12-02 23:15 and 2025-12-03 00:15). 6 steps executed (prepare piecewise input, fit piecewise LMM, extract slopes, compute contrasts, consolidation benefit, plot data). Fixed 4 bugs in partial session (data source correction, test numbering, When filter, slope reduction). When domain excluded due to floor effect (6-9% probability, 77% item attrition). Statistical results: Strong consolidation effect (~6× slope reduction Early→Late) but NO domain-specific consolidation (What ≈ Where, all contrasts p > 0.68). Hypothesis NOT SUPPORTED. Validated via full pipeline (rq_inspect, rq_plots regenerated for 2 domains, rq_results). Publication-ready with When exclusion documented.
+
 ---
 
 ## How to Use This Index
