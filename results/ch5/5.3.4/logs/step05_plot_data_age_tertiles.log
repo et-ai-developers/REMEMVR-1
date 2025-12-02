@@ -28,3 +28,33 @@
 [VALIDATION] [PASS] All standard errors positive
 [VALIDATION] [PASS] All groups have N >= 10
 [SUCCESS] Step 5 complete
+[START] Step 5: Prepare Plot Data by Age Tertiles
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (1200 rows, 9 cols)
+[INFO] Data structure: 100 participants, 3 paradigms, 4 tests
+[ANALYSIS] Creating age tertiles...
+[INFO] 100 unique participants
+[INFO] Age range: 20.0 to 70.0 years
+[INFO] Age tertile distribution:
+  - Young: 33 participants
+  - Middle: 34 participants
+  - Older: 33 participants
+[INFO] Tertile age ranges:
+  - Young: 20.0 to 36.0 years (N=33)
+  - Middle: 37.0 to 52.0 years (N=34)
+  - Older: 53.0 to 70.0 years (N=33)
+[ANALYSIS] Aggregating statistics by age tertile, paradigm, and test...
+[INFO] Aggregated data: 36 rows
+[INFO] Mean sample size per group: 33.3
+[INFO] Range of sample sizes: 33 to 34
+[SAVE] Saving plot data...
+[SAVED] step05_plot_data.csv (36 rows, 7 cols)
+[SAVED] step05_age_tertiles.csv (3 rows, 5 cols)
+[VALIDATION] Running completeness checks...
+[VALIDATION] [PASS] All 3 paradigms present (IFR, ICR, IRE)
+[VALIDATION] [PASS] All 3 age tertiles present (Young, Middle, Older)
+[VALIDATION] [PASS] Row count: 36 (expected 36)
+[VALIDATION] [PASS] No missing values in aggregated data
+[VALIDATION] [PASS] All standard errors positive
+[VALIDATION] [PASS] All groups have N >= 10
+[SUCCESS] Step 5 complete

@@ -26,7 +26,9 @@ EXPECTED OUTPUTS:
 IMPLEMENTATION NOTES:
 - Uses statsmodels.formula.api.mixedlm directly (not wrapper tool)
 - 3-way interaction: Age_c × paradigm × Time (linear + log)
-- Random effects: Random intercepts + slopes for TSVR_hours by UID
+- Random effects: Random intercepts + slopes for log_TSVR by UID
+  CRITICAL: RQ 5.2.1 established Log model as best fit (AIC=3187.96)
+  Random slope must be on log_TSVR, NOT linear TSVR_hours
 - Convergence contingency: Falls back to intercept-only if slopes fail
 """
 # =============================================================================
@@ -119,18 +121,21 @@ if __name__ == "__main__":
         # =========================================================================
         # STEP 3: Fit Model with Random Slopes (Primary Attempt)
         # =========================================================================
-        log("[FIT] Attempting model with random slopes for TSVR_hours...")
+        # CRITICAL: RQ 5.2.1 established Log model as best fit (AIC=3187.96)
+        # Random slope must be on log_TSVR, NOT linear TSVR_hours
+        # 5.2.1 showed log_Days Var = 0.046 (meaningful individual differences)
+        log("[FIT] Attempting model with random slopes for log_TSVR (per RQ 5.2.1 best model)...")
 
         model_converged = False
         random_structure = "random_slopes"
 
         try:
-            # Random slopes: (TSVR_hours | UID) - allows individual forgetting rates
+            # Random slopes: (log_TSVR | UID) - allows individual forgetting rates on LOG scale
             model = smf.mixedlm(
                 formula=formula,
                 data=df,
                 groups=df['UID'],
-                re_formula="~TSVR_hours"  # Random intercept + slope for TSVR_hours
+                re_formula="~log_TSVR"  # Random intercept + slope for log_TSVR (per 5.2.1)
             )
             lmm_result = model.fit(reml=False, method='lbfgs')
 

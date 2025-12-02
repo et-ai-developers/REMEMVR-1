@@ -6,13 +6,31 @@
 
 ---
 
+## ⚠️ Note on When Domain Exclusion
+
+**CRITICAL:** The When (temporal order) domain is **EXCLUDED** from this analysis due to floor effects discovered in RQ 5.2.1.
+
+**Rationale:**
+- When domain theta scores show 6-9% probability at encoding (severe floor effect)
+- Only 5 When items survived IRT purification (vs 17 What, 47 Where)
+- Floor effects make forgetting trajectory analysis invalid (cannot measure decline from near-zero)
+- All 5.2.X RQs exclude When for methodological consistency
+
+**Impact on This RQ:**
+- Analysis conducted on **2 domains** (What, Where) instead of 3
+- Row counts reduced: 800 (100×4×2) instead of 1200 (100×4×3)
+- Correlation tests reduced: 3 (What, Where, Overall) instead of 4
+- LMM coefficients reduced accordingly
+
+---
+
 ## Research Question
 
 **Primary Question:**
 Do IRT theta scores and CTT mean scores yield the same conclusions about domain-specific forgetting trajectories?
 
 **Scope:**
-This RQ examines convergent validity between two measurement approaches (IRT vs CTT) for episodic memory ability across three domains (What, Where, When) and four test sessions (T1, T2, T3, T4). Focuses on correlation magnitude (r > 0.90 threshold), statistical significance agreement in LMM coefficients, and trajectory pattern overlap. Uses identical data sources and models for direct comparison.
+This RQ examines convergent validity between two measurement approaches (IRT vs CTT) for episodic memory ability across **two domains (What, Where)** and four test sessions (T1, T2, T3, T4). Focuses on correlation magnitude (r > 0.70 threshold for strong convergence), statistical significance agreement in LMM coefficients, and trajectory pattern overlap. Uses identical data sources and models for direct comparison.
 
 **Theoretical Framing:**
 Convergent validity is a cornerstone of construct validity - if IRT and CTT measure the same latent construct (episodic memory ability), they should correlate highly and reach identical statistical conclusions despite different scaling (IRT: unbounded latent, CTT: 0-1 manifest). Divergence would indicate method-specific artifacts threatening construct validity of forgetting trajectory findings.
@@ -64,22 +82,26 @@ High Pearson correlations (r > 0.90) between IRT and CTT scores for each domain.
 - [x] **What** (Object Identity)
   - Tag Code: `-N-`
   - Description: Object identity / naming
+  - Items: 17 purified items
 
 - [x] **Where** (Spatial Location)
   - [x] `-L-` tags (general location, legacy)
   - [x] `-U-` tags (pick-up location)
   - [x] `-D-` tags (put-down location)
-  - Disambiguation: **ALL Where tags included** for complete spatial coverage (matches RQ 5.1 domain definitions)
+  - Disambiguation: **ALL Where tags included** for complete spatial coverage
+  - Items: 47 purified items
 
-- [x] **When** (Temporal Order)
+- [ ] **When** (Temporal Order) - **EXCLUDED**
   - Tag Code: `-O-`
   - Description: Temporal order / sequence
+  - Status: **EXCLUDED due to floor effects** (see Note above)
+  - Items: Only 5 purified items (insufficient for reliable CTT)
 
 **Inclusion Rationale:**
-This RQ examines convergent validity across all three WWW episodic memory components. Domain-specific comparisons allow testing whether IRT-CTT convergence varies by memory type (e.g., What might show higher convergence due to simpler psychometric properties). Comprehensive coverage matches RQ 5.1 design for direct comparison.
+This RQ examines convergent validity across two WWW episodic memory components (What, Where). Domain-specific comparisons allow testing whether IRT-CTT convergence varies by memory type.
 
 **Exclusion Rationale:**
-None - all WWW domains included to match RQ 5.1 analysis scope.
+When domain excluded due to severe floor effects (6-9% probability at encoding) discovered in RQ 5.2.1. With only 5 purified items and floor effects, CTT mean scores would be unreliable and not comparable to IRT theta estimates.
 
 ---
 
@@ -91,24 +113,25 @@ Convergent validity comparison using Correlation Analysis + Parallel LMM (Linear
 **High-Level Workflow:**
 
 **Step 0:** Get Data
-- Load IRT theta scores from results/ch5/5.2.1/data/step03_theta_scores.csv (Theta_What, Theta_Where, Theta_When per UID × Test)
-- Load purified item list from results/ch5/5.2.1/data/step02_purified_items.csv (filter CTT to match IRT item set)
+- Load IRT theta scores from results/ch5/5.2.1/data/step03_theta_scores.csv (Theta_What, Theta_Where per UID × Test; **exclude Theta_When**)
+- Load purified item list from results/ch5/5.2.1/data/step02_purified_items.csv (filter CTT to match IRT item set, **exclude When items**)
 - Load TSVR mapping from results/ch5/5.2.1/data/step00_tsvr_mapping.csv (UID, Test, TSVR)
 - Load raw VR item scores from data/cache/dfData.csv for CTT computation
 
 **Step 1:** Data Preparation
-- Extract IRT theta scores (Theta_What, Theta_Where, Theta_When) per UID × Test
-- Compute CTT mean scores from raw data: Extract all TQ_ items per domain (What: -N-, Where: -L-/-U-/-D-, When: -O-), calculate mean score per UID × Test × Domain
+- Extract IRT theta scores (Theta_What, Theta_Where) per UID × Test (**When excluded**)
+- Compute CTT mean scores from raw data: Extract all TQ_ items per domain (What: -N-, Where: -L-/-U-/-D-), calculate mean score per UID × Test × Domain (**When excluded**)
 - Merge IRT and CTT scores on UID, Test, Domain
 - Merge TSVR data on UID, Test
 - Reshape to long format for LMM (columns: UID, Test, Domain, TSVR, IRT_Score, CTT_Score)
+- **Expected rows:** 800 (100 participants × 4 tests × 2 domains)
 
 **Step 2:** Correlation Analysis
-- Compute Pearson correlations between IRT and CTT for each domain (What, Where, When) + overall (4 tests total)
-- **Multiple Testing Correction:** Apply Holm-Bonferroni correction to control family-wise error rate across 4 correlation tests (less conservative than standard Bonferroni), rank p-values from smallest to largest, compare each p-value to α/(m-k+1) where m=4 tests and k=rank, reject null if p < adjusted α, report both uncorrected and corrected p-values for transparency (dual reporting aligns with Decision D068 philosophy)
+- Compute Pearson correlations between IRT and CTT for each domain (What, Where) + overall (**3 tests total** - When excluded)
+- **Multiple Testing Correction:** Apply Holm-Bonferroni correction to control family-wise error rate across **3** correlation tests (less conservative than standard Bonferroni), rank p-values from smallest to largest, compare each p-value to α/(m-k+1) where m=3 tests and k=rank, reject null if p < adjusted α, report both uncorrected and corrected p-values for transparency (dual reporting aligns with Decision D068 philosophy)
 - Test if r > 0.70 (strong convergence per psychometric standards, Carlson & Herdman 2012) as primary threshold, with r > 0.90 as exceptional convergence (secondary threshold)
 - Report 95% confidence intervals and both uncorrected and Holm-Bonferroni corrected p-values
-- Generate scatterplots: IRT (x-axis) vs CTT (y-axis) with regression lines, separate panels per domain
+- Generate scatterplots: IRT (x-axis) vs CTT (y-axis) with regression lines, separate panels per domain (What, Where)
 
 **Step 3:** Parallel LMM Comparison
 - Fit identical LMMs for IRT and CTT: Ability ~ (Time + log(Time+1)) × Domain + (Time | UID), **model selection strategy:** attempt full random slopes model (Time | UID) first, if convergence fails for EITHER model (checked via validate_lmm_convergence), simplify BOTH to random intercepts (1 | UID) to maintain identical structure, with N=100, random slopes may cause convergence issues (Bates et al., 2015 recommend N>=200), document convergence decisions in results
@@ -127,7 +150,7 @@ Convergent validity comparison using Correlation Analysis + Parallel LMM (Linear
 
 **Step 5:** Visualization
 - Generate comparison plot showing IRT vs CTT trajectories for each domain
-- Three panels (What, Where, When) or overlaid lines with different styles (solid = IRT, dashed = CTT)
+- **Two panels (What, Where)** or overlaid lines with different styles (solid = IRT, dashed = CTT)
 - Include observed means with 95% CIs and model-predicted lines for both approaches
 - Scale CTT scores to match IRT range for visual comparison (optional, note if applied)
 
@@ -156,12 +179,15 @@ DERIVED (from RQ 5.1 IRT outputs + raw data for CTT computation)
 RQ 5.1 (Domain-Specific Forgetting Trajectories)
 
 **File Paths:**
-- **IRT Scores:** `results/ch5/5.2.1/data/step03_theta_scores.csv` (or equivalent theta output file)
-  - Columns: UID, Test, Domain, Theta (IRT ability estimates)
+- **IRT Scores:** `results/ch5/5.2.1/data/step03_theta_scores.csv`
+  - Columns: composite_ID, theta_what, theta_where, ~~theta_when~~ (theta_when **EXCLUDED**)
+  - Use only theta_what and theta_where columns
 - **TSVR Mapping:** `results/ch5/5.2.1/data/step00_tsvr_mapping.csv`
-  - Columns: UID, Test, TSVR (actual hours since encoding)
+  - Columns: composite_ID, UID, test, TSVR_hours (actual hours since encoding)
+- **Purified Items:** `results/ch5/5.2.1/data/step02_purified_items.csv`
+  - Filter to factor ∈ {'what', 'where'} (**exclude factor='when'**)
 - **Raw Data for CTT:** `data/cache/dfData.csv` (master dataset)
-  - Columns: UID, TEST, TQ_* (all VR item scores for domain-specific aggregation)
+  - Columns: UID, TEST, TQ_* (VR item scores for domain-specific aggregation)
 
 **Dependencies:**
 RQ 5.1 must complete Steps 0-3 (TSVR extraction, IRT calibration Pass 1, purification, IRT calibration Pass 2, theta extraction) before this RQ can run. This RQ uses purified IRT theta scores and computes CTT scores from the same purified item set for fair comparison.

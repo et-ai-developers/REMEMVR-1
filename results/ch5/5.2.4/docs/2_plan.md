@@ -2,13 +2,26 @@
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-27
-**Status:** Ready for rq_tools (Step 11 workflow)
+**Updated:** 2025-12-03 (When domain exclusion applied)
+**Status:** Ready for execution
+
+---
+
+## ⚠️ Note on When Domain Exclusion
+
+**CRITICAL:** The When (temporal order) domain is **EXCLUDED** from this analysis due to floor effects discovered in RQ 5.2.1.
+
+**Impact on Plan:**
+- Analysis conducted on **2 domains** (What, Where) instead of 3
+- Row counts: **800** (100×4×2) instead of 1200 (100×4×3)
+- Correlation tests: **3** (What, Where, Overall) instead of 4
+- LMM coefficients reduced accordingly
 
 ---
 
 ## Overview
 
-This RQ examines convergent validity between IRT and CTT measurement approaches for domain-specific episodic memory ability across three domains (What, Where, When) and four test sessions (T1-T4). The analysis compares IRT theta scores (from RQ 5.1) with CTT mean scores (computed from raw data using the same purified item set) via correlation analysis and parallel LMM trajectory modeling.
+This RQ examines convergent validity between IRT and CTT measurement approaches for domain-specific episodic memory ability across **two domains (What, Where)** and four test sessions (T1-T4). The analysis compares IRT theta scores (from RQ 5.2.1) with CTT mean scores (computed from raw data using the same purified item set) via correlation analysis and parallel LMM trajectory modeling.
 
 **Key Objectives:**
 1. Test correlation strength (r > 0.70 threshold for strong convergence per psychometric standards)
@@ -16,7 +29,7 @@ This RQ examines convergent validity between IRT and CTT measurement approaches 
 3. Assess model fit equivalence (AIC/BIC comparison)
 4. Visualize IRT vs CTT trajectories to identify scaling differences vs pattern differences
 
-**Pipeline Type:** Correlation Analysis + Parallel LMM Comparison (NOT IRT calibration - uses DERIVED data from RQ 5.1)
+**Pipeline Type:** Correlation Analysis + Parallel LMM Comparison (NOT IRT calibration - uses DERIVED data from RQ 5.2.1)
 
 **Total Steps:** 9 analysis steps (Step 0 = data loading, Steps 1-8 = analysis and plotting)
 
@@ -50,36 +63,35 @@ This RQ examines convergent validity between IRT and CTT measurement approaches 
 
 **Input:**
 
-**File 1:** results/ch5/5.2.1/data/step03_theta_scores.csv (DERIVED from RQ 5.1)
-**Source:** RQ 5.1 Step 3 (IRT calibration Pass 2 theta extraction)
+**File 1:** results/ch5/5.2.1/data/step03_theta_scores.csv (DERIVED from RQ 5.2.1)
+**Source:** RQ 5.2.1 Step 3 (IRT calibration Pass 2 theta extraction)
 **Format:** CSV with columns:
-  - `composite_ID` (string, format: {UID}_{test}, e.g., P001_T1)
-  - `theta_what` (float, common item ability estimate)
-  - `se_what` (float, standard error for common items)
-  - `theta_where` (float, congruent item ability estimate)
-  - `se_where` (float, standard error for congruent items)
-  - `theta_when` (float, incongruent item ability estimate)
-  - `se_when` (float, standard error for incongruent items)
-**Expected Rows:** ~400 (100 participants x 4 tests)
-**Note:** Theta scores are from purified item set (RQ 5.1 Pass 2)
+  - `composite_ID` (string, format: {UID}_{test}, e.g., A010_1)
+  - `theta_what` (float, What domain ability estimate) - **USE THIS**
+  - `theta_where` (float, Where domain ability estimate) - **USE THIS**
+  - `theta_when` (float, When domain ability estimate) - **EXCLUDE THIS**
+**Expected Rows:** 400 (100 participants x 4 tests)
+**Note:** Only use theta_what and theta_where columns (When excluded due to floor effects)
 
-**File 2:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv (DERIVED from RQ 5.1)
-**Source:** RQ 5.1 Step 0 (TSVR extraction)
+**File 2:** results/ch5/5.2.1/data/step00_tsvr_mapping.csv (DERIVED from RQ 5.2.1)
+**Source:** RQ 5.2.1 Step 0 (TSVR extraction)
 **Format:** CSV with columns:
-  - `UID` (string, participant identifier, e.g., P001)
-  - `test` (string, test session, e.g., T1, T2, T3, T4)
+  - `composite_ID` (string, format: {UID}_{test}, e.g., A010_1)
+  - `UID` (string, participant identifier, e.g., A010)
+  - `test` (int, test session: 1, 2, 3, 4)
   - `TSVR_hours` (float, actual hours since encoding per Decision D070)
-**Expected Rows:** ~400 (100 participants x 4 tests)
+**Expected Rows:** 400 (100 participants x 4 tests)
 
-**File 3:** results/ch5/5.2.1/data/step02_purified_items.csv (DERIVED from RQ 5.1)
-**Source:** RQ 5.1 Step 2 (item purification per Decision D039)
+**File 3:** results/ch5/5.2.1/data/step02_purified_items.csv (DERIVED from RQ 5.2.1)
+**Source:** RQ 5.2.1 Step 2 (item purification per Decision D039)
 **Format:** CSV with columns:
-  - `item_name` (string, item tag from master.xlsx, e.g., VR-IFR-A01-N-ANS)
-  - `dimension` (string, domain classification: common/congruent/incongruent)
-  - `a` (float, Pass 1 discrimination parameter - for reference)
-  - `b` (float, Pass 1 difficulty parameter - for reference)
-**Expected Rows:** ~40-60 items (40-50% retention per Decision D039 expectations for temporal items)
-**Purpose:** Ensures CTT scores computed from SAME item set as IRT for fair comparison
+  - `item_name` (string, item tag, e.g., TQ_ICR-N-i1)
+  - `factor` (string, domain classification: what, where, when)
+  - `a` (float, discrimination parameter)
+  - `b` (float, difficulty parameter)
+**Expected Rows:** 70 total items (17 what + 47 where + 5 when)
+**Filter Required:** Use only items where factor ∈ {'what', 'where'} (64 items; **exclude factor='when'**)
+**Purpose:** Ensures CTT scores computed from SAME purified item set as IRT (minus When)
 
 **File 4:** data/cache/dfData.csv (RAW master dataset)
 **Source:** Project-level master data file
@@ -91,39 +103,39 @@ This RQ examines convergent validity between IRT and CTT measurement approaches 
 **Purpose:** Source for CTT mean score computation
 
 **Processing:**
-1. Load IRT theta scores (File 1)
+1. Load IRT theta scores (File 1) - select only theta_what, theta_where columns
 2. Load TSVR mapping (File 2)
-3. Load purified item list (File 3) - extract item_name column as filter
+3. Load purified item list (File 3) - **filter to factor ∈ {'what', 'where'} only**
 4. Load raw master data (File 4)
-5. Filter master data to retain ONLY items in purified_items.csv (ensures IRT-CTT comparison uses same items)
+5. Filter master data to retain ONLY items from purified list where factor ∈ {'what', 'where'}
 6. Parse domain from item tags:
-   - What domain: `-N-` tag pattern
-   - Where domain: `-L-`, `-U-`, `-D-` tag patterns (all three per concept.md)
-   - When domain: `-O-` tag pattern
+   - What domain: `-N-` tag pattern (17 items)
+   - Where domain: `-L-`, `-U-`, `-D-` tag patterns (47 items)
+   - **When domain: `-O-` tag pattern - EXCLUDED**
 7. No aggregation yet (Step 1 computes CTT scores)
 
 **Output:**
 
 **File 1:** data/step00_irt_theta_loaded.csv
-**Format:** CSV (copy of RQ 5.1 theta scores for local reference)
-**Columns:** composite_ID, theta_what, se_what, theta_where, se_where, theta_when, se_when
-**Expected Rows:** ~400
+**Format:** CSV (copy of RQ 5.2.1 theta scores for local reference, When excluded)
+**Columns:** composite_ID, theta_what, theta_where (NO theta_when)
+**Expected Rows:** 400
 
 **File 2:** data/step00_tsvr_loaded.csv
-**Format:** CSV (copy of RQ 5.1 TSVR for local reference)
-**Columns:** UID, test, TSVR_hours
-**Expected Rows:** ~400
+**Format:** CSV (copy of RQ 5.2.1 TSVR for local reference)
+**Columns:** composite_ID, UID, test, TSVR_hours
+**Expected Rows:** 400
 
 **File 3:** data/step00_purified_items.csv
-**Format:** CSV (copy of RQ 5.1 purified items for local reference)
-**Columns:** item_name, dimension, a, b
-**Expected Rows:** ~40-60
+**Format:** CSV (copy of RQ 5.2.1 purified items, When excluded)
+**Columns:** item_name, factor, a, b
+**Expected Rows:** 64 (17 what + 47 where; When items excluded)
 
 **File 4:** data/step00_raw_data_filtered.csv
 **Format:** CSV, wide format (one row per UID x test)
-**Columns:** UID, TEST, [item columns from purified set only]
-**Expected Rows:** ~400
-**Expected Columns:** 2 (UID, TEST) + ~40-60 item columns = ~42-62 total
+**Columns:** UID, TEST, [item columns from purified set, What+Where only]
+**Expected Rows:** 400
+**Expected Columns:** 2 (UID, TEST) + 64 item columns = 66 total
 
 **Validation Requirement:**
 Validation tools MUST be used after data loading tool execution. Specific validation tools will be determined by rq_tools based on data loading requirements (file existence checks, column validation, row count verification).
@@ -170,7 +182,7 @@ Validation tools MUST be used after data loading tool execution. Specific valida
 
 ### Step 1: Compute CTT Mean Scores
 
-**Purpose:** Calculate CTT (Classical Test Theory) mean scores per UID x test x domain using same purified item set as RQ 5.1 IRT
+**Purpose:** Calculate CTT (Classical Test Theory) mean scores per UID x test x domain using same purified item set as RQ 5.2.1 IRT (**When domain excluded**)
 
 **Dependencies:** Step 0 (requires filtered raw data and purified item list)
 
@@ -181,43 +193,42 @@ Validation tools MUST be used after data loading tool execution. Specific valida
 **File 1:** data/step00_raw_data_filtered.csv
 **Source:** Generated by Step 0
 **Format:** CSV, wide format
-**Columns:** UID, TEST, [~40-60 purified item columns]
-**Expected Rows:** ~400
+**Columns:** UID, TEST, [64 purified item columns - What + Where only]
+**Expected Rows:** 400
 
 **File 2:** data/step00_purified_items.csv
 **Source:** Generated by Step 0
 **Format:** CSV
-**Columns:** item_name, dimension, a, b
-**Expected Rows:** ~40-60
+**Columns:** item_name, factor, a, b
+**Expected Rows:** 64 (What + Where items only)
 
 **Processing:**
 1. Parse item tags to assign domains:
-   - Extract tag components: VR-{paradigm}-{test}-{domain}-{type}
-   - What domain: `-N-` pattern
-   - Where domain: `-L-` OR `-U-` OR `-D-` patterns (aggregate all three per concept.md)
-   - When domain: `-O-` pattern
-2. Group items by domain (What items, Where items, When items)
+   - Extract tag components: TQ_{paradigm}-{domain}-{item}
+   - What domain: `-N-` pattern (17 items)
+   - Where domain: `-L-` OR `-U-` OR `-D-` patterns (47 items)
+   - **When domain: `-O-` pattern - EXCLUDED**
+2. Group items by domain (What items, Where items only)
 3. Compute CTT mean scores per UID x TEST x domain:
    - CTT_What = mean of all What items (ignoring NaN)
    - CTT_Where = mean of all Where items (ignoring NaN)
-   - CTT_When = mean of all When items (ignoring NaN)
 4. Reshape to long format:
    - One row per UID x TEST x domain
    - Columns: UID, TEST, domain, CTT_score
-5. Create composite_ID column: composite_ID = {UID}_{TEST} (matches IRT theta format)
+5. Create composite_ID column: composite_ID = {UID}_{test} (matches IRT theta format)
 
 **Output:**
 
 **File:** data/step01_ctt_scores.csv
 **Format:** CSV, long format (one row per UID x test x domain)
 **Columns:**
-  - `composite_ID` (string, format: {UID}_{test}, e.g., P001_T1)
+  - `composite_ID` (string, format: {UID}_{test}, e.g., A010_1)
   - `UID` (string, participant identifier)
-  - `test` (string, test session: T1, T2, T3, T4)
-  - `domain` (string, memory domain: What, Where, When)
+  - `test` (int, test session: 1, 2, 3, 4)
+  - `domain` (string, memory domain: What, Where - **NO When**)
   - `CTT_score` (float, mean accuracy across domain items, range [0, 1])
   - `n_items` (int, number of items contributing to mean - diagnostic)
-**Expected Rows:** 1200 (400 UID x test combinations x 3 domains)
+**Expected Rows:** 800 (400 UID x test combinations x 2 domains)
 **Expected Values:** CTT_score in [0, 1] (proportion correct)
 
 **Validation Requirement:**
@@ -226,22 +237,21 @@ Validation tools MUST be used after CTT computation tool execution. Specific val
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step01_ctt_scores.csv: 1200 rows x 6 columns (composite_ID: object, UID: object, test: object, domain: object, CTT_score: float64, n_items: int64)
+- data/step01_ctt_scores.csv: 800 rows x 6 columns (composite_ID: object, UID: object, test: int64, domain: object, CTT_score: float64, n_items: int64)
 
 *Value Ranges:*
 - CTT_score in [0, 1] (proportion correct - cannot exceed 1.0)
-- n_items > 0 (at least 1 item per domain, expected: 10-20 items per domain)
-- n_items approximately equal across domains (What ~= Where ~= When within 50% tolerance)
+- n_items > 0 (at least 1 item per domain, expected: What ~17 items, Where ~47 items)
 
 *Data Quality:*
-- Exactly 1200 rows (400 UID x test x 3 domains, no missing combinations)
-- All 3 domains present (What, Where, When) for each UID x test
+- Exactly 800 rows (400 UID x test x 2 domains, no missing combinations)
+- Both domains present (What, Where) for each UID x test - **NO When**
 - No NaN in CTT_score (if insufficient items, flag as data quality issue)
 - composite_ID matches format from IRT theta file (for merge in Step 2)
 
 *Log Validation:*
-- Required pattern: "Computed CTT scores: 1200 rows (400 UID x test x 3 domains)"
-- Required pattern: "Domain distribution: What [N] items, Where [N] items, When [N] items"
+- Required pattern: "Computed CTT scores: 800 rows (400 UID x test x 2 domains)"
+- Required pattern: "Domain distribution: What [N] items, Where [N] items"
 - Required pattern: "CTT_score range: [min, max] (expected [0, 1])"
 - Forbidden patterns: "ERROR", "No items for domain", "CTT_score > 1.0"
 - Acceptable warnings: "Some participants missing items (NaN ignored in mean)"
@@ -256,7 +266,7 @@ Validation tools MUST be used after CTT computation tool execution. Specific val
 
 ### Step 2: Correlation Analysis (IRT vs CTT per Domain)
 
-**Purpose:** Compute Pearson correlations between IRT theta and CTT mean scores for each domain, test significance with Holm-Bonferroni correction per concept.md
+**Purpose:** Compute Pearson correlations between IRT theta and CTT mean scores for each domain, test significance with Holm-Bonferroni correction per concept.md (**When domain excluded**)
 
 **Dependencies:** Steps 0, 1 (requires IRT theta and CTT scores)
 
@@ -267,34 +277,32 @@ Validation tools MUST be used after CTT computation tool execution. Specific val
 **File 1:** data/step00_irt_theta_loaded.csv
 **Source:** Generated by Step 0
 **Format:** CSV
-**Columns:** composite_ID, theta_what, se_what, theta_where, se_where, theta_when, se_when
-**Expected Rows:** ~400
+**Columns:** composite_ID, theta_what, theta_where (NO theta_when)
+**Expected Rows:** 400
 
 **File 2:** data/step01_ctt_scores.csv
 **Source:** Generated by Step 1
 **Format:** CSV, long format
 **Columns:** composite_ID, UID, test, domain, CTT_score, n_items
-**Expected Rows:** 1200
+**Expected Rows:** 800
 
 **Processing:**
-1. Map RQ 5.1 IRT dimensions to domains:
-   - theta_what -> corresponds to "common items" (likely What domain per RQ 5.1 design)
-   - theta_where -> corresponds to "congruent items" (likely Where domain)
-   - theta_when -> corresponds to "incongruent items" (likely When domain)
-   - NOTE: Exact mapping should match RQ 5.1 dimension definitions (check RQ 5.1 1_concept.md if unclear)
+1. Map RQ 5.2.1 IRT dimensions to domains:
+   - theta_what -> What domain
+   - theta_where -> Where domain
+   - **theta_when -> EXCLUDED**
 2. Reshape IRT theta to long format for merge:
-   - Create rows: composite_ID, domain (What/Where/When), IRT_score
+   - Create rows: composite_ID, domain (What/Where), IRT_score
 3. Merge IRT and CTT on composite_ID + domain
 4. Compute Pearson correlations per domain:
    - r_What = corr(IRT_What, CTT_What)
    - r_Where = corr(IRT_Where, CTT_Where)
-   - r_When = corr(IRT_When, CTT_When)
-   - r_overall = corr(IRT_all, CTT_all) [pooled across domains]
+   - r_overall = corr(IRT_all, CTT_all) [pooled across What + Where]
 5. Compute 95% confidence intervals for each correlation (Fisher z-transformation)
 6. Test significance with Holm-Bonferroni correction:
-   - 4 tests total (What, Where, When, overall)
+   - **3 tests total** (What, Where, overall) - When excluded
    - Rank p-values from smallest to largest
-   - Compare each p to alpha/(m - k + 1) where m=4, k=rank
+   - Compare each p to alpha/(m - k + 1) where **m=3**, k=rank
    - Report BOTH uncorrected and Holm-Bonferroni corrected p-values (per Decision D068 dual reporting philosophy)
 7. Test thresholds:
    - Primary: r > 0.70 (strong convergence per psychometric standards, concept.md)
@@ -305,7 +313,7 @@ Validation tools MUST be used after CTT computation tool execution. Specific val
 **File:** results/step02_correlations.csv
 **Format:** CSV
 **Columns:**
-  - `domain` (string: What, Where, When, Overall)
+  - `domain` (string: What, Where, Overall - **NO When**)
   - `r` (float, Pearson correlation coefficient, range [-1, 1])
   - `CI_lower` (float, 95% CI lower bound)
   - `CI_upper` (float, 95% CI upper bound)
@@ -314,7 +322,7 @@ Validation tools MUST be used after CTT computation tool execution. Specific val
   - `n` (int, sample size for correlation)
   - `threshold_0.70` (boolean, TRUE if r > 0.70)
   - `threshold_0.90` (boolean, TRUE if r > 0.90)
-**Expected Rows:** 4 (What, Where, When, Overall)
+**Expected Rows:** 3 (What, Where, Overall) - **NO When**
 
 **Validation Requirement:**
 Validation tools MUST be used after correlation tool execution. Specific validation tools will be determined by rq_tools based on correlation analysis requirements (dual p-value validation per Decision D068, value range checks).
@@ -322,7 +330,7 @@ Validation tools MUST be used after correlation tool execution. Specific validat
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step02_correlations.csv: 4 rows x 9 columns (domain: object, r/CI/p/n: float64, thresholds: bool)
+- results/step02_correlations.csv: 3 rows x 9 columns (domain: object, r/CI/p/n: float64, thresholds: bool)
 
 *Value Ranges:*
 - r in [-1, 1] (correlation coefficient bounds)
@@ -334,15 +342,15 @@ Validation tools MUST be used after correlation tool execution. Specific validat
 - n > 0 (sample size must be positive)
 
 *Data Quality:*
-- Exactly 4 rows (What, Where, When, Overall)
-- All domains present (no missing domain)
+- Exactly 3 rows (What, Where, Overall) - **NO When**
+- Both domains present plus Overall (no missing domain)
 - No NaN in r, CI, or p columns (correlations must compute for all domains)
-- Expected correlation strength: r > 0.70 for at least 2/4 tests (convergence expected per hypothesis)
+- Expected correlation strength: r > 0.70 for at least 2/3 tests (convergence expected per hypothesis)
 - p_uncorrected and p_holm both present (Decision D068 dual reporting)
 
 *Log Validation:*
-- Required pattern: "Computed 4 correlations (What, Where, When, Overall)"
-- Required pattern: "Holm-Bonferroni correction applied (m=4 tests)"
+- Required pattern: "Computed 3 correlations (What, Where, Overall)"
+- Required pattern: "Holm-Bonferroni correction applied (m=3 tests)"
 - Required pattern: "VALIDATION - PASS: Dual p-values present (uncorrected + Holm)"
 - Required pattern: "[N] correlations exceed r > 0.70 threshold"
 - Required pattern: "[N] correlations exceed r > 0.90 threshold"
@@ -418,12 +426,12 @@ Validation tools MUST be used after correlation tool execution. Specific validat
 **File 1:** data/step03_irt_lmm_input.csv
 **Format:** CSV, long format
 **Columns:** composite_ID, UID, test, domain, TSVR_hours, IRT_score
-**Expected Rows:** 1200 (400 UID x test x 3 domains)
+**Expected Rows:** 800 (400 UID x test x 2 domains - When excluded)
 
 **File 2:** data/step03_ctt_lmm_input.csv
 **Format:** CSV, long format
 **Columns:** composite_ID, UID, test, domain, TSVR_hours, CTT_score
-**Expected Rows:** 1200
+**Expected Rows:** 800
 
 **File 3:** results/step03_irt_lmm_summary.txt
 **Format:** Text file with statsmodels MixedLM summary
@@ -458,8 +466,8 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step03_irt_lmm_input.csv: 1200 rows x 6 columns (composite_ID: object, UID: object, test: object, domain: object, TSVR_hours: float64, IRT_score: float64)
-- data/step03_ctt_lmm_input.csv: 1200 rows x 6 columns (composite_ID: object, UID: object, test: object, domain: object, TSVR_hours: float64, CTT_score: float64)
+- data/step03_irt_lmm_input.csv: 800 rows x 6 columns (composite_ID: object, UID: object, test: int64, domain: object, TSVR_hours: float64, IRT_score: float64)
+- data/step03_ctt_lmm_input.csv: 800 rows x 6 columns (composite_ID: object, UID: object, test: int64, domain: object, TSVR_hours: float64, CTT_score: float64)
 - results/step03_irt_lmm_summary.txt: exists, >1000 characters (full summary)
 - results/step03_ctt_lmm_summary.txt: exists, >1000 characters
 - results/step03_irt_lmm_fixed_effects.csv: ~10 rows x 5 columns
@@ -477,16 +485,16 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 - AIC/BIC > 0 (information criteria must be positive)
 
 *Data Quality:*
-- Exactly 1200 rows in both LMM input files
-- All 3 domains present for each UID x test
+- Exactly 800 rows in both LMM input files
+- Both domains present for each UID x test (What, Where - **NO When**)
 - No NaN in TSVR_hours or score columns
 - Both models converged OR both simplified to same random structure (parallelism maintained)
 - Fixed effects tables have same row count for both models (identical structure)
 - Convergence report documents decisions clearly
 
 *Log Validation:*
-- Required pattern: "Prepared IRT LMM input: 1200 rows"
-- Required pattern: "Prepared CTT LMM input: 1200 rows"
+- Required pattern: "Prepared IRT LMM input: 800 rows"
+- Required pattern: "Prepared CTT LMM input: 800 rows"
 - Required pattern: "Fitting IRT model with formula: Score ~ (TSVR_hours + log(TSVR_hours+1)) * domain + (...)"
 - Required pattern: "Fitting CTT model with formula: Score ~ (TSVR_hours + log(TSVR_hours+1)) * domain + (...)"
 - Required pattern: "IRT model converged: [True/False]"
@@ -841,15 +849,15 @@ Validation tools MUST be used after model fit comparison tool execution. Specifi
 
 **Required Columns:**
 - `composite_ID` (string, participant-test identifier)
-- `domain` (string, What/Where/When)
+- `domain` (string, What/Where - **NO When**)
 - `IRT_score` (float, IRT theta)
 - `CTT_score` (float, CTT mean)
 - `r` (float, correlation coefficient for domain - for plot annotation)
 
-**Expected Rows:** 1200 (400 UID x test x 3 domains)
+**Expected Rows:** 800 (400 UID x test x 2 domains - When excluded)
 
 **Aggregation Logic:**
-1. Reshape IRT theta to long format (composite_ID, domain, IRT_score)
+1. Reshape IRT theta to long format (composite_ID, domain, IRT_score) - **What, Where only**
 2. Merge with CTT scores on composite_ID + domain
 3. Join with correlations on domain (adds r column for annotation)
 4. Select and rename columns to match required schema
@@ -863,19 +871,19 @@ Validation tools MUST be used after model fit comparison tool execution. Specifi
 **File 3:** results/step02_correlations.csv
 
 **Processing:**
-1. Reshape IRT theta: theta_what -> What, theta_where -> Where, theta_when -> When
+1. Reshape IRT theta: theta_what -> What, theta_where -> Where (**NO theta_when**)
 2. Merge IRT and CTT on composite_ID + domain
 3. Join correlations on domain (broadcast r to all rows for that domain)
 4. Select columns: composite_ID, domain, IRT_score, CTT_score, r
-5. Validate: No NaN in score columns, all 3 domains present
+5. Validate: No NaN in score columns, both domains present (What, Where)
 
 **Output:**
 
 **File:** plots/step07_scatterplot_data.csv
 **Format:** CSV
 **Columns:** composite_ID, domain, IRT_score, CTT_score, r
-**Expected Rows:** 1200
-**Expected Domains:** What, Where, When (400 rows each)
+**Expected Rows:** 800
+**Expected Domains:** What, Where (400 rows each) - **NO When**
 
 **Validation Requirement:**
 Validation tools MUST be used after plot data preparation tool execution. Specific validation tools will be determined by rq_tools based on plot data format requirements (Option B architecture validation).
@@ -883,7 +891,7 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- plots/step07_scatterplot_data.csv: 1200 rows x 5 columns (composite_ID: object, domain: object, IRT_score: float64, CTT_score: float64, r: float64)
+- plots/step07_scatterplot_data.csv: 800 rows x 5 columns (composite_ID: object, domain: object, IRT_score: float64, CTT_score: float64, r: float64)
 
 *Value Ranges:*
 - IRT_score in [-3, 3] (typical IRT ability range)
@@ -891,15 +899,15 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 - r in [-1, 1] (correlation coefficient)
 
 *Data Quality:*
-- Exactly 1200 rows (400 UID x test x 3 domains)
-- All 3 domains present (What, Where, When)
+- Exactly 800 rows (400 UID x test x 2 domains)
+- Both domains present (What, Where) - **NO When**
 - No NaN in IRT_score or CTT_score columns (all scores computed)
 - r values match correlations from Step 2 (same per domain)
 - Expected: 400 rows per domain (balanced design)
 
 *Log Validation:*
-- Required pattern: "Plot data preparation complete: 1200 rows created"
-- Required pattern: "All domains represented: What, Where, When"
+- Required pattern: "Plot data preparation complete: 800 rows created"
+- Required pattern: "All domains represented: What, Where"
 - Required pattern: "IRT_score range: [min, max]"
 - Required pattern: "CTT_score range: [min, max]"
 - Forbidden patterns: "ERROR", "NaN values detected", "Missing domain"
@@ -936,14 +944,14 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 
 **Required Columns:**
 - `TSVR_hours` (float, time since encoding)
-- `domain` (string, What/Where/When)
+- `domain` (string, What/Where - **NO When**)
 - `model` (string, IRT/CTT)
 - `mean_score` (float, observed mean per time x domain x model)
 - `CI_lower` (float, 95% CI lower bound)
 - `CI_upper` (float, 95% CI upper bound)
 - `n` (int, sample size for mean)
 
-**Expected Rows:** ~24 (4 timepoints x 3 domains x 2 models)
+**Expected Rows:** ~16 (4 timepoints x 2 domains x 2 models) - When excluded
 
 **Aggregation Logic:**
 1. For IRT data: Group by TSVR_hours + domain, compute mean(IRT_score), 95% CI, count
@@ -963,15 +971,15 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 2. Aggregate CTT: mean_score, CI_lower, CI_upper per TSVR_hours x domain
 3. Add model identifier
 4. Combine datasets
-5. Validate: All 3 domains present, ~4 unique TSVR_hours values (timepoints), 2 models
+5. Validate: Both domains present (What, Where), ~4 unique TSVR_hours values (timepoints), 2 models
 
 **Output:**
 
 **File:** plots/step08_trajectory_data.csv
 **Format:** CSV
 **Columns:** TSVR_hours, domain, model, mean_score, CI_lower, CI_upper, n
-**Expected Rows:** ~24 (varies by exact number of unique TSVR_hours values)
-**Expected Domains:** What, Where, When
+**Expected Rows:** ~16 (varies by exact number of unique TSVR_hours values)
+**Expected Domains:** What, Where - **NO When**
 **Expected Models:** IRT, CTT
 
 **Validation Requirement:**
@@ -980,7 +988,7 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- plots/step08_trajectory_data.csv: ~24 rows x 7 columns (TSVR_hours: float64, domain: object, model: object, mean_score: float64, CI_lower: float64, CI_upper: float64, n: int64)
+- plots/step08_trajectory_data.csv: ~16 rows x 7 columns (TSVR_hours: float64, domain: object, model: object, mean_score: float64, CI_lower: float64, CI_upper: float64, n: int64)
 
 *Value Ranges:*
 - TSVR_hours in [0, 200] (hours since encoding)
@@ -989,8 +997,8 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 - n > 0 (sample size must be positive)
 
 *Data Quality:*
-- ~24 rows (4 timepoints x 3 domains x 2 models)
-- All 3 domains present (What, Where, When)
+- ~16 rows (4 timepoints x 2 domains x 2 models)
+- Both domains present (What, Where) - **NO When**
 - Both models present (IRT, CTT)
 - No NaN in mean_score, CI_lower, CI_upper columns
 - Expected: ~100 observations per timepoint (n ~= 100)
@@ -999,7 +1007,7 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 - Required pattern: "Aggregated IRT trajectories: [N] timepoint x domain combinations"
 - Required pattern: "Aggregated CTT trajectories: [N] timepoint x domain combinations"
 - Required pattern: "Combined trajectory data: [N] rows (IRT + CTT)"
-- Required pattern: "All domains represented: What, Where, When"
+- Required pattern: "All domains represented: What, Where" (When EXCLUDED)
 - Required pattern: "Both models represented: IRT, CTT"
 - Forbidden patterns: "ERROR", "NaN values detected", "Missing domain or model"
 - Acceptable warnings: None expected
@@ -1021,20 +1029,19 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 
 ### IRT Theta Reshaping (Wide to Long)
 
-**Input Format (from RQ 5.1):**
+**Input Format (from RQ 5.2.1):**
 - File: data/step00_irt_theta_loaded.csv
 - Format: Wide (one row per composite_ID)
-- Columns: composite_ID, theta_what, se_what, theta_where, se_where, theta_when, se_when
+- Columns: composite_ID, theta_what, theta_where (NO theta_when - EXCLUDED)
 
-**Reshape Logic:**
+**Reshape Logic (When EXCLUDED):**
 - Map dimensions to domains:
-  - theta_what -> What domain (common items per RQ 5.1 design)
-  - theta_where -> Where domain (congruent items)
-  - theta_when -> When domain (incongruent items)
-- Create three rows per composite_ID:
-  - Row 1: composite_ID, domain="What", IRT_score=theta_what, SE=se_what
-  - Row 2: composite_ID, domain="Where", IRT_score=theta_where, SE=se_where
-  - Row 3: composite_ID, domain="When", IRT_score=theta_when, SE=se_when
+  - theta_what -> What domain
+  - theta_where -> Where domain
+  - theta_when -> EXCLUDED (floor effects, insufficient items)
+- Create two rows per composite_ID:
+  - Row 1: composite_ID, domain="What", IRT_score=theta_what
+  - Row 2: composite_ID, domain="Where", IRT_score=theta_where
 
 **Output Format:**
 - File: Used internally for merging with CTT (not saved separately)

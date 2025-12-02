@@ -69,11 +69,14 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: "2025-12-02T18:30:00Z"
+  timestamp: "2025-12-03T06:30:00Z"
   context_dump: |
-    Results validated for scientific plausibility
-    Plausibility acceptable (0 anomalies flagged)
-    Summary documented in results/summary.md
+    CORRECTED results summary created: results/summary.md
+    CRITICAL MODEL CORRECTION: Random slopes on log_TSVR (not TSVR_hours)
+    log_TSVR slope variance: 0.031 (7.75x larger than wrong TSVR_hours Var=0.0004)
+    Model fit improved: AIC reduced 218 units (Log-Likelihood improved 109 units)
+    NULL finding unchanged: All 4 three-way Age x Paradigm x Time interactions p>0.7
+    Key insight: Meaningful individual differences in forgetting rate NOW revealed with correct specification
 
 analysis_steps:
   step00_load_theta_age: success

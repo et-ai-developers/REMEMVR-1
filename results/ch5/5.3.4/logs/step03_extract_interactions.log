@@ -90,3 +90,63 @@ AttributeError: 'NoneType' object has no attribute 'f_locals'
   Significant (p_bonferroni < 0.025): 0
   Output: data/step03_interaction_terms.csv
   Ready for Step 4 (compute age effects and post-hoc contrasts)
+[START] Step 03: Extract 3-Way Interaction Terms
+[LOAD] Loading fixed effects from Step 2...
+[LOADED] 18 fixed effects from /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step02_fixed_effects.csv
+[INFO] All fixed effect terms:
+  Intercept
+  C(paradigm, Treatment('IFR'))[T.ICR]
+  C(paradigm, Treatment('IFR'))[T.IRE]
+  TSVR_hours
+  TSVR_hours:C(paradigm, Treatment('IFR'))[T.ICR]
+  TSVR_hours:C(paradigm, Treatment('IFR'))[T.IRE]
+  log_TSVR
+  log_TSVR:C(paradigm, Treatment('IFR'))[T.ICR]
+  log_TSVR:C(paradigm, Treatment('IFR'))[T.IRE]
+  Age_c
+  Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+  Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+  TSVR_hours:Age_c
+  TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+  TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+  log_TSVR:Age_c
+  log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+  log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+[FILTER] Identifying 3-way interaction terms...
+[FILTERED] Found 4 three-way interaction terms
+  Found: TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+  Found: TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+  Found: log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+  Found: log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+[BONFERRONI] Applying Bonferroni correction for 2 time transformations...
+[INFO] Bonferroni multiplier: 2
+[INFO] Family-wise alpha: 0.025
+[RESULTS] 3-Way Interaction Terms:
+  TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+    coef=0.000031, SE=0.000083, z=0.371
+    p_uncorrected=0.7105, p_bonferroni=1.0000
+  TSVR_hours:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+    coef=-0.000018, SE=0.000083, z=-0.223
+    p_uncorrected=0.8237, p_bonferroni=1.0000
+  log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.ICR]
+    coef=-0.001044, SE=0.002898, z=-0.360
+    p_uncorrected=0.7187, p_bonferroni=1.0000
+  log_TSVR:Age_c:C(paradigm, Treatment('IFR'))[T.IRE]
+    coef=0.000743, SE=0.002898, z=0.256
+    p_uncorrected=0.7977, p_bonferroni=1.0000
+[SAVE] Saving interaction terms...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step03_interaction_terms.csv
+[INFO] Saved 4 interaction terms with 7 columns
+[VALIDATION] Checking output format...
+[PASS] Row count: 4 three-way interaction terms
+[PASS] Column count: 7 columns
+[PASS] Dual p-values present (Decision D068 compliance)
+[PASS] No NaN values
+[INFO] Significant at Bonferroni alpha=0.025: 0 of 4 terms
+[SUCCESS] Step 03 complete
+[SUMMARY]
+  Extracted: 4 three-way interaction terms
+  Bonferroni correction: × 2
+  Significant (p_bonferroni < 0.025): 0
+  Output: data/step03_interaction_terms.csv
+  Ready for Step 4 (compute age effects and post-hoc contrasts)

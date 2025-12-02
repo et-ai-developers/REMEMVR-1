@@ -76,3 +76,46 @@ KeyError: 'paradigm'
   No significant age effects on memory performance at Bonferroni-corrected level
   No significant differences in age effects between paradigms
   Age-related memory changes are similar across IFR, ICR, and IRE
+[START] Step 04: Compute Age Effects and Post-Hoc Contrasts
+[LOAD] Loading fixed effects from Step 2...
+[LOADED] 18 fixed effects from /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step02_fixed_effects.csv
+[EXTRACT] Extracting age effect components...
+[INFO] Age_c main effect: -0.011515 (SE=0.007315)
+[INFO] Age_c × ICR: 0.001702 (SE=0.006240)
+[INFO] Age_c × IRE: -0.001911 (SE=0.006240)
+[COMPUTE] Computing simple slopes (age effect by paradigm)...
+[RESULTS] Age effects by paradigm:
+  IFR: -0.011515 (SE=0.007315, z=-1.574, p=0.1155)
+  ICR: -0.009812 (SE=0.009615, z=-1.021, p=0.3075)
+  IRE: -0.013426 (SE=0.009615, z=-1.396, p=0.1626)
+[SAVE] Creating age effects dataframe...
+[COMPUTE] Computing pairwise contrasts...
+[RESULTS] Pairwise contrasts (Age effect differences):
+  IFR vs ICR: 0.001702 (SE=0.006240, z=0.273, p=0.7850)
+  IFR vs IRE: -0.001911 (SE=0.006240, z=-0.306, p=0.7594)
+  ICR vs IRE: -0.003614 (SE=0.008824, z=-0.409, p=0.6822)
+[SAVE] Creating contrasts dataframe...
+[SAVE] Saving output files...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step04_age_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.4/data/step04_contrasts.csv
+[VALIDATION] Checking output format...
+[PASS] Age effects: 3 paradigms
+[PASS] All paradigms present: IFR, ICR, IRE
+[PASS] Contrasts: 3 pairwise comparisons
+[PASS] Dual p-values present (Decision D068 compliance)
+[INFO] Significant age effects (Bonferroni): 0 of 3
+[INFO] Significant contrasts (Bonferroni): 0 of 3
+[SUCCESS] Step 04 complete
+[SUMMARY]
+  Age effects computed for 3 paradigms
+  IFR age effect: -0.0115 (p=0.1155)
+  ICR age effect: -0.0098 (p=0.3075)
+  IRE age effect: -0.0134 (p=0.1626)
+  Significant contrasts: 0 of 3
+  Output: data/step04_age_effects.csv, data/step04_contrasts.csv
+  Ready for Step 5 (prepare plot data by age tertiles)
+
+[INTERPRETATION]
+  No significant age effects on memory performance at Bonferroni-corrected level
+  No significant differences in age effects between paradigms
+  Age-related memory changes are similar across IFR, ICR, and IRE

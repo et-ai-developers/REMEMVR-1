@@ -49,3 +49,33 @@ ValueError: `x` and `y` must have length at least 2.
 [VALIDATION] p_holm >= p_uncorrected: PASS
 [VALIDATION] Exactly 4 rows: PASS
 [SUCCESS] Step 02 complete
+[START] Step 02: Correlation Analysis (IRT vs CTT per Domain)
+[LOAD] Loading input data...
+[LOADED] step00_irt_theta_loaded.csv (400 rows, 3 cols)
+[LOADED] step01_ctt_scores.csv (800 rows, 6 cols)
+[RESHAPE] Reshaping IRT theta to long format (When excluded)...
+[RESHAPE] IRT long format: 800 rows (When excluded)
+[MERGE] Merging IRT and CTT scores...
+[MERGED] 800 rows with both IRT and CTT scores
+[ANALYSIS] Computing Pearson correlations per domain (When excluded)...
+[CORRELATION] what: r=0.906, p=0.0000, n=400
+[CORRELATION] where: r=0.970, p=0.0000, n=400
+[ANALYSIS] Computing overall correlation (all domains pooled)...
+[CORRELATION] Overall: r=0.792, p=0.0000, n=800
+[CORRECTION] Applying Holm-Bonferroni correction (m=3 tests - When excluded)...
+[CORRECTION] Holm-Bonferroni correction applied
+[D068] what: p_uncorrected=0.0000, p_holm=0.0000
+[D068] where: p_uncorrected=0.0000, p_holm=0.0000
+[D068] Overall: p_uncorrected=0.0000, p_holm=0.0000
+[SAVE] Saving correlation results...
+[SAVED] step02_correlations.csv (3 rows, 9 cols)
+[VALIDATION] Running validate_correlation_test_d068...
+[VALIDATION] valid: True
+[VALIDATION] d068_compliant: True
+[VALIDATION] message: Custom validation: 2 required columns.
+[VALIDATION] Checking additional criteria...
+[VALIDATION] r values in [-1, 1]: PASS
+[VALIDATION] CI_lower < r < CI_upper: PASS
+[VALIDATION] p_holm >= p_uncorrected: PASS
+[VALIDATION] Exactly 3 rows (When excluded): PASS
+[SUCCESS] Step 02 complete

@@ -9,24 +9,20 @@
 
 ## What We're Doing
 
-**Current Task:** Chapter 5 RQ Pipeline Execution (15/31 RQs complete, 9 ready for g_code)
+**Current Task:** Chapter 5 RQ Pipeline Execution (18/31 RQs complete, 9 ready for g_code)
 
-**Context:** Systematically executing RQ analyses across Chapter 5. Recently completed RQ 5.4.3 (Age x Schema Congruence x Time interaction). NULL RESULT: No significant 3-way interactions, challenges schema compensation hypothesis. Consistent with RQ 5.3.4 null pattern (Age effects uniform across task/item variations in VR).
+**Context:** Systematically executing RQ analyses across Chapter 5. **CRITICAL SESSION:** Discovered and fixed wrong random slope specification in 3 RQs. Model correction revealed meaningful individual differences in forgetting rates that were previously masked by using linear TSVR_hours instead of log_TSVR.
 
 **Completion Status:**
 - **RQ 5.1.1-5.1.4:** ✅ COMPLETE (baseline analyses)
-- **RQ 5.2.1-5.2.5:** ✅ COMPLETE (domain analyses)
-- **RQ 5.3.1-5.3.4:** ✅ COMPLETE (paradigm analyses)
-- **RQ 5.4.1-5.4.3:** ✅ COMPLETE (congruence analyses)
+- **RQ 5.2.1-5.2.4:** ✅ COMPLETE (domain analyses) - **5.2.4 CORRECTED**
+- **RQ 5.3.1-5.3.4:** ✅ COMPLETE (paradigm analyses) - **5.3.4 CORRECTED**
+- **RQ 5.4.1-5.4.3:** ✅ COMPLETE (congruence analyses) - **5.4.3 CORRECTED**
 - **Ready for g_code:** 9 RQs (5.1.5, 5.2.6, 5.2.7, 5.3.6-5.3.9, 5.4.5-5.4.7)
 - **BLOCKED (tools=FAIL):** 4 RQs (5.1.6, 5.2.8, 5.3.5, 5.4.4) - missing GLMM/CTT tools
 
-**Current Token Usage:** ~115k / 200k (58%) - Healthy
-
 **Related Documents:**
-- `results/ch5/rq_status.tsv` - RQ tracking (17 COMPLETE, 14 ready, 4 BLOCKED)
-- `results/ch5/5.2.3/` - Most recent completed RQ (Age x Domain interaction)
-- `tools/plotting.py` - New plot_piecewise_trajectory() function (lines 844-1005)
+- `results/ch5/rq_status.tsv` - RQ tracking (18 COMPLETE, 13 ready, 4 BLOCKED)
 - Archive: `rq_5.2.3_complete_execution_age_domain_interaction.md` (Session 2025-12-03 01:30)
 - Archive: `rq_5.2.2_partial_execution_when_exclusion_consolidation.md` (Sessions 2025-12-02 23:15 + 2025-12-03 00:15)
 - Archive: `rq_5.4.3_complete_execution_age_schema_congruence.md` (Session 2025-12-02 22:20)
@@ -38,21 +34,21 @@
 ### Completed
 
 - **Phases 0-28:** All complete (13 v4.X agents built and tested)
-- **RQ 5.1-5.4 Baseline Analyses:** 15/31 RQs COMPLETE with validated IRT settings
+- **RQ 5.1-5.4 Baseline Analyses:** 18/31 RQs COMPLETE with validated IRT settings
   - General (5.1.1-5.1.4): 4/6 COMPLETE
-  - Domains (5.2.1-5.2.5): 5/8 COMPLETE
-  - Paradigms (5.3.1-5.3.4): 4/9 COMPLETE
-  - Congruence (5.4.1-5.4.3): 3/8 COMPLETE
-- **Mass Parallel Execution:** 18 RQs through rq_planner → rq_tools → rq_analysis (Session 18:30)
-- **New Tools Created:**
-  - plot_piecewise_trajectory() - Dual-scale piecewise trajectories (D069 compliant)
-  - K-means clustering suite (bootstrap stability, silhouette validation)
+  - Domains (5.2.1-5.2.4): 4/8 COMPLETE (5.2.4 with corrected model)
+  - Paradigms (5.3.1-5.3.4): 4/9 COMPLETE (5.3.4 with corrected model)
+  - Congruence (5.4.1-5.4.3): 3/8 COMPLETE (5.4.3 with corrected model)
+- **CRITICAL MODEL CORRECTION (Session 2025-12-03 06:00):**
+  - Fixed random slope specification in 3 RQs (5.2.4, 5.3.4, 5.4.3)
+  - Changed from TSVR_hours to log_TSVR per ROOT RQ model selection
+  - Revealed meaningful individual differences previously masked
 - **ALL 26 TOOLS:** 258/261 tests GREEN (98.9%), production-validated
 
 ### Next Actions
 
 **Immediate:**
-- Execute remaining 12 ready RQs via g_code (5.1.5, 5.2.6-5.2.7, 5.3.4, 5.3.6-5.3.9, 5.4.3, 5.4.5-5.4.7)
+- Execute remaining 9 ready RQs via g_code (5.1.5, 5.2.6-5.2.7, 5.3.6-5.3.9, 5.4.5-5.4.7)
 - Prioritize clustering RQs (5.2.7, 5.3.8, 5.4.7) - same pipeline as 5.1.5
 
 **Strategic:**
@@ -148,145 +144,21 @@ Completed remaining Steps 03-05 with When domain exclusion:
 | 04 | Consolidation benefit | 2 domain benefits | ✅ |
 | 05 | Prepare plot data | 8 rows (2 domains × 4 tests) | ✅ |
 
-**Code Updates for When Exclusion:**
-- `step03_compute_contrasts.py`: Reduced from 6 contrasts to 3, Bonferroni α=0.0167
-- `step04_compute_consolidation_benefit.py`: Reduced from 3 domains to 2
-- `step05_prepare_piecewise_plot_data.py`: Reduced from 12 rows to 8, updated dependency from RQ 5.1.1 to RQ 5.2.1
+**Key Finding: NO Domain-Specific Consolidation Effects** - All contrasts p > 0.68
 
-**2. RQ 5.2.2 Statistical Results (Final)**
+**2. RQ 5.2.3 Documentation Updated for When Domain Exclusion**
 
-**Key Finding: NO Domain-Specific Consolidation Effects**
-- All 3 contrasts p > 0.68 (none significant)
-- Where-What Early: β=0.023, p=0.78
-- Where-What Late: β=-0.014, p=0.68
-- Where slope change vs What: β=0.037, p=0.67
-
-**Consolidation Benefit (Both domains similar):**
-- Where: -0.348 [-0.475, -0.222] (Rank 1)
-- What: -0.385 [-0.512, -0.259] (Rank 2)
-- Both CIs overlap substantially → no significant difference
-
-**Conclusion:** Strong consolidation effect (~6× slope reduction) is domain-general, NOT domain-specific. Hypothesis NOT supported.
-
-**3. RQ 5.2.2 Validation Pipeline Complete**
-
-| Agent | Status | Key Output |
-|-------|--------|------------|
-| rq_inspect | ✅ PASS | All 4 layers validated |
-| rq_plots | ✅ PASS | Regenerated with 2 domains (316KB + 253KB) |
-| rq_results | ✅ PASS | summary.md created, plot currency fixed |
-
-**Plot Regeneration Critical:** rq_results identified plots from Nov 30 (3 domains) didn't match Dec 2 analysis (2 domains). Plots regenerated correctly.
-
-**4. RQ 5.2.3 Documentation Updated for When Domain Exclusion**
-
-Updated 3 files for When domain exclusion:
-
-**1_concept.md Updates:**
-- Added "Note on When Domain Exclusion" section
-- Changed "What, Where, When" → "What, Where" throughout
-- Updated hypothesis: When > Where > What → Where > What
-- Updated domain checkboxes: When marked as EXCLUDED
-- Reduced expected contrasts from 3 pairwise to 1 (Where vs What)
-- Updated Bonferroni correction references
-
-**2_plan.md Updates:**
-- Added When exclusion header
-- Changed row count expectations: 1200 → 800
-- Updated domain count: 3 → 2
-- Changed data source: RQ 5.1.1 → RQ 5.2.1
-- Updated validation criteria throughout
-
-**step00_get_data_from_rq51.py Updates:**
-- Excluded `theta_when` from pd.melt() value_vars
-- Updated domain_mapping to exclude When
-- Changed expected rows: 1200 → 800
-- Updated validation: domains = {'What', 'Where'} instead of {'What', 'Where', 'When'}
-
-**5. Files Created/Modified**
-
-**RQ 5.2.2 Code Files Modified (3):**
-- `results/ch5/5.2.2/code/step03_compute_contrasts.py`
-- `results/ch5/5.2.2/code/step04_compute_consolidation_benefit.py`
-- `results/ch5/5.2.2/code/step05_prepare_piecewise_plot_data.py`
-
-**RQ 5.2.2 Data Files Created (3):**
-- `results/ch5/5.2.2/results/step03_planned_contrasts.csv`
-- `results/ch5/5.2.2/results/step04_consolidation_benefit.csv`
-- `results/ch5/5.2.2/plots/step05_piecewise_theta_data.csv` + probability
-
-**RQ 5.2.2 Plots Regenerated (2):**
-- `results/ch5/5.2.2/plots/piecewise_trajectory_theta.png`
-- `results/ch5/5.2.2/plots/piecewise_trajectory_probability.png`
-
-**RQ 5.2.3 Documentation Files Modified (3):**
-- `results/ch5/5.2.3/docs/1_concept.md`
-- `results/ch5/5.2.3/docs/2_plan.md`
-- `results/ch5/5.2.3/code/step00_get_data_from_rq51.py`
-
-**Session Metrics:**
-
-**Tokens:**
-- Session start: ~5k (after /refresh)
-- Session end: ~55k (at /save)
-- Delta: ~50k consumed
-
-**Bug Fixes:** 0 new bugs this session (code updates were planned modifications)
-
-**Key Insights:**
-
-**When Domain Exclusion Pattern:**
-- Floor effect (6-9% probability) makes When domain unusable for forgetting analysis
-- All 5.2.X RQs must exclude When for valid results
-- Row counts change: N×4×3 → N×4×2 (100×4×3=1200 → 100×4×2=800)
-- Contrast counts reduce by 50% (6→3 or 3→1 depending on RQ)
-
-**Domain-General Consolidation:**
-- Strong consolidation effect exists (~6× slope reduction Early→Late)
-- Effect is domain-general (What ≈ Where)
-- Spatial memory (Where) does NOT show greater consolidation benefit
-- Challenges domain-specificity hypotheses from memory literature
-
-**RQ 5.2.3 Ready for Execution:**
-- Documentation updated for When exclusion
-- Step 00 code updated for When filter
-- Remaining code files (step01-step05) will need similar row count updates
-- Expect similar null result based on RQ 5.3.4 pattern (Age effects uniform)
-
-**Active Topics (For context-manager):**
-
-Topic naming format: [topic][task][subtask]
-
-- rq_5.2.2_complete_execution_when_exclusion (Session 2025-12-03 00:15: steps_03_04_05_completed step03_3_contrasts_all_ns step04_2_domain_benefits_similar step05_8_rows_plot_data, when_exclusion 2_domains_not_3 800_rows_not_1200 bonferroni_0.0167, final_results NO_DOMAIN_SPECIFIC_CONSOLIDATION all_contrasts_p_gt_0.68 what_equals_where consolidation_benefit_similar hypothesis_NOT_supported, validation rq_inspect_pass rq_plots_regenerated rq_results_summary_created, chapter_5_progress 16/31_complete_52%)
-
-- rq_5.2.3_documentation_update_when_exclusion (Session 2025-12-03 00:15: files_modified 1_concept.md 2_plan.md step00_code, updates hypothesis_reduced 3_domains_to_2 1200_rows_to_800 data_source_RQ521, ready_for_execution step00_filter_updated steps_01_05_need_row_count_updates)
-
-**Relevant Archived Topics (from context-finder):**
-- when_domain_anomalies.md (2025-11-23 04:00: floor effect discovery, 6-9% probability)
-- rq_5.3.4_complete_execution_age_paradigm_interaction.md (2025-12-02 21:45: null Age interaction pattern)
-- rq_status_creation_root_validation_pipeline_analysis.md (2025-12-02 16:30: When exclusion tracking)
+Updated 3 files: 1_concept.md, 2_plan.md, step00_get_data_from_rq51.py
 
 **End of Session (2025-12-03 00:15)**
-
-**Status:** ✅ **RQ 5.2.2 COMPLETE - PUBLICATION READY** + **RQ 5.2.3 DOCUMENTATION UPDATED**
-
-**RQ 5.2.2:** Executed all 6 steps for domain-specific consolidation with When domain exclusion. **FINAL FINDING:** Strong consolidation effect (~6× slope reduction) is domain-GENERAL, not domain-specific. What ≈ Where (all contrasts p > 0.68). Validated via rq_inspect, rq_plots (regenerated), rq_results.
-
-**RQ 5.2.3:** Documentation updated for When exclusion (1_concept.md, 2_plan.md, step00 code). Ready for execution but step01-step05 will need row count validation updates.
-
-**Chapter 5 Progress:** 16/31 RQs complete (52%), 8 ready for execution.
 
 ## Session (2025-12-03 01:30)
 
 **Task:** RQ 5.2.3 Complete Execution - Age × Domain × Time 3-Way Interaction LMM
 
-**Context:** User requested step-by-step execution of RQ 5.2.3 (Age × Domain interaction) with When domain exclusion. Executed all steps, debugged convergence issues, ran full validation pipeline.
-
 **Major Accomplishments:**
 
 **1. Complete 6-Step Analysis Pipeline Executed**
-
-All 6 steps executed successfully with debugging:
 
 | Step | Name | Output | Status |
 |------|------|--------|--------|
@@ -297,164 +169,154 @@ All 6 steps executed successfully with debugging:
 | 04 | Compute age effects | 2 domain slopes | ✅ |
 | 05 | Prepare plot data | 1770 rows, 2 domains × 3 tertiles | ✅ |
 
-**2. Critical Bug Fixes During Execution**
+**2. Critical Bug Fixes:**
+- Step 00: Data source correction (RQ 5.1.1 → RQ 5.2.1)
+- Step 02: Random effects convergence failure → intercepts only
 
-**Step 00 - Data source correction:**
-- Original code referenced RQ 5.1.1 (wrong format - overall theta only)
-- Fixed: Changed to RQ 5.2.1/data/step04_lmm_input.csv (domain-specific theta in LONG format)
-- Already had When excluded by filtering `domain.isin(['what', 'where'])`
+**Key Finding: NULL RESULT** - Age effects on forgetting do NOT differ between What and Where domains (p > 0.4)
 
-**Step 02 - Random effects convergence failure:**
-- Initial model with random slopes `(TSVR_hours | UID)` failed to converge
-- Error: `Gradient optimization failed, |grad| = 114.638457`
-- Error: `Hessian matrix not positive definite`
-- **Fix:** Changed to random intercepts only `(1 | UID)`
-- Root cause: Complex fixed effects (11 terms) + reduced sample (800 rows) + random slopes = over-parameterization
-- **DOCUMENTED AS MAJOR LIMITATION** in summary.md
+**Random Effects Limitation Documented:** Complex fixed effects + reduced sample forced simplification to intercepts-only.
 
-**3. Statistical Results Summary**
+**End of Session (2025-12-03 01:30)**
 
-**Model Fit:**
-- 3-way Age × Domain × Time interaction LMM
-- Random intercepts only (convergence fix)
-- 800 observations, 100 groups
-- Log-Likelihood: -760.64, AIC: 1549.27, BIC: 1614.86
-- Converged: TRUE
+## Session (2025-12-03 06:00)
 
-**Key Finding: NULL RESULT - Hypothesis NOT SUPPORTED**
+**Task:** CRITICAL MODEL CORRECTION - Fix Random Slope Specification in 3 RQs
 
-**3-Way Interactions (primary hypothesis):**
-| Term | β | SE | z | p (uncorr) | p (Bonf) |
-|------|---|---|---|------------|----------|
-| TSVR_hours:Age_c:domain[Where] | -0.0001 | 0.0001 | -0.68 | 0.495 | 0.990 |
-| log_TSVR:Age_c:domain[Where] | 0.0025 | 0.003 | 0.78 | 0.438 | 0.876 |
+**Context:** User discovered RQ 5.2.4 was using wrong random slope specification (TSVR_hours instead of log_TSVR). Investigation revealed same error in RQ 5.3.4 and 5.4.3. ROOT RQ analyses (5.2.1, 5.3.1, 5.4.1) ALL selected Log model as best fit, meaning random slopes should be on log-transformed time.
 
-Both p > 0.4 (not borderline, clear null)
+**Major Accomplishments:**
 
-**Domain-Specific Age Effects (at Day 3, TSVR=72h):**
-| Domain | Age Slope (θ/year) | SE | p |
-|--------|-------------------|-----|-------|
-| What | -0.000014 | 0.000041 | 0.737 |
-| Where | +0.000014 | 0.000041 | 0.737 |
+**1. CRITICAL ERROR DISCOVERY**
 
-Both effectively zero and non-significant (identical magnitude, opposite signs = numerical noise)
+**The Problem:**
+- RQ 5.2.4, 5.3.4, 5.4.3 all had `re_formula="~TSVR_hours"` (linear time)
+- But ROOT RQ analyses established Log model as best:
+  - RQ 5.2.1: Log (AIC weight=61.9%)
+  - RQ 5.3.1: Log (AIC weight=99.99%)
+  - RQ 5.4.1: Log (AIC weight=100%)
+- Random slope should align with dominant fixed effects time transformation
 
-**Interpretation:**
-- Age does NOT differentially affect forgetting rate between What and Where domains
-- Neither domain shows a significant age effect on forgetting at Day 3
-- Consistent with RQ 5.2.2 (domain-general consolidation) - forgetting is uniform across domains
-- Strong consolidation effect exists but applies equally to all ages and both domains
+**The Symptom:**
+- All three RQs showed TSVR_hours Var = 0.000 (boundary estimate)
+- This MASKED individual differences in forgetting rates
+- Models "converged" but estimated wrong variance components
 
-**4. Final Validation Pipeline**
+**2. FIXES APPLIED TO 3 RQs**
 
-| Agent | Status | Key Output |
-|-------|--------|------------|
-| rq_inspect | ✅ PASS | All 4 layers validated, NULL result scientifically valid |
-| rq_plots | ✅ PASS | plots.py updated for 2 domains, plot regenerated |
-| rq_results | ✅ PASS | summary.md updated with random effects limitation |
+| RQ | File Modified | Previous (WRONG) | Corrected |
+|----|---------------|------------------|-----------|
+| 5.2.4 | step03_fit_lmm.py | `re_formula="TSVR_hours"` | `re_formula="log_TSVR"` |
+| 5.3.4 | step02_fit_lmm.py | `re_formula="~TSVR_hours"` | `re_formula="~log_TSVR"` |
+| 5.4.3 | step02_fit_lmm.py | `re_formula='~TSVR_hours'` | `re_formula='~log_TSVR'` |
 
-**5. Random Effects Limitation Documentation**
+**3. RE-EXECUTION RESULTS**
 
-User raised important methodological question: "Why random intercepts only?"
+| RQ | Previous Var | Corrected Var | Improvement |
+|----|--------------|---------------|-------------|
+| **5.2.4 IRT** | 0.000 | **0.021** | IRT detects individual forgetting rates |
+| **5.2.4 CTT** | 0.000 | 0.000 (boundary) | CTT still can't detect (key finding!) |
+| **5.3.4** | 0.0004 | **0.031** | 7.75× more variance detected |
+| **5.4.3** | 0.000 | **0.019** | Meaningful individual differences |
 
-**Documentation Added to summary.md:**
+**4. KEY FINDINGS FROM CORRECTED MODELS**
 
-**What Failed:**
-- Random slopes model: `ConvergenceWarning: Maximum Likelihood optimization failed`
-- Gradient = 114.6, Hessian not positive definite
+**RQ 5.2.4 (IRT-CTT Convergent Validity):**
+- **CRITICAL FINDING:** IRT detects individual forgetting rate variance (0.021), CTT cannot (0.000)
+- Static convergence exceptional: What r=0.906, Where r=0.970
+- **Dynamic divergence:** IRT enables person-specific trajectories, CTT limited to group-average
+- This supports hypothesis that IRT superior for individual trajectory modeling
 
-**Why Random Slopes Matter:**
-- Would model individual differences in forgetting rate
-- Age might predict individual slope variation (the core hypothesis)
-- Without random slopes, model assumes uniform forgetting rates
+**RQ 5.3.4 (Age × Paradigm):**
+- NULL finding ROBUST: No significant 3-way interactions (all p > 0.7)
+- Age effects uniform across IFR, ICR, IRE paradigms
+- Model fit improved: AIC 2427 → 2209 (ΔAIC = -218)
 
-**Consequences:**
-1. Assumed uniform forgetting rates (potentially biased)
-2. Individual slope variation absorbed into residual
-3. If slopes correlate with Age/Domain, fixed effects may be biased
-4. Type I error inflation risk (Barr et al., 2013)
+**RQ 5.4.3 (Age × Congruence):**
+- NULL finding ROBUST: No significant 3-way interactions (all p > 0.15)
+- Age effects uniform across Common, Congruent, Incongruent items
 
-**Caveat:** Given strong null result (p > 0.4), limitation unlikely to change conclusion
+**5. METHODOLOGICAL LESSON DOCUMENTED**
 
-**Recommended Sensitivity Analyses:**
-1. Simpler fixed effects + random slopes
-2. Bayesian mixed model (brms)
-3. Two-stage approach
-4. Alternative optimizers
+**Rule:** Random slopes must align with dominant fixed effects time transformation.
+- If log_TSVR is dominant fixed effect, random slopes should be on log_TSVR
+- Using TSVR_hours random slopes when forgetting is logarithmic underestimates variance
+- Always check ROOT RQ model selection before specifying random slopes in derivative RQs
 
-**6. Files Created/Modified**
+**6. RQ 5.4.1 VERIFIED CORRECT**
 
-**Code Files Updated (6):**
-- `results/ch5/5.2.3/code/step00_get_data_from_rq51.py` (data source changed to RQ 5.2.1)
-- `results/ch5/5.2.3/code/step01_prepare_lmm_input.py` (row count 800)
-- `results/ch5/5.2.3/code/step02_fit_lmm.py` (random intercepts only)
-- `results/ch5/5.2.3/code/step03_extract_interactions.py` (2 terms only)
-- `results/ch5/5.2.3/code/step04_compute_contrasts.py` (2 domains)
-- `results/ch5/5.2.3/code/step05_prepare_plot_data.py` (2 domains)
+- Log model uses `re_formula="~TSVR_log"` (line 94) - CORRECT
+- Other models (Linear, Quadratic, Lin+Log, Quad+Log) use TSVR_hours but those aren't selected
+- Since Log model was selected and has correct spec, RQ 5.4.1 is fine
 
-**Data Files Created:**
-- `data/step00_theta_from_rq51.csv` (800 rows)
-- `data/step00_tsvr_from_rq51.csv` (400 rows)
-- `data/step00_age_from_dfdata.csv` (100 rows)
-- `data/step01_lmm_input.csv` (800 rows)
-- `data/step02_lmm_model.pkl`
-- `data/step02_lmm_summary.txt`
-- `data/step02_fixed_effects.csv` (13 terms)
-- `data/step03_interaction_terms.csv` (2 terms)
-- `data/step04_age_effects_by_domain.csv` (2 rows)
-- `plots/step05_age_effects_plot_data.csv` (1770 rows)
+**7. VALIDATION PIPELINE COMPLETED**
 
-**Results Files:**
-- `results/step03_hypothesis_test.txt`
-- `results/step04_summary.txt`
-- `results/summary.md` (31KB, publication-ready with random effects limitation documented)
+All 3 corrected RQs validated via finisher agents:
+
+| RQ | rq_inspect | rq_plots | rq_results |
+|----|------------|----------|------------|
+| 5.2.4 | ✅ PASS | ✅ PASS | ✅ PASS |
+| 5.3.4 | ✅ PASS | ✅ Already existed | ✅ PASS |
+| 5.4.3 | ✅ PASS | ✅ Already existed | ✅ PASS |
+
+**8. Files Modified**
+
+**Code Files Updated (3):**
+- `results/ch5/5.2.4/code/step03_fit_lmm.py` (lines 312-317, 72-82)
+- `results/ch5/5.3.4/code/step02_fit_lmm.py` (lines 26-32, 122-138)
+- `results/ch5/5.4.3/code/step02_fit_lmm.py` (lines 7-11, 28, 137-154)
+
+**Documentation Updated:**
+- `results/ch5/5.2.4/docs/2_plan.md` (When exclusion patterns)
+
+**Data/Results Regenerated:**
+- All step03+ outputs for 5.2.4
+- All step02+ outputs for 5.3.4 and 5.4.3
+- Model summaries, fixed effects, plots
 
 **Session Metrics:**
 
 **Tokens:**
 - Session start: ~5k (after /refresh)
-- Session end: ~85k (at /save)
-- Delta: ~80k consumed
+- Session end: ~125k (at /save)
+- Delta: ~120k consumed
 
-**Bug Fixes:** 2 critical issues fixed
-1. Data source correction (5.1.1 → 5.2.1)
-2. Random effects convergence failure (slopes → intercepts only)
+**Critical Fixes:** 3 RQs corrected (5.2.4, 5.3.4, 5.4.3)
 
 **Key Insights:**
 
-**1. Consistent Null Pattern (4th confirmation):**
-- RQ 5.3.4 (Age × Paradigm): NULL
-- RQ 5.4.3 (Age × Congruence): NULL
-- RQ 5.2.3 (Age × Domain): NULL
-- Age-related forgetting appears UNIFORM across task/item/domain variations in REMEMVR
+**1. Silent Model Specification Errors:**
+- Models "converge" even with wrong random effects
+- Boundary estimates (Var=0.000) are the symptom
+- Without knowing ROOT RQ model selection, error is invisible
 
-**2. Random Effects Trade-off:**
-- Complex models with random slopes ideal for detecting Age × Time effects
-- But convergence failures force simplification
-- Trade-off: Statistical purity vs. practical estimation
-- Document as limitation, note p > 0.4 makes interpretation robust
+**2. IRT vs CTT Dynamic Divergence:**
+- With CORRECT model, IRT shows Var=0.021 (individual differences)
+- CTT still shows Var=0.000 (boundary) - CTT genuinely can't detect slope variation
+- This is key thesis finding: IRT superior for individual trajectory modeling
 
-**3. When Domain Exclusion Pattern:**
-- All 5.2.X RQs now exclude When (floor effect)
-- Row counts: 100×4×2 = 800 (not 100×4×3 = 1200)
-- Contrast counts reduced by ~33%
+**3. Consistency of Random Slope Specification:**
+- ROOT RQ model selection determines appropriate random effects for ALL derivative RQs
+- Log model best → random slopes on log_TSVR
+- Must propagate this consistently through pipeline
 
 **Active Topics (For context-manager):**
 
 Topic naming format: [topic][task][subtask]
 
-- rq_5.2.3_complete_execution_age_domain_interaction (Session 2025-12-03 01:30: steps_00_05_completed step00_data_source_fix_rq521 step02_random_effects_convergence_failure_intercepts_only, when_exclusion 2_domains_not_3 800_rows_not_1200, final_results NULL_FINDING no_3way_interaction_all_p_gt_0.4 age_effects_identical_across_domains hypothesis_NOT_supported, random_effects_limitation documented_in_summary_sensitivity_analyses_recommended, validation rq_inspect_pass rq_plots_updated rq_results_updated, chapter_5_progress 17/31_complete_55%)
+- random_slope_correction_log_tsvr (Session 2025-12-03 06:00: critical_error_discovery TSVR_hours_wrong_log_TSVR_correct 3_rqs_fixed 5.2.4_5.3.4_5.4.3, root_rq_model_selection 5.2.1_log_62% 5.3.1_log_99.99% 5.4.1_log_100%, variance_improvement 5.2.4_irt_0.021_vs_ctt_0.000 5.3.4_0.031_vs_0.0004 5.4.3_0.019_vs_0.000, methodological_lesson random_slopes_align_with_fixed_effects, validation_complete rq_inspect_pass rq_plots_pass rq_results_pass)
+
+- rq_5.2.4_irt_ctt_convergent_validity_corrected (Session 2025-12-03 06:00: model_corrected log_TSVR_random_slopes, critical_finding IRT_var_0.021_CTT_var_0.000 IRT_detects_individual_forgetting_CTT_cannot, static_convergence_exceptional what_0.906_where_0.970, dynamic_divergence IRT_enables_personalized_prediction)
 
 **Relevant Archived Topics (from context-finder):**
-- rq_5.3.4_complete_execution_age_paradigm_interaction (2025-12-02 21:45: same null pattern, same LMM bugs)
-- rq_5.4.3_complete_execution_age_schema_congruence (2025-12-02 22:20: null pattern continues)
-- when_domain_anomalies.md (2025-11-23: floor effect discovery)
+- rq_5_13_complete_rerun_linlog_model_validation_pipeline.md (2025-11-30 15:10: singular covariance matrix issue with Log model, Lin+Log alternative)
+- rq_status_creation_root_validation_pipeline_analysis.md (2025-12-02 16:30: ROOT RQ model selection patterns)
+- decision_d070_tsvr_pipeline.md (2025-11-14: TSVR specification decision)
 
-**End of Session (2025-12-03 01:30)**
+**End of Session (2025-12-03 06:00)**
 
-**Status:** ✅ **RQ 5.2.3 COMPLETE - PUBLICATION READY**
+**Status:** ✅ **CRITICAL MODEL CORRECTION COMPLETE**
 
-**Executed** all 6 steps for Age × Domain × Time 3-way interaction LMM with When domain exclusion. **Fixed 2 critical bugs:** data source correction (RQ 5.2.1), random effects convergence (intercepts only). **NULL FINDING:** Age effects on forgetting do NOT differ between What and Where domains (p > 0.4 for all interactions, domain-specific slopes identical). **Random effects limitation documented** with sensitivity analysis recommendations. Validated via rq_inspect, rq_plots, rq_results.
+Fixed random slope specification in 3 RQs (5.2.4, 5.3.4, 5.4.3). Changed from TSVR_hours to log_TSVR per ROOT RQ model selection. **Key discovery:** IRT detects individual forgetting rate variance (0.021), CTT cannot (0.000 boundary) - supports thesis hypothesis that IRT superior for individual trajectory modeling. NULL findings for 3-way interactions remain ROBUST after correction.
 
-**Chapter 5 Progress:** 17/31 RQs complete (55%), 14 ready for execution.
-
+**Chapter 5 Progress:** 18/31 RQs complete (58%), 13 ready for execution.

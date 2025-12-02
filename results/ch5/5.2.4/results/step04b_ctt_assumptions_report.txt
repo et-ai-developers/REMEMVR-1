@@ -3,15 +3,17 @@ CTT LMM ASSUMPTION DIAGNOSTICS (Step 04b)
 ================================================================================
 
 valid: False
-diagnostics: {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9643145210554777, 'p_value': 1.391814322279074e-16, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 171.5647483600677, 'p_value': 6.060463963830576e-33, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.990622467504766, 'p_value': 0.7148474253343504, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9777419974005522, 'p_value': 0.08851992270117948, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': 0.050880636852024284, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 14, 'outlier_percentage': 1.1666666666666667, 'pass': True, 'outlier_indices': [182, 296, 326, 350, 368, 455, 470, 485, 614, 656, 749, 803, 866, 1193]}, 'convergence': {'converged': True, 'pass': True}}
-plot_paths: [PosixPath('/home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04b_ctt_diagnostics/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04b_ctt_diagnostics/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04b_ctt_diagnostics/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04b_ctt_diagnostics/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04b_ctt_diagnostics/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/rq11/plots/step04b_ctt_diagnostics/studentized_residuals.png')]
-message: LMM assumption violations detected (2/7 checks failed):
+diagnostics: {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.995472580568116, 'p_value': 0.018939863670877348, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 10.860950585464035, 'p_value': 0.012502027846435882, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.95011808654855, 'p_value': 0.0008445762306751941, 'pass': np.False_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931093025164894, 'p_value': 0.8945657946249992, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.056848652042876355, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 2, 'outlier_percentage': 0.25, 'pass': True, 'outlier_indices': [126, 644]}, 'convergence': {'converged': True, 'pass': True}}
+plot_paths: [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.2.4/plots/step04b_ctt_diagnostics/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.2.4/plots/step04b_ctt_diagnostics/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.2.4/plots/step04b_ctt_diagnostics/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.2.4/plots/step04b_ctt_diagnostics/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.2.4/plots/step04b_ctt_diagnostics/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.2.4/plots/step04b_ctt_diagnostics/studentized_residuals.png')]
+message: LMM assumption violations detected (3/7 checks failed):
   - Residual normality violated (Shapiro-Wilk p < 0.05)
   - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Random effects normality violated
 
 Recommended remedial actions:
   1. Consider using robust standard errors or transforming the outcome variable
   2. Model variance structure explicitly or use weighted least squares
+  3. Check for outlying subjects or consider alternative random effects distributions
 
 
 ================================================================================

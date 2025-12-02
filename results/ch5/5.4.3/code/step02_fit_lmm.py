@@ -6,7 +6,9 @@ RQ 5.4.3 - Step 02: Fit LMM with 3-Way Age x Congruence x Time Interaction
 
 PURPOSE:
     Fit Linear Mixed Model with 3-way Age x Congruence x Time interaction.
-    Random intercepts and slopes for TSVR_hours by participant.
+    Random intercepts and slopes for log_TSVR by participant.
+    CRITICAL: RQ 5.4.1 established Log model as best fit (AIC weight=100%)
+    Random slope must be on log_TSVR, NOT linear TSVR_hours.
 
 INPUTS:
     - data/step01_lmm_input.csv (1200 rows, long format)
@@ -23,7 +25,7 @@ MODEL FORMULA:
             Age_c:C(congruence) +
             Age_c:C(congruence):TSVR_hours + Age_c:C(congruence):log_TSVR
 
-    Random: ~TSVR_hours | UID (random intercepts and slopes)
+    Random: ~log_TSVR | UID (random intercepts and slopes per RQ 5.4.1)
 
 ===============================================================================
 """
@@ -132,22 +134,24 @@ def main():
     log(f"        + Age_c:Congruent:TSVR_hours + Age_c:Congruent:log_TSVR")
     log(f"        + Age_c:Incongruent:TSVR_hours + Age_c:Incongruent:log_TSVR")
     log("")
-    log(f"[INFO] Random effects: ~TSVR_hours | UID")
+    # CRITICAL: RQ 5.4.1 established Log model as best fit (AIC weight=100%)
+    # Random slope must be on log_TSVR, NOT linear TSVR_hours
+    log(f"[INFO] Random effects: ~log_TSVR | UID (per RQ 5.4.1 best model)")
     log("")
 
     log("[INFO] Fitting model (this may take a moment)...")
 
-    # Try to fit with random slopes first
+    # Try to fit with random slopes on log_TSVR (per RQ 5.4.1 best model)
     try:
         model = smf.mixedlm(
             formula=formula,
             data=lmm_input,
             groups=lmm_input['UID'],
-            re_formula='~TSVR_hours'
+            re_formula='~log_TSVR'  # CORRECTED: log_TSVR not TSVR_hours (per 5.4.1)
         )
         result = model.fit(method='lbfgs', maxiter=500)
-        random_structure = "random intercepts + slopes for TSVR_hours"
-        log(f"[SUCCESS] Model fitted with random slopes")
+        random_structure = "random intercepts + slopes for log_TSVR (per 5.4.1)"
+        log(f"[SUCCESS] Model fitted with random slopes on log_TSVR")
 
     except Exception as e:
         log(f"[WARNING] Random slopes failed: {e}")

@@ -17,7 +17,7 @@ rq_concept:
     \ (all three domains)\nAnalysis: Correlation (r > 0.90) + Parallel LMM (IRT vs\
     \ CTT)\nData: DERIVED from RQ 5.1 IRT scores + raw data for CTT computation\n\
     Critical: Uses purified item set from RQ 5.1 for fair comparison. Paired design\
-    \ (UID \xD7 Test \xD7 Domain).\n"
+    \ (UID × Test × Domain).\n"
 rq_scholar:
   status: success
   context_dump: '9.4/10 APPROVED. Theory exceptional (convergent validity + measurement
@@ -56,16 +56,21 @@ rq_inspect:
     All steps PASS: outputs match plan.md, embedded validation successful
     Key findings: 69 purified items, r>0.9 correlations, convergent LMMs, 100% coefficient agreement
 rq_plots:
-  status: pending
-  context_dump: ''
+  status: success
+  context_dump: |
+    Plots generated: 2 (scatterplot_irt_ctt, trajectory_comparison)
+    Data sources: step07_scatterplot_data.csv, step08_trajectory_data.csv
+    When domain EXCLUDED: Only 2 domains (What, Where) plotted
+    Functions used: Custom scatterplot + trajectory plots (matplotlib/scipy directly)
 rq_results:
   status: success
-  timestamp: '2025-11-29T19:45:00Z'
+  timestamp: '2025-12-03T06:00:00Z'
   context_dump: |
-    Results validated for scientific plausibility
-    4 anomalies flagged: 1 sample imbalance (When=5 items), 1 model convergence (CTT Hessian), 1 technical (3/9 coefficients compared), 1 visualization (trajectory noise)
-    Summary documented in results/summary.md
-    Exceptional convergent validity: r>0.90 all domains, kappa=1.0, 100% LMM agreement
+    CORRECTED results summary created: results/summary.md
+    CRITICAL FINDING: IRT detects individual forgetting rate variance (log_TSVR Var=0.021), CTT does not (Var=0.000)
+    Static convergence: r=0.906 (What), r=0.970 (Where) - exceptional
+    Dynamic divergence: IRT enables person-specific forgetting curves, CTT limited to group-average
+    Model specification CORRECTED: Random slopes on log_TSVR (not linear TSVR_hours)
 
 analysis_steps:
   step00_load_data: success

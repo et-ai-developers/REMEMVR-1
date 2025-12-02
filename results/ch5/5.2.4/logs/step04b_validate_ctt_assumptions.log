@@ -53,3 +53,33 @@ FileNotFoundError: Validation failed - not all required files exist. Check that 
 [VALIDATION] IRT plots exist: True
 [VALIDATION] CTT plots exist: True
 [SUCCESS] Step 04b complete
+[START] Step 04b: validate_ctt_assumptions
+[LOAD] Loading CTT model and input data...
+[LOADED] step03_ctt_lmm_model.pkl (CTT LMM model object)
+[LOADED] step03_ctt_lmm_input.csv (800 rows, 6 cols)
+[ANALYSIS] Running validate_lmm_assumptions_comprehensive...
+[DONE] Assumption validation complete
+[SAVE] Saving assumption diagnostics report...
+[SAVED] step04b_ctt_assumptions_report.txt (2412 bytes)
+[SAVED] 6 diagnostic plots in step04b_ctt_diagnostics/
+[VALIDATION] Checking file existence with os.path...
+[VALIDATION] IRT report exists: True
+[VALIDATION] CTT report exists: True
+[VALIDATION] IRT plots exist: True
+[VALIDATION] CTT plots exist: True
+[SUCCESS] Step 04b complete
+[START] Step 04b: validate_ctt_assumptions
+[LOAD] Loading CTT model and input data...
+[LOADED] step03_ctt_lmm_model.pkl (CTT LMM model object)
+[LOADED] step03_ctt_lmm_input.csv (800 rows, 6 cols)
+[ANALYSIS] Running validate_lmm_assumptions_comprehensive...
+[DONE] Assumption validation complete
+[SAVE] Saving assumption diagnostics report...
+[SAVED] step04b_ctt_assumptions_report.txt (2537 bytes)
+[SAVED] 6 diagnostic plots in step04b_ctt_diagnostics/
+[VALIDATION] Checking file existence with os.path...
+[VALIDATION] IRT report exists: True
+[VALIDATION] CTT report exists: True
+[VALIDATION] IRT plots exist: True
+[VALIDATION] CTT plots exist: True
+[SUCCESS] Step 04b complete
