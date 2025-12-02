@@ -1,0 +1,32 @@
+Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect	plots	results
+5.1.1	General	Functional Form	Log model best (48% weight). Omnibus factor valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.1.2	General	Two-Phase Test	Depends on 5.1.1. Piecewise vs continuous.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.1.3	General	Age Effects	Depends on 5.1.1. Age tertile analysis.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.1.4	General	Variance Decomp	Depends on 5.1.1. ICC for slopes.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.1.5	General	Clustering	NOT STARTED. Depends on 5.1.4 random effects.	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.1.6	General	Item Difficulty	NOT STARTED. Cross-classified LMM.	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.2.1	Domains	Trajectories	CRITICAL: When domain floor effect (6-9%). Use What/Where only downstream.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.2.2	Domains	Consolidation	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.2.3	Domains	Age Effects	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.2.4	Domains	IRT-CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.2.5	Domains	Purified CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.2.6	Domains	Variance Decomp	USE WHAT/WHERE ONLY. 4 clustering vars not 6.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.2.7	Domains	Clustering	USE WHAT/WHERE ONLY. 4 clustering vars not 6.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.2.8	Domains	Item Difficulty	USE WHAT/WHERE ONLY. Exclude When items.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.1	Paradigms	Trajectories	Recognition faster forgetting (contradicts hypothesis). Investigate item quality.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.3.2	Paradigms	Gradient Test	Unique to Paradigms. Linear trend contrast.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.3.3	Paradigms	Consolidation	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.4	Paradigms	Age Effects	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.5	Paradigms	IRT-CTT	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.6	Paradigms	Purified CTT	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.7	Paradigms	Variance Decomp	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.8	Paradigms	Clustering	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.9	Paradigms	Item Difficulty	All 3 paradigms valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.1	Congruence	Trajectories	NULL schema effects (valid finding). All 3 levels usable.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.4.2	Congruence	Consolidation	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.4.3	Congruence	Age Effects	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.4	Congruence	IRT-CTT	All 3 congruence levels valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.5	Congruence	Purified CTT	All 3 congruence levels valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.6	Congruence	Variance Decomp	All 3 congruence levels valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.7	Congruence	Clustering	All 3 congruence levels valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.8	Congruence	Item Difficulty	All 3 congruence levels valid.	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE

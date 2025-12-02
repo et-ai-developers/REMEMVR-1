@@ -16,7 +16,7 @@ This is the ROOT extraction for Congruence type RQs (5.4.X).
 5.4.1 extracts independently from dfData.csv - NO cross-type dependencies.
 
 EXPECTED INPUTS:
-  - data/cache/dfData.csv
+  - data/step00_input_data.csv (LOCAL to this RQ - no external dependencies)
     Columns: [UID, TEST, TSVR, TQ_* columns]
     Format: CSV with UTF-8 encoding
     Expected rows: ~400 (100 participants x 4 test sessions)
@@ -70,8 +70,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.4.1
 LOG_FILE = RQ_DIR / "logs" / "step00_extract_congruence_data.log"
 
-# Input file - RAW DATA (no cross-type dependencies)
-INPUT_FILE = PROJECT_ROOT / "data" / "cache" / "dfData.csv"
+# Input file - LOCAL to this RQ (no external dependencies)
+INPUT_FILE = RQ_DIR / "data" / "step00_input_data.csv"
 
 # Output paths
 OUTPUT_IRT_INPUT = RQ_DIR / "data" / "step00_irt_input.csv"
@@ -121,14 +121,14 @@ if __name__ == "__main__":
 
         log("[START] Step 00: Extract VR Data for Congruence IRT Analysis")
         log(f"[INFO] RQ: 5.4.1 (Congruence Type ROOT)")
-        log(f"[INFO] Source: dfData.csv (RAW - no cross-type dependencies)")
+        log(f"[INFO] Source: step00_input_data.csv (LOCAL - no external dependencies)")
 
         # =========================================================================
-        # STEP 1: Load Input Data from dfData.csv
+        # STEP 1: Load Input Data from step00_input_data.csv
         # =========================================================================
-        log("[LOAD] Loading raw data from dfData.csv...")
+        log("[LOAD] Loading raw data from step00_input_data.csv...")
         df = pd.read_csv(INPUT_FILE, encoding='utf-8')
-        log(f"[LOADED] dfData.csv ({len(df)} rows, {len(df.columns)} cols)")
+        log(f"[LOADED] step00_input_data.csv ({len(df)} rows, {len(df.columns)} cols)")
 
         # =========================================================================
         # STEP 2: Identify and Filter Columns

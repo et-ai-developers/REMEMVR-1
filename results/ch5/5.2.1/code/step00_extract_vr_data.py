@@ -13,7 +13,7 @@ Extract VR test item responses from dfData.csv, dichotomize scores,
 create Q-matrix for multidimensional IRT, and prepare TSVR mapping for LMM.
 
 EXPECTED INPUTS:
-- data/cache/dfData.csv
+- data/step00_input_data.csv (LOCAL to this RQ - no external dependencies)
   Columns: [UID, TEST, TSVR, TQ_* columns]
   Format: CSV with UTF-8 encoding
   Expected rows: ~400 (100 participants x 4 tests)
@@ -77,8 +77,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[4]
 RQ_DIR = Path(__file__).resolve().parents[1]
 LOG_FILE = RQ_DIR / "logs" / "step00_extract_vr_data.log"
 
-# Input file
-INPUT_FILE = PROJECT_ROOT / "data" / "cache" / "dfData.csv"
+# Input file - LOCAL to this RQ (no external dependencies)
+INPUT_FILE = RQ_DIR / "data" / "step00_input_data.csv"
 
 # Output files (relative to RQ_DIR)
 OUTPUT_IRT_INPUT = RQ_DIR / "data" / "step00_irt_input.csv"
@@ -244,16 +244,18 @@ if __name__ == "__main__":
             f.write("=" * 80 + "\n\n")
 
         log("[START] Step 00: Extract VR Data for IRT Analysis")
+        log(f"[INFO] RQ: 5.2.1 (Domains Type ROOT)")
+        log(f"[INFO] Source: step00_input_data.csv (LOCAL - no external dependencies)")
 
         # =====================================================================
         # STEP 1: Load Input Data
         # =====================================================================
-        # Expected: dfData.csv with UID, TEST, TSVR, and TQ_* columns
+        # Expected: step00_input_data.csv with UID, TEST, TSVR, and TQ_* columns
         # Purpose: Raw VR test item responses for IRT calibration
 
-        log("[LOAD] Loading input data from dfData.csv...")
+        log("[LOAD] Loading input data from step00_input_data.csv...")
         df = pd.read_csv(INPUT_FILE, encoding='utf-8')
-        log(f"[LOADED] dfData.csv ({len(df)} rows, {len(df.columns)} cols)")
+        log(f"[LOADED] step00_input_data.csv ({len(df)} rows, {len(df.columns)} cols)")
 
         # =====================================================================
         # STEP 2: Identify Columns
