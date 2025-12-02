@@ -1,0 +1,112 @@
+[START] Step 02: Fit LMM with 3-Way Interaction
+
+[STEP 1] Load LMM Input Data
+----------------------------------------------------------------------
+[LOADED] LMM input: 1200 rows, 10 columns
+[INFO] Columns: ['UID', 'composite_ID', 'test', 'congruence', 'theta', 'se_theta', 'Age', 'Age_c', 'TSVR_hours', 'log_TSVR']
+[INFO] Unique UIDs: 100
+[INFO] Congruence levels: ['Common', 'Congruent', 'Incongruent']
+
+[STEP 2] Create Dummy Variables for Congruence
+----------------------------------------------------------------------
+[CREATED] Dummy variables: Congruent, Incongruent (reference: Common)
+[INFO] Congruent sum: 400 (expected: 400)
+[INFO] Incongruent sum: 400 (expected: 400)
+
+[STEP 3] Fit LMM Model
+----------------------------------------------------------------------
+[INFO] Model formula (fixed effects):
+  theta ~ 1 + TSVR_hours + log_TSVR + Age_c + Congruent + Incongruent
+        + Age_c:TSVR_hours + Age_c:log_TSVR
+        + Congruent:TSVR_hours + Congruent:log_TSVR
+        + Incongruent:TSVR_hours + Incongruent:log_TSVR
+        + Age_c:Congruent + Age_c:Incongruent
+        + Age_c:Congruent:TSVR_hours + Age_c:Congruent:log_TSVR
+        + Age_c:Incongruent:TSVR_hours + Age_c:Incongruent:log_TSVR
+
+[INFO] Random effects: ~TSVR_hours | UID
+
+[INFO] Fitting model (this may take a moment)...
+[SUCCESS] Model fitted with random slopes
+[INFO] Model converged: True
+
+[STEP 4] Extract Fixed Effects
+----------------------------------------------------------------------
+[INFO] Model summary available
+[EXTRACTED] Fixed effects: 18 terms
+
+[INFO] Fixed Effects Table:
+----------------------------------------------------------------------
+  Intercept                                coef=  0.5402 SE=0.0949 p=0.0000*
+  TSVR_hours                               coef= -0.0025 SE=0.0011 p=0.0258*
+  log_TSVR                                 coef= -0.1138 SE=0.0375 p=0.0024*
+  Age_c                                    coef= -0.0079 SE=0.0066 p=0.2269
+  Congruent                                coef= -0.0563 SE=0.1140 p=0.6213
+  Incongruent                              coef=  0.0630 SE=0.1140 p=0.5808
+  Age_c:TSVR_hours                         coef=  0.0000 SE=0.0001 p=0.9770
+  Age_c:log_TSVR                           coef=  0.0004 SE=0.0026 p=0.8930
+  Congruent:TSVR_hours                     coef= -0.0006 SE=0.0015 p=0.6704
+  Congruent:log_TSVR                       coef=  0.0350 SE=0.0526 p=0.5058
+  Incongruent:TSVR_hours                   coef=  0.0003 SE=0.0015 p=0.8258
+  Incongruent:log_TSVR                     coef= -0.0210 SE=0.0526 p=0.6904
+  Age_c:Congruent                          coef= -0.0043 SE=0.0079 p=0.5815
+  Age_c:Incongruent                        coef= -0.0033 SE=0.0079 p=0.6791
+  Age_c:Congruent:TSVR_hours               coef= -0.0001 SE=0.0001 p=0.1626
+  Age_c:Congruent:log_TSVR                 coef=  0.0050 SE=0.0037 p=0.1694
+  Age_c:Incongruent:TSVR_hours             coef=  0.0000 SE=0.0001 p=0.9558
+  Age_c:Incongruent:log_TSVR               coef=  0.0007 SE=0.0037 p=0.8587
+
+[STEP 5] Model Diagnostics
+----------------------------------------------------------------------
+[INFO] Log-Likelihood: -1357.72
+[INFO] AIC: nan
+[INFO] BIC: nan
+
+[INFO] Random Effects:
+  Group Var (UID): 0.2490
+  TSVR_hours Var: 0.0000
+  Covariance: -0.0007
+  Residual Var: 0.3874
+
+[INFO] Sample Size:
+  Observations: 1200
+  Groups (UIDs): 100
+
+[STEP 6] Validate LMM Assumptions (Basic Checks)
+----------------------------------------------------------------------
+[CHECK] Residual mean: 0.000000 (should be ~0)
+[PASS] Residual mean approximately zero
+[INFO] Residual SD: 0.5802
+[CHECK] Observations with |residual| > 3 SD: 4
+[PASS] Few extreme residuals (<1% of observations)
+
+[STEP 7] Save Outputs
+----------------------------------------------------------------------
+[SAVED] Fixed effects: /home/etai/projects/REMEMVR/results/ch5/5.4.3/data/step02_fixed_effects.csv
+  18 rows, 5 columns
+[SAVED] Model summary: /home/etai/projects/REMEMVR/results/ch5/5.4.3/data/step02_lmm_model_summary.txt
+[SAVED] Model object: /home/etai/projects/REMEMVR/results/ch5/5.4.3/data/step02_lmm_model.pkl
+
+[SUMMARY]
+----------------------------------------------------------------------
+Model: 3-way Age x Congruence x Time LMM
+Random Structure: random intercepts + slopes for TSVR_hours
+Converged: True
+
+Fixed Effects: 18 terms
+  - Main effects: Intercept, TSVR_hours, log_TSVR, Age_c, Congruent, Incongruent
+  - 2-way interactions: Age_c x Time, Congruence x Time, Age_c x Congruence
+  - 3-way interactions: Age_c x Congruence x Time (4 terms)
+
+Model Fit:
+  Log-Likelihood: -1357.72
+  AIC: nan
+  BIC: nan
+
+[KEY FINDINGS] 3-Way Interaction Terms:
+  Age_c:Congruent:TSVR_hours: p=0.1626 (not significant)
+  Age_c:Congruent:log_TSVR: p=0.1694 (not significant)
+  Age_c:Incongruent:TSVR_hours: p=0.9558 (not significant)
+  Age_c:Incongruent:log_TSVR: p=0.8587 (not significant)
+
+[SUCCESS] Step 02 complete - LMM model fitted

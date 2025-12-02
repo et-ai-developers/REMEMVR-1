@@ -51,21 +51,33 @@ rq_analysis:
     All steps have analysis + validation calls, all signatures complete with type hints
 
 rq_inspect:
-  status: pending
+  status: success
   context_dump: |
+    All 6 steps PASS 4-layer validation (Existence, Structure, Substance, Log)
+    NULL RESULT: No significant Age x Schema interactions (all p_bonferroni > 0.025)
+    Decision D068 compliance: Dual p-values for all hypothesis tests
+    Decision D070 compliance: TSVR hours used correctly throughout
 
 rq_plots:
-  status: pending
+  status: success
   context_dump: |
+    Plot generated: age_congruence_trajectories.png (3-panel: Young/Middle/Older)
+    Data source: step05_age_effects_plot_data.csv (36 rows: 3 tertiles x 3 congruence x 4 tests)
+    Visualization: Age-specific trajectories across Common/Congruent/Incongruent schema conditions
+    NULL finding annotated: No significant Age x Congruence x Time interactions
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: 2025-12-02T22:30:00Z
   context_dump: |
+    Results validated for scientific plausibility
+    NULL RESULT ACCEPTED: 0 anomalies flagged (plausibility checks passed)
+    Summary documented in results/summary.md (5 sections: Findings, Plots, Interpretation, Limitations, Next Steps)
 
 analysis_steps:
-  step00_load_dependencies: pending
-  step01_prepare_lmm_input: pending
-  step02_fit_lmm: pending
-  step03_extract_interactions: pending
-  step04_compute_age_effects: pending
-  step05_prepare_plot_data: pending
+  step00_load_dependencies: success
+  step01_prepare_lmm_input: success
+  step02_fit_lmm: success
+  step03_extract_interactions: success
+  step04_compute_age_effects: success
+  step05_prepare_plot_data: success

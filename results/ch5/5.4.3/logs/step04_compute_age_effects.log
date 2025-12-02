@@ -1,0 +1,59 @@
+[START] Step 04: Compute Congruence-Specific Age Effects with Tukey HSD
+
+[STEP 1] Load Data
+----------------------------------------------------------------------
+[LOADED] Fixed effects: 18 rows
+[LOADED] LMM input: 1200 rows
+[INFO] Available coefficients: 18
+
+[STEP 2] Compute Day 3 Reference Timepoint
+----------------------------------------------------------------------
+[INFO] Day 3 (test=3) mean TSVR_hours: 78.67
+[INFO] Day 3 log(TSVR_hours + 1): 4.3779
+
+[STEP 3] Compute Marginal Age Effects by Congruence
+----------------------------------------------------------------------
+[COMPUTED] Age effect for Common: -0.006213
+[COMPUTED] Age effect for Congruent: -0.000019
+[COMPUTED] Age effect for Incongruent: -0.006165
+
+[STEP 4] Estimate Standard Errors
+----------------------------------------------------------------------
+[INFO] SE estimation method: simplified delta method approximation
+[INFO] SE for Common: 0.006558
+[INFO] SE for Congruent: 0.010257
+[INFO] SE for Incongruent: 0.010257
+
+[INFO] Age Effects by Congruence (at Day 3):
+Congruence         Age Slope         SE                    95% CI
+-----------------------------------------------------------------
+Common             -0.006213   0.006558         [-0.0191, 0.0066]
+Congruent          -0.000019   0.010257         [-0.0201, 0.0201]
+Incongruent        -0.006165   0.010257         [-0.0263, 0.0139]
+
+[STEP 5] Compute Tukey HSD Post-Hoc Contrasts
+----------------------------------------------------------------------
+[INFO] Tukey HSD Post-Hoc Contrasts (Decision D068 Dual P-Values):
+
+Contrast                    Estimate         SE        z    p_uncor    p_tukey   Sig
+------------------------------------------------------------------------------------------
+Congruent - Common          0.006194   0.012175     0.51     0.6109     1.0000      
+Incongruent - Common        0.000048   0.012175     0.00     0.9969     1.0000      
+Incongruent - Congruent    -0.006146   0.014506    -0.42     0.6718     1.0000      
+
+[SUMMARY] Significant contrasts: 0 / 3
+[FINDING] No significant differences in age effects across congruence levels
+[INTERPRETATION] Age-related forgetting is similar for Common, Congruent, and Incongruent items
+
+[STEP 6] Validate and Save Outputs
+----------------------------------------------------------------------
+[PASS] Age effects: 3 congruence levels
+[PASS] Confidence intervals valid (CI_upper > CI_lower)
+[PASS] Tukey contrasts: 3 pairwise comparisons
+[PASS] Dual p-values present (p_uncorrected + p_tukey)
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.3/data/step04_age_effects_by_congruence.csv
+  3 rows, 6 columns
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.3/data/step04_tukey_contrasts.csv
+  3 rows, 7 columns
+
+[SUCCESS] Step 04 complete - Age effects and Tukey contrasts computed

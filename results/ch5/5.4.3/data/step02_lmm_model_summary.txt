@@ -1,0 +1,53 @@
+======================================================================
+RQ 5.4.3 - LMM Model Summary
+======================================================================
+
+Model Formula:
+theta ~ 1 + TSVR_hours + log_TSVR + Age_c +             Congruent + Incongruent +             Age_c:TSVR_hours + Age_c:log_TSVR +             Congruent:TSVR_hours + Congruent:log_TSVR +             Incongruent:TSVR_hours + Incongruent:log_TSVR +             Age_c:Congruent + Age_c:Incongruent +             Age_c:Congruent:TSVR_hours + Age_c:Congruent:log_TSVR +             Age_c:Incongruent:TSVR_hours + Age_c:Incongruent:log_TSVR
+
+Random Structure: random intercepts + slopes for TSVR_hours
+Converged: True
+
+Model Fit Statistics:
+  Log-Likelihood: -1357.72
+  AIC: nan
+  BIC: nan
+
+Sample Size:
+  Observations: 1200
+  Groups (UIDs): 100
+
+======================================================================
+Fixed Effects
+======================================================================
+                               Coef. Std.Err.       z  P>|z|  [0.025  0.975]
+Intercept                      0.540    0.095   5.691  0.000   0.354   0.726
+TSVR_hours                    -0.003    0.001  -2.230  0.026  -0.005  -0.000
+log_TSVR                      -0.114    0.037  -3.037  0.002  -0.187  -0.040
+Age_c                         -0.008    0.007  -1.208  0.227  -0.021   0.005
+Congruent                     -0.056    0.114  -0.494  0.621  -0.280   0.167
+Incongruent                    0.063    0.114   0.552  0.581  -0.161   0.286
+Age_c:TSVR_hours               0.000    0.000   0.029  0.977  -0.000   0.000
+Age_c:log_TSVR                 0.000    0.003   0.135  0.893  -0.005   0.005
+Congruent:TSVR_hours          -0.001    0.001  -0.426  0.670  -0.004   0.002
+Congruent:log_TSVR             0.035    0.053   0.665  0.506  -0.068   0.138
+Incongruent:TSVR_hours         0.000    0.001   0.220  0.826  -0.003   0.003
+Incongruent:log_TSVR          -0.021    0.053  -0.398  0.690  -0.124   0.082
+Age_c:Congruent               -0.004    0.008  -0.551  0.582  -0.020   0.011
+Age_c:Incongruent             -0.003    0.008  -0.414  0.679  -0.019   0.012
+Age_c:Congruent:TSVR_hours    -0.000    0.000  -1.396  0.163  -0.000   0.000
+Age_c:Congruent:log_TSVR       0.005    0.004   1.374  0.169  -0.002   0.012
+Age_c:Incongruent:TSVR_hours   0.000    0.000   0.055  0.956  -0.000   0.000
+Age_c:Incongruent:log_TSVR     0.001    0.004   0.178  0.859  -0.007   0.008
+Group Var                      0.249    0.078                               
+Group x TSVR_hours Cov        -0.001    0.001                               
+TSVR_hours Var                 0.000    0.000                               
+
+======================================================================
+Random Effects
+======================================================================
+               Group  TSVR_hours
+Group       0.249032   -0.000709
+TSVR_hours -0.000709    0.000013
+
+Residual Variance: 0.3874

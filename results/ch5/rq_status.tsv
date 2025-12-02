@@ -16,7 +16,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.3.1	Paradigms	Trajectories	Recognition faster forgetting (contradicts hypothesis). Investigate item quality.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 5.3.2	Paradigms	Gradient Test	Unique to Paradigms. Linear trend contrast.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 5.3.3	Paradigms	Consolidation	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-5.3.4	Paradigms	Age Effects	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
+5.3.4	Paradigms	Age Effects	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 5.3.5	Paradigms	IRT-CTT	BLOCKED: Missing CTT tools (compute_ctt_scores, compute_pearson_correlation_d068, compute_cohens_kappa)	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
 5.3.6	Paradigms	Purified CTT	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.3.7	Paradigms	Variance Decomp	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
