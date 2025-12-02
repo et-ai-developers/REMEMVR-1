@@ -10,16 +10,21 @@ rq_builder:
     Next: rq_concept extracts concept from thesis
 
 rq_concept:
-  status: pending
+  status: success
   context_dump: |
+    RQ 5.1.6: Item Difficulty Interaction
+    Type: General / Item Difficulty Interaction
+    Analysis: Cross-classified binomial GLMM (pymer4) with Time x Difficulty_c interaction
+    Data: DERIVED item parameters from RQ 5.2.1 + RAW responses from dfData.csv
+    Critical: Exploratory (3 competing predictions), alpha=0.05, item-level long format (~28k-42k obs), binomial family with logit link
 
 rq_scholar:
-  status: pending
-  context_dump: |
+  status: success
+  context_dump: "9.3/10 APPROVED. Theory strong (exploratory 3-prediction framework), literature adequate (needs Sadeh 2018 null finding), interpretation excellent, implications clear, devil's advocate comprehensive (10 concerns, all MODERATE/MINOR). 5 suggested improvements (optional)."
 
 rq_stats:
-  status: pending
-  context_dump: |
+  status: success
+  context_dump: "9.4/10 APPROVED. Category 1: 2.9/3 (binomial GLMM appropriate, nAGQ/fallback minor refinements). Category 2: 1.6/2 (57% tool reuse, 3 missing GLMM tools). Category 3: 2.0/2 (complete parameter specification). Category 4: 2.0/2 (comprehensive GLMM diagnostics). Category 5: 0.9/1 (8 concerns across 4 subsections, literature-grounded)."
 
 rq_planner:
   status: pending

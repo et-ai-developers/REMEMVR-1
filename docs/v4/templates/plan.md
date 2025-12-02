@@ -1,7 +1,7 @@
 # plan.md Template Specification
 
-**Version:** 4.1
-**Last Updated:** 2025-11-22
+**Version:** 4.2
+**Last Updated:** 2025-12-02
 **Purpose:** Specification for 2_plan.md format (analysis plan created by rq_planner agent)
 **Audience:** rq_planner agent when creating 2_plan.md for RQ workflow
 **Status:** Current (v4.X architecture)
@@ -217,11 +217,21 @@ This RQ requires N steps:
 **Purpose:** Define exactly what data/files each step requires to execute.
 
 **Format:**
-- **File paths** (relative to RQ root: results/chX/rqY/)
+- **File paths** (relative to RQ root: results/chX/X.Y.Z/)
 - **File formats** (CSV, YAML, TXT, etc.)
 - **Required columns** (if CSV/tabular data)
 - **Data types** (string, int, float, bool)
 - **Expected values** (ranges, categories, null handling)
+
+**FOLDER STRUCTURE (v4.2 - Updated 2025-12-02):**
+```
+/code    = ALL .py code files for running analysis
+/data    = ALL inputs AND outputs from analysis steps (intermediate + final)
+/docs    = ALL planning documentation (1_concept.md, 2_plan.md, 3_tools.yaml, 4_analysis.yaml, validation reports)
+/logs    = ONLY .log files (execution logs from each step - stdout/stderr capture)
+/plots   = EMPTY until rq_plots generates PNG/PDF visualizations
+/results = EMPTY until rq_results generates summary.md
+```
 
 **Example Structure:**
 
@@ -293,6 +303,12 @@ This RQ requires N steps:
 - **Dimensions** (if plotting - PNG 800 x 600 @ 300 DPI)
 - **Expected row counts** (if known - helps validation)
 
+**CRITICAL - Folder Destinations:**
+- **ALL analysis outputs** (CSV, TXT, etc.) go to `data/` folder
+- **Execution logs** (.log files only) go to `logs/` folder
+- `plots/` stays EMPTY until rq_plots runs (generates PNG/PDF there)
+- `results/` stays EMPTY until rq_results runs (generates summary.md there)
+
 **Example Structure:**
 
 ```markdown
@@ -319,32 +335,30 @@ This RQ requires N steps:
 **Expected Rows:** ~102 items
 ```
 
-**Example Structure (Plotting Step):**
+**Example Structure (Plot Data Preparation Step - creates source CSV in data/):**
 
 ```markdown
-### Step 8: Plot Trajectory (Dual-Scale per Decision D069)
+### Step 7: Prepare Trajectory Plot Data
 
 **Output:**
 
-**File 1:** plots/trajectory_theta_scale.png
-**Format:** PNG image
-**Dimensions:** 800 x 600 pixels @ 300 DPI
-**Content:** Trajectory plot with theta scale (-3 to +3) on Y-axis, TSVR (hours) on X-axis, participant groups as separate lines
+**File 1:** data/step07_trajectory_theta_data.csv
+**Format:** CSV, plot source data for theta-scale trajectory
+**Columns:**
+  - `time` (float): TSVR hours
+  - `theta` (float): Mean theta per group per timepoint
+  - `CI_lower` (float): Lower 95% confidence bound
+  - `CI_upper` (float): Upper 95% confidence bound
+  - `domain` (string): Memory domain grouping
+**Expected Rows:** 12 (3 domains x 4 timepoints)
+**Note:** This CSV is read by rq_plots later. PNG output goes to plots/ when rq_plots runs.
 
-**File 2:** plots/trajectory_probability_scale.png
-**Format:** PNG image
-**Dimensions:** 800 x 600 pixels @ 300 DPI
-**Content:** Same trajectory plot with probability scale (0.0 to 1.0) on Y-axis, TSVR on X-axis
-**Note:** Per Decision D069, dual-scale improves interpretability for non-psychometricians
-
-**File 3:** plots/plot_metadata.yaml
-**Format:** YAML metadata
-**Keys:**
-  - `plot_function: plot_trajectory_probability` (function from tools/plots.py)
-  - `created_by: plots.py` (script that generated plots)
-  - `theta_range: [-3.0, 3.0]` (observed theta range)
-  - `tsvr_range: [0, 168]` (hours, 0 = encoding, 168 = 1 week)
+**File 2:** data/step07_trajectory_probability_data.csv
+**Format:** CSV, plot source data for probability-scale trajectory (Decision D069 dual-scale)
+**Columns:** Same as theta_data but with probability values (0-1 scale)
 ```
+
+**Note:** Analysis steps create plot SOURCE CSVs in `data/`. The actual PNG/PDF plots are generated later by rq_plots and saved to `plots/`.
 
 **Key Principles:**
 - **Completeness** (list ALL outputs, not just primary files)
@@ -376,7 +390,7 @@ This RQ requires N steps:
 - data/observed_means.csv (columns: test, domain, mean_theta, CI_lower, CI_upper)
 - data/tsvr_mapping.csv (columns: composite_ID, TSVR_hours, test)
 
-**Output (Plot Source CSV):** plots/trajectory_theta_data.csv
+**Output (Plot Source CSV):** data/step07_trajectory_theta_data.csv
 
 **Required Columns:**
 - `time` (float): TSVR hours (0, 24, 72, 144 for T0-T3)
@@ -393,7 +407,7 @@ This RQ requires N steps:
 3. Join with observed_means for confidence intervals
 4. Select and rename columns to match required schema
 5. Sort by domain, then time
-6. Save to plots/trajectory_theta_data.csv
+6. Save to data/step07_trajectory_theta_data.csv
 
 **Validation Requirement:**
 Validation tools MUST be used after plot data preparation tool execution. Specific validation
@@ -402,7 +416,7 @@ tools determined by rq_tools based on plot data format requirements.
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- plots/trajectory_theta_data.csv exists (exact path)
+- data/step07_trajectory_theta_data.csv exists (exact path)
 - Expected rows: 12 (3 domains x 4 timepoints)
 - Expected columns: 5 (time, theta, CI_lower, CI_upper, domain)
 - Data types: float (time, theta, CI bounds), string (domain)
@@ -433,8 +447,9 @@ tools determined by rq_tools based on plot data format requirements.
 
 **Plotting Function (rq_plots will call):** Trajectory plot with confidence bands
 - rq_plots agent maps this description to specific tools/plots.py function
-- Plot reads plots/trajectory_theta_data.csv (created by this step)
+- Plot reads data/step07_trajectory_theta_data.csv (created by this step)
 - No data aggregation in rq_plots (visualization only per Option B)
+- PNG output saved to plots/ folder by rq_plots
 ```
 
 **CRITICAL NOTE:** Plot source CSVs created DURING ANALYSIS (by g_code), NOT during plotting (by rq_plots). This is Option B architecture - separation of data manipulation (analysis agents) from visualization (plotting agent).

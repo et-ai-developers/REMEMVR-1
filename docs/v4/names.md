@@ -167,18 +167,47 @@ step_names:
 
 ```yaml
 file_names:
-  # Data files (intermediate and final outputs)
+  # =============================================================================
+  # FOLDER STRUCTURE (v4.1 - Aligned 2025-12-02)
+  # =============================================================================
+  # /code   = ALL .py code files for running analysis
+  # /data   = ALL inputs AND outputs from analysis steps (intermediate + final)
+  # /docs   = ALL planning documentation (1_concept.md, 2_plan.md, 3_tools.yaml, 4_analysis.yaml, validation reports)
+  # /logs   = ONLY .log files (execution logs from each step - stdout/stderr capture)
+  # /plots  = EMPTY until rq_plots generates PNG/PDF visualizations
+  # /results = EMPTY until rq_results generates summary.md
+  # =============================================================================
+
+  # Data files - ALL analysis inputs and outputs go here
   - name: irt_input
     pattern: data/step00_irt_input.csv
     example: data/step00_irt_input.csv
     introduced: RQ 5.1
-    notes: "Wide-format IRT input from extraction (composite_ID × item columns). Step 00 prefix for clear ordering."
+    notes: "Wide-format IRT input from extraction (composite_ID x item columns). Step 00 prefix for clear ordering."
+
+  - name: pass1_item_params
+    pattern: data/step01_pass1_item_params.csv
+    example: data/step01_pass1_item_params.csv
+    introduced: RQ 5.1
+    notes: "Pass 1 IRT item parameters (before purification). Used to identify items for exclusion. Step 01 prefix."
+
+  - name: pass1_theta
+    pattern: data/step01_pass1_theta.csv
+    example: data/step01_pass1_theta.csv
+    introduced: RQ 5.1
+    notes: "Pass 1 theta estimates (diagnostic, used for purification decisions). Step 01 prefix."
 
   - name: purified_items
     pattern: data/step02_purified_items.csv
     example: data/step02_purified_items.csv
     introduced: RQ 5.1
     notes: "List of items retained after purification (Decision D039 thresholds applied). Step 02 prefix."
+
+  - name: purification_report
+    pattern: data/step02_purification_report.txt
+    example: data/step02_purification_report.txt
+    introduced: RQ 5.1
+    notes: "Text report listing excluded items with reasons (low discrimination or extreme difficulty). Step 02 prefix."
 
   - name: item_parameters
     pattern: data/step03_item_parameters.csv
@@ -198,56 +227,42 @@ file_names:
     introduced: RQ 5.1
     notes: "Long-format LMM input (one row per observation). Includes theta + TSVR per Decision D070. Step 04 prefix."
 
-  # Log files (diagnostic outputs, Pass 1 results)
-  - name: pass1_item_params
-    pattern: logs/step01_pass1_item_params.csv
-    example: logs/step01_pass1_item_params.csv
-    introduced: RQ 5.1
-    notes: "Pass 1 IRT item parameters (before purification). Used to identify items for exclusion. Step 01 prefix."
-
-  - name: pass1_theta
-    pattern: logs/step01_pass1_theta.csv
-    example: logs/step01_pass1_theta.csv
-    introduced: RQ 5.1
-    notes: "Pass 1 theta estimates (diagnostic only, not used in analysis). Step 01 prefix."
-
-  - name: purification_report
-    pattern: logs/step02_purification_report.txt
-    example: logs/step02_purification_report.txt
-    introduced: RQ 5.1
-    notes: "Text report listing excluded items with reasons (low discrimination or extreme difficulty). Step 02 prefix."
-
-  # Results files (final analysis outputs)
   - name: lmm_model_summary
-    pattern: results/step05_lmm_model_summary.txt
-    example: results/step05_lmm_model_summary.txt
+    pattern: data/step05_lmm_model_summary.txt
+    example: data/step05_lmm_model_summary.txt
     introduced: RQ 5.1
     notes: "LMM fitted model summary (fixed effects, random effects, fit indices). Step 05 prefix."
 
   - name: post_hoc_contrasts
-    pattern: results/step06_post_hoc_contrasts.csv
-    example: results/step06_post_hoc_contrasts.csv
+    pattern: data/step06_post_hoc_contrasts.csv
+    example: data/step06_post_hoc_contrasts.csv
     introduced: RQ 5.1
     notes: "Post-hoc pairwise comparisons with BOTH uncorrected and Bonferroni p-values (Decision D068). Step 06 prefix."
 
   - name: effect_sizes
-    pattern: results/step06_effect_sizes.csv
-    example: results/step06_effect_sizes.csv
+    pattern: data/step06_effect_sizes.csv
+    example: data/step06_effect_sizes.csv
     introduced: RQ 5.1
-    notes: "Effect size estimates (Cohen's d, partial η²) for contrasts. Step 06 prefix (same step as contrasts)."
+    notes: "Effect size estimates (Cohen's d, partial eta-squared) for contrasts. Step 06 prefix (same step as contrasts)."
 
-  # Plot source CSVs (Option B architecture - Decision D069)
   - name: trajectory_theta_data
-    pattern: plots/step07_trajectory_theta_data.csv
-    example: plots/step07_trajectory_theta_data.csv
+    pattern: data/step07_trajectory_theta_data.csv
+    example: data/step07_trajectory_theta_data.csv
     introduced: RQ 5.1
-    notes: "Plot source CSV for theta-scale trajectory (Decision D069 dual-scale requirement). Step 07 prefix."
+    notes: "Plot source CSV for theta-scale trajectory (Decision D069 dual-scale requirement). Step 07 prefix. rq_plots reads from data/, writes PNG to plots/."
 
   - name: trajectory_probability_data
-    pattern: plots/step07_trajectory_probability_data.csv
-    example: plots/step07_trajectory_probability_data.csv
+    pattern: data/step07_trajectory_probability_data.csv
+    example: data/step07_trajectory_probability_data.csv
     introduced: RQ 5.1
-    notes: "Plot source CSV for probability-scale trajectory (Decision D069 dual-scale requirement). Step 07 prefix."
+    notes: "Plot source CSV for probability-scale trajectory (Decision D069 dual-scale requirement). Step 07 prefix. rq_plots reads from data/, writes PNG to plots/."
+
+  # Log files - ONLY execution logs (.log files capturing stdout/stderr)
+  - name: step_execution_log
+    pattern: logs/stepNN_<step_name>.log
+    example: logs/step01_irt_calibration_pass1.log
+    introduced: RQ 5.1
+    notes: "Execution log capturing stdout/stderr from running stepNN_<name>.py. One .log per .py script."
 ```
 
 ---
@@ -346,6 +361,7 @@ plot_names:
 - 2025-11-16: File created (F3) - Empty TDD initialization
 - 2025-11-16: Design decisions F0a-F0b approved (header structure + YAML format)
 - 2025-11-20: RQ 5.1 naming conventions added (8 step_names, 14 file_names, 11 variable_names) during Phase 21 testing
+- 2025-12-02: v4.1 folder structure alignment - ALL outputs to data/, logs/ for .log only, plots/ empty until rq_plots, results/ empty until rq_results
 
 **Future Additions:**
 - All conventions added during RQ 5.1-7.20 execution will be documented above with timestamps

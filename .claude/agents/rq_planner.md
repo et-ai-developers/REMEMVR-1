@@ -610,7 +610,7 @@ For EACH step, you MUST specify comprehensive substance criteria that rq_inspect
 **Substance Criteria Requirements (Per Step):**
 
 1. **Output Files Specification:**
-   - Exact file paths (logs/theta_scores.csv NOT just "theta file")
+   - Exact file paths (data/step03_theta_scores.csv NOT just "theta file")
    - Row counts (100 rows NOT "N rows")
    - Column counts (7 columns NOT "several columns")
    - Data types for EACH column (theta: float64, participant_id: object)
@@ -712,31 +712,51 @@ Validation tools MUST be used after EVERY analysis tool execution. No step proce
 
 #### F. Document Expected Outputs (Files Created)
 
+**FOLDER STRUCTURE (v4.2 - Updated 2025-12-02):**
+```
+/code    = ALL .py code files for running analysis
+/data    = ALL inputs AND outputs from analysis steps (intermediate + final)
+/docs    = ALL planning documentation (1_concept.md, 2_plan.md, 3_tools.yaml, 4_analysis.yaml)
+/logs    = ONLY .log files (execution logs from each step - stdout/stderr capture)
+/plots   = EMPTY until rq_plots generates PNG/PDF visualizations
+/results = EMPTY until rq_results generates summary.md
+```
+
 **List all files the analysis will create:**
 
 ```markdown
 ## Expected Outputs
 
-### Data Files (Intermediate)
-- data/irt_input.csv (from Step 0: extraction)
-- data/purified_items.csv (from Step 2: purification)
-- data/theta_scores.csv (from Step 3: Pass 2 theta)
-- data/lmm_input.csv (from Step 4: TSVR merge)
+### Data Files (ALL analysis inputs and outputs - intermediate and final)
+- data/step00_irt_input.csv (from Step 0: extraction)
+- data/step01_pass1_item_params.csv (from Step 1: Pass 1 IRT)
+- data/step01_pass1_theta.csv (from Step 1: Pass 1 theta)
+- data/step02_purified_items.csv (from Step 2: purification)
+- data/step02_purification_report.txt (from Step 2: purification report)
+- data/step03_theta_scores.csv (from Step 3: Pass 2 theta)
+- data/step04_lmm_input.csv (from Step 4: TSVR merge)
+- data/step05_lmm_model_summary.txt (from Step 5: LMM fit)
+- data/step06_post_hoc_contrasts.csv (from Step 6: group comparisons)
+- data/step06_effect_sizes.csv (from Step 6: Cohen's d, eta-squared)
+- data/step07_trajectory_theta_data.csv (from Step 7: plot source CSV)
+- data/step07_trajectory_probability_data.csv (from Step 7: plot source CSV)
 
-### Results Files (Final)
-- results/lmm_model_summary.txt (from Step 5: LMM fit)
-- results/compute_contrasts_pairwise.csv (from Step 6: group comparisons)
-- results/effect_sizes.csv (from Step 6: Cohen's d, η²)
+### Logs (ONLY execution logs - .log files capturing stdout/stderr)
+- logs/step00_extract_data.log
+- logs/step01_irt_calibration_pass1.log
+- logs/step02_purify_items.log
+- logs/step03_irt_calibration_pass2.log
+- logs/step04_merge_theta_tsvr.log
+- logs/step05_fit_lmm.log
+- logs/step06_compute_post_hoc_contrasts.log
+- logs/step07_prepare_trajectory_plot_data.log
 
-### Plots
-- plots/trajectory_dual_scale.png (from Step 7: Decision D069 dual-scale plot)
-- plots/residual_diagnostics.png (from Step 7: LMM assumption checks)
+### Plots (EMPTY until rq_plots runs)
+- plots/trajectory_theta_scale.png (created by rq_plots, NOT analysis steps)
+- plots/trajectory_probability_scale.png (created by rq_plots)
 
-### Logs
-- logs/pass1_item_params.csv (Step 1)
-- logs/pass1_theta.csv (Step 1)
-- logs/purification_report.txt (Step 2)
-- logs/validation_results.txt (all steps)
+### Results (EMPTY until rq_results runs)
+- results/summary.md (created by rq_results, NOT analysis steps)
 ```
 
 #### G. Check Cross-RQ Dependencies
@@ -1178,6 +1198,13 @@ You EDIT (not overwrite):
 ---
 
 ## Version History
+
+- **v5.1.0** (2025-12-02): Folder structure alignment
+  - ALL analysis outputs now go to data/ (including LMM summaries, contrasts, effect sizes, plot source CSVs)
+  - logs/ now ONLY contains .log files (execution logs capturing stdout/stderr)
+  - plots/ stays EMPTY until rq_plots runs (generates PNG/PDF there)
+  - results/ stays EMPTY until rq_results runs (generates summary.md there)
+  - Updated all examples and expected outputs section
 
 - **v5.0.0** (2025-12-01): Updated for hierarchical RQ numbering
   - Changed invocation format from chX/rqY to chX/X.Y.Z
