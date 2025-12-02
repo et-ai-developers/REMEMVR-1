@@ -329,6 +329,9 @@
 ### rq_5.1.5_complete_execution_kmeans_clustering
 **Description:** Complete RQ 5.1.5 K-means clustering execution (Session 2025-12-02 19:30). 8-step analysis pipeline (load random effects, standardize, test K, fit, bootstrap stability, silhouette, characterize, plot data). Fixed 5 bugs (BIC boundary elbow fallback, 3 validation signature mismatches, plots import path). Results: K=2 clusters (69%/31%), Jaccard=0.929 stable, silhouette=0.594 reasonable structure. Two memory profiles identified (Resilient vs Improving). Validated via full pipeline (rq_inspect 4-layer pass, rq_plots cluster_scatter.png 283KB, rq_results summary.md 34KB 0 anomalies). Added scikit-learn to Poetry. First clustering RQ fully executed end-to-end. Publication-ready.
 
+### rq_5.3.4_complete_execution_age_paradigm_interaction
+**Description:** Complete RQ 5.3.4 execution (Age × Paradigm × Time 3-way interaction LMM, Session 2025-12-02 21:45). 6 steps executed (load theta, merge TSVR, fit LMM, extract interactions, age effects, plot tertiles). Fixed 6 bugs (dfData dedup, TSVR validation, pickle/patsy CSV workaround, direct computation, spec updates, plots import). NULL FINDING: No significant 3-way interactions (all p > 0.7), age effects uniform across IFR/ICR/IRE paradigms, challenges retrieval support hypothesis in VR. Validated via rq_inspect (4 layers pass), rq_plots (age_paradigm_trajectories.png 408KB), rq_results (summary.md 53KB, 0 anomalies). Publication-ready. Documents statsmodels pickle/patsy limitation and specification drift patterns.
+
 ---
 
 ## How to Use This Index
