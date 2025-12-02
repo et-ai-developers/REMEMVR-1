@@ -432,3 +432,139 @@ Topic naming format: [topic][task][subtask]
 
 **Status:** ✅ **RQ 5.4.3 COMPLETE - PUBLICATION READY** - Executed all 6 analysis steps for Age × Schema Congruence × Time 3-way interaction LMM. Fixed 2 bugs (fixed effects extraction alignment, n_groups attribute). **NULL FINDING:** No significant 3-way interactions (all p_bonferroni > 0.025), age effects similar across Common/Congruent/Incongruent, challenges schema compensation hypothesis in VR episodic memory. Validated via rq_inspect (4 layers pass), rq_plots (age_congruence_trajectories.png 724KB), rq_results (summary.md 31KB, 0 anomalies). **Chapter 5 Progress:** 15/31 RQs COMPLETE (48%), 9 ready for execution (5.2.6, 5.2.7, 5.3.6-5.3.9, 5.4.5-5.4.7), 4 BLOCKED (missing GLMM/CTT tools). **Next:** Continue executing remaining 9 ready RQs.
 
+## Session (2025-12-02 23:15)
+
+**Task:** RQ 5.2.2 Partial Execution - Domain-Specific Consolidation Effects with When Domain Exclusion
+
+**Context:** User requested step-by-step execution of RQ 5.2.2 with When domain exclusion due to floor effect discovered in RQ 5.2.1 (6-9% probability, 77% item exclusion). Session paused after Step 02 for /save.
+
+**Major Accomplishments:**
+
+**1. Document Updates for When Domain Exclusion**
+
+Updated `1_concept.md` and `2_plan.md` to reflect When domain exclusion:
+- Research question changed from 3 domains (What/Where/When) to 2 domains (What/Where)
+- Expected row counts reduced: 1200 → 800 rows
+- Planned contrasts reduced: 6 → 3 (Bonferroni α = 0.0167)
+- Validation criteria updated throughout
+
+**2. Steps 00-02 Completed Successfully**
+
+| Step | Name | Output | Status |
+|------|------|--------|--------|
+| 00 | Prepare piecewise input | 800 rows (filtered from 1200) | ✅ |
+| 01 | Fit piecewise LMM | 8 fixed effects, converged | ✅ |
+| 02 | Extract slopes | 4 segment-domain slopes | ✅ |
+
+**3. Key Bug Fixes During Execution**
+
+**Step 00 - Data source correction:**
+- Original code referenced RQ 5.1.1 data (overall theta, no domains)
+- Fixed: Changed to RQ 5.2.1 data (domain-specific theta scores)
+- Fixed: Test numbering is 1,2,3,4 (sequential) not 0,1,3,6 (nominal days)
+- Updated SEGMENT_MAPPING: Early=[1,2], Late=[3,4]
+
+**Step 00 - When domain filter:**
+- Added explicit filter: `df = df[df["domain"].isin(["what", "where"])]`
+- Logged row reduction: 1200 → 800 rows (400 When rows removed)
+
+**Step 02 - Slope computation update:**
+- Removed When domain slope calculations (was computing 6 slopes, now 4)
+- Updated validation: expected_domains = {"what", "where"} instead of {"what", "where", "when"}
+
+**4. Statistical Results Summary (Partial)**
+
+**Model Fit (Step 01):**
+- 3-way Days_within × Segment × domain interaction LMM
+- 800 observations, 100 groups (UIDs)
+- Log-Likelihood: -756.82, AIC: 1537.63
+
+**Key Fixed Effects:**
+- Days_within: **-0.4564 (p<.001)** - significant forgetting slope in Early-What
+- Days_within×Segment[T.Late]: **+0.3854 (p<.001)** - slope flattens significantly in Late
+- Days_within×domain[T.where]: 0.0233 (p=.775) - no domain difference
+- 3-way interaction: -0.0371 (p=.671) - **no differential consolidation by domain**
+
+**Segment-Domain Slopes (Step 02):**
+| Segment | Domain | Slope | SE | 95% CI |
+|---------|--------|-------|-----|--------|
+| Early | What | -0.456 | 0.059 | [-0.57, -0.34] |
+| Early | Where | -0.433 | 0.059 | [-0.55, -0.32] |
+| Late | What | -0.071 | 0.025 | [-0.12, -0.02] |
+| Late | Where | -0.085 | 0.025 | [-0.13, -0.04] |
+
+**Preliminary Interpretation:**
+- **Strong consolidation effect:** Early slopes (~-0.45) are ~6× steeper than Late slopes (~-0.08)
+- **No domain-specific consolidation:** What ≈ Where in both segments
+- **Hypothesis NOT supported:** Spatial memory (Where) does not show greater consolidation benefit than object identity (What)
+
+**5. Files Created/Modified**
+
+**Document Updates (2):**
+- `results/ch5/5.2.2/docs/1_concept.md` - When excluded, hypothesis updated
+- `results/ch5/5.2.2/docs/2_plan.md` - Row counts, contrasts, validation updated
+
+**Code Files Modified (3):**
+- `results/ch5/5.2.2/code/step00_prepare_piecewise_input.py` - RQ 5.2.1 source, When filter, test numbering
+- `results/ch5/5.2.2/code/step01_fit_piecewise_lmm.py` - Docstring updated for 2 domains
+- `results/ch5/5.2.2/code/step02_extract_slopes.py` - 4 slopes instead of 6, validation updated
+
+**Data Files Created (3):**
+- `data/step00_piecewise_lmm_input.csv` (800 rows, 8 cols)
+- `data/step01_piecewise_lmm_model.pkl` (fitted model)
+- `results/step01_piecewise_lmm_summary.txt` (model output)
+
+**Results Files Created (2):**
+- `results/step02_fixed_effects.csv` (11 terms including RE variance)
+- `results/step02_segment_domain_slopes.csv` (4 rows: 2 segments × 2 domains)
+
+**6. Remaining Steps (3)**
+
+| Step | Name | Status |
+|------|------|--------|
+| 03 | Compute contrasts | Pending (needs code update for 3 contrasts) |
+| 04 | Compute consolidation benefit | Pending (needs code update for 2 domains) |
+| 05 | Prepare plot data | Pending (needs code update for 8 rows) |
+
+**Session Metrics:**
+
+**Tokens:**
+- Session start: ~6k (after /refresh)
+- Session end: ~45k (at /save)
+- Delta: ~39k consumed
+
+**Bug Fixes:** 4 issues fixed during execution
+1. Data source correction (5.1.1 → 5.2.1)
+2. Test numbering (0,1,3,6 → 1,2,3,4)
+3. When domain filter addition
+4. Slope computation reduction (6 → 4)
+
+**Key Insights:**
+
+**When Domain Exclusion:**
+- Floor effect discovered in RQ 5.2.1: 6-9% probability throughout study
+- 20/26 When items (77%) excluded for low discrimination
+- Cannot meaningfully interpret When domain forgetting
+- Consistent approach: All subsequent domain RQs exclude When
+
+**Consolidation Effect Pattern:**
+- Strong segment effect (Early vs Late) confirms consolidation hypothesis
+- ~6× slope reduction after Day 1 (consolidation window)
+- However, no domain-specific consolidation benefit
+- What and Where consolidate equally
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtask]
+
+- rq_5.2.2_partial_execution_when_exclusion_consolidation (Session 2025-12-02 23:15: steps_00_01_02_completed step00_data_source_fix_when_filter step01_piecewise_lmm_8_fixed_effects step02_4_slopes_extracted, when_exclusion floor_effect_5.2.1 6_9_percent_probability 77_percent_item_exclusion, preliminary_results strong_consolidation_6x_slope_reduction no_domain_difference_what_equals_where hypothesis_not_supported, remaining_steps step03_contrasts step04_benefit step05_plot_data, session_metrics 39k_tokens 4_bugs_fixed)
+
+**Relevant Archived Topics (from context-finder):**
+- when_domain_anomalies.md (2025-11-24 12:30: original floor effect discovery)
+- rq_5.3.3_complete_execution_piecewise_lmm_consolidation.md (2025-12-02 20:45: same methodology)
+- rq_5.2.1 completion (rq_status.tsv: source of When exclusion decision)
+
+**End of Session (2025-12-02 23:15)**
+
+**Status:** 🔄 **RQ 5.2.2 IN PROGRESS** - Completed Steps 00-02 (data prep, LMM fit, slope extraction) with When domain exclusion. 4 bugs fixed (data source, test numbering, When filter, slope reduction). **PRELIMINARY FINDING:** Strong consolidation effect (~6× slope reduction) but no domain-specific benefit - What ≈ Where. Steps 03-05 remaining (contrasts, consolidation benefit, plot data). Session paused for /save at ~45k tokens.
+

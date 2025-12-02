@@ -15,24 +15,25 @@ theta data. This creates the foundation for the 3-way interaction analysis
 between Early and Late consolidation phases across memory domains.
 
 EXPECTED INPUTS:
-  - results/ch5/5.1.1/data/step04_lmm_input.csv
+  - results/ch5/5.2.1/data/step04_lmm_input.csv
     Columns: [composite_ID, UID, test, TSVR_hours, domain, theta]
-    Format: CSV with RQ 5.1 LMM input data
+    Format: CSV with RQ 5.2.1 domain-specific LMM input data
     Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
 
 EXPECTED OUTPUTS:
   - data/step00_piecewise_lmm_input.csv
     Columns: [composite_ID, UID, test, TSVR_hours, domain, theta, Segment, Days_within]
     Format: CSV with piecewise LMM input data
-    Expected rows: ~1200 (same as input)
+    Expected rows: ~800 (100 participants x 4 tests x 2 domains - When excluded)
 
 VALIDATION CRITERIA:
   - RQ 5.1 dependency exists (CRITICAL)
-  - Row count preserved (CRITICAL)
+  - When domain excluded (floor effect per RQ 5.2.1) (CRITICAL)
+  - Row count ~800 after filtering (CRITICAL)
   - Segment assignment correct: test in {0,1} -> 'Early', test in {3,6} -> 'Late' (CRITICAL)
   - No NaN in new columns (CRITICAL)
   - Days_within range valid: Early [0, 2], Late [0, 6] (CRITICAL)
-  - All domains present: {what, where, when} (CRITICAL)
+  - Only What/Where domains present: {what, where} (CRITICAL)
 
 g_code REASONING:
 - Approach: Transform RQ 5.1 continuous TSVR data into piecewise segments for
@@ -74,8 +75,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.2.2
 LOG_FILE = RQ_DIR / "logs" / "step00_prepare_piecewise_input.log"
 
-# Input from RQ 5.1
-RQ51_INPUT = PROJECT_ROOT / "results" / "ch5" / "5.1.1" / "data" / "step04_lmm_input.csv"
+# Input from RQ 5.2.1 (domain-specific theta scores)
+RQ521_INPUT = PROJECT_ROOT / "results" / "ch5" / "5.2.1" / "data" / "step04_lmm_input.csv"
 
 # Output for this step
 OUTPUT_FILE = RQ_DIR / "data" / "step00_piecewise_lmm_input.csv"
@@ -106,11 +107,12 @@ OUTPUT_FILE = RQ_DIR / "data" / "step00_piecewise_lmm_input.csv"
 # =============================================================================
 
 SEGMENT_MAPPING = {
-    "Early": [0, 1],  # Test 0 (Day 0) and Test 1 (Day 1) - consolidation window
-    "Late": [3, 6]    # Test 3 (Day 3) and Test 6 (Day 6) - decay phase
+    "Early": [1, 2],  # Test 1 (Day 0) and Test 2 (Day 1) - consolidation window
+    "Late": [3, 4]    # Test 3 (Day 3) and Test 4 (Day 6) - decay phase
 }
 
-# Note: Day 1 is in Early segment ONLY (no overlap between segments)
+# Note: Test 2 (Day 1) is in Early segment ONLY (no overlap between segments)
+# Test numbering: 1=Day0, 2=Day1, 3=Day3, 4=Day6 (sequential, not nominal days)
 
 # =============================================================================
 # Logging Function
@@ -128,37 +130,37 @@ def log(msg):
 
 if __name__ == "__main__":
     try:
-        log("[START] Step 00: Prepare Piecewise LMM Input from RQ 5.1")
+        log("[START] Step 00: Prepare Piecewise LMM Input from RQ 5.2.1")
         log(f"[CONFIG] RQ Directory: {RQ_DIR}")
-        log(f"[CONFIG] Input: {RQ51_INPUT}")
+        log(f"[CONFIG] Input: {RQ521_INPUT}")
         log(f"[CONFIG] Output: {OUTPUT_FILE}")
 
         # =========================================================================
-        # STEP 1: Validate RQ 5.1 Dependency
+        # STEP 1: Validate RQ 5.2.1 Dependency
         # =========================================================================
-        # Check that RQ 5.1 output exists before proceeding
+        # Check that RQ 5.2.1 output exists before proceeding
         # This is a CRITICAL validation - cannot proceed without input
 
-        log("[VALIDATE] Checking RQ 5.1 dependency...")
+        log("[VALIDATE] Checking RQ 5.2.1 dependency...")
 
-        if not RQ51_INPUT.exists():
+        if not RQ521_INPUT.exists():
             raise ValueError(
-                f"CRITICAL: RQ 5.1 dependency missing. "
-                f"Expected file: {RQ51_INPUT}. "
-                f"Run RQ 5.1 first to generate this file."
+                f"CRITICAL: RQ 5.2.1 dependency missing. "
+                f"Expected file: {RQ521_INPUT}. "
+                f"Run RQ 5.2.1 first to generate this file."
             )
 
-        log(f"[PASS] RQ 5.1 dependency exists: {RQ51_INPUT}")
+        log(f"[PASS] RQ 5.2.1 dependency exists: {RQ521_INPUT}")
 
         # =========================================================================
         # STEP 2: Load Input Data
         # =========================================================================
-        # Expected: RQ 5.1 LMM input with theta scores and TSVR
+        # Expected: RQ 5.2.1 LMM input with domain-specific theta scores and TSVR
         # Purpose: Base data for piecewise segment transformation
 
-        log("[LOAD] Loading RQ 5.1 LMM input data...")
-        df_rq51 = pd.read_csv(RQ51_INPUT, encoding='utf-8')
-        log(f"[LOADED] {RQ51_INPUT.name} ({len(df_rq51)} rows, {len(df_rq51.columns)} cols)")
+        log("[LOAD] Loading RQ 5.2.1 LMM input data...")
+        df_rq51 = pd.read_csv(RQ521_INPUT, encoding='utf-8')
+        log(f"[LOADED] {RQ521_INPUT.name} ({len(df_rq51)} rows, {len(df_rq51.columns)} cols)")
         log(f"[INFO] Columns: {list(df_rq51.columns)}")
 
         # Validate required columns
@@ -168,6 +170,31 @@ if __name__ == "__main__":
             raise ValueError(f"CRITICAL: Missing required columns: {missing_cols}")
 
         log(f"[PASS] All required columns present: {required_cols}")
+
+        # =========================================================================
+        # STEP 2.5: FILTER OUT WHEN DOMAIN (Floor Effect per RQ 5.2.1)
+        # =========================================================================
+        # When domain excluded due to floor effect discovered in RQ 5.2.1:
+        # - Performance at 6-9% probability throughout study (near 0% floor)
+        # - 20/26 When items (77%) excluded for low discrimination (a < 0.4)
+        # - Only 6 items retained, limiting reliability
+        # - Per RQ 5.2.1: "Exclude When domain from subsequent RQs until resolved"
+
+        log("[FILTER] Excluding When domain (floor effect per RQ 5.2.1)...")
+        original_rows = len(df_rq51)
+        original_domains = df_rq51["domain"].unique()
+        log(f"[INFO] Original domains: {list(original_domains)}")
+        log(f"[INFO] Original row count: {original_rows}")
+
+        # Filter to What and Where only
+        df_rq51 = df_rq51[df_rq51["domain"].isin(["what", "where"])].copy()
+
+        filtered_rows = len(df_rq51)
+        filtered_domains = df_rq51["domain"].unique()
+        log(f"[INFO] After filter - domains: {list(filtered_domains)}")
+        log(f"[INFO] After filter - row count: {filtered_rows}")
+        log(f"[INFO] Rows removed (When domain): {original_rows - filtered_rows}")
+        log(f"[PASS] When domain excluded successfully")
 
         # =========================================================================
         # STEP 3: Create Segment Variable
@@ -245,18 +272,18 @@ if __name__ == "__main__":
 
         log("[VALIDATE] Running validation checks...")
 
-        # Check 1: Row count preserved
+        # Check 1: Row count preserved (after When filtering)
         if len(df_piecewise) != len(df_rq51):
             raise ValueError(
                 f"CRITICAL: Row count changed during transformation. "
-                f"Input: {len(df_rq51)}, Output: {len(df_piecewise)}"
+                f"Input (after When filter): {len(df_rq51)}, Output: {len(df_piecewise)}"
             )
-        log(f"[PASS] Row count preserved: {len(df_piecewise)}")
+        log(f"[PASS] Row count preserved (after When filter): {len(df_piecewise)}")
 
         # Check 2: Segment assignment correct
-        # test in {0,1} should be 100% Early
-        # test in {3,6} should be 100% Late
-        for test_val, expected_seg in [(0, "Early"), (1, "Early"), (3, "Late"), (6, "Late")]:
+        # test in {1,2} should be 100% Early
+        # test in {3,4} should be 100% Late
+        for test_val, expected_seg in [(1, "Early"), (2, "Early"), (3, "Late"), (4, "Late")]:
             test_data = df_piecewise[df_piecewise["test"] == test_val]
             if len(test_data) > 0:
                 actual_seg = test_data["Segment"].unique()
@@ -265,7 +292,7 @@ if __name__ == "__main__":
                         f"CRITICAL: test={test_val} should be {expected_seg}, "
                         f"but found: {actual_seg}"
                     )
-        log("[PASS] Segment assignment correct: test 0,1 -> Early; test 3,6 -> Late")
+        log("[PASS] Segment assignment correct: test 1,2 -> Early; test 3,4 -> Late")
 
         # Check 3: No NaN in new columns
         nan_segment = df_piecewise["Segment"].isna().sum()
@@ -290,15 +317,15 @@ if __name__ == "__main__":
 
         log(f"[PASS] Days_within range valid: Early max={early_max:.2f}, Late max={late_max:.2f}")
 
-        # Check 5: All domains present
+        # Check 5: Only What/Where domains present (When excluded)
         domains_present = set(df_piecewise["domain"].unique())
-        expected_domains = {"what", "where", "when"}
+        expected_domains = {"what", "where"}  # When excluded due to floor effect
         if domains_present != expected_domains:
             raise ValueError(
                 f"CRITICAL: Domain mismatch. "
                 f"Expected: {expected_domains}, Found: {domains_present}"
             )
-        log(f"[PASS] All domains present: {expected_domains}")
+        log(f"[PASS] Expected domains present (When excluded): {expected_domains}")
 
         # =========================================================================
         # STEP 6: Save Output
@@ -325,7 +352,7 @@ if __name__ == "__main__":
         log("=" * 70)
         log("[SUCCESS] Step 00 complete: Piecewise LMM Input Prepared")
         log("=" * 70)
-        log(f"  Input:  {RQ51_INPUT}")
+        log(f"  Input:  {RQ521_INPUT}")
         log(f"  Output: {OUTPUT_FILE}")
         log(f"  Rows:   {len(df_piecewise)}")
         log("")

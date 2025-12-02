@@ -8,11 +8,18 @@
 
 ## Overview
 
-This plan specifies the complete analysis workflow for RQ 5.2, which examines whether sleep-dependent consolidation (Day 0->1) differentially benefits memory domains (What/Where/When) compared to later decay (Day 1->6). The analysis uses piecewise LMM with a 3-way interaction (Days_within x Segment x Domain) to test whether forgetting slopes differ across consolidation and decay phases by memory domain.
+This plan specifies the complete analysis workflow for RQ 5.2, which examines whether sleep-dependent consolidation (Day 0->1) differentially benefits memory domains (What/Where) compared to later decay (Day 1->6). The analysis uses piecewise LMM with a 3-way interaction (Days_within x Segment x Domain) to test whether forgetting slopes differ across consolidation and decay phases by memory domain.
+
+**When Domain Exclusion (RQ 5.2.1 Floor Effect):**
+When domain excluded from this analysis due to floor effect discovered in RQ 5.2.1:
+- Performance at 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination
+- Only 6 items retained, limiting reliability
+- Per RQ 5.2.1: "Exclude When domain from subsequent RQs until resolved"
 
 **Key Innovation:** Piecewise time structure assigns Day 1 to the Early segment only (no overlap), testing the theoretical prediction that hippocampal-dependent spatial memory (Where) benefits most from sleep consolidation.
 
-**Pipeline:** Data preparation (from RQ 5.1 outputs) -> Piecewise LMM (3-way interaction) -> Slope extraction -> Planned contrasts
+**Pipeline:** Data preparation (from RQ 5.1 outputs) -> Filter to What/Where domains -> Piecewise LMM (3-way interaction) -> Slope extraction -> Planned contrasts
 
 **Total Steps:** 6 steps (Step 0: data preparation + Steps 1-5: analysis and plot preparation)
 
@@ -24,8 +31,8 @@ This plan specifies the complete analysis workflow for RQ 5.2, which examines wh
 - Decision D070: TSVR (actual hours) as LMM time variable, not nominal days
 
 **Bonferroni Correction (per rq_stats feedback):**
-- 6 planned comparisons: 3 domains x 2 segment-specific slope tests
-- alpha = 0.05/6 = 0.0083
+- 3 planned comparisons: 2 domains x 2 segment-specific slope tests (reduced from 6 due to When exclusion)
+- alpha = 0.05/3 = 0.0167
 
 ---
 
@@ -41,27 +48,28 @@ This plan specifies the complete analysis workflow for RQ 5.2, which examines wh
 **File 1:** results/ch5/5.1.1/data/step04_lmm_input.csv
 **Format:** CSV, long format (one row per observation = composite_ID x domain)
 **Columns:** composite_ID, UID, test, TSVR_hours, domain, theta, se
-**Expected Rows:** ~1200 (400 composite_IDs x 3 domains)
+**Expected Rows:** ~1200 (400 composite_IDs x 3 domains) -> filtered to ~800 (What/Where only)
 **Source:** RQ 5.1 Step 4 output (theta scores merged with TSVR)
 
 **Processing:**
 
 1. Load RQ 5.1 LMM input data (long format with theta, domain, TSVR_hours, test)
-2. Create Segment variable based on test:
+2. **FILTER: Exclude When domain** (floor effect per RQ 5.2.1) - keep only What/Where
+3. Create Segment variable based on test:
    - Early segment: test in {0, 1} (Day 0 encoding, Day 1 immediate retest - consolidation window)
    - Late segment: test in {3, 6} (Day 3, Day 6 - decay-dominated phase)
    - CRITICAL: Day 1 (test=1) assigned to Early segment ONLY (no overlap)
-3. Create Days_within variable (time since segment start):
+4. Create Days_within variable (time since segment start):
    - For Early segment: Days_within = TSVR_hours / 24 (ranges ~0-1 days)
    - For Late segment: Days_within = (TSVR_hours - TSVR_at_Day1) / 24 (ranges ~0-5 days)
    - Interpretation: Days elapsed within each segment, centered at segment start
-4. Verify segment assignments:
+5. Verify segment assignments:
    - Each observation belongs to exactly one segment
    - test=0,1 -> Early; test=3,6 -> Late
-5. Create interaction-ready factors:
+6. Create interaction-ready factors:
    - domain: Treatment coding with What as reference
    - Segment: Treatment coding with Early as reference
-6. Save piecewise LMM input
+7. Save piecewise LMM input
 
 **Output:**
 
@@ -72,12 +80,12 @@ This plan specifies the complete analysis workflow for RQ 5.2, which examines wh
 - `UID` (string): Participant identifier
 - `test` (int): Nominal test session (0, 1, 3, 6)
 - `TSVR_hours` (float): Actual time since encoding in hours
-- `domain` (string): Memory domain (what, where, when)
+- `domain` (string): Memory domain (what, where) - **When excluded**
 - `theta` (float): IRT ability estimate for this domain
 - `se` (float): Standard error of theta estimate
 - `Segment` (string): "Early" or "Late"
 - `Days_within` (float): Days elapsed within segment (centered at segment start)
-**Expected Rows:** ~1200 (same as input)
+**Expected Rows:** ~800 (400 composite_IDs x 2 domains, What/Where only)
 **Expected Columns:** 9
 
 **Validation Requirement:**
@@ -86,20 +94,20 @@ Validation tools MUST be used after data preparation tool execution. Specific va
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_piecewise_lmm_input.csv: ~1200 rows x 9 columns
+- data/step00_piecewise_lmm_input.csv: ~800 rows x 9 columns (What/Where only, When excluded)
 
 *Value Ranges:*
 - TSVR_hours in [0, 200] (reasonable range for 6-day study)
 - theta in [-3.0, 3.0] (bounded by IRT ability scale)
 - se in [0.1, 1.5] (reasonable standard errors)
 - test in {0, 1, 3, 6} (nominal test sessions)
-- domain in {what, where, when} (categorical)
+- domain in {what, where} (categorical) - **When excluded due to floor effect**
 - Segment in {Early, Late} (categorical)
 - Days_within in [0, 6] for Late segment, [0, 2] for Early segment
 
 *Data Quality:*
-- All composite_IDs from RQ 5.1 present (no data loss)
-- Each composite_ID appears exactly 3 times (once per domain)
+- All composite_IDs from RQ 5.1 present for What/Where domains (When filtered out)
+- Each composite_ID appears exactly 2 times (once per retained domain: What, Where)
 - test 0,1 -> Segment=Early (100%); test 3,6 -> Segment=Late (100%)
 - No NaN in Segment or Days_within columns
 - ~100 unique UIDs present
@@ -209,15 +217,13 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 
 1. Load fitted piecewise LMM model
 2. Extract fixed effects coefficients
-3. Compute segment-specific slopes for each domain:
+3. Compute segment-specific slopes for each domain (What/Where only - When excluded):
    - **Early segment slopes (from coefficients directly):**
      - What (Early): beta[Days_within]
      - Where (Early): beta[Days_within] + beta[Days_within:domain[T.Where]]
-     - When (Early): beta[Days_within] + beta[Days_within:domain[T.When]]
    - **Late segment slopes (add Segment interaction):**
      - What (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]]
      - Where (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]] + beta[Days_within:domain[T.Where]] + beta[Days_within:Segment[T.Late]:domain[T.Where]]
-     - When (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]] + beta[Days_within:domain[T.When]] + beta[Days_within:Segment[T.Late]:domain[T.When]]
 4. Compute standard errors via delta method or linear combination SE
 5. Compute 95% confidence intervals for each slope
 6. Save slope summary table
@@ -228,14 +234,14 @@ Validation tools MUST be used after LMM fitting tool execution. Specific validat
 **Format:** CSV (one row per segment x domain combination)
 **Columns:**
 - `segment` (string): Early or Late
-- `domain` (string): what, where, when
+- `domain` (string): what, where (When excluded due to floor effect)
 - `slope` (float): Estimated forgetting slope (theta units per day)
 - `se` (float): Standard error of slope estimate
 - `CI_lower` (float): Lower 95% CI bound
 - `CI_upper` (float): Upper 95% CI bound
 - `z` (float): Z-statistic (slope / se)
 - `p_value` (float): p-value for slope != 0
-**Expected Rows:** 6 (2 segments x 3 domains)
+**Expected Rows:** 4 (2 segments x 2 domains)
 
 **Validation Requirement:**
 Validation tools MUST be used after slope extraction tool execution. Specific validation tools will be determined by rq_tools based on statistical validity requirements.
@@ -243,7 +249,7 @@ Validation tools MUST be used after slope extraction tool execution. Specific va
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step02_segment_domain_slopes.csv: 6 rows x 8 columns
+- results/step02_segment_domain_slopes.csv: 4 rows x 8 columns (What/Where only)
 
 *Value Ranges:*
 - slope in [-1, 0] typically (negative = forgetting, decline over time)
@@ -253,14 +259,14 @@ Validation tools MUST be used after slope extraction tool execution. Specific va
 - z in [-10, 10]
 
 *Data Quality:*
-- Exactly 6 rows (2 segments x 3 domains)
+- Exactly 4 rows (2 segments x 2 domains - When excluded)
 - All segment-domain combinations present
-- segment in {Early, Late}; domain in {what, where, when}
+- segment in {Early, Late}; domain in {what, where}
 - No NaN in any column
 - Early slopes should generally be steeper (more negative) or similar to Late slopes
 
 *Log Validation:*
-- Required pattern: "Extracted 6 segment-domain slopes"
+- Required pattern: "Extracted 4 segment-domain slopes"
 - Required pattern: "SE computed via linear combination"
 - Forbidden patterns: "ERROR", "Slope extraction failed", "NaN slope"
 
@@ -288,20 +294,17 @@ Validation tools MUST be used after slope extraction tool execution. Specific va
 **Processing:**
 
 1. Load fitted piecewise LMM model
-2. Define 6 planned contrasts (per rq_stats validation feedback):
+2. Define 3 planned contrasts (reduced from 6 due to When exclusion):
 
    **Within-segment domain comparisons (consolidation benefit tests):**
    - C1: Where vs What slope in Early segment (tests spatial consolidation advantage)
-   - C2: When vs What slope in Early segment (tests temporal consolidation)
-   - C3: Where vs What slope in Late segment (decay phase comparison)
-   - C4: When vs What slope in Late segment (decay phase comparison)
+   - C2: Where vs What slope in Late segment (decay phase comparison)
 
    **Cross-segment comparisons (slope change tests):**
-   - C5: Where (Late-Early) vs What (Late-Early) - does consolidation benefit differ?
-   - C6: When (Late-Early) vs What (Late-Early) - does consolidation benefit differ?
+   - C3: Where (Late-Early) vs What (Late-Early) - does consolidation benefit differ?
 
 3. Compute each contrast using linear combinations of fixed effects
-4. Apply Bonferroni correction: alpha = 0.05/6 = 0.0083
+4. Apply Bonferroni correction: alpha = 0.05/3 = 0.0167
 5. Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
 6. Compute effect sizes (Cohen's d) for domain differences
 7. Save contrast results
@@ -318,8 +321,8 @@ Validation tools MUST be used after slope extraction tool execution. Specific va
 - `p_uncorrected` (float): Raw p-value
 - `p_bonferroni` (float): Bonferroni-corrected p-value (Decision D068)
 - `significant_uncorrected` (bool): p < 0.05
-- `significant_bonferroni` (bool): p < 0.0083
-**Expected Rows:** 6 (6 planned contrasts)
+- `significant_bonferroni` (bool): p < 0.0167
+**Expected Rows:** 3 (3 planned contrasts - When excluded)
 
 **File 2:** results/step03_effect_sizes.csv
 **Format:** CSV
@@ -329,7 +332,7 @@ Validation tools MUST be used after slope extraction tool execution. Specific va
 - `ci_lower` (float): 95% CI lower bound
 - `ci_upper` (float): 95% CI upper bound
 - `interpretation` (string): Small/Medium/Large per Cohen's guidelines
-**Expected Rows:** 6 (effect sizes for 6 contrasts)
+**Expected Rows:** 3 (effect sizes for 3 contrasts)
 
 **Validation Requirement:**
 Validation tools MUST be used after contrast computation tool execution. Specific validation tools will be determined by rq_tools based on statistical validity and effect size computation requirements.
@@ -337,8 +340,8 @@ Validation tools MUST be used after contrast computation tool execution. Specifi
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step03_planned_contrasts.csv: 6 rows x 8 columns
-- results/step03_effect_sizes.csv: 6 rows x 5 columns
+- results/step03_planned_contrasts.csv: 3 rows x 8 columns (When excluded)
+- results/step03_effect_sizes.csv: 3 rows x 5 columns (When excluded)
 
 *Value Ranges:*
 - p_uncorrected in [0, 1] (valid probability)
@@ -347,14 +350,14 @@ Validation tools MUST be used after contrast computation tool execution. Specifi
 - cohens_d in [-3, 3] (typical effect size range, |d| > 2 is very large)
 
 *Data Quality:*
-- Exactly 6 contrasts present (per rq_stats specification)
-- p_bonferroni = min(1.0, p_uncorrected * 6) for each row
+- Exactly 3 contrasts present (reduced from 6 due to When exclusion)
+- p_bonferroni = min(1.0, p_uncorrected * 3) for each row
 - Both uncorrected and Bonferroni p-values present (Decision D068)
 - Effect size CI contains point estimate (ci_lower <= cohens_d <= ci_upper)
 
 *Log Validation:*
-- Required pattern: "Computed 6 planned contrasts"
-- Required pattern: "Bonferroni correction applied (alpha = 0.0083)"
+- Required pattern: "Computed 3 planned contrasts"
+- Required pattern: "Bonferroni correction applied (alpha = 0.0167)"
 - Forbidden patterns: "ERROR", "Invalid contrast", "Effect size NaN"
 
 **Expected Behavior on Validation Failure:**
@@ -395,7 +398,7 @@ Validation tools MUST be used after contrast computation tool execution. Specifi
 **File:** results/step04_consolidation_benefit.csv
 **Format:** CSV (one row per domain)
 **Columns:**
-- `domain` (string): what, where, when
+- `domain` (string): what, where (When excluded due to floor effect)
 - `early_slope` (float): Forgetting slope in Early segment
 - `late_slope` (float): Forgetting slope in Late segment
 - `consolidation_benefit` (float): Early - Late (positive = protected)
@@ -403,7 +406,7 @@ Validation tools MUST be used after contrast computation tool execution. Specifi
 - `benefit_CI_lower` (float): Lower 95% CI
 - `benefit_CI_upper` (float): Upper 95% CI
 - `rank` (int): Rank by consolidation benefit (1 = most protected)
-**Expected Rows:** 3 (3 domains)
+**Expected Rows:** 2 (What/Where only, When excluded)
 
 **Validation Requirement:**
 Validation tools MUST be used after consolidation benefit computation tool execution. Specific validation tools will be determined by rq_tools based on statistical validity requirements.
@@ -411,23 +414,23 @@ Validation tools MUST be used after consolidation benefit computation tool execu
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- results/step04_consolidation_benefit.csv: 3 rows x 8 columns
+- results/step04_consolidation_benefit.csv: 2 rows x 8 columns (What/Where only)
 
 *Value Ranges:*
 - early_slope in [-1, 0] typically (forgetting = negative)
 - late_slope in [-1, 0] typically
 - consolidation_benefit in [-0.5, 0.5] (difference of slopes)
-- rank in {1, 2, 3} (unique ranks for 3 domains)
+- rank in {1, 2} (unique ranks for 2 domains)
 
 *Data Quality:*
-- Exactly 3 rows (3 domains)
-- All domains present (what, where, when)
-- Ranks are unique (1, 2, 3)
+- Exactly 2 rows (What/Where only, When excluded)
+- All retained domains present (what, where)
+- Ranks are unique (1, 2)
 - benefit_CI_lower < consolidation_benefit < benefit_CI_upper
 
 *Log Validation:*
-- Required pattern: "Computed consolidation benefit for 3 domains"
-- Required pattern: "Domain ranking by consolidation benefit: X > Y > Z"
+- Required pattern: "Computed consolidation benefit for 2 domains"
+- Required pattern: "Domain ranking by consolidation benefit: X > Y"
 - Forbidden patterns: "ERROR", "Benefit computation failed"
 
 **Expected Behavior on Validation Failure:**
@@ -489,28 +492,28 @@ Validation tools MUST be used after consolidation benefit computation tool execu
 **Columns:**
 - `time` (float): TSVR_hours (representative time per test)
 - `test` (int): Nominal test session (0, 1, 3, 6)
-- `domain` (string): Memory domain (what, where, when)
+- `domain` (string): Memory domain (what, where) - **When excluded**
 - `Segment` (string): Early or Late
 - `mean_theta` (float): Observed mean theta per domain x test
 - `CI_lower` (float): Lower 95% CI bound (theta scale)
 - `CI_upper` (float): Upper 95% CI bound (theta scale)
 - `predicted_theta` (float): Piecewise LMM model prediction at this time point
 - `n_obs` (int): Number of observations in group
-**Expected Rows:** 12 (3 domains x 4 time points)
+**Expected Rows:** 8 (2 domains x 4 time points)
 
 **File 2:** plots/step05_piecewise_probability_data.csv
 **Format:** CSV (plot-ready data for probability scale - Decision D069)
 **Columns:**
 - `time` (float): TSVR_hours
 - `test` (int): Nominal test session
-- `domain` (string): Memory domain
+- `domain` (string): Memory domain (what, where) - **When excluded**
 - `Segment` (string): Early or Late
 - `mean_probability` (float): Mean theta transformed to probability scale
 - `CI_lower` (float): Lower 95% CI bound (probability scale)
 - `CI_upper` (float): Upper 95% CI bound (probability scale)
 - `predicted_probability` (float): Model prediction on probability scale
 - `n_obs` (int): Number of observations
-**Expected Rows:** 12 (3 domains x 4 time points)
+**Expected Rows:** 8 (2 domains x 4 time points)
 
 **Validation Requirement:**
 Validation tools MUST be used after plot data preparation tool execution. Specific validation tools will be determined by rq_tools based on plot data format requirements.
@@ -518,13 +521,13 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- plots/step05_piecewise_theta_data.csv: 12 rows x 9 columns
-- plots/step05_piecewise_probability_data.csv: 12 rows x 9 columns
+- plots/step05_piecewise_theta_data.csv: 8 rows x 9 columns (What/Where only)
+- plots/step05_piecewise_probability_data.csv: 8 rows x 9 columns (What/Where only)
 
 *Value Ranges:*
 - time in [0, 200] hours (reasonable TSVR range)
 - test in {0, 1, 3, 6} (nominal sessions)
-- domain in {what, where, when} (categorical)
+- domain in {what, where} (categorical) - **When excluded**
 - Segment in {Early, Late} (categorical)
 - mean_theta in [-3, 3] (IRT ability scale)
 - mean_probability in [0, 1] (probability scale)
@@ -532,22 +535,22 @@ Validation tools MUST be used after plot data preparation tool execution. Specif
 - n_obs >= 80 per group (100 participants, some missing acceptable)
 
 *Data Quality:*
-- Exactly 12 rows per file (3 domains x 4 tests, no more, no less)
-- All 3 domains present (what, where, when)
+- Exactly 8 rows per file (2 domains x 4 tests - When excluded)
+- Both retained domains present (what, where)
 - All 4 tests present (0, 1, 3, 6)
 - Segment assignment correct: test 0,1 -> Early; test 3,6 -> Late
 - No NaN values in any column
 - Domain x test combinations unique (no duplicates)
 
 *Log Validation:*
-- Required pattern: "Plot data preparation complete: 12 rows created"
-- Required pattern: "All domains represented: what, where, when"
+- Required pattern: "Plot data preparation complete: 8 rows created"
+- Required pattern: "Domains represented: what, where"
 - Required pattern: "Segment boundaries: Early (tests 0,1), Late (tests 3,6)"
 - Required pattern: "Dual-scale conversion applied (Decision D069)"
 - Forbidden patterns: "ERROR", "NaN values detected", "Missing domain"
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific failure message (e.g., "Expected 12 rows, found 9")
+- Raise error with specific failure message (e.g., "Expected 8 rows, found 6")
 - Log failure to logs/step05_prepare_piecewise_plot_data.log
 - Quit script immediately (do NOT proceed to rq_plots)
 - g_debug invoked to diagnose root cause

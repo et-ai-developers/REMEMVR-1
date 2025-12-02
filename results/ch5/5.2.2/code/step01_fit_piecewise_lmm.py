@@ -14,14 +14,14 @@ Days_within * Segment * domain
 
 This tests whether forgetting slopes differ by:
 1. Time segment (Early: consolidation phase vs Late: decay phase)
-2. Memory domain (What/Where/When)
+2. Memory domain (What/Where) - When excluded due to floor effect in RQ 5.2.1
 3. Their interaction (differential consolidation benefit by domain)
 
 EXPECTED INPUTS:
   - data/step00_piecewise_lmm_input.csv
     Columns: [composite_ID, UID, test, TSVR_hours, domain, theta, Segment, Days_within]
     Format: Long format with one row per person x domain x test
-    Expected rows: ~1200 (100 participants x 3 domains x 4 tests)
+    Expected rows: ~800 (100 participants x 2 domains x 4 tests) - When excluded
 
 EXPECTED OUTPUTS:
   - data/step01_piecewise_lmm_model.pkl
@@ -34,7 +34,7 @@ EXPECTED OUTPUTS:
 VALIDATION CRITERIA:
   - Model converged successfully
   - No singular fit (random effects variance > 0)
-  - All fixed effect terms present (7 terms: intercept + 6 interactions)
+  - All fixed effect terms present (5 terms: intercept + 4 interaction terms for 2 domains)
 
 g_code REASONING:
 - Approach: Use statsmodels MixedLM with Treatment coding for interpretable contrasts
@@ -166,10 +166,10 @@ if __name__ == "__main__":
         # Define model parameters
         # Formula: 3-way interaction testing slope differences by Segment and Domain
         # Reference levels: Early segment, What domain (via Treatment coding)
-        # This means:
+        # This means (with When excluded, only What/Where remain):
         #   - Days_within main effect = slope in Early-What
         #   - Segment[T.Late] interaction = slope change from Early to Late in What
-        #   - domain[T.where/when] interaction = slope difference from What in Early
+        #   - domain[T.where] interaction = slope difference from What in Early
         #   - 3-way = whether slope differences vary by segment
 
         formula = "theta ~ Days_within * C(Segment, Treatment('Early')) * C(domain, Treatment('what'))"
@@ -273,8 +273,12 @@ if __name__ == "__main__":
             pval = lmm_model.pvalues[name]
             log(f"  {i+1}. {name}: {coef:.4f} (p={pval:.4f})")
 
-        # Check we have the expected structure (intercept + 6 interaction terms)
-        expected_min_terms = 7  # Intercept + main effects + interactions
+        # Check we have the expected structure (intercept + 4 interaction terms for 2 domains)
+        # With 2 domains (What/Where) and 2 segments (Early/Late):
+        # Intercept, Days_within, Segment[T.Late], domain[T.where],
+        # Days_within:Segment[T.Late], Days_within:domain[T.where],
+        # Segment[T.Late]:domain[T.where], Days_within:Segment[T.Late]:domain[T.where]
+        expected_min_terms = 5  # Intercept + at least 4 interaction terms
         if len(fe_names) >= expected_min_terms:
             log(f"[PASS] Model has {len(fe_names)} fixed effects (expected >= {expected_min_terms})")
         else:

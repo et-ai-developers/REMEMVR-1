@@ -24,7 +24,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.3.9	Paradigms	Item Difficulty	All 3 paradigms valid. Cross-classified LMM.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.4.1	Congruence	Trajectories	NULL schema effects (valid finding). All 3 levels usable.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 5.4.2	Congruence	Consolidation	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-5.4.3	Congruence	Age Effects	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
+5.4.3	Congruence	Age Effects	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 5.4.4	Congruence	IRT-CTT	BLOCKED: Missing CTT tools (compute_ctt_scores, compute_pearson_correlation, compute_cohens_kappa)	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
 5.4.5	Congruence	Purified CTT	All 3 congruence levels valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.4.6	Congruence	Variance Decomp	All 3 congruence levels valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE

@@ -9,37 +9,37 @@ RQ: results/ch5/5.2.2
 Generated: 2025-11-23
 
 PURPOSE:
-Extract 6 segment-domain specific forgetting slopes via linear combinations
+Extract 4 segment-domain specific forgetting slopes via linear combinations
 from the fitted piecewise LMM model. Slopes represent forgetting rates
 (theta change per day) for each combination of Segment (Early/Late) and
-domain (what/where/when).
+domain (what/where). When domain excluded due to floor effect in RQ 5.2.1.
 
 EXPECTED INPUTS:
   - data/step01_piecewise_lmm_model.pkl
     Format: Pickled MixedLMResults object from statsmodels
     Contains: Fitted piecewise LMM with 3-way interaction (Days_within * Segment * domain)
-    Fixed effects: 12 parameters (intercept + main effects + interactions)
+    Fixed effects: 8 parameters (intercept + main effects + interactions for 2 domains)
 
 EXPECTED OUTPUTS:
   - results/step02_fixed_effects.csv
     Columns: [Term, Coef, Std_Err, z, P_value, CI_lower, CI_upper]
     Format: Fixed effects table from LMM
-    Expected rows: 12 (all fixed effect terms)
+    Expected rows: 8 (all fixed effect terms for 2 domains)
 
   - results/step02_segment_domain_slopes.csv
     Columns: [segment, domain, slope, se, CI_lower, CI_upper]
     Format: Computed slopes for each segment x domain combination
-    Expected rows: 6 (2 segments x 3 domains)
+    Expected rows: 4 (2 segments x 2 domains - When excluded)
 
 VALIDATION CRITERIA:
-  - Fixed effects table has 7+ rows (intercept + interaction terms)
-  - Slope table has exactly 6 rows (2 segments x 3 domains)
-  - All segment-domain combinations present: Early/Late x what/where/when
+  - Fixed effects table has 5+ rows (intercept + interaction terms)
+  - Slope table has exactly 4 rows (2 segments x 2 domains)
+  - All segment-domain combinations present: Early/Late x what/where
   - Slopes have valid values: numeric, SE > 0, CI_lower < slope < CI_upper
 
 g_code REASONING:
 - Approach: Extract fixed effects from fitted LMM, then compute linear combinations
-  to derive the 6 specific forgetting slopes (one per segment-domain combination)
+  to derive the 4 specific forgetting slopes (one per segment-domain combination)
 - Why this approach: The piecewise LMM encodes slopes as interaction terms. The
   baseline slope (What in Early) is the Days_within coefficient. Other slopes
   require adding interaction terms (e.g., Where_Early = Days_within + Days_within:domain[T.where])
@@ -53,15 +53,12 @@ IMPLEMENTATION NOTES:
 - SE for combined slopes computed via delta method (variance propagation)
 - 95% CI computed as slope +/- 1.96*SE
 
-SLOPE COMPUTATION FORMULAS (from 4_analysis.yaml):
+SLOPE COMPUTATION FORMULAS (When excluded - only What/Where):
   - What (Early): beta[Days_within]
   - Where (Early): beta[Days_within] + beta[Days_within:domain[T.where]]
-  - When (Early): beta[Days_within] + beta[Days_within:domain[T.when]]
   - What (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]]
   - Where (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]] +
                   beta[Days_within:domain[T.where]] + beta[Days_within:Segment[T.Late]:domain[T.where]]
-  - When (Late): beta[Days_within] + beta[Days_within:Segment[T.Late]] +
-                 beta[Days_within:domain[T.when]] + beta[Days_within:Segment[T.Late]:domain[T.when]]
 """
 # =============================================================================
 
@@ -131,7 +128,8 @@ def compute_segment_domain_slopes(
     lmm_model: MixedLMResults
 ) -> pd.DataFrame:
     """
-    Compute the 6 segment-domain specific slopes via linear combinations.
+    Compute the 4 segment-domain specific slopes via linear combinations.
+    (When domain excluded due to floor effect in RQ 5.2.1)
 
     The piecewise LMM uses treatment coding:
     - Segment reference: 'Early'
@@ -140,7 +138,7 @@ def compute_segment_domain_slopes(
     So the coefficient names follow the pattern:
     - Days_within: Base slope (What in Early segment)
     - Days_within:C(Segment...)[T.Late]: Change when in Late segment
-    - Days_within:C(domain...)[T.where/when]: Change for where/when vs what
+    - Days_within:C(domain...)[T.where]: Change for where vs what
     - 3-way interactions: Combined changes
 
     Returns DataFrame with columns: segment, domain, slope, se, CI_lower, CI_upper
@@ -149,51 +147,31 @@ def compute_segment_domain_slopes(
     cov_matrix = lmm_model.cov_params()
 
     # Identify coefficient names (they have verbose treatment coding names)
-    # We need to find the exact names from the model
     coef_names = list(params.index)
-
-    # Build mapping from simple names to actual coefficient names
-    def find_coef(pattern: str) -> str:
-        """Find coefficient name matching pattern."""
-        for name in coef_names:
-            if pattern in name:
-                return name
-        return None
 
     # Find the key coefficient names
     days_within = 'Days_within'
-    days_segment_late = find_coef('Days_within:C(Segment') and find_coef('[T.Late]') and \
-                        [n for n in coef_names if 'Days_within' in n and 'Segment' in n and 'Late' in n and 'domain' not in n]
-    days_domain_where = find_coef('Days_within:C(domain') and find_coef('[T.where]') and \
-                        [n for n in coef_names if 'Days_within' in n and 'domain' in n and 'where' in n and 'Segment' not in n]
-    days_domain_when = find_coef('Days_within:C(domain') and find_coef('[T.when]') and \
-                       [n for n in coef_names if 'Days_within' in n and 'domain' in n and 'when' in n and 'Segment' not in n]
+    days_segment_late = [n for n in coef_names if 'Days_within' in n and 'Segment' in n and 'Late' in n and 'domain' not in n]
+    days_domain_where = [n for n in coef_names if 'Days_within' in n and 'domain' in n and 'where' in n and 'Segment' not in n]
     days_seg_dom_where = [n for n in coef_names if 'Days_within' in n and 'Segment' in n and 'Late' in n and 'where' in n]
-    days_seg_dom_when = [n for n in coef_names if 'Days_within' in n and 'Segment' in n and 'Late' in n and 'when' in n]
 
     # Extract the single matching name from each list
     days_segment_late = days_segment_late[0] if days_segment_late else None
     days_domain_where = days_domain_where[0] if days_domain_where else None
-    days_domain_when = days_domain_when[0] if days_domain_when else None
     days_seg_dom_where = days_seg_dom_where[0] if days_seg_dom_where else None
-    days_seg_dom_when = days_seg_dom_when[0] if days_seg_dom_when else None
 
     log(f"[DEBUG] days_within: {days_within}")
     log(f"[DEBUG] days_segment_late: {days_segment_late}")
     log(f"[DEBUG] days_domain_where: {days_domain_where}")
-    log(f"[DEBUG] days_domain_when: {days_domain_when}")
     log(f"[DEBUG] days_seg_dom_where: {days_seg_dom_where}")
-    log(f"[DEBUG] days_seg_dom_when: {days_seg_dom_when}")
 
     # Get coefficients
     b_days = params[days_within]
     b_late = params[days_segment_late] if days_segment_late else 0
     b_where = params[days_domain_where] if days_domain_where else 0
-    b_when = params[days_domain_when] if days_domain_when else 0
     b_late_where = params[days_seg_dom_where] if days_seg_dom_where else 0
-    b_late_when = params[days_seg_dom_when] if days_seg_dom_when else 0
 
-    # Compute the 6 slopes
+    # Compute the 4 slopes (When excluded)
     slopes = []
 
     # 1. What (Early) = beta[Days_within]
@@ -223,23 +201,7 @@ def compute_segment_domain_slopes(
         'se': se_where_early
     })
 
-    # 3. When (Early) = beta[Days_within] + beta[Days_within:domain[T.when]]
-    slope_when_early = b_days + b_when
-    if days_domain_when:
-        var_days = cov_matrix.loc[days_within, days_within]
-        var_when = cov_matrix.loc[days_domain_when, days_domain_when]
-        cov_days_when = cov_matrix.loc[days_within, days_domain_when]
-        se_when_early = np.sqrt(var_days + var_when + 2 * cov_days_when)
-    else:
-        se_when_early = se_what_early
-    slopes.append({
-        'segment': 'Early',
-        'domain': 'when',
-        'slope': slope_when_early,
-        'se': se_when_early
-    })
-
-    # 4. What (Late) = beta[Days_within] + beta[Days_within:Segment[T.Late]]
+    # 3. What (Late) = beta[Days_within] + beta[Days_within:Segment[T.Late]]
     slope_what_late = b_days + b_late
     if days_segment_late:
         var_days = cov_matrix.loc[days_within, days_within]
@@ -255,7 +217,7 @@ def compute_segment_domain_slopes(
         'se': se_what_late
     })
 
-    # 5. Where (Late) = beta[Days_within] + beta[Days_within:Segment[T.Late]] +
+    # 4. Where (Late) = beta[Days_within] + beta[Days_within:Segment[T.Late]] +
     #                   beta[Days_within:domain[T.where]] + beta[Days_within:Segment[T.Late]:domain[T.where]]
     slope_where_late = b_days + b_late + b_where + b_late_where
     # Full variance calculation for 4-term linear combination
@@ -277,29 +239,6 @@ def compute_segment_domain_slopes(
         'domain': 'where',
         'slope': slope_where_late,
         'se': se_where_late
-    })
-
-    # 6. When (Late) = beta[Days_within] + beta[Days_within:Segment[T.Late]] +
-    #                  beta[Days_within:domain[T.when]] + beta[Days_within:Segment[T.Late]:domain[T.when]]
-    slope_when_late = b_days + b_late + b_when + b_late_when
-    terms = [days_within]
-    if days_segment_late:
-        terms.append(days_segment_late)
-    if days_domain_when:
-        terms.append(days_domain_when)
-    if days_seg_dom_when:
-        terms.append(days_seg_dom_when)
-
-    var_sum = 0
-    for i, t1 in enumerate(terms):
-        for j, t2 in enumerate(terms):
-            var_sum += cov_matrix.loc[t1, t2]
-    se_when_late = np.sqrt(var_sum)
-    slopes.append({
-        'segment': 'Late',
-        'domain': 'when',
-        'slope': slope_when_late,
-        'se': se_when_late
     })
 
     # Convert to DataFrame
@@ -366,7 +305,7 @@ if __name__ == "__main__":
         # STEP 3: Compute Segment-Domain Slopes
         # =========================================================================
         # What it does: Computes linear combinations of fixed effects to get slopes
-        # Expected output: 6 slopes (2 segments x 3 domains)
+        # Expected output: 4 slopes (2 segments x 2 domains - When excluded)
 
         log("\n[ANALYSIS] Computing segment-domain slopes via linear combinations...")
         df_slopes = compute_segment_domain_slopes(lmm_model)
@@ -400,22 +339,20 @@ if __name__ == "__main__":
         log("\n[VALIDATION] Running inline validation checks...")
         validation_errors = []
 
-        # Validation 1: Fixed effects table complete
-        # Note: The actual model has 12 fixed effect terms (not 7 as stated in yaml)
-        # This is because of the full 3-way interaction pattern
-        if len(df_fixed_effects) < 7:
-            validation_errors.append(f"Fixed effects table incomplete: expected >= 7 rows, got {len(df_fixed_effects)}")
-        log(f"  [PASS] Fixed effects table has {len(df_fixed_effects)} rows (>= 7 required)")
+        # Validation 1: Fixed effects table complete (8 terms for 2 domains)
+        if len(df_fixed_effects) < 5:
+            validation_errors.append(f"Fixed effects table incomplete: expected >= 5 rows, got {len(df_fixed_effects)}")
+        log(f"  [PASS] Fixed effects table has {len(df_fixed_effects)} rows (>= 5 required)")
 
-        # Validation 2: Slope table complete (6 rows)
-        if len(df_slopes) != 6:
-            validation_errors.append(f"Slope table incomplete: expected 6 rows, got {len(df_slopes)}")
+        # Validation 2: Slope table complete (4 rows - When excluded)
+        if len(df_slopes) != 4:
+            validation_errors.append(f"Slope table incomplete: expected 4 rows, got {len(df_slopes)}")
         else:
-            log(f"  [PASS] Slope table has {len(df_slopes)} rows (6 required)")
+            log(f"  [PASS] Slope table has {len(df_slopes)} rows (4 required - When excluded)")
 
-        # Validation 3: All segment-domain combinations present
+        # Validation 3: All segment-domain combinations present (What/Where only)
         expected_segments = {'Early', 'Late'}
-        expected_domains = {'what', 'where', 'when'}
+        expected_domains = {'what', 'where'}  # When excluded due to floor effect
         actual_segments = set(df_slopes['segment'].unique())
         actual_domains = set(df_slopes['domain'].unique())
 
@@ -427,7 +364,7 @@ if __name__ == "__main__":
         if actual_domains != expected_domains:
             validation_errors.append(f"Missing domains: expected {expected_domains}, got {actual_domains}")
         else:
-            log(f"  [PASS] All domains present: {actual_domains}")
+            log(f"  [PASS] All domains present (When excluded): {actual_domains}")
 
         # Validation 4: Slopes have valid values
         if df_slopes['se'].min() <= 0:

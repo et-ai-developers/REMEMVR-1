@@ -9,7 +9,7 @@
 ## Research Question
 
 **Primary Question:**
-Do memory domains (What/Where/When) show different rates of forgetting during the early consolidation window (Day 0->1) versus later decay (Day 1->6)?
+Do memory domains (What/Where) show different rates of forgetting during the early consolidation window (Day 0->1) versus later decay (Day 1->6)?
 
 **Scope:**
 This RQ examines whether sleep-dependent consolidation (first ~24 hours post-encoding, including one night's sleep) differentially benefits memory domains. Uses piecewise time structure with two segments:
@@ -17,6 +17,9 @@ This RQ examines whether sleep-dependent consolidation (first ~24 hours post-enc
 - Late segment: Days 1-6 (decay-dominated phase)
 
 The analysis tests for differential forgetting slopes across segments and domains using a 3-way interaction model.
+
+**Note on When Domain Exclusion:**
+When domain excluded due to floor effects discovered in RQ 5.2.1 (6-9% probability, 77% item exclusion). Analysis focuses on What vs Where comparison only.
 
 **Theoretical Framing:**
 Sleep consolidation theory predicts that hippocampal-dependent memories receive greater benefit from sleep-dependent replay and consolidation processes. Since spatial memory (Where) is more hippocampus-dependent than object identity (What), we expect spatial memory to show less decline during the early consolidation window.
@@ -55,7 +58,9 @@ Sleep-dependent consolidation (Day 0->1, including one night's sleep) may benefi
 Hippocampal replay during sleep preferentially strengthens spatial and contextual memories. Where memory relies heavily on hippocampal binding of spatial information, while What memory can rely more on perirhinal cortex and familiarity processes. Therefore, Where should benefit most from the consolidation window.
 
 **Expected Effect Pattern:**
-Significant 3-way interaction: Days_within:Segment[T.Late]:Domain[T.Where/When]. Where should show less decline in Early segment compared to What (consolidation benefit). The slope difference (Early vs Late) should be larger for Where than for What.
+Significant 3-way interaction: Days_within:Segment[T.Late]:Domain[T.Where]. Where should show less decline in Early segment compared to What (consolidation benefit). The slope difference (Early vs Late) should be larger for Where than for What.
+
+**Note:** Original hypothesis included When domain. With When excluded due to floor effects, analysis focuses on What vs Where comparison only.
 
 ---
 
@@ -73,15 +78,20 @@ Significant 3-way interaction: Days_within:Segment[T.Late]:Domain[T.Where/When].
   - [x] `-D-` tags (put-down location)
   - Disambiguation: **ALL Where tags included** (inherited from RQ5.1 theta scores)
 
-- [x] **When** (Temporal Order)
+- [ ] **When** (Temporal Order) - **EXCLUDED**
   - Tag Code: `-O-`
   - Description: Temporal order / sequence
 
 **Inclusion Rationale:**
-This RQ tests domain-specific consolidation effects. All three WWW domains must be included to compare consolidation benefits across domains. Analysis uses theta scores from RQ5.1, which already aggregates domain-specific ability estimates.
+This RQ tests domain-specific consolidation effects comparing What and Where domains. Analysis uses theta scores from RQ5.1, which already aggregates domain-specific ability estimates.
 
 **Exclusion Rationale:**
-None - all WWW domains included for comprehensive consolidation assessment.
+**When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:**
+- Performance at 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination (a < 0.4)
+- Only 6 items retained, limiting reliability
+- Cannot meaningfully interpret When domain forgetting trajectory
+- Per RQ 5.2.1 recommendation: "Exclude When domain from subsequent RQs until resolved"
 
 ---
 
