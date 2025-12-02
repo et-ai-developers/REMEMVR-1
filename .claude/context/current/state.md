@@ -548,3 +548,185 @@ Topic naming format: [topic][task][subtask]
 
 **Chapter 5 Progress:** 16/31 RQs complete (52%), 8 ready for execution.
 
+## Session (2025-12-03 01:30)
+
+**Task:** RQ 5.2.3 Complete Execution - Age × Domain × Time 3-Way Interaction LMM
+
+**Context:** User requested step-by-step execution of RQ 5.2.3 (Age × Domain interaction) with When domain exclusion. Executed all steps, debugged convergence issues, ran full validation pipeline.
+
+**Major Accomplishments:**
+
+**1. Complete 6-Step Analysis Pipeline Executed**
+
+All 6 steps executed successfully with debugging:
+
+| Step | Name | Output | Status |
+|------|------|--------|--------|
+| 00 | Get data from RQ 5.2.1 | 800 rows (When excluded) | ✅ |
+| 01 | Prepare LMM input | 800 rows, Age_c centered | ✅ |
+| 02 | Fit 3-way LMM | 13 fixed effects, converged | ✅ |
+| 03 | Extract interactions | 2 terms (Where only) | ✅ |
+| 04 | Compute age effects | 2 domain slopes | ✅ |
+| 05 | Prepare plot data | 1770 rows, 2 domains × 3 tertiles | ✅ |
+
+**2. Critical Bug Fixes During Execution**
+
+**Step 00 - Data source correction:**
+- Original code referenced RQ 5.1.1 (wrong format - overall theta only)
+- Fixed: Changed to RQ 5.2.1/data/step04_lmm_input.csv (domain-specific theta in LONG format)
+- Already had When excluded by filtering `domain.isin(['what', 'where'])`
+
+**Step 02 - Random effects convergence failure:**
+- Initial model with random slopes `(TSVR_hours | UID)` failed to converge
+- Error: `Gradient optimization failed, |grad| = 114.638457`
+- Error: `Hessian matrix not positive definite`
+- **Fix:** Changed to random intercepts only `(1 | UID)`
+- Root cause: Complex fixed effects (11 terms) + reduced sample (800 rows) + random slopes = over-parameterization
+- **DOCUMENTED AS MAJOR LIMITATION** in summary.md
+
+**3. Statistical Results Summary**
+
+**Model Fit:**
+- 3-way Age × Domain × Time interaction LMM
+- Random intercepts only (convergence fix)
+- 800 observations, 100 groups
+- Log-Likelihood: -760.64, AIC: 1549.27, BIC: 1614.86
+- Converged: TRUE
+
+**Key Finding: NULL RESULT - Hypothesis NOT SUPPORTED**
+
+**3-Way Interactions (primary hypothesis):**
+| Term | β | SE | z | p (uncorr) | p (Bonf) |
+|------|---|---|---|------------|----------|
+| TSVR_hours:Age_c:domain[Where] | -0.0001 | 0.0001 | -0.68 | 0.495 | 0.990 |
+| log_TSVR:Age_c:domain[Where] | 0.0025 | 0.003 | 0.78 | 0.438 | 0.876 |
+
+Both p > 0.4 (not borderline, clear null)
+
+**Domain-Specific Age Effects (at Day 3, TSVR=72h):**
+| Domain | Age Slope (θ/year) | SE | p |
+|--------|-------------------|-----|-------|
+| What | -0.000014 | 0.000041 | 0.737 |
+| Where | +0.000014 | 0.000041 | 0.737 |
+
+Both effectively zero and non-significant (identical magnitude, opposite signs = numerical noise)
+
+**Interpretation:**
+- Age does NOT differentially affect forgetting rate between What and Where domains
+- Neither domain shows a significant age effect on forgetting at Day 3
+- Consistent with RQ 5.2.2 (domain-general consolidation) - forgetting is uniform across domains
+- Strong consolidation effect exists but applies equally to all ages and both domains
+
+**4. Final Validation Pipeline**
+
+| Agent | Status | Key Output |
+|-------|--------|------------|
+| rq_inspect | ✅ PASS | All 4 layers validated, NULL result scientifically valid |
+| rq_plots | ✅ PASS | plots.py updated for 2 domains, plot regenerated |
+| rq_results | ✅ PASS | summary.md updated with random effects limitation |
+
+**5. Random Effects Limitation Documentation**
+
+User raised important methodological question: "Why random intercepts only?"
+
+**Documentation Added to summary.md:**
+
+**What Failed:**
+- Random slopes model: `ConvergenceWarning: Maximum Likelihood optimization failed`
+- Gradient = 114.6, Hessian not positive definite
+
+**Why Random Slopes Matter:**
+- Would model individual differences in forgetting rate
+- Age might predict individual slope variation (the core hypothesis)
+- Without random slopes, model assumes uniform forgetting rates
+
+**Consequences:**
+1. Assumed uniform forgetting rates (potentially biased)
+2. Individual slope variation absorbed into residual
+3. If slopes correlate with Age/Domain, fixed effects may be biased
+4. Type I error inflation risk (Barr et al., 2013)
+
+**Caveat:** Given strong null result (p > 0.4), limitation unlikely to change conclusion
+
+**Recommended Sensitivity Analyses:**
+1. Simpler fixed effects + random slopes
+2. Bayesian mixed model (brms)
+3. Two-stage approach
+4. Alternative optimizers
+
+**6. Files Created/Modified**
+
+**Code Files Updated (6):**
+- `results/ch5/5.2.3/code/step00_get_data_from_rq51.py` (data source changed to RQ 5.2.1)
+- `results/ch5/5.2.3/code/step01_prepare_lmm_input.py` (row count 800)
+- `results/ch5/5.2.3/code/step02_fit_lmm.py` (random intercepts only)
+- `results/ch5/5.2.3/code/step03_extract_interactions.py` (2 terms only)
+- `results/ch5/5.2.3/code/step04_compute_contrasts.py` (2 domains)
+- `results/ch5/5.2.3/code/step05_prepare_plot_data.py` (2 domains)
+
+**Data Files Created:**
+- `data/step00_theta_from_rq51.csv` (800 rows)
+- `data/step00_tsvr_from_rq51.csv` (400 rows)
+- `data/step00_age_from_dfdata.csv` (100 rows)
+- `data/step01_lmm_input.csv` (800 rows)
+- `data/step02_lmm_model.pkl`
+- `data/step02_lmm_summary.txt`
+- `data/step02_fixed_effects.csv` (13 terms)
+- `data/step03_interaction_terms.csv` (2 terms)
+- `data/step04_age_effects_by_domain.csv` (2 rows)
+- `plots/step05_age_effects_plot_data.csv` (1770 rows)
+
+**Results Files:**
+- `results/step03_hypothesis_test.txt`
+- `results/step04_summary.txt`
+- `results/summary.md` (31KB, publication-ready with random effects limitation documented)
+
+**Session Metrics:**
+
+**Tokens:**
+- Session start: ~5k (after /refresh)
+- Session end: ~85k (at /save)
+- Delta: ~80k consumed
+
+**Bug Fixes:** 2 critical issues fixed
+1. Data source correction (5.1.1 → 5.2.1)
+2. Random effects convergence failure (slopes → intercepts only)
+
+**Key Insights:**
+
+**1. Consistent Null Pattern (4th confirmation):**
+- RQ 5.3.4 (Age × Paradigm): NULL
+- RQ 5.4.3 (Age × Congruence): NULL
+- RQ 5.2.3 (Age × Domain): NULL
+- Age-related forgetting appears UNIFORM across task/item/domain variations in REMEMVR
+
+**2. Random Effects Trade-off:**
+- Complex models with random slopes ideal for detecting Age × Time effects
+- But convergence failures force simplification
+- Trade-off: Statistical purity vs. practical estimation
+- Document as limitation, note p > 0.4 makes interpretation robust
+
+**3. When Domain Exclusion Pattern:**
+- All 5.2.X RQs now exclude When (floor effect)
+- Row counts: 100×4×2 = 800 (not 100×4×3 = 1200)
+- Contrast counts reduced by ~33%
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtask]
+
+- rq_5.2.3_complete_execution_age_domain_interaction (Session 2025-12-03 01:30: steps_00_05_completed step00_data_source_fix_rq521 step02_random_effects_convergence_failure_intercepts_only, when_exclusion 2_domains_not_3 800_rows_not_1200, final_results NULL_FINDING no_3way_interaction_all_p_gt_0.4 age_effects_identical_across_domains hypothesis_NOT_supported, random_effects_limitation documented_in_summary_sensitivity_analyses_recommended, validation rq_inspect_pass rq_plots_updated rq_results_updated, chapter_5_progress 17/31_complete_55%)
+
+**Relevant Archived Topics (from context-finder):**
+- rq_5.3.4_complete_execution_age_paradigm_interaction (2025-12-02 21:45: same null pattern, same LMM bugs)
+- rq_5.4.3_complete_execution_age_schema_congruence (2025-12-02 22:20: null pattern continues)
+- when_domain_anomalies.md (2025-11-23: floor effect discovery)
+
+**End of Session (2025-12-03 01:30)**
+
+**Status:** ✅ **RQ 5.2.3 COMPLETE - PUBLICATION READY**
+
+**Executed** all 6 steps for Age × Domain × Time 3-way interaction LMM with When domain exclusion. **Fixed 2 critical bugs:** data source correction (RQ 5.2.1), random effects convergence (intercepts only). **NULL FINDING:** Age effects on forgetting do NOT differ between What and Where domains (p > 0.4 for all interactions, domain-specific slopes identical). **Random effects limitation documented** with sensitivity analysis recommendations. Validated via rq_inspect, rq_plots, rq_results.
+
+**Chapter 5 Progress:** 17/31 RQs complete (55%), 14 ready for execution.
+

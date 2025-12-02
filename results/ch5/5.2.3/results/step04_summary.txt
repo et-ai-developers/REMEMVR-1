@@ -11,27 +11,21 @@ RESULTS:
 
   What:
     Age slope:  -0.000014 (theta units per 1-year age increase)
-    SE:         0.000049
-    z:          -0.280
-    p-value:    0.7794
-    95% CI:     [-0.000110, 0.000082]
+    SE:         0.000041
+    z:          -0.336
+    p-value:    0.7368
+    95% CI:     [-0.000094, 0.000066]
     Interpretation: Non-significant age effect (p >= 0.05)
 
   Where:
     Age slope:  0.000014 (theta units per 1-year age increase)
-    SE:         0.000049
-    z:          0.280
-    p-value:    0.7794
-    95% CI:     [-0.000082, 0.000110]
+    SE:         0.000041
+    z:          0.336
+    p-value:    0.7368
+    95% CI:     [-0.000066, 0.000094]
     Interpretation: Non-significant age effect (p >= 0.05)
 
-  When:
-    Age slope:  -0.000014 (theta units per 1-year age increase)
-    SE:         0.000049
-    z:          -0.280
-    p-value:    0.7794
-    95% CI:     [-0.000110, 0.000082]
-    Interpretation: Non-significant age effect (p >= 0.05)
+NOTE: When domain excluded due to floor effect (RQ 5.2.1)
 
 OVERALL INTERPRETATION:
   No significant age effects detected in any domain.

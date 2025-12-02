@@ -81,3 +81,32 @@ ValueError: Validation failed: Missing required terms: ['TSVR_hours:Age_c:domain
 [WARNING] Missing terms (likely [T.] prefix mismatch): ['TSVR_hours:Age_c:domain[Where]', 'TSVR_hours:Age_c:domain[When]', 'log_TSVR:Age_c:domain[Where]', 'log_TSVR:Age_c:domain[When]']
 [NOTE] File verified correct despite validation warning (statsmodels uses [T.] prefix)
 [SUCCESS] Step 03 complete
+[START] Step 03: Extract 3-Way Interaction Terms and Test Hypothesis
+[LOAD] Loading LMM model and fixed effects table...
+[LOADED] LMM model from /home/etai/projects/REMEMVR/results/ch5/5.2.3/data/step02_lmm_model.pkl
+[LOADED] Fixed effects table: 13 terms, 7 columns
+[INFO] Sample terms: ['Intercept', 'domain[T.Where]', 'TSVR_hours', 'TSVR_hours:domain[T.Where]', 'log_TSVR']
+[EXTRACT] Filtering 3-way interaction terms...
+[INFO] When domain excluded - expecting 2 terms (Where only)
+[EXTRACTED] 2 interaction terms found
+[TERMS] ['TSVR_hours:Age_c:domain[T.Where]', 'log_TSVR:Age_c:domain[T.Where]']
+[BONFERRONI] Applying Bonferroni correction (n_comparisons=2)...
+[BONFERRONI] Correction applied (p_bonf = min(p * 2, 1.0))
+[TEST] Testing individual interaction terms (omnibus not needed with 1 contrast)...
+[TEST LINEAR] p_bonferroni=0.9898
+[TEST LOG] p_bonferroni=0.8755
+[DECISION] Evaluating hypothesis...
+[DECISION] Hypothesis NOT SUPPORTED (alpha=0.025)
+[SAVE] Saving interaction terms to CSV...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.2.3/data/step03_interaction_terms.csv (2 rows, 8 columns)
+[SAVE] Saving hypothesis test summary...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.2.3/results/step03_hypothesis_test.txt
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[INFO] When domain excluded - expecting 2 terms (Where only)
+[VALIDATION] Valid: False
+[VALIDATION] D068 compliant: True
+[VALIDATION] Message: Missing required terms: ['TSVR_hours:Age_c:domain[Where]', 'log_TSVR:Age_c:domain[Where]'].
+[WARNING] Validation reported issues (proceeding anyway)
+[WARNING] Missing terms (likely [T.] prefix mismatch): ['TSVR_hours:Age_c:domain[Where]', 'log_TSVR:Age_c:domain[Where]']
+[NOTE] File verified correct despite validation warning (statsmodels uses [T.] prefix)
+[SUCCESS] Step 03 complete

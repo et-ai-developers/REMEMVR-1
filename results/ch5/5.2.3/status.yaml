@@ -63,12 +63,12 @@ rq_plots:
     Age tertiles: Young/Middle/Older trajectories per domain
 rq_results:
   status: success
-  timestamp: 2025-11-29T10:30:00
+  timestamp: 2025-12-02T18:45:00
   context_dump: |
-    Results validated for scientific plausibility
-    Plausibility acceptable (0 anomalies flagged)
-    NULL RESULT: Hypothesis not supported (3-way Age x Domain x Time interactions all p > 0.4)
-    Summary documented in results/summary.md
+    Results validated for scientific plausibility (2-domain analysis: What, Where)
+    NULL RESULT: Age effects uniform across domains (no 3-way interaction, p > 0.4)
+    When domain EXCLUDED (floor effect) - critical limitation
+    Summary: results/summary.md (updated Dec 2, plots need regeneration)
 
 analysis_steps:
   step00_get_data_from_rq51: success

@@ -46,3 +46,38 @@
 [VALIDATION] PASS - All files created successfully
 [SUCCESS] Step 00 complete
 [INFO] LONG format theta ready: 1200 rows (3 domains)
+[START] Step 00: Get Data from RQ 5.1
+[LOAD] Loading theta scores from RQ 5.1 (WIDE format)...
+[LOADED] RQ 5.1 theta scores: 400 rows (WIDE format)
+[INFO] Columns: ['UID', 'test', 'Theta_All']
+[ERROR] Expected WIDE format columns ['composite_ID', 'theta_what', 'theta_where', 'theta_when'], got ['UID', 'test', 'Theta_All']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.2.3/code/step00_get_data_from_rq51.py", line 127, in <module>
+    raise ValueError(f"Expected WIDE format columns {expected_cols}, got {list(theta_wide.columns)}")
+ValueError: Expected WIDE format columns ['composite_ID', 'theta_what', 'theta_where', 'theta_when'], got ['UID', 'test', 'Theta_All']
+[START] Step 00: Get Data from RQ 5.2.1
+[LOAD] Loading theta scores from RQ 5.2.1 (LONG format)...
+[LOADED] RQ 5.2.1 lmm_input: 1200 rows (LONG format)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'domain', 'theta']
+[INFO] Domains in input: ['what', 'where', 'when']
+[INFO] Rows per domain before filter: {'what': 400, 'when': 400, 'where': 400}
+[FILTER] Excluding When domain due to floor effect (RQ 5.2.1)...
+[FILTERED] 1200 rows -> 800 rows (When excluded)
+[INFO] Remaining domains: ['what', 'where']
+[VALIDATION] PASS - When excluded, 2 domains present
+[CREATE] Creating TSVR mapping...
+[CREATED] TSVR mapping: 400 rows
+[LOAD] Loading age variable from dfData.csv...
+[LOADED] Age data: 100 unique participants
+[SAVE] Saving data/step00_theta_from_rq51.csv (LONG format, When excluded)...
+[SAVED] step00_theta_from_rq51.csv (800 rows, 4 cols)
+[SAVE] Saving data/step00_tsvr_from_rq51.csv...
+[SAVED] step00_tsvr_from_rq51.csv (400 rows, 4 cols)
+[SAVE] Saving data/step00_age_from_dfdata.csv...
+[SAVED] step00_age_from_dfdata.csv (100 rows, 2 cols)
+[VALIDATION] Running final checks...
+[VALIDATION] PASS - All files created successfully
+[SUCCESS] Step 00 complete
+[INFO] Data sourced from RQ 5.2.1 (domain-specific theta)
+[INFO] LONG format theta ready: 800 rows (2 domains - When excluded)

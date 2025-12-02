@@ -7,16 +7,22 @@ Step ID: step02
 Step Name: step02_fit_lmm
 RQ: results/ch5/5.2.3
 Generated: 2025-11-28
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Fit Linear Mixed Model testing whether age effects on forgetting rate vary by
 memory domain (3-way Age x Domain x Time interaction).
 
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- Only What (reference) and Where domains analyzed
+- Single Age x Where x Time interaction term (not 2 domain contrasts)
+- Expected ~12 fixed effects (not ~20)
+
 EXPECTED INPUTS:
   - data/step01_lmm_input.csv
     Columns: ['UID', 'composite_ID', 'test', 'domain', 'theta', 'TSVR_hours', 'log_TSVR', 'age', 'Age_c', 'mean_age']
     Format: Long-format LMM input with theta scores, TSVR, and grand-mean centered Age
-    Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
+    Expected rows: 800 (100 participants x 4 tests x 2 domains - When excluded)
 
 EXPECTED OUTPUTS:
   - data/step02_lmm_model.pkl
@@ -153,8 +159,9 @@ if __name__ == "__main__":
 
         log("[ANALYSIS] Fitting LMM with 3-way Age x Domain x Time interaction...")
         log("[INFO] Formula: theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain")
-        log("[INFO] Random effects: ~TSVR_hours (random slopes per participant)")
+        log("[INFO] Random effects: Random intercepts only (convergence fix)")
         log("[INFO] REML=False (ML estimation for model comparison)")
+        log("[NOTE] Random slopes caused convergence issues with 2-domain data")
 
         # Define formula (complex 3-way interaction structure)
         # Main effects: TSVR_hours, log_TSVR, Age_c, domain
@@ -165,11 +172,14 @@ if __name__ == "__main__":
         # Call analysis tool
         # Note: Using fit_lmm_trajectory (not fit_lmm_trajectory_tsvr) because
         # our data is already merged and in the correct format
+        # CONVERGENCE FIX: Use random intercepts only (re_formula=None) instead of
+        # random slopes. The complex fixed effects structure with reduced sample size
+        # (800 vs 1200 rows due to When exclusion) caused convergence failures.
         lmm_model = fit_lmm_trajectory(
             data=lmm_input,           # Merged LMM input with all variables
             formula=formula,
             groups="UID",             # Grouping variable for random effects
-            re_formula="~TSVR_hours", # Random slopes for TSVR_hours per participant
+            re_formula=None,          # Random intercepts only (convergence fix)
             reml=False                # ML estimation (required for LRT in step02c)
         )
 

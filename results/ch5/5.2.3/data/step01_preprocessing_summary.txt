@@ -3,24 +3,24 @@ STEP 01: LMM INPUT PREPROCESSING SUMMARY
 ================================================================================
 
 INPUT FILES:
-  - Theta scores: step00_theta_from_rq51.csv (1200 rows)
+  - Theta scores: step00_theta_from_rq51.csv (800 rows)
   - TSVR mapping: step00_tsvr_from_rq51.csv (400 rows)
   - Age data: step00_age_from_dfdata.csv (100 rows)
 
 OUTPUT FILE:
-  - LMM input: step01_lmm_input.csv (1200 rows, 10 cols)
+  - LMM input: step01_lmm_input.csv (800 rows, 10 cols)
 
 PARTICIPANT SUMMARY:
   - N participants: 100
   - N tests per participant: 4
-  - N domains: 3
-  - Total observations: 1200
+  - N domains: 2
+  - Total observations: 800
 
 AGE VARIABLE SUMMARY:
   - Grand mean age: 44.57 years
   - Age range: [20.00, 70.00] years
   - Age_c range: [-24.57, 25.43] years (centered)
-  - Mean Age_c: 1.89e-15 (verification: should be ~0)
+  - Mean Age_c: 3.41e-15 (verification: should be ~0)
   - Age_c symmetry: |min|/max = 0.966 (should be ~1.0)
 
 TSVR VARIABLE SUMMARY:
@@ -29,11 +29,11 @@ TSVR VARIABLE SUMMARY:
   - Transformation: log_TSVR = log(TSVR_hours + 1)
 
 VALIDATION RESULTS:
-  [PASS] Check 1: Row count = 1200 (100 x 4 x 3)
+  [PASS] Check 1: Row count = 800 (100 x 4 x 2 - When excluded)
   [PASS] Check 2: No NaN values
   [PASS] Check 3: Mean Age_c approximately 0
   [PASS] Check 4: Age_c range symmetric
-  [PASS] Check 5: All UIDs have 12 rows
+  [PASS] Check 5: All UIDs have 8 rows (When excluded)
   [PASS] Check 6: TSVR_hours in [0, 200]
   [PASS] Check 7: log_TSVR in [0, 6]
 

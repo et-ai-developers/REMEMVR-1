@@ -7,17 +7,23 @@ Step ID: step01
 Step Name: step01_prepare_lmm_input
 RQ: results/ch5/5.2.3
 Generated: 2025-11-28
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Merge theta scores with TSVR and Age, grand-mean center Age, reshape to long
 format for LMM analysis. This step prepares the complete input dataset for
 testing whether age effects on forgetting rate vary by memory domain.
 
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- Performance at 6-9% probability throughout study (near 0% floor)
+- 20/26 When items (77%) excluded for low discrimination
+- Only What and Where domains analyzed
+
 EXPECTED INPUTS:
   - data/step00_theta_from_rq51.csv
     Columns: ['composite_ID', 'domain', 'test', 'theta']
     Format: Theta scores from RQ 5.1 Pass 2 calibration (purified)
-    Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
+    Expected rows: 800 (100 participants x 4 tests x 2 domains - When excluded)
 
   - data/step00_tsvr_from_rq51.csv
     Columns: ['composite_ID', 'test', 'TSVR_hours']
@@ -34,18 +40,18 @@ EXPECTED OUTPUTS:
     Columns: ['UID', 'composite_ID', 'test', 'domain', 'theta', 'TSVR_hours',
               'log_TSVR', 'age', 'Age_c', 'mean_age']
     Format: Long-format LMM input ready for statsmodels MixedLM
-    Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
+    Expected rows: 800 (100 participants x 4 tests x 2 domains - When excluded)
 
   - data/step01_preprocessing_summary.txt
     Format: Text summary of preprocessing (grand mean age, age range, TSVR range,
             N participants, centering verification)
 
 VALIDATION CRITERIA:
-  - All 1200 rows present (100 participants x 4 tests x 3 domains)
+  - All 800 rows present (100 participants x 4 tests x 2 domains - When excluded)
   - No NaN values in any column (complete data after merges)
   - Mean Age_c approximately 0 (within 1e-10 tolerance)
   - Age_c range symmetric (|min(Age_c)| approximately equals max(Age_c))
-  - All UIDs have exactly 12 rows (4 tests x 3 domains)
+  - All UIDs have exactly 8 rows (4 tests x 2 domains - When excluded)
   - TSVR_hours in [0, 200] range
   - log_TSVR in [0, 6] range
 
@@ -260,11 +266,11 @@ if __name__ == "__main__":
 
         log("[VALIDATE] Running 7 validation checks...")
 
-        # Check 1: Row count (1200 rows expected)
-        expected_rows = 100 * 4 * 3  # 100 participants x 4 tests x 3 domains
+        # Check 1: Row count (800 rows expected - When excluded)
+        expected_rows = 100 * 4 * 2  # 100 participants x 4 tests x 2 domains (When excluded)
         if len(df_merged) != expected_rows:
             raise ValueError(f"Expected {expected_rows} rows, got {len(df_merged)}")
-        log(f"[PASS] Check 1: Row count = {len(df_merged)} (100 participants x 4 tests x 3 domains)")
+        log(f"[PASS] Check 1: Row count = {len(df_merged)} (100 participants x 4 tests x 2 domains - When excluded)")
 
         # Check 2: No NaN values
         nan_counts = df_merged.isna().sum()
@@ -283,12 +289,12 @@ if __name__ == "__main__":
             raise ValueError(f"Age_c range not symmetric: |min| / max = {symmetry_ratio:.2f}")
         log(f"[PASS] Check 4: Age_c range symmetric (|min|/max = {symmetry_ratio:.2f})")
 
-        # Check 5: All UIDs have exactly 12 rows (4 tests x 3 domains)
+        # Check 5: All UIDs have exactly 8 rows (4 tests x 2 domains - When excluded)
         rows_per_uid = df_merged.groupby('UID').size()
-        if not (rows_per_uid == 12).all():
-            bad_uids = rows_per_uid[rows_per_uid != 12]
-            raise ValueError(f"UIDs with != 12 rows:\n{bad_uids}")
-        log(f"[PASS] Check 5: All {len(rows_per_uid)} UIDs have exactly 12 rows")
+        if not (rows_per_uid == 8).all():
+            bad_uids = rows_per_uid[rows_per_uid != 8]
+            raise ValueError(f"UIDs with != 8 rows:\n{bad_uids}")
+        log(f"[PASS] Check 5: All {len(rows_per_uid)} UIDs have exactly 8 rows (When excluded)")
 
         # Check 6: TSVR_hours reasonable range (allow up to 300 hours for scheduling variations)
         tsvr_min = df_merged['TSVR_hours'].min()
@@ -366,11 +372,11 @@ if __name__ == "__main__":
             f.write(f"  - Transformation: log_TSVR = log(TSVR_hours + 1)\n\n")
 
             f.write("VALIDATION RESULTS:\n")
-            f.write("  [PASS] Check 1: Row count = 1200 (100 x 4 x 3)\n")
+            f.write("  [PASS] Check 1: Row count = 800 (100 x 4 x 2 - When excluded)\n")
             f.write("  [PASS] Check 2: No NaN values\n")
             f.write("  [PASS] Check 3: Mean Age_c approximately 0\n")
             f.write("  [PASS] Check 4: Age_c range symmetric\n")
-            f.write("  [PASS] Check 5: All UIDs have 12 rows\n")
+            f.write("  [PASS] Check 5: All UIDs have 8 rows (When excluded)\n")
             f.write("  [PASS] Check 6: TSVR_hours in [0, 200]\n")
             f.write("  [PASS] Check 7: log_TSVR in [0, 6]\n\n")
 

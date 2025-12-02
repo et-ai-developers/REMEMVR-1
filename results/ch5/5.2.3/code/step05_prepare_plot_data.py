@@ -7,6 +7,7 @@ Step ID: step05
 Step Name: step05_prepare_plot_data
 RQ: results/ch5/5.2.3
 Generated: 2025-11-28
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Create plot source CSV for multi-panel age effects visualization (Option B
@@ -14,11 +15,15 @@ architecture). Prepares data for RQ 5.2.3 Age × Domain × Time interaction
 visualization by creating age tertiles, aggregating observed means, and
 generating LMM predictions for each domain × tertile × timepoint combination.
 
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- Only What and Where domains plotted
+- Expected ~400 rows (2 domains x 3 tertiles x ~67 timepoints)
+
 EXPECTED INPUTS:
   - data/step01_lmm_input.csv
     Columns: ['UID', 'age', 'domain', 'TSVR_hours', 'theta']
     Format: Long-format LMM input with age variable from Step 1
-    Expected rows: ~1200 (100 participants x 4 tests x 3 domains)
+    Expected rows: 800 (100 participants x 4 tests x 2 domains - When excluded)
 
   - results/step02_lmm_model.pkl
     Format: Fitted statsmodels MixedLM model object (selected from Step 2c)
@@ -27,7 +32,7 @@ EXPECTED INPUTS:
   - data/step04_age_effects_by_domain.csv
     Columns: ['domain', 'age_effect', 'se', 'z', 'p', 'CI_lower', 'CI_upper']
     Format: Domain-specific age effects from Step 4
-    Expected rows: 3 (What, Where, When)
+    Expected rows: 2 (What, Where - When excluded)
 
 EXPECTED OUTPUTS:
   - plots/step05_age_effects_plot_data.csv
@@ -35,7 +40,7 @@ EXPECTED OUTPUTS:
               'CI_lower_observed', 'CI_upper_observed', 'theta_predicted',
               'CI_lower_predicted', 'CI_upper_predicted', 'data_type']
     Format: Plot source CSV with observed means and model predictions
-    Expected rows: ~600 rows (3 domains x 3 tertiles x ~67 timepoints per group)
+    Expected rows: ~400 rows (2 domains x 3 tertiles x ~67 timepoints - When excluded)
 
 g_code REASONING:
 - Approach: Use prepare_age_effects_plot_data() catalogued tool to create
@@ -141,13 +146,14 @@ if __name__ == "__main__":
         # =========================================================================
         # STEP 1: Load Input Data
         # =========================================================================
-        # Expected: LMM input from Step 1 (1200 rows: 100 participants x 4 tests x 3 domains)
+        # Expected: LMM input from Step 1 (800 rows: 100 participants x 4 tests x 2 domains - When excluded)
         # Purpose: Provide data for tertile creation and observed aggregation
 
         log("[LOAD] Loading LMM input data...")
+        log("[INFO] When domain excluded due to floor effect")
         # Load LMM input with age variable
         # Expected columns: UID, age, domain, TSVR_hours, theta, composite_ID, test, log_TSVR, Age_c, mean_age
-        # Expected rows: ~1200
+        # Expected rows: 800 (When excluded)
         lmm_input = pd.read_csv(RQ_DIR / "data" / "step01_lmm_input.csv", encoding='utf-8')
         log(f"[LOADED] step01_lmm_input.csv ({len(lmm_input)} rows, {len(lmm_input.columns)} cols)")
 
@@ -161,7 +167,7 @@ if __name__ == "__main__":
 
         # Load age effects by domain (for context - not directly used by tool)
         # Expected columns: domain, age_effect, se, z, p, CI_lower, CI_upper
-        # Expected rows: 3 (What, Where, When)
+        # Expected rows: 2 (What, Where - When excluded)
         log("[LOAD] Loading age effects by domain...")
         age_effects = pd.read_csv(RQ_DIR / "data" / "step04_age_effects_by_domain.csv", encoding='utf-8')
         log(f"[LOADED] step04_age_effects_by_domain.csv ({len(age_effects)} rows, {len(age_effects.columns)} cols)")
@@ -210,12 +216,13 @@ if __name__ == "__main__":
         # STEP 4: Run Validation Tool (validate_plot_data_completeness)
         # =========================================================================
         # Tool: validate_plot_data_completeness from tools.validation
-        # Validates: All 3 domains present (What, Where, When)
+        # Validates: All 2 domains present (What, Where - When excluded)
         #           All 3 age tertiles present (Young, Middle, Older)
-        #           ~600 rows expected (3 domains x 3 tertiles x ~67 timepoints per group)
+        #           ~400 rows expected (2 domains x 3 tertiles x ~67 timepoints)
         #           No NaN values in critical columns
 
         log("[VALIDATION] Validating plot data structure...")
+        log("[INFO] When domain excluded - expecting 2 domains")
 
         # Check structure (8 columns: domain + tertile + time + observed + SEs + CIs + predicted)
         expected_cols = {'domain_name', 'age_tertile', 'TSVR_hours', 'theta_observed',
@@ -223,10 +230,10 @@ if __name__ == "__main__":
         actual_cols = set(plot_data.columns)
         assert actual_cols == expected_cols, f"Column mismatch: {actual_cols}"
 
-        # Check domains present
-        required_domains = {'What', 'Where', 'When'}
+        # Check domains present (When excluded)
+        required_domains = {'What', 'Where'}
         actual_domains = set(plot_data['domain_name'].dropna())
-        assert actual_domains == required_domains, f"Missing domains: {required_domains - actual_domains}"
+        assert actual_domains == required_domains, f"Missing domains (When excluded): {required_domains - actual_domains}"
 
         # Check age tertiles
         required_tertiles = {'Young', 'Middle', 'Older'}
@@ -238,10 +245,10 @@ if __name__ == "__main__":
         if nan_counts.any():
             log(f"[INFO] NaN counts: {nan_counts[nan_counts > 0].to_dict()}")
 
-        log(f"[INFO] Domains: {len(actual_domains)}, Tertiles: {len(actual_tertiles)}")
+        log(f"[INFO] Domains: {len(actual_domains)} (When excluded), Tertiles: {len(actual_tertiles)}")
         log(f"[INFO] Data points by domain: {plot_data.groupby('domain_name').size().to_dict()}")
 
-        validation_result = {'valid': True, 'message': 'Plot data structure valid (8 columns, domain-specific)'}
+        validation_result = {'valid': True, 'message': 'Plot data structure valid (8 columns, 2 domains - When excluded)'}
 
         # Report validation results
         # Expected: valid=True, all domains and tertiles present
@@ -260,7 +267,7 @@ if __name__ == "__main__":
 
         log("[SUCCESS] Step 05 complete")
         log(f"[INFO] Plot data ready for rq_plots agent: plots/step05_age_effects_plot_data.csv")
-        log(f"[INFO] Rows: {len(plot_data)}, Domains: 3, Age tertiles: 3")
+        log(f"[INFO] Rows: {len(plot_data)}, Domains: 2 (When excluded), Age tertiles: 3")
         sys.exit(0)
 
     except Exception as e:

@@ -57,3 +57,80 @@
 [VALIDATION] [PASS] All required 3-way interaction terms present: ['TSVR_hours:Age_c:domain', 'log_TSVR:Age_c:domain']
 [SUCCESS] Step 02 complete
 [INFO] Model ready for assumption validation (step02b) and model selection (step02c)
+[START] Step 02: Fit LMM with 3-Way Age x Domain x Time Interaction
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (800 rows, 10 cols)
+[INFO] Columns: ['UID', 'composite_ID', 'test', 'domain', 'theta', 'TSVR_hours', 'log_TSVR', 'age', 'Age_c', 'mean_age']
+[INFO] Unique UIDs: 100
+[INFO] Domains: ['What', 'Where']
+[INFO] Tests: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[INFO] Age range: 20.0 - 70.0
+[INFO] Age_c range: -24.57 - 25.43
+[ANALYSIS] Fitting LMM with 3-way Age x Domain x Time interaction...
+[INFO] Formula: theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain
+[INFO] Random effects: ~TSVR_hours (random slopes per participant)
+[INFO] REML=False (ML estimation for model comparison)
+[DONE] LMM fitting complete
+[INFO] Model converged: False
+[INFO] Number of observations: 800
+[INFO] Number of groups: 100
+[INFO] Log-likelihood: -1154.88
+[INFO] AIC: 2341.76
+[INFO] BIC: 2416.71
+[SAVE] Saving model object to step02_lmm_model.pkl...
+[SAVED] step02_lmm_model.pkl (statsmodels MixedLMResults object)
+[SAVE] Saving model summary to step02_lmm_summary.txt...
+[SAVED] step02_lmm_summary.txt (full model summary with fixed effects table)
+[SAVE] Saving fixed effects table to step02_fixed_effects.csv...
+[SAVED] step02_fixed_effects.csv (15 rows, 7 cols)
+[INFO] Fixed effects include 15 terms
+[INFO] 3-way interaction terms found: 2
+  - TSVR_hours:Age_c:domain[T.Where]: beta=-0.0001, p=0.4081
+  - log_TSVR:Age_c:domain[T.Where]: beta=0.0025, p=0.3469
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] converged: False
+[VALIDATION] message: LMM did not converge
+[VALIDATION] warning: Results may be unreliable
+[VALIDATION] [FAIL] Model did not converge
+[VALIDATION] Message: LMM did not converge
+[START] Step 02: Fit LMM with 3-Way Age x Domain x Time Interaction
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (800 rows, 10 cols)
+[INFO] Columns: ['UID', 'composite_ID', 'test', 'domain', 'theta', 'TSVR_hours', 'log_TSVR', 'age', 'Age_c', 'mean_age']
+[INFO] Unique UIDs: 100
+[INFO] Domains: ['What', 'Where']
+[INFO] Tests: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[INFO] Age range: 20.0 - 70.0
+[INFO] Age_c range: -24.57 - 25.43
+[ANALYSIS] Fitting LMM with 3-way Age x Domain x Time interaction...
+[INFO] Formula: theta ~ TSVR_hours + log_TSVR + Age_c + domain + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:domain + log_TSVR:domain + Age_c:domain + TSVR_hours:Age_c:domain + log_TSVR:Age_c:domain
+[INFO] Random effects: Random intercepts only (convergence fix)
+[INFO] REML=False (ML estimation for model comparison)
+[NOTE] Random slopes caused convergence issues with 2-domain data
+[DONE] LMM fitting complete
+[INFO] Model converged: True
+[INFO] Number of observations: 800
+[INFO] Number of groups: 100
+[INFO] Log-likelihood: -760.64
+[INFO] AIC: 1549.27
+[INFO] BIC: 1614.86
+[SAVE] Saving model object to step02_lmm_model.pkl...
+[SAVED] step02_lmm_model.pkl (statsmodels MixedLMResults object)
+[SAVE] Saving model summary to step02_lmm_summary.txt...
+[SAVED] step02_lmm_summary.txt (full model summary with fixed effects table)
+[SAVE] Saving fixed effects table to step02_fixed_effects.csv...
+[SAVED] step02_fixed_effects.csv (13 rows, 7 cols)
+[INFO] Fixed effects include 13 terms
+[INFO] 3-way interaction terms found: 2
+  - TSVR_hours:Age_c:domain[T.Where]: beta=-0.0001, p=0.4949
+  - log_TSVR:Age_c:domain[T.Where]: beta=0.0025, p=0.4377
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[VALIDATION] [PASS] Model converged successfully
+[VALIDATION] Checking additional criteria...
+[VALIDATION] [PASS] Random effects variance > 0 (0.3653)
+[VALIDATION] [PASS] All fixed effects have finite estimates
+[VALIDATION] [PASS] All required 3-way interaction terms present: ['TSVR_hours:Age_c:domain', 'log_TSVR:Age_c:domain']
+[SUCCESS] Step 02 complete
+[INFO] Model ready for assumption validation (step02b) and model selection (step02c)

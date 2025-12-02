@@ -8,9 +8,14 @@ Step Name: step04_compute_contrasts
 RQ: results/ch5/5.2.3
 Generated: 2025-11-28
 FIXED: 2025-11-29 (replaced compute_contrasts_pairwise with extract_marginal_age_slopes_by_domain)
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
-Quantify age effect on forgetting rate for each domain (What, Where, When)
+Quantify age effect on forgetting rate for each domain (What, Where)
+
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- Only What and Where domains analyzed
+- Expected 2 rows in output (not 3)
 
 EXPECTED INPUTS:
   - data/step02_lmm_model.pkl
@@ -21,14 +26,14 @@ EXPECTED OUTPUTS:
   - data/step04_age_effects_by_domain.csv
     Columns: ['domain', 'age_slope', 'se', 'z', 'p', 'CI_lower', 'CI_upper']
     Format: Domain-specific marginal age effects on forgetting rate at Day 3 (TSVR=72h)
-    Expected rows: 3 (What, Where, When)
+    Expected rows: 2 (What, Where - When excluded)
 
   - results/step04_summary.txt
     Format: Text summary of age effects with interpretation
     Expected: Statistical summary report
 
 VALIDATION CRITERIA:
-  - All 3 domains present (What, Where, When)
+  - All 2 domains present (What, Where - When excluded)
   - All p-values in [0, 1] range
   - Standard errors > 0
   - CI_lower < CI_upper
@@ -165,17 +170,20 @@ if __name__ == "__main__":
             summary_lines.append("")
 
         # Overall interpretation
+        summary_lines.append("NOTE: When domain excluded due to floor effect (RQ 5.2.1)")
+        summary_lines.append("")
         summary_lines.append("OVERALL INTERPRETATION:")
         n_sig = (age_effects['p'] < 0.05).sum()
+        n_domains = len(age_effects)
         if n_sig == 0:
             summary_lines.append("  No significant age effects detected in any domain.")
             summary_lines.append("  Age does not differentially affect forgetting rate across domains.")
-        elif n_sig == 3:
-            summary_lines.append("  Significant age effects detected in ALL domains.")
-            summary_lines.append("  Age affects forgetting rate across all episodic memory domains.")
+        elif n_sig == n_domains:
+            summary_lines.append(f"  Significant age effects detected in ALL {n_domains} domains.")
+            summary_lines.append("  Age affects forgetting rate across analyzed episodic memory domains.")
         else:
             sig_domains = age_effects.loc[age_effects['p'] < 0.05, 'domain'].tolist()
-            summary_lines.append(f"  Significant age effects detected in {n_sig}/3 domains: {', '.join(sig_domains)}")
+            summary_lines.append(f"  Significant age effects detected in {n_sig}/{n_domains} domains: {', '.join(sig_domains)}")
             summary_lines.append("  Age effects are domain-specific.")
 
         summary_lines.append("")
@@ -194,12 +202,12 @@ if __name__ == "__main__":
         # Check output structure
         expected_cols = ['domain', 'age_slope', 'se', 'z', 'p', 'CI_lower', 'CI_upper']
         assert list(age_effects.columns) == expected_cols, f"Columns mismatch: {age_effects.columns}"
-        assert len(age_effects) == 3, f"Expected 3 rows, got {len(age_effects)}"
+        assert len(age_effects) == 2, f"Expected 2 rows (When excluded), got {len(age_effects)}"
 
-        # Check domains
-        expected_domains = {'What', 'Where', 'When'}
+        # Check domains (When excluded)
+        expected_domains = {'What', 'Where'}
         actual_domains = set(age_effects['domain'])
-        assert actual_domains == expected_domains, f"Domains mismatch: {actual_domains}"
+        assert actual_domains == expected_domains, f"Domains mismatch (When excluded): {actual_domains}"
 
         # Check value ranges
         assert all(age_effects['se'] > 0), "All SEs must be positive"

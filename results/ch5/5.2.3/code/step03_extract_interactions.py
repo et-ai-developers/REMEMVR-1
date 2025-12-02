@@ -7,11 +7,17 @@ Step ID: step03
 Step Name: Extract 3-Way Interaction Terms and Test Hypothesis
 RQ: results/ch5/5.2.3
 Generated: 2025-11-28
+Updated: 2025-12-02 (When domain excluded due to floor effect)
 
 PURPOSE:
 Extract and test 3-way Age x Domain x Time interaction terms from LMM model
 to evaluate primary hypothesis: whether age effects on forgetting rate vary
-by memory domain (What vs Where vs When).
+by memory domain (What vs Where).
+
+NOTE: When domain EXCLUDED due to floor effect discovered in RQ 5.2.1:
+- Only What (reference) and Where domains analyzed
+- Expected 2 interaction terms (not 4): TSVR_hours:Age_c:domain[Where] and log_TSVR:Age_c:domain[Where]
+- Single domain comparison: Where vs What (no multiple comparison correction needed)
 
 EXPECTED INPUTS:
   - results/step02_lmm_model.pkl
@@ -22,48 +28,43 @@ EXPECTED INPUTS:
   - data/step02_fixed_effects.csv
     Columns: ['term', 'estimate', 'se', 'z', 'p', 'CI_lower', 'CI_upper']
     Format: Fixed effects table from selected model
-    Expected rows: ~20 terms (main effects + 2-way + 3-way interactions)
+    Expected rows: ~12 terms (main effects + 2-way + 3-way interactions - When excluded)
     Source: Step 2 LMM fit output
 
 EXPECTED OUTPUTS:
   - data/step03_interaction_terms.csv
     Columns: ['term', 'estimate', 'se', 'z', 'p', 'p_bonferroni', 'CI_lower', 'CI_upper']
     Format: 3-way interaction terms with dual p-values (Decision D068)
-    Expected rows: 4 terms (TSVR_hours:Age_c:domain[Where], TSVR_hours:Age_c:domain[When],
-                            log_TSVR:Age_c:domain[Where], log_TSVR:Age_c:domain[When])
+    Expected rows: 2 terms (TSVR_hours:Age_c:domain[Where], log_TSVR:Age_c:domain[Where])
+    NOTE: When excluded - only Where vs What comparison
 
   - results/step03_hypothesis_test.txt
-    Format: Hypothesis test summary with omnibus tests and decision
-    Contains: Omnibus test statistics (chi-square, df=2) for linear and log 3-way interactions,
-              p-values, and hypothesis decision (supported if EITHER omnibus p < 0.025)
+    Format: Hypothesis test summary with individual term tests and decision
+    Contains: Individual term p-values for linear and log 3-way interactions (df=1 each),
+              and hypothesis decision (supported if EITHER p < 0.025)
 
 VALIDATION CRITERIA:
-  - All 4 three-way interaction terms present
+  - Both 3-way interaction terms present (2 terms - When excluded)
   - p_uncorrected column present (Decision D068 compliance)
   - p_bonferroni column present (Decision D068 compliance)
   - All p-values in [0, 1] range
-  - Omnibus tests performed for linear and log interactions
 
 g_code REASONING:
 - Approach: Extract 3-way interaction terms from fixed effects table, apply Bonferroni
-  correction (p × 2 domains, capped at 1.0), perform omnibus tests for linear and log
-  interactions separately using Wald chi-square test (df=2), make hypothesis decision
-  based on alpha=0.025 threshold for omnibus tests.
+  correction (p × 2 for 2 hypothesis tests: linear + log), test individual terms
+  since only one domain contrast (Where vs What) with When excluded.
 - Why this approach: Decision D068 requires dual p-value reporting (uncorrected + correction).
-  Omnibus tests test joint significance of both domain contrasts simultaneously (more
-  conservative than testing individual terms). Alpha=0.025 for omnibus maintains family-wise
-  error rate at 0.05 across both omnibus tests (linear + log).
-- Data flow: Fixed effects table -> filter 3-way terms -> apply Bonferroni -> omnibus test
-  -> hypothesis decision -> save CSV + TXT report
-- Expected performance: <1 second (pure DataFrame operations + scipy chi-square test)
+  With only 1 domain contrast (Where vs What), omnibus test not needed - individual term
+  tests suffice. Alpha=0.025 for each term maintains family-wise error rate at 0.05.
+- Data flow: Fixed effects table -> filter 3-way terms -> apply Bonferroni -> decision
+- Expected performance: <1 second (pure DataFrame operations)
 
 IMPLEMENTATION NOTES:
-- Analysis tool: stdlib (pandas DataFrame filtering + scipy.stats for chi-square test)
+- Analysis tool: stdlib (pandas DataFrame filtering)
 - Validation tool: validate_hypothesis_test_dual_pvalues from tools.validation
-- Parameters: Bonferroni correction factor = 2 (comparing 2 domains: Where vs When, relative to What reference)
-- Expected terms: TSVR_hours:Age_c:domain[Where], TSVR_hours:Age_c:domain[When],
-                 log_TSVR:Age_c:domain[Where], log_TSVR:Age_c:domain[When]
-- Omnibus approach: Wald test on variance-covariance matrix for joint significance
+- Parameters: Bonferroni correction factor = 2 (for 2 hypothesis tests: linear + log)
+- Expected terms: TSVR_hours:Age_c:domain[Where], log_TSVR:Age_c:domain[Where] (When excluded)
+- Note: With only 1 domain contrast, individual term tests replace omnibus tests
 """
 # =============================================================================
 
@@ -249,15 +250,14 @@ if __name__ == "__main__":
         # =========================================================================
         # STEP 2: Extract 3-Way Interaction Terms
         # =========================================================================
-        # Expected terms (4 total):
+        # Expected terms (2 total - When domain excluded):
         #   TSVR_hours:Age_c:domain[Where]
-        #   TSVR_hours:Age_c:domain[When]
         #   log_TSVR:Age_c:domain[Where]
-        #   log_TSVR:Age_c:domain[When]
         #
-        # These represent how age effects on forgetting rate differ by domain
+        # These represent how age effects on forgetting rate differ for Where vs What
 
         log("[EXTRACT] Filtering 3-way interaction terms...")
+        log("[INFO] When domain excluded - expecting 2 terms (Where only)")
 
         # Filter for terms containing all three components: TSVR (linear or log), Age_c, and domain
         # Pattern: terms containing "Age_c" AND "domain" AND either "TSVR_hours" or "log_TSVR"
@@ -273,10 +273,10 @@ if __name__ == "__main__":
         log(f"[EXTRACTED] {len(interaction_terms)} interaction terms found")
         log(f"[TERMS] {interaction_terms['term'].tolist()}")
 
-        # Verify we have exactly 4 terms
-        if len(interaction_terms) != 4:
-            log(f"[WARNING] Expected 4 interaction terms, found {len(interaction_terms)}")
-            log(f"[WARNING] This may indicate model specification changed")
+        # Verify we have exactly 2 terms (When excluded)
+        if len(interaction_terms) != 2:
+            log(f"[WARNING] Expected 2 interaction terms (When excluded), found {len(interaction_terms)}")
+            log(f"[WARNING] This may indicate When domain was not properly excluded")
 
         # =========================================================================
         # STEP 3: Apply Bonferroni Correction
@@ -298,58 +298,55 @@ if __name__ == "__main__":
         log(f"[BONFERRONI] Correction applied (p_bonf = min(p * 2, 1.0))")
 
         # =========================================================================
-        # STEP 4: Perform Omnibus Tests
+        # STEP 4: Test Individual Interaction Terms
         # =========================================================================
-        # Test joint significance of:
-        #   (1) Linear 3-way interactions: TSVR_hours:Age_c:domain[Where/When]
-        #   (2) Log 3-way interactions: log_TSVR:Age_c:domain[Where/When]
+        # With only 1 domain contrast (Where vs What, When excluded), omnibus tests
+        # are not needed. Test individual terms instead:
+        #   (1) Linear 3-way: TSVR_hours:Age_c:domain[Where]
+        #   (2) Log 3-way: log_TSVR:Age_c:domain[Where]
         #
-        # Hypothesis supported if EITHER omnibus test significant at alpha=0.025
+        # Hypothesis supported if EITHER term significant at alpha=0.025
 
-        log("[OMNIBUS] Performing omnibus Wald tests...")
+        log("[TEST] Testing individual interaction terms (omnibus not needed with 1 contrast)...")
 
-        # Separate linear and log interaction terms
-        linear_terms = interaction_terms[
+        # Extract p-values for individual terms
+        linear_term_row = interaction_terms[
             interaction_terms['term'].str.contains('TSVR_hours:Age_c:domain', na=False)
-        ]['term'].tolist()
-
-        log_terms = interaction_terms[
+        ]
+        log_term_row = interaction_terms[
             interaction_terms['term'].str.contains('log_TSVR:Age_c:domain', na=False)
-        ]['term'].tolist()
+        ]
 
-        log(f"[OMNIBUS] Linear 3-way terms: {linear_terms}")
-        log(f"[OMNIBUS] Log 3-way terms: {log_terms}")
+        # Get p-values (use Bonferroni-corrected for decision)
+        linear_p = linear_term_row['p_bonferroni'].values[0] if len(linear_term_row) > 0 else 1.0
+        log_p = log_term_row['p_bonferroni'].values[0] if len(log_term_row) > 0 else 1.0
 
-        # Perform omnibus tests
-        omnibus_linear = perform_omnibus_wald_test(lmm_model, linear_terms)
-        omnibus_log = perform_omnibus_wald_test(lmm_model, log_terms)
-
-        log(f"[OMNIBUS LINEAR] chi2={omnibus_linear['chi2_statistic']:.3f}, df={omnibus_linear['df']}, p={omnibus_linear['p_value']:.4f}")
-        log(f"[OMNIBUS LOG] chi2={omnibus_log['chi2_statistic']:.3f}, df={omnibus_log['df']}, p={omnibus_log['p_value']:.4f}")
+        log(f"[TEST LINEAR] p_bonferroni={linear_p:.4f}")
+        log(f"[TEST LOG] p_bonferroni={log_p:.4f}")
 
         # =========================================================================
         # STEP 5: Make Hypothesis Decision
         # =========================================================================
         # Hypothesis: Age effects on forgetting rate vary by memory domain
-        # Decision rule: Supported if EITHER omnibus test p < 0.025
-        # Alpha = 0.025 maintains family-wise error rate at 0.05 (2 omnibus tests)
+        # Decision rule: Supported if EITHER term p_bonferroni < 0.025
+        # Alpha = 0.025 maintains family-wise error rate at 0.05 (2 tests)
 
         log("[DECISION] Evaluating hypothesis...")
 
-        alpha_omnibus = 0.025
+        alpha_test = 0.025
         hypothesis_supported = (
-            (omnibus_linear['p_value'] < alpha_omnibus) or
-            (omnibus_log['p_value'] < alpha_omnibus)
+            (linear_p < alpha_test) or
+            (log_p < alpha_test)
         )
 
         decision_text = "SUPPORTED" if hypothesis_supported else "NOT SUPPORTED"
-        log(f"[DECISION] Hypothesis {decision_text} (alpha={alpha_omnibus})")
+        log(f"[DECISION] Hypothesis {decision_text} (alpha={alpha_test})")
 
         # =========================================================================
         # STEP 6: Save Interaction Terms CSV
         # =========================================================================
         # Output: data/step03_interaction_terms.csv
-        # Contains: 4 rows with dual p-values per Decision D068
+        # Contains: 2 rows with dual p-values per Decision D068 (When excluded)
 
         log("[SAVE] Saving interaction terms to CSV...")
 
@@ -376,31 +373,44 @@ if __name__ == "__main__":
             f.write("Step 03: 3-Way Age x Domain x Time Interaction\n")
             f.write("=" * 80 + "\n\n")
 
+            f.write("NOTE: When domain EXCLUDED due to floor effect (RQ 5.2.1)\n")
+            f.write("Only What (reference) and Where domains analyzed.\n\n")
+
             f.write("HYPOTHESIS:\n")
             f.write("  Age effects on forgetting rate vary by memory domain\n")
-            f.write("  (What vs Where vs When)\n\n")
+            f.write("  (What vs Where - When excluded)\n\n")
 
             f.write("DECISION RULE:\n")
-            f.write("  Hypothesis supported if EITHER omnibus test p < 0.025\n")
+            f.write("  Hypothesis supported if EITHER term p_bonferroni < 0.025\n")
             f.write("  Alpha = 0.025 maintains family-wise error rate at 0.05\n\n")
 
             f.write("-" * 80 + "\n")
-            f.write("OMNIBUS TESTS (Wald Chi-Square)\n")
+            f.write("INTERACTION TESTS (Individual Terms - 1 Domain Contrast)\n")
             f.write("-" * 80 + "\n\n")
 
-            f.write("Linear 3-Way Interaction (TSVR_hours:Age_c:domain):\n")
-            f.write(f"  Terms tested: {', '.join(omnibus_linear['terms_tested'])}\n")
-            f.write(f"  Chi-square: {omnibus_linear['chi2_statistic']:.3f}\n")
-            f.write(f"  df: {omnibus_linear['df']}\n")
-            f.write(f"  p-value: {omnibus_linear['p_value']:.4f}\n")
-            f.write(f"  Significant (alpha=0.025): {'YES' if omnibus_linear['p_value'] < alpha_omnibus else 'NO'}\n\n")
+            f.write("Linear 3-Way Interaction (TSVR_hours:Age_c:domain[Where]):\n")
+            if len(linear_term_row) > 0:
+                row = linear_term_row.iloc[0]
+                f.write(f"  Estimate: {row['estimate']:.4f}\n")
+                f.write(f"  SE: {row['se']:.4f}\n")
+                f.write(f"  z: {row['z']:.3f}\n")
+                f.write(f"  p (uncorrected): {row['p_uncorrected']:.4f}\n")
+                f.write(f"  p (Bonferroni): {row['p_bonferroni']:.4f}\n")
+                f.write(f"  Significant (alpha=0.025): {'YES' if row['p_bonferroni'] < alpha_test else 'NO'}\n\n")
+            else:
+                f.write("  NOT FOUND\n\n")
 
-            f.write("Log 3-Way Interaction (log_TSVR:Age_c:domain):\n")
-            f.write(f"  Terms tested: {', '.join(omnibus_log['terms_tested'])}\n")
-            f.write(f"  Chi-square: {omnibus_log['chi2_statistic']:.3f}\n")
-            f.write(f"  df: {omnibus_log['df']}\n")
-            f.write(f"  p-value: {omnibus_log['p_value']:.4f}\n")
-            f.write(f"  Significant (alpha=0.025): {'YES' if omnibus_log['p_value'] < alpha_omnibus else 'NO'}\n\n")
+            f.write("Log 3-Way Interaction (log_TSVR:Age_c:domain[Where]):\n")
+            if len(log_term_row) > 0:
+                row = log_term_row.iloc[0]
+                f.write(f"  Estimate: {row['estimate']:.4f}\n")
+                f.write(f"  SE: {row['se']:.4f}\n")
+                f.write(f"  z: {row['z']:.3f}\n")
+                f.write(f"  p (uncorrected): {row['p_uncorrected']:.4f}\n")
+                f.write(f"  p (Bonferroni): {row['p_bonferroni']:.4f}\n")
+                f.write(f"  Significant (alpha=0.025): {'YES' if row['p_bonferroni'] < alpha_test else 'NO'}\n\n")
+            else:
+                f.write("  NOT FOUND\n\n")
 
             f.write("-" * 80 + "\n")
             f.write("DECISION\n")
@@ -409,16 +419,18 @@ if __name__ == "__main__":
 
             if hypothesis_supported:
                 f.write("INTERPRETATION:\n")
-                f.write("  At least one omnibus test significant at alpha=0.025.\n")
-                f.write("  Evidence that age effects on forgetting rate differ by domain.\n")
+                f.write("  At least one interaction term significant at alpha=0.025.\n")
+                f.write("  Evidence that age effects on forgetting rate differ\n")
+                f.write("  between What and Where domains.\n")
             else:
                 f.write("INTERPRETATION:\n")
-                f.write("  Neither omnibus test significant at alpha=0.025.\n")
-                f.write("  Insufficient evidence that age effects differ by domain.\n")
+                f.write("  Neither interaction term significant at alpha=0.025.\n")
+                f.write("  Insufficient evidence that age effects differ\n")
+                f.write("  between What and Where domains.\n")
 
             f.write("\n")
             f.write("-" * 80 + "\n")
-            f.write("INDIVIDUAL INTERACTION TERMS (Decision D068 Dual P-Values)\n")
+            f.write("ALL INTERACTION TERMS (Decision D068 Dual P-Values)\n")
             f.write("-" * 80 + "\n\n")
 
             for _, row in interaction_terms_out.iterrows():
@@ -436,15 +448,14 @@ if __name__ == "__main__":
         # STEP 8: Run Validation
         # =========================================================================
         # Tool: validate_hypothesis_test_dual_pvalues
-        # Validates: (1) All 4 required terms present, (2) D068 compliance (dual p-values)
+        # Validates: (1) All 2 required terms present (When excluded), (2) D068 compliance
 
         log("[VALIDATION] Running validate_hypothesis_test_dual_pvalues...")
+        log("[INFO] When domain excluded - expecting 2 terms (Where only)")
 
         required_terms = [
             "TSVR_hours:Age_c:domain[Where]",
-            "TSVR_hours:Age_c:domain[When]",
-            "log_TSVR:Age_c:domain[Where]",
-            "log_TSVR:Age_c:domain[When]"
+            "log_TSVR:Age_c:domain[Where]"
         ]
 
         validation_result = validate_hypothesis_test_dual_pvalues(

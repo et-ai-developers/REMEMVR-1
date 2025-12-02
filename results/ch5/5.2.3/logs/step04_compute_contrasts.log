@@ -64,3 +64,22 @@ KeyError: 'sig_uncorrected'
 [VALIDATION] Validating outputs...
 [VALIDATION] All checks passed
 [SUCCESS] Step 04 complete
+[START] Step 04: Compute Domain-Specific Age Effects
+[LOAD] Loading LMM model from Step 2c...
+[LOADED] LMM model from step02_lmm_model.pkl
+[INFO] Model has 100 groups (participants)
+[INFO] Model converged: True
+[ANALYSIS] Extracting marginal age effects by domain...
+[INFO] Evaluation timepoint: TSVR = 72.0 hours (Day 3, midpoint)
+[INFO] Using delta method for SE propagation
+[DONE] Age effect extraction complete
+[INFO] Extracted age effects for 2 domains
+[RESULT] What: age_slope=-0.000014, SE=0.000041, p=0.7368
+[RESULT] Where: age_slope=0.000014, SE=0.000041, p=0.7368
+[SAVE] Saving age effects by domain...
+[SAVED] step04_age_effects_by_domain.csv (2 rows, 7 columns)
+[SAVE] Creating summary report...
+[SAVED] step04_summary.txt
+[VALIDATION] Validating outputs...
+[VALIDATION] All checks passed
+[SUCCESS] Step 04 complete
