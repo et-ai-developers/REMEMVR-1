@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-01 14:00 (context-manager curation)
+**Last Updated:** 2025-12-02 17:45 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -310,6 +310,9 @@
 
 ### validation_mass_execution_32_agents_stats_scholar_guide_3_rq_fixes
 **Description:** Mass validation execution (16 TODO RQs × 2 agents = 32 parallel agents with Haiku model), comprehensive stats_scholar.md guide creation with 6 common fix templates and priority order, and 3 RQ fixes (5.2.6, 5.2.7 was REJECTED, 5.2.8) achieving publication-quality validation scores. Documents dual-agent validation results (13 scholar APPROVED, 2 stats APPROVED, 1 fully ready RQ 5.3.9), common methodological issues (LMM convergence, assumption validation, practice effects, GLMM for binary responses, K-means justification, cluster validation), and reusable fix patterns applied.
+
+### fix_13_rqs_revalidate_all_16_approved
+**Description:** Complete history of fixing remaining 13 RQs (5.3.3-5.3.8, 5.4.3-5.4.8) using stats_scholar.md templates and re-validating all CONDITIONAL RQs with 14 parallel agents (3 rq_scholar + 11 rq_stats). All 16 TODO RQs achieved APPROVED threshold (≥9.25) with average score improvements of +0.5 to +0.9 points. Documents 6 common fix templates (LMM convergence strategy, assumption validation, practice effects, GLMM for binary responses, K-means justification, cluster validation metrics), comprehensive fixes applied across paradigms and congruence types, final status table, files modified, and publication-quality standard achievement.
 
 ---
 
