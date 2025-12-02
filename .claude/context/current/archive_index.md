@@ -308,6 +308,9 @@
 ### agent_framework_v5_update_hierarchical_numbering_rq_concept_mass_execution
 **Description:** Complete history of Agent Framework v5.0 update implementing chX/X.Y.Z hierarchical numbering format and rq_refactor.tsv as authoritative specification source. Updated 4 RQ workflow agents (rq_concept major rewrite with TSV column mapping, rq_planner, rq_scholar, rq_stats). Updated templates and workflow documentation. Mass execution via rq_concept on 16 TODO RQs (all SUCCESS). ANALYSES_CH5.md deprecated. 52-minute total session with 113k token consumption. Parallel execution efficiency demonstrated (15 agents in 5 minutes). Session 2025-12-01 16:30.
 
+### validation_mass_execution_32_agents_stats_scholar_guide_3_rq_fixes
+**Description:** Mass validation execution (16 TODO RQs × 2 agents = 32 parallel agents with Haiku model), comprehensive stats_scholar.md guide creation with 6 common fix templates and priority order, and 3 RQ fixes (5.2.6, 5.2.7 was REJECTED, 5.2.8) achieving publication-quality validation scores. Documents dual-agent validation results (13 scholar APPROVED, 2 stats APPROVED, 1 fully ready RQ 5.3.9), common methodological issues (LMM convergence, assumption validation, practice effects, GLMM for binary responses, K-means justification, cluster validation), and reusable fix patterns applied.
+
 ---
 
 ## How to Use This Index
