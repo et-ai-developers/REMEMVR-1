@@ -835,3 +835,171 @@ def prepare_piecewise_plot_data(
         result[segment_name] = df_combined
 
     return result
+
+
+# =============================================================================
+# Piecewise Trajectory Plotting
+# =============================================================================
+
+def plot_piecewise_trajectory(
+    theta_data: pd.DataFrame,
+    prob_data: Optional[pd.DataFrame] = None,
+    segment_col: str = 'Segment',
+    paradigm_col: str = 'paradigm',
+    time_col: str = 'Days_within',
+    theta_obs_col: str = 'theta_observed',
+    theta_pred_col: str = 'theta_predicted',
+    prob_obs_col: str = 'prob_observed',
+    prob_pred_col: str = 'prob_predicted',
+    ci_lower_col: str = 'CI_lower',
+    ci_upper_col: str = 'CI_upper',
+    slope_col: str = 'slope',
+    data_type_col: str = 'data_type',
+    segment_order: List[str] = None,
+    paradigm_colors: Optional[Dict[str, str]] = None,
+    figsize: Tuple[int, int] = (14, 6),
+    output_path: Optional[Path] = None,
+    title: str = 'Piecewise Trajectory by Segment',
+    suptitle: Optional[str] = None
+) -> Tuple[plt.Figure, np.ndarray]:
+    """
+    Create two-panel piecewise trajectory plot (Early vs Late segments).
+
+    Designed for piecewise LMM visualizations where forgetting trajectory
+    is divided into temporal segments (e.g., Early consolidation window
+    vs Late decay period). Each panel shows trajectories for multiple
+    paradigms/factors with observed data points and model predictions.
+
+    Args:
+        theta_data: DataFrame with theta-scale plot data
+            Required columns: segment_col, paradigm_col, time_col,
+            theta_obs_col, theta_pred_col, ci_lower_col, ci_upper_col,
+            slope_col, data_type_col
+        prob_data: Optional DataFrame with probability-scale data
+            If provided, creates a 2x2 grid (theta + probability scales)
+            Required columns: same as theta_data but with prob_obs_col, prob_pred_col
+        segment_col: Column name for segment variable (default 'Segment')
+        paradigm_col: Column name for paradigm/factor grouping (default 'paradigm')
+        time_col: Column name for time within segment (default 'Days_within')
+        theta_obs_col: Column name for observed theta values (default 'theta_observed')
+        theta_pred_col: Column name for predicted theta values (default 'theta_predicted')
+        prob_obs_col: Column name for observed probability values (default 'prob_observed')
+        prob_pred_col: Column name for predicted probability values (default 'prob_predicted')
+        ci_lower_col: Column name for CI lower bound (default 'CI_lower')
+        ci_upper_col: Column name for CI upper bound (default 'CI_upper')
+        slope_col: Column name for segment-paradigm slopes (default 'slope')
+        data_type_col: Column name for data type marker (default 'data_type')
+        segment_order: List of segment names in display order (default ['Early', 'Late'])
+        paradigm_colors: Dict mapping paradigm names to colors
+            Default: {'IFR': '#E74C3C', 'ICR': '#3498DB', 'IRE': '#2ECC71'}
+        figsize: Figure size (width, height) in inches
+        output_path: Optional path to save plot
+        title: Plot title (per panel)
+        suptitle: Optional super title for entire figure
+
+    Returns:
+        fig: Matplotlib figure
+        axes: Array of matplotlib axes (1x2 for theta only, 2x2 with prob_data)
+
+    Example:
+        >>> theta_df = pd.read_csv('step06_piecewise_theta_data.csv')
+        >>> prob_df = pd.read_csv('step06_piecewise_probability_data.csv')
+        >>> fig, axes = plot_piecewise_trajectory(theta_df, prob_df)
+        >>> fig.savefig('piecewise_plot.png', dpi=300)
+    """
+    # Set defaults
+    if segment_order is None:
+        segment_order = ['Early', 'Late']
+
+    if paradigm_colors is None:
+        paradigm_colors = {
+            'IFR': '#E74C3C',  # Red - Free Recall
+            'ICR': '#3498DB',  # Blue - Cued Recall
+            'IRE': '#2ECC71'   # Green - Recognition
+        }
+
+    # Determine layout
+    if prob_data is not None:
+        nrows, ncols = 2, 2
+        figsize = (figsize[0], figsize[1] * 1.6)  # Taller for 2 rows
+    else:
+        nrows, ncols = 1, 2
+
+    # Create figure
+    fig, axes = plt.subplots(nrows, ncols, figsize=figsize, squeeze=False)
+
+    # Get paradigms from data
+    paradigms = theta_data[paradigm_col].dropna().unique()
+
+    def plot_panel(ax, data, segment, obs_col, pred_col, ylabel, show_legend=True):
+        """Plot single panel for one segment."""
+        seg_data = data[data[segment_col] == segment]
+
+        for paradigm in paradigms:
+            color = paradigm_colors.get(paradigm, None)
+            para_data = seg_data[seg_data[paradigm_col] == paradigm]
+
+            # Plot predictions (smooth line)
+            pred_data = para_data[para_data[data_type_col] == 'prediction']
+            if len(pred_data) > 0:
+                pred_sorted = pred_data.sort_values(time_col)
+                ax.plot(pred_sorted[time_col], pred_sorted[pred_col],
+                       color=color, linewidth=2, label=paradigm, alpha=0.9)
+
+            # Plot observed data points with error bars
+            obs_data = para_data[para_data[data_type_col] == 'observed']
+            if len(obs_data) > 0:
+                ax.errorbar(obs_data[time_col], obs_data[obs_col],
+                           yerr=[obs_data[obs_col] - obs_data[ci_lower_col],
+                                 obs_data[ci_upper_col] - obs_data[obs_col]],
+                           fmt='o', color=color, markersize=8,
+                           capsize=4, capthick=1.5, alpha=0.7)
+
+            # Add slope annotation
+            slope_val = para_data[slope_col].dropna().iloc[0] if len(para_data) > 0 else None
+            if slope_val is not None:
+                # Position annotation at end of line
+                if len(pred_sorted) > 0:
+                    x_pos = pred_sorted[time_col].iloc[-1]
+                    y_pos = pred_sorted[pred_col].iloc[-1]
+                    ax.annotate(f'{slope_val:.3f}/day',
+                               xy=(x_pos, y_pos), xytext=(5, 0),
+                               textcoords='offset points', fontsize=8,
+                               color=color, alpha=0.8)
+
+        ax.set_xlabel('Days within Segment', fontweight='bold')
+        ax.set_ylabel(ylabel, fontweight='bold')
+        ax.set_title(f'{segment} Segment', fontweight='bold', fontsize=11)
+        ax.grid(True, alpha=0.3)
+
+        if show_legend:
+            ax.legend(loc='upper right', framealpha=0.95, fontsize=9)
+
+    # Plot theta-scale panels (row 0)
+    for col, segment in enumerate(segment_order):
+        plot_panel(axes[0, col], theta_data, segment,
+                  theta_obs_col, theta_pred_col, 'Theta (IRT Ability)',
+                  show_legend=(col == 1))
+
+    # Plot probability-scale panels (row 1) if provided
+    if prob_data is not None:
+        for col, segment in enumerate(segment_order):
+            plot_panel(axes[1, col], prob_data, segment,
+                      prob_obs_col, prob_pred_col, 'Probability',
+                      show_legend=(col == 1))
+            axes[1, col].set_ylim(0, 1)  # Probability scale 0-1
+
+    # Add suptitle
+    if suptitle:
+        fig.suptitle(suptitle, fontweight='bold', fontsize=14, y=1.02)
+
+    plt.tight_layout()
+
+    # Save if path provided
+    if output_path:
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(output_path, dpi=300, bbox_inches='tight',
+                   facecolor='white', edgecolor='none')
+
+    return fig, axes

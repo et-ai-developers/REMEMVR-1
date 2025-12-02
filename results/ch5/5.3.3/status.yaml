@@ -52,23 +52,36 @@ rq_analysis:
     Next: g_code generates stepNN_*.py scripts with 4-layer validation
 
 rq_inspect:
-  status: pending
+  status: success
   context_dump: |
+    Validated all 7 steps (step00-step06): ALL LAYERS PASS
+    Layer 1 (Existence): 10 data files + 7 logs present, all >0 bytes
+    Layer 2 (Structure): All column counts/names/dtypes match plan.md
+    Layer 3 (Substance): Theta [-2.4,2.8], slopes [-0.42,-0.10], probs [0.27,0.65], D068/D069 compliant
+    Layer 4 (Execution): Convergence=True, validation markers present, 0 errors
 
 rq_plots:
-  status: pending
+  status: success
   context_dump: |
+    Generated piecewise_trajectory.png (592 KB, 300 DPI)
+    2x2 layout: Early/Late segments x theta/probability scales (D069 compliant)
+    Added plot_piecewise_trajectory() to tools/plotting.py for this RQ
+    All 3 paradigms visible (IFR red, ICR blue, IRE green) with slope annotations
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: 2025-12-02T16:00:00Z
   context_dump: |
+    Results validated for scientific plausibility
+    1 anomaly flagged: Unexpected pattern (ICR>IFR>IRE ranking contradicts hypothesis, but non-significant)
+    Summary documented in results/summary.md
+    CRITICAL limitation: Practice effects confound per rq_scholar (4-session design)
 
 analysis_steps:
-  step00_load_theta_from_rq531: pending
-  step01_assign_piecewise_segments: pending
-  step02_fit_piecewise_lmm: pending
-  step03_extract_segment_slopes: pending
-  step04_compute_planned_contrasts: pending
-  step05_compute_consolidation_benefit: pending
-  step06_prepare_piecewise_plot_data: pending
-
+  step00_load_theta_from_rq531: success
+  step01_assign_piecewise_segments: success
+  step02_fit_piecewise_lmm: success
+  step03_extract_segment_slopes: success
+  step04_compute_planned_contrasts: success
+  step05_compute_consolidation_benefit: success
+  step06_prepare_piecewise_plot_data: success
