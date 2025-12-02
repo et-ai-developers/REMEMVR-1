@@ -1,0 +1,334 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.3.7
+# Created by: rq_tools agent
+# Date: 2025-12-02
+# RQ: 5.3.7 Paradigm-Specific Variance Decomposition
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+
+  # -------------------------------------------------------------------------
+  # pandas.read_csv (STDLIB - No verification required)
+  # -------------------------------------------------------------------------
+  read_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer: str, **kwargs) -> DataFrame"
+    validation_tool: "validate_data_columns"
+
+    description: "Load theta scores CSV from RQ 5.3.1 dependency"
+    notes: "Standard library function - exempt from tools_inventory.md verification"
+
+  # -------------------------------------------------------------------------
+  # pickle.load (STDLIB - No verification required)
+  # -------------------------------------------------------------------------
+  pickle_load:
+    module: "pickle"
+    function: "load"
+    signature: "load(file: BinaryIO) -> Any"
+    validation_tool: "validate_model_convergence"
+
+    description: "Load fitted LMM model from RQ 5.3.1 for metadata extraction"
+    notes: "Standard library function - exempt from tools_inventory.md verification"
+
+  # -------------------------------------------------------------------------
+  # fit_lmm_trajectory_tsvr (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_assumptions_comprehensive"
+
+    description: "D070: Fit paradigm-stratified LMM using TSVR (actual hours) as time variable with random slopes per participant"
+    source_reference: "tools_inventory.md line 99"
+    notes: "Will be called 3 times (once per paradigm: IFR, ICR, IRE). Convergence contingency plan per Bates et al. 2015 if random slopes fail."
+
+  # -------------------------------------------------------------------------
+  # compute_icc_from_variance_components (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  compute_icc_from_variance_components:
+    module: "tools.analysis_lmm"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_icc_bounds"
+
+    description: "Compute 3 ICC types (intercept, slope_simple, slope_conditional) from LMM variance components per paradigm"
+    source_reference: "tools_inventory.md line 166"
+    notes: "Returns 3 rows per paradigm (9 total). ICC quantifies proportion of variance due to between-person differences."
+
+  # -------------------------------------------------------------------------
+  # extract_random_effects_from_lmm (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+
+    description: "Extract individual random intercepts and slopes for 100 participants per paradigm (300 total rows)"
+    source_reference: "tools_inventory.md line 120"
+    notes: "CRITICAL: Output required for RQ 5.3.8 downstream dependency (clustering analysis)"
+
+  # -------------------------------------------------------------------------
+  # test_intercept_slope_correlation_d068 (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  test_intercept_slope_correlation_d068:
+    module: "tools.analysis_lmm"
+    function: "test_intercept_slope_correlation_d068"
+    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "D068: Test intercept-slope correlation with dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md line 176"
+    notes: "Pearson correlation with Bonferroni correction (n_tests=15 per Chapter 5 family size)"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+
+  # -------------------------------------------------------------------------
+  # validate_data_columns (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    criteria:
+      - "All required columns present (composite_ID, UID, test, TSVR_hours, paradigm, theta, se)"
+      - "No missing required columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        missing_columns: "List[str] (empty if valid)"
+        existing_columns: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_theta_scores.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate theta scores CSV has all required columns for variance decomposition"
+    source_reference: "tools_inventory.md line 402"
+
+  # -------------------------------------------------------------------------
+  # validate_model_convergence (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    criteria:
+      - "Model converged successfully (model.converged = True)"
+      - "No convergence warnings"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if converged)"
+        message: "str (convergence status)"
+        converged: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_load_model_metadata.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate RQ 5.3.1 best-fitting model converged (prerequisite check)"
+    source_reference: "tools_inventory.md line 540"
+
+  # -------------------------------------------------------------------------
+  # validate_lmm_assumptions_comprehensive (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+    criteria:
+      - "Residual normality (Shapiro-Wilk p > 0.01)"
+      - "Homoscedasticity (Breusch-Pagan test)"
+      - "Random effects normality (Q-Q plots for intercepts/slopes)"
+      - "Independence (ACF plot, Lag-1 < 0.1)"
+      - "Linearity (partial residual plots)"
+      - "Outliers (Cook's distance < 4/N)"
+      - "Convergence (model converged successfully)"
+
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool (True if all 7 diagnostics pass)"
+        diagnostics: "Dict (per-diagnostic results)"
+        plot_paths: "List[Path] (diagnostic plot files)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_paradigm_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "MANDATORY: Comprehensive LMM assumption validation (7 diagnostics per 1_concept.md)"
+    source_reference: "tools_inventory.md line 414"
+    notes: "Per RQ 5.3.7 1_concept.md Section 'Validation Procedures' - all 7 checks required"
+
+  # -------------------------------------------------------------------------
+  # validate_icc_bounds (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+    criteria:
+      - "All ICC values in [0, 1] range (ICC is a proportion)"
+      - "No NaN values"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all ICCs in bounds)"
+        message: "str"
+        out_of_bounds: "List[Dict] (violations)"
+        icc_range: "Tuple[float, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_compute_icc.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate ICC values in valid [0, 1] range (proportion of variance)"
+    source_reference: "tools_inventory.md line 571"
+
+  # -------------------------------------------------------------------------
+  # validate_dataframe_structure (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    criteria:
+      - "Row count = 300 (100 participants x 3 paradigms)"
+      - "Required columns present (UID, paradigm, Total_Intercept, Total_Slope)"
+      - "No missing data in critical columns"
+      - "No duplicate UID x paradigm combinations"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if structure correct)"
+        message: "str"
+        checks: "Dict[str, bool] (per-check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_extract_random_effects.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate random effects DataFrame structure (CRITICAL for RQ 5.3.8 dependency)"
+    source_reference: "tools_inventory.md line 580"
+
+  # -------------------------------------------------------------------------
+  # validate_correlation_test_d068 (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    criteria:
+      - "BOTH p_uncorrected AND p_bonferroni present (Decision D068 compliance)"
+      - "p_bonferroni >= p_uncorrected (correction cannot decrease p-value)"
+      - "Correlation coefficient in [-1, 1]"
+      - "Confidence intervals valid (CI_lower < CI_upper)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_correlation_tests.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "MANDATORY: Validate Decision D068 dual p-value reporting for correlation tests"
+    source_reference: "tools_inventory.md line 454"
+
+  # -------------------------------------------------------------------------
+  # validate_plot_data_completeness (CUSTOM - Verified in tools_inventory.md)
+  # -------------------------------------------------------------------------
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    criteria:
+      - "All 3 paradigms present (IFR, ICR, IRE)"
+      - "No missing paradigms in ICC comparison"
+      - "Confidence intervals valid (CI_lower < icc_value < CI_upper)"
+      - "All required columns for barplot present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if plot data complete)"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_compare_icc_prepare_plot.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate ICC comparison plot data completeness (all paradigms present)"
+    source_reference: "tools_inventory.md line 590"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 7
+  total_unique_tools: 13
+  stdlib_tools: 2  # pandas.read_csv, pickle.load (exempt from verification)
+  custom_tools: 11  # All verified in tools_inventory.md
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (test_intercept_slope_correlation_d068)"
+    - "D070: TSVR time variable (fit_lmm_trajectory_tsvr)"
+  critical_dependencies:
+    - "RQ 5.3.1 outputs (theta scores, LMM model metadata)"
+    - "RQ 5.3.8 input (step04_random_effects.csv - 300 rows required)"
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+notes:
+  - "Tool catalog structure: Each tool listed ONCE (deduplication across steps)"
+  - "Analysis tools include validation_tool reference (enforces 1:1 pairing)"
+  - "rq_analysis will map tools to steps using 2_plan.md sequencing"
+  - "g_code will use these signatures for pre-generation validation"
+  - "All custom tools verified exist in tools_inventory.md (Step 10 check passed)"
+  - "Standard library functions (pandas, pickle) exempt from verification"
+  - "Paradigm-stratified design: Same tools used 3 times (IFR, ICR, IRE)"
+  - "Convergence contingency: Bates et al. 2015 fallback if random slopes fail"
+
+# =============================================================================
+# END OF TOOL CATALOG
+# =============================================================================

@@ -1,0 +1,441 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.3.3
+# Created by: rq_tools agent
+# Created: 2025-12-02
+# RQ: 5.3.3 - Paradigm Consolidation Window
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  assign_piecewise_segments:
+    module: "tools.analysis_lmm"
+    function: "assign_piecewise_segments"
+    signature: "assign_piecewise_segments(df: pd.DataFrame, tsvr_col: str = 'TSVR_hours', early_cutoff_hours: float = 24.0) -> pd.DataFrame"
+    validation_tool: "validate_piecewise_structure"
+
+    input_files:
+      - path: "data/step00_theta_from_rq531.csv"
+        required_columns: ["UID", "test", "paradigm", "theta", "SE", "TSVR_hours"]
+        expected_rows: 1200
+        data_types:
+          UID: "string (format: P###)"
+          test: "string (T1, T2, T3, T4)"
+          paradigm: "string (IFR, ICR, IRE)"
+          theta: "float64 (range: -3 to 3)"
+          SE: "float64 (range: 0.1 to 1.0)"
+          TSVR_hours: "float64 (range: 0 to 168)"
+
+    output_files:
+      - path: "data/step01_piecewise_lmm_input.csv"
+        columns: ["UID", "test", "paradigm", "theta", "SE", "TSVR_hours", "Segment", "Days_within"]
+        description: "Piecewise LMM input with Early/Late segments and Days_within variable"
+
+    parameters:
+      tsvr_col: "TSVR_hours"
+      early_cutoff_hours: 24.0
+
+    description: "Assign piecewise segments (Early: 0-24h, Late: 24-168h) and compute Days_within (time recentered within each segment starting at 0)"
+    source_reference: "tools_inventory.md lines 206-213 (assign_piecewise_segments)"
+
+  fit_lmm_piecewise:
+    module: "statsmodels.regression.mixed_linear_model"
+    function: "MixedLM"
+    signature: "MixedLM(endog, exog, groups, exog_re=None, **kwargs).fit(reml=False, **kwargs) -> MixedLMResults"
+    validation_tool: "validate_lmm_assumptions_comprehensive"
+
+    input_files:
+      - path: "data/step01_piecewise_lmm_input.csv"
+        required_columns: ["UID", "Segment", "paradigm", "Days_within", "theta"]
+        expected_rows: 1200
+        data_types:
+          UID: "string"
+          Segment: "string (Early, Late)"
+          paradigm: "string (IFR, ICR, IRE)"
+          Days_within: "float64 (>= 0)"
+          theta: "float64"
+
+    output_files:
+      - path: "data/step02_piecewise_lmm_model.pkl"
+        description: "Fitted piecewise LMM model (statsmodels MixedLMResults object)"
+      - path: "data/step02_lmm_model_summary.txt"
+        description: "Model summary with fixed effects, random effects, fit statistics"
+
+    parameters:
+      formula: "theta ~ Days_within * Segment * paradigm"
+      re_formula: "~Days_within"
+      groups: "UID"
+      reml: false
+
+    description: "Fit piecewise LMM with 3-way interaction (Days_within x Segment x paradigm) to test paradigm-specific consolidation benefits"
+    source_reference: "tools_inventory.md lines 98-103 (fit_lmm_trajectory_tsvr) - statsmodels MixedLM wrapper"
+
+  extract_segment_slopes_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_segment_slopes_from_lmm"
+    signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> pd.DataFrame"
+    validation_tool: "validate_segment_slopes"
+
+    input_files:
+      - path: "data/step02_piecewise_lmm_model.pkl"
+        description: "Fitted piecewise LMM model"
+
+    output_files:
+      - path: "data/step03_segment_paradigm_slopes.csv"
+        columns: ["Segment", "paradigm", "slope", "SE", "z_statistic", "p_value", "CI_lower", "CI_upper", "interpretation"]
+        description: "6 segment-paradigm slopes with delta method SEs (Early/Late x IFR/ICR/IRE)"
+
+    parameters:
+      segment_col: "Segment"
+      time_col: "Days_within"
+
+    description: "Extract 6 segment-paradigm slopes via linear combinations with delta method SE propagation"
+    source_reference: "tools_inventory.md lines 186-193 (extract_segment_slopes_from_lmm)"
+    notes: "Extends 2-segment extraction to 6-segment-paradigm slopes for 3-way interaction model"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> pd.DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+
+    input_files:
+      - path: "data/step02_piecewise_lmm_model.pkl"
+        description: "Fitted piecewise LMM model (needed for variance-covariance matrix)"
+      - path: "data/step03_segment_paradigm_slopes.csv"
+        required_columns: ["Segment", "paradigm", "slope"]
+        description: "Segment-paradigm slopes for contrast computation"
+
+    output_files:
+      - path: "data/step04_planned_contrasts.csv"
+        columns: ["contrast_name", "estimate", "SE", "z_statistic", "p_uncorrected", "p_bonferroni", "alpha_bonferroni", "significant", "CI_lower", "CI_upper"]
+        description: "6 planned contrasts with dual p-values (Decision D068)"
+      - path: "data/step04_effect_sizes.csv"
+        columns: ["contrast_name", "effect_size", "effect_type", "interpretation"]
+        description: "Effect sizes for contrasts"
+
+    parameters:
+      comparisons:
+        - "IFR_consolidation_benefit"
+        - "ICR_consolidation_benefit"
+        - "IRE_consolidation_benefit"
+        - "IFR_vs_ICR_benefit_difference"
+        - "IFR_vs_IRE_benefit_difference"
+        - "ICR_vs_IRE_benefit_difference"
+      family_alpha: 0.05
+      n_contrasts: 6
+
+    description: "Compute 6 planned contrasts comparing consolidation benefits (Late - Early slopes) across paradigms with Bonferroni correction (alpha = 0.0083)"
+    source_reference: "tools_inventory.md lines 129-135 (compute_contrasts_pairwise)"
+    notes: "Decision D068: Dual p-value reporting (uncorrected + Bonferroni)"
+
+  prepare_piecewise_plot_data:
+    module: "tools.plotting"
+    function: "prepare_piecewise_plot_data"
+    signature: "prepare_piecewise_plot_data(df_input: pd.DataFrame, lmm_result: MixedLMResults, segment_col: str, factor_col: str, segment_values: List[str], factor_values: List[str], days_within_col: str = 'Days_within', theta_col: str = 'theta', early_grid_points: int = 20, late_grid_points: int = 60, ci_level: float = 0.95) -> Dict[str, pd.DataFrame]"
+    validation_tool: "validate_piecewise_plot_data"
+
+    input_files:
+      - path: "data/step01_piecewise_lmm_input.csv"
+        required_columns: ["Segment", "paradigm", "Days_within", "theta", "test"]
+        expected_rows: 1200
+      - path: "data/step02_piecewise_lmm_model.pkl"
+        description: "Fitted model for predictions"
+      - path: "data/step03_segment_paradigm_slopes.csv"
+        required_columns: ["Segment", "paradigm", "slope"]
+        description: "Slopes for plot annotations"
+
+    output_files:
+      - path: "data/step06_piecewise_theta_data.csv"
+        columns: ["Segment", "paradigm", "Days_within", "test", "theta_observed", "theta_predicted", "CI_lower", "CI_upper", "slope"]
+        description: "Piecewise plot data (theta scale) with observed means and model predictions"
+      - path: "data/step06_piecewise_probability_data.csv"
+        columns: ["Segment", "paradigm", "Days_within", "test", "prob_observed", "prob_predicted", "CI_lower", "CI_upper", "slope"]
+        description: "Piecewise plot data (probability scale) - Decision D069 dual-scale requirement"
+
+    parameters:
+      segment_col: "Segment"
+      factor_col: "paradigm"
+      segment_values: ["Early", "Late"]
+      factor_values: ["IFR", "ICR", "IRE"]
+      days_within_col: "Days_within"
+      theta_col: "theta"
+      early_grid_points: 20
+      late_grid_points: 60
+      ci_level: 0.95
+
+    description: "Prepare piecewise trajectory plot data with observed means and model predictions for Early/Late segments x IFR/ICR/IRE paradigms (dual-scale per D069)"
+    source_reference: "tools_inventory.md lines 298-305 (prepare_piecewise_plot_data)"
+    notes: "Decision D069: Creates BOTH theta-scale and probability-scale plot data"
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: np.ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> np.ndarray"
+    validation_tool: "validate_probability_range"
+
+    input_files:
+      - path: "data/step06_piecewise_theta_data.csv"
+        required_columns: ["theta_observed", "theta_predicted"]
+        description: "Theta values to convert"
+
+    output_files:
+      - path: "data/step06_piecewise_probability_data.csv"
+        columns: ["prob_observed", "prob_predicted"]
+        description: "Probability values (transformed from theta via IRT 2PL formula)"
+
+    parameters:
+      discrimination: 1.0
+      difficulty: 0.0
+
+    description: "Transform theta scores to probability scale via IRT 2PL formula P = 1/(1 + exp(-(a*(theta - b)))) for Decision D069 dual-scale plots"
+    source_reference: "tools_inventory.md lines 230-235 (convert_theta_to_probability)"
+
+validation_tools:
+  validate_piecewise_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_piecewise_lmm_input.csv"
+        required_columns: ["Segment", "Days_within"]
+        source: "analysis tool output (assign_piecewise_segments)"
+
+    parameters:
+      expected_rows: 1200
+      expected_columns: ["UID", "test", "paradigm", "theta", "SE", "TSVR_hours", "Segment", "Days_within"]
+      column_types:
+        Segment: "object"
+        Days_within: "float64"
+
+    criteria:
+      - "Segment variable created (2 levels: Early, Late)"
+      - "Days_within computed (>= 0 within each segment)"
+      - "Balanced design (600 rows per segment)"
+      - "No NaN in Segment or Days_within columns"
+      - "All original columns preserved from Step 0"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (per-check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_assign_piecewise_segments.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate piecewise data structure (Segment variable, Days_within computed, balanced segments)"
+    source_reference: "tools_inventory.md lines 580-588 (validate_dataframe_structure)"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: pd.DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_piecewise_lmm_model.pkl"
+        description: "Fitted LMM model"
+      - path: "data/step01_piecewise_lmm_input.csv"
+        description: "Original data for diagnostics"
+
+    parameters:
+      output_dir: "data/"
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+
+    criteria:
+      - "Model converged (True)"
+      - "Residuals normality (Shapiro-Wilk p > 0.01 or robust SEs reported)"
+      - "Homoscedasticity (Breusch-Pagan test)"
+      - "Random effects normality (Shapiro-Wilk for intercepts and slopes)"
+      - "No autocorrelation (ACF lag-1 < 0.1)"
+      - "Linearity (partial residual plots)"
+      - "No outliers (Cook's distance < 4/n)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True only if ALL 7 diagnostics pass)"
+        diagnostics: "Dict (per-diagnostic results)"
+        plot_paths: "List[Path] (6 diagnostic plots generated)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "Apply remedial actions per 1_concept.md (robust SEs, weighted LMM, simplify random structure via LRT)"
+      log_to: "logs/step02_fit_piecewise_lmm.log"
+      invoke: "Convergence contingency plan if convergence failed, otherwise proceed with warnings"
+
+    description: "Comprehensive LMM assumption validation (7 diagnostics + 6 plots + remedial action recommendations)"
+    source_reference: "tools_inventory.md lines 414-422 (validate_lmm_assumptions_comprehensive)"
+
+  validate_segment_slopes:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_segment_paradigm_slopes.csv"
+        required_columns: ["Segment", "paradigm", "slope", "SE", "p_value"]
+        source: "analysis tool output (extract_segment_slopes_from_lmm)"
+
+    parameters:
+      expected_rows: 6
+      expected_columns: ["Segment", "paradigm", "slope", "SE", "z_statistic", "p_value", "CI_lower", "CI_upper", "interpretation"]
+      additional_checks:
+        - "SE > 0 for all rows (delta method successful)"
+        - "p_value in [0, 1] for all rows"
+        - "CI_lower < CI_upper for all rows"
+        - "No NaN in slope column"
+
+    criteria:
+      - "Exactly 6 rows (2 segments x 3 paradigms)"
+      - "All slopes computed (no NaN)"
+      - "SE > 0 (delta method successful)"
+      - "p-values in [0, 1]"
+      - "CI_lower < CI_upper"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_segment_slopes.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate 6 segment-paradigm slopes extracted with delta method SEs"
+    source_reference: "tools_inventory.md lines 580-588 (validate_dataframe_structure) + validate_numeric_range for SE > 0"
+
+  validate_contrasts_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_contrasts_dual_pvalues"
+    signature: "validate_contrasts_dual_pvalues(contrasts_df: pd.DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_planned_contrasts.csv"
+        required_columns: ["contrast_name", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (compute_contrasts_pairwise)"
+
+    parameters:
+      required_comparisons:
+        - "IFR_consolidation_benefit"
+        - "ICR_consolidation_benefit"
+        - "IRE_consolidation_benefit"
+        - "IFR_vs_ICR_benefit_difference"
+        - "IFR_vs_IRE_benefit_difference"
+        - "ICR_vs_IRE_benefit_difference"
+
+    criteria:
+      - "All 6 required contrasts present"
+      - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+      - "alpha_bonferroni = 0.0083 for all rows"
+      - "No NaN in estimate column"
+      - "p_bonferroni >= p_uncorrected (correction cannot decrease p-value)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_comparisons: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_compute_planned_contrasts.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate 6 planned contrasts with Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md lines 444-452 (validate_contrasts_dual_pvalues)"
+
+  validate_piecewise_plot_data:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_piecewise_theta_data.csv"
+        required_columns: ["Segment", "paradigm", "theta_observed", "theta_predicted"]
+      - path: "data/step06_piecewise_probability_data.csv"
+        required_columns: ["Segment", "paradigm", "prob_observed", "prob_predicted"]
+        source: "analysis tool output (prepare_piecewise_plot_data)"
+
+    parameters:
+      required_segments: ["Early", "Late"]
+      required_paradigms: ["IFR", "ICR", "IRE"]
+      segment_col: "Segment"
+      paradigm_col: "paradigm"
+
+    criteria:
+      - "BOTH theta_data AND probability_data CSVs created (Decision D069)"
+      - "All 6 segment-paradigm combinations present (2 x 3)"
+      - "No NaN in theta_predicted or prob_predicted columns"
+      - "Probability values in [0, 1]"
+      - "CI_lower < CI_upper for observed data"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_segments: "List[str]"
+        missing_paradigms: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_prepare_piecewise_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate piecewise plot data completeness (all segments, paradigms present) and Decision D069 dual-scale compliance"
+    source_reference: "tools_inventory.md lines 590-598 (validate_plot_data_completeness)"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_piecewise_probability_data.csv"
+        required_columns: ["prob_observed", "prob_predicted"]
+        source: "analysis tool output (convert_theta_to_probability)"
+
+    parameters:
+      prob_columns: ["prob_observed", "prob_predicted"]
+
+    criteria:
+      - "All probability values in [0, 1] (inclusive)"
+      - "No NaN in probability columns (transformation successful)"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violations: "List[Dict] (column, issue, count, example)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_prepare_piecewise_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate probability transformation output (all values in [0, 1], no NaN/infinite)"
+    source_reference: "tools_inventory.md lines 528-536 (validate_probability_range)"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068", "D069", "D070"]
+  notes:
+    - "Step 0 (dependency loading) uses pandas.read_csv (stdlib, exempt from catalog)"
+    - "Step 5 (consolidation benefit) uses pandas arithmetic (stdlib, exempt from catalog)"
+    - "Each analysis tool has corresponding validation tool (1:1 pairing)"
+    - "Decision D068: Dual p-value reporting in contrasts"
+    - "Decision D069: Dual-scale plot data (theta + probability)"
+    - "Decision D070: TSVR_hours as time variable (embedded in piecewise model)"
+    - "All tools verified exist in tools_inventory.md"

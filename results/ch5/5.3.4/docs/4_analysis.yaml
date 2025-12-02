@@ -1,0 +1,526 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.3.4 - Age x Paradigm Interactions
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.3.4"
+  total_steps: 6
+  analysis_type: "LMM-only (3-way Age x Paradigm x Time interaction)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T18:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Theta Scores and Age Data
+  # --------------------------------------------------------------------------
+  - name: "step00_load_theta_age"
+    step_number: "00"
+    description: "Load paradigm-specific theta scores from RQ 5.3.1 and merge with participant Age from dfData.csv"
+
+    # Stdlib operations (pandas/numpy - NOT a catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load results/ch5/5.3.1/data/step03_theta_scores.csv (theta scores for IFR, ICR, IRE paradigms)"
+        - "Parse composite_ID to extract UID component (format: UID_test_paradigm)"
+        - "Load data/cache/dfData.csv (Age variable)"
+        - "Merge theta with Age on UID (left join, keep all theta observations)"
+        - "Validate all 1200 theta observations matched with Age (no missing)"
+        - "Save merged data to data/step00_theta_age_merged.csv"
+
+      input_files:
+        - path: "results/ch5/5.3.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta", "se", "paradigm"]
+          expected_rows: 1200
+          description: "Paradigm-specific theta scores from RQ 5.3.1 IRT calibration"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          expected_rows: 100
+          description: "Participant demographics (Age variable)"
+
+      output_files:
+        - path: "data/step00_theta_age_merged.csv"
+          expected_columns: ["composite_ID", "UID", "test", "paradigm", "theta", "se", "Age"]
+          expected_rows: 1200
+          description: "Theta scores merged with Age (100 participants x 4 tests x 3 paradigms)"
+
+      validation_criteria:
+        - "Exactly 1200 rows (no data loss from merge)"
+        - "No NaN values in any column (all theta observations must have Age)"
+        - "100 unique UIDs (all participants present)"
+        - "400 observations per paradigm (balanced design)"
+        - "theta in [-3, 3] (typical IRT ability range)"
+        - "se in [0.1, 1.0] (above 1.0 = unreliable, below 0.1 = suspicious)"
+        - "Age in [20, 70] (study inclusion criteria)"
+        - "paradigm in {IFR, ICR, IRE}"
+        - "test in {T1, T2, T3, T4}"
+
+    # Validation call (inline validation for stdlib operations)
+    validation_call:
+      type: "inline"
+      checks:
+        - name: "Output file exists"
+          condition: "data/step00_theta_age_merged.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count validation"
+          condition: "1200 rows (100 participants x 4 tests x 3 paradigms)"
+          severity: "CRITICAL"
+        - name: "Column count validation"
+          condition: "7 columns (composite_ID, UID, test, paradigm, theta, se, Age)"
+          severity: "CRITICAL"
+        - name: "No missing Age values"
+          condition: "All 1200 theta observations have Age (merge success)"
+          severity: "CRITICAL"
+        - name: "Value range validation"
+          condition: "theta in [-3, 3], se in [0.1, 1.0], Age in [20, 70]"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step00_load_theta_age.log"
+
+    log_file: "logs/step00_load_theta_age.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Merge TSVR and Transform Variables
+  # --------------------------------------------------------------------------
+  - name: "step01_merge_tsvr_transform"
+    step_number: "01"
+    description: "Merge TSVR time variable and create Age centering + log time transformation for LMM"
+
+    # Stdlib operations (pandas/numpy - NOT a catalogued tool)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_theta_age_merged.csv from Step 0"
+        - "Load results/ch5/5.3.1/data/step00_tsvr_mapping.csv (TSVR_hours per Decision D070)"
+        - "Merge on composite_ID (inner join, expect perfect match)"
+        - "Grand-mean center Age: Age_c = Age - mean(Age)"
+        - "Create log time transformation: log_TSVR = log(TSVR_hours + 1)"
+        - "Validate Age_c mean approximately 0 (tolerance +/- 0.1)"
+        - "Save LMM input data to data/step01_lmm_input.csv"
+
+      input_files:
+        - path: "data/step00_theta_age_merged.csv"
+          required_columns: ["composite_ID", "UID", "test", "paradigm", "theta", "se", "Age"]
+          expected_rows: 1200
+          description: "Theta scores merged with Age from Step 0"
+        - path: "results/ch5/5.3.1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours"]
+          expected_rows: 1200
+          description: "TSVR time variable from RQ 5.3.1 (actual hours per Decision D070)"
+
+      output_files:
+        - path: "data/step01_lmm_input.csv"
+          expected_columns: ["composite_ID", "UID", "test", "paradigm", "theta", "se", "Age", "Age_c", "TSVR_hours", "log_TSVR"]
+          expected_rows: 1200
+          description: "LMM input data with centered age and log-transformed time"
+
+      validation_criteria:
+        - "Exactly 1200 rows (no data loss from TSVR merge)"
+        - "No NaN values in any column"
+        - "Age_c mean approximately 0 (tolerance: -0.1 to 0.1)"
+        - "Age_c SD approximately equal to Age SD (centering preserves variance)"
+        - "log_TSVR values in [0, 5.2] (log(0+1)=0, log(168+1)~5.13)"
+        - "log_TSVR monotonically increasing with TSVR_hours (no transformation errors)"
+
+    # Validation call (inline validation for stdlib operations)
+    validation_call:
+      type: "inline"
+      checks:
+        - name: "Output file exists"
+          condition: "data/step01_lmm_input.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count validation"
+          condition: "1200 rows (no data loss from TSVR merge)"
+          severity: "CRITICAL"
+        - name: "Column count validation"
+          condition: "10 columns (adds Age_c, TSVR_hours, log_TSVR)"
+          severity: "CRITICAL"
+        - name: "Age centering validation"
+          condition: "Age_c mean in [-0.1, 0.1] (grand-mean centered)"
+          severity: "CRITICAL"
+        - name: "Log transformation validation"
+          condition: "log_TSVR = log(TSVR_hours + 1), all values valid"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "raise ValueError with specific failure message"
+        log_to: "logs/step01_merge_tsvr_transform.log"
+
+    log_file: "logs/step01_merge_tsvr_transform.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with 3-Way Age x Paradigm x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm"
+    step_number: "02"
+    description: "Fit Linear Mixed Model testing full 3-way Age x Paradigm x Time interaction with random slopes for time by participant"
+
+    # Catalogued tool from 3_tools.yaml
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "theta", "Age_c", "paradigm", "TSVR_hours", "log_TSVR"]
+          variable_name: "lmm_data"
+          description: "LMM input data from Step 1"
+
+      output_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Pickle file containing statsmodels MixedLM object"
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_summary"
+          description: "Plain text summary with fixed effects, random effects, fit indices, convergence status, assumption diagnostics"
+
+      parameters:
+        theta_scores: "lmm_data"
+        tsvr_data: "lmm_data"  # Same DataFrame contains both theta and TSVR
+        formula: "theta ~ TSVR_hours + log_TSVR + Age_c + paradigm + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:paradigm + log_TSVR:paradigm + Age_c:paradigm + TSVR_hours:Age_c:paradigm + log_TSVR:Age_c:paradigm"
+        groups: "UID"
+        re_formula: "~TSVR_hours"  # Random slopes for time by participant
+        reml: false  # For model comparison if needed
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      notes:
+        - "Decision D070: Uses TSVR_hours (actual hours since encoding), not nominal days"
+        - "Convergence contingency: LRT to select random structure if full model fails (per Bates et al. 2015)"
+        - "Model includes linear + log time transformations to test Age x Paradigm x Time interactions"
+        - "6 assumption diagnostics required per RQ 5.3.4 concept.md specifications"
+        - "4 three-way interaction terms: Age_c:paradigm:TSVR_hours and Age_c:paradigm:log_TSVR for 2 paradigm contrasts (ICR-IFR, IRE-IFR)"
+
+    # Validation tool from 3_tools.yaml
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_data"
+          source: "Step 1 output (reused for assumption checks)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_data"
+        output_dir: "Path('data')"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Residual normality: Shapiro-Wilk test p > 0.01"
+        - "Homoscedasticity: Breusch-Pagan test, residuals vs fitted plot"
+        - "Random effects normality: Shapiro-Wilk + Q-Q plots for intercepts and slopes"
+        - "Independence: ACF plot + Lag-1 autocorrelation < 0.1"
+        - "Linearity: Partial residual plots for TSVR_hours and log_TSVR"
+        - "Outliers: Cook's distance < 4/1200 = 0.0033"
+        - "Convergence: model.converged = True OR convergence contingency plan documented"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm.log"
+        remedial_actions:
+          - "Normality violated -> Report robust SE or bootstrap CI"
+          - "Heteroscedasticity -> Use weighted LMM or variance function by paradigm"
+          - "Outliers detected -> Sensitivity analysis with/without outliers"
+
+    log_file: "logs/step02_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract 3-Way Interaction Terms
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_interactions"
+    step_number: "03"
+    description: "Extract and test the 4 three-way interaction terms (Age_c:paradigm:Time) with Bonferroni correction for 2 time transformations"
+
+    # Catalogued tool from 3_tools.yaml
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted LMM model from Step 2"
+
+      output_files:
+        - path: "data/step03_interaction_terms.csv"
+          variable_name: "interaction_terms"
+          description: "3-way interaction terms with dual p-values (uncorrected + Bonferroni)"
+          expected_columns: ["term", "coefficient", "SE", "z", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
+          expected_rows: 4
+
+      parameters:
+        result: "lmm_model"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "fixed_effects"
+
+      processing_notes:
+        - "Extract fixed effects table (coefficients, SE, z-values, p-values)"
+        - "Identify 4 three-way interaction terms: Age_c:paradigm[ICR]:TSVR_hours, Age_c:paradigm[IRE]:TSVR_hours, Age_c:paradigm[ICR]:log_TSVR, Age_c:paradigm[IRE]:log_TSVR"
+        - "Apply Bonferroni correction: alpha = 0.025 / 2 = 0.0125 (correcting for 2 time transformation terms)"
+        - "Calculate p_bonferroni = p_uncorrected x 2 (capped at 1.0)"
+        - "Report BOTH uncorrected and Bonferroni-corrected p-values per Decision D068"
+        - "Save interaction terms table to CSV"
+
+    # Validation tool from 3_tools.yaml
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_interaction_terms.csv"
+          variable_name: "interaction_terms"
+          source: "analysis call output (extract_fixed_effects_from_lmm filtered for 3-way terms)"
+
+      parameters:
+        interaction_df: "interaction_terms"
+        required_terms:
+          - "Age_c:paradigm[T.ICR]:TSVR_hours"
+          - "Age_c:paradigm[T.IRE]:TSVR_hours"
+          - "Age_c:paradigm[T.ICR]:log_TSVR"
+          - "Age_c:paradigm[T.IRE]:log_TSVR"
+        alpha_bonferroni: 0.025
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 4 three-way interaction terms present in DataFrame"
+        - "Decision D068 compliance: p_uncorrected column exists"
+        - "Decision D068 compliance: p_bonferroni column exists"
+        - "Bonferroni correction: alpha = 0.025 / 2 = 0.0125 per term"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_interactions.log"
+
+    log_file: "logs/step03_extract_interactions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Paradigm-Specific Age Effects and Post-Hoc Contrasts
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_age_effects_contrasts"
+    step_number: "04"
+    description: "Extract paradigm-specific marginal age effects at Day 3 midpoint and test ordered pattern (Free > Cued > Recognition) with Tukey HSD"
+
+    # Catalogued tools from 3_tools.yaml (TWO analysis functions)
+    analysis_call:
+      type: "catalogued_multi"
+      functions:
+        # Function 1: Extract marginal age slopes
+        - module: "tools.analysis_lmm"
+          function: "extract_marginal_age_slopes_by_domain"
+          signature: "extract_marginal_age_slopes_by_domain(lmm_result: MixedLMResults, eval_timepoint: float = 72.0, domain_var: str = 'domain', age_var: str = 'Age_c', time_linear: str = 'TSVR_hours', time_log: str = 'log_TSVR') -> DataFrame"
+          parameters:
+            lmm_result: "lmm_model"
+            eval_timepoint: 72.0  # Day 3 midpoint
+            domain_var: "paradigm"  # RQ 5.3.4 uses paradigm instead of domain
+            age_var: "Age_c"
+            time_linear: "TSVR_hours"
+            time_log: "log_TSVR"
+          returns:
+            type: "DataFrame"
+            variable_name: "age_effects"
+          output_file:
+            path: "data/step04_age_effects_by_paradigm.csv"
+            expected_columns: ["paradigm", "age_slope", "SE", "CI_lower", "CI_upper"]
+            expected_rows: 3
+
+        # Function 2: Compute pairwise contrasts
+        - module: "tools.analysis_lmm"
+          function: "compute_contrasts_pairwise"
+          signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+          parameters:
+            lmm_result: "lmm_model"
+            comparisons:
+              - "IFR - ICR"
+              - "IFR - IRE"
+              - "ICR - IRE"
+            family_alpha: 0.05
+          returns:
+            type: "DataFrame"
+            variable_name: "contrasts"
+          output_file:
+            path: "data/step04_posthoc_contrasts.csv"
+            expected_columns: ["comparison", "estimate", "SE", "z", "p_uncorrected", "p_tukey", "significant_tukey"]
+            expected_rows: 3
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted LMM model from Step 2"
+
+      output_files:
+        - path: "data/step04_age_effects_by_paradigm.csv"
+          description: "Paradigm-specific age slopes at Day 3 with 95% CI"
+        - path: "data/step04_posthoc_contrasts.csv"
+          description: "Pairwise comparisons with dual p-values (uncorrected + Tukey HSD)"
+
+      processing_notes:
+        - "Marginal effect = beta_Age_c + beta_Age_c:paradigm + 72 x (beta_Age_c:TSVR_hours + beta_Age_c:paradigm:TSVR_hours) + log(73) x (beta_Age_c:log_TSVR + beta_Age_c:paradigm:log_TSVR)"
+        - "Delta method propagates SE through 4-term gradient with full variance-covariance matrix"
+        - "Tukey HSD adjusts for 3 pairwise comparisons"
+        - "Decision D068: Report BOTH uncorrected and Tukey-adjusted p-values"
+
+    # Validation tool from 3_tools.yaml
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_age_effects_by_paradigm.csv"
+          variable_name: "age_effects"
+          source: "analysis call output (extract_marginal_age_slopes_by_domain)"
+        - path: "data/step04_posthoc_contrasts.csv"
+          variable_name: "contrasts"
+          source: "analysis call output (compute_contrasts_pairwise)"
+
+      parameters:
+        contrasts_df: "contrasts"
+        required_comparisons:
+          - "IFR - ICR"
+          - "IFR - IRE"
+          - "ICR - IRE"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 pairwise comparisons present: IFR-ICR, IFR-IRE, ICR-IRE"
+        - "Decision D068 compliance: p_uncorrected column exists"
+        - "Decision D068 compliance: p_tukey column exists"
+        - "Age effects: 3 rows (IFR, ICR, IRE), CI_upper > CI_lower"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_age_effects_contrasts.log"
+
+    log_file: "logs/step04_compute_age_effects_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Plot Data by Age Tertiles
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create age tertiles (Young/Middle/Older) and aggregate observed means + model predictions for Age x Paradigm x Time visualization"
+
+    # Catalogued tool from 3_tools.yaml
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "prepare_age_effects_plot_data"
+      signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_data"
+          description: "LMM input data from Step 1 (for age tertile assignment)"
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted LMM model from Step 2 (for predictions)"
+
+      output_files:
+        - path: "data/step05_age_paradigm_plot_data.csv"
+          variable_name: "plot_data"
+          description: "Plot source data: 36 rows (3 paradigms x 3 tertiles x 4 timepoints) with observed + predicted theta"
+          expected_columns: ["paradigm", "age_tertile", "TSVR_hours", "observed_mean", "observed_CI_lower", "observed_CI_upper", "predicted_mean"]
+          expected_rows: 36
+
+      parameters:
+        lmm_input: "lmm_data"
+        lmm_model: "lmm_model"
+        output_path: "Path('data/step05_age_paradigm_plot_data.csv')"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "plot_data"
+
+      processing_notes:
+        - "Create age tertiles using pd.qcut(Age, q=3) for equal-sized groups (~33 participants each)"
+        - "Tertiles: Young (Age <= 33rd percentile), Middle (33rd < Age <= 67th), Older (Age > 67th)"
+        - "For each paradigm x age tertile x timepoint: compute observed mean theta + 95% CI"
+        - "For each combination: compute model predicted theta (marginal means from LMM)"
+        - "Expected: 3 paradigms x 3 tertiles x 4 timepoints = 36 rows"
+        - "Tertiles used ONLY for visualization; analysis uses continuous Age_c"
+
+    # Validation tool from 3_tools.yaml
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_age_paradigm_plot_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (prepare_age_effects_plot_data)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains:
+          - "IFR"
+          - "ICR"
+          - "IRE"
+        required_groups:
+          - "Young"
+          - "Middle"
+          - "Older"
+        domain_col: "paradigm"
+        group_col: "age_tertile"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 paradigms present: IFR, ICR, IRE"
+        - "All 3 age tertiles present: Young, Middle, Older"
+        - "Expected row count: 36 (3 paradigms x 3 tertiles x 4 timepoints)"
+        - "Complete factorial design (all combinations present)"
+        - "observed_CI_upper > observed_CI_lower for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

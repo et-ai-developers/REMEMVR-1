@@ -1,0 +1,743 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.4.5 - Purified CTT Effects
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.4.5"
+  rq_title: "Purified CTT Effects"
+  total_steps: 9
+  analysis_type: "CTT convergence validation (Full vs Purified items)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T18:00:00Z"
+  dependencies:
+    - rq: "ch5/5.4.1"
+      status_required: "success"
+      files_required:
+        - "results/ch5/5.4.1/data/step02_purified_items.csv"
+        - "results/ch5/5.4.1/data/step03_theta_scores.csv"
+        - "results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Verify Dependencies and Load RQ 5.4.1 Outputs
+  # --------------------------------------------------------------------------
+  - name: "step00_verify_dependencies"
+    step_number: "00"
+    description: "Verify RQ 5.4.1 completed successfully and load required outputs for CTT computation"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch5/5.4.1/status.yaml"
+          format: "YAML"
+          required_fields: ["rq_results.status"]
+          description: "RQ 5.4.1 workflow status - must be 'success'"
+
+      output_files:
+        - path: "data/step00_dependency_check.txt"
+          format: "Plain text report"
+          description: "Dependency verification report (RQ 5.4.1 status, file counts, item counts)"
+        - path: "data/step00_full_item_list.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item_code", type: "str", description: "Item identifier (VR-paradigm-variant-type-ANS-iN)"}
+            - {name: "dimension", type: "str", description: "Congruence level (Common/Congruent/Incongruent)"}
+            - {name: "retained", type: "bool", description: "TRUE if in purified set, FALSE if removed by D039"}
+          expected_rows: "48-52"
+          description: "All items from dfData.csv with retention flags"
+
+      parameters:
+        files_to_check:
+          - "results/ch5/5.4.1/status.yaml"
+          - "results/ch5/5.4.1/data/step02_purified_items.csv"
+          - "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          - "results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+          - "data/cache/dfData.csv"
+        min_size_bytes: 0
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "dependency_check_result"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_full_item_list.csv"
+          variable_name: "full_item_list"
+          source: "analysis call output (step00_verify_dependencies)"
+
+      parameters:
+        df: "full_item_list"
+        required_columns: ["item_code", "dimension", "retained"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All required columns present: item_code, dimension, retained"
+        - "dimension in {Common, Congruent, Incongruent}"
+        - "retained is boolean only"
+        - "Expected retention rate: 70-80% per congruence level"
+        - "No NaN values in item_code or dimension"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_verify_dependencies.log"
+
+    log_file: "logs/step00_verify_dependencies.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Map Retained vs Removed Items by Congruence Category
+  # --------------------------------------------------------------------------
+  - name: "step01_map_items"
+    step_number: "01"
+    description: "Quantify item purification effects separately for Common, Congruent, Incongruent"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step00_full_item_list.csv')"
+        - "Group by dimension (Common, Congruent, Incongruent)"
+        - "Count retained (TRUE) vs removed (FALSE) per dimension"
+        - "Compute retention_rate = N_retained / N_total"
+        - "Create summary DataFrame with columns: dimension, N_total, N_retained, N_removed, retention_rate"
+        - "Save to data/step01_item_mapping.csv"
+
+      input_files:
+        - path: "data/step00_full_item_list.csv"
+          required_columns: ["item_code", "dimension", "retained"]
+          variable_name: "full_item_list"
+
+      output_files:
+        - path: "data/step01_item_mapping.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "dimension", type: "str", description: "Congruence level"}
+            - {name: "N_total", type: "int", description: "Total items before purification"}
+            - {name: "N_retained", type: "int", description: "Items retained after purification"}
+            - {name: "N_removed", type: "int", description: "Items removed by purification"}
+            - {name: "retention_rate", type: "float", description: "N_retained / N_total"}
+          expected_rows: 3
+          description: "Item retention summary by congruence level"
+
+      parameters:
+        groupby_column: "dimension"
+        aggregation: "count retained by dimension"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_item_mapping.csv"
+          variable_name: "item_mapping"
+          source: "analysis call output (step01_map_items)"
+
+      parameters:
+        df: "item_mapping"
+        expected_rows: 3
+        expected_columns: ["dimension", "N_total", "N_retained", "N_removed", "retention_rate"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 3 rows (Common, Congruent, Incongruent)"
+        - "N_total = N_retained + N_removed (accounting identity)"
+        - "retention_rate in [0.6, 0.9] (60-90% retention plausible)"
+        - "No NaN values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_map_items.log"
+
+    log_file: "logs/step01_map_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Full CTT Mean Scores
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_ctt_full"
+    step_number: "02"
+    description: "Compute CTT mean scores using ALL items (before purification) per congruence level"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "pd.read_csv('data/step00_full_item_list.csv')"
+        - "Filter dfData to items in full_item_list (all items, retained + removed)"
+        - "Group by composite_ID and dimension"
+        - "Compute mean(response) per group -> CTT proportion correct [0, 1]"
+        - "Pivot to wide format: composite_ID x 3 congruence columns (ctt_full_common, ctt_full_congruent, ctt_full_incongruent)"
+        - "Save to data/step02_ctt_full_scores.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["composite_ID", "item_code", "response"]
+          variable_name: "dfData"
+        - path: "data/step00_full_item_list.csv"
+          required_columns: ["item_code", "dimension"]
+          variable_name: "full_item_list"
+
+      output_files:
+        - path: "data/step02_ctt_full_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test format"}
+            - {name: "ctt_full_common", type: "float", description: "Full CTT score for Common items"}
+            - {name: "ctt_full_congruent", type: "float", description: "Full CTT score for Congruent items"}
+            - {name: "ctt_full_incongruent", type: "float", description: "Full CTT score for Incongruent items"}
+          expected_rows: "~400"
+          description: "Full CTT mean scores (all items, pre-purification)"
+
+      parameters:
+        groupby_columns: ["composite_ID", "dimension"]
+        aggregation: "mean(response)"
+        pivot_index: "composite_ID"
+        pivot_columns: "dimension"
+        pivot_values: "response"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_ctt_full_scores.csv"
+          variable_name: "ctt_full_scores"
+          source: "analysis call output (step02_compute_ctt_full)"
+
+      parameters:
+        data: "ctt_full_scores[['ctt_full_common', 'ctt_full_congruent', 'ctt_full_incongruent']]"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "CTT_full_scores"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All CTT scores in [0, 1] (proportion correct scale)"
+        - "No NaN values"
+        - "Expected N: 400 rows (100 participants x 4 tests)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_compute_ctt_full.log"
+
+    log_file: "logs/step02_compute_ctt_full.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Purified CTT Mean Scores
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_ctt_purified"
+    step_number: "03"
+    description: "Compute CTT mean scores using ONLY purified items (retained after D039) per congruence level"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "pd.read_csv('results/ch5/5.4.1/data/step02_purified_items.csv')"
+        - "Filter dfData to items in purified_items (retained items only, ~70-80% of Full)"
+        - "Group by composite_ID and dimension"
+        - "Compute mean(response) per group -> CTT proportion correct [0, 1]"
+        - "Pivot to wide format: composite_ID x 3 congruence columns (ctt_purified_common, ctt_purified_congruent, ctt_purified_incongruent)"
+        - "Save to data/step03_ctt_purified_scores.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["composite_ID", "item_code", "response"]
+          variable_name: "dfData"
+        - path: "results/ch5/5.4.1/data/step02_purified_items.csv"
+          required_columns: ["item_code", "dimension"]
+          variable_name: "purified_items"
+
+      output_files:
+        - path: "data/step03_ctt_purified_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test format"}
+            - {name: "ctt_purified_common", type: "float", description: "Purified CTT score for Common items"}
+            - {name: "ctt_purified_congruent", type: "float", description: "Purified CTT score for Congruent items"}
+            - {name: "ctt_purified_incongruent", type: "float", description: "Purified CTT score for Incongruent items"}
+          expected_rows: "~400"
+          description: "Purified CTT mean scores (retained items only)"
+
+      parameters:
+        groupby_columns: ["composite_ID", "dimension"]
+        aggregation: "mean(response)"
+        pivot_index: "composite_ID"
+        pivot_columns: "dimension"
+        pivot_values: "response"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_ctt_purified_scores.csv"
+          variable_name: "ctt_purified_scores"
+          source: "analysis call output (step03_compute_ctt_purified)"
+
+      parameters:
+        data: "ctt_purified_scores[['ctt_purified_common', 'ctt_purified_congruent', 'ctt_purified_incongruent']]"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "CTT_purified_scores"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All CTT scores in [0, 1] (proportion correct scale)"
+        - "No NaN values"
+        - "Expected N: 400 rows (same as Full CTT)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_compute_ctt_purified.log"
+
+    log_file: "logs/step03_compute_ctt_purified.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Cronbach's Alpha Reliability Assessment
+  # --------------------------------------------------------------------------
+  - name: "step04_reliability_assessment"
+    step_number: "04"
+    description: "Assess internal consistency reliability (Cronbach's alpha) for Full and Purified CTT scores per congruence level"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compute_cronbachs_alpha"
+      signature: "compute_cronbachs_alpha(data: DataFrame, n_bootstrap: int = 1000) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["composite_ID", "item_code", "response"]
+          variable_name: "dfData"
+        - path: "data/step00_full_item_list.csv"
+          required_columns: ["item_code", "dimension", "retained"]
+          variable_name: "full_item_list"
+
+      output_files:
+        - path: "data/step04_reliability_assessment.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "dimension", type: "str", description: "Congruence level"}
+            - {name: "alpha_full", type: "float", description: "Cronbach's alpha for Full item set"}
+            - {name: "alpha_full_CI_lower", type: "float", description: "Lower 95% CI for Full alpha"}
+            - {name: "alpha_full_CI_upper", type: "float", description: "Upper 95% CI for Full alpha"}
+            - {name: "alpha_purified", type: "float", description: "Cronbach's alpha for Purified item set"}
+            - {name: "alpha_purified_CI_lower", type: "float", description: "Lower 95% CI for Purified alpha"}
+            - {name: "alpha_purified_CI_upper", type: "float", description: "Upper 95% CI for Purified alpha"}
+            - {name: "delta_alpha", type: "float", description: "alpha_purified - alpha_full"}
+          expected_rows: 3
+          description: "Cronbach's alpha for Full and Purified with bootstrap 95% CIs"
+
+      parameters:
+        data: "dfData"
+        n_bootstrap: 1000
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "reliability_results"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_reliability_assessment.csv"
+          variable_name: "reliability_assessment"
+          source: "analysis call output (compute_cronbachs_alpha)"
+
+      parameters:
+        data: "reliability_assessment[['alpha_full', 'alpha_purified']]"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "alpha"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All alpha values in [0, 1] (reliability coefficient bounds)"
+        - "CI_lower < alpha < CI_upper for all estimates"
+        - "Exactly 3 rows (Common, Congruent, Incongruent)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_reliability_assessment.log"
+
+    log_file: "logs/step04_reliability_assessment.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Correlation Analysis with Steiger's Z-Test
+  # --------------------------------------------------------------------------
+  - name: "step05_correlation_analysis"
+    step_number: "05"
+    description: "Test hypothesis that Purified CTT correlates more strongly with IRT theta than Full CTT using Steiger's z-test with Bonferroni correction (Decision D068)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compare_correlations_dependent"
+      signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+          variable_name: "theta_scores"
+        - path: "data/step02_ctt_full_scores.csv"
+          required_columns: ["composite_ID", "ctt_full_common", "ctt_full_congruent", "ctt_full_incongruent"]
+          variable_name: "ctt_full_scores"
+        - path: "data/step03_ctt_purified_scores.csv"
+          required_columns: ["composite_ID", "ctt_purified_common", "ctt_purified_congruent", "ctt_purified_incongruent"]
+          variable_name: "ctt_purified_scores"
+
+      output_files:
+        - path: "data/step05_correlation_analysis.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "dimension", type: "str", description: "Congruence level"}
+            - {name: "r_full", type: "float", description: "Pearson r for Full CTT vs IRT theta"}
+            - {name: "r_purified", type: "float", description: "Pearson r for Purified CTT vs IRT theta"}
+            - {name: "delta_r", type: "float", description: "r_purified - r_full"}
+            - {name: "steiger_z", type: "float", description: "Z-statistic from Steiger's test"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (alpha = 0.0167)"}
+            - {name: "normality_check", type: "str", description: "PASS or FAIL with remediation"}
+            - {name: "N", type: "int", description: "Sample size (should be 400)"}
+          expected_rows: 3
+          description: "Steiger's z-test results with Decision D068 dual p-value reporting"
+
+      parameters:
+        family_alpha: 0.05
+        n_tests: 3
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "correlation_results"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_correlation_analysis.csv"
+          variable_name: "correlation_analysis"
+          source: "analysis call output (compare_correlations_dependent)"
+
+      parameters:
+        correlation_df: "correlation_analysis"
+        required_cols: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH p_uncorrected and p_bonferroni columns present (Decision D068 compliance)"
+        - "All correlations in [-1, 1] range"
+        - "p_bonferroni = min(p_uncorrected * 3, 1.0) for 3 comparisons"
+        - "Exactly 3 rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_correlation_analysis.log"
+
+    log_file: "logs/step05_correlation_analysis.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Z-Standardize All Measurements
+  # --------------------------------------------------------------------------
+  - name: "step06_standardize_scores"
+    step_number: "06"
+    description: "Z-standardize IRT theta, Full CTT, and Purified CTT scores for LMM coefficient comparability (mean=0, SD=1)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/5.4.1/data/step03_theta_scores.csv')"
+        - "pd.read_csv('data/step02_ctt_full_scores.csv')"
+        - "pd.read_csv('data/step03_ctt_purified_scores.csv')"
+        - "Merge all three files on composite_ID"
+        - "For each score column: score_z = (score - mean(score)) / SD(score)"
+        - "Verify: mean(score_z) ~ 0 (tolerance: |mean| < 0.01), SD(score_z) ~ 1 (tolerance: |SD - 1| < 0.01)"
+        - "Create z-standardized versions of all 9 columns (3 IRT + 3 Full + 3 Purified)"
+        - "Add TSVR_hours column (not standardized, from RQ 5.4.1)"
+        - "Save to data/step06_standardized_scores.csv"
+
+      input_files:
+        - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+          variable_name: "theta_scores"
+        - path: "data/step02_ctt_full_scores.csv"
+          required_columns: ["composite_ID", "ctt_full_common", "ctt_full_congruent", "ctt_full_incongruent"]
+          variable_name: "ctt_full_scores"
+        - path: "data/step03_ctt_purified_scores.csv"
+          required_columns: ["composite_ID", "ctt_purified_common", "ctt_purified_congruent", "ctt_purified_incongruent"]
+          variable_name: "ctt_purified_scores"
+        - path: "results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours"]
+          variable_name: "tsvr_mapping"
+
+      output_files:
+        - path: "data/step06_standardized_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "z_theta_common", type: "float", description: "Z-standardized IRT theta for Common"}
+            - {name: "z_theta_congruent", type: "float", description: "Z-standardized IRT theta for Congruent"}
+            - {name: "z_theta_incongruent", type: "float", description: "Z-standardized IRT theta for Incongruent"}
+            - {name: "z_ctt_full_common", type: "float", description: "Z-standardized Full CTT for Common"}
+            - {name: "z_ctt_full_congruent", type: "float", description: "Z-standardized Full CTT for Congruent"}
+            - {name: "z_ctt_full_incongruent", type: "float", description: "Z-standardized Full CTT for Incongruent"}
+            - {name: "z_ctt_purified_common", type: "float", description: "Z-standardized Purified CTT for Common"}
+            - {name: "z_ctt_purified_congruent", type: "float", description: "Z-standardized Purified CTT for Congruent"}
+            - {name: "z_ctt_purified_incongruent", type: "float", description: "Z-standardized Purified CTT for Incongruent"}
+            - {name: "TSVR_hours", type: "float", description: "Time since VR in hours (not standardized)"}
+          expected_rows: "~400"
+          description: "Z-standardized scores for LMM comparability"
+
+      parameters:
+        standardization_method: "z-score (mean-center and scale to unit variance)"
+        tolerance_mean: 0.01
+        tolerance_sd: 0.01
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_standardized_scores.csv"
+          variable_name: "standardized_scores"
+          source: "analysis call output (step06_standardize_scores)"
+
+      parameters:
+        df: "standardized_scores"
+        column_names: ["z_theta_common", "z_theta_congruent", "z_theta_incongruent", "z_ctt_full_common", "z_ctt_full_congruent", "z_ctt_full_incongruent", "z_ctt_purified_common", "z_ctt_purified_congruent", "z_ctt_purified_incongruent"]
+        tolerance: 0.01
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All z-score columns have mean in [-0.01, 0.01] (near-zero mean)"
+        - "All z-score columns have SD in [0.99, 1.01] (unit variance)"
+        - "No NaN values"
+        - "Expected N: 400 rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_standardize_scores.log"
+
+    log_file: "logs/step06_standardize_scores.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Fit Parallel LMMs and Compare AIC
+  # --------------------------------------------------------------------------
+  - name: "step07_fit_lmms"
+    step_number: "07"
+    description: "Fit parallel LMMs for IRT theta, Full CTT, Purified CTT scores to test whether Purified CTT yields better model fit (lower AIC) - 9 models total (3 score types x 3 congruence levels)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~TSVR_hours', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step06_standardized_scores.csv"
+          required_columns: ["composite_ID", "z_theta_common", "z_theta_congruent", "z_theta_incongruent", "z_ctt_full_common", "z_ctt_full_congruent", "z_ctt_full_incongruent", "z_ctt_purified_common", "z_ctt_purified_congruent", "z_ctt_purified_incongruent", "TSVR_hours"]
+          variable_name: "standardized_scores"
+
+      output_files:
+        - path: "data/step07_lmm_model_comparison.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "dimension", type: "str", description: "Congruence level"}
+            - {name: "AIC_IRT", type: "float", description: "AIC for IRT theta model"}
+            - {name: "AIC_Full", type: "float", description: "AIC for Full CTT model"}
+            - {name: "AIC_Purified", type: "float", description: "AIC for Purified CTT model"}
+            - {name: "delta_AIC_Full_Purified", type: "float", description: "AIC_Purified - AIC_Full (negative = Purified better)"}
+            - {name: "improvement", type: "str", description: "Yes if |delta_AIC| > 2, No otherwise"}
+            - {name: "N", type: "int", description: "Sample size (400)"}
+          expected_rows: 3
+          description: "AIC comparison for IRT, Full CTT, Purified CTT models"
+        - path: "data/step07_lmm_summaries_theta.txt"
+          format: "Plain text"
+          description: "Full LMM summaries for 3 IRT theta models"
+        - path: "data/step07_lmm_summaries_full.txt"
+          format: "Plain text"
+          description: "Full LMM summaries for 3 Full CTT models"
+        - path: "data/step07_lmm_summaries_purified.txt"
+          format: "Plain text"
+          description: "Full LMM summaries for 3 Purified CTT models"
+
+      parameters:
+        formula: "score ~ TSVR_hours"
+        re_formula: "~TSVR_hours"
+        groups: "UID"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step07_lmm_summaries_theta.txt"
+          variable_name: "lmm_summaries_theta"
+          source: "analysis call output (fit_lmm_trajectory_tsvr)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        check_singularity: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 9 models converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step07_fit_lmms.log"
+
+    log_file: "logs/step07_fit_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Prepare Plot Data for Visualization
+  # --------------------------------------------------------------------------
+  - name: "step08_prepare_plot_data"
+    step_number: "08"
+    description: "Create plot source CSVs for two visualizations: (1) Correlation comparison, (2) AIC comparison - to be read by rq_plots agent"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step05_correlation_analysis.csv')"
+        - "pd.read_csv('data/step07_lmm_model_comparison.csv')"
+        - "PLOT 1 - Correlation Comparison: Reshape correlation data from wide to long format"
+        - "Create columns: dimension, CTT_type (Full/Purified), r_value"
+        - "Expected: 6 rows (3 dimensions x 2 CTT types)"
+        - "Save to data/step08_correlation_comparison_data.csv"
+        - "PLOT 2 - AIC Comparison: Reshape AIC data from wide to long format"
+        - "Create columns: dimension, CTT_type (Full/Purified), AIC"
+        - "Expected: 6 rows (3 dimensions x 2 CTT types)"
+        - "Save to data/step08_aic_comparison_data.csv"
+
+      input_files:
+        - path: "data/step05_correlation_analysis.csv"
+          required_columns: ["dimension", "r_full", "r_purified", "delta_r"]
+          variable_name: "correlation_analysis"
+        - path: "data/step07_lmm_model_comparison.csv"
+          required_columns: ["dimension", "AIC_Full", "AIC_Purified", "delta_AIC_Full_Purified"]
+          variable_name: "lmm_model_comparison"
+
+      output_files:
+        - path: "data/step08_correlation_comparison_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "dimension", type: "str", description: "Congruence level (Common, Congruent, Incongruent)"}
+            - {name: "CTT_type", type: "str", description: "Full or Purified"}
+            - {name: "r_value", type: "float", description: "Pearson r with IRT theta"}
+          expected_rows: 6
+          description: "Plot source CSV for grouped bar chart comparing r_full vs r_purified"
+        - path: "data/step08_aic_comparison_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "dimension", type: "str", description: "Congruence level"}
+            - {name: "CTT_type", type: "str", description: "Full or Purified"}
+            - {name: "AIC", type: "float", description: "Model AIC"}
+          expected_rows: 6
+          description: "Plot source CSV for grouped bar chart comparing AIC_Full vs AIC_Purified"
+
+      parameters:
+        reshape_method: "wide to long (pd.melt)"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step08_correlation_comparison_data.csv"
+          variable_name: "correlation_comparison_data"
+          source: "analysis call output (step08_prepare_plot_data)"
+        - path: "data/step08_aic_comparison_data.csv"
+          variable_name: "aic_comparison_data"
+          source: "analysis call output (step08_prepare_plot_data)"
+
+      parameters:
+        df: "correlation_comparison_data"
+        expected_rows: 6
+        expected_columns: ["dimension", "CTT_type"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 6 rows per file (3 dimensions x 2 CTT types)"
+        - "All required columns present"
+        - "No NaN values"
+        - "All 3 dimensions represented for both CTT types (complete factorial design)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step08_prepare_plot_data.log"
+
+    log_file: "logs/step08_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

@@ -1,0 +1,545 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02T18:00:00Z
+# RQ: ch5/5.2.6
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.2.6"
+  total_steps: 7
+  analysis_type: "LMM-only (domain-stratified variance decomposition)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-02T18:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 1: Fit Domain-Stratified LMMs with Random Slopes
+  # --------------------------------------------------------------------------
+  - name: "step01_fit_domain_lmms"
+    step_number: "01"
+    description: "Fit three separate Linear Mixed Models (one per domain: What, Where, When) with random intercepts and slopes for individual-specific forgetting rates"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "results/ch5/5.2.1/data/step04_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se"]
+          variable_name: "lmm_input_data"
+          expected_rows: 1200
+          description: "Long-format LMM input from RQ 5.2.1 with theta scores and TSVR time variable"
+
+      output_files:
+        - path: "data/step01_model_metadata_what.yaml"
+          variable_name: "metadata_what"
+          description: "What domain LMM metadata (convergence status, random structure, fit indices)"
+        - path: "data/step01_model_metadata_where.yaml"
+          variable_name: "metadata_where"
+          description: "Where domain LMM metadata (convergence status, random structure, fit indices)"
+        - path: "data/step01_model_metadata_when.yaml"
+          variable_name: "metadata_when"
+          description: "When domain LMM metadata (convergence status, random structure, fit indices)"
+        - path: "data/step01_fitted_models.pkl"
+          variable_name: "fitted_models"
+          description: "Pickle file containing 3 fitted MixedLM objects (dict with keys: What, Where, When)"
+
+      parameters:
+        formula: "theta ~ TSVR_hours + (TSVR_hours | UID)"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+        convergence_strategy: "Bates parsimonious selection (LRT-based per 1_concept.md)"
+        domains_to_fit: ["What", "Where", "When"]
+
+      returns:
+        type: "Dict[str, MixedLMResults]"
+        unpacking: "fitted_models"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_fitted_models.pkl"
+          variable_name: "fitted_models"
+          source: "analysis call output (fit_lmm_trajectory_tsvr)"
+
+      parameters:
+        lmm_result: "fitted_models"
+        check_all_domains: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 models converged (converged=True in YAML metadata)"
+        - "Random structure documented (Full/Uncorrelated/Intercept-only) per domain"
+        - "Log-likelihood, AIC, BIC in valid ranges"
+        - "n_obs = 400 per domain (100 participants x 4 tests)"
+        - "n_groups = 100 per domain (all participants present)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_fit_domain_lmms.log"
+
+    log_file: "logs/step01_fit_domain_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Extract Variance Components per Domain
+  # --------------------------------------------------------------------------
+  - name: "step02_extract_variance_components"
+    step_number: "02"
+    description: "Extract variance components (var_intercept, var_slope, cov_int_slope, var_residual) from each of the three domain-stratified LMMs"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "data/step01_fitted_models.pkl"
+          required_columns: []
+          variable_name: "fitted_models"
+          description: "3 fitted MixedLM objects from Step 1"
+        - path: "data/step01_model_metadata_what.yaml"
+          variable_name: "metadata_what"
+          description: "What domain metadata for random structure check"
+        - path: "data/step01_model_metadata_where.yaml"
+          variable_name: "metadata_where"
+          description: "Where domain metadata for random structure check"
+        - path: "data/step01_model_metadata_when.yaml"
+          variable_name: "metadata_when"
+          description: "When domain metadata for random structure check"
+
+      output_files:
+        - path: "data/step02_variance_components.csv"
+          variable_name: "variance_components"
+          description: "Variance components for all 3 domains (15 rows: 5 components x 3 domains)"
+          columns: ["domain", "component", "value", "interpretation"]
+          expected_rows: 15
+
+      parameters:
+        extract_components: ["var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+        domains: ["What", "Where", "When"]
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "variance_components"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_variance_positivity"
+      signature: "validate_variance_positivity(variance_df: pd.DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          variable_name: "variance_components"
+          source: "analysis call output (extract_random_effects_from_lmm)"
+
+      parameters:
+        variance_df: "variance_components"
+        component_col: "component"
+        value_col: "value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All variance components > 0 (var_intercept, var_slope, var_residual)"
+        - "Covariance can be negative, zero, or positive (unrestricted)"
+        - "No NaN values in variance components"
+        - "All 3 domains present (What, Where, When)"
+        - "All 5 components present per domain"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_extract_variance_components.log"
+
+    log_file: "logs/step02_extract_variance_components.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute ICC Estimates per Domain
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_icc_estimates"
+    step_number: "03"
+    description: "Compute Intraclass Correlation Coefficients (ICC) for intercepts and slopes to quantify between-person versus within-person variance"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_icc_from_variance_components"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          required_columns: ["domain", "component", "value"]
+          variable_name: "variance_components"
+          expected_rows: 15
+
+      output_files:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_estimates"
+          description: "ICC estimates for all 3 domains (9 rows: 3 ICC types x 3 domains)"
+          columns: ["domain", "icc_type", "icc_value", "interpretation", "threshold_used"]
+          expected_rows: 9
+
+      parameters:
+        variance_components_df: "variance_components"
+        slope_name: "TSVR_hours"
+        timepoint: 144.0  # Day 6 = 144 hours
+        thresholds:
+          low: 0.20
+          moderate: 0.40
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "icc_estimates"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: pd.DataFrame, icc_col: str = 'icc_value') -> Dict"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_estimates"
+          source: "analysis call output (compute_icc_from_variance_components)"
+
+      parameters:
+        icc_df: "icc_estimates"
+        icc_col: "icc_value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "ICC values in [0, 1] for all 9 rows (probability constraint)"
+        - "No NaN values (complete ICC computation)"
+        - "9 rows total (3 ICC types x 3 domains)"
+        - "interpretation values in {'Low', 'Moderate', 'Substantial'}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_compute_icc_estimates.log"
+
+    log_file: "logs/step03_compute_icc_estimates.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract Individual Random Effects per Domain
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_random_effects"
+    step_number: "04"
+    description: "Extract individual-specific random intercepts and slopes for all 100 participants across all 3 domains (REQUIRED for RQ 5.2.7 clustering)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "data/step01_fitted_models.pkl"
+          variable_name: "fitted_models"
+          description: "3 fitted MixedLM objects from Step 1"
+        - path: "data/step01_model_metadata_what.yaml"
+          variable_name: "metadata_what"
+          description: "What domain metadata for random structure check"
+        - path: "data/step01_model_metadata_where.yaml"
+          variable_name: "metadata_where"
+          description: "Where domain metadata for random structure check"
+        - path: "data/step01_model_metadata_when.yaml"
+          variable_name: "metadata_when"
+          description: "When domain metadata for random structure check"
+
+      output_files:
+        - path: "data/step04_random_effects.csv"
+          variable_name: "random_effects"
+          description: "Random effects for all 100 participants x 3 domains = 300 rows (REQUIRED for RQ 5.2.7)"
+          columns: ["UID", "domain", "Total_Intercept", "Total_Slope", "intercept_se", "slope_se"]
+          expected_rows: 300
+
+      parameters:
+        extract_type: "individual_random_effects"
+        domains: ["What", "Where", "When"]
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "random_effects"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          variable_name: "random_effects"
+          source: "analysis call output (extract_random_effects_from_lmm)"
+
+      parameters:
+        df: "random_effects"
+        expected_rows: 300
+        expected_columns: ["UID", "domain", "Total_Intercept", "Total_Slope", "intercept_se", "slope_se"]
+        column_types:
+          UID: "str"
+          domain: "str"
+          Total_Intercept: "float64"
+          Total_Slope: "float64"
+          intercept_se: "float64"
+          slope_se: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "300 rows exactly (100 participants x 3 domains)"
+        - "All 100 participants present (no missing UIDs)"
+        - "All 3 domains present per participant (complete coverage)"
+        - "No NaN in Total_Intercept column (critical for clustering)"
+        - "intercept_se, slope_se > 0 (standard errors positive)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_extract_random_effects.log"
+
+    log_file: "logs/step04_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Test Intercept-Slope Correlations per Domain
+  # --------------------------------------------------------------------------
+  - name: "step05_test_intercept_slope_correlations"
+    step_number: "05"
+    description: "Test correlation between baseline ability (intercept) and forgetting rate (slope) within each domain with Decision D068 dual p-value reporting"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "test_intercept_slope_correlation_d068"
+      signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          required_columns: ["UID", "domain", "Total_Intercept", "Total_Slope"]
+          variable_name: "random_effects"
+          expected_rows: 300
+
+      output_files:
+        - path: "data/step05_intercept_slope_correlations.csv"
+          variable_name: "correlations"
+          description: "Intercept-slope correlations for all 3 domains (3 rows: one per domain)"
+          columns: ["domain", "r", "p_uncorrected", "p_bonferroni", "n", "interpretation"]
+          expected_rows: 3
+
+      parameters:
+        random_effects_df: "random_effects"
+        family_alpha: 0.01  # Stricter alpha for Chapter 5
+        n_tests: 3  # Testing 3 correlations (one per domain)
+        intercept_col: "Total_Intercept"
+        slope_col: "Total_Slope"
+        bonferroni_correction: true
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "correlations"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict"
+
+      input_files:
+        - path: "data/step05_intercept_slope_correlations.csv"
+          variable_name: "correlations"
+          source: "analysis call output (test_intercept_slope_correlation_d068)"
+
+      parameters:
+        correlation_df: "correlations"
+        required_cols: ["r", "p_uncorrected", "p_bonferroni"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068 requirement)"
+        - "r in [-1, 1] (correlation coefficient bounds)"
+        - "p_uncorrected, p_bonferroni in [0, 1] (probability bounds)"
+        - "3 rows total (one per domain)"
+        - "No NaN values (complete correlation tests)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_test_intercept_slope_correlations.log"
+
+    log_file: "logs/step05_test_intercept_slope_correlations.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Compare ICC Across Domains
+  # --------------------------------------------------------------------------
+  - name: "step06_compare_domain_icc"
+    step_number: "06"
+    description: "Rank domains by ICC_slope_conditional magnitude to characterize domain-specific variance patterns"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step03_icc_estimates.csv')"
+        - "Filter to ICC_slope_conditional rows only (3 rows: one per domain)"
+        - "Rank domains by icc_value (descending order: highest ICC first)"
+        - "Characterize domain differences: which domains achieve 'Substantial' (>=0.40) threshold"
+        - "Compare rank order to theoretical prediction: ICC_When >= ICC_Where > ICC_What"
+        - "Compute ICC differences (pairwise: What-Where, What-When, Where-When)"
+        - "Create summary table with domain rank order, ICC magnitude interpretation, theoretical prediction match"
+        - "Save to CSV"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          required_columns: ["domain", "icc_type", "icc_value", "interpretation", "threshold_used"]
+          variable_name: "icc_estimates"
+          expected_rows: 9
+
+      output_files:
+        - path: "data/step06_domain_icc_comparison.csv"
+          variable_name: "domain_comparison"
+          description: "Domain ICC comparison with ranks and interpretations (3 rows: one per domain)"
+          columns: ["domain", "icc_slope_conditional", "interpretation", "rank", "meets_threshold", "theoretical_prediction"]
+          expected_rows: 3
+
+      parameters: {}
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "domain_comparison"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict"
+
+      input_files:
+        - path: "data/step06_domain_icc_comparison.csv"
+          variable_name: "domain_comparison"
+          source: "stdlib output (pandas operations)"
+
+      parameters:
+        df: "domain_comparison"
+        expected_rows: 3
+        expected_columns: ["domain", "icc_slope_conditional", "interpretation", "rank", "meets_threshold", "theoretical_prediction"]
+        column_types:
+          domain: "str"
+          icc_slope_conditional: "float64"
+          interpretation: "str"
+          rank: "int64"
+          meets_threshold: "bool"
+          theoretical_prediction: "str"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "3 rows total (one per domain)"
+        - "Ranks unique {1, 2, 3} unless ties occur"
+        - "ICC values in [0, 1] (probability bounds)"
+        - "interpretation in {'Low', 'Moderate', 'Substantial'}"
+        - "theoretical_prediction in {'Matches', 'Deviates'}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compare_domain_icc.log"
+
+    log_file: "logs/step06_compare_domain_icc.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Prepare Domain ICC Barplot Data
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_domain_icc_barplot_data"
+    step_number: "07"
+    description: "Prepare plot source CSV for visualizing ICC_slope_conditional across domains with threshold line at 0.40"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step06_domain_icc_comparison.csv')"
+        - "Add plot-specific columns: plot_order (1=What, 2=Where, 3=When), color_category (Low=red, Moderate=yellow, Substantial=green), threshold_line (0.40 for all rows)"
+        - "Sort by plot_order for consistent visualization"
+        - "Save to CSV"
+
+      input_files:
+        - path: "data/step06_domain_icc_comparison.csv"
+          required_columns: ["domain", "icc_slope_conditional", "interpretation"]
+          variable_name: "domain_comparison"
+          expected_rows: 3
+
+      output_files:
+        - path: "data/step07_domain_icc_barplot_data.csv"
+          variable_name: "barplot_data"
+          description: "Plot source CSV for domain ICC comparison barplot (3 rows: one per domain)"
+          columns: ["domain", "icc_slope_conditional", "interpretation", "plot_order", "color_category", "threshold_line"]
+          expected_rows: 3
+
+      parameters: {}
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "barplot_data"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict"
+
+      input_files:
+        - path: "data/step07_domain_icc_barplot_data.csv"
+          variable_name: "barplot_data"
+          source: "stdlib output (pandas operations)"
+
+      parameters:
+        plot_data: "barplot_data"
+        required_domains: ["What", "Where", "When"]
+        required_groups: []  # No grouping variable for this RQ
+        domain_col: "domain"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 domains present (What, Where, When)"
+        - "No duplicate plot_order values (unique positions)"
+        - "No NaN values in plot data"
+        - "threshold_line = 0.40 for all rows"
+        - "color_category matches interpretation (Low/Moderate/Substantial)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step07_prepare_domain_icc_barplot_data.log"
+
+    log_file: "logs/step07_prepare_domain_icc_barplot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

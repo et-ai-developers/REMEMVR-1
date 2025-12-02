@@ -27,16 +27,36 @@ rq_stats:
     9.55/10 APPROVED. Cat1: 3.0/3 (convergence contingency resolves risk). Cat2: 2.0/2 (100% tools). Cat3: 2.0/2 (scale clarified). Cat4: 2.3/2 (exceeds - residual diagnostics + Bates contingency plan). Cat5: 0.25/1 (3 minor, concept proactively addressed 80% of concerns). Improvements: Convergence Contingency Plan (Bates 2015), Residual Diagnostics (Schielzeth 2020), ICC Scale Interpretation, Practice Effects, Limitations.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    7 steps planned (Step 0: data loading -> Step 6: ICC comparison + barplot data).
+    Tool requirements: LMM variance decomposition (3 paradigm-stratified models), ICC computation (3 types), correlation tests (Decision D068 dual p-values).
+    Expected outputs: 15 data files (variance components, ICC estimates, random effects, correlation tests, barplot data). Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    6 analysis + 7 validation tools cataloged for LMM variance decomposition.
+    Custom tools verified: fit_lmm_trajectory_tsvr, compute_icc_from_variance_components, extract_random_effects_from_lmm, test_intercept_slope_correlation_d068.
+    Stdlib tools (pandas, pickle) exempt from verification.
+    Decisions embedded: D068 (dual p-values), D070 (TSVR time variable).
+    Critical: step04_random_effects.csv required for RQ 5.3.8 downstream dependency.
 
 rq_analysis:
-  status: pending
+  status: success
+  timestamp: "2025-12-02T00:00:00Z"
   context_dump: |
+    7 steps specified with validation (LMM variance decomposition - paradigm-stratified)
+    Step 0: Load theta scores from RQ 5.3.1 (stdlib - pandas operations)
+    Step 1: Load model metadata from RQ 5.3.1 (stdlib - pickle + model inspection)
+    Step 2: Fit paradigm-stratified LMMs with random slopes (catalogued - fit_lmm_trajectory_tsvr x3)
+    Step 3: Compute ICC per paradigm (catalogued - compute_icc_from_variance_components)
+    Step 4: Extract random effects (catalogued - extract_random_effects_from_lmm - CRITICAL for RQ 5.3.8)
+    Step 5: Test intercept-slope correlation (catalogued - test_intercept_slope_correlation_d068)
+    Step 6: Compare ICC across paradigms + prepare barplot data (stdlib - comparison + plot prep)
+    All steps have paired validation (4 catalogued tools, 3 stdlib operations)
+    All signatures complete with type hints
+    Critical output: data/step04_random_effects.csv (300 rows) required for RQ 5.3.8 clustering
 
 rq_inspect:
   status: pending
@@ -49,3 +69,12 @@ rq_plots:
 rq_results:
   status: pending
   context_dump: |
+
+analysis_steps:
+  step00_load_theta_scores: pending
+  step01_load_model_metadata: pending
+  step02_fit_paradigm_lmms: pending
+  step03_compute_icc: pending
+  step04_extract_random_effects: pending
+  step05_test_correlations: pending
+  step06_compare_icc_prepare_plot: pending

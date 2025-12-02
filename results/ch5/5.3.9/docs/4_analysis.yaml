@@ -1,0 +1,701 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.3.9
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.3.9"
+  total_steps: 5
+  analysis_type: "Cross-classified LMM (item-level response modeling with crossed random effects)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Item-Level Response Data and Dependencies
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_response_data"
+    step_number: "00"
+    description: "Extract raw item-level responses from dfData.csv in long format and merge with item difficulty parameters from RQ 5.3.1"
+
+    # Stdlib operations (pandas extraction + merge)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/cache/dfData.csv"
+        - "Filter to item-level paradigms: IFR, ICR, IRE (exclude RFR, TCR, RRE)"
+        - "Read results/ch5/5.3.1/data/step03_item_parameters.csv (DERIVED from RQ 5.3.1)"
+        - "Filter dfData to ONLY items present in item_parameters.csv (purified items)"
+        - "Merge item difficulty (column b) from item_parameters.csv into response data by Item"
+        - "Read results/ch5/5.3.1/data/step00_tsvr_mapping.csv (DERIVED from RQ 5.3.1)"
+        - "Verify all required columns present and no unexpected NaN patterns"
+        - "Save data/step00_response_level_data.csv"
+        - "Copy TSVR mapping to data/step00_tsvr_mapping.csv for reference"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          format: "Long format with item-level binary responses (0/1)"
+          required_columns:
+            - {name: "UID", type: "string", description: "Participant ID (format: P### with leading zeros)"}
+            - {name: "Test", type: "string", description: "Test session: T1, T2, T3, T4"}
+            - {name: "Item", type: "string", description: "Item identifier matching RQ 5.3.1 item codes"}
+            - {name: "Response", type: "int", description: "Binary: 0 = incorrect, 1 = correct, NaN = missing/not administered"}
+            - {name: "paradigm", type: "string", description: "Values: IFR, ICR, IRE (excludes room-level paradigms)"}
+          expected_rows: "~400,000 (100 participants x 4 tests x ~1000 items total before filtering)"
+          description: "Project-level raw data"
+
+        - path: "results/ch5/5.3.1/data/step03_item_parameters.csv"
+          format: "CSV with IRT item parameters post-purification"
+          required_columns:
+            - {name: "item_name", type: "string", description: "Item identifier"}
+            - {name: "dimension", type: "string", description: "Factor name (paradigm-specific)"}
+            - {name: "a", type: "float", description: "Discrimination parameter (quality verification)"}
+            - {name: "b", type: "float", description: "Difficulty parameter (PRIMARY predictor)"}
+          expected_rows: "~40-60 (purified items post-Decision D039)"
+          description: "DERIVED from RQ 5.3.1 Pass 2 calibration"
+
+        - path: "results/ch5/5.3.1/data/step00_tsvr_mapping.csv"
+          format: "CSV mapping composite_ID to actual time"
+          required_columns:
+            - {name: "composite_ID", type: "string", description: "Format: UID_test (e.g., P001_T1)"}
+            - {name: "TSVR_hours", type: "float", description: "Actual hours since VR encoding session per Decision D070"}
+          expected_rows: "400 (100 participants x 4 tests)"
+          description: "DERIVED from RQ 5.3.1 Step 0"
+
+      output_files:
+        - path: "data/step00_response_level_data.csv"
+          format: "Long format (one row per UID x Test x Item observation)"
+          columns:
+            - {name: "UID", type: "string", description: "Participant ID"}
+            - {name: "Test", type: "string", description: "Test session T1/T2/T3/T4"}
+            - {name: "Item", type: "string", description: "Item identifier"}
+            - {name: "Response", type: "float", description: "0/1/NaN - binary responses"}
+            - {name: "paradigm", type: "string", description: "IFR/ICR/IRE"}
+            - {name: "Difficulty", type: "float", description: "Item difficulty parameter b from RQ 5.3.1"}
+          expected_rows: "~20,000 (100 participants x 4 tests x ~50 purified items)"
+          expected_columns: 6
+          description: "Item-level response data with difficulty merged"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          format: "Copy of RQ 5.3.1 TSVR mapping for reference"
+          columns:
+            - {name: "composite_ID", type: "string"}
+            - {name: "TSVR_hours", type: "float"}
+          expected_rows: "400 (100 participants x 4 tests)"
+          expected_columns: 2
+          description: "Time variable mapping"
+
+      parameters:
+        paradigm_filter: ["IFR", "ICR", "IRE"]
+        exclude_paradigms: ["RFR", "TCR", "RRE"]
+        cross_rq_dependencies:
+          rq_5_3_1_item_params: "results/ch5/5.3.1/data/step03_item_parameters.csv"
+          rq_5_3_1_tsvr_mapping: "results/ch5/5.3.1/data/step00_tsvr_mapping.csv"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_response_level_data.csv"
+          variable_name: "response_data"
+          source: "analysis call output (pandas extraction + merge)"
+
+      parameters:
+        df: "response_data"
+        required_cols: ["UID", "Test", "Item", "Response", "paradigm", "Difficulty"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_format"
+
+      criteria:
+        - "All required columns present: UID, Test, Item, Response, paradigm, Difficulty"
+        - "No missing columns (case-sensitive matching)"
+        - "paradigm values restricted to {IFR, ICR, IRE}"
+        - "Item codes match RQ 5.3.1 purified items"
+
+      on_failure:
+        action: "raise ValueError(validation_result_format['message'])"
+        log_to: "logs/step00_extract_response_data.log"
+
+      description: "Validate DataFrame has all required columns present"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "check_missing_data"
+      signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_response_level_data.csv"
+          variable_name: "response_data"
+          source: "analysis call output"
+
+      parameters:
+        df: "response_data"
+        acceptable_missing_cols: ["Response"]
+        forbidden_missing_cols: ["Difficulty", "paradigm"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_missing"
+
+      criteria:
+        - "Response column may have NaN (missing/not-administered items)"
+        - "Difficulty, paradigm must have zero NaN"
+        - "Row count ~20,000 (100 participants x 4 tests x ~50 items)"
+
+      on_failure:
+        action: "raise ValueError(validation_result_missing['message'])"
+        log_to: "logs/step00_extract_response_data.log"
+
+      description: "Check for missing data by column, report patterns, flag unexpected NaN in critical variables"
+
+    log_file: "logs/step00_extract_response_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Create Composite ID and Expand to Analysis Format
+  # --------------------------------------------------------------------------
+  - name: "step01_create_composite_id"
+    step_number: "01"
+    description: "Create composite_ID identifier (UID_Test format) and verify data structure for cross-classified LMM modeling"
+
+    # Stdlib operations (pandas string concatenation)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step00_response_level_data.csv"
+        - "Create composite_ID column: Concatenate UID + '_' + Test (e.g., P001_T1)"
+        - "Verify paradigm assignment: Each Item belongs to ONLY one paradigm"
+        - "Check for duplicate UID x Test x Item observations (should be none)"
+        - "Sort by UID, Test, Item for reproducibility"
+        - "Save data/step01_analysis_ready.csv"
+
+      input_files:
+        - path: "data/step00_response_level_data.csv"
+          format: "Long format (UID x Test x Item observations)"
+          required_columns:
+            - {name: "UID", type: "string"}
+            - {name: "Test", type: "string"}
+            - {name: "Item", type: "string"}
+            - {name: "Response", type: "float"}
+            - {name: "paradigm", type: "string"}
+            - {name: "Difficulty", type: "float"}
+          expected_rows: "~20,000"
+          description: "Step 0 extraction output"
+
+      output_files:
+        - path: "data/step01_analysis_ready.csv"
+          format: "Long format with composite_ID"
+          columns:
+            - {name: "composite_ID", type: "string", description: "Format: UID_Test (e.g., P001_T1)"}
+            - {name: "UID", type: "string", description: "Participant ID (for random effects grouping)"}
+            - {name: "Test", type: "string", description: "Test session (for later TSVR merge)"}
+            - {name: "Item", type: "string", description: "Item identifier (for random effects grouping)"}
+            - {name: "Response", type: "float", description: "0/1/NaN"}
+            - {name: "paradigm", type: "string", description: "IFR/ICR/IRE"}
+            - {name: "Difficulty", type: "float", description: "Item difficulty from RQ 5.3.1"}
+          expected_rows: "~20,000 (unchanged from input)"
+          expected_columns: 7
+          description: "Analysis-ready format with composite_ID added"
+
+      parameters:
+        composite_id_format: "{UID}_{Test}"
+        sort_columns: ["UID", "Test", "Item"]
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_analysis_ready.csv"
+          variable_name: "analysis_ready"
+          source: "analysis call output (pandas string operations)"
+
+      parameters:
+        df: "analysis_ready"
+        required_cols: ["composite_ID", "UID", "Test", "Item", "Response", "paradigm", "Difficulty"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "composite_ID format: {UID}_{Test} (e.g., P001_T1)"
+        - "composite_ID: 400 unique values (100 participants x 4 tests)"
+        - "No duplicate UID x Test x Item combinations"
+        - "Each Item belongs to exactly ONE paradigm"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_create_composite_id.log"
+
+      description: "Validate composite_ID format and data structure"
+
+    log_file: "logs/step01_create_composite_id.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Center Difficulty Variable and Merge TSVR Time
+  # --------------------------------------------------------------------------
+  - name: "step02_center_merge"
+    step_number: "02"
+    description: "Grand-mean center item difficulty predictor (Difficulty_c = Difficulty - mean[Difficulty]) and merge TSVR time variable per Decision D070"
+
+    # Stdlib operations (pandas arithmetic + merge)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step01_analysis_ready.csv"
+        - "Compute grand mean of Difficulty: mean_difficulty = mean(Difficulty)"
+        - "Create centered variable: Difficulty_c = Difficulty - mean_difficulty"
+        - "Verify centering: Check mean(Difficulty_c) approximately 0 (within ±0.01 tolerance)"
+        - "Read data/step00_tsvr_mapping.csv"
+        - "Merge TSVR_hours by composite_ID (left join - keep all response observations)"
+        - "Verify no missing TSVR_hours after merge (all composite_IDs should match)"
+        - "Create Time variable: Time = TSVR_hours (rename for LMM clarity)"
+        - "Save data/step02_lmm_input.csv"
+
+      input_files:
+        - path: "data/step01_analysis_ready.csv"
+          format: "Long format with composite_ID"
+          required_columns:
+            - {name: "composite_ID", type: "string"}
+            - {name: "UID", type: "string"}
+            - {name: "Test", type: "string"}
+            - {name: "Item", type: "string"}
+            - {name: "Response", type: "float"}
+            - {name: "paradigm", type: "string"}
+            - {name: "Difficulty", type: "float"}
+          expected_rows: "~20,000"
+          description: "Step 1 output with composite_ID"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          format: "CSV with TSVR hours per composite_ID"
+          required_columns:
+            - {name: "composite_ID", type: "string"}
+            - {name: "TSVR_hours", type: "float"}
+          expected_rows: "400 (100 participants x 4 tests)"
+          description: "Time variable mapping from RQ 5.3.1"
+
+      output_files:
+        - path: "data/step02_lmm_input.csv"
+          format: "Long format ready for cross-classified LMM"
+          columns:
+            - {name: "composite_ID", type: "string"}
+            - {name: "UID", type: "string", description: "For random effects grouping"}
+            - {name: "Test", type: "string", description: "Retained for reference"}
+            - {name: "Item", type: "string", description: "For random effects grouping"}
+            - {name: "Response", type: "float", description: "0/1/NaN - dependent variable"}
+            - {name: "paradigm", type: "string", description: "IFR/ICR/IRE - fixed effect factor"}
+            - {name: "Difficulty", type: "float", description: "Raw difficulty (for reference)"}
+            - {name: "Difficulty_c", type: "float", description: "Centered difficulty (PRIMARY predictor)"}
+            - {name: "Time", type: "float", description: "TSVR_hours - continuous time predictor per D070"}
+          expected_rows: "~20,000 (unchanged)"
+          expected_columns: 9
+          description: "LMM input with centered predictors and time variable"
+
+      parameters:
+        centering_tolerance: 0.01
+        merge_key: "composite_ID"
+        time_variable: "TSVR_hours"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "analysis call output (pandas centering + merge)"
+
+      parameters:
+        df: "lmm_input"
+        column_names: ["Difficulty_c"]
+        tolerance: 0.01
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_centering"
+
+      criteria:
+        - "mean(Difficulty_c) in [-0.01, 0.01] (successful centering)"
+        - "No NaN introduced by centering operation"
+
+      on_failure:
+        action: "raise ValueError(validation_result_centering['message'])"
+        log_to: "logs/step02_center_merge.log"
+
+      description: "Validate grand-mean centering (mean ≈ 0)"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "check_missing_data"
+      signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "analysis call output"
+
+      parameters:
+        df: "lmm_input"
+        acceptable_missing_cols: ["Response"]
+        forbidden_missing_cols: ["Difficulty_c", "Time"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_missing"
+
+      criteria:
+        - "No NaN in Difficulty_c column (centering should not introduce NaN)"
+        - "No NaN in Time column (all composite_IDs matched in merge)"
+
+      on_failure:
+        action: "raise ValueError(validation_result_missing['message'])"
+        log_to: "logs/step02_center_merge.log"
+
+      description: "Check TSVR merge successful (no missing Time values)"
+
+    log_file: "logs/step02_center_merge.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Cross-Classified LMM with 3-Way Interaction
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_lmm"
+    step_number: "03"
+    description: "Fit cross-classified Linear Mixed Model testing 3-way interaction Time x Difficulty_c x paradigm with crossed random effects (Time | UID) + (1 | Item)"
+
+    # Catalogued tool from 3_tools.yaml
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step02_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "Item", "Response", "paradigm", "Difficulty_c", "Time"]
+          variable_name: "lmm_input"
+          expected_rows: "~20,000 (100 participants x 4 tests x ~50 items)"
+          data_types:
+            composite_ID: "string (format: UID_test)"
+            UID: "string (participant ID)"
+            Item: "string (item identifier)"
+            Response: "float (0/1/NaN - binary responses)"
+            paradigm: "string (IFR/ICR/IRE)"
+            Difficulty_c: "float (centered item difficulty)"
+            Time: "float (TSVR_hours - Decision D070)"
+          description: "Step 2 LMM input with centered predictors"
+
+      output_files:
+        - path: "data/step03_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          description: "Full LMM model summary with fixed effects, random effects, convergence status"
+
+        - path: "data/step03_fixed_effects.csv"
+          variable_name: "fixed_effects"
+          columns: ["term", "estimate", "SE", "z_value", "p_uncorrected", "p_bonferroni"]
+          expected_rows: "~15 (intercept + main effects + interactions)"
+          description: "Fixed effects coefficients with dual p-values per Decision D068"
+
+        - path: "data/step03_random_effects.csv"
+          variable_name: "random_effects"
+          columns: ["component", "variance", "SD"]
+          expected_rows: "4 (UID intercept, UID slope, Item intercept, Residual)"
+          description: "Random effects variance components"
+
+      parameters:
+        theta_scores: "lmm_input"
+        tsvr_data: "lmm_input"
+        formula: "Response ~ Time * Difficulty_c * paradigm"
+        re_formula: "~Time | UID"
+        groups: "UID"
+        reml: false
+        convergence_strategy: "If convergence fails: (1) Try (1 | UID) + (1 | Item), (2) Try uncorrelated (Time || UID), (3) Report failure"
+        bonferroni_alpha: 0.0033
+        decision_d068: "Dual p-value reporting (uncorrected + Bonferroni)"
+        decision_d070: "TSVR as time variable (actual hours)"
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+        unpacking: "lmm_model, fixed_effects, random_effects"
+
+      description: "Fit cross-classified LMM with 3-way interaction (Time x Difficulty_c x paradigm) and crossed random effects. Decision D070: TSVR as time variable."
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        check_singular_fit: true
+        check_convergence_warnings: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_convergence"
+
+      criteria:
+        - "Model converged successfully (lmm_result.converged = True)"
+        - "No singular fit warnings (random effects variance > 0)"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+
+      on_failure:
+        action: "Apply convergence strategy (simplify random structure), retry. If all strategies exhausted, raise ValueError(validation_result_convergence['message'])"
+        log_to: "logs/step03_fit_lmm.log"
+
+      description: "Validate LMM converged successfully, no singular fit, finite estimates"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output"
+        - path: "data/step02_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "Step 2 LMM input data"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_input"
+        output_dir: "data/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_assumptions"
+
+      criteria:
+        - "Residual normality (Shapiro-Wilk test)"
+        - "Homoscedasticity (Breusch-Pagan test)"
+        - "Random effects normality (Shapiro-Wilk on intercepts/slopes)"
+        - "No severe autocorrelation (ACF lag-1 test)"
+        - "Linearity (partial residual plots)"
+        - "No influential outliers (Cook's distance)"
+        - "Convergence diagnostics"
+
+      on_failure:
+        action: "Log warning for minor violations, continue. Log error for severe violations only."
+        log_to: "logs/step03_fit_lmm.log"
+
+      description: "Comprehensive LMM assumption validation with 7 diagnostics and 6 plots (Schielzeth et al. 2020)"
+
+    validation_call_3:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_fixed_effects.csv"
+          variable_name: "fixed_effects"
+          required_columns: ["term", "estimate", "SE", "z_value", "p_uncorrected", "p_bonferroni"]
+          source: "analysis call output"
+
+      parameters:
+        interaction_df: "fixed_effects"
+        required_terms: ["Time:Difficulty_c:paradigmICR", "Time:Difficulty_c:paradigmIRE"]
+        alpha_bonferroni: 0.0033
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_hypothesis"
+
+      criteria:
+        - "3-way interaction terms present: Time:Difficulty_c:paradigmICR, Time:Difficulty_c:paradigmIRE"
+        - "Decision D068 compliance: BOTH p_uncorrected AND p_bonferroni columns present"
+        - "All p-values in [0, 1] range"
+
+      on_failure:
+        action: "raise ValueError(validation_result_hypothesis['message'])"
+        log_to: "logs/step03_fit_lmm.log"
+
+      description: "Validate hypothesis test includes required 3-way interaction terms AND Decision D068 dual p-value reporting"
+
+    log_file: "logs/step03_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract 3-Way Interaction and Prepare Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_interaction"
+    step_number: "04"
+    description: "Extract 3-way interaction terms (Time x Difficulty_c x paradigm), test significance at Bonferroni alpha = 0.0033, and prepare plot data showing 6 trajectories (2 difficulty levels x 3 paradigms)"
+
+    # Stdlib operations (pandas filtering + aggregation)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step03_fixed_effects.csv"
+        - "Filter to extract terms containing 'Time:Difficulty_c:paradigm' (3-way interaction)"
+        - "Extract coefficient estimates, SE, and dual p-values (uncorrected + Bonferroni) per D068"
+        - "Compare p_bonferroni to alpha = 0.0033 (Bonferroni-corrected threshold)"
+        - "Create significant_at_0.0033 column: TRUE if p_bonferroni < 0.0033"
+        - "Save data/step04_3way_interaction_summary.csv"
+        - "Read data/step02_lmm_input.csv for plot data"
+        - "Define difficulty levels: Easy = Difficulty_c at -1 SD, Hard = Difficulty_c at +1 SD"
+        - "Create 6 trajectory groups: Easy/Hard x IFR/ICR/IRE"
+        - "For each group, compute predicted Response at 4 timepoints (Days 0, 1, 3, 6)"
+        - "Convert TSVR_hours to nominal days for plotting: Day 0 ~0 hours, Day 1 ~24 hours, Day 3 ~72 hours, Day 6 ~144 hours"
+        - "Compute observed means per group x timepoint from raw data"
+        - "Compute 95% CI bounds (CI_lower, CI_upper) from model SE"
+        - "Save data/step04_difficulty_trajectories_data.csv"
+
+      input_files:
+        - path: "data/step03_fixed_effects.csv"
+          format: "CSV with fixed effects coefficients"
+          required_columns:
+            - {name: "term", type: "string"}
+            - {name: "estimate", type: "float"}
+            - {name: "SE", type: "float"}
+            - {name: "z_value", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float"}
+          expected_rows: "~15"
+          description: "Step 3 LMM fixed effects output"
+
+        - path: "data/step02_lmm_input.csv"
+          format: "Long format with centered predictors"
+          required_columns:
+            - {name: "composite_ID", type: "string"}
+            - {name: "UID", type: "string"}
+            - {name: "Item", type: "string"}
+            - {name: "Response", type: "float"}
+            - {name: "paradigm", type: "string"}
+            - {name: "Difficulty_c", type: "float"}
+            - {name: "Time", type: "float"}
+          expected_rows: "~20,000"
+          description: "LMM input for observed means aggregation"
+
+      output_files:
+        - path: "data/step04_3way_interaction_summary.csv"
+          format: "CSV with 3-way interaction results"
+          columns:
+            - {name: "term", type: "string", description: "Interaction term name"}
+            - {name: "estimate", type: "float", description: "Coefficient"}
+            - {name: "SE", type: "float", description: "Standard error"}
+            - {name: "z_value", type: "float", description: "z-statistic"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value"}
+            - {name: "significant_at_0.0033", type: "bool", description: "TRUE if p_bonferroni < 0.0033"}
+          expected_rows: "2 (Time:Difficulty_c:paradigmICR, Time:Difficulty_c:paradigmIRE)"
+          expected_columns: 7
+          description: "3-way interaction summary with significance test at Bonferroni alpha = 0.0033"
+
+        - path: "data/step04_difficulty_trajectories_data.csv"
+          format: "Plot source CSV for interaction visualization"
+          columns:
+            - {name: "paradigm", type: "string", description: "IFR/ICR/IRE"}
+            - {name: "difficulty_level", type: "string", description: "Easy (-1SD) or Hard (+1SD)"}
+            - {name: "time_days", type: "int", description: "Nominal days: 0, 1, 3, 6"}
+            - {name: "predicted_response", type: "float", description: "Model-predicted response probability in [0, 1]"}
+            - {name: "observed_mean", type: "float", description: "Observed mean response for comparison"}
+            - {name: "CI_lower", type: "float", description: "95% CI lower bound from model SE"}
+            - {name: "CI_upper", type: "float", description: "95% CI upper bound from model SE"}
+          expected_rows: "24 (6 groups x 4 timepoints)"
+          expected_columns: 7
+          description: "Plot data showing 6 trajectories (Easy/Hard x IFR/ICR/IRE) across 4 timepoints"
+
+      parameters:
+        interaction_filter: "Time:Difficulty_c:paradigm"
+        bonferroni_alpha: 0.0033
+        difficulty_levels:
+          easy: -1  # -1 SD from mean
+          hard: 1   # +1 SD from mean
+        timepoints_days: [0, 1, 3, 6]
+        timepoints_hours_approx: [0, 24, 72, 144]
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_3way_interaction_summary.csv"
+          variable_name: "interaction_summary"
+          required_columns: ["term", "estimate", "SE", "z_value", "p_uncorrected", "p_bonferroni", "significant_at_0.0033"]
+          source: "analysis call output (pandas filtering)"
+
+      parameters:
+        interaction_df: "interaction_summary"
+        required_terms: ["Time:Difficulty_c:paradigmICR", "Time:Difficulty_c:paradigmIRE"]
+        alpha_bonferroni: 0.0033
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_interaction"
+
+      criteria:
+        - "Exactly 2 rows (ICR and IRE comparisons to IFR reference)"
+        - "Required interaction terms present"
+        - "Decision D068 compliance: BOTH p_uncorrected AND p_bonferroni columns present"
+        - "All p-values in [0, 1] range"
+
+      on_failure:
+        action: "raise ValueError(validation_result_interaction['message'])"
+        log_to: "logs/step04_extract_interaction.log"
+
+      description: "Validate 3-way interaction summary includes required terms AND Decision D068 dual p-value reporting"
+
+    validation_call_2:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_difficulty_trajectories_data.csv"
+          variable_name: "plot_data"
+          required_columns: ["paradigm", "difficulty_level", "time_days", "predicted_response", "observed_mean", "CI_lower", "CI_upper"]
+          source: "analysis call output (pandas aggregation)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["IFR", "ICR", "IRE"]
+        required_groups: ["Easy (-1SD)", "Hard (+1SD)"]
+        domain_col: "paradigm"
+        group_col: "difficulty_level"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_plot"
+
+      criteria:
+        - "All paradigms present (IFR, ICR, IRE)"
+        - "All difficulty levels present (Easy, Hard)"
+        - "Complete factorial design: 6 groups x 4 timepoints = 24 rows"
+        - "No missing combinations"
+        - "predicted_response in [0, 1], observed_mean in [0, 1]"
+        - "CI_upper > CI_lower for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result_plot['message'])"
+        log_to: "logs/step04_extract_interaction.log"
+
+      description: "Verify all paradigms/difficulty levels present in plot data (complete factorial design)"
+
+    log_file: "logs/step04_extract_interaction.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

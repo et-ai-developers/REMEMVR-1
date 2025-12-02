@@ -32,16 +32,28 @@ rq_stats:
     No new concerns. Ready for rq_planner.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    Analysis plan created: 9 steps planned (Step 0: dependency validation + Steps 1-8: analysis).
+    Tool requirements: CTT scoring (Full/Purified), Cronbach's alpha (bootstrap CIs), Steiger's z-test (D068 dual p-values), z-standardization, LMM (9 models: 3 paradigms x 3 measurement types), AIC comparison.
+    Expected outputs: 13 data files (item mapping, CTT scores, reliability, correlation, LMM comparison, plot data), 9 log files. Validation required at every step.
+    Cross-RQ dependency: RQ 5.3.1 (purified items, theta, TSVR). Estimated runtime: 30-90 minutes (dominated by bootstrap and LMM fitting).
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    8 analysis + 8 validation tools cataloged for CTT purification comparison analysis
+    Tools: CTT scoring, Cronbach's alpha, Steiger's z-test, z-standardization, LMM fitting
+    D068 compliance: validate_contrasts_d068 enforces dual p-value reporting
+    Cross-RQ: check_file_exists validates RQ 5.3.1 dependency files exist
 
 rq_analysis:
-  status: pending
+  status: success
   context_dump: |
+    9 steps specified with validation (CTT 2-type comparison -> Cronbach's alpha -> Steiger's z-test -> z-standardization -> 9 LMM models -> AIC comparison -> plot data)
+    All steps have analysis + validation calls with full signatures
+    Dual p-value reporting (D068) enforced via validate_contrasts_d068
+    Cross-RQ dependency validation (RQ 5.3.1) in Step 0
 
 rq_inspect:
   status: pending
@@ -54,3 +66,14 @@ rq_plots:
 rq_results:
   status: pending
   context_dump: |
+
+analysis_steps:
+  step00_load_dependencies: pending
+  step01_map_items: pending
+  step02_compute_full_ctt: pending
+  step03_compute_purified_ctt: pending
+  step04_reliability_assessment: pending
+  step05_correlation_analysis: pending
+  step06_standardize_measurements: pending
+  step07_fit_parallel_lmms: pending
+  step08_prepare_plot_data: pending

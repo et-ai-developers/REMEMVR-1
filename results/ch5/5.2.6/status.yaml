@@ -27,16 +27,38 @@ rq_stats:
     8.95/10 CONDITIONAL. Cat1: 2.8/3 (strong—methods appropriate, sample size risk acknowledged). Cat2: 2.0/2 (100% tool reuse, 7/7 available). Cat3: 1.6/2 (parameters specified, ICC threshold 0.40 not justified vs current 0.50 standard). Cat4: 1.7/2 (validation procedures incomplete—no Q-Q plots, Shapiro-Wilk, convergence remedial actions not detailed). Cat5: 0.85/1 (14 statistical concerns: 2 CRITICAL omissions, 3 MODERATE commissions, 3 MODERATE alternatives, 4 MODERATE pitfalls). Required changes: Add validation section with assumption checks; specify convergence protocol (Bates procedure); justify or update ICC threshold. Domain-stratified LMM with random slopes appropriate for RQ, but risks (convergence, ICC complexity, small-sample ICC instability) must be explicitly addressed in concept.md.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    Analysis plan created: 7 steps planned (no Step 0 - uses DERIVED data from RQ 5.2.1).
+    Tool requirements: Domain-stratified LMM fitting (random slopes), variance component extraction, ICC computation, random effects extraction, correlation tests (D068), domain comparison, barplot data preparation.
+    Expected outputs: 15 variance components (5 x 3 domains), 9 ICC estimates (3 x 3 domains), 300 random effects (REQUIRED for RQ 5.2.7), 3 intercept-slope correlations (dual p-values), domain ICC comparison, barplot data. Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    6 analysis + 7 validation tools cataloged for domain-stratified LMM analysis
+    Tools: fit_lmm_trajectory_tsvr, select_lmm_random_structure_via_lrt, extract_random_effects_from_lmm, compute_icc_from_variance_components, test_intercept_slope_correlation_d068
+    All tools verified in tools_inventory.md, all naming conventions verified in names.md
+    Decisions embedded: D068 (dual p-values), D070 (TSVR time variable)
 
 rq_analysis:
-  status: pending
+  status: success
+  timestamp: "2025-12-02T18:00:00Z"
   context_dump: |
+    7 steps specified with validation (LMM-only domain-stratified variance decomposition)
+    All steps have analysis + validation calls (6 catalogued tools, 2 stdlib operations)
+    All signatures complete with type hints, all parameters specified
+    CRITICAL: step04 outputs 300 random effects (REQUIRED for RQ 5.2.7 clustering)
+    Decisions embedded: D068 (dual p-values), D070 (TSVR time variable)
+
+analysis_steps:
+  step01_fit_domain_lmms: pending
+  step02_extract_variance_components: pending
+  step03_compute_icc_estimates: pending
+  step04_extract_random_effects: pending
+  step05_test_intercept_slope_correlations: pending
+  step06_compare_domain_icc: pending
+  step07_prepare_domain_icc_barplot_data: pending
 
 rq_inspect:
   status: pending

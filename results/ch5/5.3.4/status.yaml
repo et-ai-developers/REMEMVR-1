@@ -27,16 +27,28 @@ rq_stats:
     9.55/10 APPROVED (re-validation after concept.md updates). Cat1: 2.8/3 (appropriate). Cat2: 2.0/2 (100% reuse). Cat3: 1.95/2 (log transform NOW documented). Cat4: 1.95/2 (6 assumption tests NOW specified + convergence LRT contingency). Cat5: 0.85/1 (11 concerns; ~82% resolved including critical gaps). All 4 prior required changes implemented: assumption diagnostics, model selection LRT, log transform rationale, Bonferroni family clarification. Ready for rq_planner.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    6 steps planned (Step 0: load theta + Age -> Step 5: plot data prep).
+    Tool requirements: LMM fitting (3-way Age x Paradigm x Time), marginal effects extraction, Tukey HSD contrasts.
+    Expected outputs: 6 data files (lmm_model.pkl, interaction_terms.csv, age_effects.csv, contrasts.csv, plot_data.csv), 6 logs. Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    5 analysis + 4 validation tools cataloged for Age x Paradigm x Time LMM analysis
+    Analysis: fit_lmm_trajectory_tsvr, extract_fixed_effects, extract_marginal_age_slopes, compute_contrasts_pairwise, prepare_age_effects_plot_data
+    Validation: validate_lmm_assumptions_comprehensive, validate_hypothesis_test_dual_pvalues, validate_contrasts_dual_pvalues, validate_plot_data_completeness
+    All tools verified exist in tools_inventory.md. Decision D068/D070 embedded.
 
 rq_analysis:
-  status: pending
+  status: success
+  timestamp: "2025-12-02T18:00:00Z"
   context_dump: |
+    6 steps specified with validation (LMM 3-way Age x Paradigm x Time)
+    Steps: step00_load_theta_age, step01_merge_tsvr_transform, step02_fit_lmm, step03_extract_interactions, step04_compute_age_effects_contrasts, step05_prepare_plot_data
+    All catalogued tools paired with validation, stdlib operations use inline validation
+    Decision D068/D070 embedded, output paths validated against folder conventions
 
 rq_inspect:
   status: pending
@@ -49,3 +61,11 @@ rq_plots:
 rq_results:
   status: pending
   context_dump: |
+
+analysis_steps:
+  step00_load_theta_age: pending
+  step01_merge_tsvr_transform: pending
+  step02_fit_lmm: pending
+  step03_extract_interactions: pending
+  step04_compute_age_effects_contrasts: pending
+  step05_prepare_plot_data: pending

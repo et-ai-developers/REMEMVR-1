@@ -1,0 +1,492 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.2.6
+# Created by: rq_tools agent
+# Date: 2025-12-02
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.2.6 - Domain-Specific Variance Decomposition
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+# Each analysis tool includes validation_tool reference (enforces pairing)
+# All signatures copied from tools_inventory.md (exact type hints)
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit Linear Mixed Model using TSVR (actual hours since encoding) as time variable per Decision D070. Used to fit domain-stratified LMMs with random intercepts and slopes."
+
+    input_files:
+      - path: "results/ch5/5.2.1/data/step04_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "TSVR_hours", "domain", "theta", "se"]
+        expected_rows: "1200 (100 participants x 4 tests x 3 domains)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          UID: "string (participant identifier)"
+          test: "string (T1, T2, T3, T4)"
+          TSVR_hours: "float (range: [0, 168])"
+          domain: "string (What, Where, When)"
+          theta: "float (range: [-3, 3] typical IRT scale)"
+          se: "float (range: [0.1, 1.0] typical)"
+
+    output_files:
+      - path: "data/step01_model_metadata_what.yaml"
+        description: "What domain LMM metadata (convergence status, random structure, fit indices)"
+      - path: "data/step01_model_metadata_where.yaml"
+        description: "Where domain LMM metadata (convergence status, random structure, fit indices)"
+      - path: "data/step01_model_metadata_when.yaml"
+        description: "When domain LMM metadata (convergence status, random structure, fit indices)"
+      - path: "data/step01_fitted_models.pkl"
+        description: "Pickle file containing 3 fitted MixedLM objects (dict with keys: What, Where, When)"
+
+    parameters:
+      formula: "theta ~ TSVR_hours + (TSVR_hours | UID)"
+      groups: "UID"
+      re_formula: "~TSVR_hours"
+      reml: false
+      convergence_strategy: "Bates parsimonious selection (LRT-based, per 1_concept.md)"
+
+    notes:
+      - "Called 3 times (once per domain: What, Where, When)"
+      - "Random structure: Random intercept AND random slope (individual-specific forgetting rates)"
+      - "Convergence contingency: Use select_lmm_random_structure_via_lrt if initial fit fails"
+      - "Decision D070: TSVR_hours time variable (actual hours, NOT nominal days)"
+
+    source_reference: "tools_inventory.md lines 98-104"
+
+  select_lmm_random_structure_via_lrt:
+    module: "tools.analysis_lmm"
+    function: "select_lmm_random_structure_via_lrt"
+    signature: "select_lmm_random_structure_via_lrt(data: DataFrame, formula: str, time_var: str, groups: str = 'UID', reml: bool = False) -> Dict[selected_model: str, lrt_results: DataFrame, fitted_models: Dict[str, MixedLMResults]]"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Compare 3 random structure specifications via Likelihood Ratio Test: (1) Full (random intercepts + slopes with correlation), (2) Uncorrelated (random intercepts + slopes without correlation), (3) Intercept-only. Uses parsimonious selection per Bates et al. (2015)."
+
+    input_files:
+      - path: "data/domain_subset.csv"
+        required_columns: ["UID", "TSVR_hours", "theta"]
+        expected_rows: "400 (100 participants x 4 tests for one domain)"
+        notes: "Temporary subset created during Step 1 execution"
+
+    output_files:
+      - path: "data/step01_lrt_results_<domain>.csv"
+        columns: ["model", "log_likelihood", "aic", "bic", "p_value"]
+        description: "LRT comparison results for domain-specific random structure selection"
+
+    parameters:
+      formula: "theta ~ TSVR_hours"
+      time_var: "TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    notes:
+      - "Used ONLY if initial fit_lmm_trajectory_tsvr fails to converge"
+      - "Contingency plan per 1_concept.md validation section"
+      - "Prefers simpler model if p >= 0.05 (parsimonious selection)"
+
+    source_reference: "tools_inventory.md lines 146-153"
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_variance_positivity"
+
+    description: "Extract random effects variance components and ICC from fitted LMM. Returns variance components (var_intercept, var_slope, cov_int_slope, var_residual) and ICC."
+
+    input_files:
+      - path: "data/step01_fitted_models.pkl"
+        description: "3 fitted MixedLM objects from Step 1"
+
+    output_files:
+      - path: "data/step02_variance_components.csv"
+        columns: ["domain", "component", "value", "interpretation"]
+        description: "Variance components for all 3 domains (15 rows: 5 components x 3 domains)"
+
+    parameters:
+      extract_components: ["var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+
+    notes:
+      - "Called 3 times (once per domain)"
+      - "Used for both Step 2 (variance component extraction) and Step 4 (random effects extraction)"
+      - "Step 2: Extract variance components (group-level statistics)"
+      - "Step 4: Extract individual random effects (participant-level estimates)"
+
+    source_reference: "tools_inventory.md lines 121-127"
+
+  compute_icc_from_variance_components:
+    module: "tools.analysis_lmm"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_icc_bounds"
+
+    description: "Compute 3 Intraclass Correlation Coefficient (ICC) estimates from LMM variance components: ICC_intercept (baseline individual differences), ICC_slope_simple (slope variance only), and ICC_slope_conditional (slope variance accounting for correlation with intercepts at specific timepoint)."
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["domain", "component", "value"]
+        expected_rows: "15 (5 components x 3 domains)"
+
+    output_files:
+      - path: "data/step03_icc_estimates.csv"
+        columns: ["domain", "icc_type", "icc_value", "interpretation", "threshold_used"]
+        description: "ICC estimates for all 3 domains (9 rows: 3 ICC types x 3 domains)"
+
+    parameters:
+      slope_name: "TSVR_hours"
+      timepoint: 144.0  # Day 6 = 144 hours (6 days x 24 hours/day)
+      thresholds:
+        low: 0.20
+        moderate: 0.40
+
+    notes:
+      - "Called 3 times (once per domain)"
+      - "ICC_slope_conditional evaluated at Day 6 (144 hours)"
+      - "Threshold 0.40 = 'Substantial' per Koo & Li (2016) adapted guidelines"
+      - "Primary hypothesis test: ICC >= 0.40 indicates trait-like forgetting"
+
+    source_reference: "tools_inventory.md lines 165-173"
+
+  test_intercept_slope_correlation_d068:
+    module: "tools.analysis_lmm"
+    function: "test_intercept_slope_correlation_d068"
+    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "Test correlation between random intercepts and random slopes from LMM with Decision D068 dual p-value reporting (uncorrected + Bonferroni). Tests whether individuals with higher baseline memory show different rates of forgetting."
+
+    input_files:
+      - path: "data/step04_random_effects.csv"
+        required_columns: ["UID", "domain", "Total_Intercept", "Total_Slope"]
+        expected_rows: "300 (100 participants x 3 domains)"
+
+    output_files:
+      - path: "data/step05_intercept_slope_correlations.csv"
+        columns: ["domain", "r", "p_uncorrected", "p_bonferroni", "n", "interpretation"]
+        description: "Intercept-slope correlations for all 3 domains (3 rows: one per domain)"
+
+    parameters:
+      family_alpha: 0.01  # Stricter alpha for Chapter 5 (per 1_concept.md)
+      n_tests: 3  # Testing 3 correlations (one per domain)
+      bonferroni_correction: true
+
+    notes:
+      - "Called 3 times (once per domain subset)"
+      - "Decision D068: BOTH p_uncorrected AND p_bonferroni required"
+      - "Bonferroni correction: alpha_per_test = 0.01 / 3 = 0.0033"
+      - "Negative correlation = high performers maintain advantage (Fan Effect)"
+
+    source_reference: "tools_inventory.md lines 175-183"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+# Each validation tool corresponds to an analysis tool
+# All return Dict[str, Any] with 'valid' and 'message' fields
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    description: "Check LMM model converged successfully. Validates convergence status and checks for warnings."
+
+    input_files:
+      - path: "data/step01_fitted_models.pkl"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr)"
+
+    criteria:
+      - "Model converged (lmm_result.converged == True)"
+      - "No convergence warnings in model object"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if converged, False otherwise)"
+        message: "str (convergence status description)"
+        converged: "bool (model.converged attribute)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_fit_domain_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    source_reference: "tools_inventory.md lines 327-333"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics: (1) Residual normality (Shapiro-Wilk + Q-Q plot), (2) Homoscedasticity (Breusch-Pagan + residuals vs fitted), (3) Random effects normality, (4) Autocorrelation (ACF plot + Lag-1 test), (5) Linearity, (6) Outliers (Cook's distance), (7) Convergence diagnostics."
+
+    input_files:
+      - path: "data/step01_fitted_models.pkl"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr)"
+      - path: "results/ch5/5.2.1/data/step04_lmm_input.csv"
+        source: "original LMM input data (for assumption checks)"
+
+    parameters:
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+      output_dir: "data/"
+
+    criteria:
+      - "Residuals normally distributed (Shapiro-Wilk p > 0.05)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "Random effects normally distributed (Shapiro-Wilk p > 0.05)"
+      - "No autocorrelation (ACF Lag-1 < 0.1)"
+      - "Linearity (partial residual plots)"
+      - "No influential outliers (Cook's D < 4/n)"
+      - "Model converged successfully"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if ALL diagnostics pass)"
+        diagnostics: "Dict (7 diagnostic results)"
+        plot_paths: "List[Path] (6 diagnostic plots)"
+        message: "str (summary with remedial action recommendations)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_fit_domain_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    notes:
+      - "Generates 6 diagnostic plots: qq_residuals.png, residuals_vs_fitted.png, qq_random_intercepts.png, qq_random_slopes.png, acf.png, cooks_distance.png"
+      - "Returns valid=True only if ALL 7 diagnostics pass"
+      - "Used after Step 1 LMM fitting for each of 3 domains"
+
+    source_reference: "tools_inventory.md lines 414-422"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    signature: "validate_variance_positivity(variance_df: pd.DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict"
+
+    description: "Validate all LMM variance components > 0. Negative or zero variance indicates estimation issues (collinearity, convergence failure, model misspecification)."
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["component", "value"]
+        source: "analysis tool output (extract_random_effects_from_lmm)"
+
+    parameters:
+      component_col: "component"
+      value_col: "value"
+
+    criteria:
+      - "All variance components > 0 (var_intercept, var_slope, var_residual)"
+      - "Covariance can be negative, zero, or positive (unrestricted)"
+      - "No NaN values in variance components"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all variance > 0)"
+        message: "str (validation result)"
+        negative_components: "List[str] (components with variance <= 0)"
+        variance_range: "Tuple[float, float] (min, max variance values)"
+
+    behavior_on_failure:
+      action: "raise ValueError ('Heywood case detected')"
+      log_to: "logs/step02_extract_variance_components.log"
+      invoke: "g_debug (master invokes after error)"
+
+    notes:
+      - "Heywood case = negative/zero variance component (invalid LMM result)"
+      - "Common causes: model not converged, insufficient data, collinearity"
+
+    source_reference: "tools_inventory.md lines 560-568"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: pd.DataFrame, icc_col: str = 'icc_value') -> Dict"
+
+    description: "Validate ICC values in [0,1] range. ICCs outside this range indicate computation errors since ICC is a proportion of variance."
+
+    input_files:
+      - path: "data/step03_icc_estimates.csv"
+        required_columns: ["icc_value"]
+        source: "analysis tool output (compute_icc_from_variance_components)"
+
+    parameters:
+      icc_col: "icc_value"
+
+    criteria:
+      - "All ICC values in [0, 1] (inclusive, probability constraint)"
+      - "No NaN values (complete ICC computation)"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all ICC in [0,1])"
+        message: "str (validation result with ICC range)"
+        out_of_bounds: "List[Dict] (ICC values outside [0,1])"
+        icc_range: "Tuple[float, float] (min, max ICC values)"
+
+    behavior_on_failure:
+      action: "raise ValueError ('ICC computation error')"
+      log_to: "logs/step03_compute_icc_estimates.log"
+      invoke: "g_debug (master invokes after error)"
+
+    notes:
+      - "Boundary values 0 and 1 are inclusive (valid)"
+      - "Out-of-bounds ICCs indicate: formula error, negative variance components, or missing data"
+
+    source_reference: "tools_inventory.md lines 570-578"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict"
+
+    description: "Validate correlation test results include Decision D068 dual p-value reporting. Ensures correlation results contain BOTH uncorrected and corrected p-values."
+
+    input_files:
+      - path: "data/step05_intercept_slope_correlations.csv"
+        required_columns: ["r", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (test_intercept_slope_correlation_d068)"
+
+    parameters:
+      required_cols: ["r", "p_uncorrected", "p_bonferroni"]
+
+    criteria:
+      - "p_uncorrected column present (Decision D068 requirement)"
+      - "At least one correction method column present (p_bonferroni, p_holm, or p_fdr)"
+      - "r values in [-1, 1] (correlation coefficient bounds)"
+      - "p-values in [0, 1] (probability bounds)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-value reporting present)"
+        missing_cols: "List[str] (missing required columns)"
+        message: "str (validation result)"
+
+    behavior_on_failure:
+      action: "raise ValueError ('Decision D068 violation')"
+      log_to: "logs/step05_test_intercept_slope_correlations.log"
+      invoke: "g_debug (master invokes after error)"
+
+    notes:
+      - "Decision D068: BOTH uncorrected AND corrected p-values required"
+      - "Accepts p_bonferroni, p_holm, or p_fdr as correction method"
+
+    source_reference: "tools_inventory.md lines 454-462"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict"
+
+    description: "Generic DataFrame validation (rows, columns, types). Flexible validator for checking expected structure of analysis outputs. Supports exact row count or range. Optional type checking."
+
+    input_files:
+      - path: "varies (used for multiple steps)"
+        source: "analysis tool outputs (Steps 4, 6, 7)"
+
+    parameters:
+      expected_rows: "varies by step"
+      expected_columns: "varies by step"
+      column_types: "optional type validation"
+
+    criteria:
+      - "Row count in expected range (exact or min-max)"
+      - "All required columns present"
+      - "Column types match (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (validation result)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError (with specific check failure)"
+      log_to: "logs/stepNN_*.log (varies by step)"
+      invoke: "g_debug (master invokes after error)"
+
+    notes:
+      - "Flexible validator used across multiple steps"
+      - "Step 4: Validate 300 rows (100 UID x 3 domains)"
+      - "Step 6: Validate 3 rows (one per domain)"
+      - "Step 7: Validate 3 rows (plot data)"
+
+    source_reference: "tools_inventory.md lines 580-588"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict"
+
+    description: "Verify all domains/groups present in plot data. Checks for missing categories that would create incomplete visualizations."
+
+    input_files:
+      - path: "data/step07_domain_icc_barplot_data.csv"
+        required_columns: ["domain", "icc_slope_conditional", "plot_order"]
+        source: "analysis tool output (Step 7 plot data preparation)"
+
+    parameters:
+      required_domains: ["What", "Where", "When"]
+      required_groups: []  # No grouping variable for this RQ
+      domain_col: "domain"
+
+    criteria:
+      - "All 3 domains present (What, Where, When)"
+      - "No duplicate plot_order values (unique positions)"
+      - "No NaN values in plot data"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all domains present)"
+        message: "str (validation result)"
+        missing_domains: "List[str] (missing domains)"
+        missing_groups: "List[str] (missing groups)"
+
+    behavior_on_failure:
+      action: "raise ValueError ('Incomplete plot data')"
+      log_to: "logs/step07_prepare_domain_icc_barplot_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    notes:
+      - "Used for Step 7 plot data validation"
+      - "Ensures complete factorial design for visualization"
+
+    source_reference: "tools_inventory.md lines 590-598"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 7
+  total_unique_tools: 13
+  mandatory_decisions_embedded: ["D068", "D070"]
+
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "No Step 0 (uses DERIVED data from RQ 5.2.1, no extraction needed)"
+    - "7 analysis steps total (Step 1-7)"
+    - "Step 1 uses TWO analysis tools (fit_lmm_trajectory_tsvr + select_lmm_random_structure_via_lrt as contingency)"
+    - "Step 6 and Step 7 use pandas operations (no dedicated tools - validated via validate_dataframe_structure)"
+
+# =============================================================================
+# END OF TOOL CATALOG
+# =============================================================================

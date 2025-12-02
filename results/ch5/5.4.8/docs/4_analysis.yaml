@@ -1,0 +1,673 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.4.8
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.4.8"
+  total_steps: 6
+  analysis_type: "GLMM-only (cross-classified binomial, no IRT calibration)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T16:00:00Z"
+  dependencies:
+    - "RQ 5.4.1 outputs (item_parameters.csv, tsvr_mapping.csv)"
+  critical_notes:
+    - "GLMM with binomial family (NOT standard LMM) because responses are binary"
+    - "Coefficients on log-odds scale, exponentiate for odds ratios"
+    - "Cross-classified random effects: (TSVR_hours | UID) + (1 | ItemID)"
+    - "No IRT calibration (uses DERIVED difficulty from RQ 5.4.1 as predictor)"
+    - "Dual p-value reporting per D068 (uncorrected + Bonferroni alpha=0.0033)"
+    - "TSVR_hours time variable per D070 (actual hours, not nominal days)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Item Difficulty from RQ 5.4.1
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_item_difficulty"
+    step_number: "00"
+    description: "Load IRT item difficulty parameters from RQ 5.4.1 Pass 2 calibration to use as GLMM predictor"
+
+    # Analysis call specification (stdlib operations - NOT catalogued tool)
+    analysis_call:
+      type: "stdlib"  # pandas operations, not from tools_inventory.md
+      operations:
+        - "pd.read_csv('results/ch5/5.4.1/data/step03_item_parameters.csv')"
+        - "Validate: All items have a >= 0.4 and |b| <= 3.0 (D039 purification bounds)"
+        - "Validate: Item count in expected range (60-80 items)"
+        - "Extract columns: item_name, dimension, b"
+        - "Rename columns: item_name -> ItemID, dimension -> Congruence, b -> Difficulty"
+        - "Save to data/step00_item_difficulty_by_congruence.csv"
+
+      input_files:
+        - path: "results/ch5/5.4.1/data/step03_item_parameters.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item_name", type: "str", description: "Item identifier (e.g., VR-IFR-A01-N-i1)"}
+            - {name: "dimension", type: "str", description: "Congruence level: Common, Congruent, Incongruent"}
+            - {name: "a", type: "float", description: "Discrimination parameter, range: [0.4, 10.0]"}
+            - {name: "b", type: "float", description: "Difficulty parameter, range: [-3.0, 3.0]"}
+          row_count: "60-80 (purified items from RQ 5.4.1)"
+          description: "IRT item parameters from RQ 5.4.1 Pass 2 calibration (post-purification)"
+
+      output_files:
+        - path: "data/step00_item_difficulty_by_congruence.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "ItemID", type: "str", description: "Item identifier (renamed from item_name)"}
+            - {name: "Congruence", type: "str", description: "Categorical: Common, Congruent, Incongruent"}
+            - {name: "Difficulty", type: "float", description: "IRT difficulty parameter b, range: [-3.0, 3.0]"}
+          row_count: "60-80 (matches RQ 5.4.1 purified item count)"
+          description: "Item difficulty parameters with congruence labels for merging onto response data"
+
+    # Validation call specification (catalogued tool from tools.validation)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      inputs:
+        item_difficulty:
+          path: "data/step00_item_difficulty_by_congruence.csv"
+          description: "Output from step 0 extraction"
+
+      parameters:
+        df: "item_difficulty"  # Variable name from analysis output
+        expected_rows: [60, 80]  # Tuple for range
+        expected_columns: ["ItemID", "Congruence", "Difficulty"]
+        column_types:
+          ItemID: "object"
+          Congruence: "object"
+          Difficulty: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Row count in range [60, 80] (purified item count from RQ 5.4.1)"
+        - "All required columns present: ItemID, Congruence, Difficulty"
+        - "Column types match expected (ItemID: object, Congruence: object, Difficulty: float64)"
+        - "No NaN values in Difficulty column"
+        - "Difficulty values in range [-3.0, 3.0] (D039 purification bounds)"
+        - "Congruence values in {Common, Congruent, Incongruent} (no typos)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_item_difficulty.log"
+
+      description: "Validate item difficulty extraction (row count, columns, types, value ranges)"
+
+    log_file: "logs/step00_extract_item_difficulty.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Extract Item-Level Response Data and Merge TSVR
+  # --------------------------------------------------------------------------
+  - name: "step01_extract_responses"
+    step_number: "01"
+    description: "Extract raw binary responses for purified items from dfData.csv and merge with TSVR time mapping"
+
+    # Analysis call specification (stdlib operations)
+    analysis_call:
+      type: "stdlib"  # pandas operations
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv') - full dataset"
+        - "Load data/step00_item_difficulty_by_congruence.csv (purified item list)"
+        - "Filter dfData to retain only items in purified list"
+        - "Dichotomize responses: TQ < 1 -> 0 (incorrect), TQ >= 1 -> 1 (correct)"
+        - "Load results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+        - "Merge TSVR_hours onto filtered response data (left join on UID + test)"
+        - "Validate: All responses have matched TSVR_hours (no NaN after merge)"
+        - "Output columns: UID, test, ItemID (renamed from item_name), Response (binary 0/1), TSVR_hours"
+        - "Save to data/step01_response_level_data.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          format: "CSV, long format (project-level RAW data source)"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier, format: P### with leading zeros"}
+            - {name: "test", type: "str", description: "Test session: T1, T2, T3, T4"}
+            - {name: "item_name", type: "str", description: "VR item identifier"}
+            - {name: "TQ", type: "int", description: "Ternary quality score: 0=incorrect, 1=low-quality, 2=high-quality"}
+          row_count: "~1,800,000 (before filtering to purified items)"
+          description: "Master data file with all participant responses"
+
+        - path: "data/step00_item_difficulty_by_congruence.csv"
+          format: "CSV"
+          columns:
+            - {name: "ItemID", type: "str", description: "Item identifier for filtering"}
+          row_count: "60-80"
+          description: "Purified item list from Step 0"
+
+        - path: "results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+          format: "CSV"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "test", type: "str", description: "Test session"}
+            - {name: "TSVR_hours", type: "float", description: "Actual time since VR encoding in hours (D070)"}
+          row_count: "400 (100 participants x 4 tests)"
+          description: "Time variable mapping from RQ 5.4.1"
+
+      output_files:
+        - path: "data/step01_response_level_data.csv"
+          format: "CSV, long format (one row per response observation)"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "test", type: "str", description: "Test session: T1, T2, T3, T4"}
+            - {name: "ItemID", type: "str", description: "Item identifier (renamed from item_name)"}
+            - {name: "Response", type: "int", description: "Binary: 0=incorrect, 1=correct"}
+            - {name: "TSVR_hours", type: "float", description: "Actual time since encoding (D070)"}
+          row_count: "24,000-32,000 (100 participants x 4 tests x 60-80 items)"
+          description: "Item-level binary responses with time variable"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      inputs:
+        response_data:
+          path: "data/step01_response_level_data.csv"
+          description: "Output from step 1 extraction + merge"
+
+      parameters:
+        df: "response_data"
+        expected_rows: [24000, 32000]  # Range for 100 participants x 4 tests x 60-80 items
+        expected_columns: ["UID", "test", "ItemID", "Response", "TSVR_hours"]
+        column_types:
+          UID: "object"
+          test: "object"
+          ItemID: "object"
+          Response: "int64"
+          TSVR_hours: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Row count in range [24,000, 32,000] (100 participants x 4 tests x 60-80 items)"
+        - "All required columns present: UID, test, ItemID, Response, TSVR_hours"
+        - "Column types match expected"
+        - "Response values in {0, 1} (binary only, no other values)"
+        - "TSVR_hours in [0, 168] hours (0=Day 0, 168=1 week for Day 6)"
+        - "No NaN values in TSVR_hours (all responses matched with time variable)"
+        - "All 100 participants present (no data loss)"
+        - "All 4 test sessions per participant (complete data)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_extract_responses.log"
+
+      description: "Validate response extraction (row count, columns, binary responses, TSVR merge completeness)"
+
+    log_file: "logs/step01_extract_responses.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Merge Item Difficulty and Center Difficulty Variable
+  # --------------------------------------------------------------------------
+  - name: "step02_merge_difficulty"
+    step_number: "02"
+    description: "Add item difficulty and congruence labels to response-level data, grand-mean center difficulty for interaction interpretation"
+
+    # Analysis call specification (stdlib operations)
+    analysis_call:
+      type: "stdlib"  # pandas operations
+      operations:
+        - "Load data/step01_response_level_data.csv (response data from Step 1)"
+        - "Load data/step00_item_difficulty_by_congruence.csv (item difficulty from Step 0)"
+        - "Merge item difficulty + congruence onto response data (left join on ItemID)"
+        - "Validate: All responses have matched item difficulty (no NaN after merge)"
+        - "Compute grand mean: mean_difficulty = mean(Difficulty)"
+        - "Center difficulty: Difficulty_c = Difficulty - mean_difficulty"
+        - "Validate: mean(Difficulty_c) approximately 0 (within +/- 0.01)"
+        - "Output: response data with added columns Difficulty, Difficulty_c, Congruence"
+        - "Save to data/step02_merged_data.csv"
+
+      input_files:
+        - path: "data/step01_response_level_data.csv"
+          format: "CSV, long format"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "ItemID", type: "str"}
+            - {name: "Response", type: "int"}
+            - {name: "TSVR_hours", type: "float"}
+          row_count: "24,000-32,000"
+          description: "Response data from Step 1"
+
+        - path: "data/step00_item_difficulty_by_congruence.csv"
+          format: "CSV"
+          columns:
+            - {name: "ItemID", type: "str"}
+            - {name: "Congruence", type: "str"}
+            - {name: "Difficulty", type: "float"}
+          row_count: "60-80"
+          description: "Item metadata from Step 0"
+
+      output_files:
+        - path: "data/step02_merged_data.csv"
+          format: "CSV, long format (one row per response observation)"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "test", type: "str", description: "Test session"}
+            - {name: "ItemID", type: "str", description: "Item identifier"}
+            - {name: "Response", type: "int", description: "Binary: 0=incorrect, 1=correct"}
+            - {name: "TSVR_hours", type: "float", description: "Time variable per D070"}
+            - {name: "Difficulty", type: "float", description: "Raw IRT difficulty parameter b"}
+            - {name: "Difficulty_c", type: "float", description: "Grand-mean centered difficulty"}
+            - {name: "Congruence", type: "str", description: "Categorical: Common, Congruent, Incongruent"}
+          row_count: "24,000-32,000 (matches Step 1 input exactly)"
+          description: "Complete GLMM input with centered difficulty predictor"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      inputs:
+        merged_data:
+          path: "data/step02_merged_data.csv"
+          description: "Output from step 2 merge + centering"
+
+      parameters:
+        df: "merged_data"
+        column_names: ["Difficulty_c"]  # Validate centering of this column
+        tolerance: 0.01  # Mean must be within +/- 0.01 of zero
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Centered variable (Difficulty_c) has mean within tolerance of 0 (|mean| < 0.01)"
+        - "Standard deviation approximately equal to original Difficulty SD"
+        - "No NaN values introduced during centering"
+        - "Row count matches Step 1 exactly (no data loss during merge)"
+        - "All responses matched with item difficulty and congruence (no NaN)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_merge_difficulty.log"
+
+      description: "Validate grand-mean centering (mean approximately 0, no data loss during merge)"
+
+    log_file: "logs/step02_merge_difficulty.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Cross-Classified GLMM with 3-Way Interaction
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_glmm"
+    step_number: "03"
+    description: "Fit Generalized Linear Mixed Model (GLMM) with binomial family to test 3-way Time x Difficulty_c x Congruence interaction on binary responses"
+
+    # Analysis call specification (external package - pymer4 or rpy2.lme4)
+    analysis_call:
+      type: "catalogued"  # External package (not stdlib, but documented in 3_tools.yaml)
+      module: "pymer4 OR rpy2.lme4"
+      function: "Lmer(family='binomial') OR glmer(family=binomial(link='logit'))"
+      signature: "Lmer(formula: str, data: DataFrame, family: str) -> Lmer OR glmer(formula: str, data: DataFrame, family: binomial)"
+
+      input_files:
+        - path: "data/step02_merged_data.csv"
+          format: "CSV, long format"
+          columns:
+            - {name: "UID", type: "str", description: "Participant grouping factor"}
+            - {name: "ItemID", type: "str", description: "Item grouping factor (crossed with UID)"}
+            - {name: "Response", type: "int", description: "Binary DV: 0/1"}
+            - {name: "TSVR_hours", type: "float", description: "Continuous time predictor"}
+            - {name: "Difficulty_c", type: "float", description: "Centered item-level predictor"}
+            - {name: "Congruence", type: "str", description: "Categorical factor: Common/Congruent/Incongruent"}
+          row_count: "24,000-32,000"
+          description: "Complete GLMM input from Step 2"
+
+      output_files:
+        - path: "data/step03_glmm_model_summary.txt"
+          format: "Plain text summary"
+          description: "Full GLMM summary (fixed effects, random effects, fit statistics, convergence diagnostics)"
+
+        - path: "data/step03_fixed_effects.csv"
+          format: "CSV"
+          columns:
+            - {name: "term", type: "str", description: "Predictor name"}
+            - {name: "estimate", type: "float", description: "Coefficient on log-odds scale"}
+            - {name: "SE", type: "float", description: "Standard error"}
+            - {name: "z", type: "float", description: "z-statistic"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (alpha=0.0033, D068)"}
+            - {name: "OR", type: "float", description: "Odds ratio = exp(estimate)"}
+            - {name: "OR_CI_lower", type: "float", description: "Lower bound of 95% CI for OR"}
+            - {name: "OR_CI_upper", type: "float", description: "Upper bound of 95% CI for OR"}
+          row_count: "~15 (intercept + main effects + interactions)"
+          description: "Fixed effects with dual p-values (D068) and odds ratios"
+
+        - path: "data/step03_random_effects.csv"
+          format: "CSV"
+          columns:
+            - {name: "component", type: "str", description: "Random effect component (e.g., UID_intercept, ItemID_intercept)"}
+            - {name: "variance", type: "float", description: "Variance estimate (must be > 0)"}
+            - {name: "SD", type: "float", description: "Standard deviation = sqrt(variance)"}
+          row_count: "2-3 (depends on convergence: full model has 3, simplified has 2)"
+          description: "Random effects variance components"
+
+      parameters:
+        formula: "Response ~ TSVR_hours * Difficulty_c * Congruence + (TSVR_hours | UID) + (1 | ItemID)"
+        family: "binomial"
+        link: "logit"
+        optimizer: "bobyqa"  # lme4 default for GLMM
+        bonferroni_n_tests: 15  # Chapter 5 family size for D068
+        bonferroni_alpha: 0.0033  # 0.05 / 15
+
+        convergence_contingency:
+          - step: 1
+            action: "Try alternative optimizers (nloptwrap, nlminbwrap)"
+          - step: 2
+            action: "Simplify random effects to (1 | UID) + (1 | ItemID)"
+          - step: 3
+            action: "Fit participant-aggregated model if all else fails"
+
+      returns:
+        type: "Tuple[Any, pd.DataFrame, pd.DataFrame]"
+        unpacking: "glmm_model, fixed_effects, random_effects"
+
+      description: "Fit GLMM with binomial family for binary responses, test 3-way Time x Difficulty x Congruence interaction"
+
+      notes:
+        - "GLMM (not LMM) because responses are binary (0/1)"
+        - "Coefficients on log-odds scale, exponentiate for odds ratios"
+        - "Cross-classified random effects (participants x items non-nested)"
+        - "Convergence contingency plan if full model fails"
+
+    # Validation call specification (composite validation for GLMM)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence + validate_variance_positivity + validate_hypothesis_test_dual_pvalues"
+      signature: "Multiple validation functions combined for comprehensive GLMM diagnostics"
+
+      inputs:
+        glmm_model:
+          path: "data/step03_glmm_model_summary.txt"
+          description: "Fitted GLMM model object"
+
+        fixed_effects:
+          path: "data/step03_fixed_effects.csv"
+          description: "Fixed effects table from GLMM"
+
+        random_effects:
+          path: "data/step03_random_effects.csv"
+          description: "Random effects variance components"
+
+      parameters:
+        model: "glmm_model"
+        fixed_effects_df: "fixed_effects"
+        random_effects_df: "random_effects"
+        min_variance: 0.0  # All variances must be > 0
+        required_dual_pvalues: true  # D068 compliance
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (converged = TRUE)"
+        - "All variance components > 0 (no singularity)"
+        - "No NaN in fixed effects estimates"
+        - "Dual p-values present (p_uncorrected + p_bonferroni per D068)"
+        - "Overdispersion check: Residual deviance / df approximately 1 (if > 1.5, document as warning)"
+        - "Random effects normality (Q-Q plots approximately normal, mild violations acceptable)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message']) OR trigger convergence contingency plan"
+        log_to: "logs/step03_fit_glmm.log"
+
+      description: "Comprehensive GLMM validation (convergence, variance positivity, assumptions, D068 compliance)"
+
+    log_file: "logs/step03_fit_glmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract 3-Way Interaction and Congruence-Stratified Slopes
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_interaction"
+    step_number: "04"
+    description: "Extract 3-way interaction term with dual p-values (D068), fit congruence-stratified models for post-hoc slopes"
+
+    # Analysis call specification (stdlib + external package)
+    analysis_call:
+      type: "stdlib"  # pandas filtering + pymer4 re-fitting
+      operations:
+        - "Load data/step03_fixed_effects.csv"
+        - "Filter to 3-way interaction terms (TSVR_hours:Difficulty_c:Congruent, TSVR_hours:Difficulty_c:Incongruent)"
+        - "Verify dual p-values present: p_uncorrected and p_bonferroni columns exist (D068 compliance)"
+        - "Extract: term, estimate, SE, z, p_uncorrected, p_bonferroni, OR, OR_CI_lower, OR_CI_upper"
+        - "Add column: significant_bonferroni = (p_bonferroni < 0.0033)"
+        - "Save to data/step04_interaction_3way.csv"
+        - "Load data/step02_merged_data.csv for stratified models"
+        - "For each congruence level (Common, Congruent, Incongruent):"
+        - "  - Subset data to that congruence level only"
+        - "  - Fit GLMM: Response ~ TSVR_hours * Difficulty_c + (TSVR_hours | UID) + (1 | ItemID), family=binomial"
+        - "  - Extract TSVR_hours:Difficulty_c interaction coefficient"
+        - "  - Compute: estimate, SE, z, p-value, OR with 95% CI"
+        - "Save to data/step04_congruence_stratified_slopes.csv"
+
+      input_files:
+        - path: "data/step03_fixed_effects.csv"
+          format: "CSV"
+          columns:
+            - {name: "term", type: "str"}
+            - {name: "estimate", type: "float"}
+            - {name: "SE", type: "float"}
+            - {name: "z", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float"}
+            - {name: "OR", type: "float"}
+            - {name: "OR_CI_lower", type: "float"}
+            - {name: "OR_CI_upper", type: "float"}
+          row_count: "~15"
+          description: "Fixed effects from Step 3 GLMM"
+
+        - path: "data/step02_merged_data.csv"
+          format: "CSV, long format"
+          row_count: "24,000-32,000"
+          description: "Response data for congruence-stratified models"
+
+      output_files:
+        - path: "data/step04_interaction_3way.csv"
+          format: "CSV"
+          columns:
+            - {name: "term", type: "str", description: "Interaction term name"}
+            - {name: "estimate", type: "float", description: "Log-odds scale"}
+            - {name: "SE", type: "float"}
+            - {name: "z", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float", description: "Alpha = 0.0033"}
+            - {name: "OR", type: "float"}
+            - {name: "OR_CI_lower", type: "float"}
+            - {name: "OR_CI_upper", type: "float"}
+            - {name: "significant_bonferroni", type: "bool", description: "TRUE if p_bonferroni < 0.0033"}
+          row_count: "2 (Congruent, Incongruent contrasts vs Common reference)"
+          description: "3-way interaction terms with D068 compliance"
+
+        - path: "data/step04_congruence_stratified_slopes.csv"
+          format: "CSV"
+          columns:
+            - {name: "Congruence", type: "str", description: "Common, Congruent, Incongruent"}
+            - {name: "interaction_estimate", type: "float", description: "TSVR_hours:Difficulty_c coefficient on log-odds scale"}
+            - {name: "SE", type: "float"}
+            - {name: "z", type: "float"}
+            - {name: "p_value", type: "float", description: "Uncorrected p-value (exploratory post-hoc)"}
+            - {name: "OR", type: "float"}
+            - {name: "OR_CI_lower", type: "float"}
+            - {name: "OR_CI_upper", type: "float"}
+          row_count: "3 (one per congruence level)"
+          description: "Time x Difficulty interaction per congruence level (exploratory post-hoc)"
+
+      parameters:
+        required_terms: ["TSVR_hours:Difficulty_c:Congruent", "TSVR_hours:Difficulty_c:Incongruent"]
+        bonferroni_alpha: 0.0033
+        stratified_formula: "Response ~ TSVR_hours * Difficulty_c + (TSVR_hours | UID) + (1 | ItemID)"
+        stratified_levels: ["Common", "Congruent", "Incongruent"]
+
+      returns:
+        type: "Tuple[pd.DataFrame, pd.DataFrame]"
+        unpacking: "interaction_3way, stratified_slopes"
+
+      description: "Extract 3-way interaction with D068 dual p-values, fit congruence-stratified models for post-hoc interpretation"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      inputs:
+        interaction_3way:
+          path: "data/step04_interaction_3way.csv"
+          description: "3-way interaction terms from Step 4"
+
+      parameters:
+        interaction_df: "interaction_3way"
+        required_terms: ["TSVR_hours:Difficulty_c:Congruent", "TSVR_hours:Difficulty_c:Incongruent"]
+        alpha_bonferroni: 0.0033
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All required interaction terms present (2 terms: Congruent, Incongruent contrasts)"
+        - "Dual p-values present: p_uncorrected AND p_bonferroni (D068 compliance)"
+        - "Bonferroni alpha correctly calculated (0.0033 = 0.05 / 15)"
+        - "No NaN values in interaction table"
+        - "significant_bonferroni column present and boolean"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_extract_interaction.log"
+
+      description: "Validate 3-way interaction extraction with D068 dual p-value compliance"
+
+    log_file: "logs/step04_extract_interaction.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Trajectory Plot Data (6 Lines: 2 Difficulty x 3 Congruence)
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Generate GLMM predictions for 6 trajectories (Easy/Hard difficulty x Common/Congruent/Incongruent congruence) across 4 timepoints"
+
+    # Analysis call specification (stdlib + GLMM predictions)
+    analysis_call:
+      type: "stdlib"  # pandas + GLMM predict method
+      operations:
+        - "Load data/step02_merged_data.csv (for computing SD(Difficulty) and TSVR means)"
+        - "Compute SD(Difficulty) from merged data"
+        - "Define difficulty levels: Easy = -1 SD, Hard = +1 SD (centered on mean)"
+        - "Define timepoints: [0, 24, 72, 144] hours (approximate TSVR means for T1, T2, T3, T4)"
+        - "Re-fit or load GLMM model from Step 3 (same formula)"
+        - "For each combination of:"
+        - "  - Difficulty_Level: {Easy, Hard} (2 levels)"
+        - "  - Congruence: {Common, Congruent, Incongruent} (3 levels)"
+        - "  - Time: {0, 24, 72, 144} (4 timepoints)"
+        - "  Total: 2 x 3 x 4 = 24 predictions"
+        - "Generate predictions:"
+        - "  - Fixed effects: TSVR_hours, Difficulty_c, Congruence, + interactions"
+        - "  - Random effects: Marginalize over participants and items (population-level predictions)"
+        - "  - Compute 95% confidence intervals (using model SE for fixed effects)"
+        - "  - Transform from log-odds to probability: p = exp(logit) / (1 + exp(logit))"
+        - "Save to data/step05_difficulty_trajectories_by_congruence_data.csv"
+
+      input_files:
+        - path: "data/step03_glmm_model_summary.txt"
+          format: "Plain text (or model object if saved)"
+          description: "Fitted GLMM model from Step 3 (or re-fit from merged_data)"
+
+        - path: "data/step02_merged_data.csv"
+          format: "CSV"
+          columns:
+            - {name: "Difficulty", type: "float", description: "For computing SD"}
+            - {name: "TSVR_hours", type: "float", description: "For computing means per test"}
+          description: "Merged data for computing difficulty SD and TSVR representative values"
+
+      output_files:
+        - path: "data/step05_difficulty_trajectories_by_congruence_data.csv"
+          format: "CSV, plot source data"
+          columns:
+            - {name: "Congruence", type: "str", description: "Common, Congruent, Incongruent"}
+            - {name: "Difficulty_Level", type: "str", description: "Easy, Hard"}
+            - {name: "Time_Hours", type: "float", description: "TSVR_hours: 0, 24, 72, 144"}
+            - {name: "Predicted_Probability", type: "float", description: "Predicted P(correct), range: [0, 1]"}
+            - {name: "CI_lower", type: "float", description: "Lower bound of 95% CI, range: [0, 1]"}
+            - {name: "CI_upper", type: "float", description: "Upper bound of 95% CI, range: [0, 1]"}
+          row_count: "24 (2 difficulty x 3 congruence x 4 timepoints)"
+          description: "Plot source CSV for 6-line trajectory (read by rq_plots, PNG saved to plots/)"
+
+      parameters:
+        difficulty_levels:
+          Easy: "-1 SD (Difficulty_c = -1 * SD(Difficulty))"
+          Hard: "+1 SD (Difficulty_c = +1 * SD(Difficulty))"
+        congruence_levels: ["Common", "Congruent", "Incongruent"]
+        timepoints_hours: [0, 24, 72, 144]
+        ci_level: 0.95
+        transform: "Logit to probability: p = exp(logit) / (1 + exp(logit))"
+        expected_rows: 24
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "plot_data"
+
+      description: "Generate GLMM predictions for 6-line trajectory plot (2 difficulty x 3 congruence x 4 timepoints)"
+
+      notes:
+        - "This CSV is read by rq_plots later to generate PNG"
+        - "Predictions use population-level fixed effects (random effects marginalized)"
+        - "Probability scale transformation applied (not log-odds)"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+      inputs:
+        plot_data:
+          path: "data/step05_difficulty_trajectories_by_congruence_data.csv"
+          description: "Plot source data from Step 5"
+
+      parameters:
+        probability_df: "plot_data"
+        prob_columns: ["Predicted_Probability", "CI_lower", "CI_upper"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All predicted probabilities in [0, 1] range"
+        - "CI_lower <= Predicted_Probability <= CI_upper for all rows"
+        - "No NaN values in predictions or CIs"
+        - "Expected row count: 24 (2 difficulty x 3 congruence x 4 timepoints)"
+        - "Complete factorial design (all combinations present)"
+        - "All 3 congruence levels present (Common, Congruent, Incongruent)"
+        - "Both difficulty levels present (Easy, Hard)"
+        - "All 4 timepoints present (0, 24, 72, 144 hours)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+      description: "Validate GLMM predictions are valid probabilities with proper CI bounds and complete factorial design"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

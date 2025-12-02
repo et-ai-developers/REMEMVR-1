@@ -6,8 +6,9 @@ tools: Read, Write, Edit, Bash
 
 # rq_analysis Agent
 
-**Version:** v4.0.0
+**Version:** v4.1.0
 **Created:** 2025-11-18
+**Updated:** 2025-12-02
 **Purpose:** Creates complete analysis recipe (4_analysis.yaml) with full specifications for g_code agent
 
 ---
@@ -31,8 +32,8 @@ Generate **complete, self-contained analysis recipe** in 4_analysis.yaml that en
 **Circuit Breakers to Implement:**
 
 1. **EXPECTATIONS Circuit Breaker:**
-   - Master MUST specify chX/rqY to work on
-   - If missing → QUIT with error: "Missing RQ specification - expected format: 'chX/rqY'"
+   - Master MUST specify chX/X.Y.Z to work on (e.g., ch5/5.1.1)
+   - If missing → QUIT with error: "Missing RQ specification - expected format: 'chX/X.Y.Z'"
 
 2. **STEP Circuit Breaker:**
    - All prior agent steps MUST = success in status.yaml
@@ -41,7 +42,7 @@ Generate **complete, self-contained analysis recipe** in 4_analysis.yaml that en
 
 3. **TOOL Circuit Breaker:**
    - Write tool usage MUST follow file safety rules
-   - Only writes to results/chX/rqY/docs/ (never modifies core files)
+   - Only writes to results/chX/X.Y.Z/docs/ (never modifies core files)
 
 4. **CLARITY Circuit Breaker:**
    - If 2_plan.md ambiguous or missing parameter values → QUIT with specific questions
@@ -56,7 +57,7 @@ Generate **complete, self-contained analysis recipe** in 4_analysis.yaml that en
 
 ### Step 2: Read Status File
 
-**Action:** Read `results/chX/rqY/status.yaml`
+**Action:** Read `results/chX/X.Y.Z/status.yaml`
 
 **Purpose:** Verify workflow state and load prior agent context
 
@@ -107,7 +108,7 @@ agents:
 
 ### Step 4: Read Analysis Plan
 
-**Action:** Read `results/chX/rqY/docs/2_plan.md`
+**Action:** Read `results/chX/X.Y.Z/docs/2_plan.md`
 
 **Purpose:** Extract step-by-step analysis plan with parameter values
 
@@ -178,7 +179,7 @@ config:
 
 ### Step 5: Read Tool Catalog
 
-**Action:** Read `results/chX/rqY/docs/3_tools.yaml`
+**Action:** Read `results/chX/X.Y.Z/docs/3_tools.yaml`
 
 **Purpose:** Extract tool specifications (signatures, inputs, outputs, validation)
 
@@ -434,7 +435,7 @@ Action: QUIT (did not write 4_analysis.yaml - fix violations first)
 
 ### Step 9: Create Output File
 
-**Action:** Bash `mkdir -p results/chX/rqY/docs` (if needed, safe if exists)
+**Action:** Bash `mkdir -p results/chX/X.Y.Z/docs` (if needed, safe if exists)
 
 **Purpose:** Ensure output directory exists before writing
 
@@ -446,7 +447,7 @@ Action: QUIT (did not write 4_analysis.yaml - fix violations first)
 
 ### Step 10: Write Complete Analysis Recipe
 
-**Action:** Write `results/chX/rqY/docs/4_analysis.yaml`
+**Action:** Write `results/chX/X.Y.Z/docs/4_analysis.yaml`
 
 **Structure (COMPLETE specification per step):**
 
@@ -455,16 +456,16 @@ Action: QUIT (did not write 4_analysis.yaml - fix violations first)
 # ANALYSIS RECIPE - COMPLETE SPECIFICATION
 # ============================================================================
 # Generated: [timestamp]
-# RQ: chX/rqY
-# Agent: rq_analysis v4.0.0
+# RQ: chX/X.Y.Z
+# Agent: rq_analysis v4.1.0
 # Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
 # ============================================================================
 
 metadata:
-  rq_id: "chX/rqY"
+  rq_id: "chX/X.Y.Z"
   total_steps: [N]
   analysis_type: "IRT→LMM trajectory analysis"
-  generated_by: "rq_analysis v4.0.0"
+  generated_by: "rq_analysis v4.1.0"
   timestamp: "[ISO 8601 timestamp]"
 
 # ============================================================================
@@ -668,7 +669,7 @@ steps:
 
 ### Step 11: Update Status File
 
-**Action:** Edit `results/chX/rqY/status.yaml`
+**Action:** Edit `results/chX/X.Y.Z/status.yaml`
 
 **Changes:**
 
@@ -716,10 +717,10 @@ analysis_steps:
 ```
 Status: SUCCESS
 Agent: rq_analysis
-RQ: chX/rqY
-Output: results/chX/rqY/docs/4_analysis.yaml
+RQ: chX/X.Y.Z
+Output: results/chX/X.Y.Z/docs/4_analysis.yaml
 
-Summary: Successfully created complete analysis recipe for chX/rqY - [N] steps specified
+Summary: Successfully created complete analysis recipe for chX/X.Y.Z - [N] steps specified
 
 Analysis Steps:
 - Step 1: [step_1_name] - [description]
@@ -881,6 +882,15 @@ Before writing 4_analysis.yaml, verify:
 - Enables g_code to generate perfect Python (self-contained recipe)
 - Enforces quality gates (completeness checks before file creation)
 - Maintains consistency across 50 RQs (naming conventions enforced)
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v4.1.0 | 2025-12-02 | Updated path format from chX/rqY to chX/X.Y.Z (hierarchical RQ numbering) |
+| v4.0.0 | 2025-11-18 | Initial v4.X atomic agent specification |
 
 ---
 

@@ -1,0 +1,456 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (2025-12-02)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.4.6 - Schema-Specific Variance Decomposition
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_loaded_lmm_input.csv"
+        required_columns: ["UID", "test", "TSVR_hours", "congruence", "theta", "SE"]
+        expected_rows: "1200 (100 UID x 4 tests x 3 congruence)"
+        data_types:
+          UID: "string (participant identifier, e.g., 'P001')"
+          test: "string (test session: T1/T2/T3/T4)"
+          TSVR_hours: "float (0-168 hours per Decision D070)"
+          congruence: "string (Common/Congruent/Incongruent)"
+          theta: "float (IRT ability estimate, range [-3, 3])"
+          SE: "float (standard error, range [0.1, 1.0])"
+
+    output_files:
+      - path: "data/step02_fitted_model_common.pkl"
+        format: "Pickled statsmodels MixedLMResults object"
+        description: "Fitted LMM for Common congruence level"
+      - path: "data/step02_fitted_model_congruent.pkl"
+        format: "Pickled statsmodels MixedLMResults object"
+        description: "Fitted LMM for Congruent congruence level"
+      - path: "data/step02_fitted_model_incongruent.pkl"
+        format: "Pickled statsmodels MixedLMResults object"
+        description: "Fitted LMM for Incongruent congruence level"
+      - path: "data/step02_variance_components.csv"
+        columns: ["congruence", "component", "value"]
+        description: "Variance components (var_intercept, var_slope, cov_int_slope, var_residual, var_total) for all 3 congruence levels"
+      - path: "data/step02_model_metadata_common.yaml"
+        format: "YAML with model metadata (formula, converged, reml, n_obs, n_participants)"
+        description: "Model metadata for Common congruence level"
+      - path: "data/step02_model_metadata_congruent.yaml"
+        format: "YAML with model metadata"
+        description: "Model metadata for Congruent congruence level"
+      - path: "data/step02_model_metadata_incongruent.yaml"
+        format: "YAML with model metadata"
+        description: "Model metadata for Incongruent congruence level"
+
+    parameters:
+      formula: "theta ~ TSVR_hours"
+      re_formula: "~TSVR_hours | UID"
+      groups: "UID"
+      reml: true
+      stratified_by: "congruence"
+      congruence_levels: ["Common", "Congruent", "Incongruent"]
+
+    description: "Fit three separate LMMs stratified by congruence level (Common, Congruent, Incongruent) with random intercepts and random slopes to estimate variance components for ICC computation"
+    source_reference: "tools_inventory.md line 99 - fit_lmm_trajectory_tsvr"
+    notes:
+      - "Decision D070: TSVR_hours as time variable (actual hours, not nominal days)"
+      - "Random effects: Random intercept + random slope for forgetting rate variance decomposition"
+      - "REML=True for unbiased variance estimates per best practices"
+      - "Step 2 fits 3 models (one per congruence level) for variance component comparison"
+      - "Convergence contingency: If random slopes fail -> try alternative optimizers -> LRT -> simplified structure"
+
+  compute_icc_from_variance_components:
+    module: "tools.analysis_lmm"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_icc_bounds"
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["congruence", "component", "value"]
+        expected_rows: "15 (5 components x 3 congruence levels)"
+        source: "Step 2 output (variance components from stratified LMMs)"
+
+    output_files:
+      - path: "data/step03_icc_estimates.csv"
+        columns: ["congruence", "icc_type", "value", "magnitude"]
+        description: "ICC estimates (intercept, slope_simple, slope_conditional) for each congruence level"
+      - path: "data/step03_icc_summary.txt"
+        format: "Text report with ICC interpretations by congruence level"
+        description: "Human-readable ICC summary with magnitude classifications"
+
+    parameters:
+      slope_name: "TSVR_hours"
+      timepoint: 144.0
+      magnitude_thresholds:
+        low: 0.20
+        moderate: 0.40
+
+    description: "Compute 3 ICC types (intercept, slope_simple, slope_conditional) for each congruence level to quantify between-person vs within-person variance in baseline and forgetting rate"
+    source_reference: "tools_inventory.md line 165 - compute_icc_from_variance_components"
+    notes:
+      - "ICC_intercept: var_intercept / (var_intercept + var_residual)"
+      - "ICC_slope_simple: var_slope / (var_slope + var_residual)"
+      - "ICC_slope_conditional: Var(b0 + b1*t) / [Var(b0 + b1*t) + var_residual] at Day 6 (144h)"
+      - "Timepoint 144h = Day 6 for conditional ICC computation (end of observation window)"
+      - "Magnitude thresholds: <0.20 Low, 0.20-0.40 Moderate, >=0.40 Substantial"
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step02_fitted_model_common.pkl"
+        format: "Pickled statsmodels MixedLMResults"
+        source: "Step 2 output (Common congruence model)"
+      - path: "data/step02_fitted_model_congruent.pkl"
+        format: "Pickled statsmodels MixedLMResults"
+        source: "Step 2 output (Congruent congruence model)"
+      - path: "data/step02_fitted_model_incongruent.pkl"
+        format: "Pickled statsmodels MixedLMResults"
+        source: "Step 2 output (Incongruent congruence model)"
+
+    output_files:
+      - path: "data/step04_random_effects.csv"
+        columns: ["UID", "congruence", "Total_Intercept", "Total_Slope"]
+        description: "Random intercepts and slopes for all 100 participants across 3 congruence levels"
+      - path: "data/step04_random_slopes_descriptives.txt"
+        format: "Text report with descriptive statistics (mean, SD, min, max, median)"
+        description: "Descriptive statistics for random effects by congruence level"
+
+    parameters:
+      extract_from_models: 3
+      congruence_levels: ["Common", "Congruent", "Incongruent"]
+      expected_participants: 100
+
+    description: "Extract individual-level random intercepts and slopes from fitted LMMs for all participants across congruence levels to enable intercept-slope correlation testing"
+    source_reference: "tools_inventory.md line 121 - extract_random_effects_from_lmm"
+    notes:
+      - "Total_Intercept: Random intercept deviation from fixed intercept (should center at 0)"
+      - "Total_Slope: Random slope deviation from fixed slope (should center at 0)"
+      - "Output format: 300 rows (100 UID x 3 congruence levels)"
+      - "Each UID appears 3 times (once per congruence level)"
+
+  test_intercept_slope_correlation_d068:
+    module: "tools.analysis_lmm"
+    function: "test_intercept_slope_correlation_d068"
+    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step04_random_effects.csv"
+        required_columns: ["UID", "congruence", "Total_Intercept", "Total_Slope"]
+        expected_rows: "300 (100 UID x 3 congruence)"
+        source: "Step 4 output (random effects)"
+
+    output_files:
+      - path: "data/step05_intercept_slope_correlation.csv"
+        columns: ["congruence", "statistic", "value"]
+        description: "Pearson correlations between intercepts and slopes with Decision D068 dual p-values (r, p_uncorrected, p_bonferroni, CI_lower, CI_upper) for each congruence level"
+      - path: "data/step05_correlation_interpretation.txt"
+        format: "Text report with correlation interpretations and Bonferroni significance"
+        description: "Human-readable correlation summary with Decision D068 dual p-value reporting"
+
+    parameters:
+      family_alpha: 0.05
+      n_tests: 3
+      intercept_col: "Total_Intercept"
+      slope_col: "Total_Slope"
+      bonferroni_correction: true
+
+    description: "Test correlation between random intercepts and random slopes for each congruence level using Pearson correlation with Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md line 175 - test_intercept_slope_correlation_d068"
+    notes:
+      - "Decision D068: BOTH p_uncorrected AND p_bonferroni reported"
+      - "Bonferroni correction: p_bonferroni = min(p_uncorrected * 3, 1.0) for 3 tests"
+      - "Per-test alpha: 0.05 / 3 = 0.0167 for significance threshold"
+      - "Expected pattern: Negative correlations (high baseline -> maintained advantage)"
+      - "Interpretation thresholds: |r| < 0.30 Weak, 0.30-0.50 Moderate, >= 0.50 Strong"
+
+  plot_histogram_by_group:
+    module: "tools.plotting"
+    function: "plot_histogram_by_group"
+    signature: "plot_histogram_by_group(df: DataFrame, value_col: str, group_col: str, xlabel: str = 'Value', ylabel: str = 'Frequency', title: str = '', bins: int = 20, colors: Optional[Dict] = None, figsize: Tuple = (8, 6), output_path: Optional[Path] = None, vline: Optional[float] = None, vline_label: Optional[str] = None) -> Tuple[Figure, Axes]"
+    validation_tool: "check_file_exists"
+
+    input_files:
+      - path: "data/step04_random_effects.csv"
+        required_columns: ["UID", "congruence", "Total_Slope"]
+        source: "Step 4 output (random effects for plotting)"
+
+    output_files:
+      - path: "data/step05_random_slopes_histogram_common.png"
+        format: "PNG (800x600 @ 300 DPI)"
+        description: "Histogram of random slopes for Common congruence level"
+      - path: "data/step05_random_slopes_histogram_congruent.png"
+        format: "PNG (800x600 @ 300 DPI)"
+        description: "Histogram of random slopes for Congruent congruence level"
+      - path: "data/step05_random_slopes_histogram_incongruent.png"
+        format: "PNG (800x600 @ 300 DPI)"
+        description: "Histogram of random slopes for Incongruent congruence level"
+
+    parameters:
+      value_col: "Total_Slope"
+      group_col: "congruence"
+      xlabel: "Random Slope (Forgetting Rate)"
+      ylabel: "Frequency"
+      bins: 20
+      figsize: [8, 6]
+      dpi: 300
+      overlay_normal: true
+
+    description: "Create histograms of random slopes distribution for each congruence level with normal distribution overlay for normality assessment"
+    source_reference: "tools_inventory.md line 258 - plot_histogram_by_group"
+    notes:
+      - "Diagnostic plot: Assesses normality of random slope distribution"
+      - "Overlay normal curve computed from empirical mean and SD"
+      - "Step 5 generates 3 histograms (one per congruence level)"
+      - "Saved to data/ folder per v4.1 folder structure (analysis step output)"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_fitted_model_common.pkl"
+        source: "Step 2 analysis output (Common model)"
+      - path: "data/step02_fitted_model_congruent.pkl"
+        source: "Step 2 analysis output (Congruent model)"
+      - path: "data/step02_fitted_model_incongruent.pkl"
+        source: "Step 2 analysis output (Incongruent model)"
+
+    parameters:
+      check_singularity: true
+      min_observations: 100
+
+    criteria:
+      - "Model converged (model.converged = True)"
+      - "No singular fit (random effects variance > 0)"
+      - "Minimum 100 observations used per congruence level"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        convergence_status: "str (converged/failed)"
+        warnings: "List[str] (any convergence warnings)"
+
+    behavior_on_failure:
+      action: "Apply convergence contingency plan (alternative optimizers -> LRT -> simplified structure)"
+      log_to: "logs/step02_fit_stratified_lmms.log"
+      invoke: "g_debug if all contingencies fail"
+
+    description: "Validate that all 3 congruence-stratified LMMs converged successfully with non-singular variance-covariance matrices and finite parameter estimates"
+    source_reference: "tools_inventory.md line 327 - validate_lmm_convergence"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["congruence", "component", "value"]
+        source: "Step 2 analysis output (variance components)"
+
+    parameters:
+      component_col: "component"
+      value_col: "value"
+      max_variance_threshold: 10.0
+
+    criteria:
+      - "All variance components > 0 (negative variance impossible)"
+      - "var_intercept > 0, var_slope > 0, var_residual > 0"
+      - "cov_int_slope unrestricted (can be negative, zero, or positive)"
+      - "All variances < 10.0 (values > 10 suggest estimation problem for theta scale)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        negative_components: "List[str] (components with negative/zero variance)"
+        variance_range: "Tuple[float, float] (min, max variance values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_stratified_lmms.log"
+      invoke: "g_debug to diagnose variance estimation issues"
+
+    description: "Validate all variance components are positive (negative variances indicate estimation failure or model misspecification)"
+    source_reference: "tools_inventory.md line 560 - validate_variance_positivity"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_icc_estimates.csv"
+        required_columns: ["congruence", "icc_type", "value", "magnitude"]
+        source: "Step 3 analysis output (ICC estimates)"
+
+    parameters:
+      icc_col: "value"
+      min_bound: 0.0
+      max_bound: 1.0
+
+    criteria:
+      - "All ICC values in [0, 1] (values outside indicate computation error)"
+      - "ICC_slope_conditional typically lower than ICC_slope_simple"
+      - "No NaN values (variance components must be non-zero)"
+      - "Exactly 9 ICC estimates (3 types x 3 congruence levels)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_bounds: "List[Dict] (ICC values outside [0, 1])"
+        icc_range: "Tuple[float, float] (min, max ICC values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_compute_icc.log"
+      invoke: "g_debug to check variance component signs"
+
+    description: "Validate all ICC values are within valid range [0, 1] since ICC is a proportion of variance"
+    source_reference: "tools_inventory.md line 570 - validate_icc_bounds"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_loaded_lmm_input.csv"
+        source: "Step 1 analysis output (loaded data)"
+      - path: "data/step04_random_effects.csv"
+        source: "Step 4 analysis output (random effects)"
+      - path: "data/step06_congruence_icc_comparison.csv"
+        source: "Step 6 analysis output (ICC comparison)"
+
+    parameters:
+      check_types: false
+      allow_extra_columns: true
+
+    criteria:
+      - "Row count matches expected (exact or range)"
+      - "All required columns present"
+      - "Column types match if specified"
+      - "No NaN in critical columns (UID, theta, TSVR_hours)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool] (row_count, columns, types)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step##_<step_name>.log (context-dependent)"
+      invoke: "g_debug for data structure issues"
+
+    description: "Generic DataFrame structure validation for checking expected rows, columns, and types across multiple analysis steps"
+    source_reference: "tools_inventory.md line 580 - validate_dataframe_structure"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_intercept_slope_correlation.csv"
+        required_columns: ["congruence", "statistic", "value"]
+        source: "Step 5 analysis output (correlation results)"
+
+    parameters:
+      required_cols: ["r", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+      d068_compliant_check: true
+
+    criteria:
+      - "BOTH p_uncorrected AND p_bonferroni present (Decision D068 dual reporting)"
+      - "Correlation coefficient r in [-1, 1]"
+      - "p-values in [0, 1]"
+      - "Confidence interval bounds in [-1, 1]"
+      - "All 3 congruence levels present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_test_correlations_plot_diagnostics.log"
+      invoke: "g_debug if Decision D068 violation detected"
+
+    description: "Validate intercept-slope correlation test results include Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md line 454 - validate_correlation_test_d068"
+
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+    input_files: []
+
+    parameters:
+      min_size_bytes: 10000
+      check_files:
+        - "data/step05_random_slopes_histogram_common.png"
+        - "data/step05_random_slopes_histogram_congruent.png"
+        - "data/step05_random_slopes_histogram_incongruent.png"
+        - "data/step05_random_slopes_qqplot_common.png"
+        - "data/step05_random_slopes_qqplot_congruent.png"
+        - "data/step05_random_slopes_qqplot_incongruent.png"
+
+    criteria:
+      - "File exists (not directory)"
+      - "File size >= min_size_bytes (10KB for non-empty PNG)"
+      - "Readable by Python (no permission errors)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        file_path: "str"
+        size_bytes: "int (0 if file doesn't exist)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step05_test_correlations_plot_diagnostics.log"
+      invoke: "g_debug for plotting library issues"
+
+    description: "Validate all diagnostic plot files (histograms + Q-Q plots) were created successfully and are not empty/corrupted"
+    source_reference: "tools_inventory.md line 344 - check_file_exists"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 6
+  total_unique_tools: 11
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (intercept-slope correlation tests)"
+    - "D070: TSVR as time variable (inherited from RQ 5.4.1)"
+  notes:
+    - "No IRT tools required (uses theta from RQ 5.4.1)"
+    - "LMM-only pipeline with stratified models (3 congruence levels)"
+    - "ICC computation tools for variance decomposition"
+    - "Decision D068 enforced via test_intercept_slope_correlation_d068 + validation"
+    - "All 6 analysis steps have paired validation tools (100% validation coverage)"
+    - "Cross-RQ dependency: Requires RQ 5.4.1 completion (theta scores, TSVR data)"

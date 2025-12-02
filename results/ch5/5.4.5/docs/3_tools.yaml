@@ -1,0 +1,345 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.4.5 - Purified CTT Effects
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch5/5.4.1/status.yaml"
+        required_fields: ["rq_results.status"]
+        expected_value: "success"
+        data_types:
+          status: "string (value: success)"
+
+    output_files:
+      - path: "data/step00_dependency_check.txt"
+        description: "Text report documenting dependency verification results"
+      - path: "data/step00_full_item_list.csv"
+        columns: ["item_code", "dimension", "retained"]
+        description: "All items from dfData.csv with i1-i6 tags, mapped to retention status"
+
+    parameters:
+      min_size_bytes: 0
+
+    description: "Validate file existence and minimum size requirement for dependency verification"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - check_file_exists"
+
+  compute_cronbachs_alpha:
+    module: "tools.analysis_ctt"
+    function: "compute_cronbachs_alpha"
+    signature: "compute_cronbachs_alpha(data: DataFrame, n_bootstrap: int = 1000) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/cache/dfData.csv"
+        required_columns: ["composite_ID", "item_code", "response"]
+        expected_rows: "~40000 (100 participants × 4 tests × 48-52 items × 2 response options)"
+        data_types:
+          composite_ID: "string (format: P###_T#)"
+          item_code: "string (format: VR-{paradigm}-{variant}-{type}-{item})"
+          response: "int (values: 0, 1)"
+
+    output_files:
+      - path: "data/step04_reliability_assessment.csv"
+        columns: ["dimension", "alpha_full", "alpha_full_CI_lower", "alpha_full_CI_upper", "alpha_purified", "alpha_purified_CI_lower", "alpha_purified_CI_upper", "delta_alpha"]
+        description: "Cronbach's alpha for Full and Purified item sets with bootstrap 95% CIs"
+
+    parameters:
+      n_bootstrap: 1000
+
+    description: "Compute Cronbach's alpha internal consistency reliability with bootstrap confidence intervals (KR-20 equivalent for dichotomous items)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compute_cronbachs_alpha"
+
+  compare_correlations_dependent:
+    module: "tools.analysis_ctt"
+    function: "compare_correlations_dependent"
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent"]
+        source: "RQ 5.4.1 Step 3 (IRT calibration Pass 2)"
+      - path: "data/step02_ctt_full_scores.csv"
+        required_columns: ["composite_ID", "ctt_full_common", "ctt_full_congruent", "ctt_full_incongruent"]
+        source: "Step 2 output (Full CTT scores)"
+      - path: "data/step03_ctt_purified_scores.csv"
+        required_columns: ["composite_ID", "ctt_purified_common", "ctt_purified_congruent", "ctt_purified_incongruent"]
+        source: "Step 3 output (Purified CTT scores)"
+
+    output_files:
+      - path: "data/step05_correlation_analysis.csv"
+        columns: ["dimension", "r_full", "r_purified", "delta_r", "steiger_z", "p_uncorrected", "p_bonferroni", "normality_check", "N"]
+        description: "Steiger's z-test results comparing r_full vs r_purified with Decision D068 dual p-value reporting"
+
+    parameters:
+      family_alpha: 0.05
+      n_tests: 3
+
+    description: "Test if two dependent correlations differ significantly using Steiger's z-test with Bonferroni correction (Decision D068: alpha = 0.0167 for 3 comparisons)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compare_correlations_dependent"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~TSVR_hours', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step06_standardized_scores.csv"
+        required_columns: ["composite_ID", "z_theta_common", "z_theta_congruent", "z_theta_incongruent", "z_ctt_full_common", "z_ctt_full_congruent", "z_ctt_full_incongruent", "z_ctt_purified_common", "z_ctt_purified_congruent", "z_ctt_purified_incongruent", "TSVR_hours"]
+        expected_rows: "~400"
+        data_types:
+          composite_ID: "string (format: P###_T#)"
+          z_scores: "float (mean ~ 0, SD ~ 1)"
+          TSVR_hours: "float (0-168 hours)"
+
+    output_files:
+      - path: "data/step07_lmm_model_comparison.csv"
+        columns: ["dimension", "AIC_IRT", "AIC_Full", "AIC_Purified", "delta_AIC_Full_Purified", "improvement", "N"]
+        description: "AIC comparison for IRT theta, Full CTT, and Purified CTT models"
+      - path: "data/step07_lmm_summaries_theta.txt"
+        description: "Full LMM summaries for 3 IRT theta models (Common, Congruent, Incongruent)"
+      - path: "data/step07_lmm_summaries_full.txt"
+        description: "Full LMM summaries for 3 Full CTT models"
+      - path: "data/step07_lmm_summaries_purified.txt"
+        description: "Full LMM summaries for 3 Purified CTT models"
+
+    parameters:
+      formula: "score ~ TSVR_hours"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Fit LMM using TSVR (actual hours since encoding) as time variable per Decision D070. Parallel models for IRT, Full CTT, and Purified CTT."
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_full_item_list.csv"
+        required_columns: ["item_code", "dimension", "retained"]
+        source: "analysis tool output (step00_verify_dependencies)"
+
+    parameters:
+      required_columns: ["item_code", "dimension", "retained"]
+
+    criteria:
+      - "All required columns present: item_code, dimension, retained"
+      - "No missing columns"
+      - "Column names case-sensitive match"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present, False otherwise)"
+        missing_columns: "List[str] (empty if valid=True)"
+        existing_columns: "List[str] (all columns found)"
+        n_required: "int (number of required columns)"
+        n_missing: "int (number of missing columns)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_verify_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate that required columns exist in DataFrame (case-sensitive column name matching)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_columns"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_reliability_assessment.csv"
+        required_columns: ["dimension", "alpha_full", "alpha_purified", "delta_alpha"]
+        source: "analysis tool output (step04_reliability_assessment)"
+
+    parameters:
+      min_val: 0.0
+      max_val: 1.0
+      column_name: "alpha"
+
+    criteria:
+      - "All alpha values in [0, 1] (reliability coefficient bounds)"
+      - "No NaN or infinite values"
+      - "CI_lower < alpha < CI_upper for all estimates"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range, False otherwise)"
+        message: "str (human-readable explanation)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_reliability_assessment.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate Cronbach's alpha values fall within [0, 1] range (inclusive)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_correlation_analysis.csv"
+        required_columns: ["dimension", "r_full", "r_purified", "delta_r", "steiger_z", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step05_correlation_analysis)"
+
+    parameters:
+      required_cols: null
+
+    criteria:
+      - "BOTH p_uncorrected and p_bonferroni columns present (Decision D068 compliance)"
+      - "All correlations in [-1, 1] range"
+      - "p_bonferroni = min(p_uncorrected × 3, 1.0) for 3 comparisons"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant, False otherwise)"
+        d068_compliant: "bool (same as valid)"
+        missing_cols: "List[str] (empty if valid=True)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_correlation_analysis.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate correlation test results include Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_correlation_test_d068"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_standardized_scores.csv"
+        required_columns: ["z_theta_common", "z_theta_congruent", "z_theta_incongruent", "z_ctt_full_common", "z_ctt_full_congruent", "z_ctt_full_incongruent", "z_ctt_purified_common", "z_ctt_purified_congruent", "z_ctt_purified_incongruent"]
+        source: "analysis tool output (step06_standardize_scores)"
+
+    parameters:
+      tolerance: 0.01
+
+    criteria:
+      - "All z-score columns have mean in [-0.01, 0.01] (near-zero mean)"
+      - "All z-score columns have SD in [0.99, 1.01] (unit variance)"
+      - "No NaN values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns standardized, False otherwise)"
+        message: "str (human-readable explanation)"
+        mean_values: "Dict[str, float] (actual means per column)"
+        sd_values: "Dict[str, float] (actual SDs per column)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_standardize_scores.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate z-score standardization (mean H 0, SD H 1 with configurable tolerance)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_standardization"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step07_lmm_summaries_theta.txt"
+        source: "analysis tool output (step07_fit_lmms)"
+
+    parameters:
+      check_singularity: true
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged successfully)"
+        message: "str (human-readable explanation)"
+        warnings: "list (convergence warnings if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_fit_lmms.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Check LMM model convergence status and warnings (validates all 9 models converged successfully)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step08_correlation_comparison_data.csv"
+        required_columns: ["dimension", "CTT_type", "r_value"]
+        source: "analysis tool output (step08_prepare_plot_data)"
+      - path: "data/step08_aic_comparison_data.csv"
+        required_columns: ["dimension", "CTT_type", "AIC"]
+        source: "analysis tool output (step08_prepare_plot_data)"
+
+    parameters:
+      expected_rows: 6
+      expected_columns: ["dimension", "CTT_type"]
+
+    criteria:
+      - "Exactly 6 rows (3 dimensions × 2 CTT types)"
+      - "All required columns present"
+      - "No NaN values"
+      - "All 3 dimensions represented for both CTT types (complete factorial design)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if structure matches expectations, False otherwise)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step08_prepare_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Generic DataFrame validation (rows, columns, types) for plot data completeness"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_dataframe_structure"
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 6
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D039", "D068", "D070"]
+  notes:
+    - "Each analysis tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Standard library functions (pandas, numpy, pathlib) NOT cataloged (exempt from verification)"

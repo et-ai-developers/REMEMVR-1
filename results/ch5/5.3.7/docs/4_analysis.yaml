@@ -1,0 +1,655 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.3.7
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.3.7"
+  total_steps: 7
+  analysis_type: "LMM variance decomposition (paradigm-stratified)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T00:00:00Z"
+  dependencies:
+    - "RQ 5.3.1 (Paradigm-Specific Trajectories) - theta scores and model metadata"
+  critical_outputs:
+    - "data/step04_random_effects.csv (REQUIRED for RQ 5.3.8 clustering)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Theta Scores from RQ 5.3.1
+  # --------------------------------------------------------------------------
+  - name: "step00_load_theta_scores"
+    step_number: "00"
+    description: "Load paradigm-specific theta scores from RQ 5.3.1 and validate data structure"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/5.3.1/data/step04_lmm_input.csv')"
+        - "Validate structure: 1200 rows, 7 columns (composite_ID, UID, test, TSVR_hours, paradigm, theta, se)"
+        - "Validate paradigm categories: IFR, ICR, IRE (400 rows each)"
+        - "Validate test categories: T1, T2, T3, T4 (300 rows each)"
+        - "Check missing data: No NaN in theta, TSVR_hours, paradigm columns"
+        - "Validate value ranges: theta in [-4, 4], se in [0.1, 1.5], TSVR_hours in [0, 200]"
+        - "Verify balanced design: All 100 participants have 12 rows"
+        - "Save validated copy to data/step00_theta_scores_validated.csv"
+        - "Write validation summary to data/step00_validation_summary.txt"
+
+      inputs:
+        - path: "results/ch5/5.3.1/data/step04_lmm_input.csv"
+          source: "RQ 5.3.1 Step 4 output"
+          format: "CSV, long format (1200 rows x 7 columns)"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test identifier"}
+            - {name: "UID", type: "str", description: "Participant unique ID"}
+            - {name: "test", type: "str", description: "Test session (T1/T2/T3/T4)"}
+            - {name: "TSVR_hours", type: "float", description: "Time since VR in hours (Decision D070)"}
+            - {name: "paradigm", type: "str", description: "Paradigm (IFR/ICR/IRE)"}
+            - {name: "theta", type: "float", description: "IRT ability estimate"}
+            - {name: "se", type: "float", description: "Standard error of theta"}
+
+      outputs:
+        - path: "data/step00_theta_scores_validated.csv"
+          format: "CSV, same structure as input (1200 rows x 7 columns)"
+          description: "Validated theta scores from RQ 5.3.1"
+        - path: "data/step00_validation_summary.txt"
+          format: "TXT, validation report"
+          description: "Data quality validation summary"
+
+      validation:
+        criteria:
+          - "File exists: results/ch5/5.3.1/data/step04_lmm_input.csv"
+          - "Row count = 1200 (100 participants x 4 tests x 3 paradigms)"
+          - "Column count = 7 (composite_ID, UID, test, TSVR_hours, paradigm, theta, se)"
+          - "All 3 paradigms present: IFR (400), ICR (400), IRE (400)"
+          - "All 4 test sessions present: T1 (300), T2 (300), T3 (300), T4 (300)"
+          - "No missing data: 0 NaN in theta, TSVR_hours, paradigm"
+          - "theta in [-4, 4], se in [0.1, 1.5], TSVR_hours in [0, 200]"
+          - "Balanced design: All 100 UIDs have 12 rows each"
+        on_failure:
+          action: "QUIT"
+          message: "EXPECTATIONS ERROR: RQ 5.3.1 must complete before RQ 5.3.7"
+
+    log_file: "logs/step00_load_theta_scores.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Load RQ 5.3.1 Best-Fitting Model Metadata
+  # --------------------------------------------------------------------------
+  - name: "step01_load_model_metadata"
+    step_number: "01"
+    description: "Load best-fitting LMM model metadata from RQ 5.3.1 to understand functional form"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pickle.load('results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl')"
+        - "Extract model metadata: functional form, formula, convergence status, random effects structure"
+        - "pd.read_csv('results/ch5/5.3.1/data/step05_model_comparison.csv')"
+        - "Identify best model by minimum AIC"
+        - "Verify consistency: best model from comparison matches loaded .pkl"
+        - "Document functional form for paradigm-stratified models (likely Log)"
+        - "Extract paradigm categories and observation counts per paradigm"
+        - "Save metadata to data/step01_model_metadata.yaml"
+        - "Save paradigm categories to data/step01_paradigm_categories.csv"
+
+      inputs:
+        - path: "results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl"
+          source: "RQ 5.3.1 Step 5 output"
+          format: "Pickle, statsmodels MixedLM object"
+          description: "Best-fitting LMM with Paradigm x Time interaction"
+        - path: "results/ch5/5.3.1/data/step05_model_comparison.csv"
+          source: "RQ 5.3.1 Step 5 output"
+          format: "CSV, model comparison results"
+          columns:
+            - {name: "model_name", type: "str", description: "Functional form (Linear/Log/Quadratic)"}
+            - {name: "AIC", type: "float", description: "Akaike Information Criterion"}
+            - {name: "delta_AIC", type: "float", description: "AIC difference from best"}
+            - {name: "akaike_weight", type: "float", description: "Model weight"}
+            - {name: "converged", type: "bool", description: "Convergence status"}
+
+      outputs:
+        - path: "data/step01_model_metadata.yaml"
+          format: "YAML metadata file"
+          description: "RQ 5.3.1 model structure documentation"
+          fields:
+            - "source: RQ 5.3.1 Step 5"
+            - "best_model: {model_name} (e.g., Log or Quadratic+Log)"
+            - "formula: {model_formula_string}"
+            - "converged: {True/False}"
+            - "AIC: {value}"
+            - "random_effects: {structure description}"
+            - "paradigm_factor: {present/absent}"
+            - "time_variable: TSVR_hours (Decision D070)"
+            - "functional_form_for_step2: {transformation to apply}"
+        - path: "data/step01_paradigm_categories.csv"
+          format: "CSV (3 rows x 2 columns)"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "N_observations", type: "int", description: "Row count per paradigm"}
+
+      validation:
+        criteria:
+          - "File exists: results/ch5/5.3.1/data/step05_lmm_fitted_model.pkl"
+          - "Model loaded successfully (pickle deserialization successful)"
+          - "Model converged: model.converged = True"
+          - "Paradigm factor present in model formula"
+          - "Functional form identified (Linear/Log/Quadratic)"
+          - "Exactly 3 paradigm categories: IFR, ICR, IRE"
+          - "N_observations = 400 for all 3 paradigms (balanced design)"
+        on_failure:
+          action: "QUIT"
+          message: "EXPECTATIONS ERROR: RQ 5.3.1 Step 5 must complete (model file missing or invalid)"
+
+    log_file: "logs/step01_load_model_metadata.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Paradigm-Stratified LMMs with Random Slopes
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_paradigm_lmms"
+    step_number: "02"
+    description: "Fit three separate LMMs (IFR, ICR, IRE) with random slopes to isolate paradigm-specific variance components"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      inputs:
+        - path: "data/step00_theta_scores_validated.csv"
+          source: "Step 0 output"
+          format: "CSV, long format (1200 rows x 7 columns)"
+          variable_name: "theta_data"
+        - path: "data/step01_model_metadata.yaml"
+          source: "Step 1 output"
+          format: "YAML metadata"
+          variable_name: "model_metadata"
+
+      parameters:
+        # Function will be called 3 times (once per paradigm)
+        # Paradigm stratification: Filter theta_data by paradigm (IFR/ICR/IRE) before each call
+        # Functional form: Determined from model_metadata (likely log(TSVR_hours + 1))
+        # Example for IFR paradigm:
+        theta_scores: "theta_data[theta_data['paradigm'] == 'IFR']"
+        tsvr_data: "theta_data[theta_data['paradigm'] == 'IFR']"  # Already merged in RQ 5.3.1
+        formula: "theta ~ log(TSVR_hours + 1)"  # From model_metadata, adjusted per paradigm
+        groups: "UID"
+        re_formula: "~log(TSVR_hours + 1)"  # Random slopes + intercepts
+        reml: false  # For AIC comparability
+
+      convergence_contingency:
+        method: "Bates et al. 2015 parsimonious model selection"
+        steps:
+          - "Try alternative optimizers (bobyqa, nlminb)"
+          - "Likelihood ratio test: random slopes vs intercept-only"
+          - "If LRT p < 0.05: Retain slopes with uncorrelated random effects"
+          - "If LRT p >= 0.05: Use random intercepts-only model"
+        notes: "If random slopes fail for a paradigm, ICC_slope cannot be computed for that paradigm"
+
+      outputs:
+        - path: "data/step02_variance_components.csv"
+          format: "CSV (15 rows x 3 columns)"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "component", type: "str", description: "var_intercept/var_slope/cov_int_slope/corr_int_slope/var_residual"}
+            - {name: "estimate", type: "float", description: "Variance/covariance/correlation value"}
+          description: "Variance components for all 3 paradigms (5 components per paradigm)"
+        - path: "data/step02_lmm_ifr_model.pkl"
+          format: "Pickle, statsmodels MixedLM object"
+          description: "Fitted model for IFR paradigm"
+        - path: "data/step02_lmm_icr_model.pkl"
+          format: "Pickle, statsmodels MixedLM object"
+          description: "Fitted model for ICR paradigm"
+        - path: "data/step02_lmm_ire_model.pkl"
+          format: "Pickle, statsmodels MixedLM object"
+          description: "Fitted model for IRE paradigm"
+        - path: "data/step02_model_summaries.txt"
+          format: "TXT, concatenated summaries"
+          description: "Model summaries for all 3 paradigms with convergence notes"
+
+      validation_tool: "validate_lmm_assumptions_comprehensive"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+      inputs:
+        - path: "data/step02_lmm_ifr_model.pkl"
+          variable_name: "lmm_ifr_model"
+          source: "analysis call output (IFR paradigm)"
+        - path: "data/step02_lmm_icr_model.pkl"
+          variable_name: "lmm_icr_model"
+          source: "analysis call output (ICR paradigm)"
+        - path: "data/step02_lmm_ire_model.pkl"
+          variable_name: "lmm_ire_model"
+          source: "analysis call output (IRE paradigm)"
+
+      parameters:
+        # Called 3 times (once per paradigm model)
+        lmm_result: "{paradigm}_model"
+        data: "theta_data[theta_data['paradigm'] == '{paradigm}']"
+        output_dir: "Path('plots')"  # Diagnostic plots saved here
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      criteria:
+        - "Residual normality: Shapiro-Wilk p > 0.01 (accept if p > 0.01)"
+        - "Homoscedasticity: Breusch-Pagan test or Levene's test by test session"
+        - "Random effects normality: Q-Q plots for intercepts and slopes"
+        - "Independence: ACF plot, Lag-1 autocorrelation < 0.1"
+        - "Linearity: Partial residual plots vs Time predictor"
+        - "Outliers: Cook's distance < 4/N threshold (N=100 per paradigm)"
+        - "Convergence: Model converged successfully (converged = True)"
+        - "All variance components positive: var_intercept > 0, var_slope > 0, var_residual > 0"
+        - "Correlation in valid range: corr_int_slope in [-1, 1]"
+        - "At least 2 out of 3 models converged (if all 3 fail, analysis cannot proceed)"
+
+      remedial_actions:
+        - "If normality violated: Report robust standard errors; note impact on variance estimates"
+        - "If heteroscedasticity: Consider variance function by test session"
+        - "If outliers detected: Sensitivity analysis excluding influential participants"
+        - "Document all violations and impact on ICC interpretation"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_paradigm_lmms.log"
+
+    log_file: "logs/step02_fit_paradigm_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Intraclass Correlation Coefficients (ICC) Per Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_icc"
+    step_number: "03"
+    description: "Compute three types of ICC estimates per paradigm to quantify between-person variance proportion"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_icc_from_variance_components"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+
+      inputs:
+        - path: "data/step02_variance_components.csv"
+          source: "Step 2 output"
+          format: "CSV (15 rows x 3 columns)"
+          variable_name: "variance_components"
+
+      parameters:
+        variance_components_df: "variance_components"
+        slope_name: "TSVR_hours"
+        timepoint: 6.0  # Day 6 for ICC_slope_conditional (TSVR ~= 144 hours)
+
+      icc_formulas:
+        icc_intercept: "var_intercept / (var_intercept + var_residual)"
+        icc_slope_simple: "var_slope / (var_slope + var_residual)"
+        icc_slope_conditional: "[var_intercept + 2*cov_int_slope*Time + var_slope*(Time^2)] / [var_intercept + 2*cov_int_slope*Time + var_slope*(Time^2) + var_residual]"
+
+      interpretation_thresholds:
+        low: "ICC < 0.20"
+        moderate: "0.20 <= ICC < 0.40"
+        substantial: "ICC >= 0.40"
+
+      outputs:
+        - path: "data/step03_icc_estimates.csv"
+          format: "CSV (9 rows x 4 columns)"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "icc_type", type: "str", description: "intercept/slope_simple/slope_conditional"}
+            - {name: "icc_value", type: "float", description: "ICC estimate in [0, 1] range"}
+            - {name: "interpretation", type: "str", description: "Low/Moderate/Substantial"}
+          description: "ICC estimates for all 3 paradigms (3 types per paradigm)"
+        - path: "data/step03_icc_summary.txt"
+          format: "TXT, interpretation report"
+          description: "ICC interpretation and hypothesis evaluation"
+
+      validation_tool: "validate_icc_bounds"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+      inputs:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_estimates"
+          source: "analysis call output"
+
+      parameters:
+        icc_df: "icc_estimates"
+        icc_col: "icc_value"
+
+      criteria:
+        - "All ICC values in [0, 1] range (ICC is a proportion)"
+        - "No NaN values in icc_value column"
+        - "No infinite values (no division by zero)"
+        - "All 9 rows present (3 paradigms x 3 ICC types)"
+        - "Interpretation labels match thresholds: Low (<0.20), Moderate (0.20-0.40), Substantial (>=0.40)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_compute_icc.log"
+
+    log_file: "logs/step03_compute_icc.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract Individual Random Effects Per Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_random_effects"
+    step_number: "04"
+    description: "Extract individual random effects (intercepts and slopes) for all 100 participants per paradigm (300 total rows) - REQUIRED for RQ 5.3.8"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+
+      inputs:
+        - path: "data/step02_lmm_ifr_model.pkl"
+          source: "Step 2 output"
+          variable_name: "lmm_ifr_model"
+        - path: "data/step02_lmm_icr_model.pkl"
+          source: "Step 2 output"
+          variable_name: "lmm_icr_model"
+        - path: "data/step02_lmm_ire_model.pkl"
+          source: "Step 2 output"
+          variable_name: "lmm_ire_model"
+
+      parameters:
+        # Called 3 times (once per paradigm)
+        result: "{paradigm}_model"
+
+      processing:
+        - "For each paradigm (IFR, ICR, IRE):"
+        - "  Load fitted model from .pkl file"
+        - "  Extract random effects using model.random_effects attribute"
+        - "  Convert dict {UID: [intercept, slope]} to DataFrame"
+        - "  Add paradigm column"
+        - "  Verify 100 rows per paradigm (all participants present)"
+        - "Concatenate all 3 paradigm DataFrames (total 300 rows)"
+        - "Sort by paradigm, then UID for consistent ordering"
+
+      outputs:
+        - path: "data/step04_random_effects.csv"
+          format: "CSV (300 rows x 4 columns)"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier (e.g., P001)"}
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "Total_Intercept", type: "float", description: "Random intercept for participant x paradigm"}
+            - {name: "Total_Slope", type: "float", description: "Random slope for participant x paradigm"}
+          description: "CRITICAL: Required for RQ 5.3.8 (Paradigm-Based Clustering)"
+        - path: "data/step04_random_effects_descriptives.txt"
+          format: "TXT, descriptive statistics"
+          description: "Per-paradigm descriptives (mean, SD for intercept and slope)"
+
+      critical_dependency:
+        downstream_rq: "RQ 5.3.8 (Paradigm-Based Clustering)"
+        required_file: "data/step04_random_effects.csv"
+        required_format: "300 rows (100 participants x 3 paradigms)"
+        clustering_variables: "Total_Intercept_IFR, Total_Slope_IFR, Total_Intercept_ICR, Total_Slope_ICR, Total_Intercept_IRE, Total_Slope_IRE"
+
+      validation_tool: "validate_dataframe_structure"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      inputs:
+        - path: "data/step04_random_effects.csv"
+          variable_name: "random_effects"
+          source: "analysis call output"
+
+      parameters:
+        df: "random_effects"
+        expected_rows: 300
+        expected_columns: ["UID", "paradigm", "Total_Intercept", "Total_Slope"]
+        column_types:
+          UID: "object"
+          paradigm: "object"
+          Total_Intercept: "float64"
+          Total_Slope: "float64"
+
+      criteria:
+        - "Exactly 300 rows (100 participants x 3 paradigms)"
+        - "Exactly 4 columns (UID, paradigm, Total_Intercept, Total_Slope)"
+        - "All 3 paradigms present with 100 rows each (IFR, ICR, IRE)"
+        - "All 100 unique UIDs present per paradigm (no missing participants)"
+        - "No NaN values in Total_Intercept or Total_Slope columns"
+        - "No duplicate UID x paradigm combinations"
+        - "Total_Intercept in [-4, 4] (reasonable range similar to theta)"
+        - "Total_Slope typically in [-2, 2] (extreme slopes suggest estimation issues)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_extract_random_effects.log"
+
+    log_file: "logs/step04_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Test Intercept-Slope Correlation Per Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step05_test_correlations"
+    step_number: "05"
+    description: "Test intercept-slope correlation per paradigm with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "test_intercept_slope_correlation_d068"
+      signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+
+      inputs:
+        - path: "data/step04_random_effects.csv"
+          source: "Step 4 output"
+          format: "CSV (300 rows x 4 columns)"
+          variable_name: "random_effects"
+
+      parameters:
+        random_effects_df: "random_effects"
+        family_alpha: 0.05
+        n_tests: 15  # Decision D068: 3 paradigms x 5 correlation tests across paradigm types
+        intercept_col: "Total_Intercept"
+        slope_col: "Total_Slope"
+
+      processing:
+        - "Stratify random_effects by paradigm (IFR, ICR, IRE)"
+        - "For each paradigm:"
+        - "  Compute Pearson correlation between Total_Intercept and Total_Slope"
+        - "  Calculate uncorrected p-value"
+        - "  Apply Bonferroni correction: p_bonferroni = min(p_uncorrected * 15, 1.0)"
+        - "  Compute 95% confidence interval via Fisher z-transformation"
+        - "  Interpret correlation direction (negative/positive/negligible)"
+        - "  Interpret significance (after Bonferroni correction)"
+
+      outputs:
+        - path: "data/step05_intercept_slope_correlation.csv"
+          format: "CSV (3 rows x 7 columns)"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "r", type: "float", description: "Pearson correlation coefficient in [-1, 1]"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value in [0, 1]"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value in [0, 1]"}
+            - {name: "CI_lower", type: "float", description: "Lower bound of 95% CI for r"}
+            - {name: "CI_upper", type: "float", description: "Upper bound of 95% CI for r"}
+            - {name: "interpretation", type: "str", description: "Direction + significance"}
+          description: "Intercept-slope correlations with Decision D068 dual p-values"
+        - path: "data/step05_correlation_interpretation.txt"
+          format: "TXT, interpretation report"
+          description: "Correlation interpretation and hypothesis evaluation"
+
+      validation_tool: "validate_correlation_test_d068"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      inputs:
+        - path: "data/step05_intercept_slope_correlation.csv"
+          variable_name: "correlation_results"
+          source: "analysis call output"
+
+      parameters:
+        correlation_df: "correlation_results"
+        required_cols: ["paradigm", "r", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper", "interpretation"]
+
+      criteria:
+        - "BOTH p_uncorrected AND p_bonferroni present (Decision D068 compliance)"
+        - "p_bonferroni >= p_uncorrected (correction cannot decrease p-value)"
+        - "Correlation coefficient r in [-1, 1]"
+        - "Confidence intervals valid: CI_lower < CI_upper, both in [-1, 1]"
+        - "Exactly 3 rows (one per paradigm)"
+        - "All 3 paradigms present (IFR, ICR, IRE)"
+        - "No NaN values in any column"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_test_correlations.log"
+
+    log_file: "logs/step05_test_correlations.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Compare ICC Across Paradigms and Prepare Barplot Data
+  # --------------------------------------------------------------------------
+  - name: "step06_compare_icc_prepare_plot"
+    step_number: "06"
+    description: "Create paradigm ICC comparison table and prepare plot source CSV for barplot visualization"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load ICC estimates from data/step03_icc_estimates.csv"
+        - "Load variance components from data/step02_variance_components.csv"
+        - "Filter to ICC_slope_conditional only (primary ICC for hypothesis testing)"
+        - "For each paradigm:"
+        - "  Extract ICC_slope_conditional value"
+        - "  Compute 95% confidence interval (bootstrap or delta method)"
+        - "  Extract interpretation label from Step 3 (Low/Moderate/Substantial)"
+        - "Create comparison table with paradigm ordering: IFR, ICR, IRE"
+        - "Rank paradigms by ICC magnitude (1 = highest, 3 = lowest)"
+        - "Prepare barplot data CSV for rq_plots (Phase 2 visualization)"
+        - "Save comparison table to data/step06_paradigm_icc_comparison.csv"
+        - "Save barplot data to data/step06_paradigm_icc_barplot_data.csv"
+        - "Write interpretation report to data/step06_comparison_interpretation.txt"
+
+      inputs:
+        - path: "data/step03_icc_estimates.csv"
+          source: "Step 3 output"
+          format: "CSV (9 rows x 4 columns)"
+          variable_name: "icc_estimates"
+        - path: "data/step02_variance_components.csv"
+          source: "Step 2 output"
+          format: "CSV (15 rows x 3 columns)"
+          variable_name: "variance_components"
+
+      outputs:
+        - path: "data/step06_paradigm_icc_comparison.csv"
+          format: "CSV (3 rows x 6 columns)"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "icc_slope_conditional", type: "float", description: "ICC estimate in [0, 1]"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% CI"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% CI"}
+            - {name: "interpretation", type: "str", description: "Low/Moderate/Substantial"}
+            - {name: "rank", type: "int", description: "1-3, paradigm ordering by ICC magnitude"}
+          description: "ICC comparison table for all 3 paradigms"
+        - path: "data/step06_paradigm_icc_barplot_data.csv"
+          format: "CSV (3 rows x 5 columns)"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "icc_value", type: "float", description: "ICC_slope_conditional"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% CI"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% CI"}
+            - {name: "interpretation", type: "str", description: "Low/Moderate/Substantial for color coding"}
+          description: "Plot source CSV for barplot (read by rq_plots in Phase 2)"
+        - path: "data/step06_comparison_interpretation.txt"
+          format: "TXT, interpretation report"
+          description: "ICC comparison interpretation and hypothesis evaluation"
+
+      validation:
+        criteria:
+          - "All 3 paradigms present in both output files (IFR, ICR, IRE)"
+          - "ICC values in [0, 1] range"
+          - "Confidence intervals valid: CI_lower < icc_value < CI_upper, all in [0, 1]"
+          - "No NaN values in any column"
+          - "Interpretation labels consistent with Step 3"
+          - "Rank values in [1, 2, 3] (ordinal ranking)"
+          - "Plot data ready for rq_plots (correct column names, no missing values)"
+        on_failure:
+          action: "QUIT"
+          message: "VALIDATION FAILED: ICC comparison or plot data incomplete"
+
+    log_file: "logs/step06_compare_icc_prepare_plot.log"
+
+# ============================================================================
+# PLOT SPECIFICATION (FOR RQ_PLOTS - PHASE 2)
+# ============================================================================
+
+plot_specifications:
+  - plot_name: "paradigm_icc_barplot"
+    source_csv: "data/step06_paradigm_icc_barplot_data.csv"
+    plot_type: "barplot_with_error_bars"
+    output_file: "plots/step06_paradigm_icc_barplot.png"
+    description: "Barplot showing ICC_slope_conditional for Free Recall, Cued Recall, and Recognition paradigms with 95% confidence interval error bars"
+    axes:
+      x_axis: "paradigm (IFR, ICR, IRE)"
+      y_axis: "ICC (0 to 1)"
+    visual_elements:
+      - "Bars colored by interpretation (Low=red, Moderate=yellow, Substantial=green)"
+      - "Error bars showing 95% confidence intervals"
+      - "Horizontal reference line at ICC = 0.40 (threshold for substantial between-person variance)"
+    notes: "PNG output created by rq_plots agent during visualization phase (Step 17 workflow), NOT during this analysis step"
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+
+summary:
+  total_steps: 7
+  estimated_runtime: "Medium (~30-60 minutes total)"
+  runtime_breakdown:
+    - "Step 0: Low (<5 min - data loading)"
+    - "Step 1: Low (<5 min - metadata loading)"
+    - "Step 2: High (30-45 min - 3 LMM fits with random slopes)"
+    - "Step 3: Low (<5 min - ICC computation)"
+    - "Step 4: Low (<5 min - random effects extraction)"
+    - "Step 5: Low (<5 min - correlation tests)"
+    - "Step 6: Low (<5 min - ICC comparison and plot data)"
+
+  primary_outputs:
+    - "data/step02_variance_components.csv (15 rows: 5 components x 3 paradigms)"
+    - "data/step03_icc_estimates.csv (9 rows: 3 ICC types x 3 paradigms)"
+    - "data/step04_random_effects.csv (300 rows: 100 participants x 3 paradigms - REQUIRED for RQ 5.3.8)"
+    - "data/step05_intercept_slope_correlation.csv (3 rows: correlation tests per paradigm with Decision D068 dual p-values)"
+    - "data/step06_paradigm_icc_barplot_data.csv (plot source CSV for barplot)"
+
+  validation_coverage: "100% (all 7 steps have validation requirements with substance criteria documented)"
+
+  decisions_applied:
+    - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni) for correlation tests"
+    - "Decision D070: TSVR_hours as time variable (inherited from RQ 5.3.1)"
+    - "Bates et al. (2015): Convergence contingency plan if random slopes fail"
+
+  limitations_acknowledged:
+    - "Practice effects may inflate within-person variance (ICC interpreted as lower bound)"
+    - "Ceiling effects in Recognition may compress variance"
+    - "Dropout bias may bias ICC upward if poor performers missing"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

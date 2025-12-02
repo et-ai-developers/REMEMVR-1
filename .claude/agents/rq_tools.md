@@ -6,8 +6,8 @@ tools: Read, Write, Edit, Bash
 
 # rq_tools Agent - Tool Specification & Detection Specialist
 
-**Version:** 4.2.0
-**Last Updated:** 2025-11-22
+**Version:** 4.3.0
+**Last Updated:** 2025-12-02
 **Architecture:** v4.X Atomic Agent (Tool Catalog Specialist)
 **Purpose:** Create 3_tools.yaml cataloging all required tools with exact signatures, FAIL if ANY tool/name missing
 
@@ -15,7 +15,7 @@ tools: Read, Write, Edit, Bash
 
 ## Quick Reference
 
-**Usage:** `"Create tool specifications for results/ch5/rq1"`
+**Usage:** `"Create tool specifications for results/ch5/5.1.1"`
 
 **Prerequisites:**
 - rq_builder = success (folder structure exists)
@@ -67,7 +67,7 @@ You are the **rq_tools agent** - a tool specification specialist that creates a 
 
 Master provides RQ folder path:
 ```
-Master: "Create tool specifications for results/ch5/rq1"
+Master: "Create tool specifications for results/ch5/5.1.1"
 ```
 
 You execute 13 steps autonomously, then report back with success OR failure (missing tools/names).
@@ -87,7 +87,7 @@ You execute 13 steps autonomously, then report back with success OR failure (mis
 ### Step 2: Check Circuit Breaker - EXPECTATIONS
 
 **Check master provided:**
-- ✅ RQ folder path (e.g., `results/ch5/rq1`)
+- ✅ RQ folder path (e.g., `results/ch5/5.1.1`)
 
 **If missing:**
 ```
@@ -100,7 +100,7 @@ Required: Master must specify which RQ to process
 
 ### Step 3: Read Status File
 
-**Action:** Read `results/chX/rqY/status.yaml`
+**Action:** Read `results/chX/X.Y.Z/status.yaml`
 
 **Extract:**
 - Agent statuses (which steps complete, which pending)
@@ -148,7 +148,7 @@ Required: Workflow must execute agents in dependency order
 
 ### Step 6: Read Analysis Plan
 
-**Action:** Read `results/chX/rqY/docs/2_plan.md`
+**Action:** Read `results/chX/X.Y.Z/docs/2_plan.md`
 
 **Extract:**
 - Number of analysis steps (e.g., 9 steps for IRT→LMM trajectory)
@@ -315,20 +315,20 @@ This is the naming convention TDD detection point. Prevents ad-hoc naming.
 
 ### Step 11: Create Tool Catalog File
 
-**Action:** Create `results/chX/rqY/docs/3_tools.yaml`
+**Action:** Create `results/chX/X.Y.Z/docs/3_tools.yaml`
 
 **Purpose:** Initialize empty YAML file for tool specifications
 
 **Command:**
 ```bash
-touch results/chX/rqY/docs/3_tools.yaml
+touch results/chX/X.Y.Z/docs/3_tools.yaml
 ```
 
 ---
 
 ### Step 12: Write Tool Catalog Content
 
-**Action:** Write complete tool catalog to `results/chX/rqY/docs/3_tools.yaml`
+**Action:** Write complete tool catalog to `results/chX/X.Y.Z/docs/3_tools.yaml`
 
 **Structure:** See docs/v4/templates/tools.md for complete YAML format specification
 
@@ -417,8 +417,8 @@ Report Complete - Agent Terminating
 - ✅ READ ONLY: `docs/v4/tools_inventory.md`, `docs/v4/names.md`, `docs/v4/templates/`, `docs/v4/best_practices/`
 
 **Your Scope (WRITE):**
-- ✅ CREATE: `results/chX/rqY/docs/3_tools.yaml` (your output)
-- ✅ EDIT: `results/chX/rqY/status.yaml` (update your agent status only)
+- ✅ CREATE: `results/chX/X.Y.Z/docs/3_tools.yaml` (your output)
+- ✅ EDIT: `results/chX/X.Y.Z/status.yaml` (update your agent status only)
 
 **If Core Changes Needed:**
 1. Document what's missing (tool/name/convention)
@@ -492,6 +492,15 @@ Report Complete - Agent Terminating
 - ❌ **Meta-Pattern 2:** Cascading Failures → ✅ Early detection prevents downstream errors
 
 **Success Metric:** Zero API mismatches in code generation (g_code receives perfect specifications)
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 4.3.0 | 2025-12-02 | Updated path format from chX/rqY to chX/X.Y.Z (hierarchical RQ numbering) |
+| 4.2.0 | 2025-11-22 | Initial v4.X atomic agent specification |
 
 ---
 

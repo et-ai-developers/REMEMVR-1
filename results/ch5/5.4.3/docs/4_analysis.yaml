@@ -1,0 +1,566 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: 5.4.3 - Age x Schema Interactions
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "5.4.3"
+  rq_title: "Age x Schema Interactions"
+  total_steps: 6
+  analysis_type: "LMM-only (uses DERIVED theta from RQ 5.4.1)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T18:00:00Z"
+  cross_rq_dependencies:
+    - "RQ 5.4.1 (theta scores, TSVR mapping)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load and Validate Dependency Files
+  # --------------------------------------------------------------------------
+  - name: "step00_load_dependencies"
+    step_number: "00"
+    description: "Load theta scores from RQ 5.4.1, TSVR mapping, and Age data from master. Validate all dependencies exist and have correct structure."
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/5.4.1/data/step03_theta_scores.csv')"
+        - "pd.read_csv('results/ch5/5.4.1/data/step00_tsvr_mapping.csv')"
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "Parse composite_ID to extract UID list"
+        - "Validate all UIDs present in Age data"
+        - "Check for NaN values in critical columns"
+        - "Validate value ranges (theta, TSVR_hours, Age)"
+        - "Save validated copies to data/ folder"
+
+      input_files:
+        - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          expected_rows: 400
+          description: "Theta scores from RQ 5.4.1 Step 3 (wide format)"
+
+        - path: "results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+          expected_rows: 400
+          description: "TSVR mapping from RQ 5.4.1 Step 0"
+
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          expected_rows: 100
+          description: "Master data with participant demographics"
+
+      output_files:
+        - path: "data/step00_theta_wide.csv"
+          columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          expected_rows: 400
+          description: "Validated theta scores from RQ 5.4.1"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          columns: ["composite_ID", "TSVR_hours", "test"]
+          expected_rows: 400
+          description: "Validated TSVR mapping from RQ 5.4.1"
+
+        - path: "data/step00_age_data.csv"
+          columns: ["UID", "Age"]
+          expected_rows: 100
+          description: "Extracted Age data for participants"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dependency_files_comprehensive"
+      signature: "validate_dependency_files_comprehensive(file_paths: List[Path], required_columns_dict: Dict[str, List[str]], expected_rows_dict: Dict[str, int], value_ranges_dict: Dict[str, Dict[str, Tuple[float, float]]]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          variable_name: "theta_scores_path"
+          source: "RQ 5.4.1 dependency"
+
+        - path: "results/ch5/5.4.1/data/step00_tsvr_mapping.csv"
+          variable_name: "tsvr_mapping_path"
+          source: "RQ 5.4.1 dependency"
+
+        - path: "data/cache/dfData.csv"
+          variable_name: "age_data_path"
+          source: "Master data cache"
+
+      parameters:
+        file_paths: ["results/ch5/5.4.1/data/step03_theta_scores.csv", "results/ch5/5.4.1/data/step00_tsvr_mapping.csv", "data/cache/dfData.csv"]
+        required_columns_dict:
+          theta_scores: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          tsvr_mapping: ["composite_ID", "TSVR_hours", "test"]
+          age_data: ["UID", "Age"]
+        expected_rows_dict:
+          theta_scores: 400
+          tsvr_mapping: 400
+          age_data: 100
+        value_ranges_dict:
+          theta_common: [-4.0, 4.0]
+          theta_congruent: [-4.0, 4.0]
+          theta_incongruent: [-4.0, 4.0]
+          se_common: [0.1, 1.5]
+          se_congruent: [0.1, 1.5]
+          se_incongruent: [0.1, 1.5]
+          TSVR_hours: [0.0, 200.0]
+          Age: [20.0, 70.0]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 dependency files exist"
+        - "Expected column counts and names match specifications"
+        - "Expected row counts (400 for theta/TSVR, >=100 for Age)"
+        - "No NaN in critical columns (theta, se, TSVR_hours, Age)"
+        - "Value ranges: theta in [-4,4], TSVR in [0,200], Age in [20,70]"
+        - "All composite_IDs from theta have matching TSVR entries"
+        - "All UIDs parsed from composite_IDs have matching Age entries"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_load_dependencies.log"
+
+      description: "Validate all dependency files exist, have correct structure, and contain valid data"
+
+    log_file: "logs/step00_load_dependencies.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Merge Data and Prepare LMM Input
+  # --------------------------------------------------------------------------
+  - name: "step01_prepare_lmm_input"
+    step_number: "01"
+    description: "Merge theta scores with TSVR and Age, reshape wide to long format (400 -> 1200 rows), center Age, create time transformations"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Parse composite_ID to extract UID"
+        - "Left join theta_wide with age_data on UID"
+        - "Left join result with tsvr_mapping on composite_ID"
+        - "Reshape wide to long (pd.melt): theta_common/congruent/incongruent -> congruence column"
+        - "Compute Age_c = Age - mean(Age) (grand-mean centering)"
+        - "Create log_TSVR = log(TSVR_hours + 1)"
+        - "Apply contrast coding: Common (reference), Congruent, Incongruent dummies"
+        - "Save long-format LMM input"
+
+      input_files:
+        - path: "data/step00_theta_wide.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          variable_name: "theta_wide"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+          variable_name: "tsvr_mapping"
+
+        - path: "data/step00_age_data.csv"
+          required_columns: ["UID", "Age"]
+          variable_name: "age_data"
+
+      output_files:
+        - path: "data/step01_lmm_input.csv"
+          columns: ["UID", "composite_ID", "test", "congruence", "theta", "se_theta", "Age", "Age_c", "TSVR_hours", "log_TSVR"]
+          expected_rows: 1200
+          description: "Long-format LMM input (1200 rows: 400 composite_IDs x 3 congruence levels)"
+
+      parameters:
+        reshape_logic:
+          id_vars: ["composite_ID", "Age", "TSVR_hours", "test"]
+          value_vars_theta: ["theta_common", "theta_congruent", "theta_incongruent"]
+          value_vars_se: ["se_common", "se_congruent", "se_incongruent"]
+          var_name: "congruence"
+          value_name_theta: "theta"
+          value_name_se: "se_theta"
+        centering:
+          variable: "Age"
+          method: "grand_mean"
+          new_variable: "Age_c"
+        time_transformations:
+          linear: "TSVR_hours"
+          logarithmic: "log_TSVR = log(TSVR_hours + 1)"
+        contrast_coding:
+          reference: "Common"
+          contrasts: ["Congruent", "Incongruent"]
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_input_structure"
+      signature: "validate_lmm_input_structure(df: DataFrame, expected_rows: int, expected_columns: List[str], centering_vars: List[str], categorical_vars: Dict[str, List[str]], tolerance: float = 0.1) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "analysis call output (reshape result)"
+
+      parameters:
+        df: "lmm_input"
+        expected_rows: 1200
+        expected_columns: ["UID", "composite_ID", "test", "congruence", "theta", "se_theta", "Age", "Age_c", "TSVR_hours", "log_TSVR"]
+        centering_vars: ["Age_c"]
+        categorical_vars:
+          congruence: ["Common", "Congruent", "Incongruent"]
+          test: ["T1", "T2", "T3", "T4"]
+        tolerance: 0.1
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 1200 rows (400 wide x 3 congruence levels)"
+        - "No NaN values in any column"
+        - "congruence column contains only {Common, Congruent, Incongruent}"
+        - "test column contains only {T1, T2, T3, T4}"
+        - "Age_c mean within ±0.1 of 0 (grand-mean centering successful)"
+        - "Each UID appears exactly 12 times (4 tests x 3 congruence)"
+        - "log_TSVR computed correctly as log(TSVR_hours + 1)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_prepare_lmm_input.log"
+
+      description: "Validate LMM input has correct long format structure, Age centering, and time transformations"
+
+    log_file: "logs/step01_prepare_lmm_input.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with 3-Way Age x Congruence x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm"
+    step_number: "02"
+    description: "Fit Linear Mixed Model with 3-way Age x Congruence x Time interaction. Random intercepts and slopes for TSVR_hours by participant."
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "theta", "TSVR_hours", "log_TSVR", "Age_c", "congruence"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Pickled fitted LMM model object"
+
+        - path: "data/step02_lmm_model_summary.txt"
+          variable_name: "lmm_summary_text"
+          description: "Model summary with convergence status, fixed effects, random effects, fit indices"
+
+        - path: "data/step02_fixed_effects.csv"
+          columns: ["term", "coef", "se", "z", "p"]
+          expected_rows: 18
+          variable_name: "fixed_effects"
+          description: "18 fixed effects terms from 3-way interaction model"
+
+      parameters:
+        theta_scores: "lmm_input"
+        tsvr_data: "lmm_input"
+        formula: "theta ~ 1 + TSVR_hours + log_TSVR + Age_c + Congruent + Incongruent + (Age_c * TSVR_hours) + (Age_c * log_TSVR) + (Congruent * TSVR_hours) + (Congruent * log_TSVR) + (Incongruent * TSVR_hours) + (Incongruent * log_TSVR) + (Age_c * Congruent) + (Age_c * Incongruent) + (Age_c * Congruent * TSVR_hours) + (Age_c * Congruent * log_TSVR) + (Age_c * Incongruent * TSVR_hours) + (Age_c * Incongruent * log_TSVR)"
+        groups: "UID"
+        re_formula: "~TSVR_hours | UID"
+        reml: false
+        convergence_contingency:
+          optimizers: ["bobyqa", "nlminb"]
+          lrt_threshold: 0.05
+          fallback: "random intercepts-only if LRT p >= 0.05"
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with 3-way Age x Congruence x Time interaction using TSVR as time variable per D070. Includes convergence contingency plan."
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "original LMM input data"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_input"
+        output_dir: "data"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (model.converged = True)"
+        - "All 18 fixed effects terms estimated (no missing coefficients)"
+        - "No NaN in coefficient estimates, SEs, p-values"
+        - "Standard errors all positive (SE > 0)"
+        - "Residuals approximately normal (Shapiro-Wilk or KS test)"
+        - "Homoscedasticity (Breusch-Pagan + residuals vs fitted)"
+        - "Random effects normality (Shapiro-Wilk + Q-Q plots)"
+        - "Independence (ACF plot, no significant autocorrelation)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message']) if convergence fails; log warnings if assumptions violated"
+        log_to: "logs/step02_fit_lmm.log"
+
+      description: "Comprehensive LMM assumption validation with 7 diagnostics: residual normality, homoscedasticity, random effects normality, autocorrelation, linearity, outliers, convergence"
+
+    log_file: "logs/step02_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract 3-Way Interaction Terms with Dual P-Values
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_interactions"
+    step_number: "03"
+    description: "Extract 4 three-way interaction terms (Age_c x Congruence x Time) and apply Bonferroni correction. Report dual p-values per Decision D068."
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Filter fixed_effects.csv for rows containing Age_c + congruence + time term"
+        - "Extract 4 terms: Age_c:Congruent:TSVR_hours, Age_c:Congruent:log_TSVR, Age_c:Incongruent:TSVR_hours, Age_c:Incongruent:log_TSVR"
+        - "Extract coefficient, SE, z-statistic, p-value for each term"
+        - "Apply Bonferroni correction: p_bonferroni = min(p_uncorrected * 2, 1.0)"
+        - "Set significance threshold: p_bonferroni < 0.025"
+        - "Save dual p-value results"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+
+        - path: "data/step02_fixed_effects.csv"
+          required_columns: ["term", "coef", "se", "z", "p"]
+          variable_name: "fixed_effects"
+
+      output_files:
+        - path: "data/step03_interaction_terms.csv"
+          columns: ["term", "coef", "se", "z", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
+          expected_rows: 4
+          description: "4 three-way interaction terms with dual p-values per Decision D068"
+
+      parameters:
+        required_terms:
+          - "Age_c:Congruent:TSVR_hours"
+          - "Age_c:Congruent:log_TSVR"
+          - "Age_c:Incongruent:TSVR_hours"
+          - "Age_c:Incongruent:log_TSVR"
+        bonferroni_factor: 2
+        alpha_bonferroni: 0.025
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_interaction_terms.csv"
+          variable_name: "interaction_terms"
+          source: "analysis call output (extraction result)"
+
+      parameters:
+        interaction_df: "interaction_terms"
+        required_terms: ["Age_c:Congruent:TSVR_hours", "Age_c:Congruent:log_TSVR", "Age_c:Incongruent:TSVR_hours", "Age_c:Incongruent:log_TSVR"]
+        alpha_bonferroni: 0.025
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 4 interaction terms extracted"
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+        - "Bonferroni correction applied correctly (p_bonferroni = min(p_uncorrected * 2, 1.0))"
+        - "significant_bonferroni threshold applied correctly (p_bonferroni < 0.025)"
+        - "No NaN in any column"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_interactions.log"
+
+      description: "Validate 3-way interaction terms include required terms AND Decision D068 dual p-value reporting"
+
+    log_file: "logs/step03_extract_interactions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Congruence-Specific Age Effects with Tukey HSD
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_age_effects"
+    step_number: "04"
+    description: "Compute marginal age effects at Day 3 for each congruence level with delta method SEs. Perform Tukey HSD post-hoc tests."
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "extract_marginal_age_slopes_by_domain"
+      signature: "extract_marginal_age_slopes_by_domain(lmm_result: MixedLMResults, eval_timepoint: float = 72.0, domain_var: str = 'domain', age_var: str = 'Age_c', time_linear: str = 'TSVR_hours', time_log: str = 'log_TSVR') -> DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["congruence", "test", "TSVR_hours", "Age_c"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step04_age_effects_by_congruence.csv"
+          columns: ["congruence", "age_slope", "se", "CI_lower", "CI_upper", "TSVR_day3"]
+          expected_rows: 3
+          variable_name: "age_effects"
+          description: "Marginal age slopes at Day 3 for Common, Congruent, Incongruent"
+
+        - path: "data/step04_tukey_contrasts.csv"
+          columns: ["contrast", "estimate", "se", "z", "p_uncorrected", "p_tukey", "significant_tukey"]
+          expected_rows: 3
+          variable_name: "tukey_contrasts"
+          description: "Tukey HSD post-hoc contrasts with dual p-values per Decision D068"
+
+      parameters:
+        lmm_result: "lmm_model"
+        eval_timepoint: 72.0
+        domain_var: "congruence"
+        age_var: "Age_c"
+        time_linear: "TSVR_hours"
+        time_log: "log_TSVR"
+        contrasts:
+          - "Congruent - Common"
+          - "Incongruent - Common"
+          - "Incongruent - Congruent"
+        family_alpha: 0.05
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "age_effects, tukey_contrasts"
+
+      description: "Compute marginal age effects at Day 3 for each congruence level with delta method SEs. Perform Tukey HSD post-hoc tests with family-wise error rate control."
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_tukey_contrasts.csv"
+          variable_name: "tukey_contrasts"
+          source: "analysis call output (extract_marginal_age_slopes_by_domain return value[1])"
+
+      parameters:
+        contrasts_df: "tukey_contrasts"
+        required_comparisons: ["Congruent - Common", "Incongruent - Common", "Incongruent - Congruent"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "3 age effects computed (one per congruence level)"
+        - "3 Tukey contrasts computed (all pairwise comparisons)"
+        - "BOTH p_uncorrected AND p_tukey columns present (Decision D068)"
+        - "Delta method SEs valid (all positive, no NaN)"
+        - "Confidence intervals valid (CI_upper > CI_lower)"
+        - "All required contrasts present (Congruent-Common, Incongruent-Common, Incongruent-Congruent)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_age_effects.log"
+
+      description: "Validate post-hoc contrasts include required comparisons AND Decision D068 dual p-value reporting"
+
+    log_file: "logs/step04_compute_age_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Age Effects Plot Data by Tertiles
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create age tertiles (Young/Middle/Older) and compute marginal means for age effects visualization. 36 rows: 3 tertiles x 3 congruence x 4 tests."
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "prepare_age_effects_plot_data"
+      signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "Age", "congruence", "test", "TSVR_hours", "theta"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step05_age_effects_plot_data.csv"
+          columns: ["age_tertile", "congruence", "test", "TSVR_hours", "mean_theta_observed", "mean_theta_predicted", "CI_lower", "CI_upper", "N"]
+          expected_rows: 36
+          variable_name: "plot_data"
+          description: "36 rows: 3 age tertiles x 3 congruence x 4 tests"
+
+      parameters:
+        lmm_input: "lmm_input"
+        lmm_model: "lmm_model"
+        output_path: "data/step05_age_effects_plot_data.csv"
+        tertiles: ["Young", "Middle", "Older"]
+        aggregation: "marginal means with 95% CI"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "plot_data"
+
+      description: "Create age tertiles and compute marginal means for age effects visualization"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_age_effects_plot_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (prepare_age_effects_plot_data return value)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["Common", "Congruent", "Incongruent"]
+        required_groups: ["Young", "Middle", "Older"]
+        domain_col: "congruence"
+        group_col: "age_tertile"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 36 rows (3 age tertiles x 3 congruence x 4 tests)"
+        - "All factorial combinations present (no missing cells)"
+        - "age_tertile contains only {Young, Middle, Older}"
+        - "congruence contains only {Common, Congruent, Incongruent}"
+        - "test contains only {T1, T2, T3, T4}"
+        - "CI_upper > CI_lower for all rows"
+        - "No NaN in any column"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+      description: "Verify all age tertiles and congruence levels present in plot data"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

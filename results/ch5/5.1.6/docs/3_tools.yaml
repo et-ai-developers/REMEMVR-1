@@ -1,0 +1,91 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.1.6
+# Created by: rq_tools agent
+# Date: 2025-12-02
+# Status: FAILED - Missing GLMM Tools
+
+# =============================================================================
+# CRITICAL FAILURE DETECTED
+# =============================================================================
+# RQ 5.1.6 requires cross-classified binomial GLMM analysis using pymer4.
+# The following tools are REQUIRED but NOT FOUND in tools_inventory.md:
+#
+# Missing Tools:
+# 1. fit_binomial_glmm (pymer4 wrapper for crossed random effects)
+# 2. validate_glmm_convergence (GLMM convergence diagnostics)
+# 3. validate_glmm_overdispersion (binomial overdispersion check)
+# 4. extract_glmm_fixed_effects (fixed effects table extraction)
+# 5. extract_glmm_random_effects (variance components extraction)
+# 6. compute_glmm_predictions (model predictions on probability scale)
+#
+# This is the TDD detection point per rq_tools agent specification (Step 10).
+# DO NOT IMPROVISE. DO NOT GUESS SIGNATURES.
+#
+# Action Required:
+# 1. User + Claude migrate GLMM tools from v3.0 with TDD
+# 2. Update tools_inventory.md with function signatures
+# 3. Re-run rq_tools agent
+#
+# =============================================================================
+
+# ANALYSIS PLAN SUMMARY (for reference when tools are migrated)
+# Step 0: Load item difficulty + TSVR from RQ 5.2.1 (pandas - stdlib exempt)
+# Step 1: Extract binary responses from dfData.csv (pandas - stdlib exempt)
+# Step 2: Merge difficulty + TSVR into response data (pandas - stdlib exempt)
+# Step 3: Grand-mean center difficulty (pandas - stdlib exempt)
+# Step 4: Fit cross-classified binomial GLMM (MISSING TOOL)
+# Step 5: Validate GLMM assumptions (MISSING TOOL)
+# Step 6: Extract Time:Difficulty interaction (pandas - stdlib exempt)
+# Step 7: Prepare plot data (easy vs hard trajectories) (pandas - stdlib exempt)
+
+# EXPECTED GLMM TOOL SIGNATURES (to be added to tools_inventory.md):
+#
+# tools.analysis_glmm.fit_binomial_glmm:
+#   signature: |
+#     fit_binomial_glmm(
+#         data: pd.DataFrame,
+#         formula: str,
+#         groups: str,
+#         re_formula: str,
+#         family: str = 'binomial',
+#         nAGQ: int = 1,
+#         fallback_tiers: bool = True
+#     ) -> pymer4.models.Lmer
+#   description: "Fit binomial GLMM with crossed random effects using pymer4/lme4"
+#   validation_tool: "validate_glmm_convergence"
+#
+# tools.validation.validate_glmm_convergence:
+#   signature: |
+#     validate_glmm_convergence(
+#         model: pymer4.models.Lmer
+#     ) -> Dict[str, Any]
+#   description: "Validate GLMM convergence, check for warnings, singular fit"
+#
+# tools.validation.validate_glmm_overdispersion:
+#   signature: |
+#     validate_glmm_overdispersion(
+#         model: pymer4.models.Lmer,
+#         threshold: float = 1.2
+#     ) -> Dict[str, Any]
+#   description: "Check binomial GLMM for overdispersion (dispersion parameter)"
+
+# =============================================================================
+# NO TOOLS CATALOGED - AWAITING MIGRATION
+# =============================================================================
+
+analysis_tools: {}
+validation_tools: {}
+
+summary:
+  status: "FAILED"
+  reason: "Missing GLMM tools - not found in tools_inventory.md"
+  missing_analysis_tools:
+    - "fit_binomial_glmm (tools.analysis_glmm)"
+    - "extract_glmm_fixed_effects (tools.analysis_glmm)"
+    - "extract_glmm_random_effects (tools.analysis_glmm)"
+    - "compute_glmm_predictions (tools.analysis_glmm)"
+  missing_validation_tools:
+    - "validate_glmm_convergence (tools.validation)"
+    - "validate_glmm_overdispersion (tools.validation)"
+    - "validate_glmm_random_effects_normality (tools.validation)"
+  action_required: "TDD migration: User + Claude create GLMM tools with tests, update tools_inventory.md"
+  estimated_migration_effort: "High (GLMM tools are complex, require pymer4 integration)"

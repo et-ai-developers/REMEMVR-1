@@ -1,0 +1,251 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# RQ: 5.3.4 - Age x Paradigm Interactions
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Created: 2025-12-02
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_assumptions_comprehensive"
+
+    description: "Fit LMM with 3-way Age x Paradigm x Time interaction using TSVR (actual hours) per Decision D070. Includes convergence contingency plan (LRT-based random structure selection if full model fails to converge)."
+
+    source_reference: "tools_inventory.md lines 97-103 (fit_lmm_trajectory_tsvr)"
+
+    notes:
+      - "Decision D070: Uses TSVR_hours (actual hours since encoding), not nominal days"
+      - "Convergence contingency: LRT to select random structure if full model fails (per Bates et al. 2015)"
+      - "Model formula includes linear + log time transformations for Age x Paradigm x Time"
+      - "6 assumption diagnostics required per RQ 5.3.4 concept.md"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    description: "Extract fixed effects table from fitted LMM with coefficients, SE, z-values, p-values. Used to identify 3-way Age x Paradigm x Time interaction terms."
+
+    source_reference: "tools_inventory.md lines 113-119 (extract_fixed_effects_from_lmm)"
+
+    notes:
+      - "Extracts 4 three-way interaction terms: Age_c:paradigm:TSVR_hours and Age_c:paradigm:log_TSVR for 2 paradigm contrasts"
+      - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni) applied in Step 3"
+      - "Output DataFrame has columns: effect, coefficient, std_error, z_value, p_value"
+
+  extract_marginal_age_slopes_by_domain:
+    module: "tools.analysis_lmm"
+    function: "extract_marginal_age_slopes_by_domain"
+    signature: "extract_marginal_age_slopes_by_domain(lmm_result: MixedLMResults, eval_timepoint: float = 72.0, domain_var: str = 'domain', age_var: str = 'Age_c', time_linear: str = 'TSVR_hours', time_log: str = 'log_TSVR') -> DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+
+    description: "Extract paradigm-specific marginal age effects on forgetting rate from 3-way Age x Paradigm x Time interaction. Uses delta method for SE propagation through linear combinations."
+
+    source_reference: "tools_inventory.md lines 195-203 (extract_marginal_age_slopes_by_domain)"
+
+    notes:
+      - "Computes marginal effect of Age_c at eval_timepoint (default 72h = Day 3 midpoint)"
+      - "Marginal slope = β(TSVR:Age_c) + β(log_TSVR:Age_c) × 1/(TSVR+1) for reference paradigm"
+      - "For non-reference paradigms: adds β(TSVR:Age_c:Paradigm[X]) + β(log_TSVR:Age_c:Paradigm[X]) × 1/(TSVR+1)"
+      - "Delta method propagates SE through 4-term gradient with full variance-covariance matrix"
+      - "Auto-detects reference paradigm by absence of [T.] prefix in coefficient names"
+      - "Returns 3 rows (IFR, ICR, IRE) with columns: paradigm, age_slope, se, z, p, CI_lower, CI_upper"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+
+    description: "Compute pairwise post-hoc contrasts with Decision D068 dual p-value reporting (uncorrected + Tukey HSD). Tests ordered pattern (Free > Cued > Recognition) in age effects."
+
+    source_reference: "tools_inventory.md lines 129-136 (compute_contrasts_pairwise)"
+
+    notes:
+      - "Decision D068: Reports BOTH p_uncorrected AND p_tukey (Tukey HSD-adjusted)"
+      - "3 pairwise comparisons: IFR-ICR, IFR-IRE, ICR-IRE"
+      - "Hypothesis: IFR (Free Recall) shows strongest age effects (weakest retrieval support)"
+      - "Returns DataFrame with columns: comparison, beta, se, z, p_uncorrected, alpha_corrected, p_corrected, sig_uncorrected, sig_corrected"
+
+  prepare_age_effects_plot_data:
+    module: "tools.analysis_lmm"
+    function: "prepare_age_effects_plot_data"
+    signature: "prepare_age_effects_plot_data(lmm_input: DataFrame, lmm_model: MixedLMResults, output_path: Path) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    description: "Create age tertiles (Young/Middle/Older), aggregate observed means + 95% CI, and generate LMM predictions for Age x Paradigm x Time visualization."
+
+    source_reference: "tools_inventory.md lines 155-163 (prepare_age_effects_plot_data)"
+
+    notes:
+      - "Age tertiles created using pd.qcut(Age, q=3) for equal-sized groups (~33 participants each)"
+      - "Tertiles used ONLY for visualization; analysis uses continuous Age_c (grand-mean centered)"
+      - "Expected: 36 rows = 3 paradigms × 3 age tertiles × 4 timepoints"
+      - "Returns DataFrame with columns: paradigm, age_tertile, TSVR_hours, theta_observed, se_observed, ci_lower, ci_upper, theta_predicted"
+      - "rq_plots will read this CSV from data/ folder to generate visualization"
+
+validation_tools:
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics: residual normality, homoscedasticity, random effects normality, autocorrelation, linearity, outliers, convergence. Includes remedial action recommendations."
+
+    source_reference: "tools_inventory.md lines 414-422 (validate_lmm_assumptions_comprehensive)"
+
+    criteria:
+      - "Residual normality: Shapiro-Wilk test p > 0.01 (accept if p > 0.01 per RQ 5.3.4 concept.md)"
+      - "Homoscedasticity: Breusch-Pagan test, residuals vs fitted plot (Levene's test by paradigm x age tertile)"
+      - "Random effects normality: Shapiro-Wilk + Q-Q plots for intercepts and slopes"
+      - "Independence: ACF plot + Lag-1 autocorrelation < 0.1 (no significant autocorrelation)"
+      - "Linearity: Partial residual plots for TSVR_hours and log_TSVR (no systematic patterns)"
+      - "Outliers: Cook's distance < 4/1200 = 0.0033 (threshold for N=1200)"
+      - "Convergence: model.converged = True OR convergence contingency plan documented"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True only if ALL 7 diagnostics pass)"
+        diagnostics: "Dict (results per diagnostic check)"
+        plot_paths: "List[Path] (paths to 6 diagnostic PNG files)"
+        message: "str (human-readable summary)"
+
+    behavior_on_failure:
+      action: "raise ValueError (if any diagnostic fails)"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+      remedial_actions:
+        - "Normality violated -> Report robust SE or bootstrap CI"
+        - "Heteroscedasticity -> Use weighted LMM or variance function by paradigm"
+        - "Outliers detected -> Sensitivity analysis with/without outliers"
+
+    notes:
+      - "Generates 6 diagnostic plots: qq_residuals.png, residuals_vs_fitted.png, qq_random_intercepts.png, qq_random_slopes.png, acf.png, cooks_distance.png"
+      - "Generates partial residual CSVs for ALL predictors (for rq_plots if needed)"
+      - "Configurable thresholds per RQ requirements (acf_lag1_threshold, alpha)"
+      - "Complete rewrite of v3.0 minimal implementation with comprehensive diagnostics"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    description: "Validate hypothesis test results (3-way interactions) include both required statistical terms AND Decision D068 dual p-value reporting. Checks all specified interaction terms present AND p_uncorrected + correction method columns exist."
+
+    source_reference: "tools_inventory.md lines 434-442 (validate_hypothesis_test_dual_pvalues)"
+
+    criteria:
+      - "All 4 three-way interaction terms present in DataFrame"
+      - "Required terms: Age_c:paradigm[ICR]:TSVR_hours, Age_c:paradigm[IRE]:TSVR_hours, Age_c:paradigm[ICR]:log_TSVR, Age_c:paradigm[IRE]:log_TSVR"
+      - "Decision D068 compliance: p_uncorrected column exists"
+      - "Decision D068 compliance: At least one correction method (p_bonferroni, p_holm, or p_fdr) exists"
+      - "Bonferroni correction: alpha = 0.025 / 2 = 0.0125 (correcting for 2 time transformation terms)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all terms present AND D068 compliant)"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_terms: "List[str] (interaction terms not found)"
+        missing_cols: "List[str] (required p-value columns not found)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError (if terms missing or D068 non-compliant)"
+      log_to: "logs/step03_extract_interactions.log"
+      invoke: "g_debug (master invokes)"
+
+    notes:
+      - "Case-sensitive term matching for interaction names"
+      - "Handles empty DataFrames and empty required_terms list (still checks D068)"
+      - "Accepts alternative correction names: p_bonferroni, p_tukey, or p_holm"
+
+  validate_contrasts_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_contrasts_dual_pvalues"
+    signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+    description: "Validate post-hoc contrasts include required pairwise comparisons AND Decision D068 dual p-value reporting. Ensures contrast results DataFrame contains all required comparison names AND both uncorrected and corrected p-values."
+
+    source_reference: "tools_inventory.md lines 444-452 (validate_contrasts_dual_pvalues)"
+
+    criteria:
+      - "All 3 pairwise comparisons present: IFR-ICR, IFR-IRE, ICR-IRE"
+      - "Decision D068 compliance: p_uncorrected column exists"
+      - "Decision D068 compliance: p_tukey column exists (Tukey HSD-adjusted p-values)"
+      - "Alternative corrections accepted: p_bonferroni or p_holm if p_tukey not used"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all comparisons present AND D068 compliant)"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_comparisons: "List[str] (comparison names not found)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError (if comparisons missing or D068 non-compliant)"
+      log_to: "logs/step04_compute_age_effects_contrasts.log"
+      invoke: "g_debug (master invokes)"
+
+    notes:
+      - "Typically p_tukey (Tukey HSD) for post-hoc contrasts, but accepts p_bonferroni or p_holm alternatives"
+      - "Case-sensitive comparison name matching"
+      - "Handles empty DataFrames (returns invalid)"
+      - "Empty required_comparisons list allowed (still checks D068)"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    description: "Verify all paradigms and age tertiles present in plot data. Checks for missing categories that would create incomplete visualizations. Ensures complete factorial design (3 paradigms × 3 tertiles × 4 timepoints = 36 rows)."
+
+    source_reference: "tools_inventory.md lines 590-598 (validate_plot_data_completeness)"
+
+    criteria:
+      - "All 3 paradigms present: IFR, ICR, IRE"
+      - "All 3 age tertiles present: Young, Middle, Older"
+      - "Expected row count: 36 (3 paradigms × 3 tertiles × 4 timepoints)"
+      - "No duplicate paradigm × age_tertile × TSVR_hours combinations"
+      - "All required columns present: paradigm, age_tertile, TSVR_hours, theta_observed, ci_lower, ci_upper, theta_predicted"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all paradigms and tertiles present)"
+        message: "str (human-readable explanation)"
+        missing_domains: "List[str] (paradigms not found)"
+        missing_groups: "List[str] (age tertiles not found)"
+
+    behavior_on_failure:
+      action: "raise ValueError (if missing paradigms/tertiles or incomplete factorial design)"
+      log_to: "logs/step05_prepare_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    notes:
+      - "Configurable column names for paradigm (domain_col) and age tertile (group_col) variables"
+      - "Reports missing paradigms and missing tertiles separately"
+      - "Lightweight validator for ensuring complete factorial design in plot data"
+      - "All paradigms and tertiles must be present for valid visualization"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 4
+  total_unique_tools: 9
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Standard library functions (pandas, numpy) NOT cataloged (exempt from verification)"
+    - "Decision D068: Dual p-value reporting enforced via validation tools"
+    - "Decision D070: TSVR (actual hours) enforced in fit_lmm_trajectory_tsvr"
+    - "Convergence contingency plan: LRT-based random structure selection (per Bates et al. 2015)"
+    - "6 comprehensive assumption diagnostics per RQ 5.3.4 concept.md specifications"

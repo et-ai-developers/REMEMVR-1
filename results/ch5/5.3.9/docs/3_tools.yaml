@@ -1,0 +1,330 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.3.9
+# Created by: rq_tools agent
+# Date: 2025-12-02
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.3.9 - Paradigm x Item Difficulty Interaction
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step02_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "Item", "Response", "paradigm", "Difficulty_c", "Time"]
+        expected_rows: "~20,000 (100 participants × 4 tests × ~50 items)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          UID: "string (participant ID)"
+          Item: "string (item identifier)"
+          Response: "float (0/1/NaN - binary responses)"
+          paradigm: "string (IFR/ICR/IRE)"
+          Difficulty_c: "float (centered item difficulty)"
+          Time: "float (TSVR_hours - Decision D070)"
+
+    output_files:
+      - path: "data/step03_lmm_model_summary.txt"
+        description: "Full LMM model summary with fixed effects, random effects, convergence status"
+      - path: "data/step03_fixed_effects.csv"
+        columns: ["term", "estimate", "SE", "z_value", "p_uncorrected", "p_bonferroni"]
+        description: "Fixed effects coefficients with dual p-values per Decision D068"
+      - path: "data/step03_random_effects.csv"
+        columns: ["component", "variance", "SD"]
+        description: "Random effects variance components (UID intercept/slope, Item intercept, Residual)"
+
+    parameters:
+      formula: "Response ~ Time * Difficulty_c * paradigm"
+      re_formula: "~Time | UID"
+      groups: "UID"
+      reml: false
+      convergence_strategy: "If convergence fails, simplify random structure: (1) Try (1 | UID) + (1 | Item), (2) Try uncorrelated (Time || UID), (3) Report failure"
+
+    description: "Fit cross-classified LMM with 3-way interaction (Time × Difficulty_c × paradigm) and crossed random effects (Time | UID) + (1 | Item). Decision D070: TSVR as time variable."
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_response_level_data.csv"
+        required_columns: ["UID", "Test", "Item", "Response", "paradigm", "Difficulty"]
+        source: "Step 0 extraction output"
+      - path: "data/step01_analysis_ready.csv"
+        required_columns: ["composite_ID", "UID", "Test", "Item", "Response", "paradigm", "Difficulty"]
+        source: "Step 1 composite_ID creation output"
+
+    parameters:
+      required_cols: ["UID", "Test", "Item", "Response", "paradigm", "Difficulty"]
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing columns (case-sensitive matching)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (columns not found)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_data.log or logs/step01_create_composite_id.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate DataFrame has all required columns present (column presence check only, not missing values)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+  check_missing_data:
+    module: "tools.validation"
+    function: "check_missing_data"
+    signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_response_level_data.csv"
+        source: "Step 0 extraction output"
+      - path: "data/step02_lmm_input.csv"
+        source: "Step 2 centering + merge output"
+
+    parameters:
+      acceptable_missing_cols: ["Response"]
+      forbidden_missing_cols: ["Difficulty", "paradigm", "TSVR_hours", "Difficulty_c", "Time"]
+
+    criteria:
+      - "Response column may have NaN (missing/not-administered items)"
+      - "Difficulty, paradigm, TSVR_hours must have zero NaN"
+      - "Difficulty_c, Time must have zero NaN after centering/merge"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        has_missing: "bool"
+        total_missing: "int"
+        total_cells: "int"
+        percent_missing: "float"
+        missing_by_column: "Dict[str, int]"
+
+    behavior_on_failure:
+      action: "raise ValueError if forbidden columns have NaN"
+      log_to: "logs/step00_extract_data.log or logs/step02_center_merge.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Check for missing data by column, report patterns, flag unexpected NaN in critical variables"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - check_missing_data"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_lmm_input.csv"
+        required_columns: ["Difficulty_c"]
+        source: "Step 2 centering output"
+
+    parameters:
+      column_names: ["Difficulty_c"]
+      tolerance: 0.01
+      expected_mean: 0.0
+      expected_sd: "unrestricted (centering shifts mean to 0 but does NOT standardize SD to 1)"
+
+    criteria:
+      - "mean(Difficulty_c) in [-0.01, 0.01] (successful centering)"
+      - "No NaN introduced by centering operation"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_center_merge.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate grand-mean centering (mean ≈ 0), NOT full standardization (SD ≠ 1 expected)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_standardization"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_lmm_model_summary.txt"
+        source: "Step 3 LMM fitting output"
+
+    parameters:
+      check_singular_fit: true
+      check_convergence_warnings: true
+
+    criteria:
+      - "Model converged successfully (lmm_result.converged = True)"
+      - "No singular fit warnings (random effects variance > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "Apply convergence strategy (simplify random structure), retry. If all strategies exhausted, raise ValueError."
+      log_to: "logs/step03_fit_lmm.log"
+      invoke: "g_debug (master invokes with convergence diagnostics)"
+
+    description: "Validate LMM converged successfully, no singular fit, finite estimates"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_lmm_model_summary.txt"
+        source: "Step 3 LMM fitting output"
+      - path: "data/step02_lmm_input.csv"
+        source: "Step 2 LMM input data"
+
+    parameters:
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+      output_dir: "data/"
+
+    criteria:
+      - "Residual normality (Shapiro-Wilk test)"
+      - "Homoscedasticity (Breusch-Pagan test)"
+      - "Random effects normality (Shapiro-Wilk on intercepts/slopes)"
+      - "No severe autocorrelation (ACF lag-1 test)"
+      - "Linearity (partial residual plots)"
+      - "No influential outliers (Cook's distance)"
+      - "Convergence diagnostics"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True only if ALL 7 diagnostics pass)"
+        diagnostics: "Dict (individual diagnostic results)"
+        plot_paths: "List[Path] (6 diagnostic plots generated)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "Log warning for minor violations, continue. Log error for severe violations, recommend transformation."
+      log_to: "logs/step03_fit_lmm.log"
+      invoke: "g_debug only if CRITICAL failure (severe violations)"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics and 6 plots (Schielzeth et al. 2020)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_assumptions_comprehensive"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_fixed_effects.csv"
+        required_columns: ["term", "estimate", "SE", "z_value", "p_uncorrected", "p_bonferroni"]
+        source: "Step 3 LMM fitting output"
+      - path: "data/step04_3way_interaction_summary.csv"
+        required_columns: ["term", "estimate", "SE", "z_value", "p_uncorrected", "p_bonferroni", "significant_at_0.0033"]
+        source: "Step 4 interaction extraction output"
+
+    parameters:
+      required_terms: ["Time:Difficulty_c:paradigmICR", "Time:Difficulty_c:paradigmIRE"]
+      alpha_bonferroni: 0.0033
+
+    criteria:
+      - "Required interaction terms present in results DataFrame"
+      - "Decision D068 compliance: BOTH p_uncorrected AND p_bonferroni columns present"
+      - "All p-values in [0, 1] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_lmm.log or logs/step04_extract_interaction.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate hypothesis test includes required terms AND Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_hypothesis_test_dual_pvalues"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_difficulty_trajectories_data.csv"
+        required_columns: ["paradigm", "difficulty_level", "time_days", "predicted_response", "observed_mean", "CI_lower", "CI_upper"]
+        source: "Step 4 plot data preparation output"
+
+    parameters:
+      required_domains: ["IFR", "ICR", "IRE"]
+      required_groups: ["Easy (-1SD)", "Hard (+1SD)"]
+      domain_col: "paradigm"
+      group_col: "difficulty_level"
+
+    criteria:
+      - "All paradigms present (IFR, ICR, IRE)"
+      - "All difficulty levels present (Easy, Hard)"
+      - "Complete factorial design: 6 groups × 4 timepoints = 24 rows"
+      - "No missing combinations"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_extract_interaction.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Verify all paradigms/difficulty levels present in plot data (complete factorial design)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_plot_data_completeness"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 1
+  validation_tools_count: 7
+  total_unique_tools: 8
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "No IRT tools required (uses RQ 5.3.1 item difficulty)"
+    - "Cross-classified LMM with crossed random effects (Time | UID) + (1 | Item)"
+    - "3-way interaction testing at Bonferroni alpha = 0.0033"
+    - "Convergence strategy documented per rq_stats feedback"
+    - "All validation tools paired with analysis steps"
+    - "Stdlib operations (pandas extraction/merge/centering) exempt from cataloging"

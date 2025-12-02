@@ -27,16 +27,30 @@ rq_stats:
     9.5/10 APPROVED (UPDATED). Category 1: 3.0/3.0 (exceptional, z-standardization now explicit). Category 2: 2.0/2.0 (100% tool reuse). Category 3: 2.0/2.0 (z-standardization rationale fully specified). Category 4: 1.9/2.0 (bivariate normality + missing data handling added). Category 5: 0.6/1.0 (proactive addressing of criticisms). Original 9.1 CONDITIONAL upgraded to 9.5 APPROVED after additions: Z-Standardization Rationale (lines 121-139), Bivariate Normality Check (lines 140-147), Missing Data Handling (lines 148-157), Practice Effects Acknowledgment (lines 159-164). All 3 critical additions from original report implemented. Ready for rq_planner.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    9 steps planned (Step 0: dependency verification + Steps 1-8: analysis)
+    Tool requirements: CTT computation, Cronbach's alpha, Steiger's z-test, z-standardization, parallel LMMs, plot data prep
+    Expected outputs: 14 data files, 9 logs, 2 plot source CSVs (correlation + AIC comparison)
+    Validation: Mandatory per-step validation, dual p-values (D068), z-score criteria (mean~0, SD~1)
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    4 analysis + 6 validation tools cataloged for CTT convergence analysis
+    Analysis: check_file_exists, compute_cronbachs_alpha, compare_correlations_dependent, fit_lmm_trajectory_tsvr
+    Validation: validate_data_columns, validate_numeric_range, validate_correlation_test_d068, validate_standardization, validate_lmm_convergence, validate_dataframe_structure
+    All tools verified in tools_inventory.md (CTT module tools documented)
+    Decision D068 dual p-value validation included (Steiger's z-test)
 
 rq_analysis:
-  status: pending
+  status: success
   context_dump: |
+    9 steps specified with validation (CTT convergence: Full vs Purified)
+    Step types: 1 catalogued dependency check + 4 stdlib data ops + 3 catalogued statistical tests + 1 stdlib plot prep
+    All steps have paired validation tools (4 catalogued + 5 stdlib inline validation)
+    Decisions embedded: D039 (purification), D068 (dual p-values), D070 (TSVR time)
+    Output folder compliance: 14 CSV files to data/, 9 log files to logs/, 2 plot source CSVs to data/
 
 rq_inspect:
   status: pending
@@ -49,3 +63,14 @@ rq_plots:
 rq_results:
   status: pending
   context_dump: |
+
+analysis_steps:
+  step00_verify_dependencies: pending
+  step01_map_items: pending
+  step02_compute_ctt_full: pending
+  step03_compute_ctt_purified: pending
+  step04_reliability_assessment: pending
+  step05_correlation_analysis: pending
+  step06_standardize_scores: pending
+  step07_fit_lmms: pending
+  step08_prepare_plot_data: pending

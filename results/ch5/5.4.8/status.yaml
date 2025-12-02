@@ -27,16 +27,39 @@ rq_stats:
     8.7/10 CONDITIONAL. Cross-classified LMM appropriate, 100% tool reuse. Critical gaps: (1) no LMM assumption diagnostics (residuals, homoscedasticity, outliers); (2) binary response normality violation unaddressed; (3) no 3-way interaction power analysis; (4) convergence contingencies incomplete. Required fixes: add assumption testing procedures, binary response justification, power analysis plan, expanded convergence protocol. See 1_stats.md for detailed recommendations.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    6 steps planned: GLMM-only pipeline (no IRT, uses RQ 5.4.1 item difficulty).
+    Analysis: Cross-classified GLMM (binomial family, logit link) for binary responses.
+    Dependencies: RQ 5.4.1 outputs (item_parameters.csv, tsvr_mapping.csv).
+    Primary test: 3-way Time×Difficulty_c×Congruence interaction (Bonferroni alpha=0.0033).
+    Outputs: GLMM summary, fixed/random effects, interaction extraction, 6-line plot source CSV.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    6 analysis + 5 validation tools cataloged for GLMM-only pipeline.
+    GLMM binomial family (binary responses), NO IRT (uses RQ 5.4.1 difficulty).
+    Cross-classified random effects (UID x ItemID).
+    D068 dual p-values (Bonferroni alpha=0.0033).
+    Stdlib tools (pandas) exempt from tools_inventory.md verification.
 
 rq_analysis:
-  status: pending
+  status: success
   context_dump: |
+    6 steps specified with validation (GLMM-only, no IRT calibration)
+    Analysis: Cross-classified GLMM (binomial family, binary responses)
+    3-way interaction: Time x Difficulty_c x Congruence (D068 dual p-values)
+    Dependencies: RQ 5.4.1 outputs (item difficulty as predictor)
+    Outputs: GLMM summary, fixed/random effects, interaction terms, 6-line plot CSV
+
+analysis_steps:
+  step00_extract_item_difficulty: pending
+  step01_extract_responses: pending
+  step02_merge_difficulty: pending
+  step03_fit_glmm: pending
+  step04_extract_interaction: pending
+  step05_prepare_plot_data: pending
 
 rq_inspect:
   status: pending

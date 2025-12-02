@@ -1,0 +1,645 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.2.7 - Domain-Based Clustering
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.2.7"
+  total_steps: 7
+  analysis_type: "K-means clustering (sklearn stdlib, NO IRT/LMM)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T00:00:00Z"
+  dependencies:
+    - "RQ 5.2.6 MUST complete Step 4 (extract random effects) before this RQ can run"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Random Effects from RQ 5.2.6
+  # --------------------------------------------------------------------------
+  - name: "step00_load_random_effects"
+    step_number: "00"
+    description: "Load domain-specific random effects (intercepts and slopes) from RQ 5.2.6 variance decomposition analysis"
+
+    # Analysis specification (stdlib pandas operations)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.2.6 dependency file exists (circuit breaker if missing)"
+        - "Load results/ch5/5.2.6/data/step04_random_effects.csv"
+        - "Validate structure: 300 rows (100 UID x 3 domains), 4 columns (UID, domain, Total_Intercept, Total_Slope)"
+        - "Pivot from long to wide format:"
+        - "  - Input: 300 rows (100 UID x 3 domains)"
+        - "  - Output: 100 rows x 7 columns (UID + 6 clustering variables)"
+        - "  - Variables: Total_Intercept_What, Total_Slope_What, Total_Intercept_Where, Total_Slope_Where, Total_Intercept_When, Total_Slope_When"
+        - "Verify no missing values (all 100 participants must have all 6 variables)"
+        - "Save pivoted data for Step 1 standardization"
+
+      input_files:
+        - path: "../5.2.6/data/step04_random_effects.csv"
+          description: "Random effects from RQ 5.2.6 (DERIVED data - EXTERNAL dependency)"
+          format: "CSV, long format, 300 rows x 4 columns"
+          required_columns:
+            - name: "UID"
+              type: "str"
+              description: "Participant unique ID (P### with leading zeros)"
+            - name: "domain"
+              type: "str"
+              description: "Memory domain (What, Where, When)"
+            - name: "Total_Intercept"
+              type: "float"
+              description: "Baseline theta at Day 0 for given domain"
+            - name: "Total_Slope"
+              type: "float"
+              description: "Forgetting rate per day for given domain"
+          dependency_circuit_breaker:
+            condition: "File does NOT exist"
+            error_type: "EXPECTATIONS"
+            message: "RQ 5.2.6 must complete Step 4 (extract random effects) before RQ 5.2.7 can run"
+
+      output_files:
+        - path: "data/step00_random_effects_from_rq526.csv"
+          description: "Pivoted random effects in wide format (100 participants x 6 clustering variables)"
+          format: "CSV, wide format, 100 rows x 7 columns"
+          columns:
+            - name: "UID"
+              type: "str"
+            - name: "Total_Intercept_What"
+              type: "float"
+            - name: "Total_Slope_What"
+              type: "float"
+            - name: "Total_Intercept_Where"
+              type: "float"
+            - name: "Total_Slope_Where"
+              type: "float"
+            - name: "Total_Intercept_When"
+              type: "float"
+            - name: "Total_Slope_When"
+              type: "float"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      inputs:
+        df:
+          source: "analysis output (loaded and pivoted DataFrame)"
+          description: "step00_random_effects_from_rq526.csv"
+        expected_rows: 100
+        expected_columns:
+          - "UID"
+          - "Total_Intercept_What"
+          - "Total_Slope_What"
+          - "Total_Intercept_Where"
+          - "Total_Slope_Where"
+          - "Total_Intercept_When"
+          - "Total_Slope_When"
+        column_types:
+          UID: "object"
+          Total_Intercept_What: "float64"
+          Total_Slope_What: "float64"
+          Total_Intercept_Where: "float64"
+          Total_Slope_Where: "float64"
+          Total_Intercept_When: "float64"
+          Total_Slope_When: "float64"
+
+      criteria:
+        - "Row count = 100 (all participants present, no data loss)"
+        - "Column count = 7 (UID + 6 clustering variables)"
+        - "All columns present with correct names"
+        - "Column types match expected dtypes"
+        - "No missing values (all 6 clustering variables must be non-null)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step00_load_random_effects.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step00_load_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Standardize Clustering Features
+  # --------------------------------------------------------------------------
+  - name: "step01_standardize_features"
+    step_number: "01"
+    description: "Standardize all 6 clustering variables to z-scores (mean=0, SD=1) to ensure equal weighting in K-means"
+
+    # Analysis specification (stdlib sklearn StandardScaler)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_random_effects_from_rq526.csv"
+        - "For each of 6 clustering variables:"
+        - "  - Compute mean (mu) and standard deviation (sigma)"
+        - "  - Transform to z-score: z = (x - mu) / sigma using sklearn.preprocessing.StandardScaler"
+        - "  - Store z-scored variable with suffix _z (e.g., Total_Intercept_What_z)"
+        - "Validate standardization:"
+        - "  - Mean of each z-scored variable ~ 0 (tolerance: |mean| < 0.01)"
+        - "  - SD of each z-scored variable ~ 1 (tolerance: |SD - 1| < 0.05)"
+        - "Check for extreme outliers (|z| > 3 flag, |z| > 4 investigate)"
+        - "Save standardized features for K-means clustering"
+
+      input_files:
+        - path: "data/step00_random_effects_from_rq526.csv"
+          description: "Pivoted random effects (raw scale)"
+          format: "CSV, 100 rows x 7 columns"
+          required_columns:
+            - "UID"
+            - "Total_Intercept_What"
+            - "Total_Slope_What"
+            - "Total_Intercept_Where"
+            - "Total_Slope_Where"
+            - "Total_Intercept_When"
+            - "Total_Slope_When"
+
+      output_files:
+        - path: "data/step01_standardized_features.csv"
+          description: "Z-scored clustering variables (mean=0, SD=1)"
+          format: "CSV, 100 rows x 7 columns"
+          columns:
+            - "UID"
+            - "Total_Intercept_What_z"
+            - "Total_Slope_What_z"
+            - "Total_Intercept_Where_z"
+            - "Total_Slope_Where_z"
+            - "Total_Intercept_When_z"
+            - "Total_Slope_When_z"
+        - path: "data/step01_standardization_summary.txt"
+          description: "Standardization report (means, SDs, outliers)"
+          format: "Plain text"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      inputs:
+        df:
+          source: "analysis output (standardized features DataFrame)"
+          description: "step01_standardized_features.csv"
+        column_names:
+          - "Total_Intercept_What_z"
+          - "Total_Slope_What_z"
+          - "Total_Intercept_Where_z"
+          - "Total_Slope_Where_z"
+          - "Total_Intercept_When_z"
+          - "Total_Slope_When_z"
+        tolerance: 0.01
+
+      criteria:
+        - "Mean of each z-scored variable within [-0.01, 0.01]"
+        - "SD of each z-scored variable within [0.95, 1.05]"
+        - "No NaN or infinite values introduced"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step01_standardize_features.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step01_standardize_features.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: K-Means Model Selection (K=1 to K=6)
+  # --------------------------------------------------------------------------
+  - name: "step02_kmeans_model_selection"
+    step_number: "02"
+    description: "Test K=1 to K=6 cluster solutions using K-means, compute inertia and BIC, select optimal K"
+
+    # Analysis specification (stdlib sklearn KMeans)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_standardized_features.csv (100 x 6 z-scored matrix)"
+        - "For K in range(1, 7):"
+        - "  - Fit sklearn.cluster.KMeans with:"
+        - "    - n_clusters=K"
+        - "    - random_state=42 (reproducibility)"
+        - "    - n_init=50 (50 random initializations per K, select best by inertia)"
+        - "    - max_iter=300 (allow convergence)"
+        - "    - algorithm='lloyd' (standard K-means)"
+        - "  - Extract inertia (within-cluster sum of squares)"
+        - "  - Compute BIC:"
+        - "    - BIC = n_samples * log(inertia / n_samples) + K * log(n_samples) * n_features"
+        - "    - Where: n_samples=100, n_features=6"
+        - "  - Store: K, inertia, BIC"
+        - "Model selection logic:"
+        - "  - Find K with minimum BIC (K_min_BIC)"
+        - "  - Check parsimony rule: If multiple K have delta_BIC < 2 from minimum, select smallest K"
+        - "  - Document selected K with justification"
+        - "Save model selection results for Step 3 final fitting"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          description: "Z-scored clustering variables"
+          format: "CSV, 100 rows x 7 columns (UID + 6 z-variables)"
+          clustering_matrix: "Extract 6 z-scored columns only (exclude UID), shape: 100 x 6"
+
+      output_files:
+        - path: "data/step02_cluster_selection.csv"
+          description: "Model selection results (K, inertia, BIC for K=1-6)"
+          format: "CSV, 6 rows x 3 columns"
+          columns:
+            - name: "K"
+              type: "int"
+            - name: "inertia"
+              type: "float"
+            - name: "BIC"
+              type: "float"
+        - path: "data/step02_optimal_k_selection.txt"
+          description: "Selected K with justification (BIC minimum or parsimony rule)"
+          format: "Plain text"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      inputs:
+        df:
+          source: "analysis output (cluster_selection DataFrame)"
+          description: "step02_cluster_selection.csv"
+        expected_rows: 6
+        expected_columns:
+          - "K"
+          - "inertia"
+          - "BIC"
+        column_types:
+          K: "int64"
+          inertia: "float64"
+          BIC: "float64"
+
+      criteria:
+        - "Row count = 6 (K=1 to K=6 tested)"
+        - "Column count = 3 (K, inertia, BIC)"
+        - "All K values in [1, 6] (consecutive integers)"
+        - "Inertia values monotonically decreasing with K"
+        - "No NaN or infinite values"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step02_kmeans_model_selection.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step02_kmeans_model_selection.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Final K-Means Model with Optimal K
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_final_kmeans"
+    step_number: "03"
+    description: "Fit final K-means model using optimal K, extract cluster assignments and cluster centers"
+
+    # Analysis specification (stdlib sklearn KMeans)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_standardized_features.csv (100 x 6 z-scored matrix)"
+        - "Read optimal K from data/step02_optimal_k_selection.txt (parse 'Optimal K = [value]')"
+        - "Fit final sklearn.cluster.KMeans:"
+        - "  - n_clusters=K (from Step 2 selection)"
+        - "  - random_state=42 (reproducibility)"
+        - "  - n_init=50 (50 random initializations)"
+        - "  - max_iter=300"
+        - "Extract cluster assignments (labels_ attribute, array of length 100)"
+        - "Extract cluster centers (cluster_centers_ attribute, K x 6 matrix)"
+        - "Compute cluster sizes (count participants per cluster)"
+        - "Check balance: No cluster < 10% of sample (N < 10 participants)"
+        - "Merge cluster assignments with original UIDs"
+        - "Save cluster assignments, centers, and sizes"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          description: "Z-scored clustering variables"
+        - path: "data/step02_optimal_k_selection.txt"
+          description: "Selected K value (parse from text)"
+
+      output_files:
+        - path: "data/step03_cluster_assignments.csv"
+          description: "Cluster assignment per participant"
+          format: "CSV, 100 rows x 2 columns"
+          columns:
+            - name: "UID"
+              type: "str"
+            - name: "cluster"
+              type: "int"
+              description: "Cluster ID (0 to K-1, sklearn convention)"
+        - path: "data/step03_cluster_centers.csv"
+          description: "Cluster centroids in z-scored space"
+          format: "CSV, K rows x 7 columns"
+          columns:
+            - "cluster"
+            - "Total_Intercept_What_z"
+            - "Total_Slope_What_z"
+            - "Total_Intercept_Where_z"
+            - "Total_Slope_Where_z"
+            - "Total_Intercept_When_z"
+            - "Total_Slope_When_z"
+        - path: "data/step03_cluster_sizes.csv"
+          description: "Cluster size distribution"
+          format: "CSV, K rows x 3 columns"
+          columns:
+            - name: "cluster"
+              type: "int"
+            - name: "N"
+              type: "int"
+            - name: "percent"
+              type: "float"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_cluster_assignment"
+      signature: "validate_cluster_assignment(cluster_labels: Union[np.ndarray, pd.Series], n_expected: int, min_cluster_size: int = 5) -> Dict[str, Any]"
+
+      inputs:
+        cluster_labels:
+          source: "analysis output (cluster column from assignments DataFrame)"
+          description: "Cluster assignments array (length 100)"
+        n_expected: 100
+        min_cluster_size: 10
+
+      criteria:
+        - "All 100 participants assigned (length = n_expected)"
+        - "Cluster IDs consecutive starting from 0 (e.g., {0, 1, 2} for K=3)"
+        - "Each cluster has >= 10 members (balance requirement)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step03_fit_final_kmeans.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step03_fit_final_kmeans.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Validate Cluster Quality
+  # --------------------------------------------------------------------------
+  - name: "step04_validate_cluster_quality"
+    step_number: "04"
+    description: "Assess cluster quality using silhouette score, Davies-Bouldin index, and bootstrap Jaccard stability"
+
+    # Analysis specification (stdlib sklearn metrics + numpy bootstrap)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_standardized_features.csv (z-scored features for distance calculations)"
+        - "Load data/step03_cluster_assignments.csv (cluster labels)"
+        - "1. Compute Silhouette Score (sklearn.metrics.silhouette_score):"
+        - "   - Global silhouette = mean across all participants"
+        - "   - Interpretation: >= 0.50 Good, >= 0.40 Acceptable, < 0.40 Poor, < 0.25 Fail"
+        - "2. Compute Davies-Bouldin Index (sklearn.metrics.davies_bouldin_score):"
+        - "   - Lower is better (< 1.0 Good, < 1.5 Acceptable, >= 1.5 Poor)"
+        - "3. Bootstrap Stability (100 iterations):"
+        - "   - Resample 80 participants (80% with replacement)"
+        - "   - Fit K-means with same K and random_state"
+        - "   - Compute Jaccard index (agreement between bootstrap and original)"
+        - "   - Aggregate: mean Jaccard, 95% CI (2.5th and 97.5th percentiles)"
+        - "   - Interpretation: > 0.75 Stable, [0.60, 0.75] Moderate, < 0.60 Unstable"
+        - "4. Combined Decision Rule:"
+        - "   - GOOD: silhouette >= 0.50, DB < 1.0, Jaccard > 0.75"
+        - "   - ACCEPTABLE: silhouette >= 0.40, DB < 1.5, Jaccard > 0.60"
+        - "   - POOR: silhouette < 0.40 OR DB >= 1.5 OR Jaccard < 0.60"
+        - "   - FAIL: silhouette < 0.25 (recommend GMM or continuous interpretation)"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          description: "Z-scored features for distance calculations"
+        - path: "data/step03_cluster_assignments.csv"
+          description: "Cluster labels for validation"
+
+      output_files:
+        - path: "data/step04_cluster_validation.csv"
+          description: "Cluster quality metrics summary"
+          format: "CSV, 5 rows x 3 columns"
+          columns:
+            - name: "metric"
+              type: "str"
+              values: ["silhouette_score", "davies_bouldin_index", "jaccard_mean", "jaccard_ci_lower", "jaccard_ci_upper"]
+            - name: "value"
+              type: "float"
+            - name: "interpretation"
+              type: "str"
+        - path: "data/step04_validation_summary.txt"
+          description: "Overall quality assessment with recommendation"
+          format: "Plain text"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_bootstrap_stability"
+      signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+
+      inputs:
+        jaccard_values:
+          source: "analysis output (array of 100 Jaccard coefficients from bootstrap)"
+          description: "Bootstrap Jaccard distribution"
+        min_jaccard_threshold: 0.75
+
+      criteria:
+        - "Jaccard values in [0,1] range"
+        - "Mean Jaccard computed"
+        - "95% CI computed via percentile method (2.5th, 97.5th)"
+        - "Stability assessed against threshold (0.75 for GOOD)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step04_validate_cluster_quality.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step04_validate_cluster_quality.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Characterize Clusters by Domain-Specific Patterns
+  # --------------------------------------------------------------------------
+  - name: "step05_characterize_clusters"
+    step_number: "05"
+    description: "Compute mean intercept/slope per cluster per domain, assign interpretive labels based on patterns"
+
+    # Analysis specification (stdlib pandas groupby)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_random_effects_from_rq526.csv (raw-scale values for interpretability)"
+        - "Load data/step03_cluster_assignments.csv (cluster labels)"
+        - "Merge on UID"
+        - "For each cluster (0 to K-1):"
+        - "  - Compute mean and SD for each of 6 variables (pandas groupby)"
+        - "  - Compute min and max for each variable"
+        - "  - Store aggregated statistics"
+        - "Domain-specific pattern identification:"
+        - "  - High baseline: mean intercept > 0 (above grand mean)"
+        - "  - Low baseline: mean intercept < 0 (below grand mean)"
+        - "  - Fast forgetting: mean slope < -0.5 (steep decline)"
+        - "  - Slow forgetting: mean slope > -0.5 (shallow decline)"
+        - "Assign interpretive labels:"
+        - "  - Format: '{Baseline pattern} / {Forgetting pattern}'"
+        - "  - Examples: 'High Memory / Slow Forgetting', 'Domain-Selective What', 'Fast Temporal Decline'"
+        - "Create cluster characterization report with qualitative descriptions"
+
+      input_files:
+        - path: "data/step00_random_effects_from_rq526.csv"
+          description: "Raw-scale random effects (NOT z-scored, for interpretability)"
+        - path: "data/step03_cluster_assignments.csv"
+          description: "Cluster labels per participant"
+
+      output_files:
+        - path: "data/step05_cluster_summary_statistics.csv"
+          description: "Summary statistics per cluster per variable"
+          format: "CSV, K*6 rows x 6 columns"
+          columns:
+            - name: "cluster"
+              type: "int"
+            - name: "variable"
+              type: "str"
+            - name: "mean"
+              type: "float"
+            - name: "SD"
+              type: "float"
+            - name: "min"
+              type: "float"
+            - name: "max"
+              type: "float"
+        - path: "data/step05_cluster_characterization.txt"
+          description: "Interpretive cluster descriptions (2-3 sentences per cluster)"
+          format: "Plain text"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_cluster_summary_stats"
+      signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str = 'min', mean_col: str = 'mean', max_col: str = 'max', sd_col: str = 'SD', n_col: str = 'N') -> Dict[str, Any]"
+
+      inputs:
+        summary_df:
+          source: "analysis output (cluster summary statistics DataFrame)"
+          description: "step05_cluster_summary_statistics.csv"
+        min_col: "min"
+        mean_col: "mean"
+        max_col: "max"
+        sd_col: "SD"
+        n_col: null
+
+      criteria:
+        - "min <= mean <= max for each row"
+        - "SD >= 0 (non-negative)"
+        - "All K clusters present (6 rows per cluster)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step05_characterize_clusters.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step05_characterize_clusters.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Scatter Plot Matrix Data
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_scatter_plot_data"
+    step_number: "06"
+    description: "Create plot source CSV for scatter plot matrix (rq_plots will generate PNG from this data)"
+
+    # Analysis specification (stdlib pandas merge)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_standardized_features.csv (z-scored variables for plotting)"
+        - "Load data/step03_cluster_assignments.csv (cluster labels)"
+        - "Load data/step03_cluster_centers.csv (cluster centroids)"
+        - "Load data/step05_cluster_characterization.txt (parse interpretive labels)"
+        - "Merge z-scored features with cluster assignments on UID"
+        - "Create plot data matrix:"
+        - "  - Rows: 100 participants (individual points)"
+        - "  - Columns: UID, cluster, cluster_label, point_type='participant', 6 z-variables"
+        - "Create cluster centers annotation data:"
+        - "  - Rows: K clusters (centroid markers)"
+        - "  - Columns: UID='Centroid_[cluster]', cluster, cluster_label, point_type='centroid', 6 z-coordinates"
+        - "Combine participants + centroids in single CSV:"
+        - "  - First 100 rows: participants"
+        - "  - Next K rows: centroids"
+        - "  - Column point_type distinguishes them"
+        - "Save plot source CSV for rq_plots (Step 20 in workflow)"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          description: "Z-scored clustering variables"
+        - path: "data/step03_cluster_assignments.csv"
+          description: "Cluster labels"
+        - path: "data/step03_cluster_centers.csv"
+          description: "Cluster centroids"
+        - path: "data/step05_cluster_characterization.txt"
+          description: "Interpretive labels (parse for legend)"
+
+      output_files:
+        - path: "data/step06_scatter_plot_matrix_data.csv"
+          description: "Plot source CSV for scatter plot matrix (100+K rows)"
+          format: "CSV, (100+K) rows x 10 columns"
+          columns:
+            - name: "UID"
+              type: "str"
+              description: "Participant ID or 'Centroid_[cluster]'"
+            - name: "cluster"
+              type: "int"
+            - name: "cluster_label"
+              type: "str"
+              description: "Interpretive label from Step 5"
+            - name: "point_type"
+              type: "str"
+              values: ["participant", "centroid"]
+            - name: "Total_Intercept_What_z"
+              type: "float"
+            - name: "Total_Slope_What_z"
+              type: "float"
+            - name: "Total_Intercept_Where_z"
+              type: "float"
+            - name: "Total_Slope_Where_z"
+              type: "float"
+            - name: "Total_Intercept_When_z"
+              type: "float"
+            - name: "Total_Slope_When_z"
+              type: "float"
+          note: "rq_plots will create 6x6 scatter plot matrix from this data (15 unique pairs + diagonal histograms)"
+
+    # Validation specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      inputs:
+        plot_data:
+          source: "analysis output (scatter plot matrix data DataFrame)"
+          description: "step06_scatter_plot_matrix_data.csv"
+        required_domains:
+          - "participant"
+          - "centroid"
+        required_groups: []
+        domain_col: "point_type"
+        group_col: "cluster"
+
+      criteria:
+        - "All 100 participants present (no missing)"
+        - "All K centroids present (one per cluster)"
+        - "point_type distribution: 100 'participant' + K 'centroid' rows"
+        - "All clusters represented: Each cluster ID has participants AND centroid"
+        - "No NaN values (all cells must have valid values for plotting)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step06_prepare_scatter_plot_data.log"
+        invoke_g_debug: true
+
+    log_file: "logs/step06_prepare_scatter_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

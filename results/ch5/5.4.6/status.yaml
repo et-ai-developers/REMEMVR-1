@@ -27,16 +27,40 @@ rq_stats:
     9.7/10.0 APPROVED (RE-VALIDATED 2025-12-02 after concept update). Cat1: 3.0/3.0 (convergence strategy complete). Cat2: 2.0/2.0 (100% tool reuse, 9 tools). Cat3: 1.8/2.0 (parameters adequate, Breusch-Pagan ambiguity minor). Cat4: 2.0/2.0 (comprehensive validation: convergence contingency + homoscedasticity Levene/BP + independence ACF + practice effects). Cat5: 0.9/1.0 (7 concerns, critical omissions RESOLVED). All required changes addressed: (1) LRT-based convergence fallback documented, (2) Homoscedasticity testing procedure complete. Report: results/ch5/5.4.6/docs/1_stats.md
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    6 steps planned (no Step 0 - DERIVED data from RQ 5.4.1).
+    Tool requirements: LMM fitting (stratified by congruence), ICC computation, random effects extraction, correlation tests (D068), diagnostic plots.
+    Expected outputs: 7 data files (variance components, ICC estimates, random effects, correlations, comparison), 7 PNG plots (6 diagnostics + 1 comparison).
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    5 analysis + 6 validation tools cataloged for LMM-stratified variance decomposition.
+    Analysis tools: fit_lmm_trajectory_tsvr (stratified), compute_icc_from_variance_components, extract_random_effects_from_lmm, test_intercept_slope_correlation_d068, plot_histogram_by_group.
+    Validation tools: validate_lmm_convergence, validate_variance_positivity, validate_icc_bounds, validate_dataframe_structure, validate_correlation_test_d068, check_file_exists.
+    Decision D068 embedded: Dual p-value reporting for intercept-slope correlations (uncorrected + Bonferroni).
+    Decision D070 inherited: TSVR_hours as time variable from RQ 5.4.1.
 
 rq_analysis:
-  status: pending
+  status: success
   context_dump: |
+    9 step specifications created (6 main + 3 sub-steps for validation/plotting).
+    Type: LMM-stratified variance decomposition (no IRT - uses RQ 5.4.1 theta).
+    Step 1: Load dependency (stdlib). Step 2: Fit LMMs (catalogued). Step 3: Compute ICC (catalogued).
+    Step 4: Extract random effects (catalogued). Step 5: Test correlations + plots (catalogued + stdlib).
+    Step 6: Compare ICC across congruence (stdlib). All steps have validation tools (100% coverage).
+
+analysis_steps:
+  step01_load_dependency_data: pending
+  step02_fit_stratified_lmms: pending
+  step02b_validate_variance_components: pending
+  step03_compute_icc: pending
+  step04_extract_random_effects: pending
+  step05_test_correlations_plot_diagnostics: pending
+  step05b_create_diagnostic_histograms: pending
+  step05c_create_diagnostic_qqplots: pending
+  step06_compare_icc_across_congruence: pending
 
 rq_inspect:
   status: pending

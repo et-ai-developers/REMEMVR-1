@@ -1,0 +1,635 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.3.3 - Paradigm Consolidation Window
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.3.3"
+  total_steps: 7
+  analysis_type: "Piecewise LMM (paradigm consolidation window analysis)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T00:00:00Z"
+  dependencies:
+    - rq_id: "ch5/5.3.1"
+      file: "results/ch5/5.3.1/data/step04_lmm_input.csv"
+      description: "Paradigm-specific theta scores from RQ 5.3.1"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Theta Scores from RQ 5.3.1
+  # --------------------------------------------------------------------------
+  - name: "step00_load_theta_from_rq531"
+    step_number: "00"
+    description: "Load paradigm-specific theta scores from RQ 5.3.1 and verify data structure for piecewise LMM analysis"
+
+    # Analysis call specification - STDLIB OPERATION (pandas CSV loading)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/5.3.1/data/step04_lmm_input.csv')"
+        - "Verify all required columns present: UID, test, paradigm, theta, SE, TSVR_hours"
+        - "Verify expected row count: 1200 (100 participants x 4 tests x 3 paradigms)"
+        - "Verify paradigm levels: IFR, ICR, IRE (exactly 3 levels)"
+        - "Verify test levels: T1, T2, T3, T4 (exactly 4 levels)"
+        - "Verify no missing theta values (NaN check)"
+        - "Add loaded_timestamp column (datetime.now())"
+        - "Save to data/step00_theta_from_rq531.csv"
+
+      input_files:
+        - path: "results/ch5/5.3.1/data/step04_lmm_input.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test", "paradigm", "theta", "SE", "TSVR_hours"]
+          expected_rows: 1200
+          description: "Paradigm-specific theta scores from RQ 5.3.1"
+
+      output_files:
+        - path: "data/step00_theta_from_rq531.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier (P### format)"}
+            - {name: "test", type: "str", description: "Test session (T1, T2, T3, T4)"}
+            - {name: "paradigm", type: "str", description: "Retrieval paradigm (IFR, ICR, IRE)"}
+            - {name: "theta", type: "float", description: "IRT ability estimate"}
+            - {name: "SE", type: "float", description: "Standard error of theta"}
+            - {name: "TSVR_hours", type: "float", description: "Time Since VR in hours (Decision D070)"}
+            - {name: "loaded_timestamp", type: "str", description: "Timestamp when file was loaded"}
+          expected_rows: 1200
+          description: "Copy of RQ 5.3.1 theta scores with validation metadata"
+
+      parameters: {}
+
+    # Validation call specification
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "File exists"
+          check: "results/ch5/5.3.1/data/step04_lmm_input.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count"
+          check: "Exactly 1200 rows (100 participants x 4 tests x 3 paradigms)"
+          severity: "CRITICAL"
+        - name: "Required columns present"
+          check: "All columns [UID, test, paradigm, theta, SE, TSVR_hours] exist"
+          severity: "CRITICAL"
+        - name: "No missing theta"
+          check: "No NaN values in theta column"
+          severity: "CRITICAL"
+        - name: "Paradigm levels"
+          check: "paradigm in {IFR, ICR, IRE} (exactly 3 levels)"
+          severity: "CRITICAL"
+        - name: "Test levels"
+          check: "test in {T1, T2, T3, T4} (exactly 4 levels)"
+          severity: "CRITICAL"
+        - name: "Theta range"
+          check: "theta in [-3, 3] (typical IRT range)"
+          severity: "MODERATE"
+        - name: "SE range"
+          check: "SE in [0.1, 1.0] (reasonable precision)"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "QUIT"
+        message: "RQ 5.3.1 dependency not met - verify RQ 5.3.1 completed successfully"
+
+    log_file: "logs/step00_load_theta_from_rq531.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Assign Temporal Segments and Compute Days_within
+  # --------------------------------------------------------------------------
+  - name: "step01_assign_piecewise_segments"
+    step_number: "01"
+    description: "Create piecewise data structure by assigning temporal segments (Early vs Late) and computing Days_within (time recentered within each segment to start at 0)"
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "assign_piecewise_segments"
+      signature: "assign_piecewise_segments(df: pd.DataFrame, tsvr_col: str = 'TSVR_hours', early_cutoff_hours: float = 24.0) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step00_theta_from_rq531.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test", "paradigm", "theta", "SE", "TSVR_hours"]
+          variable_name: "theta_data"
+
+      output_files:
+        - path: "data/step01_piecewise_lmm_input.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "paradigm", type: "str"}
+            - {name: "theta", type: "float"}
+            - {name: "SE", type: "float"}
+            - {name: "TSVR_hours", type: "float"}
+            - {name: "Segment", type: "str", description: "Temporal segment (Early, Late)"}
+            - {name: "Days_within", type: "float", description: "Time recentered within segment (starts at 0)"}
+          expected_rows: 1200
+          variable_name: "piecewise_data"
+          description: "Piecewise LMM input with segment assignment and recentered time"
+
+      parameters:
+        df: "theta_data"
+        tsvr_col: "TSVR_hours"
+        early_cutoff_hours: 24.0
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "piecewise_data"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_input.csv"
+          variable_name: "piecewise_data"
+          source: "analysis call output (assign_piecewise_segments)"
+
+      parameters:
+        df: "piecewise_data"
+        expected_rows: 1200
+        expected_columns: ["UID", "test", "paradigm", "theta", "SE", "TSVR_hours", "Segment", "Days_within"]
+        column_types:
+          Segment: "object"
+          Days_within: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Segment variable created (2 levels: Early, Late)"
+        - "Days_within computed (>= 0 within each segment)"
+        - "Balanced design (600 rows per segment)"
+        - "No NaN in Segment or Days_within columns"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_assign_piecewise_segments.log"
+
+    log_file: "logs/step01_assign_piecewise_segments.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Piecewise LMM
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_piecewise_lmm"
+    step_number: "02"
+    description: "Fit piecewise Linear Mixed Model with 3-way interaction (Days_within x Segment x paradigm) to test whether consolidation benefits differ across retrieval paradigms"
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "statsmodels.regression.mixed_linear_model"
+      function: "MixedLM"
+      signature: "MixedLM(endog, exog, groups, exog_re=None, **kwargs).fit(reml=False, **kwargs) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_input.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "Segment", "paradigm", "Days_within", "theta"]
+          variable_name: "piecewise_data"
+
+      output_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          format: "Pickle (serialized statsmodels MixedLMResults object)"
+          variable_name: "lmm_model"
+          description: "Fitted piecewise LMM model"
+        - path: "data/step02_lmm_model_summary.txt"
+          format: "Text file"
+          variable_name: "model_summary_text"
+          description: "Model summary with fixed effects, random effects, fit statistics"
+
+      parameters:
+        data: "piecewise_data"
+        formula: "theta ~ Days_within * Segment * paradigm"
+        re_formula: "~Days_within"
+        groups: "UID"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: pd.DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output (MixedLM.fit())"
+        - path: "data/step01_piecewise_lmm_input.csv"
+          variable_name: "piecewise_data"
+          source: "original data for diagnostics"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "piecewise_data"
+        output_dir: "data/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (True)"
+        - "Residuals normality (Shapiro-Wilk p > 0.01 or robust SEs reported)"
+        - "Homoscedasticity (Breusch-Pagan test)"
+        - "Random effects normality (Shapiro-Wilk for intercepts and slopes)"
+        - "No autocorrelation (ACF lag-1 < 0.1)"
+        - "Linearity (partial residual plots)"
+        - "No outliers (Cook's distance < 4/n)"
+
+      on_failure:
+        action: "Apply remedial actions per 1_concept.md (robust SEs, weighted LMM, simplify random structure via LRT)"
+        log_to: "logs/step02_fit_piecewise_lmm.log"
+
+    log_file: "logs/step02_fit_piecewise_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract 6 Segment-Paradigm Slopes
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_segment_slopes"
+    step_number: "03"
+    description: "Extract 6 segment-paradigm-specific slopes (Early IFR, Early ICR, Early IRE, Late IFR, Late ICR, Late IRE) via linear combinations of fixed effects with delta method standard errors"
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_segment_slopes_from_lmm"
+      signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          format: "Pickle"
+          variable_name: "lmm_model"
+
+      output_files:
+        - path: "data/step03_segment_paradigm_slopes.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "Segment", type: "str", description: "Temporal segment (Early, Late)"}
+            - {name: "paradigm", type: "str", description: "Retrieval paradigm (IFR, ICR, IRE)"}
+            - {name: "slope", type: "float", description: "Forgetting rate per day within segment"}
+            - {name: "SE", type: "float", description: "Delta method standard error"}
+            - {name: "z_statistic", type: "float", description: "slope / SE"}
+            - {name: "p_value", type: "float", description: "Two-tailed test"}
+            - {name: "CI_lower", type: "float", description: "95% CI lower bound"}
+            - {name: "CI_upper", type: "float", description: "95% CI upper bound"}
+            - {name: "interpretation", type: "str", description: "Significance and direction"}
+          expected_rows: 6
+          variable_name: "segment_slopes"
+          description: "6 segment-paradigm slopes with delta method SEs"
+
+      parameters:
+        lmm_result: "lmm_model"
+        segment_col: "Segment"
+        time_col: "Days_within"
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "segment_slopes"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_segment_paradigm_slopes.csv"
+          variable_name: "segment_slopes"
+          source: "analysis call output (extract_segment_slopes_from_lmm)"
+
+      parameters:
+        df: "segment_slopes"
+        expected_rows: 6
+        expected_columns: ["Segment", "paradigm", "slope", "SE", "z_statistic", "p_value", "CI_lower", "CI_upper", "interpretation"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 6 rows (2 segments x 3 paradigms)"
+        - "All slopes computed (no NaN)"
+        - "SE > 0 (delta method successful)"
+        - "p-values in [0, 1]"
+        - "CI_lower < CI_upper"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_segment_slopes.log"
+
+    log_file: "logs/step03_extract_segment_slopes.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute 6 Planned Contrasts with Bonferroni Correction
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_planned_contrasts"
+    step_number: "04"
+    description: "Test 6 planned contrasts comparing consolidation benefits (Late slope - Early slope) across paradigms with Bonferroni correction (alpha = 0.0083) and dual p-value reporting per Decision D068"
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          format: "Pickle"
+          variable_name: "lmm_model"
+          description: "Fitted model for variance-covariance matrix"
+        - path: "data/step03_segment_paradigm_slopes.csv"
+          format: "CSV"
+          required_columns: ["Segment", "paradigm", "slope"]
+          variable_name: "segment_slopes"
+
+      output_files:
+        - path: "data/step04_planned_contrasts.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "contrast_name", type: "str"}
+            - {name: "estimate", type: "float"}
+            - {name: "SE", type: "float"}
+            - {name: "z_statistic", type: "float"}
+            - {name: "p_uncorrected", type: "float", description: "Decision D068 uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Decision D068 Bonferroni-corrected p-value"}
+            - {name: "alpha_bonferroni", type: "float", description: "Always 0.0083 for this RQ"}
+            - {name: "significant", type: "bool"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+          expected_rows: 6
+          variable_name: "contrasts"
+          description: "6 planned contrasts with dual p-values (Decision D068)"
+        - path: "data/step04_effect_sizes.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "contrast_name", type: "str"}
+            - {name: "effect_size", type: "float"}
+            - {name: "effect_type", type: "str"}
+            - {name: "interpretation", type: "str"}
+          expected_rows: 6
+          variable_name: "effect_sizes"
+          description: "Effect sizes for contrasts"
+
+      parameters:
+        lmm_result: "lmm_model"
+        comparisons:
+          - "IFR_consolidation_benefit"
+          - "ICR_consolidation_benefit"
+          - "IRE_consolidation_benefit"
+          - "IFR_vs_ICR_benefit_difference"
+          - "IFR_vs_IRE_benefit_difference"
+          - "ICR_vs_IRE_benefit_difference"
+        family_alpha: 0.05
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "contrasts"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: pd.DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_planned_contrasts.csv"
+          required_columns: ["contrast_name", "p_uncorrected", "p_bonferroni"]
+          variable_name: "contrasts"
+          source: "analysis call output (compute_contrasts_pairwise)"
+
+      parameters:
+        contrasts_df: "contrasts"
+        required_comparisons:
+          - "IFR_consolidation_benefit"
+          - "ICR_consolidation_benefit"
+          - "IRE_consolidation_benefit"
+          - "IFR_vs_ICR_benefit_difference"
+          - "IFR_vs_IRE_benefit_difference"
+          - "ICR_vs_IRE_benefit_difference"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 6 required contrasts present"
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+        - "alpha_bonferroni = 0.0083 for all rows"
+        - "No NaN in estimate column"
+        - "p_bonferroni >= p_uncorrected (correction cannot decrease p-value)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_planned_contrasts.log"
+
+    log_file: "logs/step04_compute_planned_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compute Consolidation Benefit Index
+  # --------------------------------------------------------------------------
+  - name: "step05_compute_consolidation_benefit"
+    step_number: "05"
+    description: "Compute consolidation benefit index (Late slope - Early slope) for each paradigm, rank paradigms by benefit magnitude, and interpret pattern relative to hypothesis"
+
+    # Analysis call specification - STDLIB OPERATION (pandas arithmetic)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step03_segment_paradigm_slopes.csv"
+        - "For each paradigm (IFR, ICR, IRE): Extract Early and Late slopes"
+        - "Compute consolidation_benefit = Late_slope - Early_slope"
+        - "Rank paradigms by benefit magnitude (1 = largest, 3 = smallest)"
+        - "Interpret pattern vs hypothesis (expected: IFR > ICR > IRE)"
+        - "Add interpretation column (matches/contradicts hypothesis)"
+        - "Save to data/step05_consolidation_benefit.csv"
+
+      input_files:
+        - path: "data/step03_segment_paradigm_slopes.csv"
+          format: "CSV"
+          required_columns: ["Segment", "paradigm", "slope"]
+          variable_name: "segment_slopes"
+
+      output_files:
+        - path: "data/step05_consolidation_benefit.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "paradigm", type: "str"}
+            - {name: "Early_slope", type: "float"}
+            - {name: "Late_slope", type: "float"}
+            - {name: "consolidation_benefit", type: "float"}
+            - {name: "rank", type: "int"}
+            - {name: "interpretation", type: "str"}
+          expected_rows: 3
+          variable_name: "benefit_data"
+          description: "Consolidation benefit indices ranked by magnitude"
+
+      parameters: {}
+
+    # Validation call specification
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Row count"
+          check: "Exactly 3 rows (IFR, ICR, IRE)"
+          severity: "CRITICAL"
+        - name: "All paradigms present"
+          check: "paradigm in {IFR, ICR, IRE}"
+          severity: "CRITICAL"
+        - name: "Benefit computed"
+          check: "consolidation_benefit = Late_slope - Early_slope (arithmetic verified)"
+          severity: "CRITICAL"
+        - name: "Ranks assigned"
+          check: "rank in {1, 2, 3}, all unique"
+          severity: "CRITICAL"
+        - name: "No NaN"
+          check: "No NaN in consolidation_benefit column"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Consolidation benefit computation failed"
+
+    log_file: "logs/step05_compute_consolidation_benefit.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Piecewise Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_piecewise_plot_data"
+    step_number: "06"
+    description: "Aggregate observed means and model predictions per paradigm x segment x timepoint for two-panel piecewise trajectory visualization with dual-scale plots (theta + probability scales per Decision D069)"
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.plotting"
+      function: "prepare_piecewise_plot_data"
+      signature: "prepare_piecewise_plot_data(df_input: pd.DataFrame, lmm_result: MixedLMResults, segment_col: str, factor_col: str, segment_values: List[str], factor_values: List[str], days_within_col: str = 'Days_within', theta_col: str = 'theta', early_grid_points: int = 20, late_grid_points: int = 60, ci_level: float = 0.95) -> Dict[str, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step01_piecewise_lmm_input.csv"
+          required_columns: ["Segment", "paradigm", "Days_within", "theta", "test"]
+          variable_name: "piecewise_data"
+        - path: "data/step02_piecewise_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Fitted model for predictions"
+        - path: "data/step03_segment_paradigm_slopes.csv"
+          required_columns: ["Segment", "paradigm", "slope"]
+          variable_name: "segment_slopes"
+          description: "Slopes for plot annotations"
+
+      output_files:
+        - path: "data/step06_piecewise_theta_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "Segment", type: "str"}
+            - {name: "paradigm", type: "str"}
+            - {name: "Days_within", type: "float"}
+            - {name: "test", type: "str"}
+            - {name: "theta_observed", type: "float"}
+            - {name: "theta_predicted", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "slope", type: "float"}
+          variable_name: "theta_plot_data"
+          description: "Piecewise plot data (theta scale)"
+        - path: "data/step06_piecewise_probability_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "Segment", type: "str"}
+            - {name: "paradigm", type: "str"}
+            - {name: "Days_within", type: "float"}
+            - {name: "test", type: "str"}
+            - {name: "prob_observed", type: "float"}
+            - {name: "prob_predicted", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "slope", type: "float"}
+          variable_name: "prob_plot_data"
+          description: "Piecewise plot data (probability scale - Decision D069)"
+
+      parameters:
+        df_input: "piecewise_data"
+        lmm_result: "lmm_model"
+        segment_col: "Segment"
+        factor_col: "paradigm"
+        segment_values: ["Early", "Late"]
+        factor_values: ["IFR", "ICR", "IRE"]
+        days_within_col: "Days_within"
+        theta_col: "theta"
+        early_grid_points: 20
+        late_grid_points: 60
+        ci_level: 0.95
+
+      returns:
+        type: "Dict[str, pd.DataFrame]"
+        unpacking: "{'theta': theta_plot_data, 'probability': prob_plot_data}"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_piecewise_theta_data.csv"
+          required_columns: ["Segment", "paradigm", "theta_observed", "theta_predicted"]
+          variable_name: "theta_plot_data"
+        - path: "data/step06_piecewise_probability_data.csv"
+          required_columns: ["Segment", "paradigm", "prob_observed", "prob_predicted"]
+          variable_name: "prob_plot_data"
+          source: "analysis call output (prepare_piecewise_plot_data)"
+
+      parameters:
+        plot_data: "theta_plot_data"
+        required_domains: ["Early", "Late"]
+        required_groups: ["IFR", "ICR", "IRE"]
+        domain_col: "Segment"
+        group_col: "paradigm"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH theta_data AND probability_data CSVs created (Decision D069)"
+        - "All 6 segment-paradigm combinations present (2 x 3)"
+        - "No NaN in theta_predicted or prob_predicted columns"
+        - "Probability values in [0, 1]"
+        - "CI_lower < CI_upper for observed data"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_prepare_piecewise_plot_data.log"
+
+    log_file: "logs/step06_prepare_piecewise_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

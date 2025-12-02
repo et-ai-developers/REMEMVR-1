@@ -1,0 +1,230 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.2.7
+# Created by: rq_tools agent
+# Created: 2025-12-02
+# RQ: 5.2.7 - Domain-Based Clustering
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+# ==============================================================================
+# CRITICAL NOTE: Standard Library Exemption
+# ==============================================================================
+# RQ 5.2.7 uses ONLY standard library functions (sklearn, pandas, numpy)
+# for clustering analysis. Per best_practices/code.md, these are EXEMPT
+# from tools_inventory.md verification.
+#
+# Custom tools/ module usage: ONLY validation tools from tools.validation
+# All analysis operations use stdlib (no custom analysis tools required)
+# ==============================================================================
+
+analysis_tools:
+  # ==========================================================================
+  # NO CUSTOM ANALYSIS TOOLS REQUIRED
+  # ==========================================================================
+  # All analysis operations for RQ 5.2.7 use standard library:
+  # - pandas for data loading/pivoting/merging
+  # - sklearn.preprocessing.StandardScaler for z-score standardization
+  # - sklearn.cluster.KMeans for clustering
+  # - sklearn.metrics for silhouette_score, davies_bouldin_score
+  # - numpy for bootstrap operations
+  #
+  # These are NOT custom tools and do NOT require tools_inventory.md entries.
+  # Per best_practices/code.md: "Standard library functions (pandas, numpy,
+  # pathlib) - Do NOT require tools_inventory.md documentation"
+  # ==========================================================================
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    purpose: "Generic DataFrame validation for rows, columns, and types"
+
+    criteria:
+      - "Row count matches expected (exact or within range)"
+      - "All required columns present"
+      - "Column types match expected dtypes (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Flexible validator for checking expected structure of analysis outputs"
+    source_reference: "tools_inventory.md lines 580-588"
+    notes: "Used for Steps 0, 2, 3, 5 to validate DataFrame structure"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    purpose: "Validate z-score standardization (mean ≈ 0, SD ≈ 1)"
+
+    criteria:
+      - "Mean of each z-scored variable within tolerance of 0"
+      - "SD of each z-scored variable within tolerance of 1"
+      - "No NaN or infinite values introduced"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float] (actual means per column)"
+        sd_values: "Dict[str, float] (actual SDs per column)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_standardize_features.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate z-score standardization for equal weighting in K-means"
+    source_reference: "tools_inventory.md lines 550-558"
+    notes: "Used in Step 1 after sklearn StandardScaler transformation"
+
+  validate_cluster_assignment:
+    module: "tools.validation"
+    function: "validate_cluster_assignment"
+    signature: "validate_cluster_assignment(cluster_labels: Union[np.ndarray, pd.Series], n_expected: int, min_cluster_size: int = 5) -> Dict[str, Any]"
+
+    purpose: "Validate K-means cluster assignments"
+
+    criteria:
+      - "All participants assigned (length = n_expected)"
+      - "Cluster IDs consecutive starting from 0"
+      - "Each cluster has >= min_cluster_size members"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        cluster_sizes: "Dict[int, int]"
+        n_clusters: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_final_kmeans.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Prevent degenerate K-means solutions with tiny/empty clusters"
+    source_reference: "tools_inventory.md lines 600-608"
+    notes: "Used in Step 3 after K-means fitting, min_cluster_size=10 for RQ 5.2.7"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+
+    purpose: "Validate clustering stability via Jaccard coefficient"
+
+    criteria:
+      - "Jaccard values in [0,1] range"
+      - "Mean Jaccard computed from bootstrap distribution"
+      - "95% CI computed via percentile method"
+      - "Stability assessed against threshold (default 0.75)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_jaccard: "float"
+        ci_lower: "float"
+        ci_upper: "float"
+        above_threshold: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_validate_cluster_quality.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Assess cluster stability using bootstrap Jaccard coefficient"
+    source_reference: "tools_inventory.md lines 610-618"
+    notes: "Used in Step 4 for bootstrap stability validation (100 iterations)"
+
+  validate_cluster_summary_stats:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str = 'min', mean_col: str = 'mean', max_col: str = 'max', sd_col: str = 'sd', n_col: str = 'N') -> Dict[str, Any]"
+
+    purpose: "Validate cluster summary statistics consistency"
+
+    criteria:
+      - "min <= mean <= max for each row"
+      - "SD >= 0 (non-negative)"
+      - "N > 0 (positive cluster sizes)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        failed_checks: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_characterize_clusters.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Ensure cluster summary tables are mathematically consistent"
+    source_reference: "tools_inventory.md lines 620-628"
+    notes: "Used in Step 5 to validate aggregated cluster statistics"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    purpose: "Verify all domains/groups present in plot data"
+
+    criteria:
+      - "All required domains present"
+      - "All required groups present"
+      - "No missing categories that would create incomplete visualizations"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_prepare_scatter_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Ensure complete factorial design in plot data"
+    source_reference: "tools_inventory.md lines 590-598"
+    notes: "Used in Step 6 to validate scatter plot matrix data completeness"
+
+summary:
+  analysis_tools_count: 0
+  validation_tools_count: 6
+  total_unique_tools: 6
+  stdlib_exemption_note: "All analysis operations use sklearn/pandas/numpy (standard library)"
+  validation_coverage: "100% (all 7 steps have validation requirements)"
+  key_validations:
+    - "DataFrame structure validation (Steps 0, 2, 3, 5)"
+    - "Standardization validation (Step 1)"
+    - "Cluster assignment validation (Step 3)"
+    - "Bootstrap stability validation (Step 4)"
+    - "Summary statistics validation (Step 5)"
+    - "Plot data completeness validation (Step 6)"
+
+# ==============================================================================
+# NOTES FOR DOWNSTREAM AGENTS
+# ==============================================================================
+# rq_analysis: Map these validation tools to analysis steps per 2_plan.md
+# g_code: Import from sklearn/pandas for analysis, tools.validation for validation
+# g_debug: All errors logged to logs/stepNN_*.log per step
+# ==============================================================================

@@ -27,16 +27,28 @@ rq_stats:
     RQ 5.4.3 RE-VALIDATED APPROVED 9.9/10. Cat1: 3.0/3.0 (convergence plan). Cat2: 2.0/2.0 (100% reuse). Cat3: 2.0/2.0 (contrast coding added). Cat4: 2.0/2.0 (remedial actions added). Cat5: 0.9/1.0 (3 critical issues resolved). Concept successfully addressed all 3 required changes. Ready for rq_planner.
 
 rq_planner:
-  status: pending
+  status: success
   context_dump: |
+    Analysis plan created: 6 steps planned (Step 0: dependency validation + Steps 1-5: analysis).
+    Tool requirements: LMM fitting (3-way Age x Congruence x Time), marginal effects (delta method), Tukey HSD contrasts, age tertile aggregation.
+    Expected outputs: 11 data files, 6 log files. Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    6 analysis + 6 validation tools cataloged for LMM-only Age x Schema analysis
+    LMM tools: fit_lmm_trajectory_tsvr, extract_marginal_age_slopes_by_domain, prepare_age_effects_plot_data
+    Standard library: pandas (load_dependency_files, merge_and_reshape, extract_interaction_terms)
+    Validation: comprehensive LMM assumptions, dual p-values (D068), plot data completeness
+    All tools verified against tools_inventory.md, all naming conventions verified against names.md
 
 rq_analysis:
-  status: pending
+  status: success
   context_dump: |
+    6 steps specified with validation (LMM-only Age x Schema analysis)
+    Step 0: Load dependencies (RQ 5.4.1 theta, TSVR, master Age)
+    Steps 1-5: Prepare LMM input, fit 3-way interaction, extract terms, age effects + Tukey, plot data
+    All steps have analysis + validation calls, all signatures complete with type hints
 
 rq_inspect:
   status: pending
@@ -49,3 +61,11 @@ rq_plots:
 rq_results:
   status: pending
   context_dump: |
+
+analysis_steps:
+  step00_load_dependencies: pending
+  step01_prepare_lmm_input: pending
+  step02_fit_lmm: pending
+  step03_extract_interactions: pending
+  step04_compute_age_effects: pending
+  step05_prepare_plot_data: pending

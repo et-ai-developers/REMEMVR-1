@@ -1,0 +1,431 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# Consumed by: rq_analysis agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.4.7 - Schema-Based Clustering
+
+analysis_tools:
+  reshape_long_to_wide:
+    module: "pandas"
+    function: "pivot"
+    signature: "pivot(index: str, columns: str, values: Union[str, List[str]]) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "results/ch5/5.4.6/data/step04_random_effects.csv"
+        required_columns: ["UID", "congruence", "Total_Intercept", "Total_Slope"]
+        expected_rows: "300 (100 UID x 3 congruence levels)"
+        data_types:
+          UID: "string (participant identifier)"
+          congruence: "string (Common, Congruent, Incongruent)"
+          Total_Intercept: "float (random intercept)"
+          Total_Slope: "float (random slope)"
+
+    output_files:
+      - path: "data/step00_random_effects_from_rq546.csv"
+        columns: ["UID", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+        description: "Reshaped random effects (100 rows x 7 columns: UID + 6 clustering features)"
+
+    parameters:
+      index: "UID"
+      columns: "congruence"
+      values: ["Total_Intercept", "Total_Slope"]
+
+    description: "Reshape random effects from long (300 rows) to wide (100 rows x 6 features) for clustering"
+    source_reference: "pandas documentation - pivot method"
+
+  standardize_features:
+    module: "sklearn.preprocessing"
+    function: "StandardScaler"
+    signature: "StandardScaler().fit_transform(X: ndarray) -> ndarray"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step00_random_effects_from_rq546.csv"
+        required_columns: ["Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+        expected_rows: "100"
+
+    output_files:
+      - path: "data/step01_standardized_features.csv"
+        columns: ["UID", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        description: "Z-scored clustering features (mean=0, SD=1)"
+
+    parameters:
+      with_mean: true
+      with_std: true
+
+    description: "Standardize 6 clustering features to z-scores for equal weighting in K-means"
+    source_reference: "sklearn StandardScaler documentation"
+
+  kmeans_bic_selection:
+    module: "sklearn.cluster"
+    function: "KMeans"
+    signature: "KMeans(n_clusters: int, random_state: int, n_init: int).fit(X: ndarray) -> KMeans"
+    validation_tool: "validate_cluster_assignment"
+
+    input_files:
+      - path: "data/step01_standardized_features.csv"
+        required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        expected_rows: "100"
+
+    output_files:
+      - path: "data/step02_cluster_selection.csv"
+        columns: ["K", "inertia", "BIC"]
+        description: "BIC values for K=1-6 cluster solutions"
+      - path: "data/step02_optimal_k.txt"
+        description: "Optimal K (single integer value)"
+
+    parameters:
+      K_range: [1, 2, 3, 4, 5, 6]
+      random_state: 42
+      n_init: 50
+      bic_formula: "N * log(inertia / N) + K * log(N)"
+
+    description: "Test K=1-6 cluster solutions, compute BIC, select optimal K as BIC minimum"
+    source_reference: "sklearn KMeans documentation + custom BIC computation"
+
+  kmeans_final_fit:
+    module: "sklearn.cluster"
+    function: "KMeans"
+    signature: "KMeans(n_clusters: int, random_state: int, n_init: int).fit(X: ndarray) -> KMeans"
+    validation_tool: "validate_cluster_assignment"
+
+    input_files:
+      - path: "data/step01_standardized_features.csv"
+        required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        expected_rows: "100"
+      - path: "data/step02_optimal_k.txt"
+        description: "Optimal K from model selection"
+
+    output_files:
+      - path: "data/step03_cluster_assignments.csv"
+        columns: ["UID", "cluster"]
+        description: "Cluster assignments (100 participants x 2 columns)"
+      - path: "data/step03_cluster_centers.csv"
+        columns: ["cluster", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        description: "Cluster centers in z-score space (K rows x 7 columns)"
+
+    parameters:
+      n_clusters: "from step02_optimal_k.txt"
+      random_state: 42
+      n_init: 50
+
+    description: "Fit final K-means model with optimal K, extract cluster assignments and centers"
+    source_reference: "sklearn KMeans documentation"
+
+  compute_cluster_quality_metrics:
+    module: "sklearn.metrics"
+    function: "silhouette_score, davies_bouldin_score"
+    signature: "silhouette_score(X: ndarray, labels: ndarray) -> float"
+    validation_tool: "validate_bootstrap_stability"
+
+    input_files:
+      - path: "data/step01_standardized_features.csv"
+        required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        expected_rows: "100"
+      - path: "data/step03_cluster_assignments.csv"
+        required_columns: ["UID", "cluster"]
+        expected_rows: "100"
+
+    output_files:
+      - path: "data/step04_cluster_quality_metrics.csv"
+        columns: ["metric", "value", "threshold", "pass"]
+        description: "Silhouette, Davies-Bouldin, bootstrap Jaccard metrics (5 rows)"
+
+    parameters:
+      silhouette_threshold: 0.40
+      davies_bouldin_threshold: 1.5
+      jaccard_threshold: 0.75
+      bootstrap_iterations: 100
+      bootstrap_sample_fraction: 0.8
+
+    description: "Compute silhouette (>= 0.40), Davies-Bouldin (< 1.5), bootstrap stability (Jaccard > 0.75)"
+    source_reference: "sklearn metrics documentation + custom bootstrap function"
+
+  characterize_clusters:
+    module: "pandas"
+    function: "groupby"
+    signature: "DataFrame.groupby(by: str).agg(func: Union[str, List[str]]) -> DataFrame"
+    validation_tool: "validate_cluster_summary_stats"
+
+    input_files:
+      - path: "data/step03_cluster_centers.csv"
+        required_columns: ["cluster", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+      - path: "data/step00_random_effects_from_rq546.csv"
+        required_columns: ["UID", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+        description: "Original scale means/SDs for back-transformation"
+      - path: "data/step03_cluster_assignments.csv"
+        required_columns: ["UID", "cluster"]
+
+    output_files:
+      - path: "data/step05_cluster_centers_original_scale.csv"
+        columns: ["cluster", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope", "N", "label"]
+        description: "Cluster centers back-transformed to original scale with interpretive labels"
+      - path: "data/step05_cluster_summary_stats.csv"
+        columns: ["cluster", "feature", "mean", "SD", "min", "max"]
+        description: "Cluster-specific summary statistics (K x 6 rows)"
+
+    parameters:
+      back_transform_formula: "original_value = z * SD + mean"
+      aggregation_functions: ["mean", "std", "min", "max"]
+
+    description: "Back-transform cluster centers to original scale, compute summary stats, assign interpretive labels"
+    source_reference: "pandas groupby documentation + custom labeling logic"
+
+  prepare_scatter_matrix_data:
+    module: "pandas"
+    function: "merge"
+    signature: "DataFrame.merge(right: DataFrame, on: Union[str, List[str]], how: str) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step01_standardized_features.csv"
+        required_columns: ["UID", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+      - path: "data/step03_cluster_assignments.csv"
+        required_columns: ["UID", "cluster"]
+      - path: "data/step03_cluster_centers.csv"
+        required_columns: ["cluster", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+      - path: "data/step05_cluster_centers_original_scale.csv"
+        required_columns: ["cluster", "label"]
+
+    output_files:
+      - path: "data/step06_scatter_matrix_plot_data.csv"
+        columns: ["UID", "cluster", "cluster_label", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z", "data_type"]
+        description: "Plot source CSV for scatter matrix (100 participant rows + K cluster center rows)"
+
+    parameters:
+      merge_keys: ["UID"]
+      data_type_participant: "participant"
+      data_type_center: "center"
+
+    description: "Merge standardized features + cluster assignments + labels for scatter matrix visualization"
+    source_reference: "pandas merge documentation"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "from analysis tool output"
+        source: "Analysis tool output path varies by step"
+
+    parameters:
+      expected_rows: "varies by step (100 for participant data, 6 for K selection, K for cluster centers)"
+      expected_columns: "varies by step"
+      column_types: "optional type checking"
+
+    criteria:
+      - "Row count in expected range"
+      - "All required columns present"
+      - "Column types match (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (per-check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame has expected structure (rows, columns, types)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_dataframe_structure"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_standardized_features.csv"
+        required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        source: "analysis tool output (step01_standardize_features)"
+
+    parameters:
+      tolerance: 0.01
+      expected_mean: 0.0
+      expected_sd: 1.0
+
+    criteria:
+      - "Mean within tolerance of 0 (default: [-0.01, 0.01])"
+      - "SD within tolerance of 1 (default: [0.99, 1.01])"
+      - "No NaN values introduced"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_standardize_features.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate z-score standardization (mean ~ 0, SD ~ 1)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_standardization"
+
+  validate_cluster_assignment:
+    module: "tools.validation"
+    function: "validate_cluster_assignment"
+    signature: "validate_cluster_assignment(cluster_labels: Union[ndarray, Series], n_expected: int, min_cluster_size: int) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_cluster_assignments.csv"
+        required_columns: ["UID", "cluster"]
+        source: "analysis tool output (step03_fit_final_kmeans)"
+
+    parameters:
+      n_expected: 100
+      min_cluster_size: 10
+
+    criteria:
+      - "All 100 participants assigned (no missing values)"
+      - "Cluster IDs consecutive (0, 1, ..., K-1)"
+      - "Each cluster has >= 10 participants (10% of sample)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        cluster_sizes: "Dict[int, int]"
+        n_clusters: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_final_kmeans.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate K-means cluster assignments (consecutive IDs, minimum cluster size >= 10)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_cluster_assignment"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[ndarray, List[float]], min_jaccard_threshold: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_cluster_quality_metrics.csv"
+        required_columns: ["metric", "value"]
+        source: "analysis tool output (step04_validate_clustering)"
+
+    parameters:
+      min_jaccard_threshold: 0.75
+
+    criteria:
+      - "Jaccard values in [0, 1] range"
+      - "Mean Jaccard >= 0.75 (stable clustering)"
+      - "95% CI computed via percentile method"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_jaccard: "float"
+        ci_lower: "float"
+        ci_upper: "float"
+        above_threshold: "bool"
+
+    behavior_on_failure:
+      action: "log warning (not error - quality failures are warnings)"
+      log_to: "logs/step04_validate_clustering.log"
+      invoke: "proceed with caution (report tentative clusters)"
+
+    description: "Validate clustering stability via bootstrap Jaccard coefficient (> 0.75 for stable clusters)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_bootstrap_stability"
+
+  validate_cluster_summary_stats:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: DataFrame, min_col: str, mean_col: str, max_col: str, sd_col: str, n_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_cluster_summary_stats.csv"
+        required_columns: ["cluster", "feature", "mean", "SD", "min", "max"]
+        source: "analysis tool output (step05_characterize_clusters)"
+
+    parameters:
+      min_col: "min"
+      mean_col: "mean"
+      max_col: "max"
+      sd_col: "SD"
+      n_col: "N"
+
+    criteria:
+      - "min <= mean <= max for all rows"
+      - "SD >= 0 for all rows"
+      - "N > 0 for all clusters"
+      - "N >= 10 for all clusters (cluster size constraint)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        failed_checks: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_characterize_clusters.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate cluster summary statistics consistency (min <= mean <= max, SD >= 0, N >= 10)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_cluster_summary_stats"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str, group_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_scatter_matrix_plot_data.csv"
+        required_columns: ["UID", "cluster", "cluster_label", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z", "data_type"]
+        source: "analysis tool output (step06_prepare_plot_data)"
+
+    parameters:
+      required_clusters: "from step02_optimal_k.txt"
+      cluster_col: "cluster"
+      data_type_values: ["participant", "center"]
+
+    criteria:
+      - "All K clusters present in participant data rows"
+      - "All K clusters present in cluster center rows"
+      - "Exactly 100 participant rows + K center rows"
+      - "No NaN in cluster, cluster_label, or z-scored features"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str] (empty if valid)"
+        missing_groups: "List[str] (empty if valid)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_prepare_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate all clusters represented in plot data (both participant and center rows)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_plot_data_completeness"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 6
+  total_unique_tools: 13
+  clustering_specific_decisions: ["K-means selected over LPA", "BIC model selection K=1-6", "Silhouette >= 0.40", "Davies-Bouldin < 1.5", "Jaccard > 0.75", "Min cluster size >= 10% (N >= 10)"]
+  notes:
+    - "All sklearn tools (KMeans, StandardScaler, metrics) are standard library - exempt from tool_inventory.md verification"
+    - "Custom validation tools verified in tool_inventory.md - all present"
+    - "Each analysis tool has corresponding validation tool (architectural requirement)"
+    - "Bootstrap stability validation returns warnings not errors (quality failures proceed with caution)"
+    - "Tool catalog structure: each tool listed ONCE, rq_analysis will map to steps via 2_plan.md"

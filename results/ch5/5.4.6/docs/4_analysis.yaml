@@ -1,0 +1,627 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.4.6 - Schema-Specific Variance Decomposition
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.4.6"
+  total_steps: 6
+  analysis_type: "LMM-only variance decomposition (stratified by congruence, ICC computation)"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T17:50:00Z"
+  notes:
+    - "NO IRT calibration (uses theta from RQ 5.4.1)"
+    - "DERIVED data pipeline (requires RQ 5.4.1 completion)"
+    - "Decision D068: Dual p-value reporting (intercept-slope correlations)"
+    - "Decision D070: TSVR_hours as time variable (inherited from RQ 5.4.1)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 1: Load Dependency Data from RQ 5.4.1
+  # --------------------------------------------------------------------------
+  - name: "step01_load_dependency_data"
+    step_number: "01"
+    description: "Load theta scores, TSVR mapping, and LMM model from RQ 5.4.1. Verify data structure and convergence status before proceeding to congruence-stratified analysis."
+
+    # Stdlib operations (pandas/numpy - NOT catalogued tools)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.4.1 completion: Read results/ch5/5.4.1/status.yaml, parse rq_results.status field"
+        - "If rq_results.status != 'success' -> Circuit breaker: EXPECTATIONS ERROR"
+        - "Load theta scores: pd.read_csv('results/ch5/5.4.1/data/step03_theta_scores.csv')"
+        - "Verify 400 rows (100 UID x 4 tests), 7 columns (composite_ID + 3 theta + 3 SE)"
+        - "Load LMM input: pd.read_csv('results/ch5/5.4.1/data/step04_lmm_input.csv')"
+        - "Verify 1200 rows (100 UID x 4 tests x 3 congruence), required columns present"
+        - "Check TSVR_hours range: [0, 168] hours, congruence levels: exactly 3 unique (Common, Congruent, Incongruent)"
+        - "Load reference model: pickle.load('results/ch5/5.4.1/data/step05_lmm_fitted_model.pkl')"
+        - "Check model.converged = True (if False -> warning, proceed cautiously)"
+        - "Cache LMM input locally: df.to_csv('data/step01_loaded_lmm_input.csv')"
+        - "Write validation report: text file with completion status, data summaries"
+
+      input_files:
+        - path: "results/ch5/5.4.1/status.yaml"
+          description: "RQ 5.4.1 workflow status (verify completion)"
+        - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          expected_rows: 400
+        - path: "results/ch5/5.4.1/data/step04_lmm_input.csv"
+          required_columns: ["UID", "test", "TSVR_hours", "congruence", "theta", "SE"]
+          expected_rows: 1200
+        - path: "results/ch5/5.4.1/data/step05_lmm_fitted_model.pkl"
+          description: "Reference LMM model from RQ 5.4.1"
+
+      output_files:
+        - path: "data/step01_dependency_validation_report.txt"
+          description: "Text report with RQ 5.4.1 completion status, data summaries, validation status"
+        - path: "data/step01_loaded_lmm_input.csv"
+          description: "Cached copy of RQ 5.4.1 LMM input for local workflow (1200 rows x 6 columns)"
+
+    # Validation (stdlib - inline checks)
+    validation_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.4.1 status = 'success' (circuit breaker if not)"
+        - "Check all 3 required files exist"
+        - "Verify step04_lmm_input.csv: 1200 rows, 6 columns, 3 unique congruence levels"
+        - "Verify no NaN in theta or TSVR_hours columns"
+        - "Verify TSVR_hours in [0, 168] range"
+
+      criteria:
+        - "RQ 5.4.1 rq_results.status = 'success'"
+        - "All 3 dependency files exist (theta_scores, lmm_input, fitted_model)"
+        - "LMM input: 1200 rows, 6 columns (UID, test, TSVR_hours, congruence, theta, SE)"
+        - "Exactly 3 unique congruence levels (Common, Congruent, Incongruent)"
+        - "No NaN in theta or TSVR_hours columns"
+        - "TSVR_hours in [0, 168] range"
+
+      on_failure:
+        action: "If RQ 5.4.1 incomplete -> EXPECTATIONS ERROR (circuit breaker). If data structure invalid -> raise ValueError"
+        log_to: "logs/step01_load_dependency_data.log"
+
+    log_file: "logs/step01_load_dependency_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Congruence-Stratified LMMs
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_stratified_lmms"
+    step_number: "02"
+    description: "Fit three separate LMMs, one per congruence level (Common, Congruent, Incongruent), to estimate variance components for between-person and within-person variance in intercepts and slopes."
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_loaded_lmm_input.csv"
+          required_columns: ["UID", "test", "TSVR_hours", "congruence", "theta", "SE"]
+          expected_rows: 1200
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step02_fitted_model_common.pkl"
+          variable_name: "model_common"
+          description: "Fitted LMM for Common congruence level (pickled statsmodels MixedLMResults)"
+        - path: "data/step02_fitted_model_congruent.pkl"
+          variable_name: "model_congruent"
+          description: "Fitted LMM for Congruent congruence level (pickled statsmodels MixedLMResults)"
+        - path: "data/step02_fitted_model_incongruent.pkl"
+          variable_name: "model_incongruent"
+          description: "Fitted LMM for Incongruent congruence level (pickled statsmodels MixedLMResults)"
+        - path: "data/step02_variance_components.csv"
+          variable_name: "variance_df"
+          description: "Variance components (var_intercept, var_slope, cov_int_slope, var_residual, var_total) for all 3 congruence levels (15 rows: 5 components x 3 congruence)"
+        - path: "data/step02_model_metadata_common.yaml"
+          variable_name: "metadata_common"
+          description: "Model metadata for Common congruence (formula, converged, reml, n_obs, n_participants)"
+        - path: "data/step02_model_metadata_congruent.yaml"
+          variable_name: "metadata_congruent"
+          description: "Model metadata for Congruent congruence"
+        - path: "data/step02_model_metadata_incongruent.yaml"
+          variable_name: "metadata_incongruent"
+          description: "Model metadata for Incongruent congruence"
+
+      parameters:
+        formula: "theta ~ TSVR_hours"
+        re_formula: "~TSVR_hours | UID"
+        groups: "UID"
+        reml: true
+        stratified_by: "congruence"
+        congruence_levels: ["Common", "Congruent", "Incongruent"]
+
+      returns:
+        type: "MixedLMResults (3 models)"
+        unpacking: "model_common, model_congruent, model_incongruent"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_fitted_model_common.pkl"
+          variable_name: "model_common"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value[0])"
+        - path: "data/step02_fitted_model_congruent.pkl"
+          variable_name: "model_congruent"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value[1])"
+        - path: "data/step02_fitted_model_incongruent.pkl"
+          variable_name: "model_incongruent"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value[2])"
+
+      parameters:
+        check_singularity: true
+        min_observations: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 models converged (model.converged = True)"
+        - "No singular fit (random effects variance > 0)"
+        - "Minimum 100 observations per congruence level"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+
+      on_failure:
+        action: "If convergence fails -> apply contingency plan (alternative optimizer -> LRT -> simplified structure). If all contingencies fail -> raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_stratified_lmms.log"
+
+    log_file: "logs/step02_fit_stratified_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2b: Validate Variance Positivity (paired validation for variance components)
+  # --------------------------------------------------------------------------
+  - name: "step02b_validate_variance_components"
+    step_number: "02b"
+    description: "Validate all variance components are positive (negative variances indicate estimation failure)."
+
+    # This step runs immediately after Step 2 (embedded in same script)
+    # Listed separately here for clarity but g_code may combine with step02
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_variance_positivity"
+      signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          variable_name: "variance_df"
+          source: "Step 2 analysis output (variance components)"
+
+      parameters:
+        component_col: "component"
+        value_col: "value"
+        max_variance_threshold: 10.0
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "variance_validation_result"
+
+      criteria:
+        - "All variance components > 0 (var_intercept, var_slope, var_residual)"
+        - "cov_int_slope unrestricted (can be negative)"
+        - "All variances < 10.0 (theta scale check)"
+        - "No NaN values in variance estimates"
+
+      on_failure:
+        action: "raise ValueError(variance_validation_result['message'])"
+        log_to: "logs/step02_fit_stratified_lmms.log"
+
+    log_file: "logs/step02_fit_stratified_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute ICC Estimates
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_icc"
+    step_number: "03"
+    description: "Compute three types of Intraclass Correlation Coefficients (ICC) for each congruence level to quantify between-person vs within-person variance in intercepts and slopes."
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_icc_from_variance_components"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          required_columns: ["congruence", "component", "value"]
+          expected_rows: 15
+          variable_name: "variance_df"
+
+      output_files:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_df"
+          description: "ICC estimates (intercept, slope_simple, slope_conditional) for each congruence level (9 rows: 3 ICC types x 3 congruence)"
+        - path: "data/step03_icc_summary.txt"
+          variable_name: "icc_summary"
+          description: "Text report with ICC interpretations by congruence level"
+
+      parameters:
+        slope_name: "TSVR_hours"
+        timepoint: 144.0
+        magnitude_thresholds:
+          low: 0.20
+          moderate: 0.40
+
+      returns:
+        type: "DataFrame"
+        variable_name: "icc_df"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_df"
+          source: "analysis call output (compute_icc_from_variance_components return value)"
+
+      parameters:
+        icc_col: "value"
+        min_bound: 0.0
+        max_bound: 1.0
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All ICC values in [0, 1] (out of bounds indicates computation error)"
+        - "Exactly 9 ICC estimates (3 types x 3 congruence)"
+        - "No NaN values"
+        - "magnitude column contains only: Low / Moderate / Substantial"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_compute_icc.log"
+
+    log_file: "logs/step03_compute_icc.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract Random Effects
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_random_effects"
+    step_number: "04"
+    description: "Extract individual-level random intercepts and slopes for all 100 participants, separately for each congruence level, to enable intercept-slope correlation testing and distribution visualization."
+
+    # Analysis tool specification
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "data/step02_fitted_model_common.pkl"
+          variable_name: "model_common"
+          description: "Common congruence model"
+        - path: "data/step02_fitted_model_congruent.pkl"
+          variable_name: "model_congruent"
+          description: "Congruent congruence model"
+        - path: "data/step02_fitted_model_incongruent.pkl"
+          variable_name: "model_incongruent"
+          description: "Incongruent congruence model"
+
+      output_files:
+        - path: "data/step04_random_effects.csv"
+          variable_name: "random_effects_df"
+          description: "Random intercepts and slopes for all 100 participants across 3 congruence levels (300 rows: 100 UID x 3 congruence)"
+        - path: "data/step04_random_slopes_descriptives.txt"
+          variable_name: "descriptives_report"
+          description: "Descriptive statistics for random effects by congruence level"
+
+      parameters:
+        extract_from_models: 3
+        congruence_levels: ["Common", "Congruent", "Incongruent"]
+        expected_participants: 100
+
+      returns:
+        type: "Dict (combined from 3 models)"
+        variable_name: "random_effects_df"
+
+    # Validation tool specification
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          variable_name: "random_effects_df"
+          source: "analysis call output (extract_random_effects_from_lmm return value)"
+
+      parameters:
+        expected_rows: 300
+        expected_columns: ["UID", "congruence", "Total_Intercept", "Total_Slope"]
+        check_types: false
+        allow_extra_columns: false
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 300 rows (100 UID x 3 congruence)"
+        - "No NaN in Total_Intercept or Total_Slope"
+        - "Each UID appears exactly 3 times"
+        - "All 3 congruence levels present"
+        - "Mean of Total_Intercept ~ 0, Mean of Total_Slope ~ 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_extract_random_effects.log"
+
+    log_file: "logs/step04_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Test Intercept-Slope Correlation and Create Diagnostic Plots
+  # --------------------------------------------------------------------------
+  - name: "step05_test_correlations_plot_diagnostics"
+    step_number: "05"
+    description: "Test the correlation between random intercepts and random slopes within each congruence level using Pearson correlation. Apply Bonferroni correction for multiple comparisons per Decision D068 (dual p-values). Create diagnostic plots (histograms + Q-Q plots) to assess random slope distribution normality."
+
+    # Analysis tool specification (correlation testing)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "test_intercept_slope_correlation_d068"
+      signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          required_columns: ["UID", "congruence", "Total_Intercept", "Total_Slope"]
+          expected_rows: 300
+          variable_name: "random_effects_df"
+
+      output_files:
+        - path: "data/step05_intercept_slope_correlation.csv"
+          variable_name: "correlation_df"
+          description: "Pearson correlations between intercepts and slopes with Decision D068 dual p-values (15 rows: 5 statistics x 3 congruence)"
+        - path: "data/step05_correlation_interpretation.txt"
+          variable_name: "correlation_report"
+          description: "Text report with correlation interpretations and Bonferroni significance"
+
+      parameters:
+        family_alpha: 0.05
+        n_tests: 3
+        intercept_col: "Total_Intercept"
+        slope_col: "Total_Slope"
+        bonferroni_correction: true
+
+      returns:
+        type: "Dict"
+        variable_name: "correlation_df"
+
+    # Validation tool specification (correlation test validation)
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_intercept_slope_correlation.csv"
+          variable_name: "correlation_df"
+          source: "analysis call output (test_intercept_slope_correlation_d068 return value)"
+
+      parameters:
+        required_cols: ["r", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+        d068_compliant_check: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH p_uncorrected AND p_bonferroni present (Decision D068)"
+        - "Correlation coefficient r in [-1, 1]"
+        - "p-values in [0, 1]"
+        - "All 3 congruence levels present"
+        - "Exactly 15 rows (5 statistics x 3 congruence)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_test_correlations_plot_diagnostics.log"
+
+    log_file: "logs/step05_test_correlations_plot_diagnostics.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5b: Create Diagnostic Plots (histograms)
+  # --------------------------------------------------------------------------
+  - name: "step05b_create_diagnostic_histograms"
+    step_number: "05b"
+    description: "Create histograms of random slopes distribution for each congruence level with normal distribution overlay."
+
+    # Analysis tool specification (histogram plotting)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.plotting"
+      function: "plot_histogram_by_group"
+      signature: "plot_histogram_by_group(df: DataFrame, value_col: str, group_col: str, xlabel: str = 'Value', ylabel: str = 'Frequency', title: str = '', bins: int = 20, colors: Optional[Dict] = None, figsize: Tuple = (8, 6), output_path: Optional[Path] = None, vline: Optional[float] = None, vline_label: Optional[str] = None) -> Tuple[Figure, Axes]"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          required_columns: ["UID", "congruence", "Total_Slope"]
+          variable_name: "random_effects_df"
+
+      output_files:
+        - path: "data/step05_random_slopes_histogram_common.png"
+          variable_name: "plot_files"
+          description: "Histogram of random slopes for Common congruence level (800x600 @ 300 DPI)"
+        - path: "data/step05_random_slopes_histogram_congruent.png"
+          variable_name: "plot_files"
+          description: "Histogram of random slopes for Congruent congruence level"
+        - path: "data/step05_random_slopes_histogram_incongruent.png"
+          variable_name: "plot_files"
+          description: "Histogram of random slopes for Incongruent congruence level"
+
+      parameters:
+        value_col: "Total_Slope"
+        group_col: "congruence"
+        xlabel: "Random Slope (Forgetting Rate)"
+        ylabel: "Frequency"
+        bins: 20
+        figsize: [8, 6]
+        dpi: 300
+        overlay_normal: true
+
+      returns:
+        type: "Tuple[Figure, Axes] (3 plots)"
+        variable_name: "plot_files"
+
+    # Validation tool specification (plot file existence)
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      input_files: []
+
+      parameters:
+        min_size_bytes: 10000
+        check_files:
+          - "data/step05_random_slopes_histogram_common.png"
+          - "data/step05_random_slopes_histogram_congruent.png"
+          - "data/step05_random_slopes_histogram_incongruent.png"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 histogram files exist"
+        - "Each file > 10KB (non-empty PNG)"
+
+      on_failure:
+        action: "raise FileNotFoundError(validation_result['message'])"
+        log_to: "logs/step05_test_correlations_plot_diagnostics.log"
+
+    log_file: "logs/step05_test_correlations_plot_diagnostics.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5c: Create Diagnostic Plots (Q-Q plots) - STDLIB
+  # --------------------------------------------------------------------------
+  - name: "step05c_create_diagnostic_qqplots"
+    step_number: "05c"
+    description: "Create Q-Q plots to assess normality of random slopes distribution for each congruence level."
+
+    # Stdlib operations (scipy.stats + matplotlib Q-Q plotting)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "For each congruence level (Common, Congruent, Incongruent):"
+        - "Extract Total_Slope values from random_effects_df where congruence == level"
+        - "Use scipy.stats.probplot() to compute theoretical vs sample quantiles"
+        - "Use matplotlib to create Q-Q plot with 45-degree reference line"
+        - "Save to data/step05_random_slopes_qqplot_<congruence>.png (800x600 @ 300 DPI)"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          required_columns: ["UID", "congruence", "Total_Slope"]
+          variable_name: "random_effects_df"
+
+      output_files:
+        - path: "data/step05_random_slopes_qqplot_common.png"
+          description: "Q-Q plot for Common congruence random slopes (800x600 @ 300 DPI)"
+        - path: "data/step05_random_slopes_qqplot_congruent.png"
+          description: "Q-Q plot for Congruent congruence random slopes"
+        - path: "data/step05_random_slopes_qqplot_incongruent.png"
+          description: "Q-Q plot for Incongruent congruence random slopes"
+
+    # Validation (stdlib - file existence checks)
+    validation_call:
+      type: "stdlib"
+      operations:
+        - "Check all 3 Q-Q plot PNG files exist"
+        - "Check each file size > 10KB (non-empty)"
+
+      criteria:
+        - "All 3 Q-Q plot files exist"
+        - "Each file > 10KB"
+
+      on_failure:
+        action: "raise FileNotFoundError"
+        log_to: "logs/step05_test_correlations_plot_diagnostics.log"
+
+    log_file: "logs/step05_test_correlations_plot_diagnostics.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Compare ICC Across Congruence Levels
+  # --------------------------------------------------------------------------
+  - name: "step06_compare_icc_across_congruence"
+    step_number: "06"
+    description: "Compare ICC estimates across the three congruence levels (Common, Congruent, Incongruent) to assess differential stability of schema-based memory. Rank congruence levels by ICC_slope magnitude. Create bar plot for visualization."
+
+    # Stdlib operations (pandas pivot + matplotlib bar plot)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load ICC estimates: pd.read_csv('data/step03_icc_estimates.csv')"
+        - "Pivot to wide format: rows = congruence, columns = icc_intercept/icc_slope_simple/icc_slope_conditional"
+        - "Rank by ICC_slope_simple descending (1=highest, 3=lowest)"
+        - "Save comparison table: data/step06_congruence_icc_comparison.csv (3 rows x 5 columns)"
+        - "Create bar plot: x-axis = congruence, y-axis = ICC value, 3 grouped bars per congruence"
+        - "Horizontal reference lines at 0.20 (Moderate threshold) and 0.40 (Substantial threshold)"
+        - "Save bar plot: data/step06_congruence_icc_barplot.png (800x600 @ 300 DPI)"
+        - "Write interpretation report: data/step06_icc_comparison_interpretation.txt"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          required_columns: ["congruence", "icc_type", "value", "magnitude"]
+          expected_rows: 9
+
+      output_files:
+        - path: "data/step06_congruence_icc_comparison.csv"
+          description: "ICC comparison table (3 rows: 1 per congruence, columns: icc_intercept, icc_slope_simple, icc_slope_conditional, rank_by_slope)"
+        - path: "data/step06_icc_comparison_interpretation.txt"
+          description: "Text report with ranking and hypothesis interpretation"
+        - path: "data/step06_congruence_icc_barplot.png"
+          description: "Bar plot of ICC estimates by congruence level (800x600 @ 300 DPI)"
+
+    # Validation (stdlib - inline checks)
+    validation_call:
+      type: "stdlib"
+      operations:
+        - "Check comparison.csv: exactly 3 rows (1 per congruence)"
+        - "Check all 3 congruence levels present (Common, Congruent, Incongruent)"
+        - "Check all 3 ICC types populated (no NaN)"
+        - "Check rank_by_slope: exactly one rank=1, one rank=2, one rank=3"
+        - "Check bar plot PNG file exists and > 10KB"
+
+      criteria:
+        - "Exactly 3 rows in comparison.csv"
+        - "All 3 congruence levels present"
+        - "All ICC values in [0, 1] (inherited from Step 3)"
+        - "rank_by_slope in {1, 2, 3} (no duplicates)"
+        - "PNG file > 10KB"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step06_compare_icc_across_congruence.log"
+
+    log_file: "logs/step06_compare_icc_across_congruence.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

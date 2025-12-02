@@ -1,0 +1,578 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-02
+# RQ: ch5/5.4.7 - Schema-Based Clustering
+# Agent: rq_analysis v4.0.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch5/5.4.7"
+  total_steps: 7
+  analysis_type: "K-means clustering with BIC model selection"
+  generated_by: "rq_analysis v4.0.0"
+  timestamp: "2025-12-02T17:00:00Z"
+  dependencies:
+    - rq_id: "ch5/5.4.6"
+      file: "results/ch5/5.4.6/data/step04_random_effects.csv"
+      description: "Random effects (intercepts/slopes per congruence level) for clustering"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract and Reshape Random Effects from RQ 5.4.6
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_random_effects"
+    step_number: "00"
+    description: "Load random effects from RQ 5.4.6 and reshape from long (300 rows) to wide (100 rows x 6 features) for clustering"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/5.4.6/data/step04_random_effects.csv')"
+        - "Verify file contains 300 rows (100 UID x 3 congruence levels)"
+        - "Pivot from long to wide format: index=UID, columns=congruence, values=[Total_Intercept, Total_Slope]"
+        - "Flatten column names: Common_Intercept, Common_Slope, Congruent_Intercept, Congruent_Slope, Incongruent_Intercept, Incongruent_Slope"
+        - "Verify exactly 100 participants present (no missing UIDs)"
+        - "Verify no NaN values in any of 6 clustering features"
+        - "Save to data/step00_random_effects_from_rq546.csv"
+
+      input_files:
+        - path: "results/ch5/5.4.6/data/step04_random_effects.csv"
+          required_columns: ["UID", "congruence", "Total_Intercept", "Total_Slope"]
+          expected_rows: 300
+          description: "Random effects from RQ 5.4.6 variance decomposition (long format)"
+
+      output_files:
+        - path: "data/step00_random_effects_from_rq546.csv"
+          columns: ["UID", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+          expected_rows: 100
+          description: "Reshaped random effects (wide format) - 100 participants x 6 clustering features"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_random_effects_from_rq546.csv"
+          variable_name: "df_wide"
+          source: "Step 0 output (reshaped random effects)"
+
+      parameters:
+        df: "df_wide"
+        expected_rows: 100
+        expected_columns: ["UID", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+        column_types:
+          UID: "object"
+          Common_Intercept: "float64"
+          Common_Slope: "float64"
+          Congruent_Intercept: "float64"
+          Congruent_Slope: "float64"
+          Incongruent_Intercept: "float64"
+          Incongruent_Slope: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 100 rows (one per participant)"
+        - "Exactly 7 columns (UID + 6 clustering features)"
+        - "No NaN values in any column"
+        - "No duplicate UIDs"
+        - "All feature columns are float64 type"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_random_effects.log"
+
+    log_file: "logs/step00_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Standardize Clustering Features to Z-Scores
+  # --------------------------------------------------------------------------
+  - name: "step01_standardize_features"
+    step_number: "01"
+    description: "Standardize all 6 clustering features to mean=0, SD=1 (z-scores) for equal weighting in K-means"
+
+    analysis_call:
+      type: "catalogued"
+      module: "sklearn.preprocessing"
+      function: "StandardScaler"
+      signature: "StandardScaler().fit_transform(X: ndarray) -> ndarray"
+
+      input_files:
+        - path: "data/step00_random_effects_from_rq546.csv"
+          required_columns: ["Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+          variable_name: "df_features"
+          description: "Wide-format random effects for standardization"
+
+      output_files:
+        - path: "data/step01_standardized_features.csv"
+          columns: ["UID", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_standardized"
+          description: "Z-scored clustering features (mean=0, SD=1)"
+
+      parameters:
+        with_mean: true
+        with_std: true
+
+      returns:
+        type: "ndarray"
+        variable_name: "features_z"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          variable_name: "df_standardized"
+          source: "Step 1 output (z-scored features)"
+
+      parameters:
+        df: "df_standardized"
+        column_names: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+        tolerance: 0.1
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Mean within tolerance of 0 (mean in [-0.1, 0.1] for each feature)"
+        - "SD within tolerance of 1 (SD in [0.9, 1.1] for each feature)"
+        - "No NaN values introduced during standardization"
+        - "All 100 participants present (no data loss)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_standardize_features.log"
+
+    log_file: "logs/step01_standardize_features.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Cluster Model Selection (K=1 to K=6 via BIC)
+  # --------------------------------------------------------------------------
+  - name: "step02_cluster_selection"
+    step_number: "02"
+    description: "Test K=1 to K=6 cluster solutions, compute BIC for each, select optimal K as BIC minimum"
+
+    analysis_call:
+      type: "catalogued"
+      module: "sklearn.cluster"
+      function: "KMeans"
+      signature: "KMeans(n_clusters: int, random_state: int, n_init: int).fit(X: ndarray) -> KMeans"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_standardized"
+          description: "Z-scored features for clustering"
+
+      output_files:
+        - path: "data/step02_cluster_selection.csv"
+          columns: ["K", "inertia", "BIC"]
+          variable_name: "df_bic"
+          description: "BIC values for K=1-6 cluster solutions"
+        - path: "data/step02_optimal_k.txt"
+          variable_name: "optimal_k"
+          description: "Optimal K value (single integer)"
+
+      parameters:
+        K_range: [1, 2, 3, 4, 5, 6]
+        random_state: 42
+        n_init: 50
+        bic_formula: "N * log(inertia / N) + K * log(N)"
+
+      returns:
+        type: "int"
+        variable_name: "optimal_k"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_cluster_assignment"
+      signature: "validate_cluster_assignment(cluster_labels: Union[ndarray, Series], n_expected: int, min_cluster_size: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_cluster_selection.csv"
+          variable_name: "df_bic"
+          source: "Step 2 output (BIC model selection results)"
+
+      parameters:
+        cluster_labels: "df_bic"
+        n_expected: 6
+        min_cluster_size: 1
+        check_type: "bic_selection"
+        optimal_k: "optimal_k"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 6 rows present (K=1 to K=6)"
+        - "Inertia monotonically decreasing with K"
+        - "BIC has minimum within K=1-6 range"
+        - "Optimal K NOT at boundary (K != 1 and K != 6)"
+        - "No NaN values in inertia or BIC"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_cluster_selection.log"
+
+    log_file: "logs/step02_cluster_selection.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Final K-means Model with Optimal K
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_final_kmeans"
+    step_number: "03"
+    description: "Fit K-means using optimal K from Step 2, extract cluster assignments and centers"
+
+    analysis_call:
+      type: "catalogued"
+      module: "sklearn.cluster"
+      function: "KMeans"
+      signature: "KMeans(n_clusters: int, random_state: int, n_init: int).fit(X: ndarray) -> KMeans"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_standardized"
+          description: "Z-scored features for clustering"
+        - path: "data/step02_optimal_k.txt"
+          variable_name: "optimal_k"
+          description: "Optimal K from BIC model selection"
+
+      output_files:
+        - path: "data/step03_cluster_assignments.csv"
+          columns: ["UID", "cluster"]
+          variable_name: "df_assignments"
+          description: "Cluster assignments (100 participants)"
+        - path: "data/step03_cluster_centers.csv"
+          columns: ["cluster", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_centers"
+          description: "Cluster centers in z-score space (K rows)"
+
+      parameters:
+        n_clusters: "from step02_optimal_k.txt"
+        random_state: 42
+        n_init: 50
+
+      returns:
+        type: "KMeans"
+        variable_name: "kmeans_model"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_cluster_assignment"
+      signature: "validate_cluster_assignment(cluster_labels: Union[ndarray, Series], n_expected: int, min_cluster_size: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_cluster_assignments.csv"
+          variable_name: "df_assignments"
+          source: "Step 3 output (cluster assignments)"
+
+      parameters:
+        cluster_labels: "df_assignments['cluster']"
+        n_expected: 100
+        min_cluster_size: 10
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 100 participants assigned to exactly one cluster"
+        - "Cluster IDs consecutive (0, 1, ..., K-1)"
+        - "Each cluster has >= 10 participants (10% of sample constraint)"
+        - "No missing cluster IDs (all K clusters represented)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_fit_final_kmeans.log"
+
+    log_file: "logs/step03_fit_final_kmeans.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Validate Clustering Quality Metrics
+  # --------------------------------------------------------------------------
+  - name: "step04_validate_clustering"
+    step_number: "04"
+    description: "Compute silhouette score, Davies-Bouldin index, and bootstrap stability (Jaccard coefficient)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "sklearn.metrics"
+      function: "silhouette_score, davies_bouldin_score"
+      signature: "silhouette_score(X: ndarray, labels: ndarray) -> float"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          required_columns: ["Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_standardized"
+          description: "Z-scored features"
+        - path: "data/step03_cluster_assignments.csv"
+          required_columns: ["UID", "cluster"]
+          variable_name: "df_assignments"
+          description: "Cluster assignments"
+
+      output_files:
+        - path: "data/step04_cluster_quality_metrics.csv"
+          columns: ["metric", "value", "threshold", "pass"]
+          variable_name: "df_quality"
+          description: "Silhouette, Davies-Bouldin, bootstrap Jaccard metrics (5 rows)"
+
+      parameters:
+        silhouette_threshold: 0.40
+        davies_bouldin_threshold: 1.5
+        jaccard_threshold: 0.75
+        bootstrap_iterations: 100
+        bootstrap_sample_fraction: 0.8
+
+      returns:
+        type: "DataFrame"
+        variable_name: "df_quality"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_bootstrap_stability"
+      signature: "validate_bootstrap_stability(jaccard_values: Union[ndarray, List[float]], min_jaccard_threshold: float) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_cluster_quality_metrics.csv"
+          variable_name: "df_quality"
+          source: "Step 4 output (quality metrics)"
+
+      parameters:
+        jaccard_values: "df_quality[df_quality['metric'].str.contains('jaccard')]['value']"
+        min_jaccard_threshold: 0.75
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Silhouette score >= 0.40 (acceptable cluster cohesion)"
+        - "Davies-Bouldin index < 1.5 (acceptable cluster separation)"
+        - "Bootstrap Jaccard coefficient > 0.75 (stable clustering)"
+        - "All 5 metrics present (no missing rows)"
+        - "No NaN values in metric values"
+
+      on_failure:
+        action: "log warning (quality failures proceed with caution, not hard errors)"
+        log_to: "logs/step04_validate_clustering.log"
+
+    log_file: "logs/step04_validate_clustering.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Characterize Clusters by Congruence-Specific Patterns
+  # --------------------------------------------------------------------------
+  - name: "step05_characterize_clusters"
+    step_number: "05"
+    description: "Back-transform cluster centers to original scale, compute summary statistics, assign interpretive labels"
+
+    analysis_call:
+      type: "catalogued"
+      module: "pandas"
+      function: "groupby"
+      signature: "DataFrame.groupby(by: str).agg(func: Union[str, List[str]]) -> DataFrame"
+
+      input_files:
+        - path: "data/step03_cluster_centers.csv"
+          required_columns: ["cluster", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_centers"
+          description: "Cluster centers in z-score space"
+        - path: "data/step00_random_effects_from_rq546.csv"
+          required_columns: ["UID", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope"]
+          variable_name: "df_original"
+          description: "Original scale features (for back-transformation means/SDs)"
+        - path: "data/step03_cluster_assignments.csv"
+          required_columns: ["UID", "cluster"]
+          variable_name: "df_assignments"
+          description: "Cluster assignments"
+
+      output_files:
+        - path: "data/step05_cluster_centers_original_scale.csv"
+          columns: ["cluster", "Common_Intercept", "Common_Slope", "Congruent_Intercept", "Congruent_Slope", "Incongruent_Intercept", "Incongruent_Slope", "N", "label"]
+          variable_name: "df_centers_original"
+          description: "Cluster centers back-transformed to original scale with interpretive labels"
+        - path: "data/step05_cluster_summary_stats.csv"
+          columns: ["cluster", "feature", "mean", "SD", "min", "max"]
+          variable_name: "df_summary_stats"
+          description: "Cluster-specific summary statistics (K x 6 rows)"
+
+      parameters:
+        back_transform_formula: "original_value = z * SD + mean"
+        aggregation_functions: ["mean", "std", "min", "max"]
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "df_centers_original, df_summary_stats"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_cluster_summary_stats"
+      signature: "validate_cluster_summary_stats(summary_df: DataFrame, min_col: str, mean_col: str, max_col: str, sd_col: str, n_col: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_cluster_summary_stats.csv"
+          variable_name: "df_summary_stats"
+          source: "Step 5 output (cluster summary statistics)"
+
+      parameters:
+        summary_df: "df_summary_stats"
+        min_col: "min"
+        mean_col: "mean"
+        max_col: "max"
+        sd_col: "SD"
+        n_col: "N"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "min <= mean <= max for all rows (statistical consistency)"
+        - "SD >= 0 for all rows (non-negative variance)"
+        - "N >= 10 for all clusters (cluster size constraint)"
+        - "All K clusters characterized (no missing clusters)"
+        - "No NaN values in summary statistics"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_characterize_clusters.log"
+
+    log_file: "logs/step05_characterize_clusters.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Scatter Plot Matrix Data for Visualization
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_plot_data"
+    step_number: "06"
+    description: "Merge standardized features + cluster assignments + labels for scatter matrix visualization"
+
+    analysis_call:
+      type: "catalogued"
+      module: "pandas"
+      function: "merge"
+      signature: "DataFrame.merge(right: DataFrame, on: Union[str, List[str]], how: str) -> DataFrame"
+
+      input_files:
+        - path: "data/step01_standardized_features.csv"
+          required_columns: ["UID", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_standardized"
+          description: "Z-scored features"
+        - path: "data/step03_cluster_assignments.csv"
+          required_columns: ["UID", "cluster"]
+          variable_name: "df_assignments"
+          description: "Cluster assignments"
+        - path: "data/step03_cluster_centers.csv"
+          required_columns: ["cluster", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z"]
+          variable_name: "df_centers"
+          description: "Cluster centers in z-score space"
+        - path: "data/step05_cluster_centers_original_scale.csv"
+          required_columns: ["cluster", "label"]
+          variable_name: "df_labels"
+          description: "Cluster labels"
+
+      output_files:
+        - path: "data/step06_scatter_matrix_plot_data.csv"
+          columns: ["UID", "cluster", "cluster_label", "Common_Intercept_z", "Common_Slope_z", "Congruent_Intercept_z", "Congruent_Slope_z", "Incongruent_Intercept_z", "Incongruent_Slope_z", "data_type"]
+          variable_name: "df_plot_data"
+          description: "Plot source CSV (100 participant rows + K cluster center rows)"
+
+      parameters:
+        merge_keys: ["UID"]
+        data_type_participant: "participant"
+        data_type_center: "center"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "df_plot_data"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str, group_col: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_scatter_matrix_plot_data.csv"
+          variable_name: "df_plot_data"
+          source: "Step 6 output (plot source data)"
+
+      parameters:
+        plot_data: "df_plot_data"
+        required_clusters: "from step02_optimal_k.txt"
+        cluster_col: "cluster"
+        data_type_values: ["participant", "center"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All K clusters present in participant data rows"
+        - "All K clusters present in cluster center rows"
+        - "Exactly 100 participant rows + K center rows"
+        - "No NaN in cluster, cluster_label, or z-scored features"
+        - "No duplicate UIDs in participant rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_prepare_plot_data.log"
+
+    log_file: "logs/step06_prepare_plot_data.log"
+
+# ============================================================================
+# EXPECTED OUTPUTS SUMMARY
+# ============================================================================
+
+expected_outputs:
+  data_files:
+    - "data/step00_random_effects_from_rq546.csv"
+    - "data/step01_standardized_features.csv"
+    - "data/step02_cluster_selection.csv"
+    - "data/step02_optimal_k.txt"
+    - "data/step03_cluster_assignments.csv"
+    - "data/step03_cluster_centers.csv"
+    - "data/step04_cluster_quality_metrics.csv"
+    - "data/step05_cluster_centers_original_scale.csv"
+    - "data/step05_cluster_summary_stats.csv"
+    - "data/step06_scatter_matrix_plot_data.csv"
+
+  log_files:
+    - "logs/step00_extract_random_effects.log"
+    - "logs/step01_standardize_features.log"
+    - "logs/step02_cluster_selection.log"
+    - "logs/step03_fit_final_kmeans.log"
+    - "logs/step04_validate_clustering.log"
+    - "logs/step05_characterize_clusters.log"
+    - "logs/step06_prepare_plot_data.log"
+
+  plots:
+    - "plots/scatter_matrix_clusters.png (created by rq_plots, not analysis steps)"
+
+  results:
+    - "results/summary.md (created by rq_results, not analysis steps)"
+
+# ============================================================================
+# VALIDATION COVERAGE
+# ============================================================================
+
+validation_coverage:
+  total_steps: 7
+  steps_with_validation: 7
+  validation_percentage: 100
+  note: "All steps have paired validation tools per v4.X architectural requirement"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================
