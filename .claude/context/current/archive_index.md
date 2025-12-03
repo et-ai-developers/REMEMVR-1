@@ -353,6 +353,12 @@
 ### rq_validate_agent_mass_testing
 **Description:** rq_validate agent testing on 16 completed RQs, discovery of critical random structure mismatch in RQ 5.1.2 (quadratic used (1|UID), piecewise used (Days_within|UID)), fix to matched (1|UID) structure, Test 2 interpretation changed from "continuous favored" to "models equivalent", achievement of 100% validation pass rate (all 16 RQs), and rq_status.tsv validate column addition (Session 2025-12-03 19:30).
 
+### rq_5.2.5_when_exclusion_complete
+**Description:** Complete RQ 5.2.5 re-execution after discovering When domain contamination (26 items in step01_item_mapping.csv). When domain excluded per RQ 5.2.1 floor effect discovery (77% item attrition, 6-9% floor). All 9 code steps fixed (step00-step08) to analyze only What/Where domains (79 items). Key findings: purification improves CTT-IRT correlation significantly (What Δr=0.027, Where Δr=0.015, both p<0.001 Bonferroni k=2), IRT theta superior for trajectory modeling (AIC 1655 vs Full CTT 1780 vs Purified CTT 1812), paradox pattern confirmed (purified CTT higher correlation but worse model fit than full CTT due to item homogeneity), reliability maintained (α 0.70-0.83). All 4 validation layers PASS (Session 2025-12-03 20:45).
+
+### ctt_irt_convergence_validated
+**Description:** CTT-IRT convergence validation across multiple RQs documenting purification benefit hypothesis using Steiger's z-test for dependent correlations. Primary evidence from RQ 5.2.5 (When excluded): purified CTT shows significantly higher correlation with IRT theta than full CTT (What Δr=0.027 z=10.06, Where Δr=0.015 z=14.22, both p<0.001 Bonferroni k=2). Paradox pattern: purified CTT better convergence but worse trajectory fit (AIC 1812 vs full CTT 1780) due to item homogeneity reducing variance. Cross-references RQ 5.12 paradox discovery, When domain floor effect, Steiger's z-test tool creation. Implications: dual-reporting strategy (full CTT for trajectories, purified CTT for convergence validation) (Session 2025-12-03 20:45).
+
 ---
 
 ## How to Use This Index
