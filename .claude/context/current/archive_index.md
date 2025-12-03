@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-02 17:45 (context-manager curation)
+**Last Updated:** 2025-12-03 21:30 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -337,6 +337,21 @@
 
 ### rq_5.2.2_partial_execution_when_exclusion_consolidation
 **Description:** Complete RQ 5.2.2 execution (Domain-Specific Consolidation Effects with When Domain Exclusion, Sessions 2025-12-02 23:15 and 2025-12-03 00:15). 6 steps executed (prepare piecewise input, fit piecewise LMM, extract slopes, compute contrasts, consolidation benefit, plot data). Fixed 4 bugs in partial session (data source correction, test numbering, When filter, slope reduction). When domain excluded due to floor effect (6-9% probability, 77% item attrition). Statistical results: Strong consolidation effect (~6× slope reduction Early→Late) but NO domain-specific consolidation (What ≈ Where, all contrasts p > 0.68). Hypothesis NOT SUPPORTED. Validated via full pipeline (rq_inspect, rq_plots regenerated for 2 domains, rq_results). Publication-ready with When exclusion documented.
+
+### random_slope_correction_log_tsvr
+**Description:** Critical model correction fixing random slope specification across 3 RQs (5.2.4, 5.3.4, 5.4.3) from TSVR_hours to log_TSVR per ROOT RQ model selection. Revealed IRT var=0.021 vs CTT var=0.000 (IRT detects individual differences, CTT cannot). Documents silent model specification errors, methodological lesson that random slopes must align with fixed effects time transformation, and IRT vs CTT dynamic divergence as key thesis finding (Session 2025-12-03 06:00).
+
+### chapter_5_story_narrative_assessment
+**Description:** Comprehensive Chapter 5 story draft creation with good/bad/ugly framework, extended literature search of 15+ VR memory studies, critical insight about theta scale artifact hypothesis (no VR study uses IRT theta for trajectories), investigation plan for theta→probability conversion via Test Characteristic Curve, and correction that REMEMVR uses Oculus Pro HMD not desktop VR (Session 2025-12-03 09:15).
+
+### icc_slope_deep_investigation_complete
+**Description:** Complete 6-hypothesis investigation explaining ICC_slope = 0.0005 anomaly. Scale transformation gave 3.5× improvement (not primary cause), model specification 22× improvement (partial), shrinkage 93% from sparse design (KEY FINDING), LR test p=0.69 (random slopes not significant), sleep covariates no effect, dichotomous data 81% max reliability. Design limitation confirmed not biological reality. Recommendation: do NOT report ICC_slope, focus on fixed effects and ICC_intercept (Session 2025-12-03 14:30).
+
+### thesis_reframe_laboratory_artifacts_dissolve
+**Description:** Major thesis narrative transformation from "failed to find effects" to "laboratory dissociations dissolve in ecological memory encoding." Includes 2024 literature support (Scientific Reports Dec 2024 N=236 confirms null age effects replicate SOTA), binding hypothesis integration (Yonelinas 2019 unitization explains pattern), story.md major rewrite, comprehensive validation framework (execution_plan.md with 6-layer checklist), rq_validate agent creation, and Type 5.5 Source-Destination memory proposal (Session 2025-12-03 18:45).
+
+### rq_validate_agent_mass_testing
+**Description:** rq_validate agent testing on 16 completed RQs, discovery of critical random structure mismatch in RQ 5.1.2 (quadratic used (1|UID), piecewise used (Days_within|UID)), fix to matched (1|UID) structure, Test 2 interpretation changed from "continuous favored" to "models equivalent", achievement of 100% validation pass rate (all 16 RQs), and rq_status.tsv validate column addition (Session 2025-12-03 19:30).
 
 ---
 
