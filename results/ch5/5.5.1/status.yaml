@@ -1,0 +1,38 @@
+rq_builder:
+  status: success
+  context_dump: |
+    Created results/ch5/5.5.1/ with 6 folders
+    Folders: docs/, data/, code/, logs/, plots/, results/
+    status.yaml initialized
+    Next: rq_concept already created manually
+
+rq_concept:
+  status: success
+  context_dump: "REVISED 2025-12-04: Hypothesis flipped to Destination > Source per action-effect binding literature"
+
+rq_scholar:
+  status: pending
+
+rq_stats:
+  status: pending
+
+rq_planner:
+  status: pending
+
+rq_tools:
+  status: pending
+
+rq_analysis:
+  status: pending
+
+g_code:
+  status: pending
+
+rq_inspect:
+  status: pending
+
+rq_plots:
+  status: pending
+
+rq_results:
+  status: pending
