@@ -1,0 +1,18 @@
+CTT Computation Report for RQ 5.4.4
+==================================================
+
+Items per congruence level:
+  common: 19 items
+  congruent: 18 items
+  incongruent: 13 items
+
+Total purified items used: 50
+
+CTT Score Descriptives by Congruence:
+  common: mean=0.6124, sd=0.1628, n=400
+  congruent: mean=0.6574, sd=0.1703, n=400
+  incongruent: mean=0.5830, sd=0.1947, n=400
+
+Overall CTT: mean=0.6176, sd=0.1790
+Total observations: 1200
+Missing values: 0

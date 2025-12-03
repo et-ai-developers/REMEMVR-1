@@ -1,0 +1,13 @@
+RQ 5.4.4 Dependency Verification Report
+==================================================
+Parent RQ: 5.4.1 (Schema Congruence Trajectories)
+==================================================
+
+RQ 5.4.1 status: success
+Theta scores: 400 rows x 7 columns
+Theta columns verified: ['composite_ID', 'theta_common', 'theta_congruent', 'theta_incongruent', 'se_common', 'se_congruent', 'se_incongruent']
+TSVR mapping: 400 rows x 4 columns
+TSVR columns: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'TEST', 'Days']
+Purified items: 50 rows x 5 columns
+Items per congruence: common=19, congruent=18, incongruent=13
+Common composite_IDs between theta and TSVR: 400

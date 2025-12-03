@@ -1,0 +1,32 @@
+CTT LMM Summary for RQ 5.4.4
+============================================================
+Formula: CTT_mean ~ C(congruence) * log_TSVR
+Groups: UID
+N observations: 1200
+N groups: 100
+Converged: True
+AIC: -1069.30
+BIC: -1018.40
+============================================================
+
+                     Mixed Linear Model Regression Results
+================================================================================
+Model:                      MixedLM         Dependent Variable:         CTT_mean
+No. Observations:           1200            Method:                     ML      
+No. Groups:                 100             Scale:                      0.0200  
+Min. group size:            12              Log-Likelihood:             544.6509
+Max. group size:            12              Converged:                  Yes     
+Mean group size:            12.0                                                
+--------------------------------------------------------------------------------
+                                      Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+--------------------------------------------------------------------------------
+Intercept                              0.707    0.019 38.015 0.000  0.670  0.743
+C(congruence)[T.congruent]             0.065    0.023  2.856 0.004  0.020  0.109
+C(congruence)[T.incongruent]           0.007    0.023  0.328 0.743 -0.037  0.052
+log_TSVR                              -0.028    0.005 -6.199 0.000 -0.037 -0.019
+C(congruence)[T.congruent]:log_TSVR   -0.006    0.006 -0.963 0.336 -0.018  0.006
+C(congruence)[T.incongruent]:log_TSVR -0.011    0.006 -1.814 0.070 -0.023  0.001
+UID Var                                0.009    0.018                           
+UID x log_TSVR Cov                    -0.001    0.003                           
+log_TSVR Var                           0.000    0.001                           
+================================================================================

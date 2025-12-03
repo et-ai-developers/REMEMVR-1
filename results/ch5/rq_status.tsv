@@ -9,7 +9,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.2.2	Domains	Consolidation	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
 5.2.3	Domains	Age Effects	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
 5.2.4	Domains	IRT-CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.2.5	Domains	Purified CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+5.2.5	Domains	Purified CTT	COMPLETE 2025-12-03. What/Where only. Purification improves CTT-IRT correlation Δr=0.015-0.027 p<0.001. IRT superior AIC=1655 vs CTT=1780-1812.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
 5.2.6	Domains	Variance Decomp	COMPLETE 2025-12-03. What/Where only. ICC_int=0.51/0.57, ICC_slope_simple=0.008/0.011 (low - design limitation). Where Fan Effect r=-0.316 p<0.003.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
 5.2.7	Domains	Clustering	COMPLETE 2025-12-03. What/Where only. K=5 clusters (BIC). Silhouette=0.34 (POOR), Jaccard=0.88 (STABLE). 5 profiles: Average/Slow, Average/Improving, Low/Improving, High/Stable, Fast Decline.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
 5.2.8	Domains	Item Difficulty	BLOCKED: Missing GLMM tools (fit_glmm_binomial, extract_glmm_*, etc.)	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
@@ -17,7 +17,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.3.2	Paradigms	Gradient Test	Unique to Paradigms. Linear trend contrast.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
 5.3.3	Paradigms	Consolidation	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
 5.3.4	Paradigms	Age Effects	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.3.5	Paradigms	IRT-CTT	BLOCKED: Missing CTT tools (compute_ctt_scores, compute_pearson_correlation_d068, compute_cohens_kappa)	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
+5.3.5	Paradigms	IRT-CTT	COMPLETE 2025-12-04. r=0.84-0.88 all >0.70. κ=0.667 substantial. 83.3% agreement. Validates 5.3.1 not measurement artifact.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2L)
 5.3.6	Paradigms	Purified CTT	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.3.7	Paradigms	Variance Decomp	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.3.8	Paradigms	Clustering	All 3 paradigms valid. K-means stdlib only.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
@@ -25,7 +25,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.4.1	Congruence	Trajectories	NULL schema effects (valid finding). All 3 levels usable.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
 5.4.2	Congruence	Consolidation	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
 5.4.3	Congruence	Age Effects	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.4.4	Congruence	IRT-CTT	BLOCKED: Missing CTT tools (compute_ctt_scores, compute_pearson_correlation, compute_cohens_kappa)	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
+5.4.4	Congruence	IRT-CTT	COMPLETE 2025-12-04. r=0.87-0.91 all >0.70. κ=0.667 substantial. 83.3% agreement. Validates 5.4.1 null schema findings robust to measurement.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1L)
 5.4.5	Congruence	Purified CTT	All 3 congruence levels valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.4.6	Congruence	Variance Decomp	All 3 congruence levels valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.4.7	Congruence	Clustering	All 3 congruence levels valid. K-means stdlib only.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE

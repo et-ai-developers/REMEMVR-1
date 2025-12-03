@@ -1,0 +1,448 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.4.4
+# Created by: rq_tools agent
+# Date: 2025-12-03
+# RQ: 5.4.4 (IRT-CTT Convergence)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+# Each analysis tool includes validation_tool reference for architectural
+# enforcement of validation per step. Tools are cataloged once even if used
+# multiple times in workflow (e.g., fit_lmm_trajectory_tsvr used for both
+# IRT and CTT models).
+
+analysis_tools:
+  compute_ctt_mean_scores_by_factor:
+    module: "tools.analysis_ctt"
+    function: "compute_ctt_mean_scores_by_factor"
+    signature: "compute_ctt_mean_scores_by_factor(df_wide: DataFrame, item_factor_df: DataFrame, factor_col: str = 'factor', item_col: str = 'item_name', include_factors: Optional[List[str]] = None) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    description: "Compute CTT mean scores (proportion correct) per UID x test x congruence factor using purified items from RQ 5.4.1"
+
+    input_requirements:
+      - Wide-format raw responses (composite_ID x item columns)
+      - Item-to-factor mapping (item_code, dimension columns)
+      - Congruence factor values: common, congruent, incongruent
+
+    output_format:
+      columns: ["composite_ID", "UID", "test", "factor", "CTT_score", "n_items"]
+      expected_rows: 1200 (400 composite_IDs x 3 congruence factors)
+      ctt_score_range: [0.0, 1.0]
+
+    parameters:
+      factor_col: "dimension"
+      item_col: "item_code"
+      include_factors: ["common", "congruent", "incongruent"]
+
+    source_reference: "tools_inventory.md lines 492-500"
+
+  compute_pearson_correlations_with_correction:
+    module: "tools.analysis_ctt"
+    function: "compute_pearson_correlations_with_correction"
+    signature: "compute_pearson_correlations_with_correction(df: DataFrame, irt_col: str = 'IRT_score', ctt_col: str = 'CTT_score', factor_col: str = 'factor', thresholds: Optional[List[float]] = [0.70, 0.90]) -> DataFrame"
+    validation_tool: "validate_contrasts_d068"
+
+    description: "Compute Pearson r between IRT theta and CTT scores stratified by congruence with Holm-Bonferroni correction per Decision D068"
+
+    input_requirements:
+      - Merged IRT theta and CTT scores
+      - Factor column for stratification
+      - Fisher z-transform for 95% CI
+
+    output_format:
+      columns: ["factor", "r", "CI_lower", "CI_upper", "p_uncorrected", "p_holm", "n", "threshold_0.70", "threshold_0.90"]
+      expected_rows: 4 (3 congruence factors + 1 overall)
+      r_range: [-1.0, 1.0]
+
+    parameters:
+      irt_col: "theta"
+      ctt_col: "CTT_score"
+      factor_col: "dimension"
+      thresholds: [0.70, 0.90]
+
+    decision_compliance:
+      - "D068: Dual p-value reporting (p_uncorrected + p_holm)"
+
+    source_reference: "tools_inventory.md lines 504-512"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit LMM using TSVR (actual hours since encoding) as time variable per Decision D070. Used twice: once for IRT theta, once for CTT scores"
+
+    input_requirements:
+      - Long-format scores (IRT or CTT)
+      - TSVR mapping (UID, test, TSVR_hours)
+      - Identical formula for both models (parallel design)
+
+    output_format:
+      type: "MixedLMResults object"
+      extractable: ["fixed effects", "random effects", "AIC", "BIC", "converged"]
+
+    parameters:
+      formula: "score ~ TSVR_hours + dimension + TSVR_hours:dimension"
+      groups: "UID"
+      re_formula: "~TSVR_hours"
+      reml: false
+
+    decision_compliance:
+      - "D070: TSVR time variable (actual hours, not nominal days)"
+
+    source_reference: "tools_inventory.md lines 97-104"
+
+  compute_cohens_kappa_agreement:
+    module: "tools.analysis_ctt"
+    function: "compute_cohens_kappa_agreement"
+    signature: "compute_cohens_kappa_agreement(classifications_1: List[bool], classifications_2: List[bool], labels: Optional[List[str]] = None) -> Dict"
+    validation_tool: "validate_icc_bounds"
+
+    description: "Compute Cohen's kappa for agreement between IRT and CTT model significance classifications (kappa > 0.60 threshold per Landis & Koch 1977)"
+
+    input_requirements:
+      - Boolean significance vectors from both models
+      - Effect labels for reporting
+      - Chance-corrected agreement metric
+
+    output_format:
+      type: "Dict"
+      keys: ["kappa", "agreement_percent", "interpretation", "n_effects", "substantial_agreement", "confusion_matrix"]
+      kappa_range: [-1.0, 1.0]
+
+    parameters:
+      classifications_1: "IRT model significance (p < 0.05)"
+      classifications_2: "CTT model significance (p < 0.05)"
+      labels: ["Intercept", "Time", "Dimension", "Time:Dimension"]
+
+    source_reference: "tools_inventory.md lines 516-524"
+
+  compare_lmm_fit_aic_bic:
+    module: "tools.analysis_ctt"
+    function: "compare_lmm_fit_aic_bic"
+    signature: "compare_lmm_fit_aic_bic(aic_model1: float, bic_model1: float, aic_model2: float, bic_model2: float, model1_name: str = 'Model1', model2_name: str = 'Model2') -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    description: "Compare model fit between IRT and CTT LMMs using AIC/BIC delta with Burnham & Anderson (2002) interpretation (delta < 4 = comparable fit)"
+
+    input_requirements:
+      - AIC and BIC from both fitted LMMs
+      - Model names for reporting
+
+    output_format:
+      columns: ["metric", "IRT_LMM", "CTT_LMM", "delta", "interpretation"]
+      expected_rows: 2 (AIC, BIC)
+
+    parameters:
+      model1_name: "IRT_LMM"
+      model2_name: "CTT_LMM"
+
+    source_reference: "tools_inventory.md lines 529-536"
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
+    validation_tool: "validate_probability_range"
+
+    description: "Transform IRT theta scores to probability scale via 2PL formula for Decision D069 dual-scale trajectory plots"
+
+    input_requirements:
+      - Theta scores (theta column from LMM predictions)
+      - Mean discrimination parameter (from Pass 2 item parameters)
+      - Difficulty fixed at 0.0 (centered)
+
+    output_format:
+      type: "ndarray"
+      value_range: [0.0, 1.0]
+
+    parameters:
+      discrimination: "mean(a) from step03_item_parameters.csv"
+      difficulty: 0.0
+
+    decision_compliance:
+      - "D069: Dual-scale trajectory plots (theta + probability)"
+
+    source_reference: "tools_inventory.md lines 229-235"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+# Each validation tool corresponds to an analysis tool. Validation inputs are
+# analysis tool outputs (sequential dependency). All validation tools return
+# Dict with 'valid' and 'message' keys per v4.X standard format.
+
+validation_tools:
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[ndarray, Series], min_val: float, max_val: float, column_name: str) -> Dict"
+
+    description: "Validate CTT scores are in [0, 1] range (proportion correct cannot exceed bounds)"
+
+    criteria:
+      - "All CTT_score values in [0.0, 1.0]"
+      - "No NaN values in CTT_score column"
+      - "No infinite values"
+
+    parameters:
+      min_val: 0.0
+      max_val: 1.0
+      column_name: "CTT_score"
+
+    expected_output:
+      valid: "bool (True if all criteria passed)"
+      message: "str (human-readable explanation)"
+      out_of_range_count: "int"
+      violations: "List (first 10 violations for debugging)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "CTT scores out of valid range [0,1]"
+
+    source_reference: "tools_inventory.md lines 540-548"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict"
+
+    description: "Validate Decision D068 compliance: dual p-value reporting (p_uncorrected + p_holm) in correlation results"
+
+    criteria:
+      - "p_uncorrected column present"
+      - "p_holm column present (Holm-Bonferroni correction)"
+      - "Both p-value columns have no NaN values"
+      - "p_holm >= p_uncorrected (correction never reduces p-value)"
+
+    parameters:
+      required_columns: ["p_uncorrected", "p_holm"]
+
+    expected_output:
+      valid: "bool"
+      d068_compliant: "bool"
+      missing_cols: "List[str]"
+      message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "Decision D068 violation: missing dual p-value reporting"
+
+    decision_compliance:
+      - "D068: Mandatory dual p-value reporting"
+
+    source_reference: "tools_inventory.md lines 424-432"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict"
+
+    description: "Validate LMM converged successfully by checking model.converged attribute"
+
+    criteria:
+      - "model.converged == True"
+      - "No convergence warnings in model output"
+
+    parameters:
+      check_attribute: "converged"
+
+    expected_output:
+      valid: "bool"
+      converged: "bool"
+      message: "str"
+      warnings: "List[str] (if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "LMM convergence failed"
+
+    source_reference: "tools_inventory.md lines 326-333"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics (residual normality, homoscedasticity, random effects normality, autocorrelation, linearity, outliers, convergence)"
+
+    criteria:
+      - "Residual normality (Shapiro-Wilk p > 0.05)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "Random effects normality (Shapiro-Wilk p > 0.05 for intercepts and slopes)"
+      - "Low autocorrelation (ACF lag-1 < 0.1)"
+      - "Linearity (partial residual plots)"
+      - "No influential outliers (Cook's distance < 1.0)"
+      - "Model converged"
+
+    parameters:
+      output_dir: "plots/"
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+
+    expected_output:
+      valid: "bool (True only if ALL 7 diagnostics pass)"
+      diagnostics: "Dict (results per diagnostic)"
+      plot_paths: "List[Path] (6 diagnostic plots generated)"
+      message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "LMM assumptions violated (see diagnostics)"
+
+    source_reference: "tools_inventory.md lines 414-422"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict"
+
+    description: "Validate Cohen's kappa in [-1, 1] range (kappa is bounded correlation-like metric)"
+
+    criteria:
+      - "All kappa values in [-1.0, 1.0]"
+      - "No NaN values"
+      - "No infinite values"
+
+    parameters:
+      icc_col: "kappa"
+      min_val: -1.0
+      max_val: 1.0
+
+    expected_output:
+      valid: "bool"
+      message: "str"
+      out_of_bounds: "List[Dict]"
+      icc_range: "Tuple[float, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "Cohen's kappa out of valid range [-1,1]"
+
+    source_reference: "tools_inventory.md lines 618-626"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict"
+
+    description: "Validate AIC/BIC comparison DataFrame has required columns (metric, IRT_LMM, CTT_LMM, delta, interpretation)"
+
+    criteria:
+      - "All required columns present"
+      - "Exactly 2 rows (AIC, BIC)"
+
+    parameters:
+      required_cols: ["metric", "IRT_LMM", "CTT_LMM", "delta", "interpretation"]
+
+    expected_output:
+      valid: "bool"
+      message: "str"
+      missing_cols: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "Model fit comparison table missing required columns"
+
+    source_reference: "tools_inventory.md lines 552-560"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict"
+
+    description: "Validate IRT theta->probability transformation produces values in [0, 1] for Decision D069 dual-scale plots"
+
+    criteria:
+      - "All probability values in [0.0, 1.0]"
+      - "No NaN values"
+      - "No infinite values"
+
+    parameters:
+      prob_columns: ["probability"]
+
+    expected_output:
+      valid: "bool"
+      message: "str"
+      violations: "List[Dict] (per-column violations with examples)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message: "Probability transformation produced out-of-range values"
+
+    decision_compliance:
+      - "D069: Dual-scale trajectory plots require valid probability transformation"
+
+    source_reference: "tools_inventory.md lines 576-584"
+
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict"
+
+    description: "Validate dependency files from RQ 5.4.1 exist before loading (circuit breaker for missing dependencies)"
+
+    criteria:
+      - "File exists at specified path"
+      - "Path is a file, not a directory"
+      - "File size >= min_size_bytes (if specified)"
+
+    parameters:
+      min_size_bytes: 100
+
+    expected_output:
+      valid: "bool"
+      file_path: "str"
+      size_bytes: "int"
+      message: "str"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      message: "Dependency file from RQ 5.4.1 not found"
+
+    source_reference: "tools_inventory.md lines 343-350"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 8
+  total_unique_tools: 15
+
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (correlations, contrasts)"
+    - "D069: Dual-scale trajectory plots (theta + probability)"
+    - "D070: TSVR time variable (actual hours, not nominal days)"
+
+  convergence_thresholds:
+    correlations: "r > 0.70 (strong), r > 0.90 (exceptional)"
+    kappa: "kappa > 0.60 (substantial agreement per Landis & Koch)"
+    model_fit: "delta-AIC < 4 (comparable fit per Burnham & Anderson)"
+    agreement: ">=80% on significance/non-significance"
+
+  cross_rq_dependencies:
+    - "RQ 5.4.1: theta scores (step03_theta_scores.csv)"
+    - "RQ 5.4.1: TSVR mapping (step00_tsvr_mapping.csv)"
+    - "RQ 5.4.1: purified items (step02_purified_items.csv)"
+    - "RQ 5.4.1: raw responses (data/cache/dfData.csv filtered to purified items)"
+
+  notes:
+    - "Tool catalog approach: each tool listed ONCE, deduplication across steps"
+    - "fit_lmm_trajectory_tsvr used twice (IRT and CTT) but cataloged once"
+    - "Validation tools enforce sequential dependency (inputs = analysis outputs)"
+    - "All tools verified exist in tools_inventory.md (no missing tools)"
+    - "All naming conventions verified exist in names.md (no missing patterns)"
+
+# =============================================================================
+# VERSION HISTORY
+# =============================================================================
+# v1.0 (2025-12-03): Initial tool catalog created by rq_tools agent for RQ 5.4.4
+#                    15 total tools (7 analysis + 8 validation)
+#                    All tools verified in tools_inventory.md
+#                    Decision D068/D069/D070 compliance embedded
+
+# End of 3_tools.yaml

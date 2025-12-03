@@ -81,44 +81,51 @@ We are making a significant theoretical claim: that canonical What-Where-When di
 
 ## RQ Execution Order
 
-### Phase 1: Verify Completed RQs (CRITICAL)
+### Phase 1: Verify Completed RQs (CRITICAL) - ✅ DONE
 
-Before proceeding, re-validate all 15 completed RQs against the checklist above.
+All 22 completed RQs validated via rq_validate agent (2025-12-03).
 
-| RQ | Type | Status | Validation Priority |
-|----|------|--------|---------------------|
-| 5.1.1 | Functional Form | COMPLETE | HIGH - ROOT RQ |
-| 5.1.2 | Two-Phase | COMPLETE | MEDIUM |
-| 5.1.3 | Age Effects | COMPLETE | HIGH - Key null finding |
-| 5.1.4 | Variance Decomp | COMPLETE | HIGH - ICC investigation |
-| 5.1.5 | Clustering | COMPLETE | LOW |
-| 5.2.1 | Domain Trajectories | COMPLETE | HIGH - ROOT RQ, When exclusion |
-| 5.2.2 | Domain Consolidation | COMPLETE | MEDIUM |
-| 5.2.3 | Domain Age | COMPLETE | HIGH - Key null finding |
-| 5.2.4 | IRT-CTT | NEEDS VALIDATION | HIGH - Model correction applied |
-| 5.3.1 | Paradigm Trajectories | COMPLETE | HIGH - ROOT RQ |
-| 5.3.2 | Gradient Test | COMPLETE | MEDIUM |
-| 5.3.3 | Paradigm Consolidation | COMPLETE | MEDIUM |
-| 5.3.4 | Paradigm Age | COMPLETE | HIGH - Key null finding |
-| 5.4.1 | Congruence Trajectories | COMPLETE | HIGH - ROOT RQ |
-| 5.4.2 | Congruence Consolidation | COMPLETE | MEDIUM |
-| 5.4.3 | Congruence Age | COMPLETE | HIGH - Key null finding |
+| RQ | Type | Status | Validation |
+|----|------|--------|------------|
+| 5.1.1 | Functional Form | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.1.2 | Two-Phase | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.1.3 | Age Effects | ✅ COMPLETE | PASS (0C/0H/1M) |
+| 5.1.4 | Variance Decomp | ✅ COMPLETE | PASS (0C/0H/1M) |
+| 5.1.5 | Clustering | ✅ COMPLETE | PASS (0C/0H/1M) |
+| 5.2.1 | Domain Trajectories | ✅ COMPLETE | PASS (0C/0H/1M) |
+| 5.2.2 | Domain Consolidation | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.2.3 | Domain Age | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.2.4 | IRT-CTT | ✅ COMPLETE | PASS (0C/0H/1M) - Model corrected 2025-12-03 |
+| 5.2.5 | Purified CTT | ✅ COMPLETE | PASS |
+| 5.2.6 | Variance Decomp | ✅ COMPLETE | PASS |
+| 5.2.7 | Clustering | ✅ COMPLETE | PASS (0C/0H/1M) |
+| 5.3.1 | Paradigm Trajectories | ✅ COMPLETE | PASS (0C/0H/4M) |
+| 5.3.2 | Gradient Test | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.3.3 | Paradigm Consolidation | ✅ COMPLETE | PASS (0C/0H/1M) |
+| 5.3.4 | Paradigm Age | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.3.5 | IRT-CTT | ✅ COMPLETE | PASS (0C/0H/2L) - 2025-12-04 |
+| 5.4.1 | Congruence Trajectories | ✅ COMPLETE | PASS (0C/0H/2M) |
+| 5.4.2 | Congruence Consolidation | ✅ COMPLETE | PASS (0C/0H/3M) |
+| 5.4.3 | Congruence Age | ✅ COMPLETE | PASS (0C/0H/1M) |
 
 ### Phase 2: Execute Remaining Ready RQs
 
-| RQ | Type | tools | analysis | Priority | Notes |
-|----|------|-------|----------|----------|-------|
-| 5.2.5 | Domains Purified CTT | TRUE | TRUE | MEDIUM | IRT-CTT on purified items |
-| 5.2.6 | Domains Variance | TRUE | TRUE | LOW | ICC by domain |
-| 5.2.7 | Domains Clustering | TRUE | TRUE | LOW | K-means by domain |
-| 5.3.6 | Paradigms Purified CTT | TRUE | TRUE | MEDIUM | CTT by paradigm |
-| 5.3.7 | Paradigms Variance | TRUE | TRUE | LOW | ICC by paradigm |
-| 5.3.8 | Paradigms Clustering | TRUE | TRUE | LOW | K-means by paradigm |
-| 5.3.9 | Paradigms Item LMM | TRUE | TRUE | MEDIUM | Cross-classified item analysis |
-| 5.4.5 | Congruence Purified CTT | TRUE | TRUE | MEDIUM | CTT by schema |
-| 5.4.6 | Congruence Variance | TRUE | TRUE | LOW | ICC by schema |
-| 5.4.7 | Congruence Clustering | TRUE | TRUE | LOW | K-means by schema |
-| 5.4.8 | Congruence Item LMM | TRUE | TRUE | MEDIUM | Item × schema analysis |
+**Status:** 9 RQs remaining (tools+analysis specs ready, need g_code execution)
+
+| RQ | Type | Status | Priority | Notes |
+|----|------|--------|----------|-------|
+| ~~5.2.5~~ | ~~Domains Purified CTT~~ | ✅ COMPLETE | - | IRT superior AIC=1655 vs CTT=1780-1812 |
+| ~~5.2.6~~ | ~~Domains Variance~~ | ✅ COMPLETE | - | ICC_int=0.51/0.57, Fan Effect r=-0.316 |
+| ~~5.2.7~~ | ~~Domains Clustering~~ | ✅ COMPLETE | - | K=5 clusters, silhouette=0.34 |
+| 5.3.6 | Paradigms Purified CTT | READY | LOW | Similar to 5.2.5 |
+| 5.3.7 | Paradigms Variance | READY | LOW | ICC by paradigm |
+| 5.3.8 | Paradigms Clustering | READY | LOW | K-means by paradigm (same as 5.2.7) |
+| 5.3.9 | Paradigms Item LMM | READY | MEDIUM | Cross-classified LMM |
+| 5.4.4 | Congruence IRT-CTT | READY | HIGH | **UNBLOCKED** - CTT tools now available |
+| 5.4.5 | Congruence Purified CTT | READY | LOW | Similar to 5.2.5 |
+| 5.4.6 | Congruence Variance | READY | LOW | ICC by schema |
+| 5.4.7 | Congruence Clustering | READY | LOW | K-means by schema (same as 5.2.7) |
+| 5.4.8 | Congruence Item LMM | READY | MEDIUM | Item × schema analysis |
 
 ### Phase 3: Create and Execute New Type 5.5 (Source-Destination)
 
@@ -136,12 +143,14 @@ Before proceeding, re-validate all 15 completed RQs against the checklist above.
 
 ### Phase 4: Assess Blocked RQs
 
+**Status:** 2 RQs still blocked (GLMM tools needed)
+
 | RQ | Type | Blocking Issue | Decision Criteria |
 |----|------|----------------|-------------------|
 | 5.1.6 | General Item GLMM | Missing GLMM tools | Build only if item analysis adds unique value |
 | 5.2.8 | Domain Item GLMM | Missing GLMM tools | Build only if domain×item interaction important |
-| 5.3.5 | Paradigm IRT-CTT | Missing CTT tools | Build only if paradigm-specific divergence expected |
-| 5.4.4 | Congruence IRT-CTT | Missing CTT tools | Build only if schema-specific divergence expected |
+| ~~5.3.5~~ | ~~Paradigm IRT-CTT~~ | ✅ COMPLETE | CTT tools built 2025-12-03 |
+| ~~5.4.4~~ | ~~Congruence IRT-CTT~~ | UNBLOCKED | CTT tools available, moved to Phase 2 |
 
 ---
 
@@ -245,22 +254,42 @@ results/ch5/X.Y.Z/
 
 ---
 
-## Execution Timeline
+## Current Progress Summary
 
-### Immediate (This Session)
-1. Review this plan
-2. Re-validate 5.2.4 (model correction applied)
-3. Begin Phase 1 spot-checks on completed RQs
+**Last Updated:** 2025-12-04
 
-### Short-term (Next 2-3 Sessions)
-1. Execute Phase 2 RQs (11 remaining ready)
-2. Create 5.5 specifications
-3. Execute 5.5.1-5.5.3
+| Category | Complete | Remaining | Blocked |
+|----------|----------|-----------|---------|
+| General (5.1.x) | 5 | 0 | 1 (5.1.6 GLMM) |
+| Domains (5.2.x) | 7 | 0 | 1 (5.2.8 GLMM) |
+| Paradigms (5.3.x) | 5 | 4 | 0 |
+| Congruence (5.4.x) | 3 | 5 | 0 |
+| **TOTAL** | **20** | **9** | **2** |
 
-### After Assessment
-1. Decide on blocked RQs
-2. Build tools if needed
-3. Final chapter scope determination
+**Overall Progress:** 20/31 complete (65%), 9 ready, 2 blocked
+
+## What Comes Next (Logical Order)
+
+### Immediate Priority: 5.4.4 (Congruence IRT-CTT)
+- **Why first:** HIGH priority, newly unblocked, validates 5.4.1 findings
+- **Pipeline:** Same as 5.3.5 (just completed)
+- **Expected outcome:** Validate schema congruence null findings are robust to measurement
+
+### Then: Complete Congruence Section (5.4.5-5.4.8)
+- 5.4.5 Purified CTT (same pipeline as 5.2.5)
+- 5.4.6 Variance Decomp (same pipeline as 5.2.6)
+- 5.4.7 Clustering (same pipeline as 5.2.7)
+- 5.4.8 Item LMM (cross-classified)
+
+### Then: Complete Paradigms Section (5.3.6-5.3.9)
+- 5.3.6 Purified CTT
+- 5.3.7 Variance Decomp
+- 5.3.8 Clustering
+- 5.3.9 Item LMM
+
+### Finally: Decide on Blocked GLMM RQs (5.1.6, 5.2.8)
+- Build GLMM tools via TDD if item analysis adds thesis value
+- Or defer to future work if core findings sufficient
 
 ---
 

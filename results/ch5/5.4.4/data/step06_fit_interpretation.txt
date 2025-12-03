@@ -1,0 +1,19 @@
+Model Fit Comparison - RQ 5.4.4
+============================================================
+
+IRT Model: AIC = 2559.06, BIC = 2609.96
+CTT Model: AIC = -1069.30, BIC = -1018.40
+
+Delta AIC (IRT - CTT): 3628.36
+
+IMPORTANT CAVEAT:
+AIC and BIC are NOT directly comparable across models with different
+dependent variables (theta scale vs proportion correct scale). The large
+difference reflects scale differences, not model quality differences.
+
+The key convergence metrics are:
+1. Correlations (Step 02): All r > 0.70 - PASSED
+2. Cohen's kappa (Step 05): kappa > 0.60 - PASSED
+3. Percent agreement (Step 05): > 80% - PASSED
+
+Both models converged with identical random structure (random slopes on log_TSVR).

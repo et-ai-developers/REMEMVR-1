@@ -1,0 +1,4 @@
+Model Convergence Log for RQ 5.4.4
+============================================================
+IRT: Converged with random slopes (method=powell)
+CTT: Converged with random slopes (method=powell)

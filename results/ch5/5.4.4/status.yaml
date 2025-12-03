@@ -34,21 +34,53 @@ rq_planner:
     Expected outputs: 18 data files, 2 scatterplot data, 2 trajectory data (dual-scale D069). Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    7 analysis + 8 validation tools cataloged for IRT-CTT convergence analysis
+    CTT tools: compute_ctt_mean_scores_by_factor, compute_pearson_correlations_with_correction, compute_cohens_kappa_agreement, compare_lmm_fit_aic_bic
+    LMM tool: fit_lmm_trajectory_tsvr (used twice: IRT+CTT parallel models)
+    All tools verified in tools_inventory.md (no missing tools)
+    Decisions D068/D069/D070 compliance embedded
 
 rq_analysis:
-  status: pending
+  status: success
   context_dump: |
+    8 analysis steps specified (Step 0-8, skip Step 4 assumptions).
+    Adapted from ch5/5.3.5 (identical pipeline, congruence factor instead of paradigm).
+    Steps: load_deps, compute_ctt, correlations, parallel_lmms, compare_fe, compare_fit, scatterplot, trajectory.
+    Cross-RQ: Uses RQ 5.4.1 step03 theta, step02 purified items, step00 TSVR mapping.
+
+analysis_steps:
+  step00_load_dependencies: success
+  step01_compute_ctt_scores: success
+  step02_compute_correlations: success
+  step03_fit_parallel_lmms: success
+  step05_compare_fixed_effects: success
+  step06_compare_model_fit: success
+  step07_prepare_scatterplot_data: success
+  step08_prepare_trajectory_data: success
 
 rq_inspect:
-  status: pending
+  status: success
   context_dump: |
+    Validated all 8 analysis steps (step00-step08, skip step04)
+    Layer 1-4 validation: All PASS (existence, structure, substance, execution logs)
+    Key results: r>0.87 all dimensions, kappa=0.667, 83.3% agreement, delta-AIC=-3628
+    All outputs match plan.md expectations, no errors in logs
+    Ready for rq_plots (plotting) and rq_results (interpretation)
 
 rq_plots:
-  status: pending
+  status: success
   context_dump: |
+    Generated 4 plots: scatterplot_irt_ctt.png, trajectory_irt.png, trajectory_ctt.png, trajectory_comparison.png
+    Data sources: step02_merged_irt_ctt.csv, step03_irt_lmm_input.csv, step03_ctt_lmm_input.csv
+    D069 compliance: YES (dual-scale trajectory plots included)
+    Style: 5.2.1 matching (faded scatter, dashed curves, shaded 95% CI)
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: 2025-12-03T20:15:00
   context_dump: |
+    Results validated for scientific plausibility
+    1 anomaly flagged: CTT fit dominance (delta-AIC=-3628, see summary.md Section 3)
+    Summary documented in results/summary.md
