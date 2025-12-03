@@ -7,12 +7,16 @@ Step ID: step02
 Step Name: Compute Full CTT Scores
 RQ: ch5/5.2.5
 Generated: 2025-11-30
+Updated: 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
 
 PURPOSE:
 Calculate Classical Test Theory (CTT) scores using ALL items (full item set)
 per domain. CTT scores are computed as the mean of dichotomized responses (0/1)
-within each domain (What, Where, When), providing a baseline measurement
-approach for comparison with IRT theta scores and purified CTT scores.
+within each domain (What, Where only - When EXCLUDED), providing a baseline
+measurement approach for comparison with IRT theta scores and purified CTT scores.
+
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains processed.
 
 EXPECTED INPUTS:
   - data/step00_raw_scores.csv
@@ -22,14 +26,15 @@ EXPECTED INPUTS:
 
   - data/step01_item_mapping.csv
     Columns: ['item_name', 'domain', 'retained']
-    Format: Item-to-domain mapping with retention status from Step 1
-    Expected rows: ~50 items (all VR items)
+    Format: Item-to-domain mapping (What/Where only, When excluded)
+    Expected rows: ~79 items (What + Where only)
 
 EXPECTED OUTPUTS:
   - data/step02_ctt_full_scores.csv
-    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where', 'CTT_full_when']
+    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where']
     Format: CTT scores (proportion correct [0,1]) per domain using ALL items
     Expected rows: ~400 (100 participants x 4 tests)
+    NOTE: No CTT_full_when column (When domain excluded)
 
 VALIDATION CRITERIA:
   - All CTT_full_* scores in [0, 1] range (proportion cannot be negative or > 1)
@@ -48,13 +53,11 @@ g_code REASONING:
 
 - Data flow:
   1. Load raw item responses (step00_raw_scores.csv with 105 TQ_* columns)
-  2. Load item-to-domain mapping (step01_item_mapping.csv)
-  3. For each domain (what/where/when):
-     - Select ALL items matching domain tag pattern (regardless of retained status)
-     - Group by composite_ID (UID_TEST format)
+  2. Load item-to-domain mapping (step01_item_mapping.csv - What/Where only)
+  3. For each domain (what/where - When excluded):
+     - Select ALL items matching domain (regardless of retained status)
      - Compute mean of 0/1 responses -> CTT_full_{domain} score
   4. Merge domain scores into single wide-format DataFrame
-  5. Add UID and TEST columns extracted from composite_ID
 
 - Expected performance: <10 seconds (simple pandas aggregation)
 
@@ -63,11 +66,10 @@ IMPLEMENTATION NOTES:
 - Validation tool: tools.validation.validate_numeric_range
 - Domain tag patterns:
   - What: TQ_*-N-* (nominal content)
-  - Where: TQ_*-U-* + TQ_*-D-* (up/down spatial)
-  - When: TQ_*-O-* (temporal order)
+  - Where: TQ_*-U-* + TQ_*-D-* + TQ_*-L-* (spatial)
+  - When: EXCLUDED (floor effect)
 - CTT scoring: Mean of dichotomized responses within domain (proportion correct)
 - Score range: [0, 1] where 0 = all incorrect, 1 = all correct
-- Missing data: NaN if participant has no valid responses for entire domain (rare)
 """
 # =============================================================================
 
@@ -180,12 +182,13 @@ if __name__ == "__main__":
         # Expected output: CTT_full_{domain} scores in [0, 1] range
 
         log("[ANALYSIS] Computing full CTT scores using ALL items per domain...")
+        log("[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect")
 
         # Initialize results dictionary
         ctt_scores = {'composite_ID': df_raw['composite_ID'].values}
 
-        # Process each domain
-        domains = ['what', 'where', 'when']
+        # Process each domain (What/Where only - When excluded)
+        domains = ['what', 'where']
 
         for domain in domains:
             log(f"[COMPUTE] Processing domain: {domain}")
@@ -228,8 +231,8 @@ if __name__ == "__main__":
 
         log("[SAVE] Saving CTT full scores...")
 
-        # Select output columns
-        output_cols = ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where', 'CTT_full_when']
+        # Select output columns (What/Where only - no When)
+        output_cols = ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where']
         df_output = df_raw[output_cols].copy()
 
         # Save to CSV

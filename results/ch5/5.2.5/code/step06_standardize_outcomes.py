@@ -17,20 +17,23 @@ Direct AIC comparison requires IDENTICAL data scales. Z-score standardization
 (mean=0, SD=1) puts all measurements on same scale without altering relative
 information content.
 
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains processed.
+
 EXPECTED INPUTS:
   - data/step00_theta_scores.csv
-    Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
-    Format: IRT theta scores from RQ 5.1 Step 3 (Pass 2 calibration)
+    Columns: ['composite_ID', 'theta_what', 'theta_where']
+    Format: IRT theta scores from RQ 5.2.1 (What/Where only)
     Expected rows: ~400 (100 participants x 4 tests)
 
   - data/step02_ctt_full_scores.csv
-    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where', 'CTT_full_when']
-    Format: Full CTT scores (all items) from Step 2
+    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where']
+    Format: Full CTT scores (all items) from Step 2 (What/Where only)
     Expected rows: ~400
 
   - data/step03_ctt_purified_scores.csv
-    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_purified_what', 'CTT_purified_where', 'CTT_purified_when']
-    Format: Purified CTT scores (retained items only) from Step 3
+    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_purified_what', 'CTT_purified_where']
+    Format: Purified CTT scores (retained items only) from Step 3 (What/Where only)
     Expected rows: ~400
 
   - data/step00_tsvr_mapping.csv
@@ -42,12 +45,12 @@ EXPECTED OUTPUTS:
   - data/step06_standardized_outcomes.csv
     Columns: ['composite_ID', 'UID', 'TSVR_hours', 'domain', 'z_full_ctt', 'z_purified_ctt', 'z_irt_theta']
     Format: Z-scored outcomes in long format for parallel LMM fitting
-    Expected rows: ~1200 (400 composite_IDs x 3 domains)
+    Expected rows: ~800 (400 composite_IDs x 2 domains - What/Where only)
 
 VALIDATION CRITERIA:
   - mean(z) within ±0.01 of 0 for all columns
   - sd(z) within ±0.01 of 1 for all columns
-  - Checks all 3 measurement types x 3 domains = 9 combinations
+  - Checks all 3 measurement types x 2 domains = 6 combinations
 
 g_code REASONING:
 - Approach: Z-score transformation (value - mean) / sd per measurement x domain
@@ -170,23 +173,23 @@ if __name__ == "__main__":
         # Start with TSVR (includes UID which we need for grouping)
         df_merged = df_tsvr.copy()
 
-        # Merge theta scores
+        # Merge theta scores (What/Where only - no When)
         df_merged = df_merged.merge(
-            df_theta[['composite_ID', 'theta_what', 'theta_where', 'theta_when']],
+            df_theta[['composite_ID', 'theta_what', 'theta_where']],
             on='composite_ID',
             how='left'
         )
 
-        # Merge full CTT scores
+        # Merge full CTT scores (What/Where only - no When)
         df_merged = df_merged.merge(
-            df_full_ctt[['composite_ID', 'CTT_full_what', 'CTT_full_where', 'CTT_full_when']],
+            df_full_ctt[['composite_ID', 'CTT_full_what', 'CTT_full_where']],
             on='composite_ID',
             how='left'
         )
 
-        # Merge purified CTT scores
+        # Merge purified CTT scores (What/Where only - no When)
         df_merged = df_merged.merge(
-            df_purified_ctt[['composite_ID', 'CTT_purified_what', 'CTT_purified_where', 'CTT_purified_when']],
+            df_purified_ctt[['composite_ID', 'CTT_purified_what', 'CTT_purified_where']],
             on='composite_ID',
             how='left'
         )
@@ -207,14 +210,15 @@ if __name__ == "__main__":
         # What it does: Convert from wide format (1 row per composite_ID) to long format (3 rows per composite_ID, 1 per domain)
         # Expected output: Long DataFrame with columns: composite_ID, UID, TSVR_hours, domain, theta, ctt_full, ctt_purified
 
-        log("[RESHAPE] Converting to long format (3 rows per composite_ID, 1 per domain)...")
+        log("[RESHAPE] Converting to long format (2 rows per composite_ID, 1 per domain)...")
+        log("[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect")
 
         # Create list to store long-format data
         rows = []
 
         for _, row in df_merged.iterrows():
-            # Process each domain (what, where, when)
-            for domain in ['what', 'where', 'when']:
+            # Process each domain (What/Where only - When excluded)
+            for domain in ['what', 'where']:
                 rows.append({
                     'composite_ID': row['composite_ID'],
                     'UID': row['UID'],
@@ -226,7 +230,7 @@ if __name__ == "__main__":
                 })
 
         df_long = pd.DataFrame(rows)
-        log(f"[RESHAPED] Long format created ({len(df_long)} rows = {len(df_merged)} composite_IDs x 3 domains)")
+        log(f"[RESHAPED] Long format created ({len(df_long)} rows = {len(df_merged)} composite_IDs x 2 domains)")
 
         # =========================================================================
         # STEP 4: Compute Z-Scores per Measurement Type x Domain
@@ -240,7 +244,7 @@ if __name__ == "__main__":
         # Group by domain and compute z-scores for each measurement type
         # Z-score formula: (value - mean) / sd
 
-        for domain in ['what', 'where', 'when']:
+        for domain in ['what', 'where']:
             domain_mask = df_long['domain'] == domain
 
             # IRT theta z-scores

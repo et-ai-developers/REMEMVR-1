@@ -7,6 +7,7 @@ Step ID: step05
 Step Name: Correlation Analysis with Steiger's z-test
 RQ: ch5/5.2.5
 Generated: 2025-11-30
+Updated: 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
 
 PURPOSE:
 Test primary hypothesis that purified CTT correlates more strongly with IRT
@@ -14,27 +15,30 @@ theta than full CTT using Steiger's z-test for dependent correlations. This
 addresses whether IRT purification improves CTT-IRT convergence by removing
 poor-quality items.
 
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains analyzed.
+
 EXPECTED INPUTS:
 - data/step00_theta_scores.csv
-  Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
-  Format: IRT theta scores from RQ 5.1 Step 3 (Pass 2 calibration)
+  Columns: ['composite_ID', 'theta_what', 'theta_where']
+  Format: IRT theta scores from RQ 5.2.1 (What/Where only)
   Expected rows: ~400 (100 participants x 4 tests)
 
 - data/step02_ctt_full_scores.csv
-  Columns: ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where', 'CTT_full_when']
-  Format: Full CTT scores (all items) from Step 2
+  Columns: ['composite_ID', 'UID', 'TEST', 'CTT_full_what', 'CTT_full_where']
+  Format: Full CTT scores (all items) from Step 2 (What/Where only)
   Expected rows: ~400
 
 - data/step03_ctt_purified_scores.csv
-  Columns: ['composite_ID', 'UID', 'TEST', 'CTT_purified_what', 'CTT_purified_where', 'CTT_purified_when']
-  Format: Purified CTT scores (retained items only) from Step 3
+  Columns: ['composite_ID', 'UID', 'TEST', 'CTT_purified_what', 'CTT_purified_where']
+  Format: Purified CTT scores (retained items only) from Step 3 (What/Where only)
   Expected rows: ~400
 
 EXPECTED OUTPUTS:
 - data/step05_correlation_analysis.csv
   Columns: ['domain', 'r_full_irt', 'r_purified_irt', 'r_full_purified', 'delta_r', 'steiger_z', 'p_uncorrected', 'p_bonferroni', 'interpretation']
   Format: Steiger's z-test results comparing Full CTT-IRT vs Purified CTT-IRT correlations
-  Expected rows: 3 (one per domain: what, where, when)
+  Expected rows: 2 (what, where - no when)
 
 VALIDATION CRITERIA:
 - Decision D068 dual p-value reporting: BOTH p_uncorrected and p_bonferroni present
@@ -169,16 +173,16 @@ if __name__ == "__main__":
 
         log("[MERGE] Merging theta, full CTT, and purified CTT on composite_ID...")
 
-        # Merge theta + full CTT
+        # Merge theta + full CTT (What/Where only - no When)
         df_merged = df_theta.merge(
-            df_ctt_full[['composite_ID', 'CTT_full_what', 'CTT_full_where', 'CTT_full_when']],
+            df_ctt_full[['composite_ID', 'CTT_full_what', 'CTT_full_where']],
             on='composite_ID',
             how='inner'
         )
 
-        # Merge + purified CTT
+        # Merge + purified CTT (What/Where only - no When)
         df_merged = df_merged.merge(
-            df_ctt_purified[['composite_ID', 'CTT_purified_what', 'CTT_purified_where', 'CTT_purified_when']],
+            df_ctt_purified[['composite_ID', 'CTT_purified_what', 'CTT_purified_where']],
             on='composite_ID',
             how='inner'
         )
@@ -203,9 +207,10 @@ if __name__ == "__main__":
         # Expected output: Steiger's z-statistic with p_uncorrected and p_bonferroni
 
         log("[ANALYSIS] Running Steiger's z-test for each domain...")
+        log("[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect")
 
-        # Define domains to analyze
-        domains = ['what', 'where', 'when']
+        # Define domains to analyze (What/Where only - When excluded)
+        domains = ['what', 'where']
 
         # Initialize results list
         results = []
@@ -268,9 +273,9 @@ if __name__ == "__main__":
             delta_r = r23 - r12
             log(f"  Delta r (Purified - Full) = {delta_r:.3f}")
 
-            # Bonferroni correction (3 domains tested)
-            p_bonferroni = min(steiger_result['p_value'] * 3, 1.0)
-            log(f"  p (Bonferroni) = {p_bonferroni:.4f}")
+            # Bonferroni correction (2 domains tested - What/Where only)
+            p_bonferroni = min(steiger_result['p_value'] * 2, 1.0)
+            log(f"  p (Bonferroni, k=2) = {p_bonferroni:.4f}")
 
             # Interpretation
             if p_bonferroni < 0.05:

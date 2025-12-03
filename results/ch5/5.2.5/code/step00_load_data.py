@@ -7,6 +7,7 @@ Step ID: step00
 Step Name: Load Data Sources
 RQ: ch5/5.2.5
 Generated: 2025-11-30
+Updated: 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
 
 PURPOSE:
 Load IRT item parameters, theta scores, TSVR mapping from RQ 5.2.1 and raw
@@ -14,16 +15,20 @@ dichotomized scores from dfData.csv for CTT computation. Creates composite_ID
 in raw data (UID_test format) and copies all source files to local data/ folder
 for reference.
 
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). This step filters out When items/columns.
+
 EXPECTED INPUTS:
   - results/ch5/5.2.1/data/step02_purified_items.csv
     Columns: ['item_name', 'factor', 'a', 'b']
     Format: IRT purified items from RQ 5.2.1 Step 2 (retained items after purification)
-    Expected rows: ~38 items
+    Expected rows: ~38 items (but we filter to What/Where only)
 
   - results/ch5/5.2.1/data/step03_theta_scores.csv
     Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
     Format: IRT theta scores from RQ 5.2.1 Step 3 (Pass 2 calibration)
     Expected rows: ~400 (100 participants x 4 tests)
+    NOTE: theta_when column will be DROPPED
 
   - results/ch5/5.2.1/data/step00_tsvr_mapping.csv
     Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
@@ -38,17 +43,17 @@ EXPECTED INPUTS:
 EXPECTED OUTPUTS:
   - data/step00_irt_purified_items.csv
     Columns: ['item_name', 'factor', 'a', 'b']
-    Format: Local copy of RQ 5.1 purified items for reference
-    Expected rows: ~38
+    Format: Purified items for What/Where domains only (When excluded)
+    Expected rows: ~34 items (What + Where only)
 
   - data/step00_theta_scores.csv
-    Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
-    Format: Local copy of RQ 5.1 theta scores for reference
+    Columns: ['composite_ID', 'theta_what', 'theta_where']
+    Format: Theta scores for What/Where only (theta_when DROPPED)
     Expected rows: ~400
 
   - data/step00_tsvr_mapping.csv
     Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
-    Format: Local copy of RQ 5.1 TSVR mapping for reference
+    Format: Local copy of RQ 5.2.1 TSVR mapping for reference
     Expected rows: ~400
 
   - data/step00_raw_scores.csv
@@ -60,20 +65,20 @@ VALIDATION CRITERIA:
   - All 4 output files exist
   - Each file size >= 100 bytes (not empty)
   - Validate columns using validate_data_columns for each file
+  - theta_when column NOT present in theta_scores output
+  - No 'when' factor items in purified_items output
 
 g_code REASONING:
-- Approach: Load prerequisite data from RQ 5.1 (purified items, theta scores,
-  TSVR mapping) and raw item responses from dfData.csv. Verify RQ 5.1 completion
+- Approach: Load prerequisite data from RQ 5.2.1 (purified items, theta scores,
+  TSVR mapping) and raw item responses from dfData.csv. Verify RQ 5.2.1 completion
   by checking status.yaml. Create composite_ID in dfData for cross-file merging.
-  Copy all source files to local data/ folder for self-contained analysis.
+  **Filter out When domain** at this step so downstream steps work with What/Where only.
 
-- Why this approach: RQ 5.12 is a methodological convergence analysis comparing
-  CTT vs IRT. Requires IRT outputs from RQ 5.1 (purified items + theta scores)
-  and raw dichotomized responses for CTT computation. TSVR mapping needed for
-  LMM trajectory analysis (Step 7). Copying to local data/ ensures reproducibility
-  and prevents cross-RQ file dependency issues.
+- Why this approach: RQ 5.2.5 is a methodological convergence analysis comparing
+  CTT vs IRT. When domain excluded due to floor effect (77% item attrition).
+  Filtering at step00 ensures all downstream steps work with clean What/Where data.
 
-- Data flow: RQ 5.1 outputs -> Local data/ copies -> CTT score computation (Steps 2-3)
+- Data flow: RQ 5.2.1 outputs -> Filter When -> Local data/ copies -> CTT (Steps 2-3)
   -> Correlation analysis (Step 5) -> LMM comparison (Step 7)
 
 - Expected performance: <5 seconds (file I/O operations only, no computation)
@@ -83,6 +88,7 @@ IMPLEMENTATION NOTES:
 - Validation tool: tools.validation.check_file_exists + validate_data_columns
 - Parameters: composite_ID format = UID + '_' + TEST (e.g., A010_1)
 - Cross-RQ dependency: Checks results/ch5/5.2.1/status.yaml for step03_theta_scores = success
+- WHEN EXCLUSION: Filter purified_items to factor != 'when', drop theta_when column
 """
 # =============================================================================
 
@@ -220,14 +226,26 @@ if __name__ == "__main__":
         # Load purified items
         log(f"[LOAD] Reading {RQ51_PURIFIED_ITEMS}...")
         df_purified_items = pd.read_csv(RQ51_PURIFIED_ITEMS, encoding='utf-8')
-        log(f"[LOADED] Purified items: {len(df_purified_items)} items, {len(df_purified_items.columns)} columns")
+        log(f"[LOADED] Purified items (raw): {len(df_purified_items)} items, {len(df_purified_items.columns)} columns")
         log(f"[INFO] Columns: {list(df_purified_items.columns)}")
+
+        # FILTER: Exclude When domain items (floor effect in RQ 5.2.1)
+        items_before = len(df_purified_items)
+        df_purified_items = df_purified_items[df_purified_items['factor'] != 'when'].copy()
+        items_after = len(df_purified_items)
+        log(f"[FILTER] Excluded When domain: {items_before} -> {items_after} items ({items_before - items_after} removed)")
 
         # Load theta scores
         log(f"[LOAD] Reading {RQ51_THETA_SCORES}...")
         df_theta = pd.read_csv(RQ51_THETA_SCORES, encoding='utf-8')
-        log(f"[LOADED] Theta scores: {len(df_theta)} rows, {len(df_theta.columns)} columns")
+        log(f"[LOADED] Theta scores (raw): {len(df_theta)} rows, {len(df_theta.columns)} columns")
         log(f"[INFO] Columns: {list(df_theta.columns)}")
+
+        # FILTER: Drop theta_when column (When domain excluded)
+        if 'theta_when' in df_theta.columns:
+            df_theta = df_theta.drop(columns=['theta_when'])
+            log(f"[FILTER] Dropped theta_when column (When domain excluded)")
+        log(f"[INFO] Theta columns after filter: {list(df_theta.columns)}")
 
         # Load TSVR mapping
         log(f"[LOAD] Reading {RQ51_TSVR_MAPPING}...")
@@ -287,8 +305,8 @@ if __name__ == "__main__":
             )
         log(f"[PASS] Purified items columns: {expected_purified}")
 
-        # Validate theta scores columns
-        expected_theta = ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
+        # Validate theta scores columns (theta_when already dropped)
+        expected_theta = ['composite_ID', 'theta_what', 'theta_where']
         result_theta = validate_data_columns(df_theta, expected_theta)
         if not result_theta['valid']:
             raise ValueError(

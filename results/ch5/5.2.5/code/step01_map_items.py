@@ -7,17 +7,21 @@ Step ID: step01
 Step Name: Map Items to Full vs Purified Sets
 RQ: ch5/5.2.5
 Generated: 2025-11-30
+Updated: 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
 
 PURPOSE:
-Identify which TQ_* items in dfData.csv were retained vs excluded by RQ 5.1
+Identify which TQ_* items in dfData.csv were retained vs excluded by RQ 5.2.1
 IRT purification process. Creates mapping table showing retention status for
-all items across three domains (What, Where, When).
+What and Where domains only (When excluded due to floor effect).
+
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). This step excludes When (-O-) items.
 
 EXPECTED INPUTS:
   - data/step00_irt_purified_items.csv
     Columns: ['item_name', 'factor', 'a', 'b']
-    Format: Purified item list from RQ 5.1 Step 2 (~38 items retained after quality filtering)
-    Expected rows: ~38 items
+    Format: Purified item list from RQ 5.2.1 Step 2 (What/Where only)
+    Expected rows: ~64 items (What + Where, When already filtered out in step00)
 
   - data/step00_raw_scores.csv
     Columns: ['composite_ID', 'UID', 'TEST', 'TQ_*']
@@ -27,35 +31,34 @@ EXPECTED INPUTS:
 EXPECTED OUTPUTS:
   - data/step01_item_mapping.csv
     Columns: ['item_name', 'domain', 'retained']
-    Format: Item mapping with retention status (True if retained by RQ 5.1 purification)
-    Expected rows: ~50 items (all TQ_* items from dfData)
+    Format: Item mapping with retention status for What/Where items only
+    Expected rows: ~70-80 items (What + Where items from dfData, When excluded)
 
   - logs/step01_item_counts.txt
-    Format: Text report of item counts (full vs purified per domain)
+    Format: Text report of item counts (full vs purified per domain, What/Where only)
 
 VALIDATION CRITERIA:
-  - Row count in range [48, 52] items (all TQ_* items from dfData)
+  - Row count in range [60, 90] items (What + Where items from dfData)
   - All 3 columns present: item_name, domain, retained
-  - domain values in {what, where, when}
+  - domain values in {what, where} ONLY (no 'when')
   - retained values in {True, False}
-  - Retention rate approximately 75% (36-40 items retained)
+  - Retention rate approximately 70-90%
 
 g_code REASONING:
-- Approach: Extract all TQ_* column names from raw data (full item set), compare
-  against purified item list from RQ 5.1, create boolean mapping showing which
-  items were retained/excluded by IRT quality filtering
-- Why this approach: Simple set operations (set difference) provide exact mapping
-  without requiring IRT recalibration. Enables downstream CTT score computation
-  for both full and purified item sets
-- Data flow: Full item list (from dfData columns) + Purified item list (from RQ 5.1)
+- Approach: Extract What/Where TQ_* column names from raw data, compare against
+  purified item list from RQ 5.2.1 (which already excludes When), create boolean
+  mapping showing retention status
+- Why this approach: When domain excluded at step00 level, so step01 just maps
+  the remaining What/Where items
+- Data flow: Full What/Where items (from dfData) + Purified items (from step00)
   -> Set comparison -> Mapping table with retention status
 - Expected performance: <1 second (pure data manipulation, no statistical computation)
 
 IMPLEMENTATION NOTES:
 - Analysis tool: STDLIB (pandas set operations, NOT catalogued tool)
 - Validation tool: tools.validation.validate_dataframe_structure
-- Parameters: Tag patterns for domain classification (What: TQ_*-N-*, Where: TQ_*-U/D-*, When: TQ_*-O-*)
-- Expected retention: ~75% (RQ 5.1 purification typically retains 38-40 from 50 items)
+- Parameters: Tag patterns for domain classification (What: TQ_*-N-*, Where: TQ_*-U/D/L-*)
+- WHEN EXCLUSION: Items with -O- tag are EXCLUDED from mapping
 """
 # =============================================================================
 
@@ -172,39 +175,49 @@ if __name__ == "__main__":
         log(f"[INFO] Retention rate: {retention_rate:.1f}% ({len(purified_item_list)}/{len(full_item_list)})")
 
         # =========================================================================
-        # STEP 3: Classify Items by Domain
+        # STEP 3: Classify Items by Domain (What/Where only - When EXCLUDED)
         # =========================================================================
         # Tag patterns for domain classification:
         #   What (Nominal): TQ_*-N-*
-        #   Where (Spatial): TQ_*-U-* (Up/Down) + TQ_*-D-* (Left/Right via L/D tag variants)
-        #   When (Temporal): TQ_*-O-* (Ordinal/Temporal events)
-        # Note: RQ 5.1 used -U-/-D-/-L- for Where domain; -D- catches both Down and Left variants
+        #   Where (Spatial): TQ_*-U-* + TQ_*-D-* + TQ_*-L-*
+        #   When (Temporal): TQ_*-O-* -> EXCLUDED due to floor effect
+        # Note: When items are filtered out, not classified
 
         log("[CLASSIFY] Classifying items by domain using tag patterns...")
+        log("[INFO] When domain (-O-) items will be EXCLUDED per RQ 5.2.1 floor effect")
 
         def classify_domain(item_name: str) -> str:
-            """Classify item into domain based on tag pattern."""
+            """Classify item into domain based on tag pattern.
+            Returns None for When items (to be excluded).
+            """
             if '-N-' in item_name:
                 return 'what'
             elif '-U-' in item_name or '-D-' in item_name or '-L-' in item_name:
                 return 'where'
             elif '-O-' in item_name or '-T-' in item_name:
-                return 'when'
+                return None  # EXCLUDED - When domain
             else:
                 # Fallback for unexpected pattern
                 return 'unknown'
 
-        # Create item mapping DataFrame
+        # Create item mapping DataFrame (EXCLUDING When items)
         # Columns: item_name, domain, retained
         item_mapping_data = []
+        when_excluded_count = 0
         for item in full_item_list:
             domain = classify_domain(item)
+            if domain is None:
+                # When item - skip (excluded)
+                when_excluded_count += 1
+                continue
             retained = item in purified_item_list
             item_mapping_data.append({
                 'item_name': item,
                 'domain': domain,
                 'retained': retained
             })
+
+        log(f"[FILTER] Excluded {when_excluded_count} When domain items")
 
         df_mapping = pd.DataFrame(item_mapping_data)
         log(f"[CLASSIFIED] Created mapping for {len(df_mapping)} items")
@@ -217,10 +230,10 @@ if __name__ == "__main__":
         domain_counts['removed'] = domain_counts['total'] - domain_counts['retained']
         domain_counts['retention_rate'] = domain_counts['retained'] / domain_counts['total'] * 100
 
-        log("[COUNTS] Item counts per domain:")
+        log("[COUNTS] Item counts per domain (What/Where only):")
         log(f"  What:  {domain_counts.loc['what', 'retained']:.0f} retained / {domain_counts.loc['what', 'total']:.0f} total ({domain_counts.loc['what', 'retention_rate']:.1f}%)")
         log(f"  Where: {domain_counts.loc['where', 'retained']:.0f} retained / {domain_counts.loc['where', 'total']:.0f} total ({domain_counts.loc['where', 'retention_rate']:.1f}%)")
-        log(f"  When:  {domain_counts.loc['when', 'retained']:.0f} retained / {domain_counts.loc['when', 'total']:.0f} total ({domain_counts.loc['when', 'retention_rate']:.1f}%)")
+        log(f"  When:  EXCLUDED (floor effect in RQ 5.2.1 - {when_excluded_count} items removed)")
 
         # =========================================================================
         # STEP 4: Save Outputs
@@ -239,20 +252,21 @@ if __name__ == "__main__":
         log(f"[SAVED] {output_mapping_path.name} ({len(df_mapping)} rows, {len(df_mapping.columns)} cols)")
 
         # Save item counts report (text file in logs/)
-        # Contains: Domain-wise breakdown of full vs purified counts
+        # Contains: Domain-wise breakdown of full vs purified counts (What/Where only)
         counts_report_path = RQ_DIR / "logs/step01_item_counts.txt"
         with open(counts_report_path, 'w', encoding='utf-8') as f:
             f.write("=" * 70 + "\n")
-            f.write("ITEM MAPPING REPORT - RQ 5.12 Step 1\n")
+            f.write("ITEM MAPPING REPORT - RQ 5.2.5 Step 1\n")
+            f.write("(When domain EXCLUDED due to floor effect in RQ 5.2.1)\n")
             f.write("=" * 70 + "\n\n")
-            f.write(f"Total items in test battery: {len(full_item_list)}\n")
-            f.write(f"Items retained by RQ 5.1 purification: {len(purified_item_list)}\n")
-            f.write(f"Items removed by RQ 5.1 purification: {len(full_item_list) - len(purified_item_list)}\n")
-            f.write(f"Overall retention rate: {retention_rate:.1f}%\n\n")
+            f.write(f"Total items in test battery (raw): {len(full_item_list)}\n")
+            f.write(f"When domain items excluded: {when_excluded_count}\n")
+            f.write(f"Items analyzed (What/Where only): {len(df_mapping)}\n")
+            f.write(f"Items retained by RQ 5.2.1 purification: {len(purified_item_list)}\n\n")
             f.write("-" * 70 + "\n")
-            f.write("DOMAIN-WISE BREAKDOWN\n")
+            f.write("DOMAIN-WISE BREAKDOWN (What/Where only)\n")
             f.write("-" * 70 + "\n\n")
-            for domain in ['what', 'where', 'when']:
+            for domain in ['what', 'where']:
                 if domain in domain_counts.index:
                     total = int(domain_counts.loc[domain, 'total'])
                     retained = int(domain_counts.loc[domain, 'retained'])
@@ -263,22 +277,26 @@ if __name__ == "__main__":
                     f.write(f"  Retained items: {retained}\n")
                     f.write(f"  Removed items:  {removed}\n")
                     f.write(f"  Retention rate: {rate:.1f}%\n\n")
+            f.write("-" * 70 + "\n")
+            f.write("WHEN Domain: EXCLUDED\n")
+            f.write(f"  Reason: Floor effect discovered in RQ 5.2.1\n")
+            f.write(f"  Items excluded: {when_excluded_count}\n")
             f.write("=" * 70 + "\n")
 
         log(f"[SAVED] {counts_report_path.name} (item counts report)")
 
         # =========================================================================
-        # STEP 5: Run Validation
+        # STEP 5: Run Validation (What/Where only - When excluded)
         # =========================================================================
         # Tool: validate_dataframe_structure
-        # Validates: Row count in [48, 52], all required columns present,
-        #            domain values in {what, where, when}, retention rate ~75%
+        # Validates: Row count in [60, 90], all required columns present,
+        #            domain values in {what, where} ONLY, retention rate in typical range
 
         log("[VALIDATION] Running validate_dataframe_structure...")
 
         validation_result = validate_dataframe_structure(
             df=df_mapping,
-            expected_rows=(100, 110),  # Range for total item count (actual: 105 items in dfData.csv)
+            expected_rows=(60, 100),  # Range for What+Where item count
             expected_columns=['item_name', 'domain', 'retained'],
             column_types={
                 'item_name': (object,),
@@ -290,22 +308,31 @@ if __name__ == "__main__":
         # Report validation results
         if validation_result['valid']:
             log("[VALIDATION] [PASS] DataFrame structure valid")
-            log(f"[VALIDATION]   Row count: {len(df_mapping)} (expected range: [48, 52])")
+            log(f"[VALIDATION]   Row count: {len(df_mapping)} (What/Where items only)")
             log(f"[VALIDATION]   Columns: {list(df_mapping.columns)}")
             log(f"[VALIDATION]   Domain values: {df_mapping['domain'].unique().tolist()}")
-            log(f"[VALIDATION]   Retention rate: {retention_rate:.1f}% (expected ~75%)")
 
-            # Additional validation checks
+            # Compute retention rate for included items only
+            included_retention = df_mapping['retained'].sum() / len(df_mapping) * 100
+            log(f"[VALIDATION]   Retention rate (What/Where): {included_retention:.1f}%")
+
+            # Additional validation checks - ensure only what/where (no when)
             domain_values = set(df_mapping['domain'].unique())
-            expected_domains = {'what', 'where', 'when'}
+            expected_domains = {'what', 'where'}
             if domain_values != expected_domains:
                 unexpected = domain_values - expected_domains
                 if unexpected:
-                    log(f"[VALIDATION] [WARNING] Unexpected domain values: {unexpected}")
+                    log(f"[VALIDATION] [FAIL] Unexpected domain values: {unexpected}")
+                    raise ValueError(f"When domain should be excluded but found: {unexpected}")
+                missing = expected_domains - domain_values
+                if missing:
+                    log(f"[VALIDATION] [WARNING] Missing expected domains: {missing}")
 
-            # Check retention rate in reasonable range (60-90%)
-            if retention_rate < 60 or retention_rate > 90:
-                log(f"[VALIDATION] [WARNING] Retention rate {retention_rate:.1f}% outside typical range [60%, 90%]")
+            # Check if 'when' was accidentally included
+            if 'when' in domain_values:
+                raise ValueError("When domain should be EXCLUDED but was found in mapping!")
+
+            log("[VALIDATION] [PASS] When domain correctly excluded")
 
         else:
             log(f"[VALIDATION] [FAIL] {validation_result['message']}")

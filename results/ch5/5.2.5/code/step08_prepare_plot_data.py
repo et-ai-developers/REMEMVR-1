@@ -16,11 +16,14 @@ Create plot source CSVs for methodological comparison visualizations:
 This step transforms analysis results into rq_plots-ready format by reshaping
 correlation data to long format and annotating AIC data with significance markers.
 
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains in plot data.
+
 EXPECTED INPUTS:
   - data/step05_correlation_analysis.csv
     Columns: ['domain', 'r_full_irt', 'r_purified_irt', 'delta_r', 'p_bonferroni']
     Format: Steiger's z-test results comparing Full CTT-IRT vs Purified CTT-IRT correlations
-    Expected rows: ~3 (one per domain: what, where, when)
+    Expected rows: ~2 (what, where - no when)
 
   - data/step07_lmm_model_comparison.csv
     Columns: ['measurement', 'AIC', 'delta_AIC', 'interpretation']
@@ -31,7 +34,7 @@ EXPECTED OUTPUTS:
   - plots/step08_correlation_comparison_data.csv
     Columns: ['domain', 'measurement_type', 'correlation', 'significance']
     Format: Long-format correlation data for grouped bar chart
-    Expected rows: ~6 (3 domains x 2 measurement types)
+    Expected rows: ~4 (2 domains x 2 measurement types)
 
   - plots/step08_aic_comparison_data.csv
     Columns: ['measurement', 'AIC', 'delta_AIC', 'interpretation']
@@ -39,9 +42,9 @@ EXPECTED OUTPUTS:
     Expected rows: ~3 (Full CTT, Purified CTT, IRT theta)
 
 VALIDATION CRITERIA:
-  - Plot 1: All domains present (what, where, when)
+  - Plot 1: All domains present (what, where - no when)
   - Plot 1: All measurements present (Full CTT, Purified CTT)
-  - Plot 1: Exactly 6 rows (3 domains x 2 types)
+  - Plot 1: Exactly 4 rows (2 domains x 2 types)
   - Plot 2: All measurements present (Full CTT, Purified CTT, IRT theta)
   - Plot 2: Exactly 3 rows
   - No NaN values in either plot data
@@ -244,10 +247,10 @@ if __name__ == "__main__":
         log("[VALIDATION] Running validate_plot_data_completeness...")
 
         # Validate Plot 1 data
-        # Expected: All domains (what, where, when) + all measurement types (Full CTT, Purified CTT)
+        # Expected: All domains (what, where - no when) + all measurement types (Full CTT, Purified CTT)
         validation_result1 = validate_plot_data_completeness(
             plot_data=df_plot1,
-            required_domains=['what', 'where', 'when'],
+            required_domains=['what', 'where'],  # When excluded
             required_groups=['Full CTT', 'Purified CTT'],
             domain_col='domain',
             group_col='measurement_type'

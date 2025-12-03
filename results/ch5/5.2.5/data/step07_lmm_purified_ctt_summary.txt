@@ -1,24 +1,21 @@
                        Mixed Linear Model Regression Results
 ===================================================================================
-Model:                     MixedLM          Dependent Variable:          Theta     
-No. Observations:          1200             Method:                      ML        
-No. Groups:                100              Scale:                       0.6638    
-Min. group size:           12               Log-Likelihood:              -1541.2516
-Max. group size:           12               Converged:                   Yes       
-Mean group size:           12.0                                                    
+Model:                      MixedLM          Dependent Variable:          Theta    
+No. Observations:           800              Method:                      ML       
+No. Groups:                 100              Scale:                       0.3995   
+Min. group size:            8                Log-Likelihood:              -896.1314
+Max. group size:            8                Converged:                   Yes      
+Mean group size:            8.0                                                    
 -----------------------------------------------------------------------------------
                                          Coef.  Std.Err.   z    P>|z| [0.025 0.975]
 -----------------------------------------------------------------------------------
-Intercept                                 0.157    0.103  1.520 0.128 -0.045  0.359
-C(Domain)[T.when]                        -0.291    0.130 -2.243 0.025 -0.546 -0.037
-C(Domain)[T.where]                        0.033    0.130  0.254 0.800 -0.222  0.288
-Days                                     -0.048    0.034 -1.421 0.155 -0.114  0.018
-Days:C(Domain)[T.when]                    0.110    0.047  2.340 0.019  0.018  0.202
-Days:C(Domain)[T.where]                  -0.009    0.047 -0.191 0.849 -0.101  0.083
-np.log(Days + 1 / 24)                    -0.151    0.049 -3.091 0.002 -0.247 -0.055
-np.log(Days + 1 / 24):C(Domain)[T.when]  -0.034    0.069 -0.487 0.626 -0.169  0.101
-np.log(Days + 1 / 24):C(Domain)[T.where] -0.048    0.069 -0.694 0.488 -0.183  0.087
-Group Var                                 0.213    0.062                           
-Group x Days Cov                         -0.004    0.009                           
-Days Var                                  0.001    0.002                           
+Intercept                                 0.151    0.092  1.637 0.102 -0.030  0.331
+C(Domain)[T.where]                        0.033    0.101  0.327 0.743 -0.164  0.230
+Days                                     -0.045    0.027 -1.681 0.093 -0.098  0.008
+Days:C(Domain)[T.where]                  -0.009    0.036 -0.246 0.806 -0.080  0.062
+np.log(Days + 1 / 24)                    -0.154    0.038 -4.040 0.000 -0.229 -0.079
+np.log(Days + 1 / 24):C(Domain)[T.where] -0.048    0.053 -0.895 0.371 -0.153  0.057
+Group Var                                 0.327    0.106                           
+Group x Days Cov                          0.009    0.012                           
+Days Var                                  0.005    0.003                           
 ===================================================================================

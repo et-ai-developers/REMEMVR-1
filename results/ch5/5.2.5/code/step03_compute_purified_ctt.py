@@ -7,13 +7,16 @@ Step ID: step03
 Step Name: Compute Purified CTT Scores
 RQ: ch5/5.2.5
 Generated: 2025-11-30
+Updated: 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
 
 PURPOSE:
 Calculate Classical Test Theory (CTT) scores using ONLY IRT-retained items
 (purified item set) per UID x Test x Domain. This step filters to items with
 retained=True from Step 1 mapping, then computes mean dichotomized responses
-per domain (What/Where/When). Compares to full CTT (Step 2) to test whether
-IRT-informed item purification improves CTT-IRT convergence.
+per domain (What/Where only - When excluded).
+
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains processed.
 
 EXPECTED INPUTS:
   - data/step00_raw_scores.csv
@@ -23,14 +26,15 @@ EXPECTED INPUTS:
 
   - data/step01_item_mapping.csv
     Columns: ['item_name', 'domain', 'retained']
-    Format: Item-to-domain mapping with retention status from RQ 5.1 purification
-    Expected rows: ~50 items (all TQ_* items from dfData)
+    Format: Item-to-domain mapping (What/Where only, When excluded)
+    Expected rows: ~79 items (What + Where only)
 
 EXPECTED OUTPUTS:
   - data/step03_ctt_purified_scores.csv
-    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_purified_what', 'CTT_purified_where', 'CTT_purified_when']
+    Columns: ['composite_ID', 'UID', 'TEST', 'CTT_purified_what', 'CTT_purified_where']
     Format: Purified CTT scores (mean of retained items only) per domain
     Expected rows: ~400 (100 participants x 4 tests)
+    NOTE: No CTT_purified_when column (When domain excluded)
 
 VALIDATION CRITERIA:
   - All CTT_purified_* scores in [0, 1] range (proportion correct)
@@ -41,29 +45,23 @@ VALIDATION CRITERIA:
 g_code REASONING:
 - Approach: Filter item_mapping to retained=True, extract retained item names
   per domain, select those columns from raw_scores, compute mean per composite_ID.
-  This creates CTT scores using ONLY the high-quality items identified by
-  RQ 5.1 IRT purification (a > 0.4, |b| < 3.0).
 
 - Why this approach: Tests central hypothesis that IRT purification removes
-  measurement noise (poorly discriminating items) rather than signal. If purified
-  CTT correlates more strongly with IRT theta than full CTT, validates that
-  removed items contributed error not construct variance.
+  measurement noise (poorly discriminating items) rather than signal.
 
-- Data flow: step01_item_mapping (identifies retained items per domain) +
-  step00_raw_scores (dichotomized responses) -> filter to retained items ->
-  compute domain means -> step03_ctt_purified_scores (purified CTT).
+- Data flow: step01_item_mapping (What/Where retained items) +
+  step00_raw_scores -> filter to retained items -> compute domain means
 
 - Expected performance: ~2 seconds (simple pandas filtering + groupby mean)
 
 IMPLEMENTATION NOTES:
-- Analysis tool: STDLIB (pandas filtering and mean computation, NOT catalogued tool)
+- Analysis tool: STDLIB (pandas filtering and mean computation)
 - Validation tool: tools.validation.validate_numeric_range
 - Parameters:
     - scoring_method: Mean of dichotomized responses (0/1) within domain
     - score_range: [0, 1] (proportion correct)
     - item_filter: retained == True (ONLY IRT-retained items)
-- Item counts: Expected ~38 retained items from ~50 total (~75% retention rate)
-  What: ~14 retained, Where: ~12 retained, When: ~12 retained
+- WHEN EXCLUSION: Only What/Where domains processed
 """
 # =============================================================================
 
@@ -156,12 +154,12 @@ if __name__ == "__main__":
         df_mapping = pd.read_csv(RQ_DIR / "data/step01_item_mapping.csv")
         log(f"[LOADED] step01_item_mapping.csv ({len(df_mapping)} rows)")
 
-        # Report retention counts per domain
+        # Report retention counts per domain (What/Where only)
         retention_counts = df_mapping.groupby('domain')['retained'].value_counts().unstack(fill_value=0)
-        log(f"[INFO] Item retention by domain:")
+        log(f"[INFO] Item retention by domain (What/Where only - When excluded):")
         log(f"  What:  {retention_counts.loc['what', True] if 'what' in retention_counts.index else 0} retained, {retention_counts.loc['what', False] if 'what' in retention_counts.index else 0} removed")
         log(f"  Where: {retention_counts.loc['where', True] if 'where' in retention_counts.index else 0} retained, {retention_counts.loc['where', False] if 'where' in retention_counts.index else 0} removed")
-        log(f"  When:  {retention_counts.loc['when', True] if 'when' in retention_counts.index else 0} retained, {retention_counts.loc['when', False] if 'when' in retention_counts.index else 0} removed")
+        log(f"  When:  EXCLUDED (floor effect in RQ 5.2.1)")
 
         total_retained = df_mapping['retained'].sum()
         total_items = len(df_mapping)
@@ -175,12 +173,13 @@ if __name__ == "__main__":
         # This creates CTT scores using high-quality items only (IRT-informed selection)
 
         log("[ANALYSIS] Computing purified CTT scores per domain...")
+        log("[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect")
 
         # Initialize output DataFrame with composite_ID, UID, TEST
         df_output = df_raw[['composite_ID', 'UID', 'TEST']].copy()
 
-        # Process each domain
-        for domain in ['what', 'where', 'when']:
+        # Process each domain (What/Where only - When excluded)
+        for domain in ['what', 'where']:
             # Get retained items for this domain
             retained_items = df_mapping[
                 (df_mapping['domain'] == domain) &
@@ -234,7 +233,7 @@ if __name__ == "__main__":
 
         validation_passed = True
 
-        for domain in ['what', 'where', 'when']:
+        for domain in ['what', 'where']:
             col_name = f'CTT_purified_{domain}'
 
             result = validate_numeric_range(

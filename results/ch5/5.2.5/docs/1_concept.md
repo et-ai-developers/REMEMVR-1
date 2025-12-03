@@ -72,17 +72,21 @@ Item purification identifies and removes items with extreme difficulty (|b| > 3)
   - [x] `-L-` tags (general location, legacy)
   - [x] `-U-` tags (pick-up location)
   - [x] `-D-` tags (put-down location)
-  - Disambiguation: **ALL Where tags included** (full coverage from RQ 5.1)
+  - Disambiguation: **ALL Where tags included** (full coverage from RQ 5.2.1)
 
-- [x] **When** (Temporal Order)
+- [ ] **When** (Temporal Order) - **EXCLUDED**
   - Tag Code: `-O-`
   - Description: Temporal order / sequence
 
 **Inclusion Rationale:**
-This RQ examines all three episodic memory domains (What/Where/When) to test whether IRT item purification improves CTT-IRT convergence across all domains. Complete domain coverage ensures findings generalize to full episodic memory construct, not just specific components.
+This RQ examines What and Where domains to test whether IRT item purification improves CTT-IRT convergence. These two domains have adequate psychometric properties for trajectory analysis.
 
 **Exclusion Rationale:**
-None - all domains included to maintain comparability with RQ 5.1 (source of IRT purification criteria and theta scores).
+**When domain excluded due to floor effect discovered in RQ 5.2.1:**
+- 77% item attrition after IRT purification (only 4 of 18 items retained)
+- 6-9% floor effect (participants at chance level)
+- Insufficient item count for reliable CTT computation
+- All Type 5.2.x RQs exclude When to maintain consistency
 
 ---
 
@@ -99,14 +103,14 @@ Methodological comparison - CTT vs IRT convergence testing using correlation ana
 - Load raw scores from data/cache/dfData.csv for CTT computation
 
 **Step 1:** Identify IRT-Retained Items
-- Load IRT item parameters (difficulty b and discrimination a from RQ 5.1 purification)
-- For each domain (What/Where/When): identify items with acceptable discrimination (0.5 ≤ a ≤ 4.0)
-- Create list of retained items (union across all factors)
+- Load IRT item parameters (difficulty b and discrimination a from RQ 5.2.1 purification)
+- For each domain (What/Where only - When excluded): identify items with acceptable discrimination (0.5 ≤ a ≤ 4.0)
+- Create list of retained items (union across What and Where factors)
 - Document counts: retained vs removed items per domain
 
 **Step 2:** Compute Full CTT Scores
 - Extract all TQ_ items from raw data (dfData.csv)
-- Group items by domain (What: -N-, Where: -U-/-D-, When: -O-)
+- Group items by domain (What: -N-, Where: -U-/-D-) - **When (-O-) excluded**
 - Calculate mean scores per UID × Test × Domain using ALL items (full CTT)
 
 **Step 3:** Compute Purified CTT Scores
@@ -115,13 +119,13 @@ Methodological comparison - CTT vs IRT convergence testing using correlation ana
 - Compare item counts: Full vs Purified per domain
 
 **Step 3b:** CTT Reliability Assessment
-- Compute Cronbach's alpha for full and purified CTT item sets per domain (What/Where/When)
+- Compute Cronbach's alpha for full and purified CTT item sets per domain (What/Where only)
 - Use `tools.analysis_ctt.compute_cronbachs_alpha()` with bootstrap 95% confidence intervals
 - Report alpha with CIs for both item sets per domain
 - **Interpretation:**
   - If alpha increases or remains stable (within 95% CI) after purification → validates that IRT item selection improved/maintained CTT reliability
   - If alpha decreases → suggests removed items contained meaningful variance from CTT perspective, requiring discussion of CTT-IRT framework differences
-- Compare: alpha_full_What vs alpha_purified_What (repeat for Where, When)
+- Compare: alpha_full_What vs alpha_purified_What (repeat for Where)
 
 **Step 4:** Correlation Analysis
 - Correlate Purified CTT with IRT theta (expect r > Full CTT-IRT correlation)
@@ -198,11 +202,11 @@ RQ 5.1 must complete Steps 0-4 (IRT calibration, purification, theta extraction)
 - Note: Same N as RQ 5.1 ensures direct comparability
 
 **Items:**
-- [x] Full CTT: All TQ_ items (What: -N-, Where: -U-/-D-, When: -O-)
-- [x] Purified CTT: Only items retained by RQ 5.1 purification (0.5 ≤ a ≤ 4.0)
-- Expected counts (from thesis Expected Output):
-  - Full CTT: 18 What, 16 Where, 16 When (50 total)
-  - Purified CTT: ~14 What, ~12 Where, ~12 When (~38 total, 12 removed)
+- [x] Full CTT: All TQ_ items (What: -N-, Where: -U-/-D-) - **When (-O-) excluded**
+- [x] Purified CTT: Only items retained by RQ 5.2.1 purification (0.5 ≤ a ≤ 4.0)
+- Expected counts (What/Where only):
+  - Full CTT: ~18 What, ~18 Where (~36 total)
+  - Purified CTT: ~14 What, ~14 Where (~28 total, ~8 removed)
 
 **Tests:**
 - [x] All 4 tests (T1, T2, T3, T4)

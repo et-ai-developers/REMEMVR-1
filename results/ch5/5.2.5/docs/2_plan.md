@@ -2,7 +2,10 @@
 
 **Created by:** rq_planner agent
 **Date:** 2025-11-30
-**Status:** Ready for rq_tools (Step 11 workflow)
+**Updated:** 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
+**Status:** Ready for execution
+
+**CRITICAL NOTE:** When domain EXCLUDED from this analysis due to floor effect discovered in RQ 5.2.1 (77% item attrition, 6-9% floor). All steps below use What/Where domains only.
 
 ---
 

@@ -61,3 +61,53 @@
 [WARNING] Domain when full set alpha = 0.575 < 0.70 (below acceptable)
 [WARNING] Domain when purified set alpha = 0.616 < 0.70 (below acceptable)
 [SUCCESS] Step 04 complete - Reliability assessment validated
+[START] Step 04: Assess Reliability
+[LOAD] Loading input data...
+[LOADED] step00_raw_scores.csv (400 rows, 215 cols)
+[LOADED] step01_item_mapping.csv (79 items)
+[INFO] Found 105 TQ_* item columns in raw data
+[ANALYSIS] Computing Cronbach's alpha for full vs purified item sets...
+[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect
+[ANALYSIS] Processing domain: what
+  [FULL SET] 29 items for domain what
+  [FULL SET] Running bootstrap (n=1000)...
+  [FULL SET] alpha = 0.712 [0.657, 0.748]
+  [PURIFIED SET] 19 items for domain what
+  [PURIFIED SET] Running bootstrap (n=1000)...
+  [PURIFIED SET] alpha = 0.702 [0.649, 0.744]
+  [DELTA] delta_alpha = -0.010 (reduction)
+[ANALYSIS] Processing domain: where
+  [FULL SET] 50 items for domain where
+  [FULL SET] Running bootstrap (n=1000)...
+  [FULL SET] alpha = 0.821 [0.797, 0.841]
+  [PURIFIED SET] 45 items for domain where
+  [PURIFIED SET] Running bootstrap (n=1000)...
+  [PURIFIED SET] alpha = 0.829 [0.804, 0.848]
+  [DELTA] delta_alpha = +0.007 (improvement)
+[DONE] Cronbach's alpha computation complete for all domains
+[SAVE] Saving reliability assessment results...
+[SAVED] step04_reliability_assessment.csv (2 rows, 10 cols)
+[SUMMARY] Reliability Assessment Results:
+  Domain: what
+    Full Set:     alpha = 0.712 [0.657, 0.748] (29 items)
+    Purified Set: alpha = 0.702 [0.649, 0.744] (19 items)
+    Delta:        -0.010
+  Domain: where
+    Full Set:     alpha = 0.821 [0.797, 0.841] (50 items)
+    Purified Set: alpha = 0.829 [0.804, 0.848] (45 items)
+    Delta:        +0.007
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] alpha_full: PASS (all values in [0, 1])
+[VALIDATION] CI_lower_full: PASS (all values in [0, 1])
+[VALIDATION] CI_upper_full: PASS (all values in [0, 1])
+[VALIDATION] alpha_purified: PASS (all values in [0, 1])
+[VALIDATION] CI_lower_purified: PASS (all values in [0, 1])
+[VALIDATION] CI_upper_purified: PASS (all values in [0, 1])
+[VALIDATION] Checking CI bounds...
+[VALIDATION] CI bounds check: PASS (alpha within CIs for all domains)
+[VALIDATION] Checking typical alpha range...
+[VALIDATION] Domain what full set alpha = 0.712 in typical range [0.70, 0.95]
+[VALIDATION] Domain what purified set alpha = 0.702 in typical range [0.70, 0.95]
+[VALIDATION] Domain where full set alpha = 0.821 in typical range [0.70, 0.95]
+[VALIDATION] Domain where purified set alpha = 0.829 in typical range [0.70, 0.95]
+[SUCCESS] Step 04 complete - Reliability assessment validated

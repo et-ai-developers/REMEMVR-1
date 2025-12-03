@@ -1,14 +1,15 @@
 ======================================================================
-ITEM MAPPING REPORT - RQ 5.12 Step 1
+ITEM MAPPING REPORT - RQ 5.2.5 Step 1
+(When domain EXCLUDED due to floor effect in RQ 5.2.1)
 ======================================================================
 
-Total items in test battery: 105
-Items retained by RQ 5.1 purification: 69
-Items removed by RQ 5.1 purification: 36
-Overall retention rate: 65.7%
+Total items in test battery (raw): 105
+When domain items excluded: 26
+Items analyzed (What/Where only): 79
+Items retained by RQ 5.2.1 purification: 64
 
 ----------------------------------------------------------------------
-DOMAIN-WISE BREAKDOWN
+DOMAIN-WISE BREAKDOWN (What/Where only)
 ----------------------------------------------------------------------
 
 WHAT Domain:
@@ -23,10 +24,8 @@ WHERE Domain:
   Removed items:  5
   Retention rate: 90.0%
 
-WHEN Domain:
-  Total items:    26
-  Retained items: 5
-  Removed items:  21
-  Retention rate: 19.2%
-
+----------------------------------------------------------------------
+WHEN Domain: EXCLUDED
+  Reason: Floor effect discovered in RQ 5.2.1
+  Items excluded: 26
 ======================================================================

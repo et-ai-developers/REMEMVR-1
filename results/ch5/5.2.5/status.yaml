@@ -13,13 +13,13 @@ rq_builder:
     '
 rq_concept:
   status: success
-  context_dump: 'RQ 5.12: CTT-IRT convergence via item purification
+  context_dump: 'RQ 5.12: CTT-IRT convergence via item purification - UPDATED 2025-12-03
 
-    Domains: What/Where/When (all three, full coverage)
+    Domains: What/Where ONLY (When EXCLUDED per RQ 5.2.1 floor effect)
 
     Analysis: Methodological comparison (Full CTT vs Purified CTT vs IRT)
 
-    Data: DERIVED from RQ 5.1 (IRT params, theta, TSVR) + raw dfData.csv for CTT
+    Data: DERIVED from RQ 5.2.1 (IRT params, theta, TSVR) + raw dfData.csv for CTT
 
     Critical: Parallel LMM on 3 measurement approaches tests purification validity
 
@@ -63,13 +63,17 @@ rq_analysis:
   context_dump: '9 steps specified with validation (CTT-IRT convergence: data loading -> item mapping -> CTT computation (full + purified) -> reliability -> correlation -> standardization -> parallel LMM -> plot prep)'
 rq_inspect:
   status: success
-  context_dump: 'Validated all 9 analysis steps (step00-step08)
+  context_dump: 'Validated all 9 analysis steps (step00-step08) - REVALIDATED 2025-12-03 after When exclusion
 
     All 4 validation layers PASS: existence, structure, substance, execution logs
 
-    Key outputs: 69 purified items (66% retention), CTT scores (full+purified), correlations (when domain: r 0.45->0.84), LMM comparison (3 models converged)
+    CRITICAL UPDATE: When domain EXCLUDED per RQ 5.2.1 floor effect (77% attrition, 6-9% floor)
 
-    Critical finding: When domain shows largest purification impact (19% item retention, +0.39 correlation improvement)
+    Key outputs: 64 purified items (What/Where only), 800 long-format rows (400 × 2 domains)
+
+    Correlations: What r=0.879→0.906, Where r=0.940→0.955 (both significant improvement)
+
+    LMM: IRT theta best fit (AIC=1655), Full CTT delta=+125, Purified CTT delta=+157
 
     '
 rq_plots:
@@ -78,12 +82,16 @@ rq_plots:
     '
 rq_results:
   status: success
-  timestamp: '2025-11-30T13:45:00'
-  context_dump: 'Results validated for scientific plausibility
+  timestamp: '2025-12-03T20:00:00'
+  context_dump: 'Results REVALIDATED 2025-12-03 after When domain exclusion
 
-    3 anomalies flagged: When domain catastrophic item loss (81% exclusion), paradoxical LMM fit (Full CTT best), hypothesis partially supported (What/Where only)
+    When domain EXCLUDED per RQ 5.2.1 floor effect (77% attrition, 6-9% floor)
 
-    Summary documented in results/summary.md
+    Key findings: Both What/Where show significant purification improvement (p<0.001)
+
+    IRT theta clearly best LMM fit (AIC=1655 vs CTT 1780-1812)
+
+    Purification validates convergence for What/Where domains
 
     '
 

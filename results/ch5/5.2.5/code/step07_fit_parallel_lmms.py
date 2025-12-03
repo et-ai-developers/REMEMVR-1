@@ -20,11 +20,14 @@ The parallel LMM design isolates the effect of measurement method by holding
 constant: (1) formula structure, (2) random effects structure, (3) data scale
 (z-scores), (4) sample (same participants). Only measurement approach varies.
 
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains analyzed.
+
 EXPECTED INPUTS:
   - data/step06_standardized_outcomes.csv
     Columns: ['composite_ID', 'UID', 'TSVR_hours', 'domain', 'z_full_ctt', 'z_purified_ctt', 'z_irt_theta']
     Format: Standardized outcomes in long format (z-scores, mean=0 SD=1)
-    Expected rows: ~1200 (400 composite_IDs x 3 domains)
+    Expected rows: ~800 (400 composite_IDs x 2 domains - What/Where only)
 
 EXPECTED OUTPUTS:
   - data/step07_lmm_model_comparison.csv

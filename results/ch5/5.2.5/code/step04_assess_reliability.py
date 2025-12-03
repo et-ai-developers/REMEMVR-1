@@ -7,9 +7,13 @@ Step ID: 04
 Step Name: Assess Reliability
 RQ: ch5/5.2.5
 Generated: 2025-11-30
+Updated: 2025-12-03 (When domain excluded per RQ 5.2.1 floor effect)
 
 PURPOSE:
 Compute Cronbach's alpha internal consistency for both full and purified CTT item sets per domain with bootstrap 95% confidence intervals. Tests whether IRT purification maintains CTT reliability.
+
+**CRITICAL: When domain EXCLUDED** - Due to floor effect discovered in RQ 5.2.1
+(77% item attrition, 6-9% floor). Only What and Where domains processed.
 
 EXPECTED INPUTS:
   - data/step00_raw_scores.csv
@@ -19,14 +23,14 @@ EXPECTED INPUTS:
 
   - data/step01_item_mapping.csv
     Columns: item_name, domain, retained
-    Format: Item-to-domain mapping with retention status
-    Expected rows: ~50 items (all TQ_* items from dfData)
+    Format: Item-to-domain mapping (What/Where only, When excluded)
+    Expected rows: ~79 items (What + Where only)
 
 EXPECTED OUTPUTS:
   - data/step04_reliability_assessment.csv
     Columns: domain, alpha_full, CI_lower_full, CI_upper_full, alpha_purified, CI_lower_purified, CI_upper_purified, delta_alpha
     Format: Cronbach's alpha for full vs purified CTT with bootstrap 95% CIs
-    Expected rows: 3 (one per domain: what, where, when)
+    Expected rows: 2 (what, where - no when)
 
 VALIDATION CRITERIA:
   - All alpha values in [0, 1] range
@@ -149,9 +153,10 @@ if __name__ == "__main__":
         # Expected output: dict with keys: alpha, ci_lower, ci_upper, n_items, n_participants
 
         log("[ANALYSIS] Computing Cronbach's alpha for full vs purified item sets...")
+        log("[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect")
 
-        # Define domains
-        domains = ['what', 'where', 'when']
+        # Define domains (What/Where only - When excluded)
+        domains = ['what', 'where']
 
         # Initialize results list
         results_list = []

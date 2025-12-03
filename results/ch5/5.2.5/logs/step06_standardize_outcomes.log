@@ -25,3 +25,28 @@
 [VALIDATION] Mean values: {'z_full_ctt': np.float64(4.263256414560601e-16), 'z_purified_ctt': np.float64(-2.1908401019269756e-16), 'z_irt_theta': np.float64(-5.921189464667502e-18)}
 [VALIDATION] SD values: {'z_full_ctt': np.float64(0.9991656235510066), 'z_purified_ctt': np.float64(0.9991656235510066), 'z_irt_theta': np.float64(0.9991656235510066)}
 [SUCCESS] Step 6 complete
+[START] Step 6: Standardize Outcomes for Parallel LMM
+[LOAD] Loading input data...
+[LOADED] step00_theta_scores.csv (400 rows, 3 cols)
+[LOADED] step02_ctt_full_scores.csv (400 rows, 5 cols)
+[LOADED] step03_ctt_purified_scores.csv (400 rows, 5 cols)
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[MERGE] Merging all measurement approaches on composite_ID...
+[MERGED] All data merged (400 rows, 10 cols)
+[RESHAPE] Converting to long format (2 rows per composite_ID, 1 per domain)...
+[INFO] When domain EXCLUDED per RQ 5.2.1 floor effect
+[RESHAPED] Long format created (800 rows = 400 composite_IDs x 2 domains)
+[STANDARDIZE] Computing z-scores per measurement type x domain...
+[STANDARDIZED] what - IRT theta: mean=-0.0072, SD=0.8986
+[STANDARDIZED] what - Full CTT: mean=0.7716, SD=0.1271
+[STANDARDIZED] what - Purified CTT: mean=0.7159, SD=0.1648
+[STANDARDIZED] where - IRT theta: mean=0.0368, SD=0.9319
+[STANDARDIZED] where - Full CTT: mean=0.5980, SD=0.1280
+[STANDARDIZED] where - Purified CTT: mean=0.6145, SD=0.1360
+[SAVE] Saving standardized outcomes...
+[SAVED] step06_standardized_outcomes.csv (800 rows, 7 cols)
+[VALIDATION] Running validate_standardization...
+[VALIDATION] PASS - All z-scores meet standardization criteria (mean ≈ 0, SD ≈ 1)
+[VALIDATION] Mean values: {'z_full_ctt': np.float64(5.329070518200751e-16), 'z_purified_ctt': np.float64(-3.8191672047105384e-16), 'z_irt_theta': np.float64(-1.7763568394002505e-17)}
+[VALIDATION] SD values: {'z_full_ctt': np.float64(0.9993740218478918), 'z_purified_ctt': np.float64(0.9993740218478919), 'z_irt_theta': np.float64(0.9993740218478918)}
+[SUCCESS] Step 6 complete
