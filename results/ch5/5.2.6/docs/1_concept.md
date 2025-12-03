@@ -7,13 +7,29 @@
 
 ---
 
+## ⚠️ WHEN DOMAIN EXCLUSION
+
+**Critical:** When domain is EXCLUDED from this analysis due to floor effect discovered in RQ 5.2.1.
+
+**Exclusion Rationale:**
+- 77% item attrition (26→6 items) after IRT purification
+- 6-9% floor effect (participants scoring at chance)
+- Only What (29 items) and Where (50 items) domains provide reliable theta estimates
+
+**Impact on Analysis:**
+- Original: 3 domains × 100 participants × 4 tests = 1200 rows
+- Revised: 2 domains × 100 participants × 4 tests = 800 rows
+- Random effects: 200 rows (100 UID × 2 domains) instead of 300
+
+---
+
 ## Research Question
 
 **Primary Question:**
-What proportion of variance in forgetting rate is between-person versus within-person for each memory domain (What, Where, When)?
+What proportion of variance in forgetting rate is between-person versus within-person for each memory domain (What, Where)?
 
 **Scope:**
-This RQ examines variance decomposition in forgetting trajectories across three episodic memory domains. Sample: N=100 participants x 4 test sessions x 3 domains = 1200 observations. Analysis uses IRT-derived theta scores from domain-specific calibrations (RQ 5.2.1). Focus on random slope variance (forgetting rate) as indicator of trait-like individual differences versus measurement error.
+This RQ examines variance decomposition in forgetting trajectories across two episodic memory domains. Sample: N=100 participants x 4 test sessions x 2 domains = 800 observations. Analysis uses IRT-derived theta scores from domain-specific calibrations (RQ 5.2.1). Focus on random slope variance (forgetting rate) as indicator of trait-like individual differences versus measurement error.
 
 **Theoretical Framing:**
 Variance decomposition addresses whether forgetting rate is a stable individual difference (between-person variance) or primarily measurement noise (within-person variance). High between-person variance (ICC > 0.40) suggests forgetting rate is a trait-like characteristic. Domain differences in ICC magnitude may reflect differential stability of domain-specific memory systems (dual-process theory: familiarity-based What memory vs recollection-based Where/When memory).
@@ -72,16 +88,16 @@ If forgetting rate were purely measurement error, ICC would approach 0. High ICC
   - Disambiguation: All Where tags included (50 items from RQ 5.2.1)
   - Theoretical Basis: Recollection-based, hippocampal-dependent
 
-- [x] **When** (Temporal Order)
+- [ ] **When** (Temporal Order) - EXCLUDED
   - Tag Code: `-O-`
-  - Description: Temporal order / sequence (26 items from RQ 5.2.1)
-  - Theoretical Basis: Recollection-based, hippocampal-dependent
+  - Description: Temporal order / sequence
+  - **EXCLUSION REASON:** Floor effect discovered in RQ 5.2.1 (77% item attrition, 6-9% floor)
 
 **Inclusion Rationale:**
-All three WWW domains included to test domain-specific variance patterns. Variance decomposition requires domain-stratified models (separate LMM per domain) to isolate domain-specific between-person and within-person variance components.
+What and Where domains included to test domain-specific variance patterns. Variance decomposition requires domain-stratified models (separate LMM per domain) to isolate domain-specific between-person and within-person variance components.
 
 **Exclusion Rationale:**
-None - this RQ examines all three episodic memory domains.
+When domain excluded due to floor effect (RQ 5.2.1): 77% item attrition after IRT purification (26→6 items), 6-9% participants at floor. Theta estimates unreliable with only 6 items.
 
 ---
 

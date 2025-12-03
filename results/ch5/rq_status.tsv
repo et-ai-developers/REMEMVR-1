@@ -10,7 +10,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.2.3	Domains	Age Effects	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
 5.2.4	Domains	IRT-CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
 5.2.5	Domains	Purified CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-5.2.6	Domains	Variance Decomp	USE WHAT/WHERE ONLY. 4 clustering vars not 6.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
+5.2.6	Domains	Variance Decomp	COMPLETE 2025-12-03. What/Where only. ICC_int=0.51/0.57, ICC_slope_simple=0.008/0.011 (low - design limitation). Where Fan Effect r=-0.316 p<0.003.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
 5.2.7	Domains	Clustering	USE WHAT/WHERE ONLY. 4 clustering vars not 6. K-means stdlib only.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.2.8	Domains	Item Difficulty	BLOCKED: Missing GLMM tools (fit_glmm_binomial, extract_glmm_*, etc.)	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
 5.3.1	Paradigms	Trajectories	Recognition faster forgetting (contradicts hypothesis). Investigate item quality.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/4M)

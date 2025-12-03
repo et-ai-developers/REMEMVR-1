@@ -6,9 +6,20 @@
 
 ---
 
+## ⚠️ WHEN DOMAIN EXCLUSION
+
+**Critical:** When domain is EXCLUDED from this analysis due to floor effect discovered in RQ 5.2.1.
+
+**Impact:**
+- Original: 3 domains × 100 participants × 4 tests = 1200 rows → 2 domains = 800 rows
+- Random effects: 200 rows (100 UID × 2 domains) instead of 300
+- Bonferroni correction: k=2 instead of k=3
+
+---
+
 ## Overview
 
-This RQ examines variance decomposition in forgetting trajectories across three episodic memory domains (What, Where, When). The analysis uses DERIVED data from RQ 5.2.1 (theta scores already calibrated, purified, and merged with TSVR). The focus is on quantifying between-person versus within-person variance in forgetting rate (random slopes) to determine whether forgetting is a stable individual difference (trait-like) or primarily measurement noise.
+This RQ examines variance decomposition in forgetting trajectories across two episodic memory domains (What, Where). The analysis uses DERIVED data from RQ 5.2.1 (theta scores already calibrated, purified, and merged with TSVR). The focus is on quantifying between-person versus within-person variance in forgetting rate (random slopes) to determine whether forgetting is a stable individual difference (trait-like) or primarily measurement noise.
 
 The analysis fits three domain-stratified Linear Mixed Models (separate LMM per domain) with random intercepts and slopes, extracts variance components and computes Intraclass Correlation Coefficients (ICC) for interpretation. Random effects from all three domains are exported for downstream clustering analysis (RQ 5.2.7 dependency). Intercept-slope correlations are tested using dual p-value reporting per Decision D068.
 

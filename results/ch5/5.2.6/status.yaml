@@ -52,22 +52,38 @@ rq_analysis:
     Decisions embedded: D068 (dual p-values), D070 (TSVR time variable)
 
 analysis_steps:
-  step01_fit_domain_lmms: pending
-  step02_extract_variance_components: pending
-  step03_compute_icc_estimates: pending
-  step04_extract_random_effects: pending
-  step05_test_intercept_slope_correlations: pending
-  step06_compare_domain_icc: pending
-  step07_prepare_domain_icc_barplot_data: pending
+  step00_load_and_filter_data: success
+  step01_fit_domain_lmms: success
+  step02_extract_variance_components: success
+  step03_compute_icc_estimates: success
+  step04_extract_random_effects: success
+  step05_test_intercept_slope_correlations: success
+  step06_compare_domain_icc: success
+  step07_prepare_domain_icc_barplot_data: success
 
 rq_inspect:
-  status: pending
+  status: success
   context_dump: |
+    Validated all 8 steps (step00-step07) for RQ 5.2.6
+    When domain excluded (floor effect): 2 domains analyzed (What, Where)
+    200 random effects extracted (100 UID x 2 domains) for RQ 5.2.7
+    All variance components positive, all ICC in [0,1], D068 dual p-values present
+    All embedded validations passed, no errors in logs
 
 rq_plots:
-  status: pending
+  status: success
   context_dump: |
+    Plots generated: 1 (domain_icc_barplot)
+    Data source: step07_domain_icc_barplot_data.csv
+    Domains: What, Where (When excluded due to floor effect)
+    Plotting: Custom barplot with threshold line, color-coded by interpretation
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: "2025-12-03T20:00:00Z"
   context_dump: |
+    Results validated for scientific plausibility
+    0 anomalies flagged (plausibility acceptable)
+    Summary documented in results/summary.md
+    Key finding: Both domains ICC_slope_conditional > 0.50 (Substantial)
+    Fan Effect confirmed in Where (r=-0.316, p_bonf=0.003), absent in What

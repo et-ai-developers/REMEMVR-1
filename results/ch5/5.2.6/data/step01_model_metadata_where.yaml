@@ -1,0 +1,13 @@
+aic: 879.2600828611348
+bic: 903.2088701437827
+converged: true
+domain: Where
+formula: theta ~ log_TSVR
+log_likelihood: -433.6300414305674
+n_groups: 100
+n_obs: 400
+optimizer: lbfgs
+random_structure: Full
+re_formula: ~log_TSVR
+reml: false
+time_variable: log_TSVR
