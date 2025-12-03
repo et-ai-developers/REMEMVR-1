@@ -1,0 +1,26 @@
+RQ 5.2.7 Step 02: Optimal K Selection
+==================================================
+
+Optimal K = 5
+
+Justification: Clear BIC minimum
+  K=5 has minimum BIC = 90.09
+  Next best K has ΔBIC = 3.38
+
+BIC Comparison Table:
+---------------------------------------------
+   K      Inertia          BIC       ΔBIC
+---------------------------------------------
+ 1.0       396.00       156.05      65.95
+ 2.0       255.44       130.62      40.53
+ 3.0       152.33        97.35       7.25
+ 4.0       121.88        93.47       3.38
+ 5.0        98.01        90.09       0.00 <-- optimal
+ 6.0        84.58        93.78       3.69
+---------------------------------------------
+
+Model Selection Parameters:
+  - n_samples: 100
+  - n_features: 4
+  - n_init: 50
+  - random_state: 42

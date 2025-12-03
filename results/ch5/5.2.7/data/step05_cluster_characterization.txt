@@ -1,0 +1,115 @@
+RQ 5.2.7 Cluster Characterization Report
+=======================================================
+
+Note: Cluster quality assessment = POOR (silhouette = 0.34)
+Interpret clusters cautiously - boundaries are fuzzy.
+Bootstrap stability is high (Jaccard = 0.88), indicating
+consistent participant groupings despite overlap.
+
+-------------------------------------------------------
+Cluster 0: Average Baseline, Slow Decline
+N = 22 (22.0%)
+-------------------------------------------------------
+
+Mean values (raw theta scale):
+  Intercept_What:  -0.1946
+  Intercept_Where:  -0.2143
+  Slope_What:  -0.0106
+  Slope_Where:  -0.0116
+
+Interpretation:
+  Baseline (What):  Average
+  Baseline (Where): Average
+  Trajectory (What):  Slow Decline
+  Trajectory (Where): Slow Decline
+
+This cluster shows average baseline memory across both domains. with slow decline patterns over time.
+
+-------------------------------------------------------
+Cluster 1: Average Baseline, Improving
+N = 26 (26.0%)
+-------------------------------------------------------
+
+Mean values (raw theta scale):
+  Intercept_What:   0.1544
+  Intercept_Where:   0.1396
+  Slope_What:   0.0174
+  Slope_Where:   0.0188
+
+Interpretation:
+  Baseline (What):  Average
+  Baseline (Where): Average
+  Trajectory (What):  Improving
+  Trajectory (Where): Improving
+
+This cluster shows average baseline memory across both domains. with improving patterns over time.
+
+-------------------------------------------------------
+Cluster 2: Low Baseline, Stable What / Improving Where
+N = 17 (17.0%)
+-------------------------------------------------------
+
+Mean values (raw theta scale):
+  Intercept_What:  -0.8018
+  Intercept_Where:  -0.9251
+  Slope_What:  -0.0021
+  Slope_Where:   0.0173
+
+Interpretation:
+  Baseline (What):  Low
+  Baseline (Where): Low
+  Trajectory (What):  Stable
+  Trajectory (Where): Improving
+
+This cluster shows low baseline memory across both domains. with stable What and improving Where trajectories.
+
+-------------------------------------------------------
+Cluster 3: High Baseline, Stable
+N = 21 (21.0%)
+-------------------------------------------------------
+
+Mean values (raw theta scale):
+  Intercept_What:   0.4926
+  Intercept_Where:   0.5547
+  Slope_What:   0.0049
+  Slope_Where:  -0.0036
+
+Interpretation:
+  Baseline (What):  High
+  Baseline (Where): High
+  Trajectory (What):  Stable
+  Trajectory (Where): Stable
+
+This cluster shows high baseline memory across both domains. with stable patterns over time.
+
+-------------------------------------------------------
+Cluster 4: Average What / High Where, Fast Decline
+N = 14 (14.0%)
+-------------------------------------------------------
+
+Mean values (raw theta scale):
+  Intercept_What:   0.2539
+  Intercept_Where:   0.3688
+  Slope_What:  -0.0206
+  Slope_Where:  -0.0323
+
+Interpretation:
+  Baseline (What):  Average
+  Baseline (Where): High
+  Trajectory (What):  Fast Decline
+  Trajectory (Where): Fast Decline
+
+This cluster shows average What memory and high Where memory. with fast decline patterns over time.
+
+
+=======================================================
+Summary Table
+=======================================================
+
+ Cluster      N      % Label                              
+------------------------------------------------------------
+       0     22  22.0% Average Baseline, Slow Decline     
+       1     26  26.0% Average Baseline, Improving        
+       2     17  17.0% Low Baseline, Stable What / Improving Where
+       3     21  21.0% High Baseline, Stable              
+       4     14  14.0% Average What / High Where, Fast Decline

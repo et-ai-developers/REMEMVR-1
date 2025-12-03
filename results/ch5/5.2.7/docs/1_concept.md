@@ -7,13 +7,29 @@
 
 ---
 
+## ⚠️ WHEN DOMAIN EXCLUSION
+
+**Exclusion Applied:** When domain (-O- tags) excluded from this analysis.
+
+**Rationale:** RQ 5.2.1 discovered severe floor effect in When domain:
+- 77% item attrition during IRT purification (23 → 5 items)
+- 6-9% floor effect at baseline (participants at chance)
+- Insufficient measurement precision for reliable trajectory estimation
+
+**Impact on This RQ:**
+- Clustering uses 4 variables (not 6): What intercept/slope, Where intercept/slope
+- Source data: RQ 5.2.6 step04_random_effects.csv (200 rows: 100 UID × 2 domains)
+- Expected row counts adjusted throughout
+
+---
+
 ## Research Question
 
 **Primary Question:**
-Can participants be grouped into latent classes based on domain-specific forgetting trajectories (What/Where/When intercepts and slopes)?
+Can participants be grouped into latent classes based on domain-specific forgetting trajectories (What/Where intercepts and slopes)?
 
 **Scope:**
-This RQ examines individual differences in forgetting patterns across three episodic memory domains (What, Where, When). Uses 6 clustering variables per participant: intercept and slope for each domain. Sample: N=100 participants. Clustering explores 2-6 potential latent classes using K-means algorithm with BIC model selection.
+This RQ examines individual differences in forgetting patterns across two episodic memory domains (What, Where). When domain excluded due to floor effect (see above). Uses 4 clustering variables per participant: intercept and slope for each domain. Sample: N=100 participants. Clustering explores 2-6 potential latent classes using K-means algorithm with BIC model selection.
 
 **Theoretical Framing:**
 Exploratory analysis to identify whether participants exhibit domain-selective memory profiles (e.g., impaired spatial memory only, preserved object memory) versus global memory patterns. Addresses individual differences in domain-specific forgetting trajectories, potentially reflecting differential reliance on hippocampal vs perirhinal systems.
@@ -30,7 +46,7 @@ Exploratory analysis to identify whether participants exhibit domain-selective m
 [To be added by rq_scholar]
 
 **Theoretical Predictions:**
-Profiles may emerge reflecting: (1) global high/average/low memory across all domains, (2) domain-selective impairment (poor spatial only, poor temporal only), (3) dissociations between What versus Where/When reflecting dual-process system differences. Number of profiles (2-4) determined empirically via BIC model selection.
+Profiles may emerge reflecting: (1) global high/average/low memory across both domains, (2) domain-selective impairment (poor spatial only OR poor object memory only), (3) dissociations between What versus Where reflecting dual-process system differences (perirhinal vs hippocampal). Number of profiles (2-4) determined empirically via BIC model selection.
 
 **Literature Gaps:**
 [To be identified by rq_scholar]
@@ -40,16 +56,16 @@ Profiles may emerge reflecting: (1) global high/average/low memory across all do
 ## Hypothesis
 
 **Primary Hypothesis:**
-Exploratory analysis with no directional prediction. Expected 2-4 latent profiles based on 6 clustering variables (intercept + slope for What, Where, When domains). Profiles may show domain-selective impairment patterns (e.g., poor spatial memory only, preserved object memory).
+Exploratory analysis with no directional prediction. Expected 2-4 latent profiles based on 4 clustering variables (intercept + slope for What, Where domains). Profiles may show domain-selective impairment patterns (e.g., poor spatial memory only, preserved object memory).
 
 **Secondary Hypotheses:**
 None - exploratory clustering analysis.
 
 **Theoretical Rationale:**
-Individual differences in episodic memory may reflect differential reliance on or integrity of domain-specific neural systems (hippocampus for Where/When, perirhinal cortex for What). Clustering analysis can identify whether participants show global versus domain-selective forgetting patterns, informing theories of episodic memory architecture and individual differences.
+Individual differences in episodic memory may reflect differential reliance on or integrity of domain-specific neural systems (hippocampus for Where, perirhinal cortex for What). Clustering analysis can identify whether participants show global versus domain-selective forgetting patterns, informing theories of episodic memory architecture and individual differences.
 
 **Expected Effect Pattern:**
-Optimal cluster number (K) determined by BIC minimum across K=1 to K=6 models. All cluster sizes should be balanced (no cluster < 10% of sample). Cluster centers should show interpretable patterns in 6-dimensional space (intercept and slope for each domain). Cluster characterization should reveal meaningful domain-specific patterns.
+Optimal cluster number (K) determined by BIC minimum across K=1 to K=6 models. All cluster sizes should be balanced (no cluster < 10% of sample). Cluster centers should show interpretable patterns in 4-dimensional space (intercept and slope for each domain). Cluster characterization should reveal meaningful domain-specific patterns.
 
 ---
 
@@ -68,16 +84,16 @@ Optimal cluster number (K) determined by BIC minimum across K=1 to K=6 models. A
   - Disambiguation: All Where tags combined into single domain factor
   - Clustering Variables: Total_Intercept_Where, Total_Slope_Where
 
-- [x] **When** (Temporal Order)
+- [ ] **When** (Temporal Order) - **EXCLUDED**
   - Tag Code: `-O-`
   - Description: Temporal order / sequence memory
-  - Clustering Variables: Total_Intercept_When, Total_Slope_When
+  - **EXCLUDED:** Floor effect discovered in RQ 5.2.1 (77% item attrition, 6-9% floor)
 
 **Inclusion Rationale:**
-All three episodic memory domains (What, Where, When) are included to capture domain-specific individual differences in baseline memory (intercepts) and forgetting rates (slopes). The 6 clustering variables (2 per domain) provide a comprehensive profile of each participant's domain-specific forgetting trajectories.
+Two episodic memory domains (What, Where) are included to capture domain-specific individual differences in baseline memory (intercepts) and forgetting rates (slopes). The 4 clustering variables (2 per domain) provide a profile of each participant's domain-specific forgetting trajectories.
 
 **Exclusion Rationale:**
-None - all three domains required for domain-based clustering.
+When domain excluded due to floor effect (RQ 5.2.1). Insufficient measurement precision prevents reliable random effect extraction.
 
 ---
 
@@ -102,9 +118,9 @@ If K-means shows poor cluster quality metrics (silhouette < 0.25 or non-spherica
 
 **High-Level Workflow:**
 
-**Step 1:** Load random effects from RQ 5.2.6 (6 variables per UID: Total_Intercept_What/Where/When, Total_Slope_What/Where/When)
+**Step 1:** Load random effects from RQ 5.2.6 (4 variables per UID: Total_Intercept_What/Where, Total_Slope_What/Where)
 
-**Step 2:** Standardize all 6 variables to z-scores (mean=0, SD=1) to ensure equal weighting across domains and parameters. Check for outliers (|z| > 3) and document any extreme values.
+**Step 2:** Standardize all 4 variables to z-scores (mean=0, SD=1) to ensure equal weighting across domains and parameters. Check for outliers (|z| > 3) and document any extreme values.
 
 **Step 3:** Test K=1 to K=6 models using K-means clustering; compute inertia and BIC for each K; select optimal K as BIC minimum. If multiple K values have similar BIC (ΔBIC < 2), select the more parsimonious (smaller K) model.
 
@@ -116,24 +132,24 @@ If K-means shows poor cluster quality metrics (silhouette < 0.25 or non-spherica
 - Assess cluster stability via bootstrap resampling (100 iterations, 80% subsampling, Jaccard index > 0.75 for stable clusters)
 - If stability < 0.75: Report clusters as "tentative" and interpret cautiously
 
-**Step 5:** Characterize clusters by domain-specific patterns: compute mean intercept/slope per cluster for each domain; assign interpretive labels based on patterns (e.g., "High What, Low Where/When")
+**Step 5:** Characterize clusters by domain-specific patterns: compute mean intercept/slope per cluster for each domain; assign interpretive labels based on patterns (e.g., "High What, Low Where")
 
 **Step 6:** Create scatter plot matrix colored by cluster membership with cluster centers marked and reference lines. Visually inspect for non-spherical cluster shapes that would indicate K-means assumption violation.
 
 **Expected Outputs:**
-- data/step00_random_effects_from_rq526.csv (100 rows, 6 clustering variables)
-- data/step01_standardized_features.csv (100 rows x 6 z-scored variables)
+- data/step00_random_effects_from_rq526.csv (100 rows, 4 clustering variables)
+- data/step01_standardized_features.csv (100 rows x 4 z-scored variables)
 - results/step02_cluster_selection.csv (6 rows: K=1-6 with inertia and BIC)
 - results/step03_optimal_k.txt (selected K value with justification)
 - data/step04_cluster_assignments.csv (100 rows: UID, cluster)
-- results/step04_cluster_centers.csv (K rows x 6 variables)
+- results/step04_cluster_centers.csv (K rows x 4 variables)
 - results/step04b_cluster_validation.csv (silhouette score, Davies-Bouldin index, bootstrap Jaccard)
 - results/step05_cluster_characterization.txt (interpretive cluster descriptions)
 - plots/step06_cluster_scatter_matrix.png (scatter plot matrix)
 
 **Success Criteria:**
-- Random effects loaded successfully (100 participants x 6 variables)
-- Standardization correct (mean ~ 0, SD ~ 1 for all 6 variables)
+- Random effects loaded successfully (100 participants x 4 variables)
+- Standardization correct (mean ~ 0, SD ~ 1 for all 4 variables)
 - No extreme outliers (|z| > 4) or documented if present
 - BIC minimum clearly identified across K=1-6 range (or parsimony rule applied if ΔBIC < 2)
 - All cluster sizes balanced (no cluster < 10% of sample, i.e., N < 10)
@@ -163,10 +179,10 @@ DERIVED (from RQ 5.2.6 outputs)
 RQ 5.2.6 (Domain-Specific Variance Decomposition)
 
 **File Paths:**
-- results/ch5/5.2.6/data/step04_random_effects.csv (300 rows: 100 UID x 3 domains, contains Total_Intercept and Total_Slope per domain)
+- results/ch5/5.2.6/data/step04_random_effects.csv (200 rows: 100 UID x 2 domains, contains Total_Intercept and Total_Slope per domain)
 
 **Dependencies:**
-RQ 5.2.6 must complete Step 4 (extract individual random effects per domain) before this RQ can run. RQ 5.2.6 fits domain-stratified LMMs with random slopes, extracting intercept and slope estimates for each participant in each domain.
+RQ 5.2.6 must complete Step 4 (extract individual random effects per domain) before this RQ can run. RQ 5.2.6 fits domain-stratified LMMs with random slopes, extracting intercept and slope estimates for each participant in each domain (What, Where only - When excluded due to floor effect).
 
 ### Inclusion/Exclusion Criteria:
 
@@ -185,7 +201,7 @@ RQ 5.2.6 must complete Step 4 (extract individual random effects per domain) bef
 - [x] Total_Slope_What (What forgetting rate)
 - [x] Total_Intercept_Where (baseline Where memory at Day 0)
 - [x] Total_Slope_Where (Where forgetting rate)
-- [x] Total_Intercept_When (baseline When memory at Day 0)
-- [x] Total_Slope_When (When forgetting rate)
+- [ ] ~~Total_Intercept_When~~ (EXCLUDED - floor effect)
+- [ ] ~~Total_Slope_When~~ (EXCLUDED - floor effect)
 
 ---

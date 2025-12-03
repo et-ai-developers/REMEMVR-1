@@ -489,6 +489,8 @@ touch results/chX/rqY/results/summary.md
 
 ### Step 8: Write Summary Content
 
+**Read:** Read the summary.md file so you can then write to it.
+
 **Write:** Generate `summary.md` following `docs/v4/templates/results.md` structure
 
 **Use synthesis from Step 6 Part C to populate 5 sections:**
