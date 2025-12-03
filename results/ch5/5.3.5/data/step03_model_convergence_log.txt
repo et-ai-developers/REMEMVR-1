@@ -1,0 +1,18 @@
+============================================================
+MODEL CONVERGENCE LOG
+============================================================
+
+Model formula attempted: theta ~ C(paradigm) * log_TSVR
+
+CONVERGENCE STATUS:
+----------------------------------------
+IRT model convergence: PASS
+CTT model convergence: PASS
+
+SIMPLIFICATIONS APPLIED:
+----------------------------------------
+IRT simplification: None
+CTT simplification: None
+
+Structural equivalence: MAINTAINED
+Final random structure: random_slopes

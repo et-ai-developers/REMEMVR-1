@@ -1,0 +1,60 @@
+============================================================
+RQ 5.3.5 DEPENDENCY VERIFICATION REPORT
+============================================================
+
+SOURCE: RQ 5.3.1 (Paradigm-Specific Trajectories)
+
+1. RQ 5.3.1 COMPLETION STATUS
+----------------------------------------
+   rq_inspect: {'status': 'success', 'completed': datetime.date(2025, 11, 24), 'context_dump': 'All 8 steps validated (step00-step07). 4-layer validation PASS for all.\nIRT: 72 items -> 43 purified (59.7%), theta [-2.48, 2.95], convergence=True\nLMM: Best model=Log (AIC=2346.60), all 5 converged, 2/3 contrasts significant\nOutputs: 11 data files, 2 plot CSVs (theta+probability scales)\n'}
+   Status: PASS
+
+2. THETA SCORES (step03_theta_scores.csv)
+----------------------------------------
+   Rows: 400 (expected: 400)
+   Columns: ['composite_ID', 'theta_IFR', 'theta_ICR', 'theta_IRE', 'se_IFR', 'se_ICR', 'se_IRE']
+   composite_ID unique: 400
+   theta_IFR: min=-2.367, max=2.616
+   theta_ICR: min=-2.259, max=2.434
+   theta_IRE: min=-2.406, max=2.799
+   Status: PASS
+
+3. TSVR MAPPING (step00_tsvr_mapping.csv)
+----------------------------------------
+   Rows: 400 (expected: 400)
+   Columns: ['composite_ID', 'UID', 'TEST', 'TSVR_hours', 'Days']
+   TEST values: ['T1', 'T2', 'T3', 'T4']
+   Days values: [np.int64(0), np.int64(1), np.int64(3), np.int64(6)]
+   TSVR_hours range: [1.0, 246.2]
+   Status: PASS
+
+4. PURIFIED ITEMS (step02_purified_items.csv)
+----------------------------------------
+   Total items: 45
+   Columns: ['item_name', 'paradigm', 'dimension', 'a', 'b']
+   ICR items: 19 (minimum: 10) - PASS
+   IRE items: 14 (minimum: 10) - PASS
+   IFR items: 12 (minimum: 10) - PASS
+   Status: PASS
+
+5. DFDATA.CSV VERIFICATION
+----------------------------------------
+   All purified item tags present: YES
+   Status: PASS
+
+6. COMPOSITE_ID CONSISTENCY
+----------------------------------------
+   Theta composite_IDs: 400
+   TSVR composite_IDs: 400
+   All 400 composite_IDs matched: YES
+   Status: PASS
+
+============================================================
+OVERALL DEPENDENCY CHECK: PASS
+============================================================
+
+All files exist with expected structure.
+Data transformations applied:
+  - Theta scores: long -> wide format pivot
+  - TSVR mapping: Added Days column, TEST uppercase
+  - Purified items: Column name standardization

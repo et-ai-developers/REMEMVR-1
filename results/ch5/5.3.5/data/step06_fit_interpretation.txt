@@ -1,0 +1,30 @@
+============================================================
+MODEL FIT INTERPRETATION (IRT vs CTT)
+============================================================
+
+RAW FIT INDICES:
+----------------------------------------
+IRT AIC: 2229.53
+CTT AIC: -1488.83
+IRT BIC: 2280.43
+CTT BIC: -1437.93
+
+MODEL COMPARISON:
+----------------------------------------
+ΔAIC (IRT - CTT): 3718.37
+  Interpretation: strong evidence for CTT (|Δ| ≥ 10)
+
+ΔBIC (IRT - CTT): 3718.37
+  Interpretation: strong evidence for CTT (|Δ| ≥ 10)
+
+OVERALL CONCLUSION:
+----------------------------------------
+CTT model shows BETTER fit (ΔAIC=3718.37, ΔBIC=3718.37).
+
+Convergence Implication:
+CTT proportion correct may capture forgetting patterns differently than IRT.
+
+NOTE: AIC/BIC difference is expected since IRT uses theta (-∞,+∞)
+      and CTT uses proportion correct [0,1]. The metrics are NOT
+      directly comparable across scales. Focus on DIRECTION and
+      AGREEMENT of conclusions rather than absolute values.

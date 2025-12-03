@@ -1,0 +1,42 @@
+============================================================
+IRT MODEL SUMMARY
+============================================================
+
+Formula: theta ~ C(paradigm) * log_TSVR
+Convergence: True
+
+MODEL SUMMARY:
+----------------------------------------
+                 Mixed Linear Model Regression Results
+=======================================================================
+Model:                 MixedLM      Dependent Variable:      theta     
+No. Observations:      1200         Method:                  ML        
+No. Groups:            100          Scale:                   0.2522    
+Min. group size:       12           Log-Likelihood:          -1104.7656
+Max. group size:       12           Converged:               Yes       
+Mean group size:       12.0                                            
+-----------------------------------------------------------------------
+                            Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------
+Intercept                    0.859    0.103   8.342 0.000  0.657  1.061
+C(paradigm)[T.IFR]          -0.113    0.080  -1.411 0.158 -0.271  0.044
+C(paradigm)[T.IRE]           0.004    0.080   0.049 0.961 -0.154  0.161
+log_TSVR                    -0.237    0.023 -10.145 0.000 -0.283 -0.191
+C(paradigm)[T.IFR]:log_TSVR  0.028    0.021   1.292 0.196 -0.014  0.070
+C(paradigm)[T.IRE]:log_TSVR -0.011    0.021  -0.492 0.623 -0.053  0.031
+Group Var                    0.738    0.250                            
+Group x log_TSVR Cov        -0.106    0.046                            
+log_TSVR Var                 0.031    0.012                            
+=======================================================================
+
+
+FIT INDICES:
+----------------------------------------
+AIC: 2229.53
+BIC: 2280.43
+Log-Likelihood: -1104.77
+
+SAMPLE SIZE:
+----------------------------------------
+N observations: 1200
+N groups: 100

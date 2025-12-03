@@ -1,0 +1,42 @@
+============================================================
+CTT MODEL SUMMARY
+============================================================
+
+Formula: CTT_mean ~ C(paradigm) * log_TSVR
+Convergence: True
+
+MODEL SUMMARY:
+----------------------------------------
+                Mixed Linear Model Regression Results
+======================================================================
+Model:                  MixedLM      Dependent Variable:      CTT_mean
+No. Observations:       1200         Method:                  ML      
+No. Groups:             100          Scale:                   0.0128  
+Min. group size:        12           Log-Likelihood:          754.4172
+Max. group size:        12           Converged:               Yes     
+Mean group size:        12.0                                          
+----------------------------------------------------------------------
+                            Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------
+Intercept                    0.747    0.018 42.470 0.000  0.712  0.781
+C(paradigm)[T.IFR]          -0.106    0.018 -5.878 0.000 -0.142 -0.071
+C(paradigm)[T.IRE]          -0.016    0.018 -0.868 0.385 -0.051  0.020
+log_TSVR                    -0.037    0.004 -8.758 0.000 -0.045 -0.029
+C(paradigm)[T.IFR]:log_TSVR  0.008    0.005  1.744 0.081 -0.001  0.018
+C(paradigm)[T.IRE]:log_TSVR  0.000    0.005  0.077 0.939 -0.009  0.010
+Group Var                    0.015    0.026                           
+Group x log_TSVR Cov        -0.002    0.005                           
+log_TSVR Var                 0.001    0.001                           
+======================================================================
+
+
+FIT INDICES:
+----------------------------------------
+AIC: -1488.83
+BIC: -1437.93
+Log-Likelihood: 754.42
+
+SAMPLE SIZE:
+----------------------------------------
+N observations: 1200
+N groups: 100

@@ -1,0 +1,48 @@
+============================================================
+CTT COMPUTATION REPORT
+============================================================
+
+1. ITEMS PER PARADIGM
+----------------------------------------
+   ICR: 19 items
+   IFR: 12 items
+   IRE: 14 items
+   Total: 45 items
+
+2. CTT SCORES SUMMARY
+----------------------------------------
+   Total rows: 1200
+   Expected: 1200 (400 x 3 paradigms)
+
+   IFR:
+      N: 400
+      CTT_mean: 0.544 (SD=0.189)
+      Range: [0.146, 1.000]
+      n_items: 12.0 (mean)
+
+   ICR:
+      N: 400
+      CTT_mean: 0.622 (SD=0.144)
+      Range: [0.158, 0.974]
+      n_items: 19.0 (mean)
+
+   IRE:
+      N: 400
+      CTT_mean: 0.608 (SD=0.153)
+      Range: [0.161, 0.964]
+      n_items: 14.0 (mean)
+
+3. MISSING DATA
+----------------------------------------
+   NaN values in CTT_mean: 0
+   Complete observations: 1200
+
+4. N_ITEMS DISTRIBUTION
+----------------------------------------
+   Min n_items: 12
+   Max n_items: 19
+   Observations with n_items < 5: 0
+
+============================================================
+CTT COMPUTATION COMPLETE
+============================================================
