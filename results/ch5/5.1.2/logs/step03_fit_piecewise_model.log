@@ -394,3 +394,56 @@ AIC comparison in Step 3 uses this value as reference.
 [VALIDATION] [PASS] deltaAIC computed successfully: 5.03
 [VALIDATION] [PASS] All 18 predictions generated (9 Early + 9 Late)
 [SUCCESS] Step 3 complete
+[START] Step 3: Fit Piecewise Model
+[LOAD] Loading time-transformed data from Step 1...
+[LOADED] step01_time_transformed.csv (400 rows, 9 cols)
+[VALIDATED] All required columns present: ['UID', 'test', 'TSVR_hours', 'theta', 'Segment', 'Days_within']
+[LOAD] Loading RQ 5.7 best continuous model AIC...
+[LOADED] RQ 5.7 best continuous AIC = 873.71
+[LOAD] Checking RQ 5.7 convergence status...
+[INFO] RQ 5.7 status: RQ 5.7 Best Continuous Model Information
+============================================================
+Best model: Log
+AIC: 873.710488
+
+INTERPRETATION FOR RQ 5.8 STEP 3:
+------------------------------------------------------------
+RQ 5.7 completed successfully with Log as best model.
+AIC comparison in Step 3 uses this value as reference.
+[INFO] RQ 5.7 model converged with maximal random structure
+[INFO] AIC comparison valid (comparable random structures)
+[ANALYSIS] Fitting piecewise LMM: theta ~ Days_within * Segment + (1 | UID)...
+[INFO] Random structure: (1 | UID) - MATCHED to Step 02 quadratic model
+[INFO] This enables VALID AIC comparison (same random structure across models)
+[SUCCESS] Piecewise model converged with matched random structure (1 | UID)
+[INFO] Random structure matched to Step 02 quadratic model - AIC comparison VALID
+[DONE] Piecewise LMM fitting complete
+[INFO] Random structure used: (1 | UID)
+[EXTRACT] Extracting fixed effects and AIC...
+[INFO] Piecewise model AIC = 873.31
+[INFO] deltaAIC = -0.40 (Piecewise - Continuous)
+[INTERPRETATION] Models EQUIVALENT (-2 <= deltaAIC <= +2) - Inconclusive evidence
+[INFO] Fixed effects extracted (Intercept, Days_within, Segment, interaction)
+[INFO] Interaction p-value = 0.0000
+[SIGNIFICANT] Interaction significant at Bonferroni alpha = 0.0033
+[INTERPRETATION] Early and Late segments have DIFFERENT forgetting rates
+[PREDICT] Generating model predictions for Early and Late segments...
+[INFO] Computing fixed effects predictions (population-level trends)...
+[INFO] Fixed effects: Intercept=0.6563, Days_within=-0.4325
+[INFO]                Segment[Late]=-0.8610, Interaction=0.3636
+[DONE] Generated 18 predictions (9 Early + 9 Late)
+[SAVE] Saving piecewise model summary...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.1.2/results/step03_piecewise_model_summary.txt
+[SAVE] Saving piecewise predictions...
+[SAVED] data/step03_piecewise_predictions.csv (18 rows)
+[SAVE] Saving piecewise model pickle...
+[SAVED] step03_piecewise_model.pkl
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[VALIDATION] Checking fixed effects validity...
+[VALIDATION] [PASS] All fixed effects finite
+[VALIDATION] [PASS] Interaction p-value in valid range: 0.0000
+[VALIDATION] [PASS] deltaAIC computed successfully: -0.40
+[VALIDATION] [PASS] All 18 predictions generated (9 Early + 9 Late)
+[SUCCESS] Step 3 complete

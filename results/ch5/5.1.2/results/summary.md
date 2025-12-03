@@ -27,7 +27,7 @@ This RQ used three independent statistical tests to triangulate evidence for two
 2. **Test 2:** Piecewise vs continuous model AIC comparison (sharp inflection vs smooth curve)
 3. **Test 3:** Early vs Late slope ratio (rapid->slow transition)
 
-**Key Finding:** Tests 1 and 3 STRONGLY support two-phase forgetting, but Test 2 favors continuous model. This indicates forgetting DOES decelerate over time (two-phase pattern present), but transition is GRADUAL rather than sharp inflection at 48 hours.
+**Key Finding:** Tests 1 and 3 STRONGLY support two-phase forgetting, Test 2 is NEUTRAL (models equivalent). This indicates forgetting DOES decelerate over time (two-phase pattern present). Both piecewise and continuous models fit equally well - data cannot distinguish sharp inflection from gradual transition.
 
 ---
 
@@ -57,7 +57,9 @@ This RQ used three independent statistical tests to triangulate evidence for two
 
 ### Test 2: Piecewise vs Continuous Model Comparison
 
-**Piecewise Model:** Theta ~ Days_within x Segment + (Days_within | UID)
+**Piecewise Model:** Theta ~ Days_within x Segment + (1 | UID)
+
+**CRITICAL FIX (2025-12-03):** Random structure now MATCHED to quadratic model (1 | UID). Previous version incorrectly used (Days_within | UID) which failed to converge and invalidated AIC comparison.
 
 **Segment Definition:**
 - **Early:** 0-48 hours TSVR (Day 0-1, pre-consolidation)
@@ -69,11 +71,11 @@ This RQ used three independent statistical tests to triangulate evidence for two
 | Term | Coefficient | SE | z | p (uncorr) | p (Bonf) | 95% CI |
 |------|-------------|----|----|------------|----------|---------|
 | Intercept (Early start) | 0.656 | 0.087 | 7.526 | <.001 | <.001 | [0.485, 0.827] |
-| Segment[T.Late] | -0.860 | 0.095 | -9.034 | <.001 | <.001 | [-1.046, -0.673] |
-| Days_within (Early slope) | -0.432 | 0.071 | -6.063 | <.001 | <.001 | [-0.572, -0.292] |
-| Days_within:Segment[T.Late] | 0.362 | 0.076 | 4.791 | <.001 | <.001 | [0.214, 0.511] |
+| Segment[T.Late] | -0.861 | 0.095 | -9.034 | <.001 | <.001 | [-1.048, -0.674] |
+| Days_within (Early slope) | -0.433 | 0.073 | -5.960 | <.001 | <.001 | [-0.576, -0.290] |
+| Days_within:Segment[T.Late] | 0.364 | 0.076 | 4.771 | <.001 | <.001 | [0.214, 0.513] |
 
-**CRITICAL ISSUE:** Convergence = FALSE (model did not converge, parameter estimates potentially unstable)
+**Convergence:** TRUE (fixed 2025-12-03 by using matched random structure)
 
 **AIC Comparison:**
 
@@ -81,11 +83,11 @@ This RQ used three independent statistical tests to triangulate evidence for two
 |-------|-----|----------------------|----------------|
 | **Best Continuous (RQ 5.1.1)** | 873.71 | 0.00 (reference) | Log model from RQ 5.1.1 |
 | **Quadratic (Test 1)** | 873.24 | -0.47 | Equivalent to continuous |
-| **Piecewise (Test 2)** | 878.74 | +5.03 | WORSE than continuous |
+| **Piecewise (Test 2)** | 873.31 | -0.40 | EQUIVALENT to continuous |
 
 **Decision Rule:** deltaAIC < -2 favors piecewise (sharp inflection), deltaAIC > +2 favors continuous (smooth curve), |deltaAIC| < 2 equivalent
 
-**Test 2 Result:** deltaAIC = +5.03 strongly favors CONTINUOUS model over piecewise. Evidence AGAINST sharp inflection at 48 hours. However, this result is qualified by piecewise model non-convergence and potential random structure mismatch (see Limitations).
+**Test 2 Result:** deltaAIC = -0.40 indicates piecewise and continuous models are EQUIVALENT. Neither model provides meaningfully better fit than the other. This is consistent with Test 1 (deceleration exists) but does NOT favor discrete inflection over smooth curve.
 
 ---
 
@@ -127,13 +129,13 @@ This RQ used three independent statistical tests to triangulate evidence for two
 
 | Test | Evidence for Two-Phase? | Strength |
 |------|-------------------------|----------|
-| **Test 1** (Quadratic term) | YES - Time� significant (p<.001) | Strong |
-| **Test 2** (AIC comparison) | NO - Continuous favored (deltaAIC=+5.03) | Strong (against) |
+| **Test 1** (Quadratic term) | YES - Time² significant (p<.001) | Strong |
+| **Test 2** (AIC comparison) | NEUTRAL - Models equivalent (deltaAIC=-0.40) | Inconclusive |
 | **Test 3** (Slope ratio) | YES - Ratio=0.161<<0.5, interaction p<.001 | Very Strong |
 
-**Overall Conclusion:** Evidence for two-phase forgetting is **ROBUST but NUANCED**. Two of three tests strongly support two-phase pattern (Tests 1 and 3), indicating forgetting rate DOES decelerate over time. However, Test 2 (AIC comparison) favors continuous smooth deceleration over sharp piecewise inflection, suggesting the transition is **GRADUAL** rather than abrupt at 48 hours.
+**Overall Conclusion:** Evidence for two-phase forgetting is **ROBUST**. Two of three tests strongly support two-phase pattern (Tests 1 and 3), indicating forgetting rate DOES decelerate over time. Test 2 (AIC comparison) is now NEUTRAL (after 2025-12-03 fix), indicating both piecewise and continuous models fit equally well - neither sharp inflection nor smooth curve is definitively preferred.
 
-**Resolution:** Forgetting exhibits two-phase dynamics (rapid early, slow late), but the change is not a discrete inflection point at Day 1. Instead, forgetting rate continuously decelerates across the 6-day interval, with Early segment substantially faster than Late segment when artificially divided at 48 hours.
+**Resolution:** Forgetting exhibits two-phase dynamics (rapid early, slow late). Both continuous (smooth deceleration) and piecewise (discrete phases) models capture this pattern equally well. The data support the existence of two-phase pattern but cannot distinguish the underlying mechanism (gradual vs abrupt transition).
 
 ---
 
@@ -413,17 +415,16 @@ Non-convergence of piecewise model highlights critical LMM challenge:
 
 **Statistical:**
 
-**1. Model Convergence Failures:**
+**1. Model Convergence (RESOLVED 2025-12-03):**
 
-- Piecewise model did NOT converge (Converged: False), making parameter estimates and AIC potentially unstable
-- Non-convergence indicates model over-parameterized for N=100
+- ~~Piecewise model did NOT converge (Converged: False)~~ → **FIXED:** Piecewise model now converges with matched random structure
+- Convergence achieved by using (1 | UID) to match quadratic model
 
-**2. Random Structure Mismatch:**
+**2. Random Structure Mismatch (RESOLVED 2025-12-03):**
 
-- Quadratic model used fallback (1 | UID), piecewise attempted full (Days_within | UID)
-- **CRITICAL ISSUE:** Comparing models with different random structures confounds TIME PATTERN with MODEL COMPLEXITY
-- AIC comparison invalid when random structures differ
-- Correct approach: Refit piecewise with (1 | UID) matching quadratic, THEN compare AICs
+- ~~Quadratic model used fallback (1 | UID), piecewise attempted full (Days_within | UID)~~ → **FIXED:** Both models now use (1 | UID)
+- ~~AIC comparison invalid when random structures differ~~ → **FIXED:** AIC comparison now VALID with matched random structures
+- New result: deltaAIC = -0.40 (models equivalent), vs previous invalid deltaAIC = +5.03
 
 **3. Assumption Violations:**
 

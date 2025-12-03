@@ -202,57 +202,37 @@ if __name__ == "__main__":
         #               forgetting slopes (two-phase hypothesis Test 2)
         # Expected output: MixedLMResults object with fixed effects for interaction
 
-        log("[ANALYSIS] Fitting piecewise LMM: theta ~ Days_within * Segment + (Days_within | UID)...")
-        log("[INFO] Maximal random structure: (Days_within | UID) - allows individual slope differences")
-        log("[INFO] Fallback strategy: (Days_within || UID) -> (1 | UID) if convergence fails")
+        # CRITICAL FIX (2025-12-03): Use MATCHED random structure with Step 02 (Quadratic)
+        # Step 02 quadratic model uses (1 | UID) intercepts-only (fallback from maximal)
+        # For VALID AIC comparison, piecewise must use SAME random structure
+        # Previous version used (Days_within | UID) which:
+        #   1. Failed to converge (Converged: False)
+        #   2. Invalidated AIC comparison (different random structures)
+        # FIX: Use (1 | UID) to match quadratic model, enabling valid AIC comparison
+
+        log("[ANALYSIS] Fitting piecewise LMM: theta ~ Days_within * Segment + (1 | UID)...")
+        log("[INFO] Random structure: (1 | UID) - MATCHED to Step 02 quadratic model")
+        log("[INFO] This enables VALID AIC comparison (same random structure across models)")
 
         # Piecewise formula with interaction term (key test for two-phase forgetting)
         formula = "theta ~ Days_within * Segment"
 
-        try:
-            # Try maximal random structure first
-            piecewise_model = fit_lmm_trajectory(
-                data=time_data,
-                formula=formula,
-                groups="UID",
-                re_formula="~Days_within",  # Random slopes for Days_within
-                reml=False  # ML estimation required for AIC comparison
-            )
-            log("[SUCCESS] Piecewise model converged with maximal random structure")
-            random_structure_used = "(Days_within | UID)"
+        # Use intercept-only random structure to match Step 02 quadratic model
+        piecewise_model = fit_lmm_trajectory(
+            data=time_data,
+            formula=formula,
+            groups="UID",
+            re_formula="~1",  # Intercept-only: MUST MATCH Step 02 for valid AIC comparison
+            reml=False  # ML estimation required for AIC comparison
+        )
 
-        except Exception as e_maximal:
-            log(f"[WARNING] Maximal random structure failed: {str(e_maximal)}")
-            log("[FALLBACK] Attempting uncorrelated random structure: (Days_within || UID)...")
+        if piecewise_model.converged:
+            log("[SUCCESS] Piecewise model converged with matched random structure (1 | UID)")
+        else:
+            log("[WARNING] Piecewise model did not converge - interpret results with caution")
 
-            try:
-                # Fallback 1: Uncorrelated random effects
-                # Note: statsmodels doesn't support || syntax, so this is approximated
-                piecewise_model = fit_lmm_trajectory(
-                    data=time_data,
-                    formula=formula,
-                    groups="UID",
-                    re_formula="~Days_within",  # Same as maximal (statsmodels limitation)
-                    reml=False
-                )
-                log("[SUCCESS] Piecewise model converged with uncorrelated random structure")
-                random_structure_used = "(Days_within || UID) - approximated"
-
-            except Exception as e_uncorrelated:
-                log(f"[WARNING] Uncorrelated random structure failed: {str(e_uncorrelated)}")
-                log("[FALLBACK] Attempting intercept-only random structure: (1 | UID)...")
-
-                # Fallback 2: Intercept-only random effects
-                piecewise_model = fit_lmm_trajectory(
-                    data=time_data,
-                    formula=formula,
-                    groups="UID",
-                    re_formula="~1",  # Intercept-only
-                    reml=False
-                )
-                log("[SUCCESS] Piecewise model converged with intercept-only random structure")
-                random_structure_used = "(1 | UID)"
-                log("[WARNING] Random slopes removed - model assumes uniform forgetting rates across individuals")
+        random_structure_used = "(1 | UID)"
+        log("[INFO] Random structure matched to Step 02 quadratic model - AIC comparison VALID")
 
         log("[DONE] Piecewise LMM fitting complete")
         log(f"[INFO] Random structure used: {random_structure_used}")

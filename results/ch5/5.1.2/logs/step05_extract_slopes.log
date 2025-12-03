@@ -146,3 +146,30 @@ ValueError: Validation failed: slope estimates or ratio out of bounds
 [VALIDATION PASS] All slope estimates and ratio within expected bounds
 [INTERPRETATION] Ratio = 0.161 < 0.5 -> ROBUST two-phase forgetting
 [SUCCESS] Step 05 complete
+[START] Step 05: Extract Slopes and Compute Ratio
+[LOAD] Loading piecewise model from Step 3...
+[LOADED] Piecewise model from /home/etai/projects/REMEMVR/results/ch5/5.1.2/data/step03_piecewise_model.pkl
+[INFO] Model converged: True
+[INFO] AIC: 873.31
+[ANALYSIS] Extracting segment slopes and computing ratio...
+[DONE] Slope extraction complete
+[INFO] Extracted 4 metrics:
+  - Early_slope: -0.432548
+  - Late_slope: -0.068970
+  - Ratio_Late_Early: 0.159450
+  - Interaction_p: 0.000002
+[SAVE] Saving slope comparison to results/step05_slope_comparison.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.1.2/results/step05_slope_comparison.csv (4 rows, 6 cols)
+[INTERPRETATIONS]
+  Early_slope: Forgetting (-0.433/day). SE=0.073.
+  Late_slope: Forgetting (-0.069/day). SE=0.025.
+  Ratio_Late_Early: Ratio < 0.5 (0.159): Robust two-phase forgetting pattern. Late forgetting substantially slower than Early.
+  Interaction_p: Interaction highly significant (p=0.0000 < 0.001). Strong evidence for different forgetting rates across segments.
+[VALIDATION] Validating slope ranges and ratio bounds...
+[PASS] Early_slope: -0.432548 in [-1.0, 0.0]
+[PASS] Late_slope: -0.068970 in [-1.0, 0.0]
+[PASS] Ratio_Late_Early: 0.159450 in [0.0, 2.0]
+[PASS] Interaction_p: 0.000002 in [0.0, 1.0]
+[VALIDATION PASS] All slope estimates and ratio within expected bounds
+[INTERPRETATION] Ratio = 0.159 < 0.5 -> ROBUST two-phase forgetting
+[SUCCESS] Step 05 complete

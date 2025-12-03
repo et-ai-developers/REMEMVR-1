@@ -1,9 +1,9 @@
 ================================================================================
-PIECEWISE LMM SUMMARY - RQ 5.8 TEST 2 (Two-Phase Forgetting)
+PIECEWISE LMM SUMMARY - RQ 5.1.2 TEST 2 (Two-Phase Forgetting)
 ================================================================================
 
 Formula: theta ~ Days_within * Segment
-Random Structure: (Days_within | UID)
+Random Structure: (1 | UID)
 Estimation: ML (REML=False for AIC comparison)
 N observations: 400
 N groups (UIDs): 100
@@ -11,20 +11,17 @@ N groups (UIDs): 100
 --------------------------------------------------------------------------------
 CONVERGENCE STATUS
 --------------------------------------------------------------------------------
-Converged: False
-WARNING: Model did not converge - interpret results with caution
+Converged: True
 
 --------------------------------------------------------------------------------
 FIXED EFFECTS
 --------------------------------------------------------------------------------
                               Coef. Std.Err.       z  P>|z|  [0.025  0.975]
-Intercept                     0.656    0.087   7.526  0.000   0.485   0.827
-Segment[T.Late]              -0.860    0.095  -9.034  0.000  -1.046  -0.673
-Days_within                  -0.432    0.071  -6.063  0.000  -0.572  -0.292
-Days_within:Segment[T.Late]   0.362    0.076   4.791  0.000   0.214   0.511
-Group Var                     0.430    0.255                               
-Group x Days_within Cov      -0.002    0.047                               
-Days_within Var               0.001    0.021                               
+Intercept                     0.656    0.085   7.738  0.000   0.490   0.823
+Segment[T.Late]              -0.861    0.095  -9.110  0.000  -1.046  -0.676
+Days_within                  -0.433    0.073  -5.959  0.000  -0.575  -0.290
+Days_within:Segment[T.Late]   0.364    0.076   4.755  0.000   0.214   0.513
+Group Var                     0.376    0.130                               
 
 --------------------------------------------------------------------------------
 RANDOM EFFECTS
@@ -32,19 +29,19 @@ RANDOM EFFECTS
                    0        1                    2          3
 0             Model:  MixedLM  Dependent Variable:      theta
 1  No. Observations:      400              Method:         ML
-2        No. Groups:      100               Scale:     0.3153
-3   Min. group size:        4      Log-Likelihood:  -431.3687
-4   Max. group size:        4           Converged:         No
+2        No. Groups:      100               Scale:     0.3281
+3   Min. group size:        4      Log-Likelihood:  -430.6536
+4   Max. group size:        4           Converged:        Yes
 5   Mean group size:      4.0                                
 
 --------------------------------------------------------------------------------
 AIC COMPARISON (TEST 2 FOR TWO-PHASE FORGETTING)
 --------------------------------------------------------------------------------
-Piecewise model AIC:  878.74
+Piecewise model AIC:  873.31
 Continuous model AIC: 873.71 (from RQ 5.7)
-deltaAIC:             5.03 (Piecewise - Continuous)
+deltaAIC:             -0.40 (Piecewise - Continuous)
 
-Interpretation: Continuous model FAVORED (deltaAIC > +2) - Evidence against two-phase forgetting
+Interpretation: Models EQUIVALENT (-2 <= deltaAIC <= +2) - Inconclusive evidence
 
 --------------------------------------------------------------------------------
 INTERACTION TEST (KEY EVIDENCE FOR TWO-PHASE FORGETTING)
