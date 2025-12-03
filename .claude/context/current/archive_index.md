@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-03 21:30 (context-manager curation)
+**Last Updated:** 2025-12-04 02:15 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -367,6 +367,12 @@
 
 ### tdd_irt_ctt_tools_creation
 **Description:** Complete TDD workflow for creating 4 IRT-CTT convergence analysis tools via Red-Green-Refactor methodology. 27 tests written first (Red phase), 4 functions implemented in tools/analysis_ctt.py (compute_ctt_mean_scores_by_factor, compute_pearson_correlations_with_correction, compute_cohens_kappa_agreement, compare_lmm_fit_aic_bic) with 491 lines total (Green phase). All 27/27 tests passing. Tools feature D068 dual p-values (uncorrected + Holm-Bonferroni correction), generic factor support (domain/paradigm/congruence), Landis & Koch kappa interpretation, Burnham & Anderson AIC/BIC thresholds. tools_inventory.md updated with 4 new entries. Successfully unblocked RQ 5.3.5 and 5.4.4 (rq_tools and rq_analysis both succeeded after tool creation). Session 2025-12-03 23:30.
+
+### rq_5.3.5_complete_execution_irt_ctt_convergence
+**Description:** Complete execution of RQ 5.3.5 (IRT-CTT Convergence for Paradigms). All 8 analysis steps executed successfully. Key findings: Strong static convergence (r=0.84-0.88 across IFR/ICR/IRE paradigms), substantial dynamic convergence (Cohen's κ=0.667, agreement=83.3%), both LMMs converged with random slopes on log_TSVR. Validates RQ 5.3.1 paradigm findings are robust to measurement approach (not IRT artifacts). Fixed data format mismatch (long to wide pivot). Regenerated 4 plots in 5.2.1 style (continuous TSVR, faded scatter, dashed curves, shaded CIs). Full validation pipeline PASS (rq_inspect, rq_plots, rq_results, rq_validate). 0 anomalies flagged. Session 2025-12-04 00:00.
+
+### rq_5.4.4_complete_execution_irt_ctt_convergence
+**Description:** Complete execution of RQ 5.4.4 (IRT-CTT Convergence for Schema Congruence). All 8 analysis steps executed successfully. Key findings: EXCEPTIONAL static convergence (r=0.87-0.91 with incongruent reaching 0.91), substantial dynamic convergence (Cohen's κ=0.667, agreement=83.3%), both LMMs converged with random slopes on log_TSVR. Validates RQ 5.4.1 NULL schema congruence findings are robust to measurement approach (Common/Congruent/Incongruent all similar trajectories is real empirical finding, not measurement artifact). Fixed missing 4_analysis.yaml by adapting from 5.3.5. Full validation pipeline PASS (rq_inspect, rq_plots, rq_results). 1 anomaly flagged (CTT fit dominance). Chapter 5 IRT-CTT convergence trilogy complete (5.2.4 domains, 5.3.5 paradigms, 5.4.4 congruence). Session 2025-12-04 00:30.
 
 ---
 
