@@ -1,0 +1,31 @@
+================================================================================
+INTERCEPT-SLOPE CORRELATION TEST RESULTS (RQ 5.13 Step 5)
+================================================================================
+
+Correlation: r = -0.9727
+Direction: Negative
+Magnitude: Strong negative correlation (r=-0.973) between random intercepts and slopes. Significant after Bonferroni correction (p=0.0000 < 0.05).
+
+--------------------------------------------------------------------------------
+SIGNIFICANCE TESTS (Decision D068 Dual P-Value Reporting)
+--------------------------------------------------------------------------------
+
+Uncorrected p-value: p = 0.000000
+  Significant at alpha=0.05? YES
+
+Bonferroni-corrected p-value: p = 0.000000
+  Family size: 15 tests (Chapter 5)
+  Corrected alpha: 0.05/15 = 0.0033
+  Significant at corrected alpha? YES
+
+--------------------------------------------------------------------------------
+INTERPRETATION
+--------------------------------------------------------------------------------
+
+Negative correlation suggests that participants with higher baseline
+memory (positive random intercepts) tend to have slower forgetting rates
+(negative random slopes, meaning less steep decline).
+
+The correlation is statistically significant even after Bonferroni
+correction, indicating a robust relationship between baseline ability
+and forgetting rate that is unlikely due to chance.

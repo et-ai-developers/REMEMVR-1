@@ -490,3 +490,190 @@ However, [one real-world WWW study](https://pmc.ncbi.nlm.nih.gov/articles/PMC443
 ### Desktop vs Immersive VR
 - [Desktop vs HMD spatial learning](https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2019.00050/full) - Frontiers 2019
 - [VR context and memory retention](https://www.nature.com/articles/s41539-022-00147-6) - Nature Scientific Learning 2022
+
+---
+
+## Deep Investigation: Why Can't We Detect Individual Slope Differences?
+
+**Investigation Date:** 2025-12-03
+**Status:** COMPLETE - Root causes identified
+
+### The Core Problem
+
+The ICC_slope = 0.0005 (0.05%) finding contradicts decades of memory literature showing ICC_slope = 0.30-0.50. After extensive investigation, we identified **multiple compounding issues** that explain this anomaly.
+
+### Investigation 1: Scale Transformation (Theta → Probability)
+
+**Hypothesis:** Literature uses proportion correct (bounded 0-1), we use IRT theta (unbounded). The nonlinear logit transformation may compress individual differences.
+
+**Method:** Converted theta to probability via Test Characteristic Curve (TCC), re-fit LMM on probability scale.
+
+**Result:**
+
+| Scale | ICC_slope |
+|-------|-----------|
+| Theta (original) | 0.0005 |
+| Probability (TCC) | 0.0017 |
+
+**Verdict:** Scale transformation explains only 3.5× improvement. ICC still 200× below literature. **NOT the primary cause.**
+
+### Investigation 2: Model Specification (Wrong Random Slope Variable)
+
+**Discovery:** The Lin+Log model had random slopes on `Days`, not `log_TSVR`. Since the Log model is best by AIC, random slopes should be on the log-transformed time variable.
+
+**Result with corrected specification:**
+
+| Model | var_slope | ICC_slope |
+|-------|-----------|-----------|
+| Lin+Log with Days slopes | 0.000157 | 0.0005 |
+| Lin+Log with log_TSVR slopes | 0.003346 | 0.011 |
+
+**Verdict:** Correct specification improves ICC by 22×. Still far below literature (0.30-0.50). **Partial explanation.**
+
+### Investigation 3: Shrinkage from Sparse Design
+
+**The critical finding:** With only 4 timepoints per participant, individual slopes are estimated with massive uncertainty. The LMM correctly recognizes this and **shrinks** estimates toward the population mean.
+
+**Quantified shrinkage:**
+
+| Metric | Raw OLS | LMM BLUP | Shrinkage |
+|--------|---------|----------|-----------|
+| Slope SD | 0.209 | 0.017 | **92%** |
+| Slope variance | 0.044 | 0.003 | **93%** |
+
+The model shrinks slope variance by 93%! This is **not bias** - it's the LMM correctly handling unreliable estimates.
+
+**Reliability of individual slopes:**
+- With n=4 timepoints, df for slope estimation = 2
+- Measurement error variance = 0.021
+- Observed slope variance = 0.044
+- **Estimated reliability = 51%** (at best)
+- With some calculations: reliability as low as **14%**
+
+**What this means:** Half or more of the apparent "individual slope differences" in raw data is measurement error. The LMM correctly downweights these unreliable estimates.
+
+### Investigation 4: Likelihood Ratio Test for Random Slopes
+
+**Critical test:** Do random slopes significantly improve model fit?
+
+```
+Full model (intercepts + slopes): LL = -429.65
+Reduced model (intercepts only): LL = -430.02
+LR statistic = 0.76, p = 0.685
+```
+
+**Verdict:** Random slopes do NOT significantly improve fit. The simpler random-intercepts-only model is preferred (lower AIC: 870.05 vs 873.29).
+
+**This means:** The data itself doesn't support the existence of meaningful individual differences in forgetting rates. You cannot detect slope variance that isn't there.
+
+### Investigation 5: Time-Varying Covariates (Sleep, Tiredness)
+
+**Hypothesis:** If we reduce within-person residual variance by adding covariates, ICC_slope might increase.
+
+**Variables tested:**
+- Hours slept (before each test)
+- Tiredness rating (at each test)
+- Sleep quality (at each test)
+
+**Result:**
+
+| Model | var_residual | ICC_slope |
+|-------|--------------|-----------|
+| Without sleep covariates | 0.3106 | 0.0107 |
+| With sleep covariates | 0.3104 | 0.0104 |
+
+**Fixed effects of sleep:**
+- hours_slept: b = 0.023, t = 0.70 (NOT significant)
+- tiredness: b = -0.044, t = -0.44 (NOT significant)
+
+**LR test for random slopes after adding covariates:** p = 0.694 (still not significant)
+
+**Verdict:** Sleep variables explain essentially 0% of within-person variance. Random slopes remain non-significant. **Covariates do not help.**
+
+### Investigation 6: Model Comparison (Beyond 5 Candidates)
+
+Tested additional functional forms:
+
+| Model | AIC | ΔAIC | ICC_slope |
+|-------|-----|------|-----------|
+| Quad+Log | 872.92 | 0.00 | 0.012 |
+| Lin+Log | 873.29 | 0.37 | 0.011 |
+| Log(days+1) | 873.71 | 0.79 | ~0 (boundary) |
+| Exp decay (τ=3d) | 873.78 | 0.85 | ~0 (boundary) |
+| Power -0.2 | 891.04 | 18.11 | 0.317 |
+| Power -0.3 | 896.85 | 23.93 | 0.215 |
+
+**Observation:** Power law models (-0.2, -0.3) show higher ICC_slope (0.22-0.32) but fit much worse (ΔAIC > 18). The models that fit well all show ICC_slope ≈ 0.01 or boundary estimates.
+
+**Verdict:** No well-fitting model shows substantial slope variance.
+
+### Summary: The Truth About ICC_slope
+
+**The finding is NOT an artifact of:**
+- ❌ Scale (theta vs probability) - only 3.5× improvement
+- ❌ Model specification (after correction) - only 22× improvement
+- ❌ Sleep/state covariates - no effect
+
+**The finding IS explained by:**
+- ✅ **Sparse design:** 4 timepoints → 14-51% reliability for slopes
+- ✅ **Appropriate shrinkage:** LMM correctly downweights unreliable estimates
+- ✅ **LR test:** Random slopes don't improve model fit (p = 0.69)
+- ✅ **Raw data:** Even unshrunk, raw ICC = 0.12 (still below literature 0.30-0.50)
+
+### What This Means for the Thesis
+
+**You CANNOT claim:**
+- "People don't differ in forgetting rates" (design lacks power to detect)
+- "VR memory has homogeneous forgetting" (unfalsifiable with this design)
+- "Forgetting is a universal process" (overgeneralization)
+
+**You CAN claim:**
+- "This design was optimized for group-level trajectory modeling, not individual slope estimation"
+- "ICC for intercepts (0.57) confirms reliable between-person baseline differences"
+- "Random slopes did not improve model fit, though this may reflect insufficient timepoints (n=4) rather than absence of true differences"
+- "Future studies with more intensive longitudinal sampling are needed to characterize individual forgetting rates"
+
+### The Honest Framing
+
+**Old narrative (invalid):** "We'll find individual differences in forgetting rates and explain them with cognitive/demographic predictors"
+
+**New narrative (supported by data):** "VR episodic memory shows strong individual differences in *baseline ability* (ICC = 0.57) but the current design cannot reliably estimate *individual forgetting rates*. With only 4 timepoints per participant, slope reliability is too low for meaningful individual-level trajectory analysis. Group-level findings (logarithmic forgetting, consolidation patterns) are robust; individual-level slope claims require more intensive designs."
+
+### Recommendation: Do NOT Report ICC_slope
+
+Instead:
+1. Report **fixed effects** (population-level forgetting curve) - well-powered, robust
+2. Report **ICC_intercept** (0.57) - reliable individual differences in baseline
+3. Note in limitations: "Individual forgetting rates could not be reliably estimated with 4 timepoints per participant"
+4. Recommend future work: "Intensive longitudinal designs (8+ timepoints) needed for individual trajectory analysis"
+
+### The One Hope: Confidence Data
+
+**Type 3 data (confidence ratings)** may reveal individual slope differences that accuracy cannot:
+- Confidence is continuous (1-5 scale), not dichotomous
+- Each item provides 5× more information than 0/1 accuracy
+- Higher reliability → less shrinkage → more slope variance detectable
+- If confidence shows ICC_slope ≈ 0.30 while accuracy shows 0.01, this points to accuracy measurement limitation
+
+**This should be investigated in Chapter 6.**
+
+### Information Loss from Dichotomous Data
+
+**Additional factor:** Dichotomous (0/1) accuracy data has inherent limitations:
+
+| Metric | Value |
+|--------|-------|
+| Items per test | 68 (after purification) |
+| Binomial SE of sum score | 3.17 items |
+| Binomial SE of change score | 4.49 items |
+| Observed SD of T1→T4 change | 10.28 items |
+| Signal-to-noise ratio | 2.29 |
+| Reliability of change scores | 81% maximum |
+
+Even with perfect analysis, dichotomous data limits slope reliability to ~80%. Continuous data (confidence) would have 5-10× better signal-to-noise.
+
+---
+
+**End of Investigation Section**
+
+**Bottom line:** The ICC_slope anomaly is primarily a design limitation (4 timepoints), not a biological finding or analysis error. The thesis should not attempt to interpret individual forgetting rate differences from this data.

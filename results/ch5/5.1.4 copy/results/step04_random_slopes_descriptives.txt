@@ -1,0 +1,18 @@
+Random Slopes Descriptive Statistics
+==================================================
+
+Sample size: 100 participants
+
+Distribution:
+  Mean:   -0.0000
+  SD:     0.0045
+  Min:    -0.0103
+  Q1:     -0.0028
+  Median: -0.0007
+  Q3:     0.0024
+  Max:    0.0128
+
+Interpretation:
+  Negative slopes = faster forgetting than average
+  Positive slopes = slower forgetting than average
+  Zero slope = average forgetting rate
