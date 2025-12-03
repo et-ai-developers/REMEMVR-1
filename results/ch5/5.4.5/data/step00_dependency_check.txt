@@ -1,0 +1,22 @@
+RQ 5.4.5 Dependency Verification Report
+========================================
+
+RQ 5.4.1 Status: success
+
+Files Loaded:
+- step02_purified_items.csv: 50 items
+- step03_theta_scores.csv: 400 observations
+- step00_tsvr_mapping.csv: 400 observations
+- dfData.csv: 400 rows x 214 columns
+
+Item Mapping:
+- Total congruence items: 72
+- Retained after purification: 50
+- Overall retention rate: 69.4%
+
+By Dimension:
+- Common: 19/24 (79.2%)
+- Congruent: 18/24 (75.0%)
+- Incongruent: 13/24 (54.2%)
+
+Validation: PASS

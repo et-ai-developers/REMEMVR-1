@@ -1,0 +1,18 @@
+[START] Step 03: Compute Purified CTT Mean Scores
+[LOAD] Reading /home/etai/projects/REMEMVR/data/cache/dfData.csv
+[LOADED] 400 rows, 214 columns
+[CREATED] composite_ID column (e.g., A010_1)
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.1/data/step02_purified_items.csv
+[LOADED] 50 purified items
+[FILTER] Found 50 TQ columns in dfData that match purified_items
+[ANALYSIS] Computing mean scores by dimension
+[COMPUTED] 400 composite_IDs processed
+[VALIDATION] Checking all CTT scores in [0, 1]
+[PASS] ctt_purified_common in [0.197, 1.000]
+[PASS] ctt_purified_congruent in [0.167, 1.000]
+[PASS] ctt_purified_incongruent in [0.154, 1.000]
+[VALIDATION] Checking for NaN values
+[PASS] No NaN values found
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step03_ctt_purified_scores.csv
+[SAVED] 400 rows, 4 columns
+[SUCCESS] Step 03 complete

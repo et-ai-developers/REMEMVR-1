@@ -1,0 +1,18 @@
+[START] Step 02: Compute Full CTT Mean Scores
+[LOAD] Reading /home/etai/projects/REMEMVR/data/cache/dfData.csv
+[LOADED] 400 rows, 214 columns
+[CREATED] composite_ID column (e.g., A010_1)
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step00_full_item_list.csv
+[LOADED] 72 items
+[FILTER] Found 72 TQ columns in dfData that match full_item_list
+[ANALYSIS] Computing mean scores by dimension
+[COMPUTED] 400 composite_IDs processed
+[VALIDATION] Checking all CTT scores in [0, 1]
+[PASS] ctt_full_common in [0.229, 0.979]
+[PASS] ctt_full_congruent in [0.229, 0.958]
+[PASS] ctt_full_incongruent in [0.208, 0.938]
+[VALIDATION] Checking for NaN values
+[PASS] No NaN values found
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step02_ctt_full_scores.csv
+[SAVED] 400 rows, 4 columns
+[SUCCESS] Step 02 complete
