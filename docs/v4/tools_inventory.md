@@ -489,6 +489,54 @@
 
 ---
 
+### compute_ctt_mean_scores_by_factor
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute CTT mean scores (proportion correct) per UID × test × factor. Core CTT computation for IRT-CTT convergence analyses. Works with any factor type: domain (What/Where/When), paradigm (IFR/ICR/IRE), or congruence (Common/Congruent/Incongruent). |
+| **Inputs** | `df_wide: DataFrame` (wide format with UID, TEST, composite_ID, item columns), `item_factor_df: DataFrame` (item-to-factor mapping), `factor_col: str = 'factor'`, `item_col: str = 'item_name'`, `include_factors: Optional[List[str]] = None` (filter to subset of factors) |
+| **Outputs** | `DataFrame[composite_ID, UID, test, factor, CTT_score, n_items]` |
+| **Reference** | RQ 5.2.4 step01_compute_ctt_mean_scores.py, RQ 5.3.5, RQ 5.4.4 |
+| **Notes** | CTT_score is proportion correct (0-1 range). n_items counts items per factor. Handles missing items gracefully (uses available items). Raises ValueError on empty data. 27/27 tests GREEN. |
+
+---
+
+### compute_pearson_correlations_with_correction
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Pearson correlations between IRT and CTT scores with Holm-Bonferroni correction. Implements Decision D068 dual p-value reporting (p_uncorrected + p_holm). Computes correlations per factor plus overall (all factors pooled). |
+| **Inputs** | `df: DataFrame` (with IRT and CTT score columns), `irt_col: str = 'IRT_score'`, `ctt_col: str = 'CTT_score'`, `factor_col: str = 'factor'`, `thresholds: Optional[List[float]] = [0.70, 0.90]` |
+| **Outputs** | `DataFrame[factor, r, CI_lower, CI_upper, p_uncorrected, p_holm, n, threshold_X.XX]` |
+| **Reference** | Decision D068 (dual p-value reporting), Holm (1979), RQ 5.2.4 step02_correlations.py |
+| **Notes** | Uses Fisher z-transform for 95% CI. Holm-Bonferroni is less conservative than Bonferroni but maintains FWER control. Includes 'Overall' row (all factors pooled). Threshold columns are boolean. 27/27 tests GREEN. |
+
+---
+
+### compute_cohens_kappa_agreement
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Cohen's kappa for agreement between two significance classifications. Assesses agreement between IRT and CTT models on which effects are statistically significant. Accounts for chance agreement. |
+| **Inputs** | `classifications_1: List[bool]` (e.g., IRT model significance), `classifications_2: List[bool]` (e.g., CTT model significance), `labels: Optional[List[str]] = None` (effect names for reporting) |
+| **Outputs** | `Dict[kappa: float, agreement_percent: float, interpretation: str, n_effects: int, substantial_agreement: bool, confusion_matrix: Dict]` |
+| **Reference** | Cohen (1960), Landis & Koch (1977), RQ 5.2.4 step05 |
+| **Notes** | Interpretation thresholds per Landis & Koch: <0.20 slight, 0.20-0.40 fair, 0.40-0.60 moderate, 0.60-0.80 substantial, ≥0.80 almost perfect. substantial_agreement is True when kappa > 0.60. 27/27 tests GREEN. |
+
+---
+
+### compare_lmm_fit_aic_bic
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compare model fit between two LMMs using AIC and BIC. Computes delta (model2 - model1) and interprets per Burnham & Anderson (2002). |
+| **Inputs** | `aic_model1: float`, `bic_model1: float`, `aic_model2: float`, `bic_model2: float`, `model1_name: str = 'Model1'`, `model2_name: str = 'Model2'` |
+| **Outputs** | `DataFrame[metric, {model1_name}, {model2_name}, delta, interpretation]` (2 rows: AIC, BIC) |
+| **Reference** | Burnham & Anderson (2002), RQ 5.2.4 step06 |
+| **Notes** | Interpretation thresholds: \|delta\|<2 equivalent, 2-4 weak evidence, 4-7 moderate evidence, >7 strong evidence. Negative delta = model2 better. 27/27 tests GREEN. |
+
+---
+
 ### validate_numeric_range
 
 | Field | Value |

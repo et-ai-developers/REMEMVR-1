@@ -1,0 +1,358 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.3.5 - IRT-CTT Convergence for Paradigm-Specific Forgetting
+
+analysis_tools:
+  compute_ctt_mean_scores_by_factor:
+    module: "tools.analysis_ctt"
+    function: "compute_ctt_mean_scores_by_factor"
+    signature: "compute_ctt_mean_scores_by_factor(df_wide: DataFrame, item_factor_df: DataFrame, factor_col: str = 'factor', item_col: str = 'item_name', include_factors: Optional[List[str]] = None) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    description: "Compute CTT mean scores (proportion correct) per UID x test x paradigm using purified items from RQ 5.3.1"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compute_ctt_mean_scores_by_factor"
+
+  compute_pearson_correlations_with_correction:
+    module: "tools.analysis_ctt"
+    function: "compute_pearson_correlations_with_correction"
+    signature: "compute_pearson_correlations_with_correction(df: DataFrame, irt_col: str = 'IRT_score', ctt_col: str = 'CTT_score', factor_col: str = 'factor', thresholds: Optional[List[float]] = [0.70, 0.90]) -> DataFrame"
+    validation_tool: "validate_contrasts_d068"
+
+    description: "Compute Pearson correlations between IRT and CTT per paradigm with Holm-Bonferroni correction (Decision D068)"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compute_pearson_correlations_with_correction"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_model_convergence"
+
+    description: "Fit LMM using TSVR (Decision D070) as time variable for both IRT and CTT trajectories with identical formula"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    description: "Extract fixed effects table from fitted LMM for IRT vs CTT coefficient comparison"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_fixed_effects_from_lmm"
+
+  compute_cohens_kappa_agreement:
+    module: "tools.analysis_ctt"
+    function: "compute_cohens_kappa_agreement"
+    signature: "compute_cohens_kappa_agreement(classifications_1: List[bool], classifications_2: List[bool], labels: Optional[List[str]] = None) -> Dict"
+    validation_tool: "validate_data_format"
+
+    description: "Compute Cohen's kappa for agreement between IRT and CTT significance classifications (threshold: kappa > 0.60)"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compute_cohens_kappa_agreement"
+
+  compare_lmm_fit_aic_bic:
+    module: "tools.analysis_ctt"
+    function: "compare_lmm_fit_aic_bic"
+    signature: "compare_lmm_fit_aic_bic(aic_model1: float, bic_model1: float, aic_model2: float, bic_model2: float, model1_name: str = 'Model1', model2_name: str = 'Model2') -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    description: "Compare IRT and CTT model fit using AIC and BIC per Burnham & Anderson (2002)"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compare_lmm_fit_aic_bic"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_data_format"
+
+    description: "Comprehensive LMM assumption validation (7 diagnostics) for both IRT and CTT models"
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_assumptions_comprehensive"
+
+validation_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+    criteria:
+      - "File exists at specified path"
+      - "File size >= min_size_bytes (0 = no minimum)"
+      - "Path is file not directory"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        file_path: "str (path checked)"
+        size_bytes: "int (file size, 0 if doesn't exist)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_load_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate dependency files from RQ 5.3.1 exist before loading"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - check_file_exists"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names case-sensitive match"
+      - "No missing columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate required columns exist in DataFrame (used across multiple steps)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_columns"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
+
+    criteria:
+      - "All values in [min_val, max_val] inclusive"
+      - "No NaN values"
+      - "No infinite values"
+      - "Violations list limited to first 10 for reporting"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_ctt_scores.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate CTT_mean in [0, 1] and theta values in expected ranges"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict"
+
+    criteria:
+      - "p_uncorrected column present"
+      - "At least one correction method column (p_bonferroni, p_tukey, or p_holm)"
+      - "p_corrected >= p_uncorrected (mathematical constraint)"
+      - "Decision D068 dual p-value reporting compliance"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_correlations.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate correlation results include dual p-values per Decision D068"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_contrasts_d068"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels MixedLMResults) -> Dict"
+
+    criteria:
+      - "Model converged attribute = True"
+      - "No convergence warnings"
+      - "Handles missing converged attribute gracefully"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_parallel_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate both IRT and CTT models converged successfully with identical structure"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_model_convergence"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+      - "Convergence status documented"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        convergence_status: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_parallel_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM convergence status and warnings"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_lmm_residuals:
+    module: "tools.validation"
+    function: "validate_lmm_residuals"
+    signature: "validate_lmm_residuals(residuals: ndarray, alpha: float = 0.05) -> Dict[str, Any]"
+
+    criteria:
+      - "Residuals approximately normal (Kolmogorov-Smirnov test p > 0.05)"
+      - "KS test statistic and p-value reported"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        normal: "bool"
+        ks_statistic: "float"
+        p_value: "float"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_validate_lmm_assumptions.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Test LMM residuals for normality (part of 7-diagnostic suite)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_residuals"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict"
+
+    criteria:
+      - "All required columns present"
+      - "Case-sensitive column name matching"
+      - "Column order irrelevant"
+      - "Empty DataFrame returns invalid if required_cols specified"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_cols: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame format for fixed effects, agreement metrics, fit comparison tables"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict"
+
+    criteria:
+      - "All required domains present in plot data"
+      - "All required groups present in plot data"
+      - "No missing categories that would create incomplete visualizations"
+      - "Configurable column names for domain and group variables"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step08_prepare_trajectory_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Verify all paradigms and measurement types present in trajectory plot data"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_plot_data_completeness"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 9
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D039", "D068", "D070"]
+  notes: |
+    RQ 5.3.5 IRT-CTT Convergence Analysis Tool Catalog
+
+    This RQ validates methodological convergence between IRT theta scores and CTT
+    mean scores for paradigm-specific forgetting trajectories (Free/Cued/Recognition).
+
+    Tool usage deduplication:
+    - validate_data_columns: Used in Steps 0, 1, 7, 8 (file loading and plot data)
+    - validate_data_format: Used in Steps 5, 6 (fixed effects and fit comparison)
+    - validate_numeric_range: Used in Steps 1, 7 (CTT scores and plot data)
+    - validate_model_convergence: Used in Step 3 (both IRT and CTT models)
+
+    Decision D068 compliance:
+    - compute_pearson_correlations_with_correction: Includes Holm-Bonferroni correction
+    - validate_contrasts_d068: Validates dual p-value reporting
+
+    Decision D070 compliance:
+    - fit_lmm_trajectory_tsvr: Uses TSVR_hours not nominal days
+
+    Decision D039 compliance:
+    - CTT computed on purified items from RQ 5.3.1 (fair comparison)
+
+    Cross-RQ Dependencies:
+    - RQ 5.3.1 outputs: theta_scores, purified_items, tsvr_mapping, best_model_formula
+    - All dependency files loaded in Step 0 with existence validation
+
+    Structural Equivalence Requirement:
+    - Both IRT and CTT models fitted with identical formula
+    - Both models must converge OR both simplified equally
+    - validate_model_convergence checks equivalence
+
+    Validation Architecture:
+    - Every analysis step paired with validation tool
+    - File existence checks before loading (Step 0)
+    - Range checks after computation (Steps 1, 7)
+    - Format checks after extraction (Steps 5, 6, 8)
+    - Convergence checks after fitting (Step 3)
+    - Assumption checks after LMM (Step 4)
+    - D068 compliance checks for all hypothesis tests (Step 2, 5)

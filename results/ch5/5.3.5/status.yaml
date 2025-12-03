@@ -36,12 +36,22 @@ rq_planner:
     Expected outputs: 22 data files (correlations, LMM summaries, coefficient comparisons, agreement metrics, fit comparison, plot data). Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
   context_dump: |
+    Tool catalog created: 7 analysis + 9 validation tools cataloged for IRT-CTT convergence analysis
+    Cross-RQ dependencies: RQ 5.3.1 outputs (theta_scores, purified_items, tsvr_mapping, best_model_formula)
+    All tools verified exist in tools_inventory.md (CTT tools migrated: compute_ctt_mean_scores_by_factor, compute_pearson_correlations_with_correction, compute_cohens_kappa_agreement, compare_lmm_fit_aic_bic)
+    Decision D068 compliance: Dual p-value reporting via validate_contrasts_d068
+    Decision D070 compliance: fit_lmm_trajectory_tsvr uses TSVR_hours
 
 rq_analysis:
-  status: pending
+  status: success
+  timestamp: "2025-12-03T02:00:00Z"
   context_dump: |
+    8 steps specified with validation (IRT-CTT convergence: correlations + parallel LMMs + agreement)
+    Analysis type: CTT computation, Pearson correlations (D068 dual p-values), parallel LMM fitting (identical formula), LMM assumptions (7 diagnostics), fixed effects comparison (Cohen's kappa), AIC/BIC comparison, 2 plot datasets
+    Cross-RQ dependencies: RQ 5.3.1 (theta scores, purified items, TSVR mapping, best model formula)
+    Decisions embedded: D039 (purified items), D068 (dual p-values), D070 (TSVR time variable)
 
 rq_inspect:
   status: pending
@@ -54,3 +64,14 @@ rq_plots:
 rq_results:
   status: pending
   context_dump: |
+
+analysis_steps:
+  step00_load_dependencies: pending
+  step01_compute_ctt_scores: pending
+  step02_compute_correlations: pending
+  step03_fit_parallel_lmms: pending
+  step04_validate_lmm_assumptions: pending
+  step05_compare_fixed_effects: pending
+  step06_compare_model_fit: pending
+  step07_prepare_scatterplot_data: pending
+  step08_prepare_trajectory_data: pending

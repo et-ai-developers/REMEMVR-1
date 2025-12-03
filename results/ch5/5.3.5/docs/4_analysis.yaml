@@ -1,0 +1,733 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-03
+# RQ: ch5/5.3.5
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "5.3.5"
+  rq_title: "IRT-CTT Convergence for Paradigm-Specific Forgetting"
+  total_steps: 8
+  analysis_type: "IRT-CTT Convergence Analysis (Correlation + Parallel LMM + Agreement Metrics)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-03T02:00:00Z"
+  dependencies:
+    - "RQ 5.3.1 (Paradigm-Specific Trajectories - theta scores, purified items, TSVR mapping, best model formula)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Dependencies from RQ 5.3.1
+  # --------------------------------------------------------------------------
+  - name: "step00_load_dependencies"
+    step_number: "00"
+    description: "Load IRT theta scores, TSVR mapping, purified items, and best model formula from RQ 5.3.1. Verify all required files exist with expected structure."
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check results/ch5/5.3.1/status.yaml shows rq_inspect: success (dependency completion verification)"
+        - "Load results/ch5/5.3.1/data/step03_theta_scores.csv -> verify 400 rows x 7 columns (composite_ID + 3 theta + 3 se)"
+        - "Load results/ch5/5.3.1/data/step00_tsvr_mapping.csv -> verify 400 rows x 5 columns (composite_ID, UID, TEST, TSVR_hours, Days)"
+        - "Load results/ch5/5.3.1/data/step02_purified_items.csv -> verify 40-80 rows x 5 columns (item_name, paradigm, dimension, a, b)"
+        - "Count items per paradigm (IFR, ICR, IRE) -> verify >= 10 items each (minimum for stable IRT)"
+        - "Verify composite_ID uniqueness across theta and TSVR files (no duplicates)"
+        - "Read data/cache/dfData.csv header -> verify all purified item tags present as columns"
+        - "Copy theta_scores.csv, tsvr_mapping.csv, purified_items.csv to this RQ's data/ folder"
+        - "Save dependency verification report to data/step00_dependency_verification.txt"
+
+      input_files:
+        - path: "results/ch5/5.3.1/status.yaml"
+          description: "RQ 5.3.1 completion status (must show rq_inspect: success)"
+        - path: "results/ch5/5.3.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_IFR", "theta_ICR", "theta_IRE", "se_IFR", "se_ICR", "se_IRE"]
+          description: "Final IRT theta scores from RQ 5.3.1 Pass 2 calibration (400 rows)"
+        - path: "results/ch5/5.3.1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "Days"]
+          description: "Time Since VR mapping from RQ 5.3.1 (400 rows)"
+        - path: "results/ch5/5.3.1/data/step02_purified_items.csv"
+          required_columns: ["item_name", "paradigm", "dimension", "a", "b"]
+          description: "Purified item list from RQ 5.3.1 Decision D039 (40-80 rows)"
+        - path: "data/cache/dfData.csv"
+          description: "Project-level raw data cache (verify purified item tags present as columns)"
+
+      output_files:
+        - path: "data/step00_dependency_verification.txt"
+          description: "Text report documenting dependency check results (RQ 5.3.1 completion status, file row counts, item counts per paradigm, composite_ID uniqueness verification)"
+        - path: "data/step00_irt_theta.csv"
+          description: "Copy of theta scores for this RQ's analysis (400 rows x 7 columns)"
+        - path: "data/step00_tsvr_mapping.csv"
+          description: "Copy of TSVR mapping for this RQ's analysis (400 rows x 5 columns)"
+        - path: "data/step00_purified_items.csv"
+          description: "Copy of purified item list for this RQ's analysis (40-80 rows x 5 columns)"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      parameters:
+        file_path: "data/step00_dependency_verification.txt"
+        min_size_bytes: 100
+
+      criteria:
+        - "Dependency verification report exists (size > 100 bytes)"
+        - "All 4 dependency files loaded successfully"
+        - "Theta scores: 400 rows with 7 columns"
+        - "TSVR mapping: 400 rows with 5 columns"
+        - "Purified items: 40-80 rows with 5 columns"
+        - "Item counts per paradigm >= 10 (IFR, ICR, IRE)"
+        - "No duplicate composite_IDs"
+        - "All purified item tags present in dfData.csv"
+
+      on_failure:
+        action: "raise FileNotFoundError('Dependency verification failed - see error details')"
+        log_to: "logs/step00_load_dependencies.log"
+
+    log_file: "logs/step00_load_dependencies.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute CTT Mean Scores per Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_ctt_scores"
+    step_number: "01"
+    description: "Compute Classical Test Theory (CTT) mean scores as proportion correct for each UID-TEST-paradigm combination using purified items from RQ 5.3.1 (fair IRT-CTT comparison on same item set)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compute_ctt_mean_scores_by_factor"
+      signature: "compute_ctt_mean_scores_by_factor(df_wide: DataFrame, item_factor_df: DataFrame, factor_col: str = 'factor', item_col: str = 'item_name', include_factors: Optional[List[str]] = None) -> DataFrame"
+
+      input_files:
+        - path: "data/step00_purified_items.csv"
+          required_columns: ["item_name", "paradigm", "dimension", "a", "b"]
+          variable_name: "purified_items"
+          description: "Purified item list from Step 0 (40-80 items across 3 paradigms)"
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "Days"]
+          variable_name: "tsvr_mapping"
+          description: "TSVR mapping from Step 0 (400 rows: 100 UID x 4 TEST)"
+        - path: "data/cache/dfData.csv"
+          variable_name: "df_data"
+          description: "Raw data cache with binary item responses (filter to purified items + UID-TEST from tsvr_mapping)"
+
+      output_files:
+        - path: "data/step01_ctt_scores.csv"
+          variable_name: "ctt_scores"
+          description: "Long-format CTT scores (1200 rows: 400 x 3 paradigms). Columns: composite_ID, UID, TEST, paradigm, CTT_mean, n_items"
+        - path: "data/step01_ctt_computation_report.txt"
+          variable_name: "ctt_report"
+          description: "Text report: items per paradigm, missing response summary, CTT descriptives per paradigm"
+
+      parameters:
+        df_wide: "df_data_wide"
+        item_factor_df: "purified_items"
+        factor_col: "paradigm"
+        item_col: "item_name"
+        include_factors: ["IFR", "ICR", "IRE"]
+
+      returns:
+        type: "DataFrame"
+        variable_name: "ctt_scores"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
+
+      input_files:
+        - path: "data/step01_ctt_scores.csv"
+          variable_name: "ctt_scores"
+          source: "analysis call output (compute_ctt_mean_scores_by_factor return value)"
+
+      parameters:
+        data: "ctt_scores['CTT_mean']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "CTT_mean"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "CTT_mean in [0, 1] (proportion correct bounds)"
+        - "No NaN values in CTT_mean"
+        - "Exactly 1200 rows (100 UID x 4 TEST x 3 paradigms)"
+        - "n_items >= 5 per observation (minimum for stable mean)"
+        - "paradigm in {IFR, ICR, IRE} only"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_compute_ctt_scores.log"
+
+    log_file: "logs/step01_compute_ctt_scores.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Pearson Correlations (IRT vs CTT per Paradigm)
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_correlations"
+    step_number: "02"
+    description: "Compute Pearson correlations between IRT theta and CTT mean scores for each paradigm (IFR, ICR, IRE) plus overall. Test against convergence thresholds (r > 0.70 strong, r > 0.90 exceptional) with Holm-Bonferroni correction per Decision D068."
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compute_pearson_correlations_with_correction"
+      signature: "compute_pearson_correlations_with_correction(df: DataFrame, irt_col: str = 'IRT_score', ctt_col: str = 'CTT_score', factor_col: str = 'factor', thresholds: Optional[List[float]] = [0.70, 0.90]) -> DataFrame"
+
+      input_files:
+        - path: "data/step00_irt_theta.csv"
+          required_columns: ["composite_ID", "theta_IFR", "theta_ICR", "theta_IRE", "se_IFR", "se_ICR", "se_IRE"]
+          variable_name: "irt_theta"
+          description: "IRT theta scores from Step 0 (400 rows, wide format)"
+        - path: "data/step01_ctt_scores.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "paradigm", "CTT_mean", "n_items"]
+          variable_name: "ctt_scores"
+          description: "CTT scores from Step 1 (1200 rows, long format)"
+
+      output_files:
+        - path: "data/step02_correlations.csv"
+          variable_name: "correlations"
+          description: "Correlation table (4 rows: IFR, ICR, IRE, Overall). Columns: paradigm, n, r, p_uncorrected, p_bonferroni, threshold_0.70, threshold_0.90, interpretation"
+        - path: "data/step02_merged_irt_ctt.csv"
+          variable_name: "merged_data"
+          description: "Wide-format merged IRT-CTT data (400 rows). Columns: composite_ID, UID, TEST, theta_IFR/ICR/IRE, CTT_IFR/ICR/IRE, se_IFR/ICR/IRE"
+
+      parameters:
+        df: "merged_irt_ctt_long"
+        irt_col: "theta"
+        ctt_col: "CTT_mean"
+        factor_col: "paradigm"
+        thresholds: [0.70, 0.90]
+
+      returns:
+        type: "DataFrame"
+        variable_name: "correlations"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict"
+
+      input_files:
+        - path: "data/step02_correlations.csv"
+          variable_name: "correlations"
+          source: "analysis call output (compute_pearson_correlations_with_correction return value)"
+
+      parameters:
+        contrasts_df: "correlations"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "p_uncorrected column present"
+        - "p_bonferroni column present (Holm-Bonferroni correction)"
+        - "p_bonferroni >= p_uncorrected (mathematical constraint)"
+        - "Decision D068 dual p-value reporting compliance"
+        - "Exactly 4 rows (IFR, ICR, IRE, Overall)"
+        - "r in [-1, 1] for all correlations"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_compute_correlations.log"
+
+    log_file: "logs/step02_compute_correlations.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Parallel LMMs (IRT vs CTT)
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_parallel_lmms"
+    step_number: "03"
+    description: "Fit parallel Linear Mixed Models using identical formula for IRT theta vs CTT mean scores. Formula determined by best-fitting model from RQ 5.3.1. If either model fails to converge, simplify both equally to maintain structural equivalence."
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step02_merged_irt_ctt.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "theta_IFR", "theta_ICR", "theta_IRE", "CTT_IFR", "CTT_ICR", "CTT_IRE"]
+          variable_name: "merged_data"
+          description: "Merged IRT-CTT wide data from Step 2 (400 rows)"
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "Days"]
+          variable_name: "tsvr_mapping"
+          description: "TSVR mapping from Step 0 (400 rows)"
+        - path: "results/ch5/5.3.1/data/step05_lmm_model_comparison.csv"
+          variable_name: "model_comparison"
+          description: "RQ 5.3.1 best model identification (use lowest AIC model formula)"
+
+      output_files:
+        - path: "data/step03_irt_lmm_input.csv"
+          variable_name: "irt_lmm_input"
+          description: "Long-format IRT LMM input (1200 rows: 400 x 3 paradigms). Columns: composite_ID, UID, TEST, TSVR_hours, paradigm, theta, time transformations"
+        - path: "data/step03_ctt_lmm_input.csv"
+          variable_name: "ctt_lmm_input"
+          description: "Long-format CTT LMM input (1200 rows, same structure as IRT but CTT_mean instead of theta)"
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          description: "Fitted IRT MixedLM model object (pickle)"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          description: "Fitted CTT MixedLM model object (pickle)"
+        - path: "data/step03_irt_lmm_summary.txt"
+          variable_name: "irt_summary"
+          description: "IRT model summary: formula, convergence status, fixed effects, random effects, fit indices"
+        - path: "data/step03_ctt_lmm_summary.txt"
+          variable_name: "ctt_summary"
+          description: "CTT model summary (same structure as IRT)"
+        - path: "data/step03_model_convergence_log.txt"
+          variable_name: "convergence_log"
+          description: "Convergence attempt log: formula attempted, IRT/CTT convergence status, simplifications applied, final structure used"
+
+      parameters:
+        theta_scores: "irt_lmm_input_or_ctt_lmm_input"
+        tsvr_data: "tsvr_mapping"
+        formula: "theta ~ paradigm * TSVR_hours_transformation"
+        groups: "UID"
+        re_formula: "~TSVR_hours_transformation | UID"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        unpacking: "irt_model, ctt_model"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: statsmodels MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr IRT model)"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr CTT model)"
+
+      parameters:
+        lmm_result: "irt_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Both IRT and CTT models converged (or both simplified equally)"
+        - "Structural equivalence maintained (identical random structure)"
+        - "No negative variance components (convergence failure indicator)"
+        - "1200 observations per model, 100 groups (participants)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_fit_parallel_lmms.log"
+
+    log_file: "logs/step03_fit_parallel_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Validate LMM Assumptions
+  # --------------------------------------------------------------------------
+  - name: "step04_validate_lmm_assumptions"
+    step_number: "04"
+    description: "Validate LMM assumptions for both IRT and CTT models using 7 diagnostic tests: linearity, normality of residuals, homoscedasticity, independence, normality of random effects, outliers, convergence. Compare violation patterns across models."
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+      input_files:
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          description: "Fitted IRT model from Step 3"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          description: "Fitted CTT model from Step 3"
+        - path: "data/step03_irt_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "paradigm", "theta"]
+          variable_name: "irt_input"
+          description: "IRT model input data (1200 rows)"
+        - path: "data/step03_ctt_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "paradigm", "CTT_mean"]
+          variable_name: "ctt_input"
+          description: "CTT model input data (1200 rows)"
+
+      output_files:
+        - path: "data/step04_irt_assumptions.csv"
+          variable_name: "irt_assumptions"
+          description: "IRT assumption diagnostic results (7 rows: one per test). Columns: test_name, statistic, p_value, threshold, result, interpretation"
+        - path: "data/step04_ctt_assumptions.csv"
+          variable_name: "ctt_assumptions"
+          description: "CTT assumption diagnostic results (7 rows, same structure as IRT)"
+        - path: "data/step04_assumptions_comparison.csv"
+          variable_name: "assumptions_comparison"
+          description: "Cross-model comparison (7 rows). Columns: test_name, irt_result, ctt_result, agreement, interpretation"
+        - path: "data/step04_irt_diagnostics_data.csv"
+          variable_name: "irt_diagnostics"
+          description: "IRT diagnostics for plotting (1200 rows). Columns: fitted, residuals, standardized_residuals, observation_index, cooks_distance"
+        - path: "data/step04_ctt_diagnostics_data.csv"
+          variable_name: "ctt_diagnostics"
+          description: "CTT diagnostics for plotting (1200 rows, same structure as IRT)"
+
+      parameters:
+        lmm_result: "irt_model_or_ctt_model"
+        data: "irt_input_or_ctt_input"
+        output_dir: "data/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "assumptions_results"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict"
+
+      input_files:
+        - path: "data/step04_irt_assumptions.csv"
+          variable_name: "irt_assumptions"
+          source: "analysis call output (validate_lmm_assumptions_comprehensive IRT results)"
+        - path: "data/step04_ctt_assumptions.csv"
+          variable_name: "ctt_assumptions"
+          source: "analysis call output (validate_lmm_assumptions_comprehensive CTT results)"
+
+      parameters:
+        df: "irt_assumptions"
+        required_cols: ["test_name", "statistic", "p_value", "threshold", "result", "interpretation"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 7 diagnostic tests run per model (IRT and CTT)"
+        - "At least 5/7 tests PASS for acceptable model"
+        - "result column in {PASS, FAIL, WARNING} only"
+        - "Cook's distance < 1.0 for >95% of observations"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_validate_lmm_assumptions.log"
+
+    log_file: "logs/step04_validate_lmm_assumptions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare Fixed Effects (IRT vs CTT)
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_fixed_effects"
+    step_number: "05"
+    description: "Compare fixed effects between IRT and CTT models. Extract coefficients with SE, z-values, dual p-values (Decision D068). Compute Cohen's kappa for agreement on significance classifications (threshold: kappa > 0.60 indicates substantial agreement)."
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+
+      input_files:
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          description: "Fitted IRT model from Step 3"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          description: "Fitted CTT model from Step 3"
+
+      output_files:
+        - path: "data/step05_irt_fixed_effects.csv"
+          variable_name: "irt_fixed_effects"
+          description: "IRT fixed effects (6-12 rows). Columns: term, coef, se, z, p_uncorrected, p_bonferroni, sig"
+        - path: "data/step05_ctt_fixed_effects.csv"
+          variable_name: "ctt_fixed_effects"
+          description: "CTT fixed effects (6-12 rows, same structure as IRT)"
+        - path: "data/step05_coefficient_comparison.csv"
+          variable_name: "coefficient_comparison"
+          description: "Side-by-side comparison (6-12 rows). Columns: term, IRT_coef, IRT_se, IRT_z, IRT_p_uncorrected, IRT_p_bonferroni, IRT_sig, CTT_coef, CTT_se, CTT_z, CTT_p_uncorrected, CTT_p_bonferroni, CTT_sig, agreement"
+        - path: "data/step05_agreement_metrics.csv"
+          variable_name: "agreement_metrics"
+          description: "Agreement metrics (3 rows). Columns: metric, value, threshold, result, interpretation"
+
+      parameters:
+        result: "irt_model_or_ctt_model"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "irt_fixed_effects_or_ctt_fixed_effects"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict"
+
+      input_files:
+        - path: "data/step05_irt_fixed_effects.csv"
+          variable_name: "irt_fixed_effects"
+          source: "analysis call output (extract_fixed_effects_from_lmm IRT model)"
+        - path: "data/step05_ctt_fixed_effects.csv"
+          variable_name: "ctt_fixed_effects"
+          source: "analysis call output (extract_fixed_effects_from_lmm CTT model)"
+
+      parameters:
+        contrasts_df: "irt_fixed_effects"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "p_uncorrected column present"
+        - "p_bonferroni column present (Bonferroni correction per Decision D068)"
+        - "p_bonferroni >= p_uncorrected (mathematical constraint)"
+        - "IRT and CTT row counts match (identical formula requirement)"
+        - "All term names match between IRT and CTT"
+        - "No NaN coefficients (model estimation successful)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_compare_fixed_effects.log"
+
+    log_file: "logs/step05_compare_fixed_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Compare Model Fit (AIC/BIC)
+  # --------------------------------------------------------------------------
+  - name: "step06_compare_model_fit"
+    step_number: "06"
+    description: "Compare IRT vs CTT model fit using AIC and BIC. Compute ΔAIC and ΔBIC (IRT - CTT). Interpret per Burnham & Anderson: |Δ| < 2 = equivalent fit, 2-10 = moderate evidence, > 10 = strong evidence for better model."
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_ctt"
+      function: "compare_lmm_fit_aic_bic"
+      signature: "compare_lmm_fit_aic_bic(aic_model1: float, bic_model1: float, aic_model2: float, bic_model2: float, model1_name: str = 'Model1', model2_name: str = 'Model2') -> DataFrame"
+
+      input_files:
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          description: "Fitted IRT model from Step 3 (extract AIC and BIC)"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          description: "Fitted CTT model from Step 3 (extract AIC and BIC)"
+
+      output_files:
+        - path: "data/step06_model_fit_comparison.csv"
+          variable_name: "fit_comparison"
+          description: "Model fit comparison (6 rows). Columns: metric, value, interpretation"
+        - path: "data/step06_fit_interpretation.txt"
+          variable_name: "fit_interpretation"
+          description: "Detailed interpretation text: ΔAIC, ΔBIC, overall conclusion, convergence implication"
+
+      parameters:
+        aic_model1: "irt_model.aic"
+        bic_model1: "irt_model.bic"
+        aic_model2: "ctt_model.aic"
+        bic_model2: "ctt_model.bic"
+        model1_name: "IRT"
+        model2_name: "CTT"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "fit_comparison"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict"
+
+      input_files:
+        - path: "data/step06_model_fit_comparison.csv"
+          variable_name: "fit_comparison"
+          source: "analysis call output (compare_lmm_fit_aic_bic return value)"
+
+      parameters:
+        df: "fit_comparison"
+        required_cols: ["metric", "value", "interpretation"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 6 rows (AIC_IRT, AIC_CTT, BIC_IRT, BIC_CTT, ΔAIC, ΔBIC)"
+        - "AIC and BIC positive and finite (negative log-likelihood impossible)"
+        - "No NaN values in any metric"
+        - "interpretation column non-empty for ΔAIC and ΔBIC rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compare_model_fit.log"
+
+    log_file: "logs/step06_compare_model_fit.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Prepare Scatterplot Data (IRT vs CTT Convergence)
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_scatterplot_data"
+    step_number: "07"
+    description: "Create scatterplot dataset (1200 rows: 100 UID x 4 TEST x 3 paradigms) with IRT_theta, CTT_mean, and fitted values from both models. For plotting: scatterplot IRT vs CTT colored by paradigm, y=x reference line, paradigm-specific regression lines."
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step02_merged_irt_ctt.csv (400 rows, wide format)"
+        - "Reshape from wide to long: pivot theta_IFR/ICR/IRE into single IRT_theta column with paradigm factor"
+        - "Reshape CTT_IFR/ICR/IRE into single CTT_mean column (aligned with paradigm)"
+        - "Load fitted IRT and CTT models from Step 3 (pickle files)"
+        - "Generate fitted values: IRT_fitted = predict(irt_model, long_data), CTT_fitted = predict(ctt_model, long_data)"
+        - "Combine into single dataset: UID, TEST, paradigm, IRT_theta, CTT_mean, IRT_fitted, CTT_fitted"
+        - "Sort by paradigm, then UID, then TEST (for organized plotting)"
+        - "Save to data/step07_scatterplot_data.csv (1200 rows)"
+
+      input_files:
+        - path: "data/step02_merged_irt_ctt.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "theta_IFR", "theta_ICR", "theta_IRE", "CTT_IFR", "CTT_ICR", "CTT_IRE"]
+          variable_name: "merged_data"
+          description: "Merged IRT-CTT wide data from Step 2 (400 rows)"
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          description: "Fitted IRT model from Step 3 (for predictions)"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          description: "Fitted CTT model from Step 3 (for predictions)"
+
+      output_files:
+        - path: "data/step07_scatterplot_data.csv"
+          variable_name: "scatterplot_data"
+          description: "Long-format scatterplot data (1200 rows). Columns: UID, TEST, paradigm, IRT_theta, CTT_mean, IRT_fitted, CTT_fitted"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
+
+      input_files:
+        - path: "data/step07_scatterplot_data.csv"
+          variable_name: "scatterplot_data"
+          source: "analysis call output (stdlib reshape and predict operations)"
+
+      parameters:
+        data: "scatterplot_data['IRT_theta']"
+        min_val: -4.0
+        max_val: 4.0
+        column_name: "IRT_theta"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 1200 rows (100 UID x 4 TEST x 3 paradigms)"
+        - "IRT_theta in [-4, 4] (typical IRT ability range)"
+        - "CTT_mean in [0, 1] (proportion correct bounds)"
+        - "No NaN values in IRT_theta, CTT_mean, IRT_fitted, CTT_fitted"
+        - "All 3 paradigms represented equally (400 rows each)"
+        - "No duplicate UID x TEST x paradigm combinations"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step07_prepare_scatterplot_data.log"
+
+    log_file: "logs/step07_prepare_scatterplot_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Prepare Trajectory Comparison Data (IRT vs CTT)
+  # --------------------------------------------------------------------------
+  - name: "step08_prepare_trajectory_data"
+    step_number: "08"
+    description: "Prepare trajectory comparison data with observed means and model predictions from both IRT and CTT. Aggregate to paradigm x test level (12 groups: 3 paradigms x 4 tests) with 95% CIs. For plotting: two-panel figure (IRT trajectories vs CTT trajectories)."
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_irt_lmm_input.csv (IRT long format, 1200 rows)"
+        - "Load data/step03_ctt_lmm_input.csv (CTT long format, 1200 rows)"
+        - "Load fitted IRT and CTT models from Step 3 (pickle files)"
+        - "Aggregate observed means per paradigm x TEST (12 groups): mean(theta) for IRT, mean(CTT_mean) for CTT"
+        - "Compute 95% CIs: mean ± 1.96 x SE where SE = SD / sqrt(N participants per group)"
+        - "Generate model predictions at group level: predict using IRT/CTT models on paradigm x TEST combinations with mean TSVR_hours per test"
+        - "Stack IRT and CTT rows with measurement_type column {IRT, CTT} for two-panel plotting"
+        - "Combine into single dataset: paradigm, TEST, TSVR_hours, measurement_type, observed_mean, model_prediction, CI_lower, CI_upper"
+        - "Save to data/step08_trajectory_data.csv (24 rows: 3 paradigms x 4 tests x 2 measurement types)"
+
+      input_files:
+        - path: "data/step03_irt_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "paradigm", "theta"]
+          variable_name: "irt_input"
+          description: "IRT LMM input from Step 3 (1200 rows)"
+        - path: "data/step03_ctt_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "TEST", "TSVR_hours", "paradigm", "CTT_mean"]
+          variable_name: "ctt_input"
+          description: "CTT LMM input from Step 3 (1200 rows)"
+        - path: "data/step03_irt_lmm_model.pkl"
+          variable_name: "irt_model"
+          description: "Fitted IRT model from Step 3 (for predictions)"
+        - path: "data/step03_ctt_lmm_model.pkl"
+          variable_name: "ctt_model"
+          description: "Fitted CTT model from Step 3 (for predictions)"
+
+      output_files:
+        - path: "data/step08_trajectory_data.csv"
+          variable_name: "trajectory_data"
+          description: "Trajectory comparison data (24 rows: 3 paradigms x 4 tests x 2 measurement types). Columns: paradigm, TEST, TSVR_hours, measurement_type, observed_mean, model_prediction, CI_lower, CI_upper"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict"
+
+      input_files:
+        - path: "data/step08_trajectory_data.csv"
+          variable_name: "trajectory_data"
+          source: "analysis call output (stdlib aggregation and prediction operations)"
+
+      parameters:
+        plot_data: "trajectory_data"
+        required_domains: ["IFR", "ICR", "IRE"]
+        required_groups: ["IRT", "CTT"]
+        domain_col: "paradigm"
+        group_col: "measurement_type"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 24 rows (3 paradigms x 4 tests x 2 measurement types)"
+        - "All 3 paradigms present: IFR, ICR, IRE"
+        - "Both measurement types present: IRT, CTT"
+        - "CI_lower < observed_mean < CI_upper for all rows (confidence interval validity)"
+        - "No NaN values in any column"
+        - "No duplicate paradigm x TEST x measurement_type combinations"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step08_prepare_trajectory_data.log"
+
+    log_file: "logs/step08_prepare_trajectory_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================
