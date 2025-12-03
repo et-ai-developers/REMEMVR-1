@@ -1,0 +1,64 @@
+[START] Step 01: Load Dependency Data from RQ 5.4.1
+[CHECK] Verifying RQ 5.4.1 completion status...
+[PASS] RQ 5.4.1 completion verified (status: success)
+[CHECK] Verifying dependency files exist...
+[PASS] All 3 dependency files exist
+[LOAD] Loading theta scores from RQ 5.4.1...
+[LOADED] Theta scores: 400 rows, 7 columns
+[PASS] Theta scores validated: 400 rows, all required columns present
+[LOAD] Loading LMM input from RQ 5.4.1...
+[LOADED] LMM input: 1200 rows, 9 columns
+[ERROR] LMM input missing columns: ['SE']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.4.6/code/step01_load_dependency_data.py", line 135, in <module>
+    raise ValueError(f"LMM input missing columns: {missing_lmm_cols}")
+ValueError: LMM input missing columns: ['SE']
+[START] Step 01: Load Dependency Data from RQ 5.4.1
+[CHECK] Verifying RQ 5.4.1 completion status...
+[PASS] RQ 5.4.1 completion verified (status: success)
+[CHECK] Verifying dependency files exist...
+[PASS] All 3 dependency files exist
+[LOAD] Loading theta scores from RQ 5.4.1...
+[LOADED] Theta scores: 400 rows, 7 columns
+[PASS] Theta scores validated: 400 rows, all required columns present
+[LOAD] Loading LMM input from RQ 5.4.1...
+[LOADED] LMM input: 1200 rows, 9 columns
+[PASS] Congruence levels validated: ['common', 'congruent', 'incongruent']
+[PASS] No NaN values in theta or TSVR_hours columns
+[WARNING] TSVR_hours range [1.00, 246.24] outside expected [0, 168]
+[LOAD] Loading reference LMM model from RQ 5.4.1...
+[ERROR] 'NoneType' object has no attribute 'f_locals'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.4.6/code/step01_load_dependency_data.py", line 180, in <module>
+    lmm_model = pickle.load(f)
+                ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/base/data.py", line 112, in __setstate__
+    _, design = dmatrices(d['formula'], data, eval_env=depth,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/highlevel.py", line 316, in dmatrices
+    eval_env = EvalEnvironment.capture(eval_env, reference=1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/patsy/eval.py", line 242, in capture
+    [frame.f_locals, frame.f_globals],
+     ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'f_locals'
+[START] Step 01: Load Dependency Data from RQ 5.4.1
+[CHECK] Verifying RQ 5.4.1 completion status...
+[PASS] RQ 5.4.1 completion verified (status: success)
+[CHECK] Verifying dependency files exist...
+[PASS] All dependency files exist
+[LOAD] Loading theta scores from RQ 5.4.1...
+[LOADED] Theta scores: 400 rows, 7 columns
+[PASS] Theta scores validated: 400 rows, all required columns present
+[LOAD] Loading LMM input from RQ 5.4.1...
+[LOADED] LMM input: 1200 rows, 9 columns
+[PASS] Congruence levels validated: ['common', 'congruent', 'incongruent']
+[PASS] No NaN values in theta or TSVR_hours columns
+[INFO] TSVR_hours range: [1.00, 246.24] hours
+[SAVE] Caching LMM input for local workflow...
+[SAVED] step01_loaded_lmm_input.csv (1200 rows, 9 columns)
+[REPORT] Writing validation report...
+[SAVED] step01_dependency_validation_report.txt
+[SUCCESS] Step 01 complete - All dependencies validated

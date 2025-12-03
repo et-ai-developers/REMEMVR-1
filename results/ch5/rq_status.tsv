@@ -27,6 +27,6 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.4.3	Congruence	Age Effects	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
 5.4.4	Congruence	IRT-CTT	COMPLETE 2025-12-04. r=0.87-0.91 all >0.70. κ=0.667 substantial. 83.3% agreement. Validates 5.4.1 null schema findings robust to measurement.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1L)
 5.4.5	Congruence	Purified CTT	COMPLETE 2025-12-04. Purified CTT higher r (0.88-0.91) but WORSE AIC for Common/Congruent (paradox). Incongruent 54% retention lowest.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
-5.4.6	Congruence	Variance Decomp	All 3 congruence levels valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
-5.4.7	Congruence	Clustering	All 3 congruence levels valid. K-means stdlib only.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
+5.4.6	Congruence	Variance Decomp	COMPLETE 2025-12-04. ICC_slope=0.000 ALL levels (forgetting NOT trait-like). ICC_intercept: Congruent=0.365 highest, Common=0.277, Incongruent=0.267. Replicates RQ 5.2.6 domains finding.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
+5.4.7	Congruence	Clustering	COMPLETE 2025-12-04. K=6 by BIC but WEAK quality: silhouette=0.254, Jaccard=0.592. Slopes~0 (per 5.4.6). Null finding: no schema-selective memory profiles.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
 5.4.8	Congruence	Item Difficulty	All 3 congruence levels valid. GLMM via pymer4 (external).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE

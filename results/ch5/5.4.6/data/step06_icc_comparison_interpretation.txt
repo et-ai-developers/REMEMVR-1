@@ -1,0 +1,38 @@
+================================================================================
+ICC COMPARISON ACROSS CONGRUENCE LEVELS
+================================================================================
+
+RANKING BY ICC_SLOPE_SIMPLE (Forgetting Rate Stability):
+--------------------------------------------------------------------------------
+
+Rank 1: Congruent
+  ICC Intercept:         0.3650
+  ICC Slope (Simple):    0.0000
+  ICC Slope (Cond.):     0.2294
+
+Rank 2: Incongruent
+  ICC Intercept:         0.2665
+  ICC Slope (Simple):    0.0000
+  ICC Slope (Cond.):     0.3481
+
+Rank 3: Common
+  ICC Intercept:         0.2769
+  ICC Slope (Simple):    0.0000
+  ICC Slope (Cond.):     0.3135
+
+================================================================================
+
+INTERPRETATION:
+--------------------------------------------------------------------------------
+
+HIGHEST STABILITY: Congruent congruence
+  ICC_slope = 0.0000
+  -> LOW between-person differences in forgetting rates
+
+THEORETICAL IMPLICATIONS:
+
+PATTERN: Congruent > Incongruent ICC
+  Schema congruence predicts MORE stable individual differences
+  in forgetting rates (stronger trait-like stability).
+
+Common items show LOWEST stability (most situation-dependent).

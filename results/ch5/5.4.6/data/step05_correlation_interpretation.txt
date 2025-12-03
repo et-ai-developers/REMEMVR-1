@@ -1,0 +1,42 @@
+================================================================================
+INTERCEPT-SLOPE CORRELATION ANALYSIS
+Decision D068: Dual P-Value Reporting
+================================================================================
+
+BONFERRONI CORRECTION:
+  Family-wise alpha: 0.05
+  Number of tests: 3 (one per congruence level)
+  Corrected alpha: 0.0167 (0.05 / 3)
+
+================================================================================
+
+CONGRUENCE: Common
+--------------------------------------------------------------------------------
+  Pearson r:           1.0000
+  95% CI:             [ 1.0000,  1.0000]
+  p-value (raw):      0.0000
+  p-value (Bonf):     0.0000
+
+  DIRECTION: Positive correlation (higher baseline -> slower forgetting)
+  SIGNIFICANCE: Statistically significant after Bonferroni correction
+
+CONGRUENCE: Congruent
+--------------------------------------------------------------------------------
+  Pearson r:          -0.7917
+  95% CI:             [-0.8552, -0.7049]
+  p-value (raw):      0.0000
+  p-value (Bonf):     0.0000
+
+  DIRECTION: Negative correlation (higher baseline -> faster forgetting)
+  SIGNIFICANCE: Statistically significant after Bonferroni correction
+
+CONGRUENCE: Incongruent
+--------------------------------------------------------------------------------
+  Pearson r:           1.0000
+  95% CI:             [ 1.0000,  1.0000]
+  p-value (raw):      0.0000
+  p-value (Bonf):     0.0000
+
+  DIRECTION: Positive correlation (higher baseline -> slower forgetting)
+  SIGNIFICANCE: Statistically significant after Bonferroni correction
+

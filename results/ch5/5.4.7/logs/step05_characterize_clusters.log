@@ -1,0 +1,40 @@
+[START] Step 05: Characterize Clusters
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step00_random_effects_from_rq546.csv
+[BACKTRANSFORM] Converting z-scores to original scale
+  Means: [-7.31359417e-15 -3.85247390e-16 -1.47104551e-14 -1.08360586e-17
+  9.61795747e-18 -2.23627540e-17]
+  SDs: [3.29268371e-01 3.56469655e-01 3.18400544e-01 2.10391222e-04
+ 1.22172065e-03 4.69199260e-04]
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_centers_original_scale.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_centers_original_scale.csv
+[STATS] Computing cluster-specific summary statistics
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_summary_stats.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_summary_stats.csv
+[CLUSTERS]
+  Cluster 0: N=22, label=High
+    Common: I=0.1789, S=0.083595
+    Congruent: I=0.2146, S=0.000114
+    Incongruent: I=0.0004, S=0.000316
+  Cluster 1: N=17, label=Low
+    Common: I=-0.5128, S=-0.569555
+    Congruent: I=-0.4417, S=-0.000328
+    Incongruent: I=0.0016, S=-0.000651
+  Cluster 2: N=15, label=Low
+    Common: I=-0.2113, S=-0.251693
+    Congruent: I=-0.2395, S=-0.000135
+    Incongruent: I=0.0006, S=-0.000353
+  Cluster 3: N=22, label=Medium
+    Common: I=0.0149, S=0.128733
+    Congruent: I=-0.0592, S=0.000010
+    Incongruent: I=-0.0007, S=-0.000087
+  Cluster 4: N=18, label=High
+    Common: I=0.2181, S=0.355763
+    Congruent: I=0.2247, S=0.000139
+    Incongruent: I=-0.0015, S=0.000331
+  Cluster 5: N=6, label=High
+    Common: I=0.6162, S=0.397144
+    Congruent: I=0.6064, S=0.000394
+    Incongruent: I=-0.0006, S=0.000894
+[SUCCESS] Step 05 complete

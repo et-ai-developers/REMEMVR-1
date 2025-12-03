@@ -1,0 +1,21 @@
+[START] Step 04: Validate Clustering Quality
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[INFO] 100 samples, 6 clusters
+[METRIC] Computing silhouette score...
+  Silhouette score = 0.2539
+[METRIC] Computing Davies-Bouldin index...
+  Davies-Bouldin index = 1.0880
+[METRIC] Computing bootstrap Jaccard (100 iterations, 80% sample)...
+  Bootstrap Jaccard mean = 0.5922
+  Bootstrap Jaccard median = 0.5860
+  Bootstrap Jaccard min = 0.3056
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step04_cluster_quality_metrics.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step04_cluster_quality_metrics.csv
+[QUALITY SUMMARY]
+  silhouette: 0.2539 (threshold=0.40) [FAIL]
+  davies_bouldin: 1.0880 (threshold=1.50) [PASS]
+  jaccard_mean: 0.5922 (threshold=0.75) [FAIL]
+  jaccard_median: 0.5860 (threshold=0.75) [FAIL]
+  jaccard_min: 0.3056 (threshold=0.75) [FAIL]
+[SUCCESS] Step 04 complete

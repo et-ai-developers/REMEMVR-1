@@ -1,0 +1,48 @@
+================================================================================
+INTRACLASS CORRELATION COEFFICIENT (ICC) ESTIMATES
+Congruence-Stratified Variance Decomposition
+================================================================================
+
+ICC INTERPRETATION GUIDE:
+  Low:         ICC < 0.20 (most variance within-person)
+  Moderate:    0.20 <= ICC < 0.40
+  Substantial: ICC >= 0.40 (most variance between-person)
+
+================================================================================
+
+CONGRUENCE: Common
+--------------------------------------------------------------------------------
+  intercept                : 0.2769 (Moderate clustering (0.10-0.30))
+  slope_conditional        : 0.3135 (High clustering (0.30-0.75))
+  slope_simple             : 0.0000 (Low clustering (<0.10))
+
+  INTERPRETATION:
+    - Baseline stability: 27.7% of variance between-person
+    - Forgetting rate stability: 0.0% of slope variance between-person
+    - MODERATE between-person differences in initial memory
+    - LOW between-person differences in forgetting rates
+
+CONGRUENCE: Congruent
+--------------------------------------------------------------------------------
+  intercept                : 0.3650 (High clustering (0.30-0.75))
+  slope_conditional        : 0.2294 (Moderate clustering (0.10-0.30))
+  slope_simple             : 0.0000 (Low clustering (<0.10))
+
+  INTERPRETATION:
+    - Baseline stability: 36.5% of variance between-person
+    - Forgetting rate stability: 0.0% of slope variance between-person
+    - MODERATE between-person differences in initial memory
+    - LOW between-person differences in forgetting rates
+
+CONGRUENCE: Incongruent
+--------------------------------------------------------------------------------
+  intercept                : 0.2665 (Moderate clustering (0.10-0.30))
+  slope_conditional        : 0.3481 (High clustering (0.30-0.75))
+  slope_simple             : 0.0000 (Low clustering (<0.10))
+
+  INTERPRETATION:
+    - Baseline stability: 26.7% of variance between-person
+    - Forgetting rate stability: 0.0% of slope variance between-person
+    - MODERATE between-person differences in initial memory
+    - LOW between-person differences in forgetting rates
+

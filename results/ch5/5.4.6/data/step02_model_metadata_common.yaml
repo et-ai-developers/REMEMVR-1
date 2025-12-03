@@ -1,0 +1,10 @@
+aic: .nan
+bic: .nan
+congruence: Common
+converged: true
+formula: theta ~ TSVR_hours
+llf: -465.87851545738476
+n_groups: 100
+n_obs: 400
+re_formula: ~TSVR_hours | UID
+reml: true

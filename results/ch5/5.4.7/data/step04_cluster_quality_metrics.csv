@@ -1,0 +1,6 @@
+metric,value,threshold,pass
+silhouette,0.25394701437328,0.4,False
+davies_bouldin,1.0880270291164014,1.5,True
+jaccard_mean,0.5921524074570477,0.75,False
+jaccard_median,0.5860186494990381,0.75,False
+jaccard_min,0.30555555555552016,0.75,False

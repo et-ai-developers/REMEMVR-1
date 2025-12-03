@@ -1,0 +1,26 @@
+================================================================================
+RQ 5.4.6 DEPENDENCY VALIDATION REPORT
+================================================================================
+
+DEPENDENCY: RQ 5.4.1 (Schema-Specific IRT Calibration)
+
+RQ 5.4.1 Status: success
+
+DEPENDENCY FILES:
+  1. Theta scores: step03_theta_scores.csv
+     - Rows: 400
+     - Columns: 7
+  2. LMM input: step04_lmm_input.csv
+     - Rows: 1200
+     - Columns: 9
+     - Congruence levels: Common, Congruent, Incongruent
+
+DATA VALIDATION:
+  - Congruence levels: 3 unique (Common, Congruent, Incongruent)
+  - NaN in theta: 0
+  - NaN in TSVR_hours: 0
+  - TSVR_hours range: [1.00, 246.24] hours
+
+VALIDATION STATUS: PASS
+
+All dependency checks passed. Ready to proceed with congruence-stratified analysis.

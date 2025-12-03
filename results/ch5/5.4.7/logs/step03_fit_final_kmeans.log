@@ -1,0 +1,72 @@
+[START] Step 03: Fit Final K-means Model
+[LOAD] Reading optimal K from /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step02_optimal_k.txt
+[INFO] Optimal K = 6
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[LOADED] 100 rows, 7 columns
+[INFO] Fitting K-means with K=6, n_init=50, random_state=42
+[FITTED] Inertia = 118.6476
+[INFO] Cluster sizes:
+  Cluster 0: 22 participants (22.0%)
+  Cluster 1: 17 participants (17.0%)
+  Cluster 2: 15 participants (15.0%)
+  Cluster 3: 22 participants (22.0%)
+  Cluster 4: 18 participants (18.0%)
+  Cluster 5: 6 participants (6.0%)
+[SAVE] Writing cluster assignments to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVE] Writing cluster centers to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[VALIDATION] Validating cluster assignments
+[ERROR] validate_cluster_assignment() got an unexpected keyword argument 'cluster_labels'
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.4.7/code/step03_fit_final_kmeans.py", line 107, in <module>
+    validation_result = validate_cluster_assignment(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_cluster_assignment() got an unexpected keyword argument 'cluster_labels'
+[START] Step 03: Fit Final K-means Model
+[LOAD] Reading optimal K from /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step02_optimal_k.txt
+[INFO] Optimal K = 6
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[LOADED] 100 rows, 7 columns
+[INFO] Fitting K-means with K=6, n_init=50, random_state=42
+[FITTED] Inertia = 118.6476
+[INFO] Cluster sizes:
+  Cluster 0: 22 participants (22.0%)
+  Cluster 1: 17 participants (17.0%)
+  Cluster 2: 15 participants (15.0%)
+  Cluster 3: 22 participants (22.0%)
+  Cluster 4: 18 participants (18.0%)
+  Cluster 5: 6 participants (6.0%)
+[SAVE] Writing cluster assignments to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVE] Writing cluster centers to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[VALIDATION] Validating cluster assignments
+[ERROR] Validation failed: Clusters below minimum size (10): [5]
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.4.7/code/step03_fit_final_kmeans.py", line 114, in <module>
+    raise ValueError(f"Validation failed: {validation_result['message']}")
+ValueError: Validation failed: Clusters below minimum size (10): [5]
+[START] Step 03: Fit Final K-means Model
+[LOAD] Reading optimal K from /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step02_optimal_k.txt
+[INFO] Optimal K = 6
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[LOADED] 100 rows, 7 columns
+[INFO] Fitting K-means with K=6, n_init=50, random_state=42
+[FITTED] Inertia = 118.6476
+[INFO] Cluster sizes:
+  Cluster 0: 22 participants (22.0%)
+  Cluster 1: 17 participants (17.0%)
+  Cluster 2: 15 participants (15.0%)
+  Cluster 3: 22 participants (22.0%)
+  Cluster 4: 18 participants (18.0%)
+  Cluster 5: 6 participants (6.0%)
+[SAVE] Writing cluster assignments to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVE] Writing cluster centers to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[VALIDATION] Validating cluster assignments
+[VALIDATION PASS] Valid cluster assignment: 6 clusters, sizes {3: 22, 0: 22, 4: 18, 1: 17, 2: 15, 5: 6}
+[SUCCESS] Step 03 complete - 6 clusters assigned

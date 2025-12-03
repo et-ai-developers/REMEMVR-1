@@ -1,0 +1,83 @@
+================================================================================
+RANDOM EFFECTS DESCRIPTIVE STATISTICS
+================================================================================
+
+Total observations: 300
+Unique participants: 100
+Congruence levels: 3
+
+OVERALL STATISTICS (All Congruence Levels)
+--------------------------------------------------------------------------------
+
+Random Intercepts:
+  Mean:    -0.0000
+  Std:      0.3340
+  Min:     -0.8972
+  25%:     -0.2328
+  Median:   0.0496
+  75%:      0.2308
+  Max:      0.9819
+
+Random Slopes:
+  Mean:    -0.0000
+  Std:      0.0008
+  Min:     -0.0027
+  25%:     -0.0003
+  Median:   0.0000
+  75%:      0.0003
+  Max:      0.0032
+
+
+CONGRUENCE: Common
+--------------------------------------------------------------------------------
+N participants: 100
+
+Random Intercepts:
+  Mean:    -0.0000
+  Std:      0.3293
+  Min:     -0.7734
+  Median:   0.0511
+  Max:      0.9819
+
+Random Slopes:
+  Mean:    -0.0000
+  Std:      0.0002
+  Min:     -0.0005
+  Median:   0.0000
+  Max:      0.0006
+
+CONGRUENCE: Congruent
+--------------------------------------------------------------------------------
+N participants: 100
+
+Random Intercepts:
+  Mean:    -0.0000
+  Std:      0.3565
+  Min:     -0.8972
+  Median:   0.0655
+  Max:      0.6513
+
+Random Slopes:
+  Mean:     0.0000
+  Std:      0.0012
+  Min:     -0.0027
+  Median:   0.0001
+  Max:      0.0032
+
+CONGRUENCE: Incongruent
+--------------------------------------------------------------------------------
+N participants: 100
+
+Random Intercepts:
+  Mean:    -0.0000
+  Std:      0.3184
+  Min:     -0.7766
+  Median:   0.0087
+  Max:      0.8795
+
+Random Slopes:
+  Mean:    -0.0000
+  Std:      0.0005
+  Min:     -0.0011
+  Median:   0.0000
+  Max:      0.0013
