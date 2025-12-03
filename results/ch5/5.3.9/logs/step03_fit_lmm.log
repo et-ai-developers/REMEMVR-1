@@ -1,0 +1,191 @@
+[START] Step 03: Fit Cross-Classified LMM
+[LOAD] Loading LMM input data...
+[LOADED] 18000 rows, 10 columns
+[INFO] Columns: ['composite_ID', 'UID', 'Test', 'Item', 'Response', 'paradigm', 'Difficulty', 'Difficulty_c', 'TSVR_hours', 'Time']
+[INFO] Dropped 0 rows with missing Response (18000 rows remaining)
+[INFO] Participants: 100
+[INFO] Items: 45
+[INFO] Observations: 18000
+[INFO] Paradigms: ['ICR' 'IFR' 'IRE']
+[INFO] Response mean: 0.597
+[INFO] Difficulty_c range: [-3.101, 3.168]
+[INFO] Difficulty_c mean: 0.000000
+[INFO] Time range: [1.0, 246.2] hours
+[ANALYSIS] Fitting cross-classified LMM...
+[INFO] Formula: Response ~ Time * Difficulty_c * C(paradigm)
+[INFO] Random effects: ~Time (random intercept + slope)
+[INFO] Groups: UID (participant-level)
+[ATTEMPT 1/2] Random intercept + slope for Time
+[SUCCESS] Model converged with strategy 1
+[INFO] Model converged: True
+[INFO] Log-likelihood: -8888.54
+[INFO] AIC: 17809.07
+[INFO] BIC: 17933.84
+[EXTRACT] Extracting fixed effects...
+[INFO] Fixed effects: 15 terms
+[INFO] Bonferroni correction: n_tests = 15, alpha_bonf = 0.0033
+[EXTRACT] Extracting random effects...
+[INFO] Random effects variance components:
+  UID_intercept: variance = 0.0093, SD = 0.0963
+  UID_slope_Time: variance = 0.0000, SD = 0.0007
+  Residual: variance = 0.1543, SD = 0.3928
+[SAVE] Saving outputs...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model_summary.txt
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_fixed_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_random_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model.pkl
+[VALIDATION] Running validate_lmm_convergence...
+[ERROR] validate_lmm_convergence() got an unexpected keyword argument 'check_singular_fit'
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.9/code/step03_fit_lmm.py", line 226, in main
+    validation_result = validate_lmm_convergence(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_lmm_convergence() got an unexpected keyword argument 'check_singular_fit'
+[START] Step 03: Fit Cross-Classified LMM
+[LOAD] Loading LMM input data...
+[LOADED] 18000 rows, 10 columns
+[INFO] Columns: ['composite_ID', 'UID', 'Test', 'Item', 'Response', 'paradigm', 'Difficulty', 'Difficulty_c', 'TSVR_hours', 'Time']
+[INFO] Dropped 0 rows with missing Response (18000 rows remaining)
+[INFO] Participants: 100
+[INFO] Items: 45
+[INFO] Observations: 18000
+[INFO] Paradigms: ['ICR' 'IFR' 'IRE']
+[INFO] Response mean: 0.597
+[INFO] Difficulty_c range: [-3.101, 3.168]
+[INFO] Difficulty_c mean: 0.000000
+[INFO] Time range: [1.0, 246.2] hours
+[ANALYSIS] Fitting cross-classified LMM...
+[INFO] Formula: Response ~ Time * Difficulty_c * C(paradigm)
+[INFO] Random effects: ~Time (random intercept + slope)
+[INFO] Groups: UID (participant-level)
+[ATTEMPT 1/2] Random intercept + slope for Time
+[SUCCESS] Model converged with strategy 1
+[INFO] Model converged: True
+[INFO] Log-likelihood: -8888.54
+[INFO] AIC: 17809.07
+[INFO] BIC: 17933.84
+[EXTRACT] Extracting fixed effects...
+[INFO] Fixed effects: 15 terms
+[INFO] Bonferroni correction: n_tests = 15, alpha_bonf = 0.0033
+[EXTRACT] Extracting random effects...
+[INFO] Random effects variance components:
+  UID_intercept: variance = 0.0093, SD = 0.0963
+  UID_slope_Time: variance = 0.0000, SD = 0.0007
+  Residual: variance = 0.1543, SD = 0.3928
+[SAVE] Saving outputs...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model_summary.txt
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_fixed_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_random_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model.pkl
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] Convergence result: {'converged': True, 'message': 'LMM converged successfully'}
+[WARNING] Convergence validation issues: {'converged': True, 'message': 'LMM converged successfully'}
+[VALIDATION] Running validate_lmm_assumptions_comprehensive...
+[VALIDATION] Assumptions result: {'valid': False, 'diagnostics': {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9607890503398008, 'p_value': 9.879461603479863e-56, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 863.229032513193, 'p_value': 4.963794048721573e-178, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9750093199732517, 'p_value': 0.054047354721031775, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931077006055302, 'p_value': 0.8944717193967004, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.009431281750711208, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 1, 'outlier_percentage': 0.005555555555555556, 'pass': True, 'outlier_indices': [9187]}, 'convergence': {'converged': True, 'pass': True}}, 'plot_paths': [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/studentized_residuals.png')], 'message': 'LMM assumption violations detected (2/7 checks failed):\n  - Residual normality violated (Shapiro-Wilk p < 0.05)\n  - Homoscedasticity violated (Breusch-Pagan p < 0.05)\n\nRecommended remedial actions:\n  1. Consider using robust standard errors or transforming the outcome variable\n  2. Model variance structure explicitly or use weighted least squares\n'}
+[WARNING] Assumptions validation issues: {'valid': False, 'diagnostics': {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9607890503398008, 'p_value': 9.879461603479863e-56, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 863.229032513193, 'p_value': 4.963794048721573e-178, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9750093199732517, 'p_value': 0.054047354721031775, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931077006055302, 'p_value': 0.8944717193967004, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.009431281750711208, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 1, 'outlier_percentage': 0.005555555555555556, 'pass': True, 'outlier_indices': [9187]}, 'convergence': {'converged': True, 'pass': True}}, 'plot_paths': [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/studentized_residuals.png')], 'message': 'LMM assumption violations detected (2/7 checks failed):\n  - Residual normality violated (Shapiro-Wilk p < 0.05)\n  - Homoscedasticity violated (Breusch-Pagan p < 0.05)\n\nRecommended remedial actions:\n  1. Consider using robust standard errors or transforming the outcome variable\n  2. Model variance structure explicitly or use weighted least squares\n'}
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] Hypothesis test result: {'valid': False, 'missing_terms': ['Time:Difficulty_c:C(paradigm)[T.ICR]'], 'd068_compliant': True, 'message': "Missing required terms: ['Time:Difficulty_c:C(paradigm)[T.ICR]']."}
+[ERROR] Hypothesis test validation failed: {'valid': False, 'missing_terms': ['Time:Difficulty_c:C(paradigm)[T.ICR]'], 'd068_compliant': True, 'message': "Missing required terms: ['Time:Difficulty_c:C(paradigm)[T.ICR]']."}
+[ERROR] Hypothesis test validation failed: Missing required terms: ['Time:Difficulty_c:C(paradigm)[T.ICR]'].
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.9/code/step03_fit_lmm.py", line 259, in main
+    raise ValueError(f"Hypothesis test validation failed: {hypothesis_result.get('message', 'Unknown error')}")
+ValueError: Hypothesis test validation failed: Missing required terms: ['Time:Difficulty_c:C(paradigm)[T.ICR]'].
+[START] Step 03: Fit Cross-Classified LMM
+[LOAD] Loading LMM input data...
+[LOADED] 18000 rows, 10 columns
+[INFO] Columns: ['composite_ID', 'UID', 'Test', 'Item', 'Response', 'paradigm', 'Difficulty', 'Difficulty_c', 'TSVR_hours', 'Time']
+[INFO] Dropped 0 rows with missing Response (18000 rows remaining)
+[INFO] Participants: 100
+[INFO] Items: 45
+[INFO] Observations: 18000
+[INFO] Paradigms: ['ICR' 'IFR' 'IRE']
+[INFO] Response mean: 0.597
+[INFO] Difficulty_c range: [-3.101, 3.168]
+[INFO] Difficulty_c mean: 0.000000
+[INFO] Time range: [1.0, 246.2] hours
+[ANALYSIS] Fitting cross-classified LMM...
+[INFO] Formula: Response ~ Time * Difficulty_c * C(paradigm)
+[INFO] Random effects: ~Time (random intercept + slope)
+[INFO] Groups: UID (participant-level)
+[ATTEMPT 1/2] Random intercept + slope for Time
+[SUCCESS] Model converged with strategy 1
+[INFO] Model converged: True
+[INFO] Log-likelihood: -8888.54
+[INFO] AIC: 17809.07
+[INFO] BIC: 17933.84
+[EXTRACT] Extracting fixed effects...
+[INFO] Fixed effects: 15 terms
+[INFO] Bonferroni correction: n_tests = 15, alpha_bonf = 0.0033
+[EXTRACT] Extracting random effects...
+[INFO] Random effects variance components:
+  UID_intercept: variance = 0.0093, SD = 0.0963
+  UID_slope_Time: variance = 0.0000, SD = 0.0007
+  Residual: variance = 0.1543, SD = 0.3928
+[SAVE] Saving outputs...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model_summary.txt
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_fixed_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_random_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model.pkl
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] Convergence result: {'converged': True, 'message': 'LMM converged successfully'}
+[WARNING] Convergence validation issues: {'converged': True, 'message': 'LMM converged successfully'}
+[VALIDATION] Running validate_lmm_assumptions_comprehensive...
+[VALIDATION] Assumptions result: {'valid': False, 'diagnostics': {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9607890503398008, 'p_value': 9.879461603479863e-56, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 863.229032513193, 'p_value': 4.963794048721573e-178, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9750093199732517, 'p_value': 0.054047354721031775, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931077006055302, 'p_value': 0.8944717193967004, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.009431281750711208, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 1, 'outlier_percentage': 0.005555555555555556, 'pass': True, 'outlier_indices': [9187]}, 'convergence': {'converged': True, 'pass': True}}, 'plot_paths': [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/studentized_residuals.png')], 'message': 'LMM assumption violations detected (2/7 checks failed):\n  - Residual normality violated (Shapiro-Wilk p < 0.05)\n  - Homoscedasticity violated (Breusch-Pagan p < 0.05)\n\nRecommended remedial actions:\n  1. Consider using robust standard errors or transforming the outcome variable\n  2. Model variance structure explicitly or use weighted least squares\n'}
+[WARNING] Assumptions validation issues: {'valid': False, 'diagnostics': {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9607890503398008, 'p_value': 9.879461603479863e-56, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 863.229032513193, 'p_value': 4.963794048721573e-178, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9750093199732517, 'p_value': 0.054047354721031775, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931077006055302, 'p_value': 0.8944717193967004, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.009431281750711208, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 1, 'outlier_percentage': 0.005555555555555556, 'pass': True, 'outlier_indices': [9187]}, 'convergence': {'converged': True, 'pass': True}}, 'plot_paths': [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/studentized_residuals.png')], 'message': 'LMM assumption violations detected (2/7 checks failed):\n  - Residual normality violated (Shapiro-Wilk p < 0.05)\n  - Homoscedasticity violated (Breusch-Pagan p < 0.05)\n\nRecommended remedial actions:\n  1. Consider using robust standard errors or transforming the outcome variable\n  2. Model variance structure explicitly or use weighted least squares\n'}
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] Hypothesis test result: {'valid': True, 'missing_terms': [], 'd068_compliant': True, 'message': 'Decision D068 compliant: All 2 required terms present with both p_uncorrected and p_bonferroni.'}
+[ERROR] Hypothesis test validation failed: {'valid': True, 'missing_terms': [], 'd068_compliant': True, 'message': 'Decision D068 compliant: All 2 required terms present with both p_uncorrected and p_bonferroni.'}
+[ERROR] Hypothesis test validation failed: Decision D068 compliant: All 2 required terms present with both p_uncorrected and p_bonferroni.
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.9/code/step03_fit_lmm.py", line 259, in main
+    raise ValueError(f"Hypothesis test validation failed: {hypothesis_result.get('message', 'Unknown error')}")
+ValueError: Hypothesis test validation failed: Decision D068 compliant: All 2 required terms present with both p_uncorrected and p_bonferroni.
+[START] Step 03: Fit Cross-Classified LMM
+[LOAD] Loading LMM input data...
+[LOADED] 18000 rows, 10 columns
+[INFO] Columns: ['composite_ID', 'UID', 'Test', 'Item', 'Response', 'paradigm', 'Difficulty', 'Difficulty_c', 'TSVR_hours', 'Time']
+[INFO] Dropped 0 rows with missing Response (18000 rows remaining)
+[INFO] Participants: 100
+[INFO] Items: 45
+[INFO] Observations: 18000
+[INFO] Paradigms: ['ICR' 'IFR' 'IRE']
+[INFO] Response mean: 0.597
+[INFO] Difficulty_c range: [-3.101, 3.168]
+[INFO] Difficulty_c mean: 0.000000
+[INFO] Time range: [1.0, 246.2] hours
+[ANALYSIS] Fitting cross-classified LMM...
+[INFO] Formula: Response ~ Time * Difficulty_c * C(paradigm)
+[INFO] Random effects: ~Time (random intercept + slope)
+[INFO] Groups: UID (participant-level)
+[ATTEMPT 1/2] Random intercept + slope for Time
+[SUCCESS] Model converged with strategy 1
+[INFO] Model converged: True
+[INFO] Log-likelihood: -8888.54
+[INFO] AIC: 17809.07
+[INFO] BIC: 17933.84
+[EXTRACT] Extracting fixed effects...
+[INFO] Fixed effects: 15 terms
+[INFO] Bonferroni correction: n_tests = 15, alpha_bonf = 0.0033
+[EXTRACT] Extracting random effects...
+[INFO] Random effects variance components:
+  UID_intercept: variance = 0.0093, SD = 0.0963
+  UID_slope_Time: variance = 0.0000, SD = 0.0007
+  Residual: variance = 0.1543, SD = 0.3928
+[SAVE] Saving outputs...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model_summary.txt
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_fixed_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_random_effects.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.9/data/step03_lmm_model.pkl
+[VALIDATION] Running validate_lmm_convergence...
+[VALIDATION] Convergence result: {'converged': True, 'message': 'LMM converged successfully'}
+[WARNING] Convergence validation issues: {'converged': True, 'message': 'LMM converged successfully'}
+[VALIDATION] Running validate_lmm_assumptions_comprehensive...
+[VALIDATION] Assumptions result: {'valid': False, 'diagnostics': {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9607890503398008, 'p_value': 9.879461603479863e-56, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 863.229032513193, 'p_value': 4.963794048721573e-178, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9750093199732517, 'p_value': 0.054047354721031775, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931077006055302, 'p_value': 0.8944717193967004, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.009431281750711208, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 1, 'outlier_percentage': 0.005555555555555556, 'pass': True, 'outlier_indices': [9187]}, 'convergence': {'converged': True, 'pass': True}}, 'plot_paths': [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/studentized_residuals.png')], 'message': 'LMM assumption violations detected (2/7 checks failed):\n  - Residual normality violated (Shapiro-Wilk p < 0.05)\n  - Homoscedasticity violated (Breusch-Pagan p < 0.05)\n\nRecommended remedial actions:\n  1. Consider using robust standard errors or transforming the outcome variable\n  2. Model variance structure explicitly or use weighted least squares\n'}
+[WARNING] Assumptions validation issues: {'valid': False, 'diagnostics': {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.9607890503398008, 'p_value': 9.879461603479863e-56, 'pass': np.False_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 863.229032513193, 'p_value': 4.963794048721573e-178, 'pass': np.False_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': 0.9750093199732517, 'p_value': 0.054047354721031775, 'pass': np.True_, 'threshold': 0.05}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': 0.9931077006055302, 'p_value': 0.8944717193967004, 'pass': np.True_, 'threshold': 0.05}}, 'autocorrelation': {'lag1_acf': -0.009431281750711208, 'pass': True, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 1, 'outlier_percentage': 0.005555555555555556, 'pass': True, 'outlier_indices': [9187]}, 'convergence': {'converged': True, 'pass': True}}, 'plot_paths': [PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_intercepts.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/qq_plot_random_slopes.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch5/5.3.9/data/studentized_residuals.png')], 'message': 'LMM assumption violations detected (2/7 checks failed):\n  - Residual normality violated (Shapiro-Wilk p < 0.05)\n  - Homoscedasticity violated (Breusch-Pagan p < 0.05)\n\nRecommended remedial actions:\n  1. Consider using robust standard errors or transforming the outcome variable\n  2. Model variance structure explicitly or use weighted least squares\n'}
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] Hypothesis test result: {'valid': True, 'missing_terms': [], 'd068_compliant': True, 'message': 'Decision D068 compliant: All 2 required terms present with both p_uncorrected and p_bonferroni.'}
+[SUCCESS] Step 03 complete

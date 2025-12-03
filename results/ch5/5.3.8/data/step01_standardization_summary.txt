@@ -1,0 +1,27 @@
+STANDARDIZATION SUMMARY
+================================================================================
+
+PRE-STANDARDIZATION (Original Scale):
+--------------------------------------------------------------------------------
+Total_Intercept_Cued                      mean=  0.000000  SD=  0.482179
+Total_Intercept_Free                      mean=  0.000000  SD=  0.484731
+Total_Intercept_Recognition               mean= -0.000000  SD=  0.542880
+Total_Slope_Cued                          mean= -0.000000  SD=  0.005169
+Total_Slope_Free                          mean= -0.000000  SD=  0.041301
+Total_Slope_Recognition                   mean=  0.000000  SD=  0.027954
+
+POST-STANDARDIZATION (Z-Scores):
+--------------------------------------------------------------------------------
+Total_Intercept_Cued_z                    mean= -0.000000  SD=  1.000000
+Total_Intercept_Free_z                    mean=  0.000000  SD=  1.000000
+Total_Intercept_Recognition_z             mean= -0.000000  SD=  1.000000
+Total_Slope_Cued_z                        mean=  0.000000  SD=  1.000000
+Total_Slope_Free_z                        mean=  0.000000  SD=  1.000000
+Total_Slope_Recognition_z                 mean=  0.000000  SD=  1.000000
+
+VERIFICATION:
+--------------------------------------------------------------------------------
+Maximum mean deviation from 0: 0.000000 (threshold: 0.01)
+Maximum SD deviation from 1: 0.000000 (threshold: 0.01)
+
+STATUS: PASS - Standardization successful

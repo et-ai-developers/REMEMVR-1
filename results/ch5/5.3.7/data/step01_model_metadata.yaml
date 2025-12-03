@@ -1,0 +1,16 @@
+source: RQ 5.3.1 Step 5
+best_model: Log
+functional_form: Log
+AIC: 2346.596143302675
+converged: true
+time_variable: TSVR_hours
+time_transformation: log(TSVR_hours + 1)
+formula: Ability ~ log_Days * C(Factor, Treatment('Free_Recall'))
+random_effects: Random intercepts + slopes
+paradigm_factor: present (paradigm x time interaction)
+model_pkl_loaded: true
+paradigm_categories:
+- free_recall
+- cued_recall
+- recognition
+n_observations_per_paradigm: 400

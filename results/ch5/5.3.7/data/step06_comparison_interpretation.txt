@@ -1,0 +1,32 @@
+================================================================================
+ICC_slope_conditional Comparison Across Paradigms
+================================================================================
+
+Hypothesis: Do paradigms differ in between-person variance?
+Metric: ICC_slope_conditional at Day 6 (TSVR ~144 hours)
+
+Results:
+--------------------------------------------------------------------------------
+Rank 1: recognition
+  ICC = 0.4618 (Substantial)
+  95% CI = [0.4090, 0.5319]
+
+Rank 2: free_recall
+  ICC = 0.4507 (Substantial)
+  95% CI = [0.4086, 0.5436]
+
+Rank 3: cued_recall
+  ICC = 0.4099 (Substantial)
+  95% CI = [0.3566, 0.4551]
+
+--------------------------------------------------------------------------------
+Interpretation:
+- recognition shows the highest ICC_slope_conditional (0.4618)
+  indicating substantial between-person variance
+- Confidence intervals overlap, suggesting ICC differences may not be
+  statistically distinguishable (formal test required)
+
+All paradigms show ICC >= 0.40, indicating substantial between-person
+variance in memory trajectories across all three paradigms.
+
+================================================================================

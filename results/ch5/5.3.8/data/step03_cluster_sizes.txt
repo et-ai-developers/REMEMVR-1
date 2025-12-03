@@ -1,0 +1,17 @@
+CLUSTER SIZES REPORT
+================================================================================
+
+Total participants: 100
+Number of clusters: 3
+
+CLUSTER SIZES:
+--------------------------------------------------------------------------------
+Cluster 0:  N= 33  ( 33.0%)
+Cluster 1:  N= 31  ( 31.0%)
+Cluster 2:  N= 36  ( 36.0%)
+
+MINIMUM SIZE THRESHOLD:
+--------------------------------------------------------------------------------
+Minimum cluster size: 31
+Threshold (10%): 10
+STATUS: PASS (all clusters >= 10)

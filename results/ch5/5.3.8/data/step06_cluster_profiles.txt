@@ -1,0 +1,36 @@
+CLUSTER PROFILES
+================================================================================
+
+Clustering: K=3, N=100 participants
+Features: Paradigm-specific intercepts (immediate performance) and slopes (forgetting rates)
+
+--------------------------------------------------------------------------------
+Cluster 0: Low performers - Stable retention
+  Performance: Low (mean intercept: 0.3)
+  Forgetting:  Stable retention (mean slope: -0.02)
+  Paradigm intercepts: Free=0.4, Cued=0.3, Recog=0.4
+  Paradigm slopes:     Free=-0.04, Cued=-0.00, Recog=-0.03
+  Pattern: Uniform performance across paradigms
+
+--------------------------------------------------------------------------------
+Cluster 1: Low performers - Stable retention
+  Performance: Low (mean intercept: -0.6)
+  Forgetting:  Stable retention (mean slope: 0.01)
+  Paradigm intercepts: Free=-0.6, Cued=-0.6, Recog=-0.7
+  Paradigm slopes:     Free=0.01, Cued=0.01, Recog=0.01
+  Pattern: Uniform performance across paradigms
+
+--------------------------------------------------------------------------------
+Cluster 2: Low performers - Stable retention
+  Performance: Low (mean intercept: 0.2)
+  Forgetting:  Stable retention (mean slope: 0.02)
+  Paradigm intercepts: Free=0.2, Cued=0.3, Recog=0.2
+  Paradigm slopes:     Free=0.03, Cued=-0.00, Recog=0.02
+  Pattern: Uniform performance across paradigms
+
+================================================================================
+SUMMARY OF PROFILES:
+--------------------------------------------------------------------------------
+Cluster 0 (N=33): Low performers - Stable retention
+Cluster 1 (N=31): Low performers - Stable retention
+Cluster 2 (N=36): Low performers - Stable retention

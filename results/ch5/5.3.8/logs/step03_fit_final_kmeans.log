@@ -1,0 +1,55 @@
+[START] Step 03: Fit Final K-Means Model
+[LOAD] Loading standardized features...
+[LOADED] 100 rows, 7 columns
+[INFO] Feature matrix: 100 participants, 6 features
+[LOAD] Reading optimal K from /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step02_optimal_k.txt...
+[INFO] Optimal K=3
+[ANALYSIS] Fitting final K-means with K=3...
+[INFO] Parameters: n_init=50, random_state=42
+[DONE] K-means fitting complete
+[INFO] Cluster assignments: 100 participants
+[INFO] Cluster centers: 3 clusters × 6 features
+[SAVE] Saving cluster assignments...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step03_cluster_assignments.csv (100 rows)
+[SAVE] Saving cluster centers...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step03_cluster_centers.csv (3 rows)
+[SAVE] Computing cluster sizes...
+[INFO] Cluster sizes:
+[INFO]   Cluster 0: N=33 (33.0%)
+[INFO]   Cluster 1: N=31 (31.0%)
+[INFO]   Cluster 2: N=36 (36.0%)
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step03_cluster_sizes.txt
+[VALIDATION] Running validate_cluster_assignment...
+[ERROR] validate_cluster_assignment() got an unexpected keyword argument 'cluster_labels'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.8/code/step03_fit_final_kmeans.py", line 275, in <module>
+    validation_result = validate_cluster_assignment(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_cluster_assignment() got an unexpected keyword argument 'cluster_labels'
+[START] Step 03: Fit Final K-Means Model
+[LOAD] Loading standardized features...
+[LOADED] 100 rows, 7 columns
+[INFO] Feature matrix: 100 participants, 6 features
+[LOAD] Reading optimal K from /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step02_optimal_k.txt...
+[INFO] Optimal K=3
+[ANALYSIS] Fitting final K-means with K=3...
+[INFO] Parameters: n_init=50, random_state=42
+[DONE] K-means fitting complete
+[INFO] Cluster assignments: 100 participants
+[INFO] Cluster centers: 3 clusters × 6 features
+[SAVE] Saving cluster assignments...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step03_cluster_assignments.csv (100 rows)
+[SAVE] Saving cluster centers...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step03_cluster_centers.csv (3 rows)
+[SAVE] Computing cluster sizes...
+[INFO] Cluster sizes:
+[INFO]   Cluster 0: N=33 (33.0%)
+[INFO]   Cluster 1: N=31 (31.0%)
+[INFO]   Cluster 2: N=36 (36.0%)
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step03_cluster_sizes.txt
+[VALIDATION] Running validate_cluster_assignment...
+[VALIDATION] valid: True
+[VALIDATION] message: Valid cluster assignment: 3 clusters, sizes {2: 36, 0: 33, 1: 31}
+[VALIDATION] cluster_sizes: {2: 36, 0: 33, 1: 31}
+[SUCCESS] Step 03 complete

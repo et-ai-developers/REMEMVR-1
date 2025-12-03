@@ -1,0 +1,34 @@
+================================================================================
+STEIGER'S Z-TEST ASSUMPTION CHECKS
+RQ 5.3.6 Step 05: Correlation Analysis
+================================================================================
+
+PARADIGM: IFR
+----------------------------------------
+1. Multivariate Normality:
+   Shapiro-Wilk min p-value: 0.0000
+   Interpretation: Moderate normality violations (Shapiro-Wilk p < 0.01)
+2. Linearity:
+   IRT vs Full CTT: linear (r=0.790)
+   IRT vs Purified CTT: linear (r=0.889)
+   Overall linearity flag: linear
+
+PARADIGM: ICR
+----------------------------------------
+1. Multivariate Normality:
+   Shapiro-Wilk min p-value: 0.0014
+   Interpretation: Moderate normality violations (Shapiro-Wilk p < 0.01)
+2. Linearity:
+   IRT vs Full CTT: linear (r=0.884)
+   IRT vs Purified CTT: linear (r=0.907)
+   Overall linearity flag: linear
+
+PARADIGM: IRE
+----------------------------------------
+1. Multivariate Normality:
+   Shapiro-Wilk min p-value: 0.0000
+   Interpretation: Moderate normality violations (Shapiro-Wilk p < 0.01)
+2. Linearity:
+   IRT vs Full CTT: linear (r=0.817)
+   IRT vs Purified CTT: linear (r=0.867)
+   Overall linearity flag: linear

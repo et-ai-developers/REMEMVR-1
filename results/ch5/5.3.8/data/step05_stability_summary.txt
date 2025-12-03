@@ -1,0 +1,32 @@
+BOOTSTRAP STABILITY ASSESSMENT
+================================================================================
+
+Clustering Configuration: K=3 clusters, N=100 participants
+Bootstrap Protocol: 100 iterations, 80 participants per subsample (80%)
+
+JACCARD INDEX DISTRIBUTION:
+--------------------------------------------------------------------------------
+Mean:        0.7142
+SD:          0.1039
+95% CI:      [0.5504, 0.9488]
+Range:       [0.5208, 1.0000]
+
+INTERPRETATION:
+--------------------------------------------------------------------------------
+Stability: MARGINAL - Clustering shows moderate stability
+
+WARNING:
+--------------------------------------------------------------------------------
+Mean Jaccard 0.7142 is below threshold 0.75
+This suggests cluster assignments are sensitive to sample composition.
+Phenotypes should be interpreted as tentative and exploratory.
+
+Possible Reasons:
+  - Small sample size (N=100) limits stability
+  - Clusters may overlap in feature space
+  - Some participants near cluster boundaries
+
+Recommendation:
+  - Report clusters as exploratory phenotypes
+  - Cross-validate with external outcomes if available
+  - Consider alternative K values for robustness check

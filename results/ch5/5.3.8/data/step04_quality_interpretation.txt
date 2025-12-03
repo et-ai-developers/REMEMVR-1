@@ -1,0 +1,25 @@
+CLUSTER QUALITY INTERPRETATION
+================================================================================
+
+Clustering Configuration: K=3 clusters, N=100 participants
+Feature Space: 6 dimensions (paradigm-specific intercepts and slopes)
+
+METRIC SUMMARY:
+--------------------------------------------------------------------------------
+Silhouette Score:     0.3673  (threshold >= 0.4)
+Davies-Bouldin Index: 0.9809  (threshold < 1.5)
+Dunn Index:           0.0644  (threshold > 0)
+
+QUALITY ASSESSMENT:
+--------------------------------------------------------------------------------
+Silhouette:     POOR - Clusters may overlap substantially
+Davies-Bouldin: GOOD - Clusters well-separated
+Dunn:           MARGINAL - Limited separation or large intra-cluster spread
+
+WARNING:
+--------------------------------------------------------------------------------
+- Silhouette score 0.3673 below threshold 0.4
+  This suggests clusters may not be strongly separated.
+
+Note: These warnings are INFORMATIONAL for exploratory clustering.
+      Results should be interpreted as tentative phenotypes pending validation.

@@ -1,0 +1,40 @@
+[START] Step 01: Load Model Metadata from RQ 5.3.1
+[LOAD] Loading model comparison from RQ 5.3.1...
+[LOADED] Model comparison: 5 models
+[BEST MODEL] Log (AIC=2346.60, converged=True)
+[LOAD] Loading fitted model from .pkl file...
+[LOADED] Model .pkl successfully
+[MODEL] Formula: Ability ~ log_Days * C(Factor, Treatment('Free_Recall'))
+[MODEL] Random effects: Random intercepts + slopes
+[EXTRACT] Determining functional form for paradigm-stratified models...
+[FUNCTIONAL FORM] Log
+[TIME TRANSFORMATION] log(TSVR_hours + 1)
+[EXTRACT] Extracting paradigm categories...
+[PARADIGMS] 3 categories extracted
+  - free_recall: 400 observations
+  - cued_recall: 400 observations
+  - recognition: 400 observations
+[SAVE] Saving model metadata to YAML...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.7/data/step01_model_metadata.yaml
+[SAVE] Saving paradigm categories to CSV...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.7/data/step01_paradigm_categories.csv (3 rows)
+[VALIDATION] Validating outputs...
+[VALIDATION] Best model converged: PASS
+[VALIDATION] Paradigm count (3): PASS
+[VALIDATION] Balanced design (400 obs per paradigm): PASS
+[VALIDATION] Functional form extracted (Log): PASS
+[VALIDATION] Output files exist: PASS
+[SUCCESS] Step 01 complete
+
+SUMMARY:
+  Best model: Log
+  Functional form: Log
+  AIC: 2346.60
+  Converged: True
+  Time transformation: log(TSVR_hours + 1)
+  Paradigms: free_recall, cued_recall, recognition
+  N per paradigm: 400 observations
+
+OUTPUTS:
+  - /home/etai/projects/REMEMVR/results/ch5/5.3.7/data/step01_model_metadata.yaml
+  - /home/etai/projects/REMEMVR/results/ch5/5.3.7/data/step01_paradigm_categories.csv

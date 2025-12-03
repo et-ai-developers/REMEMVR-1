@@ -19,7 +19,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.3.4	Paradigms	Age Effects	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
 5.3.5	Paradigms	IRT-CTT	COMPLETE 2025-12-04. r=0.84-0.88 all >0.70. κ=0.667 substantial. 83.3% agreement. Validates 5.3.1 not measurement artifact.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2L)
 5.3.6	Paradigms	Purified CTT	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
-5.3.7	Paradigms	Variance Decomp	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
+5.3.7	Variance Decomp	COMPLETE	Paradigms	Variance Decomposition	icc_slope_zero_pattern_replicated
 5.3.8	Paradigms	Clustering	All 3 paradigms valid. K-means stdlib only.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.3.9	Paradigms	Item Difficulty	All 3 paradigms valid. Cross-classified LMM.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE
 5.4.1	Congruence	Trajectories	NULL schema effects (valid finding). All 3 levels usable.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)

@@ -1,0 +1,36 @@
+[START] Step 08: Prepare Comparison Plot Data
+[LOAD] Loading correlation analysis results...
+[LOADED] step05_correlation_analysis.csv (3 rows)
+[LOAD] Loading LMM model comparison results...
+[LOADED] step07_lmm_model_comparison.csv (3 rows)
+[ANALYSIS] Creating correlation comparison data (long format)...
+[CREATED] Correlation comparison data: 6 rows x 5 columns
+[ANALYSIS] Creating AIC comparison data...
+[CREATED] AIC comparison data: 3 rows x 5 columns
+[SAVE] Saving correlation comparison data...
+[SAVED] step08_correlation_comparison_data.csv (6 rows)
+[SAVE] Saving AIC comparison data...
+[SAVED] step08_aic_comparison_data.csv (3 rows)
+[VALIDATION] Validating correlation comparison data...
+[PASS] Row count: 6 rows (3 paradigms x 2 CTT types)
+[PASS] Column names: ['paradigm', 'ctt_type', 'r', 'CI_lower', 'CI_upper']
+[PASS] r values in [-1, 1]: min=0.7905, max=0.9068
+[PASS] All r values within their confidence intervals
+[PASS] ctt_type contains only {'Purified', 'Full'}
+[PASS] All paradigms present: {'IRE', 'ICR', 'IFR'}
+[PASS] No NaN values in correlation comparison data
+[VALIDATION] Validating AIC comparison data...
+[PASS] Row count: 3 rows (one per paradigm)
+[PASS] Column names: ['paradigm', 'AIC_IRT', 'AIC_full', 'AIC_purified', 'delta_AIC_full_purified']
+[PASS] All AIC values positive (min=958.46)
+[PASS] All paradigms present: {'IRE', 'ICR', 'IFR'}
+[PASS] No NaN values in AIC comparison data
+[SUMMARY] Correlation comparison data:
+  IFR: r_full=0.7905, r_purified=0.8886, delta_r=0.0981
+  ICR: r_full=0.8838, r_purified=0.9068, delta_r=0.0230
+  IRE: r_full=0.8170, r_purified=0.8673, delta_r=0.0503
+[SUMMARY] AIC comparison data:
+  IFR: AIC_IRT=1008.33, AIC_full=1056.34, AIC_purified=1089.69, delta=-33.35
+  ICR: AIC_IRT=983.93, AIC_full=958.46, AIC_purified=963.75, delta=-5.29
+  IRE: AIC_IRT=975.31, AIC_full=1005.71, AIC_purified=1012.55, delta=-6.83
+[SUCCESS] Step 08 complete

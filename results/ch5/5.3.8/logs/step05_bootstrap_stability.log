@@ -1,0 +1,160 @@
+================================================================================
+STEP 05: Bootstrap Stability Assessment
+================================================================================
+
+[LOAD] Loading standardized features and cluster assignments...
+[LOADED] Standardized features: (100, 7)
+[LOADED] Original cluster assignments: (100, 2)
+[LOADED] Optimal K: 3
+[EXTRACT] Feature matrix: (100, 6)
+[EXTRACT] Original labels: (100,)
+
+[BOOTSTRAP] Running 100 bootstrap iterations...
+            Subsample size: 80 participants (80%)
+[ITERATION  10] Jaccard: 0.7592
+[ITERATION  20] Jaccard: 0.7473
+[ITERATION  30] Jaccard: 0.6314
+[ITERATION  40] Jaccard: 0.6751
+[ITERATION  50] Jaccard: 0.8598
+[ITERATION  60] Jaccard: 0.7490
+[ITERATION  70] Jaccard: 0.8273
+[ITERATION  80] Jaccard: 0.7247
+[ITERATION  90] Jaccard: 0.7533
+[ITERATION 100] Jaccard: 0.6473
+[DONE] Completed 100 bootstrap iterations
+
+[SUMMARY] Computing bootstrap statistics...
+[STAT] Mean Jaccard: 0.7142
+[STAT] SD Jaccard:   0.1039
+[STAT] 95% CI:       [0.5504, 0.9488]
+[STAT] Range:        [0.5208, 1.0000]
+
+[THRESHOLD] Target: Mean Jaccard >= 0.75
+            Status: WARNING (below threshold)
+
+[SAVE] Saving bootstrap results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_bootstrap_stability.csv
+        100 bootstrap iterations recorded
+
+[REPORT] Generating stability summary...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_stability_summary.txt
+
+[VALIDATION] Validating bootstrap stability...
+
+[ERROR] validate_bootstrap_stability() got an unexpected keyword argument 'jaccard_values'
+
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.8/code/step05_bootstrap_stability.py", line 297, in <module>
+    validation_result = validate_bootstrap_stability(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_bootstrap_stability() got an unexpected keyword argument 'jaccard_values'
+================================================================================
+STEP 05: Bootstrap Stability Assessment
+================================================================================
+
+[LOAD] Loading standardized features and cluster assignments...
+[LOADED] Standardized features: (100, 7)
+[LOADED] Original cluster assignments: (100, 2)
+[LOADED] Optimal K: 3
+[EXTRACT] Feature matrix: (100, 6)
+[EXTRACT] Original labels: (100,)
+
+[BOOTSTRAP] Running 100 bootstrap iterations...
+            Subsample size: 80 participants (80%)
+[ITERATION  10] Jaccard: 0.7592
+[ITERATION  20] Jaccard: 0.7473
+[ITERATION  30] Jaccard: 0.6314
+[ITERATION  40] Jaccard: 0.6751
+[ITERATION  50] Jaccard: 0.8598
+[ITERATION  60] Jaccard: 0.7490
+[ITERATION  70] Jaccard: 0.8273
+[ITERATION  80] Jaccard: 0.7247
+[ITERATION  90] Jaccard: 0.7533
+[ITERATION 100] Jaccard: 0.6473
+[DONE] Completed 100 bootstrap iterations
+
+[SUMMARY] Computing bootstrap statistics...
+[STAT] Mean Jaccard: 0.7142
+[STAT] SD Jaccard:   0.1039
+[STAT] 95% CI:       [0.5504, 0.9488]
+[STAT] Range:        [0.5208, 1.0000]
+
+[THRESHOLD] Target: Mean Jaccard >= 0.75
+            Status: WARNING (below threshold)
+
+[SAVE] Saving bootstrap results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_bootstrap_stability.csv
+        100 bootstrap iterations recorded
+
+[REPORT] Generating stability summary...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_stability_summary.txt
+
+[VALIDATION] Validating bootstrap stability...
+[FAIL] Validation error: Unstable clustering: mean Jaccard=0.714 (<0.75)
+
+[ERROR] Unstable clustering: mean Jaccard=0.714 (<0.75)
+
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.8/code/step05_bootstrap_stability.py", line 308, in <module>
+    raise ValueError(validation_result['message'])
+ValueError: Unstable clustering: mean Jaccard=0.714 (<0.75)
+================================================================================
+STEP 05: Bootstrap Stability Assessment
+================================================================================
+
+[LOAD] Loading standardized features and cluster assignments...
+[LOADED] Standardized features: (100, 7)
+[LOADED] Original cluster assignments: (100, 2)
+[LOADED] Optimal K: 3
+[EXTRACT] Feature matrix: (100, 6)
+[EXTRACT] Original labels: (100,)
+
+[BOOTSTRAP] Running 100 bootstrap iterations...
+            Subsample size: 80 participants (80%)
+[ITERATION  10] Jaccard: 0.7592
+[ITERATION  20] Jaccard: 0.7473
+[ITERATION  30] Jaccard: 0.6314
+[ITERATION  40] Jaccard: 0.6751
+[ITERATION  50] Jaccard: 0.8598
+[ITERATION  60] Jaccard: 0.7490
+[ITERATION  70] Jaccard: 0.8273
+[ITERATION  80] Jaccard: 0.7247
+[ITERATION  90] Jaccard: 0.7533
+[ITERATION 100] Jaccard: 0.6473
+[DONE] Completed 100 bootstrap iterations
+
+[SUMMARY] Computing bootstrap statistics...
+[STAT] Mean Jaccard: 0.7142
+[STAT] SD Jaccard:   0.1039
+[STAT] 95% CI:       [0.5504, 0.9488]
+[STAT] Range:        [0.5208, 1.0000]
+
+[THRESHOLD] Target: Mean Jaccard >= 0.75
+            Status: WARNING (below threshold)
+
+[SAVE] Saving bootstrap results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_bootstrap_stability.csv
+        100 bootstrap iterations recorded
+
+[REPORT] Generating stability summary...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_stability_summary.txt
+
+[VALIDATION] Validating bootstrap stability...
+[PASS] Bootstrap stability computed: Mean Jaccard = 0.7142
+       95% CI: [0.5504, 0.9488]
+       Status: WARNING (below threshold 0.75)
+
+[WARNING] Bootstrap stability below threshold - tentative clustering
+          This is NOT an error - clustering is exploratory
+
+================================================================================
+[SUCCESS] Step 05 complete
+================================================================================
+
+Outputs:
+  - /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_bootstrap_stability.csv
+  - /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step05_stability_summary.txt
+
+Next: Step 06 (Characterize cluster profiles)

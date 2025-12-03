@@ -1,0 +1,104 @@
+================================================================================
+LMM MODEL COMPARISON REPORT
+================================================================================
+
+Total models fitted: 9 (3 paradigms x 3 measurement types)
+Random structure: Random intercepts only (1|UID)
+REML: False (ML estimation for AIC comparison)
+
+--------------------------------------------------------------------------------
+CONVERGENCE SUMMARY
+--------------------------------------------------------------------------------
+IFR:
+  IRT:      CONVERGED
+  Full:     CONVERGED
+  Purified: CONVERGED
+
+ICR:
+  IRT:      CONVERGED
+  Full:     CONVERGED
+  Purified: CONVERGED
+
+IRE:
+  IRT:      CONVERGED
+  Full:     CONVERGED
+  Purified: CONVERGED
+
+[PASS] All models converged successfully
+
+--------------------------------------------------------------------------------
+AIC COMPARISON
+--------------------------------------------------------------------------------
+Lower AIC = better model fit
+Positive delta_AIC = first model worse (higher AIC)
+
+IFR:
+  AIC_IRT:       1008.33
+  AIC_Full:      1056.34
+  AIC_Purified:  1089.69
+  delta(Full-Purified):  -33.35 (Full better)
+  delta(Purified-IRT):   +81.36 (IRT better)
+
+ICR:
+  AIC_IRT:        983.93
+  AIC_Full:       958.46
+  AIC_Purified:   963.75
+  delta(Full-Purified):   -5.29 (Full better)
+  delta(Purified-IRT):   -20.17 (Purified better)
+
+IRE:
+  AIC_IRT:        975.31
+  AIC_Full:      1005.71
+  AIC_Purified:  1012.55
+  delta(Full-Purified):   -6.83 (Full better)
+  delta(Purified-IRT):   +37.24 (IRT better)
+
+--------------------------------------------------------------------------------
+FIXED EFFECTS COEFFICIENTS
+--------------------------------------------------------------------------------
+Model: z_score ~ TSVR_hours + (1|UID)
+
+IFR:
+  IRT:
+    Intercept:   0.4198
+    TSVR_hours: -0.0065
+  Full CTT:
+    Intercept:   0.3786
+    TSVR_hours: -0.0058
+  Purified CTT:
+    Intercept:   0.2553
+    TSVR_hours: -0.0039
+
+ICR:
+  IRT:
+    Intercept:   0.4737
+    TSVR_hours: -0.0073
+  Full CTT:
+    Intercept:   0.5048
+    TSVR_hours: -0.0078
+  Purified CTT:
+    Intercept:   0.4870
+    TSVR_hours: -0.0075
+
+IRE:
+  IRT:
+    Intercept:   0.4710
+    TSVR_hours: -0.0073
+  Full CTT:
+    Intercept:   0.4733
+    TSVR_hours: -0.0073
+  Purified CTT:
+    Intercept:   0.4422
+    TSVR_hours: -0.0068
+
+--------------------------------------------------------------------------------
+COEFFICIENT AGREEMENT
+--------------------------------------------------------------------------------
+Slope correlation (Full vs Purified CTT): r=0.9983
+
+Interpretation:
+  Very high agreement - both CTT types show similar decay patterns
+
+================================================================================
+END OF REPORT
+================================================================================

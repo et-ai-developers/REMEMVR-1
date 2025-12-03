@@ -1,0 +1,31 @@
+[START] Step 03: Compute Purified CTT Scores (Retained Items Only)
+[LOAD] Loading input data...
+[LOADED] step01_item_mapping.csv (45 rows, 6 cols)
+[FILTER] Retained items: 45 total
+         - IFR: 12 retained items
+         - ICR: 19 retained items
+         - IRE: 14 retained items
+[LOADED] dfData.csv (400 rows, 214 cols)
+[TRANSFORM] Renamed TEST -> test for consistency
+[ANALYSIS] Computing Purified CTT scores by paradigm...
+[INIT] Output DataFrame initialized: 400 rows (UID × test combinations)
+[PARADIGM] Processing IFR...
+           Retained items: 12
+           Mean: 0.467, SD: 0.215, Range: [0.000, 1.000]
+[PARADIGM] Processing ICR...
+           Retained items: 19
+           Mean: 0.541, SD: 0.164, Range: [0.053, 0.947]
+[PARADIGM] Processing IRE...
+           Retained items: 14
+           Mean: 0.510, SD: 0.181, Range: [0.000, 0.929]
+[DONE] Purified CTT computation complete
+[SAVE] Saving step03_ctt_purified_scores.csv...
+[SAVED] step03_ctt_purified_scores.csv (400 rows, 5 cols)
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] CTT_purified_IFR: PASS (range [0, 1], 400 values)
+[VALIDATION] CTT_purified_ICR: PASS (range [0, 1], 400 values)
+[VALIDATION] CTT_purified_IRE: PASS (range [0, 1], 400 values)
+[VALIDATION] No NaN values detected: PASS
+[VALIDATION] Row count: PASS (400 rows)
+[VALIDATION] No duplicate UID × test combinations: PASS
+[SUCCESS] Step 03 complete - All validations passed

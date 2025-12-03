@@ -1,0 +1,49 @@
+================================================================================
+RQ 5.3.7 Step 0: Theta Scores Validation Summary
+================================================================================
+
+SOURCE FILE:
+  /home/etai/projects/REMEMVR/results/ch5/5.3.1/data/step04_lmm_input.csv
+
+DATA STRUCTURE:
+  Rows: 1200
+  Columns: 8
+  Column names: ['composite_ID', 'UID', 'test', 'TSVR_hours', 'TSVR_hours_sq', 'TSVR_hours_log', 'paradigm', 'theta']
+
+PARADIGM DISTRIBUTION:
+  cued_recall: 400 rows
+  free_recall: 400 rows
+  recognition: 400 rows
+
+TEST SESSION DISTRIBUTION:
+  1: 300 rows
+  2: 300 rows
+  3: 300 rows
+  4: 300 rows
+
+PARTICIPANT BALANCE:
+  Total participants: 100
+  Rows per participant: 12.0 (expected: 12)
+
+VALUE RANGES:
+  theta: [-2.406, 2.799] (expected: [-4, 4])
+  TSVR_hours: [1.000, 246.240] (expected: [0, 300])
+
+MISSING DATA:
+  No missing data detected
+
+VALIDATION RESULTS:
+  [PASS] Row count: Row count valid: 1200 rows
+  [PASS] Columns: Columns valid: 8 columns match expected
+  [PASS] Paradigm balance: Paradigm balance valid: free_recall=400, cued_recall=400, recognition=400
+  [PASS] Test balance: Test balance valid: 1=300, 2=300, 3=300, 4=300
+  [PASS] Missing data: No missing data in critical columns: ['theta', 'TSVR_hours', 'paradigm']
+  [PASS] Theta range: theta range valid: all values in [-4, 4]
+  [PASS] TSVR_hours range: TSVR_hours range valid: all values in [0, 300]
+  [PASS] Participant balance: Participant balance valid: 100 participants with 12 rows each
+
+CONCLUSION:
+  All validation checks PASSED
+  Data is ready for variance decomposition analysis
+
+================================================================================

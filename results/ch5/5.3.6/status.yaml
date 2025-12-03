@@ -24,7 +24,7 @@ rq_scholar:
 rq_stats:
   status: success
   context_dump: |
-    RE-VALIDATED 2025-12-02. Updated: 9.15/10 CONDITIONAL → 9.9/10 APPROVED.
+    RE-VALIDATED 2025-12-02. Updated: 9.15/10 CONDITIONAL -> 9.9/10 APPROVED.
     All 3 required changes addressed: (1) Convergence Contingency Plan (LRT fallback per Bates 2015),
     (2) Steiger's Z-Test Assumptions (Mardia's test, linearity, bootstrap remedials),
     (3) Cronbach's alpha Spearman-Brown interpretation. All categories improved:
@@ -56,24 +56,37 @@ rq_analysis:
     Cross-RQ dependency validation (RQ 5.3.1) in Step 0
 
 rq_inspect:
-  status: pending
+  status: success
   context_dump: |
+    Validated all 9 steps (step00-step08) for RQ 5.3.6
+    Outputs: 16 data files (13 analysis + 3 dependencies), 9 logs, all structures match plan.md
+    Substance: CTT [0,1], correlations [-1,1], AIC all positive, 9 LMMs converged, D068 dual p-values present
+    Critical finding: Negative delta_AIC (Full better than Purified) - valid empirical result, not error
+    Four-layer validation: PASS (existence, structure, substance, execution logs all clean)
 
 rq_plots:
-  status: pending
+  status: success
   context_dump: |
+    Plots generated: 2 (correlation_comparison, aic_comparison)
+    Data sources: step08_correlation_comparison_data.csv, step08_aic_comparison_data.csv
+    Plot types: Grouped bar charts (matplotlib custom implementation)
+    Functions used: set_plot_style_defaults (from tools/plotting.py)
 
 rq_results:
-  status: pending
+  status: success
   context_dump: |
+    Results summary created for RQ 5.3.6 (Purified CTT Effects - Paradigms)
+    Purification-trajectory PARADOX confirmed: Correlation improves (ALL p_bonf < .05), AIC worsens (ALL negative delta)
+    IFR: +0.098 correlation improvement but -33.4 AIC penalty (largest effects)
+    Summary documented in results/summary.md with theoretical interpretation
 
 analysis_steps:
-  step00_load_dependencies: pending
-  step01_map_items: pending
-  step02_compute_full_ctt: pending
-  step03_compute_purified_ctt: pending
-  step04_reliability_assessment: pending
-  step05_correlation_analysis: pending
-  step06_standardize_measurements: pending
-  step07_fit_parallel_lmms: pending
-  step08_prepare_plot_data: pending
+  step00_load_dependencies: success
+  step01_map_items: success
+  step02_compute_full_ctt: success
+  step03_compute_purified_ctt: success
+  step04_reliability_assessment: success
+  step05_correlation_analysis: success
+  step06_standardize_measurements: success
+  step07_fit_parallel_lmms: success
+  step08_prepare_plot_data: success

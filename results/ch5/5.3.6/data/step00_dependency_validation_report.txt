@@ -1,0 +1,69 @@
+================================================================================
+RQ 5.3.6 DEPENDENCY VALIDATION REPORT
+================================================================================
+
+Generated: 2025-12-03 23:58:42.767165
+Source RQ: 5.3.1 (Purified IRT - 3D Multidimensional Model)
+Target RQ: 5.3.6 (Purified CTT Effects - Paradigms)
+
+--------------------------------------------------------------------------------
+VALIDATION SUMMARY
+--------------------------------------------------------------------------------
+
+[PASS] file_exists_status
+  Message: File exists and meets size requirement
+  File: /home/etai/projects/REMEMVR/results/ch5/5.3.1/status.yaml
+  Size: 4,155 bytes
+
+[PASS] file_exists_purified_items
+  Message: File exists and meets size requirement
+  File: /home/etai/projects/REMEMVR/results/ch5/5.3.1/data/step02_purified_items.csv
+  Size: 2,452 bytes
+
+[PASS] file_exists_theta_scores
+  Message: File exists and meets size requirement
+  File: /home/etai/projects/REMEMVR/results/ch5/5.3.1/data/step03_theta_scores.csv
+  Size: 35,963 bytes
+
+[PASS] file_exists_tsvr_mapping
+  Message: File exists and meets size requirement
+  File: /home/etai/projects/REMEMVR/results/ch5/5.3.1/data/step00_tsvr_mapping.csv
+  Size: 7,914 bytes
+
+[PASS] rq_status
+  Message: RQ 5.3.1 completed successfully (rq_results.status = success)
+
+[PASS] schema_purified_items
+  Message: Schema validation passed
+  Rows: 45
+  Columns: item, domain, Discrimination, Difficulty_1
+
+[PASS] schema_theta_scores
+  Message: Schema validation passed
+  Rows: 1200
+  Columns: composite_ID, domain_name, theta
+
+[PASS] schema_tsvr_mapping
+  Message: Schema validation passed
+  Rows: 400
+  Columns: composite_ID, UID, test, TSVR_hours
+
+--------------------------------------------------------------------------------
+OVERALL STATUS
+--------------------------------------------------------------------------------
+
+[PASS] All validation checks passed
+RQ 5.3.1 dependencies verified and ready for RQ 5.3.6 analysis
+
+Files copied to RQ 5.3.6/data/:
+  - step00_purified_items.csv
+  - step00_theta_scores.csv
+  - step00_tsvr_mapping.csv
+
+Data Structure Notes:
+  - purified_items: 45 items retained after IRT purification
+  - theta_scores: Long format (1200 rows = 400 obs x 3 domains)
+  - tsvr_mapping: Wide format (400 rows = 100 participants x 4 tests)
+  - Domain mapping: free_recall=IFR, cued_recall=ICR, recognition=IRE
+
+================================================================================

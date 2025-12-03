@@ -1,0 +1,92 @@
+[START] Step 4: Extract Individual Random Effects Per Paradigm
+[LOAD] Loading fitted models from Step 2...
+[LOAD] Loading free_recall model from step02_lmm_free_recall_model.pkl...
+[LOADED] free_recall model loaded successfully
+[LOAD] Loading cued_recall model from step02_lmm_cued_recall_model.pkl...
+[LOADED] cued_recall model loaded successfully
+[LOAD] Loading recognition model from step02_lmm_recognition_model.pkl...
+[LOADED] recognition model loaded successfully
+[ANALYSIS] Extracting random effects from models...
+[EXTRACT] Processing free_recall...
+[EXTRACTED] free_recall: 100 participants
+  - Intercept range: [-1.088, 1.096]
+  - Slope range: [-0.103, 0.091]
+[EXTRACT] Processing cued_recall...
+[EXTRACTED] cued_recall: 100 participants
+  - Intercept range: [-1.138, 1.376]
+  - Slope range: [-0.015, 0.012]
+[EXTRACT] Processing recognition...
+[EXTRACTED] recognition: 100 participants
+  - Intercept range: [-1.453, 1.362]
+  - Slope range: [-0.070, 0.050]
+[COMBINE] Concatenating all paradigms...
+[COMBINED] Total rows: 300
+  - Expected: 300 (100 participants × 3 paradigms)
+  - IFR rows: 100
+  - ICR rows: 100
+  - IRE rows: 100
+[SAVE] Saving step04_random_effects.csv...
+[SAVED] step04_random_effects.csv (300 rows, 4 cols)
+[SAVE] Generating step04_random_effects_descriptives.txt...
+[SAVED] step04_random_effects_descriptives.txt
+[VALIDATION] Running validate_dataframe_structure...
+[ERROR] data type 'o' not understood
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.7/code/step04_extract_random_effects.py", line 279, in <module>
+    validation_result = validate_dataframe_structure(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in validate_dataframe_structure
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in <genexpr>
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/numpy/_core/numerictypes.py", line 536, in issubdtype
+    arg2 = dtype(arg2).type
+           ^^^^^^^^^^^
+TypeError: data type 'o' not understood
+[START] Step 4: Extract Individual Random Effects Per Paradigm
+[LOAD] Loading fitted models from Step 2...
+[LOAD] Loading free_recall model from step02_lmm_free_recall_model.pkl...
+[LOADED] free_recall model loaded successfully
+[LOAD] Loading cued_recall model from step02_lmm_cued_recall_model.pkl...
+[LOADED] cued_recall model loaded successfully
+[LOAD] Loading recognition model from step02_lmm_recognition_model.pkl...
+[LOADED] recognition model loaded successfully
+[ANALYSIS] Extracting random effects from models...
+[EXTRACT] Processing free_recall...
+[EXTRACTED] free_recall: 100 participants
+  - Intercept range: [-1.088, 1.096]
+  - Slope range: [-0.103, 0.091]
+[EXTRACT] Processing cued_recall...
+[EXTRACTED] cued_recall: 100 participants
+  - Intercept range: [-1.138, 1.376]
+  - Slope range: [-0.015, 0.012]
+[EXTRACT] Processing recognition...
+[EXTRACTED] recognition: 100 participants
+  - Intercept range: [-1.453, 1.362]
+  - Slope range: [-0.070, 0.050]
+[COMBINE] Concatenating all paradigms...
+[COMBINED] Total rows: 300
+  - Expected: 300 (100 participants × 3 paradigms)
+  - IFR rows: 100
+  - ICR rows: 100
+  - IRE rows: 100
+[SAVE] Saving step04_random_effects.csv...
+[SAVED] step04_random_effects.csv (300 rows, 4 cols)
+[SAVE] Generating step04_random_effects_descriptives.txt...
+[SAVED] step04_random_effects_descriptives.txt
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] [PASS] All validation checks passed
+[VALIDATION] [PASS] row_count_valid
+[VALIDATION] [PASS] actual_rows
+[VALIDATION] [PASS] columns_valid
+[VALIDATION] [FAIL] missing_columns
+[VALIDATION] [PASS] types_valid
+[VALIDATION] Running additional checks...
+[VALIDATION] [PASS] No duplicate UID × paradigm combinations
+[VALIDATION] [PASS] IFR has 100 unique UIDs
+[VALIDATION] [PASS] ICR has 100 unique UIDs
+[VALIDATION] [PASS] IRE has 100 unique UIDs
+[SUCCESS] Step 4 complete

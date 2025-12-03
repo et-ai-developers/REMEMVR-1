@@ -1,0 +1,19 @@
+OPTIMAL K SELECTION REPORT
+================================================================================
+
+BIC VALUES:
+--------------------------------------------------------------------------------
+K=1:  BIC=  205.8019  inertia=  594.0000
+K=2:  BIC=  171.7653  inertia=  320.6027
+K=3:  BIC=  159.7050  inertia=  215.5709
+K=4:  BIC=  159.6567  inertia=  163.4483
+K=5:  BIC=  166.0409  inertia=  132.1620
+K=6:  BIC=  178.3895  inertia=  113.4320
+
+SELECTION RATIONALE:
+--------------------------------------------------------------------------------
+Minimum BIC at K=4 (BIC=159.6567)
+Parsimony rule applied: BIC[4] - BIC[3] = -0.0483 < 2
+Selected simpler model K=3
+
+OPTIMAL K: 3

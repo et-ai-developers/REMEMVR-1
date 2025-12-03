@@ -1,0 +1,172 @@
+[START] Step 02: Fit Paradigm-Stratified LMMs with Random Slopes
+[LOAD] Loading theta scores and model metadata...
+[LOADED] Theta scores: 1200 rows, 8 columns
+[INFO] Paradigm counts: {'free_recall': 400, 'cued_recall': 400, 'recognition': 400}
+[INFO] Best functional form from RQ 5.3.1: Log
+[INFO] Time transformation: log(TSVR_hours + 1)
+[CREATED] log_TSVR column: log(TSVR_hours + 1)
+[INFO] log_TSVR range: [0.693, 5.510]
+[ANALYSIS] Fitting LMM for each paradigm with random slopes...
+
+======================================================================
+[PARADIGM] free_recall
+======================================================================
+[FILTER] N = 400 observations for free_recall
+[INFO] UIDs: 100 unique participants
+[FIT] Attempting LMM with random slopes (correlated)...
+[TRY] Optimizer: lbfgs
+[SUCCESS] Model converged with lbfgs
+[EXTRACT] Extracting variance components for free_recall...
+[ERROR] (0, 0)
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: (0, 0)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.7/code/step02_fit_paradigm_lmms.py", line 208, in <module>
+    var_intercept = cov_re[0, 0]
+                    ~~~~~~^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: (0, 0)
+[START] Step 02: Fit Paradigm-Stratified LMMs with Random Slopes
+[LOAD] Loading theta scores and model metadata...
+[LOADED] Theta scores: 1200 rows, 8 columns
+[INFO] Paradigm counts: {'free_recall': 400, 'cued_recall': 400, 'recognition': 400}
+[INFO] Best functional form from RQ 5.3.1: Log
+[INFO] Time transformation: log(TSVR_hours + 1)
+[CREATED] log_TSVR column: log(TSVR_hours + 1)
+[INFO] log_TSVR range: [0.693, 5.510]
+[ANALYSIS] Fitting LMM for each paradigm with random slopes...
+
+======================================================================
+[PARADIGM] free_recall
+======================================================================
+[FILTER] N = 400 observations for free_recall
+[INFO] UIDs: 100 unique participants
+[FIT] Attempting LMM with random slopes (correlated)...
+[TRY] Optimizer: lbfgs
+[SUCCESS] Model converged with lbfgs
+[EXTRACT] Extracting variance components for free_recall...
+[DEBUG] cov_re shape: (2, 2)
+[DEBUG] cov_re:
+[[ 0.38050528 -0.02826391]
+ [-0.02826391  0.00853097]]
+[VARIANCE] var_intercept = 0.380505
+[VARIANCE] var_slope = 0.008531
+[COVARIANCE] cov_int_slope = -0.028264
+[CORRELATION] corr_int_slope = -0.496081
+[VARIANCE] var_residual = 0.378340
+[SAVE] Saving model for free_recall...
+[SAVED] step02_lmm_free_recall_model.pkl
+[ERROR] list index out of range
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.3.7/code/step02_fit_paradigm_lmms.py", line 301, in <module>
+    summary_text += str(result.summary().tables[2])
+                        ~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+[START] Step 02: Fit Paradigm-Stratified LMMs with Random Slopes
+[LOAD] Loading theta scores and model metadata...
+[LOADED] Theta scores: 1200 rows, 8 columns
+[INFO] Paradigm counts: {'free_recall': 400, 'cued_recall': 400, 'recognition': 400}
+[INFO] Best functional form from RQ 5.3.1: Log
+[INFO] Time transformation: log(TSVR_hours + 1)
+[CREATED] log_TSVR column: log(TSVR_hours + 1)
+[INFO] log_TSVR range: [0.693, 5.510]
+[ANALYSIS] Fitting LMM for each paradigm with random slopes...
+
+======================================================================
+[PARADIGM] free_recall
+======================================================================
+[FILTER] N = 400 observations for free_recall
+[INFO] UIDs: 100 unique participants
+[FIT] Attempting LMM with random slopes (correlated)...
+[TRY] Optimizer: lbfgs
+[SUCCESS] Model converged with lbfgs
+[EXTRACT] Extracting variance components for free_recall...
+[DEBUG] cov_re shape: (2, 2)
+[DEBUG] cov_re:
+[[ 0.38050528 -0.02826391]
+ [-0.02826391  0.00853097]]
+[VARIANCE] var_intercept = 0.380505
+[VARIANCE] var_slope = 0.008531
+[COVARIANCE] cov_int_slope = -0.028264
+[CORRELATION] corr_int_slope = -0.496081
+[VARIANCE] var_residual = 0.378340
+[SAVE] Saving model for free_recall...
+[SAVED] step02_lmm_free_recall_model.pkl
+
+======================================================================
+[PARADIGM] cued_recall
+======================================================================
+[FILTER] N = 400 observations for cued_recall
+[INFO] UIDs: 100 unique participants
+[FIT] Attempting LMM with random slopes (correlated)...
+[TRY] Optimizer: lbfgs
+[SUCCESS] Model converged with lbfgs
+[EXTRACT] Extracting variance components for cued_recall...
+[DEBUG] cov_re shape: (2, 2)
+[DEBUG] cov_re:
+[[ 3.10049414e-01 -3.32417770e-03]
+ [-3.32417770e-03  3.56842262e-05]]
+[VARIANCE] var_intercept = 0.310049
+[VARIANCE] var_slope = 0.000036
+[COVARIANCE] cov_int_slope = -0.003324
+[CORRELATION] corr_int_slope = -0.999380
+[VARIANCE] var_residual = 0.400053
+[SAVE] Saving model for cued_recall...
+[SAVED] step02_lmm_cued_recall_model.pkl
+
+======================================================================
+[PARADIGM] recognition
+======================================================================
+[FILTER] N = 400 observations for recognition
+[INFO] UIDs: 100 unique participants
+[FIT] Attempting LMM with random slopes (correlated)...
+[TRY] Optimizer: lbfgs
+[SUCCESS] Model converged with lbfgs
+[EXTRACT] Extracting variance components for recognition...
+[DEBUG] cov_re shape: (2, 2)
+[DEBUG] cov_re:
+[[ 0.42967502 -0.02240741]
+ [-0.02240741  0.00567273]]
+[VARIANCE] var_intercept = 0.429675
+[VARIANCE] var_slope = 0.005673
+[COVARIANCE] cov_int_slope = -0.022407
+[CORRELATION] corr_int_slope = -0.453864
+[VARIANCE] var_residual = 0.404604
+[SAVE] Saving model for recognition...
+[SAVED] step02_lmm_recognition_model.pkl
+
+[SAVE] Saving variance components...
+[SAVED] step02_variance_components.csv (15 rows)
+[INFO] Components per paradigm: {'cued_recall': 5, 'free_recall': 5, 'recognition': 5}
+[SAVE] Saving model summaries...
+[SAVED] step02_model_summaries.txt
+
+[VALIDATION] Checking variance components...
+[PASS] All 3 paradigms present: ['free_recall', 'cued_recall', 'recognition']
+[PASS] free_recall: All variances non-negative
+[PASS] free_recall: Correlation in valid range [-0.496]
+[PASS] cued_recall: All variances non-negative
+[PASS] cued_recall: Correlation in valid range [-0.999]
+[PASS] recognition: All variances non-negative
+[PASS] recognition: Correlation in valid range [-0.454]
+
+[SUCCESS] Step 02 complete
+[INFO] Variance components saved: /home/etai/projects/REMEMVR/results/ch5/5.3.7/data/step02_variance_components.csv
+[INFO] Model summaries saved: /home/etai/projects/REMEMVR/results/ch5/5.3.7/data/step02_model_summaries.txt
+[INFO] Models saved: 3 .pkl files in data/

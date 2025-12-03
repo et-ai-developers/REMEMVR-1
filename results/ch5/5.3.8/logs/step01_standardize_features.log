@@ -1,0 +1,38 @@
+[START] Step 01: Standardize Features
+[LOAD] Loading wide-format random effects...
+[LOADED] 100 rows, 7 columns
+[INFO] Feature columns: ['Total_Intercept_Cued', 'Total_Intercept_Free', 'Total_Intercept_Recognition', 'Total_Slope_Cued', 'Total_Slope_Free', 'Total_Slope_Recognition']
+[ANALYSIS] Computing pre-standardization statistics...
+[INFO] Pre-standardization statistics:
+[INFO]   Total_Intercept_Cued: mean=0.000000, SD=0.482179
+[INFO]   Total_Intercept_Free: mean=0.000000, SD=0.484731
+[INFO]   Total_Intercept_Recognition: mean=-0.000000, SD=0.542880
+[INFO]   Total_Slope_Cued: mean=-0.000000, SD=0.005169
+[INFO]   Total_Slope_Free: mean=-0.000000, SD=0.041301
+[INFO]   Total_Slope_Recognition: mean=0.000000, SD=0.027954
+[ANALYSIS] Standardizing features to z-scores...
+[INFO] Standardized Total_Intercept_Cued -> Total_Intercept_Cued_z
+[INFO] Standardized Total_Intercept_Free -> Total_Intercept_Free_z
+[INFO] Standardized Total_Intercept_Recognition -> Total_Intercept_Recognition_z
+[INFO] Standardized Total_Slope_Cued -> Total_Slope_Cued_z
+[INFO] Standardized Total_Slope_Free -> Total_Slope_Free_z
+[INFO] Standardized Total_Slope_Recognition -> Total_Slope_Recognition_z
+[DONE] Standardization complete: 7 columns
+[ANALYSIS] Computing post-standardization statistics...
+[INFO] Post-standardization statistics:
+[INFO]   Total_Intercept_Cued_z: mean=-0.000000, SD=1.000000
+[INFO]   Total_Intercept_Free_z: mean=0.000000, SD=1.000000
+[INFO]   Total_Intercept_Recognition_z: mean=-0.000000, SD=1.000000
+[INFO]   Total_Slope_Cued_z: mean=0.000000, SD=1.000000
+[INFO]   Total_Slope_Free_z: mean=0.000000, SD=1.000000
+[INFO]   Total_Slope_Recognition_z: mean=0.000000, SD=1.000000
+[SAVE] Saving standardized features...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step01_standardized_features.csv (100 rows, 7 cols)
+[SAVE] Saving standardization summary...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.3.8/data/step01_standardization_summary.txt
+[VALIDATION] Running validate_standardization...
+[VALIDATION] valid: True
+[VALIDATION] message: All 6 columns properly standardized (mean ≈ 0, SD ≈ 1 within tolerance=0.01).
+[VALIDATION] mean_values: {'Total_Intercept_Cued_z': np.float64(-1.1102230246251566e-17), 'Total_Intercept_Free_z': np.float64(1.7763568394002505e-17), 'Total_Intercept_Recognition_z': np.float64(-2.2204460492503132e-17), 'Total_Slope_Cued_z': np.float64(1.1102230246251566e-17), 'Total_Slope_Free_z': np.float64(5.655198531684391e-18), 'Total_Slope_Recognition_z': np.float64(2.220446049250313e-18)}
+[VALIDATION] sd_values: {'Total_Intercept_Cued_z': np.float64(1.0), 'Total_Intercept_Free_z': np.float64(1.0), 'Total_Intercept_Recognition_z': np.float64(1.0), 'Total_Slope_Cued_z': np.float64(1.0), 'Total_Slope_Free_z': np.float64(1.0), 'Total_Slope_Recognition_z': np.float64(0.9999999999999999)}
+[SUCCESS] Step 01 complete

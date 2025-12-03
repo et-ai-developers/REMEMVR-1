@@ -1,0 +1,75 @@
+RQ 5.3.7 Step 02: Paradigm-Stratified LMM Model Summaries
+======================================================================
+
+
+======================================================================
+PARADIGM: free_recall
+======================================================================
+Convergence Status: converged_lbfgs
+AIC: 919.88
+BIC: 943.83
+Log-Likelihood: -453.94
+
+Variance Components:
+  var_intercept:  0.380505
+  var_slope:      0.008531
+  cov_int_slope:  -0.028264
+  corr_int_slope: -0.496081
+  var_residual:   0.378340
+
+Fixed Effects:
+                       Coef. Std.Err.        z  P>|z|  [0.025  0.975]
+Intercept              0.746    0.093    8.016  0.000   0.563   0.928
+log_TSVR              -0.209    0.021  -10.077  0.000  -0.250  -0.169
+Group Var              0.381    0.245                                
+Group x log_TSVR Cov  -0.028    0.046                                
+log_TSVR Var           0.009    0.012                                
+
+
+======================================================================
+PARADIGM: cued_recall
+======================================================================
+Convergence Status: converged_lbfgs
+AIC: 916.31
+BIC: 940.26
+Log-Likelihood: -452.16
+
+Variance Components:
+  var_intercept:  0.310049
+  var_slope:      0.000036
+  cov_int_slope:  -0.003324
+  corr_int_slope: -0.999380
+  var_residual:   0.400053
+
+Fixed Effects:
+                       Coef. Std.Err.        z  P>|z|  [0.025  0.975]
+Intercept              0.860    0.091    9.478  0.000   0.682   1.038
+log_TSVR              -0.237    0.019  -12.400  0.000  -0.275  -0.200
+Group Var              0.310    0.227                                
+Group x log_TSVR Cov  -0.003    0.040                                
+log_TSVR Var           0.000    0.010                                
+
+
+======================================================================
+PARADIGM: recognition
+======================================================================
+Convergence Status: converged_lbfgs
+AIC: 947.42
+BIC: 971.37
+Log-Likelihood: -467.71
+
+Variance Components:
+  var_intercept:  0.429675
+  var_slope:      0.005673
+  cov_int_slope:  -0.022407
+  corr_int_slope: -0.453864
+  var_residual:   0.404604
+
+Fixed Effects:
+                       Coef. Std.Err.        z  P>|z|  [0.025  0.975]
+Intercept              0.863    0.097    8.863  0.000   0.672   1.054
+log_TSVR              -0.247    0.021  -11.985  0.000  -0.288  -0.207
+Group Var              0.430    0.259                                
+Group x log_TSVR Cov  -0.022    0.046                                
+log_TSVR Var           0.006    0.012                                
+

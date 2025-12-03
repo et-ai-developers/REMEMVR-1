@@ -1,0 +1,46 @@
+================================================================================
+INTRACLASS CORRELATION COEFFICIENT (ICC) SUMMARY
+RQ 5.3.7 - Paradigm-Stratified Variance Decomposition
+================================================================================
+
+INTERPRETATION THRESHOLDS:
+  Low:         ICC < 0.20
+  Moderate:    0.20 <= ICC < 0.40
+  Substantial: ICC >= 0.40
+
+TIMEPOINT FOR CONDITIONAL ICC:
+  Day 6 (TSVR ~144 hours)
+  Log-transformed: log(145) = 4.977
+
+--------------------------------------------------------------------------------
+
+PARADIGM: CUED_RECALL
+--------------------------------------------------------------------------------
+  ICC Intercept (baseline memory)                   : 0.437 (Substantial)
+  ICC Slope Simple (forgetting rate)                : 0.000 (Low)
+  ICC Conditional at Day 6 (memory at 144h)         : 0.410 (Substantial)
+
+
+PARADIGM: FREE_RECALL
+--------------------------------------------------------------------------------
+  ICC Intercept (baseline memory)                   : 0.501 (Substantial)
+  ICC Slope Simple (forgetting rate)                : 0.022 (Low)
+  ICC Conditional at Day 6 (memory at 144h)         : 0.451 (Substantial)
+
+
+PARADIGM: RECOGNITION
+--------------------------------------------------------------------------------
+  ICC Intercept (baseline memory)                   : 0.515 (Substantial)
+  ICC Slope Simple (forgetting rate)                : 0.014 (Low)
+  ICC Conditional at Day 6 (memory at 144h)         : 0.462 (Substantial)
+
+--------------------------------------------------------------------------------
+
+INTERPRETATION NOTES:
+- ICC quantifies proportion of variance between participants
+- Higher ICC = more individual differences = better reliability
+- Conditional ICC at Day 6 most relevant for retention research
+- Intercept ICC captures individual differences in baseline encoding
+- Slope ICC captures individual differences in forgetting rates
+
+================================================================================
