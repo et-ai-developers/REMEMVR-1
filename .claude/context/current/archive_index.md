@@ -362,6 +362,12 @@
 ### rq_5.2.6_complete_domain_variance_decomposition
 **Description:** Complete RQ 5.2.6 execution (Domain-Specific Variance Decomposition with When exclusion). 8 analysis steps executed, all validation passed. ICC estimates show substantial between-person variance in forgetting rates (ICC_slope_conditional ~0.52 for both What/Where domains). Where domain shows significant Fan Effect (r=-0.316, p=0.003), What domain does not. Cross-domain correlations extremely high (r=0.96 intercept, r=0.77 slope) suggesting general memory factor. 200 random effects extracted for RQ 5.2.7 clustering. When domain excluded per floor effect (Session 2025-12-03 21:30).
 
+### rq_5.2.7_complete_domain_clustering
+**Description:** Complete RQ 5.2.7 execution (Domain-Based K-means Clustering with When exclusion). 7 analysis steps executed, K=5 clusters selected via BIC (BIC=90.09), cluster quality validation (silhouette=0.34 poor but Jaccard=0.88 stable), 5 distinct memory profiles identified (Average-Slow, Average-Improving, Low-Stable, High-Stable, High-Fast decline). Notable finding: 26% of sample shows improving trajectories (practice/consolidation effect). What-Where highly correlated suggesting general memory factor. Full validation pipeline complete (rq_inspect, rq_plots, rq_results, rq_validate all PASS). Session 2025-12-03 22:50.
+
+### tdd_irt_ctt_tools_creation
+**Description:** Complete TDD workflow for creating 4 IRT-CTT convergence analysis tools via Red-Green-Refactor methodology. 27 tests written first (Red phase), 4 functions implemented in tools/analysis_ctt.py (compute_ctt_mean_scores_by_factor, compute_pearson_correlations_with_correction, compute_cohens_kappa_agreement, compare_lmm_fit_aic_bic) with 491 lines total (Green phase). All 27/27 tests passing. Tools feature D068 dual p-values (uncorrected + Holm-Bonferroni correction), generic factor support (domain/paradigm/congruence), Landis & Koch kappa interpretation, Burnham & Anderson AIC/BIC thresholds. tools_inventory.md updated with 4 new entries. Successfully unblocked RQ 5.3.5 and 5.4.4 (rq_tools and rq_analysis both succeeded after tool creation). Session 2025-12-03 23:30.
+
 ---
 
 ## How to Use This Index

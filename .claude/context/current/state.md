@@ -1,31 +1,31 @@
 # Current State
 
-**Last Updated:** 2025-12-03 23:40 (context-manager curation)
+**Last Updated:** 2025-12-04 00:30 (context-manager curation)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2025-12-03 23:40 (context-manager curation)
-**Token Count:** ~2.4k tokens (curated from ~5k, 52% reduction)
+**Last /save:** 2025-12-04 00:30 (context-manager curation)
+**Token Count:** ~3.8k tokens (curated from ~6.2k, 39% reduction)
 
 ---
 
 ## What We're Doing
 
-**Current Task:** Chapter 5 RQ Pipeline Execution (18/31 RQs complete, 9 ready for g_code)
+**Current Task:** Chapter 5 RQ Pipeline Execution (22/31 RQs complete, 9 ready for g_code)
 
-**Context:** Systematically executing RQ analyses across Chapter 5. **CRITICAL SESSION:** Discovered and fixed wrong random slope specification in 3 RQs. Model correction revealed meaningful individual differences in forgetting rates that were previously masked by using linear TSVR_hours instead of log_TSVR.
+**Context:** Systematically executing RQ analyses across Chapter 5. **MILESTONE SESSION:** All 3 IRT-CTT convergence RQs complete (5.2.4, 5.3.5, 5.4.4). All convergence criteria met across domains, paradigms, and schema congruence levels. Validates that IRT theta and CTT proportion correct yield substantially agreeing conclusions (r > 0.84, κ > 0.60, agreement > 80%).
 
 **Completion Status:**
-- **RQ 5.1.1-5.1.4:** ✅ COMPLETE (baseline analyses)
-- **RQ 5.2.1-5.2.4:** ✅ COMPLETE (domain analyses) - **5.2.4 CORRECTED**
-- **RQ 5.3.1-5.3.4:** ✅ COMPLETE (paradigm analyses) - **5.3.4 CORRECTED**
-- **RQ 5.4.1-5.4.3:** ✅ COMPLETE (congruence analyses) - **5.4.3 CORRECTED**
-- **Ready for g_code:** 9 RQs (5.1.5, 5.2.6, 5.2.7, 5.3.6-5.3.9, 5.4.5-5.4.7)
-- **BLOCKED (tools=FAIL):** 4 RQs (5.1.6, 5.2.8, 5.3.5, 5.4.4) - missing GLMM/CTT tools
+- **RQ 5.1.1-5.1.4:** ✅ COMPLETE (4/6 general analyses)
+- **RQ 5.2.1-5.2.7:** ✅ COMPLETE (7/8 domain analyses) - only 5.2.8 BLOCKED by GLMM
+- **RQ 5.3.1-5.3.5:** ✅ COMPLETE (5/9 paradigm analyses) - 5.3.5 IRT-CTT UNBLOCKED
+- **RQ 5.4.1-5.4.4:** ✅ COMPLETE (4/8 congruence analyses) - 5.4.4 IRT-CTT UNBLOCKED
+- **Ready for g_code:** 9 RQs (5.1.5, 5.3.6-5.3.9, 5.4.5-5.4.7)
+- **BLOCKED (tools=FAIL):** 2 RQs (5.1.6, 5.2.8) - missing GLMM tools
 
 **Related Documents:**
-- `results/ch5/rq_status.tsv` - RQ tracking (18 COMPLETE, 13 ready, 4 BLOCKED)
-- Archive: `rq_5.2.3_complete_execution_age_domain_interaction.md` (Session 2025-12-03 01:30)
-- Archive: `rq_5.2.2_partial_execution_when_exclusion_consolidation.md` (Sessions 2025-12-02 23:15 + 2025-12-03 00:15)
-- Archive: `rq_5.4.3_complete_execution_age_schema_congruence.md` (Session 2025-12-02 22:20)
+- `results/ch5/rq_status.tsv` - RQ tracking (22 COMPLETE, 9 ready, 0 BLOCKED)
+- Archive: `rq_5.2.7_complete_domain_clustering.md` (Session 2025-12-03 22:50)
+- Archive: `tdd_irt_ctt_tools_creation.md` (Session 2025-12-03 23:30)
+- Archive: `irt_ctt_convergence_chapter5_complete.md` (All 3 convergence RQs: 5.2.4, 5.3.5, 5.4.4)
 
 ---
 
@@ -34,27 +34,27 @@
 ### Completed
 
 - **Phases 0-28:** All complete (13 v4.X agents built and tested)
-- **RQ 5.1-5.4 Baseline Analyses:** 18/31 RQs COMPLETE with validated IRT settings
+- **RQ 5.1-5.4 Baseline Analyses:** 22/31 RQs COMPLETE (71% complete)
   - General (5.1.1-5.1.4): 4/6 COMPLETE
-  - Domains (5.2.1-5.2.4): 4/8 COMPLETE (5.2.4 with corrected model)
-  - Paradigms (5.3.1-5.3.4): 4/9 COMPLETE (5.3.4 with corrected model)
-  - Congruence (5.4.1-5.4.3): 3/8 COMPLETE (5.4.3 with corrected model)
-- **CRITICAL MODEL CORRECTION (Session 2025-12-03 06:00):**
-  - Fixed random slope specification in 3 RQs (5.2.4, 5.3.4, 5.4.3)
-  - Changed from TSVR_hours to log_TSVR per ROOT RQ model selection
-  - Revealed meaningful individual differences previously masked
+  - Domains (5.2.1-5.2.7): 7/8 COMPLETE (only 5.2.8 BLOCKED by GLMM)
+  - Paradigms (5.3.1-5.3.5): 5/9 COMPLETE (5.3.5 IRT-CTT convergence)
+  - Congruence (5.4.1-5.4.4): 4/8 COMPLETE (5.4.4 IRT-CTT convergence)
+- **IRT-CTT CONVERGENCE COMPLETE (All 3 RQs):**
+  - 5.2.4 Domain: r=0.84-0.88, κ=0.667 (Session 2025-12-03 20:45)
+  - 5.3.5 Paradigm: r=0.84-0.88, κ=0.667 (Session 2025-12-04 00:00)
+  - 5.4.4 Congruence: r=0.87-0.91, κ=0.667 (Session 2025-12-04 00:30)
 - **ALL 26 TOOLS:** 258/261 tests GREEN (98.9%), production-validated
+- **CTT TOOLS:** 4 new tools created via TDD (27/27 tests GREEN) unblocking 2 RQs
 
 ### Next Actions
 
 **Immediate:**
-- Execute remaining 9 ready RQs via g_code (5.1.5, 5.2.6-5.2.7, 5.3.6-5.3.9, 5.4.5-5.4.7)
-- Prioritize clustering RQs (5.2.7, 5.3.8, 5.4.7) - same pipeline as 5.1.5
+- Execute remaining 9 ready RQs via g_code (5.1.5, 5.3.6-5.3.9, 5.4.5-5.4.7)
+- Prioritize clustering RQs (5.3.8, 5.4.7) - same pipeline as 5.1.5, 5.2.7
 
 **Strategic:**
 - Build GLMM tools via TDD (unblocks 5.1.6, 5.2.8)
-- Build CTT convergence tools via TDD (unblocks 5.3.5, 5.4.4)
-- Complete Chapter 5 analysis suite (31 RQs total)
+- Complete Chapter 5 analysis suite (31 RQs total, 71% complete)
 
 ---
 
@@ -149,265 +149,6 @@
 
 ### Session (2025-12-03 21:30) - ARCHIVED
 **Note:** Content archived to `rq_5.2.6_complete_domain_variance_decomposition.md` (RQ 5.2.6 complete execution: 8 analysis steps, ICC estimates show substantial between-person variance in forgetting rates, Where domain Fan Effect r=-0.316 p=0.003 confirmed, cross-domain correlations extremely high r=0.96 intercept suggesting g-factor, 200 random effects extracted for RQ 5.2.7 clustering, When domain excluded per floor effect, 3+ sessions old)
-
-## Session (2025-12-03 22:50)
-
-**Task:** RQ 5.2.7 Complete Execution - Domain-Based Clustering (When Excluded)
-
-**Context:** User requested execution of RQ 5.2.7 step-by-step. This is a domain-based K-means clustering analysis using random effects from RQ 5.2.6. When domain excluded due to floor effect (RQ 5.2.1).
-
-**Major Accomplishments:**
-
-**1. Updated Documentation for When Exclusion**
-
-Modified `1_concept.md` and `2_plan.md` to document When domain exclusion:
-- Added "⚠️ WHEN DOMAIN EXCLUSION" header section
-- Updated to 4 clustering variables (not 6): What intercept/slope, Where intercept/slope
-- Row counts: 200 (100 UID × 2 domains) not 300 (100 × 3)
-- Updated expected dimensions throughout (4 variables, 4×4 matrix, etc.)
-
-**2. Created and Executed 7 Analysis Steps (step00-step06)**
-
-| Step | Name | Output | Key Result |
-|------|------|--------|------------|
-| 00 | Load random effects | 100×5 (UID + 4 vars) | Pivoted from 200 long rows |
-| 01 | Standardize features | 100×5 (z-scored) | Mean~0, SD~1, 1 outlier A065 |
-| 02 | K-means model selection | K=1-6 BIC table | **K=5 selected** (BIC=90.09) |
-| 03 | Fit final K-means | 100 assignments, 5 centers | All clusters ≥10% |
-| 04 | Validate cluster quality | 3 metrics | **POOR silhouette, STABLE Jaccard** |
-| 05 | Characterize clusters | 5 profiles | Domain-specific patterns |
-| 06 | Prepare plot data | 105 rows | Ready for scatter matrix |
-
-**3. Key Findings**
-
-**K-means Model Selection (Step 2):**
-- BIC minimum at K=5 (BIC=90.09)
-- Clear minimum (ΔBICnext = 3.38 > 2.0 parsimony threshold)
-- Inertia decreases monotonically (validation passed)
-
-**Cluster Quality Validation (Step 4):**
-
-| Metric | Value | Threshold | Status |
-|--------|-------|-----------|--------|
-| Silhouette | 0.34 | ≥0.40 | **POOR** |
-| Davies-Bouldin | 0.98 | <1.0 | **GOOD** |
-| Bootstrap Jaccard | 0.88 | >0.75 | **STABLE** |
-
-**Interpretation:** Clusters are STABLE (consistent participant groupings) but have FUZZY boundaries (substantial overlap). This is common in psychological data - meaningful subgroups exist but boundaries are soft.
-
-**Cluster Profiles (Step 5):**
-
-| Cluster | N (%) | Baseline | Trajectory | Interpretation |
-|---------|-------|----------|------------|----------------|
-| 0 | 22 (22%) | Average | Slow Decline | Typical forgetting |
-| 1 | 26 (26%) | Average | **Improving** | Practice/consolidation |
-| 2 | 17 (17%) | Low | Stable/Improving | Floor recovery |
-| 3 | 21 (21%) | High | Stable | Strong retention |
-| 4 | 14 (14%) | High | Fast Decline | Fast forgetters |
-
-**Notable:** Cluster 1 (26%) shows IMPROVING memory - contradicts forgetting expectation. Possible explanations: practice effects (testing effect) or consolidation gains (sleep-dependent).
-
-**Cross-Domain Pattern:** What-Where intercepts highly correlated in raw data (r~0.7-0.8 from visual inspection), suggesting general memory factor rather than domain-specific profiles.
-
-**4. Finisher Agents Completed**
-
-| Agent | Status | Key Result |
-|-------|--------|------------|
-| **rq_inspect** | ✅ PASS | All 4 validation layers passed |
-| **rq_plots** | ✅ PASS | cluster_scatter_matrix.png generated (937KB) |
-| **rq_results** | ✅ PASS | summary.md created with 3 anomalies flagged |
-| **rq_validate** | ✅ PASS | 0C/0H/1M issues |
-
-**5. Validation Result: PASS WITH NOTES**
-
-**Moderate Issue:** Poor silhouette score (0.34 < 0.40 threshold)
-- Cluster overlap substantial, boundaries fuzzy
-- **Mitigated:** Summary.md interprets as "prototypical profiles" not discrete classes
-- Recommends GMM sensitivity analysis + continuous z-scores for clinical use
-- Appropriate for exploratory analysis with caveats
-
-**6. Files Created**
-
-**Code (7 files):**
-- `results/ch5/5.2.7/code/step00_load_random_effects.py`
-- `results/ch5/5.2.7/code/step01_standardize_features.py`
-- `results/ch5/5.2.7/code/step02_kmeans_model_selection.py`
-- `results/ch5/5.2.7/code/step03_fit_final_kmeans.py`
-- `results/ch5/5.2.7/code/step04_validate_cluster_quality.py`
-- `results/ch5/5.2.7/code/step05_characterize_clusters.py`
-- `results/ch5/5.2.7/code/step06_prepare_scatter_plot_data.py`
-
-**Data (13 files):**
-- `step00_random_effects_from_rq526.csv` (100 rows)
-- `step01_standardized_features.csv` (100 rows)
-- `step01_standardization_summary.txt`
-- `step02_cluster_selection.csv` (6 rows)
-- `step02_optimal_k_selection.txt`
-- `step03_cluster_assignments.csv` (100 rows)
-- `step03_cluster_centers.csv` (5 rows)
-- `step03_cluster_sizes.csv` (5 rows)
-- `step04_cluster_validation.csv` (5 rows)
-- `step04_validation_summary.txt`
-- `step05_cluster_summary_statistics.csv` (20 rows)
-- `step05_cluster_characterization.txt`
-- `step06_scatter_plot_matrix_data.csv` (105 rows)
-
-**Logs (7 files):**
-- All step logs in `logs/` folder
-
-**Plots:**
-- `plots/cluster_scatter_matrix.png` (937KB, 4×4 matrix)
-- `plots/plots.py` (custom plotting code)
-
-**Results:**
-- `results/summary.md` (complete narrative)
-- `results/validation.md` (thesis-quality validation)
-
-**7. Documentation Updated**
-
-| File | Changes |
-|------|---------|
-| `results/ch5/5.2.7/docs/1_concept.md` | When exclusion header, 4 variables not 6 |
-| `results/ch5/5.2.7/docs/2_plan.md` | When exclusion header, updated dimensions |
-| `results/ch5/5.2.7/status.yaml` | All agents + steps = success |
-| `results/ch5/rq_status.tsv` | 5.2.7 COMPLETE with K=5 findings |
-
-**Session Metrics:**
-
-**Tokens:**
-- Session start: ~8k (after /refresh)
-- Session end: ~85k (at /save)
-- Delta: ~77k consumed
-
-**Code steps created:** 7
-**Code steps run:** 7 (all successful)
-**Bugs encountered:** 0 (clean execution)
-**Finisher agents run:** 4 (all PASS)
-
-**Active Topics (For context-manager):**
-
-Topic naming format: [topic][task][subtopic]
-
-- rq_5.2.7_complete_domain_clustering (Session 2025-12-03 22:50: when_excluded_floor_effect, k5_clusters_bic_selection, silhouette_0.34_poor_but_stable_jaccard_0.88, 5_profiles_avg_slow_avg_improving_low_stable_high_stable_high_decline, cluster_1_26pct_improving_unexpected, what_where_highly_correlated_g_factor, random_effects_from_5.2.6)
-
-- cluster_quality_interpretation (Session 2025-12-03 22:50: poor_silhouette_0.34_lt_0.40, stable_jaccard_0.88_gt_0.75, good_db_0.98_lt_1.0, interpretation_fuzzy_boundaries_not_invalid_structure, prototypical_profiles_not_discrete_types, gmm_sensitivity_recommended)
-
-**Relevant Archived Topics (from context-finder):**
-- rq_5.1.5_complete_execution_kmeans_clustering.md (2025-12-02 19:30: Same K-means methodology, K=2)
-- rq_validate_agent_mass_testing.md (2025-12-03 19:30: Validation workflow)
-- when_domain_anomalies.md (2025-11-23: Floor effect discovery 6-9%, 77% attrition)
-- validation_mass_execution_32_agents_stats_scholar_guide_3_rq_fixes.md (2025-12-01 17:30: Clustering validation requirements)
-
-**End of Session (2025-12-03 22:50)**
-
-**Status:** ✅ **RQ 5.2.7 COMPLETE AND VALIDATED**
-
-Domain-based K-means clustering complete for What and Where domains (When excluded due to floor effect). K=5 clusters selected via BIC. Cluster quality POOR (silhouette=0.34) but STABLE (Jaccard=0.88), indicating fuzzy boundaries between meaningful subgroups. Five distinct profiles identified ranging from "improving memory" to "fast decline". Notable: 26% of sample shows improving trajectories (practice/consolidation effect). What-Where highly correlated, suggesting general memory factor dominates.
-
-**Chapter 5 Progress:** 20/31 RQs complete (65%). Domains section 7/8 complete (only 5.2.8 BLOCKED by GLMM tools).
-
-## Session (2025-12-03 23:30)
-
-**Task:** TDD Tool Creation for IRT-CTT Convergence (Unblocks RQ 5.3.5, 5.4.4)
-
-**Context:** User observed that RQ 5.3.5 and 5.4.4 were marked "BLOCKED" for missing CTT tools, but RQ 5.2.4 (Domain IRT-CTT) was already complete using inline implementations. User requested "proper path" - extract 5.2.4 inline functions into reusable tools via TDD, then run rq_tools/rq_analysis for 5.3.5.
-
-**Major Accomplishments:**
-
-**1. TDD Red Phase - Tests Written First**
-
-Created `/home/etai/projects/REMEMVR/tests/test_irt_ctt_convergence_tools.py` (27 tests):
-- 7 tests for `compute_ctt_mean_scores_by_factor`
-- 7 tests for `compute_pearson_correlations_with_correction`
-- 6 tests for `compute_cohens_kappa_agreement`
-- 6 tests for `compare_lmm_fit_aic_bic`
-- 1 integration test for full workflow
-
-Tests covered: output structure, range validation, D068 compliance (dual p-values), Holm-Bonferroni correctness, kappa interpretation thresholds, AIC/BIC delta computation.
-
-**2. TDD Green Phase - Implementation**
-
-Extended `tools/analysis_ctt.py` with 4 new functions (491 lines total):
-
-| Function | Purpose | Key Feature |
-|----------|---------|-------------|
-| `compute_ctt_mean_scores_by_factor` | CTT proportion correct by any factor | Generic: works with domain/paradigm/congruence |
-| `compute_pearson_correlations_with_correction` | Correlations + Holm-Bonferroni | D068 dual p-values (p_uncorrected + p_holm) |
-| `compute_cohens_kappa_agreement` | Significance classification agreement | Landis & Koch (1977) interpretation |
-| `compare_lmm_fit_aic_bic` | Model fit comparison | Burnham & Anderson (2002) thresholds |
-
-Also added helper functions:
-- `_compute_correlation_ci()` - Fisher z-transform for 95% CI
-- `_holm_bonferroni_correction()` - Sequential correction (less conservative than Bonferroni)
-
-**Test Results:** 27/27 tests passing (one numpy bool→Python bool fix required)
-
-**3. tools_inventory.md Updated**
-
-Added 4 new function entries to `docs/v4/tools_inventory.md` in Module: tools.analysis_ctt section:
-- compute_ctt_mean_scores_by_factor
-- compute_pearson_correlations_with_correction
-- compute_cohens_kappa_agreement
-- compare_lmm_fit_aic_bic
-
-Each entry includes: Description, Inputs (with types), Outputs, Reference, Notes (including test status "27/27 tests GREEN").
-
-**4. rq_tools Agent Succeeded for 5.3.5**
-
-After tools_inventory.md update, rq_tools agent found all required tools:
-- 7 analysis tools cataloged (CTT computation, correlations, parallel LMMs, Cohen's kappa, AIC/BIC)
-- 9 validation tools cataloged (file existence, columns, range, D068 compliance)
-- Created `results/ch5/5.3.5/docs/3_tools.yaml` (14KB)
-
-**5. rq_analysis Agent Succeeded for 5.3.5**
-
-Created complete analysis recipe:
-- 8 analysis steps (step00-step08)
-- Created `results/ch5/5.3.5/docs/4_analysis.yaml` (35KB)
-- Full validation specifications per step
-- All tool signatures with type hints
-- D039, D068, D070 decision compliance documented
-
-**Files Created/Modified:**
-
-| File | Action | Details |
-|------|--------|---------|
-| `tests/test_irt_ctt_convergence_tools.py` | CREATED | 27 TDD tests, 350 lines |
-| `tools/analysis_ctt.py` | EXTENDED | +491 lines (4 functions + 2 helpers), 742 total |
-| `docs/v4/tools_inventory.md` | UPDATED | +48 lines (4 new function entries) |
-| `results/ch5/5.3.5/docs/3_tools.yaml` | CREATED | 16 tools cataloged |
-| `results/ch5/5.3.5/docs/4_analysis.yaml` | CREATED | 8-step analysis recipe |
-| `results/ch5/5.3.5/status.yaml` | UPDATED | rq_tools=success, rq_analysis=success |
-
-**Session Metrics:**
-
-- Tokens: ~8k start → ~40k end (~32k consumed)
-- Tests created: 27
-- Tests passing: 27/27 (100%)
-- Functions created: 4 (+ 2 helpers)
-- Lines of code: 491 new production, 350 new tests
-- Agents run: 3 (context_finder, rq_tools, rq_analysis)
-
-**Active Topics (For context-manager):**
-
-Topic naming format: [topic][task][subtopic]
-
-- tdd_irt_ctt_tools_creation (Session 2025-12-03 23:30: proper_path_vs_quick_path, 27_tests_red_then_green, 4_functions_compute_ctt_mean_scores_pearson_kappa_aic_bic, holm_bonferroni_correction, d068_dual_pvalues, tools_inventory_updated, unblocks_5.3.5_5.4.4)
-
-- rq_5.3.5_specification_complete (Session 2025-12-03 23:30: rq_tools_success_16_tools, rq_analysis_success_8_steps, paradigm_irt_ctt_convergence, ready_for_g_code, uses_new_ctt_tools)
-
-**Relevant Archived Topics (from context-finder):**
-- ctt_irt_convergence_validated.md (2025-12-03 20:45: CTT-IRT methodology, Steiger's z, paradox pattern)
-- phase1_critical_path_complete.md (2025-11-26 21:00: TDD tool development approach, original 2 CTT functions)
-- rq_5_11_complete_publication_ready_critical_fixes_applied.md (2025-11-29 19:50: First IRT-CTT convergence RQ)
-
-**End of Session (2025-12-03 23:30)**
-
-**Status:** ✅ **RQ 5.3.5 READY FOR g_code EXECUTION**
-
-Four IRT-CTT convergence tools created via TDD (27/27 tests GREEN). tools_inventory.md updated. rq_tools and rq_analysis both succeeded for RQ 5.3.5 (Paradigm IRT-CTT Convergence). Same tools will unblock RQ 5.4.4 (Congruence IRT-CTT).
-
-**Chapter 5 Progress:** 20/31 RQs complete (65%). 5.3.5 ready for g_code (was BLOCKED, now READY). 5.4.4 also unblocked by new tools.
 
 ## Session (2025-12-04 00:00)
 
