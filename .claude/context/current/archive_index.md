@@ -359,6 +359,9 @@
 ### ctt_irt_convergence_validated
 **Description:** CTT-IRT convergence validation across multiple RQs documenting purification benefit hypothesis using Steiger's z-test for dependent correlations. Primary evidence from RQ 5.2.5 (When excluded): purified CTT shows significantly higher correlation with IRT theta than full CTT (What Δr=0.027 z=10.06, Where Δr=0.015 z=14.22, both p<0.001 Bonferroni k=2). Paradox pattern: purified CTT better convergence but worse trajectory fit (AIC 1812 vs full CTT 1780) due to item homogeneity reducing variance. Cross-references RQ 5.12 paradox discovery, When domain floor effect, Steiger's z-test tool creation. Implications: dual-reporting strategy (full CTT for trajectories, purified CTT for convergence validation) (Session 2025-12-03 20:45).
 
+### rq_5.2.6_complete_domain_variance_decomposition
+**Description:** Complete RQ 5.2.6 execution (Domain-Specific Variance Decomposition with When exclusion). 8 analysis steps executed, all validation passed. ICC estimates show substantial between-person variance in forgetting rates (ICC_slope_conditional ~0.52 for both What/Where domains). Where domain shows significant Fan Effect (r=-0.316, p=0.003), What domain does not. Cross-domain correlations extremely high (r=0.96 intercept, r=0.77 slope) suggesting general memory factor. 200 random effects extracted for RQ 5.2.7 clustering. When domain excluded per floor effect (Session 2025-12-03 21:30).
+
 ---
 
 ## How to Use This Index
