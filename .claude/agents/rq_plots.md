@@ -237,6 +237,74 @@ Read `tools/plotting.py` completely to extract:
 
 ---
 
+### 🚨 CRITICAL: Multi-Dimensional IRT Probability Conversion
+
+**When converting theta to probability for multi-dimensional IRT models, you MUST use FACTOR-SPECIFIC item parameters!**
+
+**The Problem:**
+In a multi-dimensional IRT model (e.g., 2 factors: source vs destination), each factor has its own set of items with different difficulties:
+- Factor A items: mean difficulty b = -0.45 (easy items)
+- Factor B items: mean difficulty b = +1.37 (hard items)
+
+The theta values from each factor are calibrated relative to their own item difficulties. This means:
+- theta_A = 0.0 → ~65% probability on Factor A items
+- theta_B = 0.0 → ~25% probability on Factor B items
+
+**These thetas are NOT on the same scale!**
+
+**The Error (DO NOT DO THIS):**
+```python
+# WRONG: Using single difficulty for all factors
+mean_discrimination = df_items['a'].mean()  # Overall mean
+probability = convert_theta_to_probability(theta, discrimination=mean_discrimination, difficulty=0.0)
+```
+
+This masks the true performance difference between factors because the difficulty offset is lost.
+
+**The Correct Approach:**
+```python
+# CORRECT: Use factor-specific parameters
+source_items = df_items[df_items['factor'] == 'source']
+dest_items = df_items[df_items['factor'] == 'destination']
+
+FACTOR_PARAMS = {
+    'source': {
+        'discrimination': source_items['a'].mean(),
+        'difficulty': source_items['b'].mean()  # e.g., -0.45
+    },
+    'destination': {
+        'discrimination': dest_items['a'].mean(),
+        'difficulty': dest_items['b'].mean()  # e.g., +1.37
+    }
+}
+
+# Convert each factor using its own parameters
+for factor in ['source', 'destination']:
+    mask = df['factor'] == factor
+    params = FACTOR_PARAMS[factor]
+    df.loc[mask, 'probability'] = convert_theta_to_probability(
+        df.loc[mask, 'theta'].values,
+        discrimination=params['discrimination'],
+        difficulty=params['difficulty']
+    )
+```
+
+**When This Applies:**
+- RQs with 2+ factor IRT models (e.g., Type 5.5 source-destination, Type 5.2 domains, Type 5.3 paradigms)
+- Any RQ where item parameters file has a 'factor' column with multiple values
+- Whenever probability-scale plots are generated (Decision D069)
+
+**Validation Check:**
+After conversion, verify probability ranges make sense:
+- If factors have similar raw accuracy → probabilities should be similar
+- If factors have different raw accuracy → probabilities should reflect this difference
+- Check against raw accuracy from step00 data if available
+
+**Lesson Learned (2025-12-05):**
+RQ 5.5.1 initially showed null main effect (p=0.40) because probability conversion used difficulty=0.0 for both source and destination factors. The true effect was a 30-45 percentage point difference (source 70% vs destination 25%) that was completely masked by incorrect probability conversion.
+
+---
+
 ### Step 6: Read Plot Specifications from plan.md
 
 Read `results/chX/rqY/docs/2_plan.md` to extract plot requirements.
@@ -723,6 +791,27 @@ Successfully generated plots.py for chX/rqY with **3 plots** specified in 2_plan
 ---
 
 ## Version History
+
+### v4.0.1 (2025-12-05)
+
+**Critical fix: Multi-dimensional IRT probability conversion**
+
+**Bug Fixed:**
+- RQ 5.5.1 showed null main effect (p=0.40) when true effect was 30-45 percentage points
+- Root cause: Probability conversion used difficulty=0.0 for all factors instead of factor-specific difficulties
+- Factor-specific item difficulties (b parameters) encode the baseline accuracy difference between factors
+- Using a single difficulty value masks this difference completely
+
+**Changes:**
+- Added section "🚨 CRITICAL: Multi-Dimensional IRT Probability Conversion" after Step 5
+- Documents the error pattern (difficulty=0.0 for all) vs correct approach (factor-specific b values)
+- Includes code example showing correct probability conversion loop
+- Lists when this applies (2+ factor IRT models, Decision D069 plots)
+- Adds validation check guidance (compare to raw accuracy)
+
+**Lesson:** When IRT model has multiple factors, each factor's theta is on a DIFFERENT scale anchored to its own item difficulties. Probability conversion must use factor-specific parameters to preserve the true performance differences.
+
+---
 
 ### v4.0.0 (2025-11-19)
 

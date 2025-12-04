@@ -389,6 +389,12 @@
 ### type_5.5_validation_fixes_complete
 **Description:** Complete history of Type 5.5.3-5.5.7 validation fixes achieving APPROVED status. Session 2025-12-04 19:00: Fixed 5 RQ concept documents per validation summary, key improvement 5.5.4 from REJECTED 8.3 to APPROVED 9.3, comprehensive methodological patterns established (LMM 7-criteria validation, power analysis for null hypotheses, bounded CTT remedial hierarchy, bootstrap B=100 standard, practice effects mitigation). All 5 downstream RQs validated via dual-agent (rq_scholar + rq_stats) achieving scores 9.3-9.6.
 
+### irt_mc_samples_pattern_discovery
+**Description:** Discovery and documentation of correct IRT mc_samples configuration pattern across ROOT RQs. model_fit uses mc_samples=1 for fast point estimates of item parameters, model_scores uses mc_samples=100 for accurate Monte Carlo integration of theta. RQ 5.5.1 violated pattern (100/100 instead of 1/100) causing 100× slowdown. Pattern now documented and validated across all ROOT RQs (5.1.1, 5.2.1, 5.3.1, 5.4.1, 5.5.1).
+
+### plots_style_5.2.1_format
+**Description:** Publication-quality trajectory plot formatting standard established. Individual scatter points (alpha=0.15) from 800 observations, dashed fitted curves from LMM predictions, 95% CI bands from covariance matrix, continuous TSVR x-axis (not binned). Dual-scale output (theta + probability) per Decision D069. Template implementation in results/ch5/5.5.1/plots/plots.py. Supersedes binned summary approach from initial rq_plots agent.
+
 ---
 
 ## How to Use This Index

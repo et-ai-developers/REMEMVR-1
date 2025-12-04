@@ -94,9 +94,27 @@ print(f"  Model fitted: AIC = {lmm_results.aic:.2f}")
 item_params_path = DATA_DIR / "step03_item_parameters.csv"
 df_items = pd.read_csv(item_params_path)
 
-# Get mean discrimination for probability transformation
-mean_discrimination = df_items['a'].mean()
-print(f"  Mean item discrimination: {mean_discrimination:.3f}")
+# Get FACTOR-SPECIFIC item parameters for probability transformation
+# CRITICAL: Source and destination items have DIFFERENT difficulties!
+# The difficulty difference must be reflected in probability conversion.
+source_items = df_items[df_items['factor'] == 'source']
+dest_items = df_items[df_items['factor'] == 'destination']
+
+FACTOR_PARAMS = {
+    'source': {
+        'discrimination': source_items['a'].mean(),
+        'difficulty': source_items['b'].mean()
+    },
+    'destination': {
+        'discrimination': dest_items['a'].mean(),
+        'difficulty': dest_items['b'].mean()
+    }
+}
+
+print(f"  Factor-specific item parameters:")
+print(f"    Source:      a={FACTOR_PARAMS['source']['discrimination']:.3f}, b={FACTOR_PARAMS['source']['difficulty']:.3f}")
+print(f"    Destination: a={FACTOR_PARAMS['destination']['discrimination']:.3f}, b={FACTOR_PARAMS['destination']['difficulty']:.3f}")
+print(f"    Difficulty difference: {FACTOR_PARAMS['destination']['difficulty'] - FACTOR_PARAMS['source']['difficulty']:.3f} theta units")
 
 # =============================================================================
 # HELPER: Create prediction grid with CIs
@@ -214,31 +232,52 @@ print("\n" + "-" * 70)
 print("Generating Plot 2: Probability-scale trajectory (Decision D069)...")
 print("-" * 70)
 
-# Transform individual observations to probability
+# Transform individual observations to probability USING FACTOR-SPECIFIC PARAMETERS
+# CRITICAL FIX: Each factor uses its own item difficulty!
 df_indiv_prob = df_indiv.copy()
-df_indiv_prob['probability'] = convert_theta_to_probability(
-    df_indiv_prob['theta'].values,
-    discrimination=mean_discrimination,
-    difficulty=0.0
-) * 100  # Convert to percentage
+df_indiv_prob['probability'] = np.nan
 
-# Transform predictions to probability
+for loc_type in df_indiv_prob['LocationType'].unique():
+    mask = df_indiv_prob['LocationType'] == loc_type
+    params = FACTOR_PARAMS[loc_type]
+    df_indiv_prob.loc[mask, 'probability'] = convert_theta_to_probability(
+        df_indiv_prob.loc[mask, 'theta'].values,
+        discrimination=params['discrimination'],
+        difficulty=params['difficulty']
+    ) * 100  # Convert to percentage
+
+# Transform predictions to probability USING FACTOR-SPECIFIC PARAMETERS
 pred_grid_prob = pred_grid.copy()
-pred_grid_prob['mean_prob'] = convert_theta_to_probability(
-    pred_grid_prob['mean_theta'].values,
-    discrimination=mean_discrimination,
-    difficulty=0.0
-) * 100
-pred_grid_prob['prob_ci_lower'] = convert_theta_to_probability(
-    pred_grid_prob['theta_ci_lower'].values,
-    discrimination=mean_discrimination,
-    difficulty=0.0
-) * 100
-pred_grid_prob['prob_ci_upper'] = convert_theta_to_probability(
-    pred_grid_prob['theta_ci_upper'].values,
-    discrimination=mean_discrimination,
-    difficulty=0.0
-) * 100
+pred_grid_prob['mean_prob'] = np.nan
+pred_grid_prob['prob_ci_lower'] = np.nan
+pred_grid_prob['prob_ci_upper'] = np.nan
+
+for loc_type in pred_grid_prob['LocationType'].unique():
+    mask = pred_grid_prob['LocationType'] == loc_type
+    params = FACTOR_PARAMS[loc_type]
+
+    pred_grid_prob.loc[mask, 'mean_prob'] = convert_theta_to_probability(
+        pred_grid_prob.loc[mask, 'mean_theta'].values,
+        discrimination=params['discrimination'],
+        difficulty=params['difficulty']
+    ) * 100
+
+    pred_grid_prob.loc[mask, 'prob_ci_lower'] = convert_theta_to_probability(
+        pred_grid_prob.loc[mask, 'theta_ci_lower'].values,
+        discrimination=params['discrimination'],
+        difficulty=params['difficulty']
+    ) * 100
+
+    pred_grid_prob.loc[mask, 'prob_ci_upper'] = convert_theta_to_probability(
+        pred_grid_prob.loc[mask, 'theta_ci_upper'].values,
+        discrimination=params['discrimination'],
+        difficulty=params['difficulty']
+    ) * 100
+
+print(f"  Probability ranges (factor-specific conversion):")
+for loc_type in location_types:
+    loc_pred = pred_grid_prob[pred_grid_prob['LocationType'] == loc_type]
+    print(f"    {loc_type}: {loc_pred['mean_prob'].min():.1f}% - {loc_pred['mean_prob'].max():.1f}%")
 
 # Create figure
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -313,5 +352,11 @@ print(f"\nPlot style: 5.2.1 format")
 print(f"  - Faded scatter points (alpha={RESIDUAL_SCATTER_POINT_ALPHA})")
 print(f"  - Dashed fitted curves from LMM")
 print(f"  - 95% CI bands from fixed effects covariance")
-print(f"\nMean discrimination for probability conversion: {mean_discrimination:.3f}")
+print(f"\nProbability conversion: FACTOR-SPECIFIC parameters")
+print(f"  Source:      a={FACTOR_PARAMS['source']['discrimination']:.3f}, b={FACTOR_PARAMS['source']['difficulty']:.3f}")
+print(f"  Destination: a={FACTOR_PARAMS['destination']['discrimination']:.3f}, b={FACTOR_PARAMS['destination']['difficulty']:.3f}")
+print(f"  Difficulty difference: {FACTOR_PARAMS['destination']['difficulty'] - FACTOR_PARAMS['source']['difficulty']:.3f} theta units")
+print(f"\nThis captures the TRUE performance difference:")
+print(f"  - Source items are EASIER (lower b) → higher probability at same theta")
+print(f"  - Destination items are HARDER (higher b) → lower probability at same theta")
 print("=" * 70)

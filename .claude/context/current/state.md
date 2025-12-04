@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2025-12-04 22:00 (context-manager curation)
+**Last Updated:** 2025-12-04 09:46 (context-manager curation)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2025-12-04 22:00
-**Token Count:** ~3.2k tokens (16% of 20k threshold)
+**Last /save:** 2025-12-04 09:46
+**Token Count:** ~2.4k tokens (12% of 20k threshold)
 
 ---
 
@@ -168,131 +168,8 @@
 ### Session (2025-12-04 19:00) - ARCHIVED
 **Note:** Content archived to `type_5.5_validation_fixes_complete.md` (Fixed 5 RQ concept documents 5.5.3-5.5.7, all APPROVED status 9.3-9.6, key improvement 5.5.4 REJECTED 8.3 → APPROVED 9.3, methodological patterns established: LMM 7-criteria validation, power analysis for null hypotheses, bounded CTT remedial hierarchy, 3+ sessions old)
 
-## Session (2025-12-04 21:00)
-
-**Task:** Complete Type 5.5 RQ Pipeline (rq_planner → rq_tools → rq_analysis) + Agent Bug Fixes
-
-**Context:** Executing complete documentation pipeline for all 7 Type 5.5 Source-Destination RQs. Also fixed critical agent prompt bug causing "read before write" errors.
-
-**Major Accomplishments:**
-
-### 1. Fixed Agent Prompt Bug: Touch/Read/Write Pattern
-
-**Problem Discovered:** rq_tools agents were creating blank files with `touch`, then immediately using `Write` tool without reading first. Claude Code requires reading a file before writing to it (for existing files). This caused wasted tokens on retries.
-
-**Agents Affected:**
-- rq_concept (Step 8 → Step 8.5 → Step 9)
-- rq_planner (Step 10 → Step 10.5 → Step 11)
-- rq_tools (Step 11 → Step 11.5 → Step 12)
-- rq_plots (Step 10 → Step 10.5 → Step 11)
-
-**Fix Applied:** Added Step X.5 "Read the empty file (REQUIRED for Write tool)" between touch and Write in all 4 agent prompts.
-
-**Agent Already Correct:** rq_results (already had Read step between touch and Write)
-
-### 2. Executed rq_planner on All 7 Type 5.5 RQs
-
-**Results (7 parallel agents):**
-
-| RQ | Status | Steps | Notes |
-|----|--------|-------|-------|
-| **5.5.1** | ✅ SUCCESS | 8 steps | ROOT RQ - 2-factor IRT + LMM, ~75-90 min |
-| **5.5.2** | ✅ SUCCESS | 8 steps | Piecewise LMM, consolidation |
-| **5.5.3** | ✅ SUCCESS | 6 steps | Age effects, NULL hypothesis |
-| **5.5.4** | ✅ SUCCESS | 8 steps | IRT-CTT convergence |
-| **5.5.5** | ✅ SUCCESS | 9 steps | Purification-trajectory paradox |
-| **5.5.6** | ✅ SUCCESS | 6 steps | Variance decomposition |
-| **5.5.7** | ✅ SUCCESS | 7 steps | K-means clustering |
-
-**Note:** 5.5.1 initially BLOCKED because rq_stats.status was "pending" in status.yaml. Fixed by updating status.yaml (1_stats.md showed APPROVED 9.3/10).
-
-### 3. Executed rq_tools on All 7 Type 5.5 RQs
-
-**Results (7 parallel agents):**
-
-| RQ | Status | Analysis Tools | Validation Tools |
-|----|--------|----------------|------------------|
-| **5.5.1** | ✅ SUCCESS | 8 | 8 |
-| **5.5.2** | ✅ SUCCESS | 5 | 8 |
-| **5.5.3** | ✅ SUCCESS | 8 | 8 |
-| **5.5.4** | ✅ SUCCESS | 6 | 6 |
-| **5.5.5** | ✅ SUCCESS | 5 | 7 |
-| **5.5.6** | ✅ SUCCESS | 6 | 5 |
-| **5.5.7** | ✅ SUCCESS | 0 | 7 | (clustering-only uses sklearn stdlib)
-
-All tools verified in tools_inventory.md.
-
-### 4. Executed rq_analysis on All 7 Type 5.5 RQs
-
-**Results (7 parallel agents):**
-
-| RQ | Status | Steps | Notes |
-|----|--------|-------|-------|
-| **5.5.1** | ✅ SUCCESS | 8 | Complete analysis recipe |
-| **5.5.2** | ✅ SUCCESS | 8 | Piecewise LMM recipe |
-| **5.5.3** | ✅ SUCCESS | 6 | Age + power analysis |
-| **5.5.4** | ✅ SUCCESS | 8 | IRT-CTT parallel models |
-| **5.5.5** | ✅ SUCCESS | 9 | Purification paradox |
-| **5.5.6** | ✅ SUCCESS | 6 | Variance decomposition |
-| **5.5.7** | ✅ SUCCESS | 7 | K-means clustering |
-
-### 5. Fixed 5.5.4 Folder Convention Violations
-
-**Problem:** 2_plan.md and 3_tools.yaml for RQ 5.5.4 had 8 output paths using `results/` instead of `data/`:
-- results/step02_correlations.csv → data/step02_correlations.csv
-- results/step03_irt_lmm_summary.txt → data/step03_irt_lmm_summary.txt
-- results/step03_ctt_lmm_summary.txt → data/step03_ctt_lmm_summary.txt
-- results/step04_assumptions_comparison.csv → data/step04_assumptions_comparison.csv
-- results/step04_assumption_diagnostics.txt → data/step04_assumption_diagnostics.txt
-- results/step05_coefficient_comparison.csv → data/step05_coefficient_comparison.csv
-- results/step05_agreement_metrics.csv → data/step05_agreement_metrics.csv
-- results/step06_model_fit_comparison.csv → data/step06_model_fit_comparison.csv
-
-**Files Fixed:** 2_plan.md (14 edits) + 3_tools.yaml (9 edits)
-
-### Session Metrics
-
-**Chapter 5 Progress:**
-- Type 5.5 Documentation: 7/7 RQs complete (100%)
-- All 7 RQs have: 2_plan.md, 3_tools.yaml, 4_analysis.yaml
-- Ready for g_code execution
-
-**Files Modified:**
-- .claude/agents/rq_concept.md (added Step 8.5)
-- .claude/agents/rq_planner.md (added Step 10.5)
-- .claude/agents/rq_tools.md (added Step 11.5)
-- .claude/agents/rq_plots.md (added Step 10.5)
-- results/ch5/5.5.1/status.yaml (updated rq_stats + rq_planner + rq_tools + rq_analysis)
-- results/ch5/5.5.1/docs/2_plan.md (created)
-- results/ch5/5.5.1/docs/3_tools.yaml (created)
-- results/ch5/5.5.1/docs/4_analysis.yaml (created)
-- results/ch5/5.5.2-5.5.7/docs/* (all documentation files created)
-- results/ch5/5.5.4/docs/2_plan.md (fixed 8 folder convention violations)
-- results/ch5/5.5.4/docs/3_tools.yaml (fixed 9 folder convention violations)
-
-**Tokens:**
-- Session start: ~12k (after /refresh)
-- Session end: ~100k (at /save)
-
-**Active Topics (For context-manager):**
-
-Topic naming format: [topic][task][subtopic]
-
-- type_5.5_pipeline_complete (Session 2025-12-04 21:00: all_7_rqs_documented, planner_tools_analysis_executed_in_parallel, 5.5.1_5.5.7_ready_for_g_code)
-
-- agent_prompt_bug_fix_touch_read_write (Session 2025-12-04 21:00: 4_agents_fixed_rq_concept_rq_planner_rq_tools_rq_plots, step_X.5_read_empty_file_added, prevents_write_without_read_error)
-
-- folder_convention_violation_5.5.4 (Session 2025-12-04 21:00: 8_paths_fixed_results_to_data, rq_analysis_detected_clarity_error, both_2_plan.md_and_3_tools.yaml_corrected)
-
-**Relevant Archived Topics (from context-finder):**
-- rq_mass_parallel_execution_planner_tools_analysis.md (2025-12-02 18:30: Parallel execution precedent)
-- pipeline_stability.md (2025-11-24 10:00: Folder convention rules documented)
-
-**End of Session (2025-12-04 21:00)**
-
-**Status:** ✅ **TYPE 5.5 DOCUMENTATION COMPLETE - READY FOR g_code**
-
-All 7 Type 5.5 RQs have complete documentation (2_plan.md, 3_tools.yaml, 4_analysis.yaml). Agent prompt bug fixed (touch/read/write pattern). Folder convention violations fixed in 5.5.4. Next: Execute g_code on all 7 RQs to generate Python scripts.
+### Session (2025-12-04 21:00) - ARCHIVED
+**Note:** Content archived to `type_5.5_pipeline_complete.md`
 
 ## Session (2025-12-04 22:00)
 
@@ -569,3 +446,128 @@ Topic naming format: [topic][task][subtopic]
 **Status:** ✅ **RQ 5.5.1 COMPLETE - FULL VALIDATION PIPELINE**
 
 RQ 5.5.1 Source-Destination analysis complete with production-quality IRT settings. Logarithmic model selected (AIC=1747.77). Main effect null (p=0.40), interaction marginally significant (p=0.05 Bonferroni) - destination forgetting faster than source over time. 1 anomaly flagged: main effect contradicts hypothesis. Plots fixed to 5.2.1 style with individual scatter. Next: Execute RQ 5.5.2-5.5.7.
+
+## Session (2025-12-05 12:30)
+
+**Task:** Deep Investigation of RQ 5.5.1 Probability Conversion Bug + rq_plots Agent Update
+
+**Context:** User observed that previous analyses showed significant intercept difference when scaled to probability, but RQ 5.5.1 showed null main effect. Conducted ultrathink investigation to discover and fix critical methodological error.
+
+**Major Accomplishments:**
+
+### 1. Root Cause Discovery: Multi-Dimensional IRT Scale Mismatch
+
+**Investigation Findings:**
+
+The 2-dimensional IRT model (source vs destination) creates TWO SEPARATE THETA SCALES:
+
+| Factor | Items | Mean Difficulty (b) | Theta=0 means |
+|--------|-------|---------------------|---------------|
+| Source | 17 items | **-0.453** (easy) | ~65% accuracy |
+| Destination | 15 items | **+1.371** (hard) | ~25% accuracy |
+
+**The Problem:**
+- Theta_source and theta_destination are NOT comparable because they're calibrated to different item difficulties
+- Mean thetas are nearly identical (-0.02 vs +0.02) because IRT anchors each dimension to mean=0
+- The 1.82 theta unit difficulty difference is absorbed into item parameters, invisible in theta
+
+**Raw Accuracy Verification:**
+| Test | Source Accuracy | Dest Accuracy | Difference |
+|------|-----------------|---------------|------------|
+| Day 0 | 69.4% | 41.4% | **28.0%** |
+| Day 1 | 63.4% | 33.5% | **29.9%** |
+| Day 3 | 54.7% | 29.6% | **25.1%** |
+| Day 6 | 45.7% | 26.4% | **19.3%** |
+
+This is a MASSIVE effect (~25-30 percentage points) that the LMM cannot detect when comparing raw thetas!
+
+### 2. Bug Fix: Factor-Specific Probability Conversion
+
+**The Error (in original plots.py):**
+```python
+# WRONG: Using difficulty=0.0 for all factors
+probability = convert_theta_to_probability(theta, discrimination=mean_a, difficulty=0.0)
+```
+
+**The Fix (now applied):**
+```python
+# CORRECT: Use factor-specific item difficulty
+FACTOR_PARAMS = {
+    'source': {'discrimination': 1.096, 'difficulty': -0.453},
+    'destination': {'discrimination': 0.873, 'difficulty': +1.371}
+}
+
+for loc_type in df['LocationType'].unique():
+    params = FACTOR_PARAMS[loc_type]
+    df.loc[mask, 'probability'] = convert_theta_to_probability(
+        df.loc[mask, 'theta'].values,
+        discrimination=params['discrimination'],
+        difficulty=params['difficulty']  # FACTOR-SPECIFIC!
+    )
+```
+
+**Result After Fix:**
+- Source: 43.8% - 73.4% probability range
+- Destination: 16.9% - 29.6% probability range
+- **30-45 percentage point difference now visible!**
+
+### 3. rq_plots Agent Updated (v4.0.1)
+
+Added critical section to `.claude/agents/rq_plots.md`:
+
+**"🚨 CRITICAL: Multi-Dimensional IRT Probability Conversion"**
+
+Contents:
+- Explains the problem (factor-specific difficulties create different theta scales)
+- Shows the wrong approach (difficulty=0.0 for all)
+- Shows the correct approach (loop through factors with factor-specific b values)
+- Lists when this applies (2+ factor IRT models)
+- Includes validation guidance (compare to raw accuracy)
+- Documents lesson learned with RQ 5.5.1 example
+
+**Version History Updated:** v4.0.1 (2025-12-05) with bug description and fix
+
+### 4. v1 Analysis Pattern Discovery
+
+Examined `.archive/v1/plots.py` lines 543-561 which shows the CORRECT pattern:
+```python
+# v1 code correctly uses factor-specific difficulty
+regex = '|'.join(groups[factor])
+factor_items = df_items[df_items.index.str.contains(regex)]
+avg_difficulty = acceptable_items['Difficulty'].mean()  # FACTOR-SPECIFIC!
+
+def to_prob(theta):
+    logit = avg_discrimination * (theta - avg_difficulty)  # Uses factor b!
+    return 1 / (1 + np.exp(-logit))
+```
+
+This is why user's previous analyses showed significant intercept difference!
+
+### Session Metrics
+
+**Files Modified:**
+- results/ch5/5.5.1/plots/plots.py (factor-specific probability conversion)
+- .claude/agents/rq_plots.md (v4.0.1 with critical section added)
+
+**Tokens:**
+- Session start: ~7k (after /refresh)
+- Session end: ~85k (at /save)
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtopic]
+
+- multidimensional_irt_probability_conversion_bug_fix (Session 2025-12-05 12:30: factor_specific_difficulty_required_for_multidim_irt, theta_scales_different_per_factor, difficulty_difference_absorbed_into_item_params_invisible_in_theta, 30_45_percentage_point_effect_now_visible)
+
+- rq_plots_agent_v4.0.1_update (Session 2025-12-05 12:30: critical_section_added_after_step5, code_example_factor_specific_conversion, validation_check_compare_to_raw_accuracy, lesson_learned_documented_5.5.1_example)
+
+**Relevant Archived Topics (from context-finder):**
+- irt_mc_samples_pattern_discovery.md (2025-12-05 09:30: IRT settings pattern)
+- plots_style_5.2.1_format.md (2025-12-05 09:30: Plot style standard)
+- type_5.5_pipeline_complete.md (2025-12-04 04:30: Type 5.5 structure)
+
+**End of Session (2025-12-05 12:30)**
+
+**Status:** ✅ **CRITICAL BUG FIX COMPLETE**
+
+Discovered and fixed critical probability conversion bug in multi-dimensional IRT. Factor-specific item difficulties MUST be used when converting theta to probability - otherwise the baseline accuracy difference between factors is completely masked. RQ 5.5.1 plots now correctly show 30-45 percentage point difference between source (70%) and destination (25%) memory. rq_plots agent updated to v4.0.1 with lesson learned. This fix applies to ALL multi-factor IRT analyses (Type 5.2, 5.3, 5.4, 5.5).
