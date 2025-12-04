@@ -9,13 +9,20 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "See docs/1_concept.md for full specification"
+  context_dump: |
+    RQ 5.5.7: Source-Destination Clustering
+    Type: Source-Destination / Clustering
+    Analysis: K-means (K=1-6 BIC selection) + quality validation (Silhouette/DB/Jaccard)
+    Data: DERIVED from RQ 5.5.6 random effects (100 × 4 features)
+    Critical: Weak quality expected (Silhouette<0.40), stable groupings (Jaccard>0.60)
 
 rq_scholar:
-  status: pending
+  status: success
+  context_dump: "9.3/10.0 APPROVED. Strong theory (dimensional model, replication logic). Add LPA alternative, Parsons 2024 + cognotyping 2023 cites, clarify Jaccard thresholds."
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: "9.3/10 APPROVED. Cat1: 2.8/3 (K-means appropriate, spherical assumption concern). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (comprehensive). Cat4: 1.8/2 (triple validation, missing assumption checks). Cat5: 0.7/1 (9 concerns, adequate)."
 
 rq_planner:
   status: pending

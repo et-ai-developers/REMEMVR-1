@@ -8,10 +8,17 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "REVISED 2025-12-04: Hypothesis flipped to Destination > Source per action-effect binding literature"
+  context_dump: |
+    RQ 5.5.1: Source-Destination Spatial Memory Trajectories
+    Type: Source-Destination / Trajectories (ROOT)
+    Analysis: IRT (2-factor GRM) + LMM (5 models)
+    Data: RAW from dfData.csv, -U- and -D- location items
+    Critical: Source vs Destination dissociation, 800 obs (2 location types)
 
 rq_scholar:
-  status: pending
+  status: success
+  context_dump: |
+    9.4/10 APPROVED. Strong theory (5 mechanisms), excellent interpretation/implications. Needs Zeigarnik replicability caveat, practice effects acknowledgment, recent citations. Ready for stats validation.
 
 rq_stats:
   status: pending

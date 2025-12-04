@@ -9,14 +9,20 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "See docs/1_concept.md for full specification"
+  context_dump: |
+    RQ 5.5.5: Purified CTT Effects for Source-Destination
+    Type: Source-Destination / Purified CTT Effects
+    Analysis: CTT sum scores (Full vs Purified) + Correlation + LMM
+    Data: DERIVED from RQ 5.5.1 (theta, purified items) + raw dfData.csv
+    Critical: Tests purification-trajectory paradox (4th replication)
 
 rq_scholar:
   status: success
-  context_dump: "6.3/10 REJECTED - Zero citations, no psychometric theory, 6 required changes before proceeding"
+  context_dump: "9.3/10 APPROVED. Theory 2.9/3 (excellent psychometric paradox framework). Lit 1.8/2 (solid foundational + recent 2022-2024 cites). Guidelines 2.0/2 (perfect). Implications 2.0/2 (novel contribution). DA 0.6/1 (6 concerns: z-std limits, Tobit models, encoding quality, all MOD/MIN). Validates purification-trajectory paradox 4th replication."
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: "9.3/10 APPROVED. Cat1: 2.8/3 (z-std AIC justification gap, bounded scale acknowledged). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (all parameters specified/justified). Cat4: 1.9/2 (comprehensive validation, remedial actions vague). Cat5: 0.6/1 (8 concerns: 5 MOD, 3 MIN; z-std AIC validity, CTT variance overestimation, no effect size threshold)."
 
 rq_planner:
   status: pending

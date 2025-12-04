@@ -9,14 +9,20 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "See docs/1_concept.md for full specification"
+  context_dump: |
+    RQ 5.5.4: IRT-CTT Convergence for Source-Destination Memory
+    Type: Source-Destination / IRT-CTT Convergence
+    Analysis: Correlation (r > 0.70) + Parallel LMMs (kappa > 0.60)
+    Data: DERIVED from RQ 5.5.1 (theta + purified items)
+    Critical: Validates 5.5.1 findings are measurement-independent
 
 rq_scholar:
   status: success
-  context_dump: "3.2/10 REJECTED: Zero citations, no theory grounding, missing 4 sections. Needs 5-7x expansion + 8-15 citations. Re-validation required."
+  context_dump: "9.4/10 APPROVED. Theory strong (2.8/3), lit good (1.8/2), guidelines perfect (2.0/2), implications clear (2.0/2). 8 concerns: 3 CRITICAL (encoding quality alternative, kappa paradox, encoding depth framework), 2 MODERATE (arcsine outdated, practice effects), 3 MINOR. Key improvement: add encoding quality vs retrieval alternative to Theoretical Background."
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: "9.3/10 APPROVED. Cat1: 2.8/3 (appropriate methods, bounded outcomes partial). Cat2: 2.0/2 (100% tool reuse). Cat3: 1.8/2 (parameters specified, sensitivity not detailed). Cat4: 2.0/2 (comprehensive validation). Cat5: 0.7/1 (8 concerns: arcsine outdated, kappa paradox, range restriction, beta regression, boundary effects)."
 
 rq_planner:
   status: pending

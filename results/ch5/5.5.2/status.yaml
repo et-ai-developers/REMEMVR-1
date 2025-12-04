@@ -9,14 +9,20 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "See docs/1_concept.md for full specification"
+  context_dump: |
+    RQ 5.5.2: Source-Destination Consolidation (Two-Phase)
+    Type: Source-Destination / Consolidation
+    Analysis: Piecewise LMM (48h breakpoint Early/Late)
+    Data: DERIVED from RQ 5.5.1 theta scores (800 obs)
+    Critical: LocationType x Phase interaction tests differential consolidation
 
 rq_scholar:
   status: success
-  context_dump: "5.5.2 REJECTED: 5.5/10. No citations, minimal theory, no interpretation guidelines. Requires substantial revision (5 required changes)."
+  context_dump: "9.5/10 APPROVED. Theory exceptional (3.0), lit strong (1.8), interpretation complete (2.0), implications clear (2.0). 1 CRITICAL error (sleep claim reversed). 5 suggested improvements. Ready for stats."
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: "9.3/10 APPROVED. Category 1: 2.8/3 (appropriate). Category 2: 2.0/2 (100% reuse). Category 3: 1.9/2 (well-specified). Category 4: 1.8/2 (assumption validation needed). Category 5: 0.8/1 (9 concerns, strong devil's advocate)."
 
 rq_planner:
   status: pending

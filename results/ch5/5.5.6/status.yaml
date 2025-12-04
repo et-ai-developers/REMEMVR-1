@@ -9,13 +9,20 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "See docs/1_concept.md for full specification"
+  context_dump: |
+    RQ 5.5.6: Source-Destination Variance Decomposition
+    Type: Source-Destination / Variance Decomposition
+    Analysis: LMM variance decomposition (location-stratified)
+    Data: DERIVED from RQ 5.5.1 (theta + LMM fitted model)
+    Critical: ICC_slope ~0 expected, 200 random effects for RQ 5.5.7
 
 rq_scholar:
-  status: pending
+  status: success
+  context_dump: "9.4/10 APPROVED. Theory excellent (source-destination variance decomposition, ICC grounding), literature strong (7 citations: Cicchetti, Barr, Oberpriller, individual differences). 6 suggested improvements (practice effects, singular fits, VR dropout). Ready for stats validation."
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: "9.6/10 APPROVED. Cat1: 3.0/3 (appropriate). Cat2: 2.0/2 (100% reuse). Cat3: 1.8/2 (well-specified, minor ICC threshold gap). Cat4: 2.0/2 (comprehensive). Cat5: 0.8/1 (5 concerns, good quality, could be more exhaustive)."
 
 rq_planner:
   status: pending

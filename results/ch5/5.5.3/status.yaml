@@ -9,14 +9,20 @@ rq_builder:
 
 rq_concept:
   status: success
-  context_dump: "See docs/1_concept.md for full specification"
+  context_dump: |
+    RQ 5.5.3: Age Effects on Source-Destination Memory
+    Type: Source-Destination / Age Effects
+    Analysis: LMM with 3-way Age x LocationType x Time interactions
+    Data: DERIVED from RQ 5.5.1 (theta scores by location type)
+    Critical: Null hypothesis - age will NOT moderate source-destination difference
 
 rq_scholar:
   status: success
-  context_dump: "9.1/10 CONDITIONAL - Theory sound, zero citations (add 5), practice effects omission (critical). 2 required changes."
+  context_dump: "9.3/10 APPROVED. Theory strong (age-invariance theoretically motivated), lit needs 2020-24 cites, 4 critical concerns (age range, practice effects, dropout bias, hippocampal mechanism). Ready for rq_stats."
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: "9.6/10 APPROVED. Cat1: 3.0/3 (optimal LMM, justified complexity, null hypothesis power analysis). Cat2: 2.0/2 (100% tools). Cat3: 2.0/2 (all parameters specified). Cat4: 2.0/2 (7 assumption checks, gold standard). Cat5: 0.6/1 (7 concerns, adequate but could be more comprehensive). 1 CRITICAL concern (random slope convergence N=100), 5 MODERATE concerns. No required changes. Power analysis for null hypothesis is exemplary."
 
 rq_planner:
   status: pending
