@@ -428,9 +428,19 @@ touch results/chX/rqY/plots/plots.py
 
 ---
 
+### Step 10.5: Read the empty file (REQUIRED for Write tool)
+
+**Action:** Read `results/chX/rqY/plots/plots.py`
+
+**Purpose:** Claude Code requires reading a file before writing to it. This Read enables the subsequent Write.
+
+**Method:** Use Read tool on the file created in Step 10
+
+---
+
 ### Step 11: Write Plotting Code
 
-**Generate plots.py with following structure:**
+**Generate plots.py with following structure (Read in Step 10.5 enables this):**
 
 ```python
 #!/usr/bin/env python3

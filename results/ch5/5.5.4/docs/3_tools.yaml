@@ -1,0 +1,424 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.5.4
+# Created by: rq_tools agent
+# Purpose: Catalog all analysis and validation tools for IRT-CTT convergence analysis
+# Architecture: Tool Catalog (Option A) - Each tool listed once, referenced by steps
+
+analysis_tools:
+  compute_ctt_mean_scores_by_factor:
+    module: "tools.analysis_ctt"
+    function: "compute_ctt_mean_scores_by_factor"
+    signature: "compute_ctt_mean_scores_by_factor(df_wide: DataFrame, item_factor_df: DataFrame, factor_col: str = 'factor', item_col: str = 'item_name', include_factors: Optional[List[str]] = None) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    description: "Compute CTT mean scores (proportion correct) per UID x test x location_type for IRT-CTT convergence analysis"
+
+    input_files:
+      - path: "data/step00_raw_responses_filtered.csv"
+        required_columns: ["composite_ID", "UID", "test", "item columns (25-32 items)"]
+        expected_rows: "400 (100 participants x 4 tests)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          UID: "string (format: P###)"
+          test: "string (T1, T2, T3, T4)"
+          item_columns: "int (binary 0/1, NaN if missing)"
+
+      - path: "data/step00_purified_items_from_rq551.csv"
+        required_columns: ["item_code", "location_type"]
+        expected_rows: "25-32 items (post-purification from RQ 5.5.1)"
+        data_types:
+          item_code: "string (format: VR-{paradigm}-{test}-{domain}-ANS)"
+          location_type: "string (source or destination)"
+
+    output_files:
+      - path: "data/step01_ctt_scores.csv"
+        columns: ["composite_ID", "UID", "test", "location_type", "ctt_mean_score", "n_items", "TSVR_hours"]
+        description: "CTT mean scores per participant x test x location type (800 rows)"
+
+    parameters:
+      factor_col: "location_type"
+      item_col: "item_code"
+      include_factors: null  # Use all location types (source, destination)
+
+    source_reference: "tools_inventory.md lines 492-500"
+
+  compute_pearson_correlations_with_correction:
+    module: "tools.analysis_ctt"
+    function: "compute_pearson_correlations_with_correction"
+    signature: "compute_pearson_correlations_with_correction(df: DataFrame, irt_col: str = 'IRT_score', ctt_col: str = 'CTT_score', factor_col: str = 'factor', thresholds: Optional[List[float]] = [0.70, 0.90]) -> DataFrame"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "Compute Pearson correlations between IRT and CTT scores with Decision D068 dual p-value reporting (uncorrected + Holm-Bonferroni)"
+
+    input_files:
+      - path: "data/step00_irt_theta_from_rq551.csv"
+        required_columns: ["composite_ID", "location_type", "irt_theta"]
+        expected_rows: "800 (100 participants x 4 tests x 2 location types)"
+        source: "RQ 5.5.1 Step 3 output, reshaped to long format in Step 0"
+
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["composite_ID", "location_type", "ctt_mean_score"]
+        expected_rows: "800"
+        source: "Step 1 output"
+
+    output_files:
+      - path: "data/step02_correlations.csv"
+        columns: ["location_type", "r", "CI_lower", "CI_upper", "p_uncorrected", "p_holm", "n", "threshold_0.70", "threshold_0.90"]
+        description: "Pearson correlations per location type (Source, Destination, Overall) with dual p-values"
+
+    parameters:
+      irt_col: "irt_theta"
+      ctt_col: "ctt_mean_score"
+      factor_col: "location_type"
+      thresholds: [0.70, 0.90]  # Convergence criteria
+
+    source_reference: "tools_inventory.md lines 504-512"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_model_convergence"
+
+    description: "Fit identical LMM to IRT and CTT scores using TSVR (Decision D070) as time variable for structural equivalence assessment"
+
+    input_files:
+      - path: "data/step00_irt_theta_from_rq551.csv"
+        required_columns: ["composite_ID", "UID", "location_type", "irt_theta", "TSVR_hours"]
+        expected_rows: "800"
+        source: "RQ 5.5.1 theta scores with TSVR merged"
+
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["composite_ID", "UID", "location_type", "ctt_mean_score", "TSVR_hours"]
+        expected_rows: "800"
+        source: "Step 1 CTT scores with TSVR merged"
+
+    output_files:
+      - path: "data/step03_irt_lmm_model.pkl"
+        description: "Fitted IRT-based LMM (pickle file containing MixedLMResults object)"
+
+      - path: "data/step03_ctt_lmm_model.pkl"
+        description: "Fitted CTT-based LMM (pickle file containing MixedLMResults object)"
+
+      - path: "data/step03_irt_lmm_summary.txt"
+        description: "IRT model summary (fixed effects, random effects, AIC, BIC)"
+
+      - path: "data/step03_ctt_lmm_summary.txt"
+        description: "CTT model summary (fixed effects, random effects, AIC, BIC)"
+
+      - path: "data/step03_model_metadata.yaml"
+        description: "Model specifications (formula, convergence status, simplification flag)"
+
+    parameters:
+      formula: "score ~ LocationType * log_TSVR"  # Identical for both models
+      groups: "UID"
+      re_formula: "~log_TSVR | UID"  # Random intercepts + slopes, simplify to ~1|UID if convergence fails
+      reml: false  # Use ML for AIC comparison in Step 6
+
+    source_reference: "tools_inventory.md lines 97-103"
+
+  compute_cohens_kappa_agreement:
+    module: "tools.analysis_ctt"
+    function: "compute_cohens_kappa_agreement"
+    signature: "compute_cohens_kappa_agreement(classifications_1: List[bool], classifications_2: List[bool], labels: Optional[List[str]] = None) -> Dict"
+    validation_tool: "validate_icc_bounds"
+
+    description: "Compute Cohen's kappa for agreement between IRT and CTT model fixed effects significance classifications"
+
+    input_files:
+      - path: "data/step03_irt_lmm_model.pkl"
+        source: "Step 3 IRT model"
+
+      - path: "data/step03_ctt_lmm_model.pkl"
+        source: "Step 3 CTT model"
+
+    output_files:
+      - path: "data/step05_coefficient_comparison.csv"
+        columns: ["term", "irt_coef", "irt_se", "irt_p_uncorrected", "irt_p_bonferroni", "ctt_coef", "ctt_se", "ctt_p_uncorrected", "ctt_p_bonferroni", "sign_match", "sig_match", "agreement"]
+        description: "Fixed effects comparison across IRT and CTT models with Decision D068 dual p-values"
+
+      - path: "data/step05_agreement_metrics.csv"
+        columns: ["cohens_kappa", "kappa_threshold_met", "overall_agreement_pct", "agreement_threshold_met", "n_terms", "n_agreements"]
+        description: "Cohen's kappa and overall agreement percentage (convergence criteria: kappa > 0.60, agreement >= 80%)"
+
+    parameters:
+      labels: ["Intercept", "LocationType[T.destination]", "log_TSVR", "LocationType:log_TSVR"]
+      kappa_threshold: 0.60  # Landis & Koch substantial agreement
+      agreement_threshold: 80  # Percentage threshold
+
+    source_reference: "tools_inventory.md lines 517-524"
+
+  compare_lmm_fit_aic_bic:
+    module: "tools.analysis_ctt"
+    function: "compare_lmm_fit_aic_bic"
+    signature: "compare_lmm_fit_aic_bic(aic_model1: float, bic_model1: float, aic_model2: float, bic_model2: float, model1_name: str = 'Model1', model2_name: str = 'Model2') -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    description: "Compare AIC and BIC between IRT and CTT models using Burnham & Anderson (2002) thresholds"
+
+    input_files:
+      - path: "data/step03_irt_lmm_model.pkl"
+        source: "Step 3 IRT model (extract AIC, BIC)"
+
+      - path: "data/step03_ctt_lmm_model.pkl"
+        source: "Step 3 CTT model (extract AIC, BIC)"
+
+    output_files:
+      - path: "data/step06_model_fit_comparison.csv"
+        columns: ["irt_aic", "irt_bic", "ctt_aic", "ctt_bic", "delta_aic", "delta_bic", "aic_interpretation", "bic_interpretation"]
+        description: "AIC/BIC comparison with Burnham & Anderson interpretations (delta < 2 = equivalent models)"
+
+    parameters:
+      model1_name: "IRT"
+      model2_name: "CTT"
+
+    source_reference: "tools_inventory.md lines 528-536"
+
+validation_tools:
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict"
+
+    description: "Validate CTT mean scores are in [0, 1] range (proportion correct)"
+
+    input_files:
+      - path: "data/step01_ctt_scores.csv"
+        required_columns: ["ctt_mean_score"]
+        source: "Step 1 output (compute_ctt_mean_scores_by_factor)"
+
+    parameters:
+      min_val: 0.0
+      max_val: 1.0
+      column_name: "ctt_mean_score"
+
+    criteria:
+      - "All CTT scores in [0, 1] range (proportion correct)"
+      - "No NaN values in ctt_mean_score"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (description)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_ctt_scores.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md lines 541-548"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict"
+
+    description: "Validate correlation results include Decision D068 dual p-value reporting (uncorrected + Holm-Bonferroni)"
+
+    input_files:
+      - path: "data/step02_correlations.csv"
+        required_columns: ["r", "p_uncorrected", "p_holm"]
+        source: "Step 2 output (compute_pearson_correlations_with_correction)"
+
+    parameters:
+      required_cols: null  # Use default D068 validation (p_uncorrected + one of [p_bonferroni, p_holm, p_fdr])
+
+    criteria:
+      - "p_uncorrected column present"
+      - "At least one correction method present (p_holm for this RQ)"
+      - "p_holm >= p_uncorrected (correction cannot reduce p-value)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_correlations.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md lines 455-462"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict"
+
+    description: "Validate LMM converged successfully (checks model.converged attribute)"
+
+    input_files:
+      - path: "data/step03_irt_lmm_model.pkl"
+        source: "Step 3 IRT model"
+
+      - path: "data/step03_ctt_lmm_model.pkl"
+        source: "Step 3 CTT model"
+
+    parameters: {}
+
+    criteria:
+      - "model.converged == True (statsmodels convergence flag)"
+      - "If False: attempt simplified random structure (intercepts-only)"
+      - "Both models must converge with IDENTICAL structure (no asymmetry)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+
+    behavior_on_failure:
+      action: "Simplify random structure to ~1|UID for BOTH models, re-fit, re-validate"
+      log_to: "logs/step03_fit_parallel_lmms.log"
+      invoke: "g_debug (if simplification also fails)"
+
+    source_reference: "tools_inventory.md lines 588-596"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+
+    description: "Comprehensive 7-diagnostic LMM assumption validation for both IRT and CTT models"
+
+    input_files:
+      - path: "data/step03_irt_lmm_model.pkl"
+        source: "Step 3 IRT model"
+
+      - path: "data/step03_ctt_lmm_model.pkl"
+        source: "Step 3 CTT model"
+
+      - path: "data/step00_irt_theta_from_rq551.csv"
+        source: "Original IRT data for residual extraction"
+
+      - path: "data/step01_ctt_scores.csv"
+        source: "Original CTT data for residual extraction"
+
+    parameters:
+      acf_lag1_threshold: 0.1
+      alpha: 0.05
+
+    criteria:
+      - "Residual normality (Shapiro-Wilk p > 0.05 or Q-Q visual assessment)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "Random effects normality (Shapiro-Wilk for BLUPs)"
+      - "Independence (ACF lag-1 < 0.1)"
+      - "Linearity (partial residual plots)"
+      - "No influential observations (Cook's D < 1.0)"
+      - "Convergence diagnostics (already validated)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if ALL 7 diagnostics pass)"
+        diagnostics: "Dict (results per assumption)"
+        plot_paths: "List[Path] (6 diagnostic plots generated)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "Document violations, continue (violations logged but not blockers for Step 5)"
+      log_to: "logs/step04_validate_assumptions.log"
+      invoke: "g_debug only for computation errors, not assumption violations"
+
+    source_reference: "tools_inventory.md lines 414-422"
+
+    notes: "CTT bounded outcome [0,1] MAY violate normality/homoscedasticity - this is documented as limitation, not error"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: pd.DataFrame, icc_col: str = 'icc_value') -> Dict"
+
+    description: "Validate Cohen's kappa in [-1, 1] range (re-purposed ICC validator for kappa, both are correlation-like statistics)"
+
+    input_files:
+      - path: "data/step05_agreement_metrics.csv"
+        required_columns: ["cohens_kappa"]
+        source: "Step 5 output (compute_cohens_kappa_agreement)"
+
+    parameters:
+      icc_col: "cohens_kappa"  # Using ICC validator for kappa bounds checking
+
+    criteria:
+      - "Cohen's kappa in [-1, 1] range (correlation-like statistic)"
+      - "No NaN values"
+      - "Kappa > 0.60 indicates substantial agreement per Landis & Koch (1977)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_bounds: "List[Dict]"
+        icc_range: "Tuple[float, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_compare_fixed_effects.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md lines 619-626"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict"
+
+    description: "Validate AIC/BIC comparison table structure (1 row x 8 columns)"
+
+    input_files:
+      - path: "data/step06_model_fit_comparison.csv"
+        required_columns: ["irt_aic", "irt_bic", "ctt_aic", "ctt_bic", "delta_aic", "delta_bic", "aic_interpretation", "bic_interpretation"]
+        source: "Step 6 output (compare_lmm_fit_aic_bic)"
+
+    parameters:
+      expected_rows: 1
+      expected_columns: ["irt_aic", "irt_bic", "ctt_aic", "ctt_bic", "delta_aic", "delta_bic", "aic_interpretation", "bic_interpretation"]
+      column_types: null  # No type checking required
+
+    criteria:
+      - "Exactly 1 row (single comparison)"
+      - "All 8 required columns present"
+      - "AIC and BIC values are finite (not NaN, not inf)"
+      - "delta_aic = ctt_aic - irt_aic (formula correct)"
+      - "delta_bic = ctt_bic - irt_bic (formula correct)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool] (row_count, columns, types)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_compare_model_fit.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md lines 628-636"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068", "D070"]
+
+  notes:
+    - "Step 0, 7, 8 use pandas/numpy (stdlib - exempt from cataloging)"
+    - "All custom tools verified exist in tools_inventory.md"
+    - "Validation tools paired 1:1 with analysis tools"
+    - "Full type signatures prevent v3.0 API mismatches"
+    - "Each tool listed ONCE (deduplication across steps)"
+    - "rq_analysis will map tools to steps via 2_plan.md"
+
+decisions_applied:
+  D068: "Dual p-value reporting (uncorrected + Holm-Bonferroni) in correlations and fixed effects comparisons"
+  D070: "TSVR (actual hours) as time variable in LMMs (inherited from RQ 5.5.1)"
+  D039: "CTT computed on purified item set only (items passing IRT quality criteria in RQ 5.5.1)"

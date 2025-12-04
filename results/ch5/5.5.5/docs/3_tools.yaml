@@ -1,0 +1,251 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.5.5 - Purified CTT Effects for Source-Destination
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_columns"
+
+    description: "Validate RQ 5.5.1 dependency files exist and meet minimum size requirements"
+    source_reference: "tools_inventory.md section 'tools.validation' - check_file_exists"
+
+  compute_cronbachs_alpha:
+    module: "tools.analysis_ctt"
+    function: "compute_cronbachs_alpha"
+    signature: "compute_cronbachs_alpha(data: DataFrame, n_bootstrap: int = 1000) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+
+    description: "Compute Cronbach's alpha internal consistency reliability with bootstrap 95% CIs for Full and Purified CTT item sets"
+    source_reference: "tools_inventory.md section 'tools.analysis_ctt' - compute_cronbachs_alpha"
+
+  compare_correlations_dependent:
+    module: "tools.analysis_ctt"
+    function: "compare_correlations_dependent"
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "Test if two dependent correlations differ using Steiger's z-test with Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'tools.analysis_ctt' - compare_correlations_dependent"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_model_convergence"
+
+    description: "Fit LMM using TSVR (actual hours) as time variable per Decision D070, parallel models on z-standardized measurements"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_dataframe_structure"
+
+    description: "Comprehensive LMM assumption validation with 7 diagnostics (residual normality, homoscedasticity, random effects normality, autocorrelation, linearity, outliers, convergence)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_lmm_assumptions_comprehensive"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names case-sensitive exact match"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        missing_columns: "List[str] (empty if valid)"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_dependency_validation.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate required columns present in loaded DataFrames (purified items, theta scores, TSVR mapping)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_data_columns"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    criteria:
+      - "Cronbach's alpha in [0, 1] (reliability bounded)"
+      - "Bootstrap CI bounds in [0, 1]"
+      - "CI_upper > CI_lower for all rows"
+      - "No NaN or infinite alpha values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_reliability_assessment.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Cronbach's alpha and bootstrap CIs are in valid range [0, 1]"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_numeric_range"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    criteria:
+      - "CTT scores in [0, 1] (proportion correct, bounded scale)"
+      - "No values < 0 or > 1 (indicates computation error)"
+      - "No NaN or infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violations: "List[Dict]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_ctt_full_scores.log or logs/step03_ctt_purified_scores.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate CTT sum scores (Full and Purified) are probabilities in [0, 1]"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_probability_range"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    criteria:
+      - "Mean approximately 0 (within tolerance 0.05)"
+      - "SD approximately 1 (within tolerance 0.05)"
+      - "All 6 z-score columns pass validation (3 measurements x 2 location types)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_standardized_scores.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate z-standardization correct (mean approximately 0, SD approximately 1 per location type)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_standardization"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    criteria:
+      - "BOTH p_uncorrected and p_bonferroni present (Decision D068 dual p-value requirement)"
+      - "p_bonferroni >= p_uncorrected (correction cannot reduce p-value)"
+      - "All correlations in [0, 1] (positive convergence expected)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_correlation_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Steiger's z-test results include Decision D068 dual p-values (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_correlation_test_d068"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+
+    criteria:
+      - "Model converged successfully (lmm_result.converged = True)"
+      - "All 6 parallel LMMs must converge (Source/Destination x IRT/Full_CTT/Purified_CTT)"
+      - "AIC values finite (not NaN or infinite)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_lmm_model_comparison.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate all 6 parallel LMMs converged successfully"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_model_convergence"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    criteria:
+      - "Assumption validation results have 42 rows (6 models x 7 assumptions)"
+      - "All required columns present (model, assumption, test_statistic, p_value, threshold, result, notes)"
+      - "result column in {'PASS', 'FAIL'} (no missing results)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07.5_assumption_validation.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM assumption validation results DataFrame has correct structure (42 rows, 7 columns)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_dataframe_structure"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 7
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D039", "D068", "D070"]
+  notes:
+    - "Step 0: check_file_exists validates RQ 5.5.1 dependency files"
+    - "Steps 2-3: CTT computation uses pandas operations (stdlib, not cataloged)"
+    - "Step 4: compute_cronbachs_alpha with bootstrap CIs (n=10,000)"
+    - "Step 5: compare_correlations_dependent implements Steiger's z-test with D068 dual p-values"
+    - "Step 6: Z-standardization uses scipy/pandas (stdlib, not cataloged)"
+    - "Step 7: fit_lmm_trajectory_tsvr fitted 6 times (parallel models on z-standardized scores)"
+    - "Step 7.5: validate_lmm_assumptions_comprehensive checks 7 diagnostics per model"
+    - "Step 8: Plot data preparation uses pandas aggregation (stdlib, not cataloged)"
+    - "All validation tools paired with analysis tools per v4.X architecture"
+    - "Stdlib functions (pandas, numpy, scipy) exempted from catalog per agent design"
+
+# End of 3_tools.yaml

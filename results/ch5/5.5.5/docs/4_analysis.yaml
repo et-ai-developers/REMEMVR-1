@@ -1,0 +1,696 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-04
+# RQ: ch5/5.5.5
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "5.5.5"
+  total_steps: 9
+  analysis_type: "CTT effects analysis (Purified vs Full) with correlation comparison and LMM AIC comparison"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-04T00:00:00Z"
+  dependencies:
+    - "RQ 5.5.1 (Source-Destination Trajectories - ROOT)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load and Validate RQ 5.5.1 Dependencies
+  # --------------------------------------------------------------------------
+  - name: "step00_dependency_validation"
+    step_number: "00"
+    description: "Verify RQ 5.5.1 completed successfully and load required outputs for downstream analysis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check results/ch5/5.5.1/status.yaml for rq_results.status = 'success'"
+        - "Load results/ch5/5.5.1/data/step02_purified_items.csv (36 items, retention status)"
+        - "Load results/ch5/5.5.1/data/step03_theta_scores.csv (400 rows, UID x test x location)"
+        - "Load results/ch5/5.5.1/data/step00_tsvr_mapping.csv (400 rows, TSVR_hours)"
+        - "Load data/cache/dfData.csv (raw binary responses)"
+        - "Validate purified_items: 36 rows, retention rate 55-85%"
+        - "Validate theta_scores: 400 rows, theta in [-4,4], no NaN"
+        - "Validate TSVR mapping: 400 rows, matches theta_scores UIDs/tests"
+        - "Validate dfData.csv contains required -U- and -D- item columns"
+
+      inputs:
+        rq_status_file:
+          path: "results/ch5/5.5.1/status.yaml"
+          description: "RQ 5.5.1 completion status"
+        purified_items_file:
+          path: "results/ch5/5.5.1/data/step02_purified_items.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "location_type", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b", type: "float"}
+            - {name: "retained", type: "bool"}
+          row_count: 36
+        theta_scores_file:
+          path: "results/ch5/5.5.1/data/step03_theta_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "theta_source", type: "float"}
+            - {name: "se_source", type: "float"}
+            - {name: "theta_destination", type: "float"}
+            - {name: "se_destination", type: "float"}
+          row_count: 400
+        tsvr_mapping_file:
+          path: "results/ch5/5.5.1/data/step00_tsvr_mapping.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "TSVR_hours", type: "float"}
+          row_count: 400
+        raw_data_file:
+          path: "data/cache/dfData.csv"
+          format: "CSV with UTF-8 encoding"
+          description: "Raw binary responses for all VR items"
+
+      outputs:
+        validation_report:
+          path: "data/step00_dependency_validation.txt"
+          format: "Text report"
+          description: "Validation results documenting RQ 5.5.1 status, item counts, participant counts"
+
+      validation:
+        criteria:
+          - "RQ 5.5.1 status = 'success'"
+          - "All 5 input files exist"
+          - "purified_items.csv: 36 rows, retention rate 55-85%"
+          - "theta_scores.csv: 400 rows, theta in [-4,4], no NaN"
+          - "TSVR_mapping.csv: 400 rows, matches theta UIDs/tests"
+          - "dfData.csv: contains required -U- and -D- item columns"
+        on_failure:
+          action: "QUIT with EXPECTATIONS ERROR"
+          message: "RQ 5.5.1 must complete successfully before RQ 5.5.5 execution"
+
+    log_file: "logs/step00_dependency_validation.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Map Retained vs Removed Items by Location Type
+  # --------------------------------------------------------------------------
+  - name: "step01_item_mapping"
+    step_number: "01"
+    description: "Create item mapping showing which items were retained vs removed during IRT purification, separately for source and destination memory"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load purified_items.csv from Step 0"
+        - "Group items by location_type (source vs destination)"
+        - "Within each location_type: count total, retained, removed items"
+        - "Compute retention rate per location_type"
+        - "Create removal_reason column: 'low_discrimination' if a < 0.4, 'extreme_difficulty' if |b| > 3.0, 'both' if both, 'retained' if kept"
+        - "Save item mapping with retention status"
+
+      inputs:
+        purified_items:
+          path: "data/step00_purified_items_from_rq551.csv"
+          source: "Step 0 dependency validation output"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "location_type", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b", type: "float"}
+            - {name: "retained", type: "bool"}
+
+      outputs:
+        item_mapping:
+          path: "data/step01_item_mapping.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "location_type", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b", type: "float"}
+            - {name: "retained", type: "bool"}
+            - {name: "removal_reason", type: "str"}
+          row_count: 36
+          description: "Item-level retention status with removal reasons"
+
+      validation:
+        criteria:
+          - "All 36 items present (18 source + 18 destination)"
+          - "location_type in {source, destination}"
+          - "removal_reason in {retained, low_discrimination, extreme_difficulty, both}"
+          - "Retention rate per location_type in [0.55, 0.85]"
+          - "At least 10 retained items per location_type"
+        on_failure:
+          action: "QUIT with CLARITY ERROR if retention < 55% or < 10 items per location"
+          message: "Insufficient retained items for reliable CTT computation"
+
+    log_file: "logs/step01_item_mapping.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Full CTT Sum Scores
+  # --------------------------------------------------------------------------
+  - name: "step02_ctt_full_scores"
+    step_number: "02"
+    description: "Compute Classical Test Theory (CTT) sum scores using ALL source and destination items (before purification) to establish baseline measurement"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load dfData.csv (raw binary responses)"
+        - "Filter to source items (-U- tags): VR-{IFR|ICR|IRE}-{A01|R03|R06}-U-ANS-{i1-i6}"
+        - "Compute source CTT score per UID x test: mean of binary responses across 18 source items"
+        - "Filter to destination items (-D- tags): VR-{IFR|ICR|IRE}-{A01|R03|R06}-D-ANS-{i1-i6}"
+        - "Compute destination CTT score per UID x test: mean of binary responses across 18 destination items"
+        - "Dichotomization: TQ < 1 -> 0, TQ >= 1 -> 1, NaN -> NaN (excluded from mean)"
+        - "Reshape to long format: UID, test, location_type, ctt_full_score"
+
+      inputs:
+        raw_data:
+          path: "data/cache/dfData.csv"
+          description: "Raw binary responses for all VR items"
+          columns: "UID, TEST, VR item columns matching -U- and -D- patterns"
+
+      outputs:
+        ctt_full_scores:
+          path: "data/step02_ctt_full_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "location_type", type: "str"}
+            - {name: "ctt_full_score", type: "float"}
+          row_count: 800
+          description: "Full CTT scores (all items) per UID x test x location_type"
+
+      validation:
+        criteria:
+          - "800 rows (100 UID x 4 test x 2 location_type)"
+          - "ctt_full_score in [0, 1] (proportion correct)"
+          - "No NaN values"
+          - "All UIDs from theta_scores present"
+          - "location_type in {source, destination}"
+          - "test in {T1, T2, T3, T4}"
+        on_failure:
+          action: "QUIT with TOOL ERROR if scores out of [0,1]"
+          message: "CTT computation error - scores outside valid range"
+
+    log_file: "logs/step02_ctt_full_scores.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Purified CTT Sum Scores
+  # --------------------------------------------------------------------------
+  - name: "step03_ctt_purified_scores"
+    step_number: "03"
+    description: "Compute CTT sum scores using ONLY IRT-retained items (post-purification) to test whether item purification improves measurement precision"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load item_mapping from Step 1"
+        - "Filter to retained items only (retained = True)"
+        - "Extract retained source item names (expected 12-16 items)"
+        - "Extract retained destination item names (expected 12-16 items)"
+        - "Load dfData.csv"
+        - "Filter dfData to retained source items only, compute purified source CTT score per UID x test"
+        - "Filter dfData to retained destination items only, compute purified destination CTT score per UID x test"
+        - "Reshape to long format: UID, test, location_type, ctt_purified_score"
+
+      inputs:
+        item_mapping:
+          path: "data/step01_item_mapping.csv"
+          source: "Step 1 output"
+          description: "Item retention status per location_type"
+        raw_data:
+          path: "data/cache/dfData.csv"
+          description: "Raw binary responses"
+
+      outputs:
+        ctt_purified_scores:
+          path: "data/step03_ctt_purified_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "location_type", type: "str"}
+            - {name: "ctt_purified_score", type: "float"}
+          row_count: 800
+          description: "Purified CTT scores (retained items only) per UID x test x location_type"
+
+      validation:
+        criteria:
+          - "800 rows (same structure as Full CTT)"
+          - "ctt_purified_score in [0, 1]"
+          - "No NaN values"
+          - "location_type and test match Full CTT exactly"
+          - "UID set matches Full CTT exactly"
+          - "Correlation with Full CTT r > 0.85 (high convergence expected)"
+        on_failure:
+          action: "QUIT with TOOL ERROR if scores out of [0,1]; WARNING if correlation < 0.85"
+          message: "Purified CTT computation error or low convergence with Full CTT"
+
+    log_file: "logs/step03_ctt_purified_scores.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Reliability Assessment (Cronbach's Alpha)
+  # --------------------------------------------------------------------------
+  - name: "step04_reliability_assessment"
+    step_number: "04"
+    description: "Assess internal consistency reliability for Full vs Purified CTT scores per location type, testing whether item purification improves reliability"
+
+    analysis_call:
+      module: "tools.analysis_ctt"
+      function: "compute_cronbachs_alpha"
+      signature: "compute_cronbachs_alpha(data: DataFrame, n_bootstrap: int = 1000) -> Dict[str, Any]"
+
+      inputs:
+        raw_data:
+          path: "data/cache/dfData.csv"
+          description: "Raw item-level responses (for computing alpha at item level)"
+        item_mapping:
+          path: "data/step01_item_mapping.csv"
+          description: "Identify retained vs full item sets per location_type"
+
+      parameters:
+        n_bootstrap: 10000
+        location_types: ["source", "destination"]
+        versions: ["full", "purified"]
+
+      outputs:
+        reliability_assessment:
+          path: "data/step04_reliability_assessment.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "version", type: "str"}
+            - {name: "n_items", type: "int"}
+            - {name: "alpha", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "alpha_improvement", type: "float"}
+          row_count: 4
+          description: "Cronbach's alpha with bootstrap 95% CIs for 2 location types x 2 versions"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "reliability_results"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      inputs:
+        reliability_data:
+          path: "data/step04_reliability_assessment.csv"
+          source: "analysis_call output"
+
+      parameters:
+        data: "reliability_results['alpha']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "alpha"
+
+      criteria:
+        - "alpha in [0.60, 0.95] (acceptable to excellent internal consistency)"
+        - "CI_lower, CI_upper in [0, 1]"
+        - "CI_upper > CI_lower for all rows"
+        - "alpha_improvement in [-0.20, +0.20]"
+        - "Bootstrap CIs non-overlapping with 0"
+      on_failure:
+        action: "WARNING if alpha < 0.60 or > 0.95; QUIT if bootstrap fails"
+        log_to: "logs/step04_reliability_assessment.log"
+
+    log_file: "logs/step04_reliability_assessment.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Correlation Analysis with Steiger's Z-Test
+  # --------------------------------------------------------------------------
+  - name: "step05_correlation_analysis"
+    step_number: "05"
+    description: "Test whether Purified CTT shows higher correlation with IRT theta compared to Full CTT, using Steiger's z-test for dependent correlations with Decision D068 dual p-values"
+
+    analysis_call:
+      module: "tools.analysis_ctt"
+      function: "compare_correlations_dependent"
+      signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+
+      inputs:
+        theta_scores:
+          path: "data/step03_theta_scores_from_rq551.csv"
+          source: "Step 0 dependency validation (RQ 5.5.1 output)"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "theta_source", type: "float"}
+            - {name: "theta_destination", type: "float"}
+        ctt_full:
+          path: "data/step02_ctt_full_scores.csv"
+          source: "Step 2 output"
+        ctt_purified:
+          path: "data/step03_ctt_purified_scores.csv"
+          source: "Step 3 output"
+
+      parameters:
+        location_types: ["source", "destination"]
+        bonferroni_alpha: 0.025  # 0.05 / 2 location types (Decision D068)
+
+      outputs:
+        correlation_analysis:
+          path: "data/step05_correlation_analysis.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "r_full", type: "float"}
+            - {name: "r_purified", type: "float"}
+            - {name: "delta_r", type: "float"}
+            - {name: "r_full_purified", type: "float"}
+            - {name: "steiger_z", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float"}
+            - {name: "n", type: "int"}
+          row_count: 2
+          description: "Steiger's z-test results for dependent correlations with dual p-values (Decision D068)"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "correlation_results"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      inputs:
+        correlation_data:
+          path: "data/step05_correlation_analysis.csv"
+          source: "analysis_call output"
+
+      parameters:
+        correlation_df: "correlation_results"
+        required_cols: ["p_uncorrected", "p_bonferroni"]
+
+      criteria:
+        - "All correlations in [0.50, 1.00] (moderate to exceptional convergence)"
+        - "BOTH p_uncorrected and p_bonferroni present (Decision D068)"
+        - "p_bonferroni >= p_uncorrected (correction cannot reduce p-value)"
+        - "All correlations positive (CTT and IRT should agree on ability ordering)"
+      on_failure:
+        action: "QUIT with SCOPE ERROR if dual p-values missing (Decision D068 violation); WARNING if correlation < 0.50"
+        log_to: "logs/step05_correlation_analysis.log"
+
+    log_file: "logs/step05_correlation_analysis.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Z-Standardize All Measurements
+  # --------------------------------------------------------------------------
+  - name: "step06_standardized_scores"
+    step_number: "06"
+    description: "Standardize all measurements (IRT theta, Full CTT, Purified CTT) to z-scores (mean=0, SD=1) within location type to enable valid AIC comparison across different measurement scales in Step 7"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load theta_scores from Step 0"
+        - "Load ctt_full_scores from Step 2"
+        - "Load ctt_purified_scores from Step 3"
+        - "For each location_type (source, destination):"
+        - "  Z-standardize IRT theta: (theta - mean) / sd"
+        - "  Z-standardize Full CTT: (ctt_full - mean) / sd"
+        - "  Z-standardize Purified CTT: (ctt_purified - mean) / sd"
+        - "Merge all z-scores into single file with location_type factor"
+        - "Validate standardization: mean approximately 0 (+/- 0.05), SD approximately 1 (+/- 0.05)"
+
+      inputs:
+        theta_scores:
+          path: "data/step03_theta_scores_from_rq551.csv"
+          source: "Step 0 dependency validation"
+        ctt_full:
+          path: "data/step02_ctt_full_scores.csv"
+          source: "Step 2 output"
+        ctt_purified:
+          path: "data/step03_ctt_purified_scores.csv"
+          source: "Step 3 output"
+
+      outputs:
+        standardized_scores:
+          path: "data/step06_standardized_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "location_type", type: "str"}
+            - {name: "irt_z", type: "float"}
+            - {name: "ctt_full_z", type: "float"}
+            - {name: "ctt_purified_z", type: "float"}
+          row_count: 800
+          description: "Z-standardized measurements per UID x test x location_type"
+
+      validation:
+        criteria:
+          - "All 800 observations present"
+          - "No NaN values"
+          - "For each location_type:"
+          - "  mean(irt_z) approximately 0 (+/- 0.05)"
+          - "  sd(irt_z) approximately 1 (+/- 0.05)"
+          - "  mean(ctt_full_z) approximately 0 (+/- 0.05)"
+          - "  sd(ctt_full_z) approximately 1 (+/- 0.05)"
+          - "  mean(ctt_purified_z) approximately 0 (+/- 0.05)"
+          - "  sd(ctt_purified_z) approximately 1 (+/- 0.05)"
+        on_failure:
+          action: "QUIT with TOOL ERROR if standardization incorrect"
+          message: "Z-standardization computation error - mean/SD outside tolerance"
+
+    log_file: "logs/step06_standardized_scores.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Fit Parallel LMMs and Compare AIC
+  # --------------------------------------------------------------------------
+  - name: "step07_lmm_model_comparison"
+    step_number: "07"
+    description: "Fit parallel Linear Mixed Models on z-standardized measurements (IRT, Full CTT, Purified CTT) for both location types, then compare trajectory fit via AIC to test purification-trajectory paradox"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      inputs:
+        standardized_scores:
+          path: "data/step06_standardized_scores.csv"
+          source: "Step 6 output"
+        tsvr_mapping:
+          path: "data/step00_tsvr_mapping.csv"
+          source: "Step 0 dependency validation"
+
+      parameters:
+        formula: "score ~ Time + (Time | UID)"
+        groups: "UID"
+        re_formula: "~Time"
+        reml: false  # Required for AIC comparison
+        models:
+          - {name: "Source_IRT", outcome: "irt_z", filter: "location_type == 'source'"}
+          - {name: "Source_Full_CTT", outcome: "ctt_full_z", filter: "location_type == 'source'"}
+          - {name: "Source_Purified_CTT", outcome: "ctt_purified_z", filter: "location_type == 'source'"}
+          - {name: "Destination_IRT", outcome: "irt_z", filter: "location_type == 'destination'"}
+          - {name: "Destination_Full_CTT", outcome: "ctt_full_z", filter: "location_type == 'destination'"}
+          - {name: "Destination_Purified_CTT", outcome: "ctt_purified_z", filter: "location_type == 'destination'"}
+
+      outputs:
+        lmm_comparison:
+          path: "data/step07_lmm_model_comparison.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "aic_irt", type: "float"}
+            - {name: "aic_ctt_full", type: "float"}
+            - {name: "aic_ctt_purified", type: "float"}
+            - {name: "delta_aic_full_purified", type: "float"}
+            - {name: "interpretation", type: "str"}
+            - {name: "n_observations", type: "int"}
+            - {name: "converged_all", type: "bool"}
+          row_count: 2
+          description: "AIC comparison across 6 parallel LMMs (3 measurements x 2 location types)"
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_results"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+
+      inputs:
+        lmm_models:
+          path: "data/step07_lmm_model_comparison.csv"
+          source: "analysis_call output"
+
+      parameters:
+        lmm_result: "lmm_results"
+
+      criteria:
+        - "All 6 parallel LMMs converged (converged_all = True)"
+        - "All AIC values finite (not NaN or infinite)"
+        - "delta_aic_full_purified finite"
+      on_failure:
+        action: "WARNING if convergence failed -> attempt simplification -> QUIT if still fails; QUIT if AIC NaN/infinite"
+        log_to: "logs/step07_lmm_model_comparison.log"
+
+    log_file: "logs/step07_lmm_model_comparison.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7.5: Validate LMM Assumptions
+  # --------------------------------------------------------------------------
+  - name: "step07.5_assumption_validation"
+    step_number: "07.5"
+    description: "Validate Linear Mixed Model assumptions for all 6 fitted models using comprehensive diagnostic procedures. Document violations for CTT models (expected due to bounded [0,1] scale) but proceed with AIC comparison"
+
+    analysis_call:
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      inputs:
+        lmm_models:
+          path: "data/step07_lmm_models.pkl"
+          source: "Step 7 fitted model objects (6 models)"
+        standardized_scores:
+          path: "data/step06_standardized_scores.csv"
+          source: "Step 6 output (for residual extraction)"
+
+      parameters:
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+        models:
+          - "Source_IRT"
+          - "Source_Full_CTT"
+          - "Source_Purified_CTT"
+          - "Destination_IRT"
+          - "Destination_Full_CTT"
+          - "Destination_Purified_CTT"
+
+      outputs:
+        assumption_validation:
+          path: "data/step07.5_assumption_validation.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "model", type: "str"}
+            - {name: "assumption", type: "str"}
+            - {name: "test_statistic", type: "float"}
+            - {name: "p_value", type: "float"}
+            - {name: "threshold", type: "str"}
+            - {name: "result", type: "str"}
+            - {name: "notes", type: "str"}
+          row_count: 42
+          description: "Comprehensive assumption validation (6 models x 7 assumptions)"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "assumption_results"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      inputs:
+        assumption_data:
+          path: "data/step07.5_assumption_validation.csv"
+          source: "analysis_call output"
+
+      parameters:
+        df: "assumption_results"
+        expected_rows: 42
+        expected_columns: ["model", "assumption", "test_statistic", "p_value", "threshold", "result", "notes"]
+
+      criteria:
+        - "42 rows (6 models x 7 assumptions)"
+        - "All required columns present"
+        - "result in {PASS, FAIL}"
+        - "No missing results"
+        - "CTT bounded scale violations documented"
+      on_failure:
+        action: "WARNING if IRT violations; EXPECTED if CTT violations (bounded scale); QUIT if >50% failures"
+        log_to: "logs/step07.5_assumption_validation.log"
+
+    log_file: "logs/step07.5_assumption_validation.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Prepare Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step08_plot_data_preparation"
+    step_number: "08"
+    description: "Create plot source CSV files for visualization of correlation comparison and AIC comparison results"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load reliability_assessment from Step 4"
+        - "Load correlation_analysis from Step 5"
+        - "Load lmm_model_comparison from Step 7"
+        - "Create correlation comparison plot data:"
+        - "  Reshape to 4 rows: (Source, Full), (Source, Purified), (Destination, Full), (Destination, Purified)"
+        - "  Compute Fisher's z-transformation for 95% CIs on correlations"
+        - "Create AIC comparison plot data:"
+        - "  Reshape to 6 rows: (Source, IRT), (Source, Full_CTT), (Source, Purified_CTT), (Destination, IRT), (Destination, Full_CTT), (Destination, Purified_CTT)"
+        - "  Compute delta_aic = AIC(model) - AIC(Full_CTT) per location_type"
+        - "  Interpret per Burnham & Anderson (2002): delta_aic > 2 = substantial, > 10 = decisive"
+
+      inputs:
+        reliability_data:
+          path: "data/step04_reliability_assessment.csv"
+          source: "Step 4 output"
+        correlation_data:
+          path: "data/step05_correlation_analysis.csv"
+          source: "Step 5 output"
+        aic_data:
+          path: "data/step07_lmm_model_comparison.csv"
+          source: "Step 7 output"
+
+      outputs:
+        correlation_plot_data:
+          path: "plots/step08_correlation_comparison_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "version", type: "str"}
+            - {name: "r", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+          row_count: 4
+          description: "Correlation comparison plot source data"
+        aic_plot_data:
+          path: "plots/step08_aic_comparison_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "model", type: "str"}
+            - {name: "aic", type: "float"}
+            - {name: "delta_aic", type: "float"}
+            - {name: "interpretation", type: "str"}
+          row_count: 6
+          description: "AIC comparison plot source data"
+
+      validation:
+        criteria:
+          - "Correlation plot: 4 rows, CI_upper > CI_lower"
+          - "AIC plot: 6 rows, all location_type x model combinations present"
+          - "No NaN values in plot data"
+          - "All CIs valid (CI_upper > CI_lower)"
+        on_failure:
+          action: "QUIT with TOOL ERROR if CI inversion; QUIT with CLARITY ERROR if missing rows"
+          message: "Plot data preparation error - invalid confidence intervals or missing data"
+
+    log_file: "logs/step08_plot_data_preparation.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

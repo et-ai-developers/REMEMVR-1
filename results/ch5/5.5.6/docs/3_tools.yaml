@@ -1,0 +1,463 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.5.6 - Source-Destination Variance Decomposition
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "results/ch5/5.5.1/data/step04_lmm_input.csv"
+        required_columns: ["UID", "test", "location", "theta", "SE", "TSVR_hours"]
+        expected_rows: "800 (100 UID x 4 tests x 2 locations)"
+        data_types:
+          UID: "string (format: P### with leading zeros)"
+          test: "string (values: T1, T2, T3, T4)"
+          location: "string (values: Source, Destination)"
+          theta: "float (IRT ability estimate)"
+          SE: "float (standard error of theta)"
+          TSVR_hours: "float (actual time since encoding in hours)"
+
+    output_files:
+      - path: "data/step01_model_metadata_source.yaml"
+        description: "Source LMM metadata (convergence status, N, formula)"
+      - path: "data/step01_model_metadata_destination.yaml"
+        description: "Destination LMM metadata (convergence status, N, formula)"
+      - path: "data/step01_source_lmm_model.pkl"
+        description: "Pickled statsmodels MixedLM results object (Source location)"
+      - path: "data/step01_destination_lmm_model.pkl"
+        description: "Pickled statsmodels MixedLM results object (Destination location)"
+
+    parameters:
+      formula: "theta ~ time_variable + (time_variable | UID)"
+      groups: "UID"
+      re_formula: "~time_variable | UID"
+      reml: true
+      time_variable: "Best-fit transformation from RQ 5.5.1 (e.g., log_TSVR, TSVR_hours, sqrt_TSVR)"
+      stratification: "Fit separate models WHERE location == 'Source' and WHERE location == 'Destination'"
+
+    description: "Fit location-stratified LMMs with random intercepts and slopes. Two separate models (Source, Destination) using best-fit time transformation from RQ 5.5.1. REML estimation for unbiased variance components."
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' line 97-103"
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_variance_positivity"
+
+    input_files:
+      - path: "data/step01_source_lmm_model.pkl"
+        description: "Pickled Source LMM model from Step 1"
+        source: "Step 1 output"
+      - path: "data/step01_destination_lmm_model.pkl"
+        description: "Pickled Destination LMM model from Step 1"
+        source: "Step 1 output"
+
+    output_files:
+      - path: "data/step02_variance_components.csv"
+        columns: ["location", "component", "value"]
+        description: "10 rows (5 components x 2 locations): var_intercept, var_slope, cov_int_slope, var_residual, correlation_int_slope"
+
+    parameters:
+      extract_components:
+        - "var_intercept: model.cov_re.iloc[0, 0]"
+        - "var_slope: model.cov_re.iloc[1, 1]"
+        - "cov_int_slope: model.cov_re.iloc[0, 1]"
+        - "var_residual: model.scale"
+        - "correlation_int_slope: cov / (sqrt(var_int) x sqrt(var_slope))"
+
+    description: "Extract 5 variance components per location from LMM random effects covariance matrix. Used for Step 2 (variance components table) and Step 3 (ICC computation)."
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' line 121-127"
+
+  compute_icc_from_variance_components:
+    module: "tools.analysis_lmm"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_icc_bounds"
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["location", "component", "value"]
+        expected_rows: "10 (5 components x 2 locations)"
+        source: "Step 2 output"
+
+    output_files:
+      - path: "data/step03_icc_estimates.csv"
+        columns: ["location", "icc_type", "value", "interpretation"]
+        description: "6 rows (3 ICC types x 2 locations): ICC_intercept, ICC_slope_simple, ICC_slope_conditional"
+
+    parameters:
+      slope_name: "time_variable from RQ 5.5.1 best-fit transformation"
+      timepoint: 6.0
+      interpretation_thresholds:
+        poor: "<0.40"
+        fair: "0.40-0.59"
+        good: "0.60-0.74"
+        excellent: ">=0.75"
+
+    description: "Compute 3 ICC estimates per location using Snijders & Bosker (2012) formulas. ICC_intercept quantifies baseline stability, ICC_slope quantifies slope variability (expected near zero)."
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' line 165-173"
+
+  extract_individual_random_effects:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step01_source_lmm_model.pkl"
+        description: "Source LMM model with random effects per UID"
+        source: "Step 1 output"
+      - path: "data/step01_destination_lmm_model.pkl"
+        description: "Destination LMM model with random effects per UID"
+        source: "Step 1 output"
+
+    output_files:
+      - path: "data/step04_random_effects.csv"
+        columns: ["UID", "location", "random_intercept", "random_slope"]
+        description: "200 rows (100 UID x 2 locations) - CRITICAL for RQ 5.5.7 clustering"
+
+    parameters:
+      extract_from: "model.random_effects dict (UID -> [intercept, slope])"
+      concatenate: "Stack Source and Destination vertically"
+
+    description: "Extract individual participant random intercepts and slopes for BOTH locations. Output is REQUIRED input for RQ 5.5.7 (K-means clustering on 200 random effects)."
+
+    notes:
+      - "CRITICAL DEPENDENCY: RQ 5.5.7 cannot proceed without this file"
+      - "Random effects represent individual memory profiles (baseline + forgetting rate) stratified by location"
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' line 121-127"
+
+  test_intercept_slope_correlation_d068:
+    module: "tools.analysis_lmm"
+    function: "test_intercept_slope_correlation_d068"
+    signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step04_random_effects.csv"
+        required_columns: ["UID", "location", "random_intercept", "random_slope"]
+        expected_rows: "200 (100 UID x 2 locations)"
+        source: "Step 4 output"
+
+    output_files:
+      - path: "data/step05_intercept_slope_correlations.csv"
+        columns: ["location", "r", "N", "t_statistic", "df", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
+        description: "2 rows (Source, Destination) with dual p-value reporting per Decision D068"
+
+    parameters:
+      family_alpha: 0.05
+      n_tests: 2
+      bonferroni_alpha: 0.025
+      correlation_method: "Pearson"
+
+    description: "Test intercept-slope correlations for both locations using Pearson correlation. Dual p-value reporting per Decision D068 (uncorrected + Bonferroni). Tests if higher baseline ability associated with different forgetting rates."
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' line 175-183"
+
+  compare_icc_across_locations:
+    module: "pandas"
+    function: "DataFrame.filter + DataFrame.merge + inline_computation"
+    signature: "Custom pandas operations (not dedicated function)"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step03_icc_estimates.csv"
+        required_columns: ["location", "icc_type", "value", "interpretation"]
+        expected_rows: "6 (3 ICC types x 2 locations)"
+        source: "Step 3 output"
+
+    output_files:
+      - path: "data/step06_location_icc_comparison.csv"
+        columns: ["icc_type", "source_value", "destination_value", "difference", "interpretation"]
+        description: "3 rows (one per ICC type) comparing Source vs Destination"
+
+    parameters:
+      operations:
+        - "Filter WHERE location == 'Source' -> source_df"
+        - "Filter WHERE location == 'Destination' -> destination_df"
+        - "Merge on icc_type"
+        - "Compute difference = source_value - destination_value"
+        - "Generate interpretation string based on difference magnitude"
+
+    description: "Simple pandas DataFrame filtering and merging to create ICC comparison table. No dedicated tool function needed (straightforward tabular operations)."
+
+    notes:
+      - "This is NOT a custom tool from tools_inventory.md - uses standard pandas operations"
+      - "rq_analysis will generate inline pandas code (no function import required)"
+      - "Validation still required (checks output structure, bounds, completeness)"
+
+    source_reference: "Standard library (pandas DataFrame operations)"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_source_lmm_model.pkl"
+        source: "Step 1 analysis output"
+      - path: "data/step01_destination_lmm_model.pkl"
+        source: "Step 1 analysis output"
+
+    parameters:
+      checks:
+        - "model.converged == True"
+        - "No singular fit warnings"
+        - "Expected N participants: 100 per model"
+        - "Expected observations: 400 per model (100 UID x 4 tests)"
+
+    criteria:
+      - "Both Source and Destination models converged successfully"
+      - "No collinearity issues (no singular fit)"
+      - "All 100 participants present (no data loss)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if valid)"
+        message: "str (human-readable explanation)"
+        warnings: "list (any convergence warnings)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_fit_location_stratified_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate both location-stratified LMMs converged successfully with no estimation issues. Critical for downstream variance component extraction."
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' line 327-333"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    signature: "validate_variance_positivity(variance_df: pd.DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["location", "component", "value"]
+        source: "Step 2 analysis output"
+
+    parameters:
+      component_col: "component"
+      value_col: "value"
+      checks:
+        - "var_intercept > 0 (both locations)"
+        - "var_slope >= 0 (both locations, expected near zero)"
+        - "var_residual > 0 (both locations)"
+        - "correlation_int_slope in [-1, 1]"
+        - "No NaN or inf values"
+
+    criteria:
+      - "All variance components non-negative (no Heywood cases)"
+      - "Correlation bounded in [-1, 1]"
+      - "No missing components (all 5 present for both locations)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        negative_components: "List[str] (empty if valid)"
+        variance_range: "Tuple[float, float] (min, max observed)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_extract_variance_components.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate all variance components are positive and correlation is bounded. Negative variances indicate model misspecification or convergence failure."
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' line 608-616"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: pd.DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_icc_estimates.csv"
+        required_columns: ["location", "icc_type", "value", "interpretation"]
+        source: "Step 3 analysis output"
+
+    parameters:
+      icc_col: "value"
+      bounds: [0, 1]
+      interpretation_thresholds:
+        poor: "<0.40"
+        fair: "0.40-0.59"
+        good: "0.60-0.74"
+        excellent: ">=0.75"
+
+    criteria:
+      - "All ICC values in [0, 1] (by definition)"
+      - "ICC_intercept expected in [0.20, 0.70] (plausible episodic memory range)"
+      - "ICC_slope expected in [0, 0.05] (near zero per hypothesis)"
+      - "Interpretation categories match Cicchetti (1994) thresholds"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_bounds: "List[Dict] (empty if valid)"
+        icc_range: "Tuple[float, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_compute_icc_estimates.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate ICC estimates are in valid [0,1] range and interpretations match thresholds. ICC > 1 indicates computation error."
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' line 618-626"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_random_effects.csv"
+        required_columns: ["UID", "location", "random_intercept", "random_slope"]
+        source: "Step 4 analysis output"
+      - path: "data/step06_location_icc_comparison.csv"
+        required_columns: ["icc_type", "source_value", "destination_value", "difference", "interpretation"]
+        source: "Step 6 analysis output"
+
+    parameters:
+      step4_validation:
+        expected_rows: 200
+        expected_columns: ["UID", "location", "random_intercept", "random_slope"]
+        column_types:
+          UID: "object"
+          location: "object"
+          random_intercept: "float64"
+          random_slope: "float64"
+      step6_validation:
+        expected_rows: 3
+        expected_columns: ["icc_type", "source_value", "destination_value", "difference", "interpretation"]
+        column_types:
+          icc_type: "object"
+          source_value: "float64"
+          destination_value: "float64"
+          difference: "float64"
+          interpretation: "object"
+
+    criteria:
+      step4:
+        - "Exactly 200 rows (100 UID x 2 locations)"
+        - "All 100 UID present for Source and Destination"
+        - "No duplicate UID-location pairs"
+        - "No NaN or inf values"
+      step6:
+        - "Exactly 3 rows (one per ICC type)"
+        - "All ICC types present (ICC_intercept, ICC_slope_simple, ICC_slope_conditional)"
+        - "Source and destination values in [0, 1]"
+        - "Difference correctly computed"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool] (row_count, columns_present, types_match)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_extract_random_effects.log or logs/step06_compare_icc_across_locations.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Generic DataFrame structure validation (rows, columns, types). Flexible validator used for Steps 4 and 6 output verification."
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' line 628-636"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_intercept_slope_correlations.csv"
+        required_columns: ["location", "r", "N", "t_statistic", "df", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
+        source: "Step 5 analysis output"
+
+    parameters:
+      required_cols: ["p_uncorrected", "p_bonferroni"]
+      bounds:
+        r: [-1, 1]
+        p_uncorrected: [0, 1]
+        p_bonferroni: [0, 1]
+      relationships:
+        - "p_bonferroni >= p_uncorrected (correction can only increase p-value)"
+        - "p_bonferroni = min(p_uncorrected x n_tests, 1.0)"
+
+    criteria:
+      - "BOTH p_uncorrected and p_bonferroni columns present (Decision D068)"
+      - "Correlation coefficients in [-1, 1]"
+      - "P-values in [0, 1]"
+      - "Bonferroni correction correctly applied"
+      - "Both locations present (Source, Destination)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_cols: "List[str] (empty if valid)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_test_intercept_slope_correlations.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate correlation test results include Decision D068 dual p-value reporting. Ensures transparency in exploratory thesis analyses."
+
+    source_reference: "tools_inventory.md section 'Module: tools.validation' line 454-462"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 5
+  total_unique_tools: 11
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (Step 5 intercept-slope correlations)"
+    - "D070: TSVR time variable (inherited from RQ 5.5.1 best-fit transformation)"
+  stdlib_tools_used:
+    - "pandas: DataFrame filtering, merging, aggregation (Step 6)"
+    - "pickle: Load saved LMM models (Steps 2, 4)"
+    - "yaml: Save/load model metadata (Step 1)"
+  critical_outputs:
+    - "data/step04_random_effects.csv: 200 rows REQUIRED for RQ 5.5.7 clustering"
+  naming_convention_notes:
+    - "Variable 'location' (Source/Destination) NOT in names.md (new RQ type 5.5.X)"
+    - "Recommend adding to names.md: location (string, values: Source, Destination)"
+  architecture_notes:
+    - "Tool catalog approach: Each tool listed ONCE (Step 2 and Step 4 both use extract_random_effects_from_lmm)"
+    - "rq_analysis will create step-by-step sequencing in 4_analysis.yaml"
+    - "Standard library functions (pandas, pickle, yaml) NOT cataloged as custom tools"
+    - "Step 6 uses inline pandas operations (no dedicated function import)"

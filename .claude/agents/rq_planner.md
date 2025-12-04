@@ -808,11 +808,21 @@ Action: Verify rq_builder completed successfully (check status.yaml)
 
 ---
 
+### Step 10.5: Read the empty file (REQUIRED for Write tool)
+
+**Action:** Read `results/chX/X.Y.Z/docs/2_plan.md`
+
+**Purpose:** Claude Code requires reading a file before writing to it. This Read enables the subsequent Write.
+
+**Method:** Use Read tool on the file created in Step 10
+
+---
+
 ### Step 11: Write Plan Content
 
 **Action:** Write to results/chX/X.Y.Z/docs/2_plan.md
 
-**Use Write tool** (file is empty from Step 10)
+**Use Write tool** (Read in Step 10.5 enables this)
 
 **Structure:** Follow docs/v4/templates/plan.md format exactly
 

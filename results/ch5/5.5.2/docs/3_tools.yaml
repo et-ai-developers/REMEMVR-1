@@ -1,0 +1,493 @@
+# 3_tools.yaml - Tool Catalog for RQ 5.5.2
+# Created by: rq_tools agent
+# Date: 2025-12-04
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.5.2 Source-Destination Consolidation (Two-Phase)
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+
+  assign_piecewise_segments:
+    module: "tools.analysis_lmm"
+    function: "assign_piecewise_segments"
+    signature: "assign_piecewise_segments(df: DataFrame, tsvr_col: str = 'TSVR_hours', early_cutoff_hours: float = 24.0) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step00_theta_from_rq551.csv"
+        required_columns: ["UID", "test", "TSVR_hours", "theta_source", "theta_destination"]
+        expected_rows: 400
+        data_types:
+          UID: "string (format: P###)"
+          test: "string (values: T1, T2, T3, T4)"
+          TSVR_hours: "float (range: [0, 168])"
+          theta_source: "float (range: [-3, 3])"
+          theta_destination: "float (range: [-3, 3])"
+
+    output_files:
+      - path: "data/step01_piecewise_time_variables.csv"
+        columns: ["UID", "test", "theta_source", "theta_destination", "se_source", "se_destination", "TSVR_hours", "Segment", "Days_within"]
+        description: "Piecewise time variables added: Segment (Early/Late) and Days_within (recentered time)"
+
+    parameters:
+      df: "pd.DataFrame (input data)"
+      tsvr_col: "str (default: 'TSVR_hours')"
+      early_cutoff_hours: "float (48.0 for RQ 5.5.2, 48h consolidation breakpoint)"
+
+    description: "Assign Early/Late segments with 48-hour breakpoint and compute Days_within (recentered time within each segment)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - assign_piecewise_segments"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step02_lmm_input_long.csv"
+        required_columns: ["UID", "theta", "Days_within", "Segment", "LocationType"]
+        expected_rows: 800
+        data_types:
+          UID: "string"
+          theta: "float (range: [-3, 3])"
+          Days_within: "float (range: [0, 5])"
+          Segment: "string (values: Early, Late)"
+          LocationType: "string (values: Source, Destination)"
+
+    output_files:
+      - path: "data/step03_piecewise_lmm_model.pkl"
+        description: "Fitted piecewise LMM model object (pickle format)"
+      - path: "data/step03_piecewise_lmm_summary.txt"
+        description: "Model summary: fixed effects, random effects, convergence status, fit indices"
+
+    parameters:
+      formula: "theta ~ Days_within * Segment * LocationType (3-way interaction, piecewise design)"
+      groups: "UID (participant-level random effects)"
+      re_formula: "~Days_within (random slopes for Days_within by UID)"
+      reml: "False (ML estimation for AIC comparison if needed)"
+
+    description: "Fit piecewise LMM with LocationType x Phase interaction (primary hypothesis) using TSVR-based Days_within as time variable"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  extract_segment_slopes_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_segment_slopes_from_lmm"
+    signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step03_piecewise_lmm_model.pkl"
+        description: "Fitted piecewise LMM model from Step 3"
+
+    output_files:
+      - path: "data/step04_segment_location_slopes.csv"
+        columns: ["Segment", "LocationType", "slope", "SE", "CI_lower", "CI_upper", "p_value"]
+        description: "4 segment-location slopes with delta method SEs"
+
+    parameters:
+      segment_col: "Segment (Early/Late factor)"
+      time_col: "Days_within (time-within-segment variable)"
+
+    description: "Extract 4 segment-location slopes via linear combinations with delta method SE propagation"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_segment_slopes_from_lmm"
+
+    notes: "MODIFIED for RQ 5.5.2: Extracts slopes for Source_Early, Source_Late, Destination_Early, Destination_Late using 3-way interaction coefficients"
+
+  prepare_piecewise_plot_data:
+    module: "tools.plotting"
+    function: "prepare_piecewise_plot_data"
+    signature: "prepare_piecewise_plot_data(df_input: DataFrame, lmm_result: MixedLMResults, segment_col: str, factor_col: str, segment_values: List[str], factor_values: List[str], days_within_col: str = 'Days_within', theta_col: str = 'theta', early_grid_points: int = 20, late_grid_points: int = 60, ci_level: float = 0.95) -> Dict[str, DataFrame]"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step02_lmm_input_long.csv"
+        required_columns: ["Segment", "LocationType", "Days_within", "theta"]
+        description: "LMM input data for observed means aggregation"
+      - path: "data/step03_piecewise_lmm_model.pkl"
+        description: "Fitted model for predictions"
+      - path: "data/step04_segment_location_slopes.csv"
+        description: "Slopes for annotation (optional)"
+
+    output_files:
+      - path: "data/step07_piecewise_theta_data.csv"
+        columns: ["Days_within", "LocationType", "theta_observed", "CI_lower_observed", "CI_upper_observed", "theta_predicted", "Data_Type"]
+        description: "Plot source data (theta scale)"
+      - path: "data/step07_piecewise_probability_data.csv"
+        columns: ["Days_within", "LocationType", "probability_observed", "CI_lower_observed", "CI_upper_observed", "probability_predicted", "Data_Type"]
+        description: "Plot source data (probability scale, Decision D069)"
+
+    parameters:
+      segment_col: "Segment"
+      factor_col: "LocationType"
+      segment_values: "['Early', 'Late']"
+      factor_values: "['Source', 'Destination']"
+      days_within_col: "Days_within"
+      theta_col: "theta"
+      early_grid_points: 20
+      late_grid_points: 60
+      ci_level: 0.95
+
+    description: "Prepare piecewise plot data with observed means and model predictions on Days_within grid"
+    source_reference: "tools_inventory.md section 'Module: tools.plotting' - prepare_piecewise_plot_data"
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float = 1.0, difficulty: float = 0.0) -> ndarray"
+    validation_tool: "validate_probability_range"
+
+    input_files:
+      - path: "data/step07_piecewise_theta_data.csv"
+        required_columns: ["theta_observed", "theta_predicted"]
+        description: "Theta-scale plot data for transformation"
+
+    output_files:
+      - path: "data/step07_piecewise_probability_data.csv"
+        columns: ["probability_observed", "probability_predicted"]
+        description: "Probability-scale plot data (Decision D069 dual-scale requirement)"
+
+    parameters:
+      theta: "ndarray (theta values to transform)"
+      discrimination: "1.0 (default GRM slope for transformation)"
+      difficulty: "0.0 (default GRM location for transformation)"
+
+    description: "Transform theta scores to probability scale via IRT 2PL formula for Decision D069 dual-scale plotting"
+    source_reference: "tools_inventory.md section 'Module: tools.plotting' - convert_theta_to_probability"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_piecewise_time_variables.csv"
+        required_columns: ["Segment", "Days_within"]
+        source: "analysis tool output (step01_assign_piecewise_segments)"
+      - path: "data/step04_segment_location_slopes.csv"
+        required_columns: ["Segment", "LocationType", "slope", "SE", "CI_lower", "CI_upper", "p_value"]
+        source: "analysis tool output (step04_extract_segment_location_slopes)"
+
+    parameters:
+      expected_rows: "400 for step01, 4 for step04"
+      expected_columns: "List of required column names"
+      column_types: "Optional dtype validation"
+
+    criteria:
+      - "Row count matches expected (exact or range)"
+      - "All required columns present"
+      - "Column types match specification (if provided)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame structure (rows, columns, types) after data transformations"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_dataframe_structure"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_piecewise_lmm_model.pkl"
+        description: "Fitted piecewise LMM model"
+        source: "analysis tool output (step03_fit_piecewise_lmm)"
+
+    parameters:
+      lmm_result: "MixedLMResults object from fit_lmm_trajectory_tsvr"
+
+    criteria:
+      - "Model converged (lmm_result.converged = True)"
+      - "No singular fit warnings"
+      - "All fixed effect estimates finite (no NaN/inf)"
+      - "Random effects variance components > 0"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "list (convergence warnings if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_piecewise_lmm.log"
+      invoke: "g_debug (master invokes, check data/model specification)"
+
+    description: "Validate LMM convergence status and check for singular fit issues"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_piecewise_time_variables.csv"
+        required_columns: ["Days_within"]
+        source: "analysis tool output (validate Days_within in [0, 5])"
+      - path: "data/step04_segment_location_slopes.csv"
+        required_columns: ["slope", "SE"]
+        source: "analysis tool output (validate slopes and SEs in reasonable ranges)"
+
+    parameters:
+      min_val: "Minimum allowed value (inclusive)"
+      max_val: "Maximum allowed value (inclusive)"
+      column_name: "Column name for error messages"
+
+    criteria:
+      - "All values in [min_val, max_val] range"
+      - "No NaN values"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list (first 10 violations for debugging)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate numeric values fall within specified range (inclusive bounds)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step07_piecewise_probability_data.csv"
+        required_columns: ["probability_observed", "probability_predicted"]
+        source: "analysis tool output (step07_convert_theta_to_probability)"
+
+    parameters:
+      prob_columns: "['probability_observed', 'probability_predicted']"
+
+    criteria:
+      - "All probability values in [0, 1] range (inclusive)"
+      - "No NaN values in probability columns"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violations: "List[Dict] (per-column violation details)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_prepare_plot_data.log"
+      invoke: "g_debug (master invokes, check theta-to-probability transformation)"
+
+    description: "Validate probability values in [0,1] range after theta transformation (Decision D069 requirement)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_probability_range"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step07_piecewise_theta_data.csv"
+        required_columns: ["LocationType", "Data_Type"]
+        source: "analysis tool output (step07_prepare_piecewise_plot_data)"
+
+    parameters:
+      required_domains: "['Early', 'Late'] (segments as domains for this RQ)"
+      required_groups: "['Source', 'Destination'] (location types as groups)"
+      domain_col: "Segment (mapped to 'domain' parameter)"
+      group_col: "LocationType (mapped to 'group' parameter)"
+
+    criteria:
+      - "All segments (Early/Late) present in plot data"
+      - "All location types (Source/Destination) present"
+      - "All segment x location combinations have data"
+      - "Both observed and predicted data types present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_prepare_plot_data.log"
+      invoke: "g_debug (master invokes, check aggregation logic)"
+
+    description: "Verify all segments and location types present in plot data (prevents incomplete visualizations)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_plot_data_completeness"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_interaction_tests.csv"
+        required_columns: ["Term", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step06_test_interaction)"
+
+    parameters:
+      required_terms: "['Days_within:Segment:LocationType'] (3-way interaction)"
+      alpha_bonferroni: 0.025
+
+    criteria:
+      - "Required interaction term present in results"
+      - "p_uncorrected column present (Decision D068)"
+      - "p_bonferroni column present (Decision D068)"
+      - "p_bonferroni >= p_uncorrected (correction never decreases p-value)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool (dual p-value requirement met)"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_test_interaction.log"
+      invoke: "g_debug (master invokes, check Decision D068 implementation)"
+
+    description: "Validate 3-way interaction test includes required term AND Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_hypothesis_test_dual_pvalues"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_theta_from_rq551.csv"
+        required_columns: ["UID", "test", "theta_source", "theta_destination", "TSVR_hours"]
+        source: "dependency load from RQ 5.5.1"
+      - path: "data/step02_lmm_input_long.csv"
+        required_columns: ["UID", "test", "LocationType", "theta", "TSVR_hours", "Segment", "Days_within"]
+        source: "reshape wide to long output"
+
+    parameters:
+      required_cols: "List of required column names (case-sensitive)"
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Case-sensitive column name matching"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_cols: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate DataFrame has all required columns (simple presence check, no missing value detection)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+    input_files: []
+
+    parameters:
+      file_path: "Path to file to validate"
+      min_size_bytes: "Minimum file size (0 = no minimum, >0 for non-empty check)"
+
+    criteria:
+      - "File exists at specified path"
+      - "Path is a file (not directory)"
+      - "File size >= min_size_bytes (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        file_path: "str"
+        size_bytes: "int (0 if file doesn't exist)"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_load_dependency_data.log"
+      invoke: "g_debug (master invokes, check RQ 5.5.1 completion)"
+
+    description: "Validate file exists and meets minimum size requirement (dependency checking)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - check_file_exists"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 8
+  total_unique_tools: 13
+  mandatory_decisions_embedded: ["D068", "D069", "D070"]
+  rq_type: "piecewise_lmm"
+  special_notes:
+    - "RQ 5.5.2 is DERIVED RQ (uses theta scores from RQ 5.5.1)"
+    - "Piecewise design with 48-hour breakpoint (Early 0-48h, Late 48-168h)"
+    - "LocationType x Phase interaction is primary hypothesis"
+    - "Steps 5-6 use stdlib (pandas/numpy/scipy) for linear combinations, not custom tools"
+    - "Decision D068 dual p-values required in Step 6"
+    - "Decision D069 dual-scale plots required in Step 7"
+    - "Decision D070 TSVR time variable inherited from RQ 5.5.1"
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+# Steps 5-6 Analysis Approach:
+# - Step 5 (consolidation benefit): Computed from Step 4 slopes using pandas + delta method
+# - Step 6 (interaction test): Extracted from Step 3 fitted model fixed effects table
+# - Both use STDLIB (pandas, numpy, scipy) for linear combinations, not custom tool functions
+# - Validation uses existing tools (validate_dataframe_structure, validate_hypothesis_test_dual_pvalues)
+
+# Tool Deduplication:
+# - Each tool appears ONCE in this catalog (e.g., validate_dataframe_structure used in Steps 1, 4)
+# - rq_analysis will map tools to steps in 4_analysis.yaml
+# - Same tool called multiple times with different parameters per step
+
+# Stdlib Exemptions:
+# - pandas.read_csv (Step 0 data loading)
+# - pandas.merge (Step 0 merge theta + TSVR)
+# - pandas.melt (Step 2 wide-to-long reshape)
+# - numpy/scipy (Steps 5-6 linear combinations)
+# - NOT cataloged here (stdlib functions exempt from tools_inventory.md verification)
+
+# End of 3_tools.yaml

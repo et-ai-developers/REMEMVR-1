@@ -1,0 +1,285 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 5.5.7 - Source-Destination Clustering
+# Created: 2025-12-04
+
+# =============================================================================
+# SPECIAL CASE: Clustering-Only RQ (No Custom Analysis Tools)
+# =============================================================================
+# This RQ uses ONLY standard library functions (pandas, sklearn, scipy, numpy).
+# Per v4.X architecture, standard library functions are EXEMPTED from
+# tools_inventory.md documentation and are NOT cataloged here.
+#
+# Only VALIDATION tools are cataloged below (custom validation functions from
+# tools.validation module that ARE documented in tools_inventory.md).
+#
+# Analysis operations use:
+# - pandas: read_csv, pivot, merge, groupby, describe
+# - sklearn.cluster.KMeans
+# - sklearn.metrics.silhouette_score, davies_bouldin_score
+# - scipy.stats: for bootstrap resampling
+# - numpy: array operations, random seed
+# =============================================================================
+
+analysis_tools:
+  # NO CUSTOM ANALYSIS TOOLS
+  # All analysis uses standard libraries (pandas, sklearn, scipy, numpy)
+  # which are exempted from tool catalog per v4.X architecture
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    purpose: "Generic DataFrame validation (rows, columns, types)"
+
+    criteria:
+      - "Row count matches expected (exact int or within (min, max) range)"
+      - "All required columns present"
+      - "Column types match expected (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (summary message)"
+        checks: "Dict[str, bool] (individual check results: rows_valid, columns_valid, types_valid)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "DataFrame validation failed: {specific_failure}"
+
+    description: "Validates DataFrame structure for clustering data files (Step 0, 1, 4, 5, 6 outputs)"
+    source_reference: "tools_inventory.md lines 628-636"
+
+    usage_notes:
+      - "Used in Step 0: Validate reshaped random effects (100 rows, 5 columns)"
+      - "Used in Step 1: Validate standardized features (100 rows, 5 columns)"
+      - "Used in Step 4: Validate cluster assignments (100 rows, 2 columns)"
+      - "Used in Step 5: Validate cluster characterization (K rows, 11 columns)"
+      - "Used in Step 6: Validate plot data (100 rows, 6 columns)"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    purpose: "Validate z-score standardization (mean H 0, SD H 1)"
+
+    criteria:
+      - "Mean of each standardized column within tolerance of 0 (default: ±0.01)"
+      - "SD of each standardized column within tolerance of 1 (default: ±0.01)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns pass)"
+        message: "str (summary message)"
+        mean_values: "Dict[str, float] (actual mean per column)"
+        sd_values: "Dict[str, float] (actual SD per column)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "Standardization failed: Column {col} has mean={mean:.3f}, SD={sd:.3f} (expected meanH0, SDH1)"
+
+    description: "Validates z-score standardization correctness for Step 1 output"
+    source_reference: "tools_inventory.md lines 598-606"
+
+    usage_notes:
+      - "Used in Step 1: Validate 4 features standardized to z-scores"
+      - "Tolerance=0.01 accounts for sampling variation with N=100"
+      - "Critical for K-means clustering (scale equalization requirement)"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    purpose: "Validate numeric values fall within specified range [min_val, max_val]"
+
+    criteria:
+      - "All values >= min_val (inclusive)"
+      - "All values <= max_val (inclusive)"
+      - "No NaN values"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (summary message)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values for debugging)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "{column_name} has {count} values outside [{min_val}, {max_val}]"
+
+    description: "Validates BIC values, metric ranges in clustering analysis (Steps 2, 3)"
+    source_reference: "tools_inventory.md lines 540-548"
+
+    usage_notes:
+      - "Used in Step 2: Validate BIC > 0, inertia >= 0"
+      - "Used in Step 3: Validate Silhouette in [0,1], Davies-Bouldin >= 0, Jaccard in [0,1]"
+      - "Range is INCLUSIVE ([min, max] not (min, max))"
+
+  validate_cluster_assignment:
+    module: "tools.validation"
+    function: "validate_cluster_assignment"
+    signature: "validate_cluster_assignment(cluster_labels: Union[np.ndarray, pd.Series], n_expected: int, min_cluster_size: int = 5) -> Dict[str, Any]"
+
+    purpose: "Validate K-means cluster assignments for completeness and quality"
+
+    criteria:
+      - "All participants assigned (length = n_expected)"
+      - "Cluster IDs consecutive starting from 0 (no gaps)"
+      - "Each cluster has >= min_cluster_size members (prevents singleton clusters)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (summary message)"
+        cluster_sizes: "Dict[int, int] (cluster ID -> participant count)"
+        n_clusters: "int (total number of clusters)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "Cluster validation failed: {specific_issue}"
+
+    description: "Validates Step 4 final K-means cluster assignments"
+    source_reference: "tools_inventory.md lines 648-656"
+
+    usage_notes:
+      - "Used in Step 4: Validate 100 participants assigned to K clusters"
+      - "min_cluster_size=10 for this RQ (10% of sample minimum)"
+      - "Prevents degenerate solutions with empty or tiny clusters"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+
+    purpose: "Validate clustering stability via Jaccard coefficient"
+
+    criteria:
+      - "All Jaccard values in [0, 1] range"
+      - "Mean Jaccard >= min_jaccard_threshold (default 0.75 for acceptable stability)"
+      - "95% CI computed from bootstrap distribution"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if values valid and mean >= threshold)"
+        message: "str (summary message)"
+        mean_jaccard: "float (mean across bootstrap iterations)"
+        ci_lower: "float (2.5th percentile)"
+        ci_upper: "float (97.5th percentile)"
+        above_threshold: "bool (mean >= min_jaccard_threshold)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "Bootstrap stability validation failed: {specific_issue}"
+
+    description: "Validates Step 3 Jaccard bootstrap stability for clustering quality"
+    source_reference: "tools_inventory.md lines 658-666"
+
+    usage_notes:
+      - "Used in Step 3: Validate B=100 bootstrap Jaccard values"
+      - "Threshold 0.75 from Hennig (2007) for reliable clustering"
+      - "95% CI via percentile method (2.5th and 97.5th percentiles)"
+      - "Weak stability (Jaccard < 0.75) expected per universal Ch5 pattern"
+
+  validate_cluster_summary_stats:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str = 'min', mean_col: str = 'mean', max_col: str = 'max', sd_col: str = 'sd', n_col: str = 'N') -> Dict[str, Any]"
+
+    purpose: "Validate cluster summary statistics consistency"
+
+    criteria:
+      - "min <= mean <= max for each row (mathematical constraint)"
+      - "SD >= 0 for all rows (non-negative by definition)"
+      - "N > 0 for all clusters (no empty clusters)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all constraints met)"
+        message: "str (summary message)"
+        failed_checks: "List[str] (specific violations with row indices)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "Cluster summary statistics invalid: {specific_violations}"
+
+    description: "Validates Step 5 cluster characterization mathematical consistency"
+    source_reference: "tools_inventory.md lines 668-676"
+
+    usage_notes:
+      - "Used in Step 5: Validate K cluster characterization rows"
+      - "Checks internal consistency of descriptive statistics"
+      - "Detects computation errors in clustering summary tables"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    purpose: "Verify all domains/groups present in plot data"
+
+    criteria:
+      - "All required_domains present in plot_data[domain_col]"
+      - "All required_groups present in plot_data[group_col]"
+      - "Prevents incomplete visualizations with missing categories"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all domains and groups present)"
+        message: "str (summary message)"
+        missing_domains: "List[str] (domains expected but not found)"
+        missing_groups: "List[str] (groups expected but not found)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      message_pattern: "Plot data incomplete: Missing {missing_categories}"
+
+    description: "Validates Step 6 scatter plot matrix data completeness"
+    source_reference: "tools_inventory.md lines 638-646"
+
+    usage_notes:
+      - "Used in Step 6: Validate all K clusters present in plot data"
+      - "Adapted for clustering: required_groups = cluster IDs {0, 1, ..., K-1}"
+      - "Ensures complete factorial design in visualization data"
+
+summary:
+  analysis_tools_count: 0
+  validation_tools_count: 7
+  total_unique_tools: 7
+
+  architecture_notes:
+    - "Clustering-only RQ: No custom analysis tools cataloged"
+    - "All analysis uses standard libraries (pandas, sklearn, scipy, numpy)"
+    - "Standard library tools exempted from catalog per v4.X architecture"
+    - "Only validation tools from tools.validation module cataloged"
+
+  validation_coverage: "100% (all 7 steps have validation requirements)"
+
+  expected_clustering_quality:
+    - "Weak quality (Silhouette < 0.40) expected per universal Chapter 5 pattern"
+    - "Stable groupings (Jaccard > 0.60) expected per RQ 5.1.5, 5.2.7, 5.3.8, 5.4.7"
+    - "Optimal K = 2-4 (based on prior RQ results)"
+
+  cross_rq_dependencies:
+    - "RQ 5.5.6: Random effects extraction (results/ch5/5.5.6/data/step04_random_effects.csv)"
+
+  decision_references: []
+  # No IRT/LMM decisions apply (clustering-only RQ)
+
+  version: "4.0"
+  created: "2025-12-04"
+  rq: "5.5.7"

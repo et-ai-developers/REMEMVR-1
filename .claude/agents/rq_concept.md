@@ -270,7 +270,7 @@ Critical: Section 3 minimal - TSV lacks literature review. Enhance during rq_sch
 
 **Action:** Create empty file `results/chX/X.Y.Z/docs/1_concept.md`
 
-**Method:** Use Bash touch or Write empty file
+**Method:** Use Bash touch to create empty file
 
 ```bash
 touch results/chX/X.Y.Z/docs/1_concept.md
@@ -282,11 +282,21 @@ touch results/chX/X.Y.Z/docs/1_concept.md
 
 ---
 
+### Step 8.5: Read the empty file (REQUIRED for Write tool)
+
+**Action:** Read `results/chX/X.Y.Z/docs/1_concept.md`
+
+**Purpose:** Claude Code requires reading a file before writing to it. This Read enables the subsequent Write.
+
+**Method:** Use Read tool on the file created in Step 8
+
+---
+
 ### Step 9: Write 1_concept.md content
 
 **Action:** Write comprehensive concept document with 7 required sections
 
-**Method:** Use Write tool with complete formatted content
+**Method:** Use Write tool with complete formatted content (Read in Step 8.5 enables this)
 
 **Content Structure:**
 ```markdown

@@ -1,0 +1,712 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-04
+# RQ: ch5/5.5.3
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "5.5.3"
+  rq_title: "Age Effects on Source-Destination Memory"
+  total_steps: 6
+  analysis_type: "LMM with 3-way Age x LocationType x Time interactions (null hypothesis testing)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-04T00:00:00Z"
+  dependencies:
+    - rq: "5.5.1"
+      status_required: "rq_results: success"
+      files_required:
+        - "results/ch5/5.5.1/data/step03_theta_scores.csv"
+        - "results/ch5/5.5.1/data/step00_tsvr_mapping.csv"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Dependency Data from RQ 5.5.1
+  # --------------------------------------------------------------------------
+  - name: "step00_load_dependency_data"
+    step_number: "00"
+    description: "Load theta scores by location type from RQ 5.5.1, TSVR mapping, and Age variable. Verify RQ 5.5.1 completion."
+
+    # Stdlib operation (pandas data loading)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Check RQ 5.5.1 completion: verify results/ch5/5.5.1/status.yaml shows rq_results: success"
+        - "pd.read_csv('results/ch5/5.5.1/data/step03_theta_scores.csv') -> theta_from_rq551"
+        - "pd.read_csv('results/ch5/5.5.1/data/step00_tsvr_mapping.csv') -> tsvr_from_rq551"
+        - "pd.read_csv('data/cache/dfData.csv', usecols=['UID', 'Age']) -> age_from_dfdata"
+        - "Validate row counts: 400 (theta), 400 (TSVR), 100 (Age)"
+        - "Validate no NaN values in critical columns"
+        - "Save outputs: data/step00_theta_from_rq551.csv, data/step00_tsvr_from_rq551.csv, data/step00_age_from_dfdata.csv"
+
+      input_files:
+        - path: "results/ch5/5.5.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_source", "se_source", "theta_destination", "se_destination"]
+          expected_rows: 400
+          description: "IRT theta scores by location type from RQ 5.5.1 Pass 2 calibration"
+        - path: "results/ch5/5.5.1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+          expected_rows: 400
+          description: "TSVR time mapping from RQ 5.5.1 extraction"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          expected_rows: 100
+          description: "Project-level raw data cache (Age variable)"
+
+      output_files:
+        - path: "data/step00_theta_from_rq551.csv"
+          columns: ["composite_ID", "theta_source", "se_source", "theta_destination", "se_destination"]
+          description: "Copy of RQ 5.5.1 theta scores for lineage tracking"
+          expected_rows: 400
+        - path: "data/step00_tsvr_from_rq551.csv"
+          columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+          description: "Copy of TSVR mapping for lineage tracking"
+          expected_rows: 400
+        - path: "data/step00_age_from_dfdata.csv"
+          columns: ["UID", "Age"]
+          description: "Extracted Age variable from dfData.csv"
+          expected_rows: 100
+
+      parameters:
+        check_rq551_dependency: true
+        allow_missing_values: false
+        theta_range: [-4.0, 4.0]
+        se_range: [0.1, 1.5]
+        tsvr_range: [0.0, 168.0]
+        age_range: [20, 70]
+
+    # Validation call (uses catalogued validation tool)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_theta_from_rq551.csv"
+          variable_name: "theta_from_rq551"
+          source: "analysis call output (pandas read_csv)"
+        - path: "data/step00_tsvr_from_rq551.csv"
+          variable_name: "tsvr_from_rq551"
+          source: "analysis call output (pandas read_csv)"
+        - path: "data/step00_age_from_dfdata.csv"
+          variable_name: "age_from_dfdata"
+          source: "analysis call output (pandas read_csv)"
+
+      parameters:
+        dataframes:
+          - df: "theta_from_rq551"
+            required_columns: ["composite_ID", "theta_source", "se_source", "theta_destination", "se_destination"]
+            expected_rows: 400
+          - df: "tsvr_from_rq551"
+            required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+            expected_rows: 400
+          - df: "age_from_dfdata"
+            required_columns: ["UID", "Age"]
+            expected_rows: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All required columns present in each DataFrame"
+        - "Expected row counts: 400, 400, 100"
+        - "No NaN values in theta, TSVR_hours, Age columns"
+        - "theta_source and theta_destination in [-4, 4]"
+        - "se_source and se_destination in [0.1, 1.5]"
+        - "TSVR_hours in [0, 168]"
+        - "Age in [20, 70]"
+        - "RQ 5.5.1 status.yaml shows rq_results = success"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_load_dependency_data.log"
+
+      description: "Validate all dependency data loaded correctly with expected structure and value ranges"
+
+    log_file: "logs/step00_load_dependency_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Prepare LMM Input Data
+  # --------------------------------------------------------------------------
+  - name: "step01_prepare_lmm_input"
+    step_number: "01"
+    description: "Merge theta with TSVR and Age, grand-mean center Age, create log_TSVR, reshape to long format with LocationType factor."
+
+    # Stdlib operation (pandas data transformations)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Parse composite_ID to extract UID (split on underscore)"
+        - "Merge theta with TSVR on composite_ID (left join, all 400 rows retained)"
+        - "Merge with Age on UID (left join, all 400 rows retained)"
+        - "Verify 400 observations after merge (no data loss)"
+        - "Grand-mean center Age: Age_c = Age - mean(Age)"
+        - "Verify |mean(Age_c)| <= 0.01 (centering check)"
+        - "Create log_TSVR = log(TSVR_hours + 1)"
+        - "Reshape wide to long: 400 -> 800 rows (2 location types)"
+        - "Create LocationType column: {Source, Destination}"
+        - "Create theta column: theta_source or theta_destination"
+        - "Create se column: se_source or se_destination"
+        - "Treatment code LocationType: Source = 0 (reference), Destination = 1"
+        - "Save output: data/step01_lmm_input.csv (800 rows x 10 columns)"
+
+      input_files:
+        - path: "data/step00_theta_from_rq551.csv"
+          required_columns: ["composite_ID", "theta_source", "se_source", "theta_destination", "se_destination"]
+          source: "Step 0 output"
+        - path: "data/step00_tsvr_from_rq551.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+          source: "Step 0 output"
+        - path: "data/step00_age_from_dfdata.csv"
+          required_columns: ["UID", "Age"]
+          source: "Step 0 output"
+
+      output_files:
+        - path: "data/step01_lmm_input.csv"
+          columns: ["composite_ID", "UID", "test", "TSVR_hours", "log_TSVR", "Age", "Age_c", "LocationType", "theta", "se"]
+          description: "Long-format LMM input (800 rows: 400 observations x 2 location types)"
+          expected_rows: 800
+
+      parameters:
+        centering_method: "grand_mean"
+        age_c_tolerance: 0.01
+        location_types: ["Source", "Destination"]
+        treatment_coding: true
+        reference_category: "Source"
+
+    # Validation call (uses catalogued validation tool)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "analysis call output (pandas operations)"
+
+      parameters:
+        df: "lmm_input"
+        expected_rows: 800
+        expected_columns: ["composite_ID", "UID", "test", "TSVR_hours", "log_TSVR", "Age", "Age_c", "LocationType", "theta", "se"]
+        column_types:
+          composite_ID: "object"
+          UID: "object"
+          test: "object"
+          TSVR_hours: "float64"
+          log_TSVR: "float64"
+          Age: "int64"
+          Age_c: "float64"
+          LocationType: "object"
+          theta: "float64"
+          se: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 800 rows (400 composite_IDs x 2 location types)"
+        - "All 10 required columns present"
+        - "Age_c mean approximately 0 (|mean| <= 0.01)"
+        - "LocationType balanced: 400 Source, 400 Destination"
+        - "No NaN values in any column"
+        - "theta in [-4, 4]"
+        - "log_TSVR in [0, 5.13]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_prepare_lmm_input.log"
+
+      description: "Validate LMM input structure and transformations (centering, reshape, balance)"
+
+    log_file: "logs/step01_prepare_lmm_input.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with 3-Way Age x LocationType x Time Interactions
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm"
+    step_number: "02"
+    description: "Fit LMM with full 3-way Age_c x LocationType x Time interaction to test age moderation of source-destination forgetting."
+
+    # Catalogued tool (statsmodels MixedLM)
+    analysis_call:
+      type: "catalogued"
+      module: "statsmodels.regression.mixed_linear_model"
+      function: "MixedLM"
+      signature: "MixedLM(endog, exog, groups, exog_re=None, **kwargs).fit(**fit_kwargs) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "TSVR_hours", "log_TSVR", "Age_c", "LocationType", "theta"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          description: "Saved statsmodels MixedLMResults object"
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_summary"
+          description: "Model summary (convergence, AIC/BIC, fixed effects, random effects)"
+        - path: "data/step02_fixed_effects.csv"
+          variable_name: "fixed_effects"
+          description: "Fixed effects table (12 terms expected)"
+
+      parameters:
+        formula: "theta ~ TSVR_hours + log_TSVR + Age_c + LocationType + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:LocationType + log_TSVR:LocationType + Age_c:LocationType + TSVR_hours:Age_c:LocationType + log_TSVR:Age_c:LocationType"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+        method: "lbfgs"
+        maxiter: 1000
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with 3-way interactions (12 fixed effects, random intercept + TSVR_hours slope per participant)"
+
+    # Validation call (uses catalogued validation tool)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "analysis call output (MixedLM.fit return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "model.converged = True"
+        - "12 fixed effects present (intercept + 11 terms)"
+        - "Random variances positive: var_intercept > 0, var_slope >= 0, var_residual > 0"
+        - "AIC and BIC finite (not NaN or inf)"
+        - "All 800 observations used (no data loss)"
+        - "No singular fit warnings"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm.log"
+
+      description: "Validate LMM converged successfully with all fixed effects and positive variance components"
+
+    log_file: "logs/step02_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2.5: Validate LMM Assumptions
+  # --------------------------------------------------------------------------
+  - name: "step02.5_validate_assumptions"
+    step_number: "02.5"
+    description: "Comprehensive validation of LMM assumptions using 7 diagnostic checks."
+
+    # Catalogued tool (custom validation suite)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_assumptions_comprehensive"
+      signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "Step 2 output"
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "Step 1 output"
+
+      output_files:
+        - path: "data/step02.5_assumption_validation.csv"
+          variable_name: "assumption_results"
+          description: "7-row assumption test results (one per diagnostic)"
+        - path: "data/step02.5_assumption_diagnostics.txt"
+          variable_name: "diagnostics_report"
+          description: "Detailed diagnostics report with remedial action recommendations"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_input"
+        output_dir: "data/"
+        acf_lag1_threshold: 0.1
+        alpha: 0.05
+        min_pass_rate: 0.71
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "assumption_result"
+
+      description: "Run 7 assumption checks: linearity, homoscedasticity, normality (residuals + random effects), independence, multicollinearity, influential observations"
+
+    # Validation call (file existence check)
+    validation_call:
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02.5_assumption_validation.csv"
+          variable_name: "assumption_results"
+          source: "analysis call output"
+        - path: "data/step02.5_assumption_diagnostics.txt"
+          variable_name: "diagnostics_report"
+          source: "analysis call output"
+
+      parameters:
+        file_paths:
+          - path: "data/step02.5_assumption_validation.csv"
+            min_size_bytes: 100
+          - path: "data/step02.5_assumption_diagnostics.txt"
+            min_size_bytes: 200
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Both output files exist"
+        - "assumption_validation.csv >= 100 bytes (7 rows expected)"
+        - "assumption_diagnostics.txt >= 200 bytes (report text)"
+        - "At least 5/7 assumptions pass (>= 71% pass rate)"
+
+      on_failure:
+        action: "raise FileNotFoundError(validation_result['message'])"
+        log_to: "logs/step02.5_validate_assumptions.log"
+
+      description: "Validate assumption validation outputs exist and minimum pass rate met"
+
+    log_file: "logs/step02.5_validate_assumptions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract 3-Way Interaction Terms
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_interactions"
+    step_number: "03"
+    description: "Extract 3-way Age_c x LocationType x Time interaction terms with Bonferroni correction (Decision D068 dual p-value reporting)."
+
+    # Catalogued tool (custom LMM extraction)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "Step 2 output"
+        - path: "data/step02_fixed_effects.csv"
+          variable_name: "all_fixed_effects"
+          source: "Step 2 output"
+
+      output_files:
+        - path: "data/step03_interaction_terms.csv"
+          variable_name: "interaction_terms"
+          description: "3-way interaction terms with dual p-values (2 rows: TSVR_hours:Age_c:LocationType, log_TSVR:Age_c:LocationType)"
+
+      parameters:
+        result: "lmm_model"
+        interaction_terms: ["TSVR_hours:Age_c:LocationType", "log_TSVR:Age_c:LocationType"]
+        alpha: 0.05
+        bonferroni_n_tests: 2
+        alpha_corrected: 0.025
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "interaction_terms"
+
+      description: "Extract 3-way interactions and apply Bonferroni correction (alpha = 0.05 / 2 = 0.025)"
+
+    # Validation call (dual p-value validation)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_interaction_terms.csv"
+          variable_name: "interaction_terms"
+          source: "analysis call output"
+
+      parameters:
+        interaction_df: "interaction_terms"
+        required_terms: ["TSVR_hours:Age_c:LocationType", "log_TSVR:Age_c:LocationType"]
+        alpha_bonferroni: 0.025
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Both required interaction terms present"
+        - "Both p_uncorrected and p_bonferroni columns present (Decision D068)"
+        - "p_bonferroni >= p_uncorrected (correction makes p-values more conservative)"
+        - "p_bonferroni = min(1.0, p_uncorrected * 2)"
+        - "All p-values in [0, 1]"
+        - "significant_at_0025 = (p_bonferroni < 0.025)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_interactions.log"
+
+      description: "Validate 3-way interaction terms present with Decision D068 dual p-value compliance"
+
+    log_file: "logs/step03_extract_interactions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3.5: Power Analysis for Null Hypothesis Testing
+  # --------------------------------------------------------------------------
+  - name: "step03.5_power_analysis"
+    step_number: "03.5"
+    description: "Simulation-based power analysis for detecting small Age x LocationType x Time interaction effects (quantify Type II error)."
+
+    # Catalogued tool (custom simulation - NOTE: needs creation)
+    analysis_call:
+      type: "catalogued"
+      module: "custom_simulation"
+      function: "power_analysis_three_way_interaction"
+      signature: "power_analysis_three_way_interaction(lmm_result: MixedLMResults, data: DataFrame, effect_size: float, n_simulations: int, alpha: float) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "Step 2 output"
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "Step 1 output"
+
+      output_files:
+        - path: "data/step03.5_power_analysis.csv"
+          variable_name: "power_results"
+          description: "Power analysis results (1 row: effect_size = 0.01)"
+        - path: "data/step03.5_minimum_detectable_effect.csv"
+          variable_name: "mde_results"
+          description: "Minimum detectable effect at 80% power (optional, if power < 0.80)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        data: "lmm_input"
+        effect_size: 0.01
+        n_simulations: 1000
+        alpha_bonferroni: 0.025
+        power_target: 0.80
+        use_observed_variances: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "power_result"
+
+      description: "Simulate 1000 datasets with small interaction effect (beta = 0.01) to estimate power"
+
+    # Validation call (numeric range validation)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03.5_power_analysis.csv"
+          variable_name: "power_results"
+          source: "analysis call output"
+
+      parameters:
+        data: "power_results['power']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "power"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "effect_size = 0.01 (small effect per Cohen, 1988)"
+        - "n_simulations = 1000"
+        - "n_detected in [0, 1000]"
+        - "power in [0, 1], power = n_detected / n_simulations"
+        - "ci_lower in [0, 1], ci_upper in [0, 1]"
+        - "ci_lower <= power <= ci_upper"
+        - "target_met = (power >= 0.80)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03.5_power_analysis.log"
+
+      description: "Validate power estimate in valid range [0, 1] with correct formula"
+
+    log_file: "logs/step03.5_power_analysis.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Location-Specific Age Effects at Day 3
+  # --------------------------------------------------------------------------
+  - name: "step04_post_hoc_contrasts"
+    step_number: "04"
+    description: "Compute location-specific marginal age effects at Day 3 with Tukey HSD adjustment (Decision D068 dual p-value reporting)."
+
+    # Catalogued tool (custom contrast computation)
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_model.pkl"
+          variable_name: "lmm_model"
+          source: "Step 2 output"
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "Step 1 output"
+
+      output_files:
+        - path: "data/step04_age_effects_by_location.csv"
+          variable_name: "age_effects"
+          description: "Location-specific age effects (2 rows: Source, Destination)"
+        - path: "data/step04_post_hoc_contrasts.csv"
+          variable_name: "contrasts"
+          description: "Tukey HSD contrast (1 row: Destination - Source)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        eval_timepoint_hours: 72.0
+        comparisons: ["Destination - Source"]
+        family_alpha: 0.05
+        correction_method: "tukey"
+        compute_cohens_d: true
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "contrasts"
+
+      description: "Compute marginal age effects at Day 3 (TSVR_hours = 72) for Source and Destination, then contrast"
+
+    # Validation call (contrast dual p-value validation)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: pd.DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_age_effects_by_location.csv"
+          variable_name: "age_effects"
+          source: "analysis call output"
+        - path: "data/step04_post_hoc_contrasts.csv"
+          variable_name: "contrasts"
+          source: "analysis call output"
+
+      parameters:
+        contrasts_df: "contrasts"
+        required_comparisons: ["Destination - Source"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "2 location-specific effects: Source, Destination"
+        - "1 contrast: Destination - Source"
+        - "Both p_uncorrected and p_tukey columns present (Decision D068)"
+        - "p_tukey >= p_uncorrected (Tukey HSD is conservative)"
+        - "All p-values in [0, 1]"
+        - "Cohen's d computed for contrast"
+        - "ci_lower < ci_upper for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_post_hoc_contrasts.log"
+
+      description: "Validate post-hoc contrasts with Decision D068 dual p-value compliance"
+
+    log_file: "logs/step04_post_hoc_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Age Tertile Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create age tertiles (Young/Middle/Older), aggregate observed means by tertile x location x test for plotting."
+
+    # Stdlib operation (pandas groupby aggregation)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Compute age tertile cutoffs: 33rd percentile, 67th percentile"
+        - "Assign each observation to age tertile: Young (<= 33rd), Middle (33rd-67th), Older (> 67th)"
+        - "Group by age_tertile x LocationType x test"
+        - "Compute per group: mean theta, SE = SD / sqrt(N), 95% CI = mean +/- 1.96 * SE, sample size N"
+        - "Validate completeness: all 24 groups present (3 tertiles x 2 locations x 4 tests)"
+        - "Save output: data/step05_age_tertile_plot_data.csv (24 rows x 8 columns)"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["Age", "LocationType", "test", "theta"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step05_age_tertile_plot_data.csv"
+          columns: ["age_tertile", "location", "test", "theta_mean", "se", "ci_lower", "ci_upper", "n"]
+          description: "Plot source data (24 rows: 3 tertiles x 2 locations x 4 tests)"
+          expected_rows: 24
+
+      parameters:
+        n_tertiles: 3
+        tertile_method: "qcut"
+        tertile_labels: ["Young", "Middle", "Older"]
+        ci_level: 0.95
+        min_group_size: 5
+
+    # Validation call (plot data completeness check)
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_age_tertile_plot_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (pandas groupby)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["Source", "Destination"]
+        required_groups: ["Young", "Middle", "Older"]
+        domain_col: "location"
+        group_col: "age_tertile"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 24 rows (complete factorial: 3 tertiles x 2 locations x 4 tests)"
+        - "All age tertiles present: Young, Middle, Older"
+        - "All locations present: Source, Destination"
+        - "All tests present: T1, T2, T3, T4"
+        - "No NaN values in any column"
+        - "ci_upper > ci_lower for all rows"
+        - "Group sizes >= 5 (minimum for stable estimates)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+      description: "Validate all 24 groups present in plot data with complete factorial design"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

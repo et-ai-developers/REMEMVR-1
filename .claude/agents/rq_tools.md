@@ -326,9 +326,19 @@ touch results/chX/X.Y.Z/docs/3_tools.yaml
 
 ---
 
+### Step 11.5: Read the empty file (REQUIRED for Write tool)
+
+**Action:** Read `results/chX/X.Y.Z/docs/3_tools.yaml`
+
+**Purpose:** Claude Code requires reading a file before writing to it. This Read enables the subsequent Write.
+
+**Method:** Use Read tool on the file created in Step 11
+
+---
+
 ### Step 12: Write Tool Catalog Content
 
-**Action:** Write complete tool catalog to `results/chX/X.Y.Z/docs/3_tools.yaml`
+**Action:** Write complete tool catalog to `results/chX/X.Y.Z/docs/3_tools.yaml` (Read in Step 11.5 enables this)
 
 **Structure:** See docs/v4/templates/tools.md for complete YAML format specification
 

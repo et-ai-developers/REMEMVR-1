@@ -21,16 +21,41 @@ rq_scholar:
     9.4/10 APPROVED. Strong theory (5 mechanisms), excellent interpretation/implications. Needs Zeigarnik replicability caveat, practice effects acknowledgment, recent citations. Ready for stats validation.
 
 rq_stats:
-  status: pending
+  status: success
+  context_dump: |
+    9.3/10 APPROVED. Cat1: 2.8/3 (appropriate methods, AICc minor gap). Cat2: 2.0/2 (100% tool reuse). Cat3: 1.9/2 (well-specified). Cat4: 1.6/2 (assumption testing incomplete). Cat5: 1.0/1 (9 concerns: 2 CRITICAL, 6 MODERATE, 1 MINOR). Ready for rq_planner.
 
 rq_planner:
-  status: pending
+  status: success
+  context_dump: |
+    Analysis plan created: 8 steps (Step 0: extraction, Steps 1-7: analysis)
+    Tool requirements: 2-factor IRT (GRM, 2-pass D039), LMM (5 models, TSVR D070), post-hoc (dual p-values D068), plotting (dual-scale D069)
+    Expected outputs: 13 data files (IRT params, theta scores, LMM results, contrasts, effect sizes, plot source CSVs). Validation mandatory all steps.
 
 rq_tools:
-  status: pending
+  status: success
+  context_dump: |
+    8 analysis + 8 validation tools cataloged for IRT->LMM trajectory analysis
+    Tools: extraction, IRT (2-pass), purification, merge, LMM selection, contrasts (D068), effect sizes, plot prep (D069)
+    Decisions embedded: D039 (2-pass purification), D068 (dual p-values), D069 (dual-scale plots), D070 (TSVR time)
+    All tools verified in tools_inventory.md, all naming conventions verified in names.md
+    Ready for rq_analysis (creates 4_analysis.yaml with step sequencing)
 
 rq_analysis:
-  status: pending
+  status: success
+  timestamp: "2025-12-04T00:00:00Z"
+  context_dump: |
+    8 steps specified with validation (IRT 2-factor -> 2-pass purification -> LMM 5 models -> dual p-values -> dual-scale plots)
+
+analysis_steps:
+  step00_extract_vr_data: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_merge_theta_tsvr: pending
+  step05_fit_lmm: pending
+  step06_compute_post_hoc_contrasts: pending
+  step07_prepare_trajectory_plot_data: pending
 
 g_code:
   status: pending

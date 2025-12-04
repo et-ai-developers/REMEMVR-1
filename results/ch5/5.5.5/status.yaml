@@ -25,13 +25,33 @@ rq_stats:
   context_dump: "9.3/10 APPROVED. Cat1: 2.8/3 (z-std AIC justification gap, bounded scale acknowledged). Cat2: 2.0/2 (100% reuse). Cat3: 2.0/2 (all parameters specified/justified). Cat4: 1.9/2 (comprehensive validation, remedial actions vague). Cat5: 0.6/1 (8 concerns: 5 MOD, 3 MIN; z-std AIC validity, CTT variance overestimation, no effect size threshold)."
 
 rq_planner:
-  status: pending
+  status: success
+  context_dump: |
+    Analysis plan created: 9 steps (Step 0: dependency validation + Steps 1-7.5: analysis + Step 8: plot prep).
+    Tool requirements: CTT computation (Full/Purified), Cronbach's alpha (bootstrap), Steiger's z-test (dependent correlations), z-standardization, LMM fitting (6 parallel models), assumption validation (7 tests x 6 models).
+    Expected outputs: 9 data files (item mapping, CTT scores, reliability, correlations, z-scores, AIC comparison, assumptions), 2 plot source CSVs. Validation required at every step.
 
 rq_tools:
-  status: pending
+  status: success
+  completed: 2025-12-04
+  context_dump: "5 analysis + 7 validation tools cataloged for CTT effects analysis (Purified vs Full)"
 
 rq_analysis:
-  status: pending
+  status: success
+  timestamp: "2025-12-04"
+  context_dump: "9 steps specified with validation (CTT Purified vs Full effects analysis)"
+
+analysis_steps:
+  step00_dependency_validation: pending
+  step01_item_mapping: pending
+  step02_ctt_full_scores: pending
+  step03_ctt_purified_scores: pending
+  step04_reliability_assessment: pending
+  step05_correlation_analysis: pending
+  step06_standardized_scores: pending
+  step07_lmm_model_comparison: pending
+  step07.5_assumption_validation: pending
+  step08_plot_data_preparation: pending
 
 g_code:
   status: pending
