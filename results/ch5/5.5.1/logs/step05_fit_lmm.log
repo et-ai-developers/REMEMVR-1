@@ -1,0 +1,204 @@
+[START] Step 5: LMM Model Selection (5 Candidate Time Transformations)
+[LOAD] Loading LMM input data...
+[LOADED] step04_lmm_input.csv (800 rows, 11 cols)
+[CHECK] All required columns present: ['UID', 'Days', 'log_Days_plus1', 'Days_squared', 'LocationType', 'theta']
+[INFO] Data summary:
+  - UIDs: 100
+  - Location types: ['source', 'destination']
+  - Location type counts: {'source': 400, 'destination': 400}
+  - Days range: [0.04, 10.26]
+  - Theta range: [-1.99, 2.35]
+[MODELS] Defining 5 candidate models...
+[INFO] Candidate models defined:
+  - Linear: Linear time × LocationType interaction
+  - Quadratic: Quadratic time (Days + Days²) × LocationType interaction
+  - Logarithmic: Logarithmic time × LocationType interaction
+  - Linear+Logarithmic: Linear + Logarithmic time × LocationType interaction
+  - Quadratic+Logarithmic: Quadratic + Logarithmic time × LocationType interaction
+[FIT] Fitting 5 candidate models (REML=False for AIC comparison)...
+[FIT] Model 1/5: Linear
+  Formula: theta ~ Days * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1841.88
+[FIT] Model 2/5: Quadratic
+  Formula: theta ~ (Days + Days_squared) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1834.48
+[FIT] Model 3/5: Logarithmic
+  Formula: theta ~ log_Days_plus1 * LocationType
+  Random effects: ~log_Days_plus1
+  [CONVERGED] AIC = 1830.15
+[FIT] Model 4/5: Linear+Logarithmic
+  Formula: theta ~ (Days + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1835.05
+[FIT] Model 5/5: Quadratic+Logarithmic
+  Formula: theta ~ (Days + Days_squared + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1838.32
+[DONE] All 5 models fitted
+[CHECK] Verifying all models converged...
+[PASS] All 5 models converged successfully
+[COMPUTE] Computing AIC comparison table...
+[INFO] Minimum AIC: 1830.15
+[COMPUTED] AIC comparison table:
+  Logarithmic               AIC= 1830.15  delta=  0.00  weight=0.8190
+  Quadratic                 AIC= 1834.48  delta=  4.33  weight=0.0942
+  Linear+Logarithmic        AIC= 1835.05  delta=  4.90  weight=0.0707
+  Quadratic+Logarithmic     AIC= 1838.32  delta=  8.17  weight=0.0138
+  Linear                    AIC= 1841.88  delta= 11.73  weight=0.0023
+[CHECK] Akaike weights sum: 1.000000 (should be ~1.0)
+[SELECT] Selecting best model...
+[BEST] Logarithmic
+  AIC: 1830.15
+  Weight: 0.8190
+[PASS] Best model weight (0.8190) > 0.30 (quality threshold met)
+[SAVE] Saving analysis outputs...
+[SAVED] step05_model_comparison.csv (5 rows)
+[SAVED] step05_lmm_fitted_model.pkl (Logarithmic model)
+[SAVED] step05_lmm_summary.txt
+[VALIDATION] Validating model selection results...
+[PASS] Best model converged
+[ERROR] ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step05_fit_lmm.py", line 434, in <module>
+    if not all(np.isfinite(aic_values.values())):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''
+[START] Step 5: LMM Model Selection (5 Candidate Time Transformations)
+[LOAD] Loading LMM input data...
+[LOADED] step04_lmm_input.csv (800 rows, 11 cols)
+[CHECK] All required columns present: ['UID', 'Days', 'log_Days_plus1', 'Days_squared', 'LocationType', 'theta']
+[INFO] Data summary:
+  - UIDs: 100
+  - Location types: ['source', 'destination']
+  - Location type counts: {'source': 400, 'destination': 400}
+  - Days range: [0.04, 10.26]
+  - Theta range: [-1.99, 2.35]
+[MODELS] Defining 5 candidate models...
+[INFO] Candidate models defined:
+  - Linear: Linear time × LocationType interaction
+  - Quadratic: Quadratic time (Days + Days²) × LocationType interaction
+  - Logarithmic: Logarithmic time × LocationType interaction
+  - Linear+Logarithmic: Linear + Logarithmic time × LocationType interaction
+  - Quadratic+Logarithmic: Quadratic + Logarithmic time × LocationType interaction
+[FIT] Fitting 5 candidate models (REML=False for AIC comparison)...
+[FIT] Model 1/5: Linear
+  Formula: theta ~ Days * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1841.88
+[FIT] Model 2/5: Quadratic
+  Formula: theta ~ (Days + Days_squared) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1834.48
+[FIT] Model 3/5: Logarithmic
+  Formula: theta ~ log_Days_plus1 * LocationType
+  Random effects: ~log_Days_plus1
+  [CONVERGED] AIC = 1830.15
+[FIT] Model 4/5: Linear+Logarithmic
+  Formula: theta ~ (Days + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1835.05
+[FIT] Model 5/5: Quadratic+Logarithmic
+  Formula: theta ~ (Days + Days_squared + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1838.32
+[DONE] All 5 models fitted
+[CHECK] Verifying all models converged...
+[PASS] All 5 models converged successfully
+[COMPUTE] Computing AIC comparison table...
+[INFO] Minimum AIC: 1830.15
+[COMPUTED] AIC comparison table:
+  Logarithmic               AIC= 1830.15  delta=  0.00  weight=0.8190
+  Quadratic                 AIC= 1834.48  delta=  4.33  weight=0.0942
+  Linear+Logarithmic        AIC= 1835.05  delta=  4.90  weight=0.0707
+  Quadratic+Logarithmic     AIC= 1838.32  delta=  8.17  weight=0.0138
+  Linear                    AIC= 1841.88  delta= 11.73  weight=0.0023
+[CHECK] Akaike weights sum: 1.000000 (should be ~1.0)
+[SELECT] Selecting best model...
+[BEST] Logarithmic
+  AIC: 1830.15
+  Weight: 0.8190
+[PASS] Best model weight (0.8190) > 0.30 (quality threshold met)
+[SAVE] Saving analysis outputs...
+[SAVED] step05_model_comparison.csv (5 rows)
+[SAVED] step05_lmm_fitted_model.pkl (Logarithmic model)
+[SAVED] step05_lmm_summary.txt
+[VALIDATION] Validating model selection results...
+[PASS] Best model converged
+[PASS] All AIC values finite
+[PASS] Akaike weights sum to 1.0
+[PASS] Exactly one model has delta_AIC = 0
+[VALIDATION] All validation checks passed
+[SUCCESS] Step 5 complete
+[SUMMARY] Best model: Logarithmic (AIC=1830.15, weight=0.8190)
+[START] Step 5: LMM Model Selection (5 Candidate Time Transformations)
+[LOAD] Loading LMM input data...
+[LOADED] step04_lmm_input.csv (800 rows, 11 cols)
+[CHECK] All required columns present: ['UID', 'Days', 'log_Days_plus1', 'Days_squared', 'LocationType', 'theta']
+[INFO] Data summary:
+  - UIDs: 100
+  - Location types: ['source', 'destination']
+  - Location type counts: {'source': 400, 'destination': 400}
+  - Days range: [0.04, 10.26]
+  - Theta range: [-1.99, 2.35]
+[MODELS] Defining 5 candidate models...
+[INFO] Candidate models defined:
+  - Linear: Linear time × LocationType interaction
+  - Quadratic: Quadratic time (Days + Days²) × LocationType interaction
+  - Logarithmic: Logarithmic time × LocationType interaction
+  - Linear+Logarithmic: Linear + Logarithmic time × LocationType interaction
+  - Quadratic+Logarithmic: Quadratic + Logarithmic time × LocationType interaction
+[FIT] Fitting 5 candidate models (REML=False for AIC comparison)...
+[FIT] Model 1/5: Linear
+  Formula: theta ~ Days * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1841.88
+[FIT] Model 2/5: Quadratic
+  Formula: theta ~ (Days + Days_squared) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1834.48
+[FIT] Model 3/5: Logarithmic
+  Formula: theta ~ log_Days_plus1 * LocationType
+  Random effects: ~log_Days_plus1
+  [CONVERGED] AIC = 1830.15
+[FIT] Model 4/5: Linear+Logarithmic
+  Formula: theta ~ (Days + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1835.05
+[FIT] Model 5/5: Quadratic+Logarithmic
+  Formula: theta ~ (Days + Days_squared + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1838.32
+[DONE] All 5 models fitted
+[CHECK] Verifying all models converged...
+[PASS] All 5 models converged successfully
+[COMPUTE] Computing AIC comparison table...
+[INFO] Minimum AIC: 1830.15
+[COMPUTED] AIC comparison table:
+  Logarithmic               AIC= 1830.15  delta=  0.00  weight=0.8190
+  Quadratic                 AIC= 1834.48  delta=  4.33  weight=0.0942
+  Linear+Logarithmic        AIC= 1835.05  delta=  4.90  weight=0.0707
+  Quadratic+Logarithmic     AIC= 1838.32  delta=  8.17  weight=0.0138
+  Linear                    AIC= 1841.88  delta= 11.73  weight=0.0023
+[CHECK] Akaike weights sum: 1.000000 (should be ~1.0)
+[SELECT] Selecting best model...
+[BEST] Logarithmic
+  AIC: 1830.15
+  Weight: 0.8190
+[PASS] Best model weight (0.8190) > 0.30 (quality threshold met)
+[SAVE] Saving analysis outputs...
+[SAVED] step05_model_comparison.csv (5 rows)
+[SAVED] step05_lmm_fitted_model.pkl (Logarithmic model)
+[SAVED] step05_lmm_coefficients.csv (7 parameters)
+[SAVED] step05_lmm_random_effects.csv
+[SAVED] step05_lmm_summary.txt
+[VALIDATION] Validating model selection results...
+[PASS] Best model converged
+[PASS] All AIC values finite
+[PASS] Akaike weights sum to 1.0
+[PASS] Exactly one model has delta_AIC = 0
+[VALIDATION] All validation checks passed
+[SUCCESS] Step 5 complete
+[SUMMARY] Best model: Logarithmic (AIC=1830.15, weight=0.8190)

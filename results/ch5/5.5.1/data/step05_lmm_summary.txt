@@ -1,0 +1,72 @@
+================================================================================
+LMM MODEL SELECTION SUMMARY - RQ 5.5.1
+================================================================================
+
+CANDIDATE MODELS (5 total):
+--------------------------------------------------------------------------------
+
+Linear:
+  Formula: theta ~ Days * LocationType
+  Random: ~Days
+  Description: Linear time × LocationType interaction
+
+Quadratic:
+  Formula: theta ~ (Days + Days_squared) * LocationType
+  Random: ~Days
+  Description: Quadratic time (Days + Days²) × LocationType interaction
+
+Logarithmic:
+  Formula: theta ~ log_Days_plus1 * LocationType
+  Random: ~log_Days_plus1
+  Description: Logarithmic time × LocationType interaction
+
+Linear+Logarithmic:
+  Formula: theta ~ (Days + log_Days_plus1) * LocationType
+  Random: ~Days
+  Description: Linear + Logarithmic time × LocationType interaction
+
+Quadratic+Logarithmic:
+  Formula: theta ~ (Days + Days_squared + log_Days_plus1) * LocationType
+  Random: ~Days
+  Description: Quadratic + Logarithmic time × LocationType interaction
+
+================================================================================
+AIC COMPARISON:
+================================================================================
+
+           model_name         AIC  delta_AIC   weight
+          Logarithmic 1830.151822   0.000000 0.819041
+            Quadratic 1834.477874   4.326051 0.094171
+   Linear+Logarithmic 1835.052505   4.900683 0.070654
+Quadratic+Logarithmic 1838.316844   8.165022 0.013813
+               Linear 1841.883728  11.731906 0.002321
+
+================================================================================
+BEST MODEL SELECTED:
+================================================================================
+
+Model: Logarithmic
+AIC: 1830.15
+Weight: 0.8190
+
+Model Summary:
+--------------------------------------------------------------------------------
+                     Mixed Linear Model Regression Results
+================================================================================
+Model:                     MixedLM         Dependent Variable:         theta    
+No. Observations:          800             Method:                     ML       
+No. Groups:                100             Scale:                      0.4498   
+Min. group size:           8               Log-Likelihood:             -907.0759
+Max. group size:           8               Converged:                  Yes      
+Mean group size:           8.0                                                  
+--------------------------------------------------------------------------------
+                                      Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+--------------------------------------------------------------------------------
+Intercept                              0.382    0.078  4.878 0.000  0.229  0.536
+LocationType[T.source]                 0.108    0.083  1.293 0.196 -0.056  0.271
+log_Days_plus1                        -0.355    0.050 -7.061 0.000 -0.453 -0.256
+log_Days_plus1:LocationType[T.source] -0.119    0.064 -1.846 0.065 -0.246  0.007
+Group Var                              0.266    0.100                           
+Group x log_Days_plus1 Cov            -0.058    0.048                           
+log_Days_plus1 Var                     0.044    0.034                           
+================================================================================

@@ -1,0 +1,44 @@
+[START] Step 6: Post-Hoc Contrasts with Dual P-Values
+[LOAD] Loading best LMM model...
+[LOADED] step05_lmm_fitted_model.pkl (formula: theta ~ log_Days_plus1 * LocationType)
+[INFO] Best model: Logarithmic (AIC: 1830.15)
+[LOADED] step04_lmm_input.csv (800 rows)
+[ANALYSIS] Extracting fixed effects coefficients...
+[ERROR] 'DataFrame' object has no attribute 'data'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step06_compute_post_hoc_contrasts.py", line 192, in <module>
+    fe_df = pd.DataFrame(fe_summary.data[1:], columns=fe_summary.data[0])
+                         ^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 6321, in __getattr__
+    return object.__getattribute__(self, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DataFrame' object has no attribute 'data'. Did you mean: '_data'?
+[START] Step 6: Post-Hoc Contrasts with Dual P-Values
+[LOAD] Checking for Step 5 outputs...
+[INFO] Model file exists: step05_lmm_fitted_model.pkl
+[INFO] Best model: Logarithmic (AIC: 1830.15)
+[LOADED] step04_lmm_input.csv (800 rows)
+[ANALYSIS] Extracting fixed effects coefficients...
+[LOADED] step05_lmm_coefficients.csv (7 parameters)
+[EXTRACTED] Main effect: coef=0.1077, z=1.293, p=0.1961
+[EXTRACTED] Interaction: coef=-0.1191, z=-1.846, p=0.0648
+[ANALYSIS] Applying Bonferroni correction (n_tests=2)...
+[DONE] Bonferroni correction applied
+  Main effect: p_uncorr=0.1961, p_bonf=0.3921
+  Interaction: p_uncorr=0.0648, p_bonf=0.1297
+[ANALYSIS] Computing effect sizes at Days 0, 1, 3, 6...
+[COMPUTED] Day 0: source_mean=0.452, dest_mean=0.378, d=0.087
+[COMPUTED] Day 1: source_mean=0.146, dest_mean=0.100, d=0.057
+[COMPUTED] Day 3: source_mean=-0.148, dest_mean=-0.119, d=-0.038
+[COMPUTED] Day 6: source_mean=-0.471, dest_mean=-0.337, d=-0.160
+[DONE] Effect sizes computed for 4 timepoints
+[SAVE] Saving outputs...
+[SAVED] step06_post_hoc_contrasts.csv (2 rows, 8 cols)
+[SAVED] step06_effect_sizes.csv (4 rows, 7 cols)
+[VALIDATION] Running validate_contrasts_d068...
+[VALIDATION] valid: True
+[VALIDATION] d068_compliant: True
+[VALIDATION] missing_cols: []
+[VALIDATION] message: Decision D068 compliant: Found both p_uncorrected and p_bonferroni columns.
+[SUCCESS] Step 6 complete

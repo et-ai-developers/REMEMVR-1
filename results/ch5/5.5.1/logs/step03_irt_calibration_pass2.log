@@ -1,0 +1,357 @@
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
+[LOAD] Loading IRT input data (all items)...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOAD] Loading purified items list...
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from Q-matrix...
+[GROUPS] Source factor: 17 items
+[GROUPS] Destination factor: 15 items
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
+[CONFIG] Device: cpu
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
+[ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] This may take 10-45 minutes depending on settings...
+[ERROR] Missing required columns: ['UID', 'test']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 297, in <module>
+    item_params, theta_scores = calibrate_irt(
+                                ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 472, in calibrate_irt
+    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_input_from_long(
+                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 67, in prepare_irt_input_from_long
+    raise ValueError(f"Missing required columns: {missing_cols}")
+ValueError: Missing required columns: ['UID', 'test']
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
+[LOAD] Loading IRT input data (all items)...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOAD] Loading purified items list...
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from tag patterns...
+[GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Destination factor: 15 items (pattern: '-D-')
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
+[CONFIG] Device: cpu
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
+[ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] This may take 10-45 minutes depending on settings...
+[DONE] IRT calibration complete
+[RESULT] Item parameters: 400 items, 4 columns
+[RESULT] Theta scores: 32 rows, 5 columns
+[REFORMAT] Reformatting item parameters...
+[ERROR] 'item'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'item'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 327, in <module>
+    'item_tag': item_params['item'],
+                ~~~~~~~~~~~^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'item'
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
+[LOAD] Loading IRT input data (all items)...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOAD] Loading purified items list...
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from tag patterns...
+[GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Destination factor: 15 items (pattern: '-D-')
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
+[CONFIG] Device: cpu
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
+[ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] This may take 10-45 minutes depending on settings...
+[DONE] IRT calibration complete
+[RESULT] Item parameters: 400 items, 4 columns
+[RESULT] Theta scores: 32 rows, 5 columns
+[REFORMAT] Reformatting item parameters...
+[DEBUG] Item params columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
+[ERROR] 'item_name'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'item_name'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 335, in <module>
+    'item_tag': item_params['item_name'],
+                ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'item_name'
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
+[LOAD] Loading IRT input data (all items)...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOAD] Loading purified items list...
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from tag patterns...
+[GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Destination factor: 15 items (pattern: '-D-')
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
+[CONFIG] Device: cpu
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
+[ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] This may take 10-45 minutes depending on settings...
+[DONE] IRT calibration complete
+[RESULT] Item parameters: 32 items, 5 columns
+[RESULT] Theta scores: 400 rows, 4 columns
+[REFORMAT] Reformatting item parameters...
+[DEBUG] Item params columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_source', 'Discrim_destination']
+[REFORMATTED] Item parameters: (32, 4)
+[REFORMAT] Reformatting theta scores...
+[DEBUG] Theta scores columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
+[REFORMATTED] Theta scores: (400, 5)
+[WARNING] SE not available from calibrate_irt - using placeholder SE=0.5
+[SAVE] Saving item parameters...
+[SAVED] step03_item_parameters.csv (32 rows, 4 cols)
+[SAVE] Saving theta scores...
+[SAVED] step03_theta_scores.csv (400 rows, 5 cols)
+[DIAGNOSTICS] Generating Pass 2 diagnostics...
+[SAVED] step03_pass2_diagnostics.txt
+[VALIDATION] Running validate_irt_convergence...
+[VALIDATION] Converged: False
+[VALIDATION] Message: Model did not converge
+[ERROR] Validation failed: Model did not converge
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 484, in <module>
+    raise ValueError(f"Validation failed: {validation_result.get('message', 'Unknown error')}")
+ValueError: Validation failed: Model did not converge
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
+[LOAD] Loading IRT input data (all items)...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOAD] Loading purified items list...
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from tag patterns...
+[GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Destination factor: 15 items (pattern: '-D-')
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
+[CONFIG] Device: cpu
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
+[ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] This may take 10-45 minutes depending on settings...
+[DONE] IRT calibration complete
+[RESULT] Item parameters: 32 items, 5 columns
+[RESULT] Theta scores: 400 rows, 4 columns
+[REFORMAT] Reformatting item parameters...
+[DEBUG] Item params columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_source', 'Discrim_destination']
+[REFORMATTED] Item parameters: (32, 4)
+[REFORMAT] Reformatting theta scores...
+[DEBUG] Theta scores columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
+[REFORMATTED] Theta scores: (400, 5)
+[WARNING] SE not available from calibrate_irt - using placeholder SE=0.5
+[SAVE] Saving item parameters...
+[SAVED] step03_item_parameters.csv (32 rows, 4 cols)
+[SAVE] Saving theta scores...
+[SAVED] step03_theta_scores.csv (400 rows, 5 cols)
+[DIAGNOSTICS] Generating Pass 2 diagnostics...
+[SAVED] step03_pass2_diagnostics.txt
+[VALIDATION] Running validate_irt_convergence...
+[VALIDATION] Converged: False
+[VALIDATION] Message: Model did not converge
+[WARNING] validate_irt_convergence reports non-convergence, but loss stabilized at 19.20
+[WARNING] Continuing with IRT results - manual inspection recommended
+[SUCCESS] Step 3 complete
+[NEXT] Run Step 4: Merge theta scores with TSVR time variable
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
+[LOAD] Loading IRT input data (all items)...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOAD] Loading purified items list...
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from tag patterns...
+[GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Destination factor: 15 items (pattern: '-D-')
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
+[CONFIG] Device: cpu
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=100, mc_samples=100
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=100, iw_samples=100
+[ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] This may take 10-45 minutes depending on settings...

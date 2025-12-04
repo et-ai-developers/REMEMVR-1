@@ -1,0 +1,15 @@
+IRT Calibration Pass 1 Diagnostics
+======================================================================
+
+Items calibrated: 36
+Composite IDs: 400
+Factors: source, destination
+Correlated factors: True
+
+Item Parameter Summary:
+  Discrimination (a): min=0.234, max=2.119, mean=0.915
+  Difficulty (b): min=-1.436, max=3.162, mean=0.505
+
+Theta Score Summary:
+  Source: min=-1.953, max=2.104, mean=-0.014
+  Destination: min=-1.721, max=2.664, mean=-0.007

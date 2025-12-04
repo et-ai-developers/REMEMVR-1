@@ -1,0 +1,51 @@
+
+========================================================================
+IRT CALIBRATION PASS 2 DIAGNOSTICS
+========================================================================
+RQ: ch5/5.5.1 - Source-Destination Spatial Memory Trajectories
+Generated: 2025-12-04
+========================================================================
+
+PURIFICATION SUMMARY:
+  - Original items (Pass 1): 36
+  - Purified items (Pass 2): 32
+  - Items removed: 4
+  - Retention rate: 88.9%
+
+CALIBRATION SETTINGS:
+  - Factors: source, destination
+  - Correlated factors: True
+  - Model fit: iw_samples=10, mc_samples=10
+  - Model scores: mc_samples=10, iw_samples=10
+
+ITEM PARAMETERS (PASS 2):
+  - Total items: 32
+  - Source items: 17
+  - Destination items: 15
+  - Discrimination (a): min=0.229, max=2.562, mean=0.997
+  - Difficulty (b): min=-1.458, max=3.961, mean=0.403
+
+THETA SCORES (PASS 2):
+  - Total composite_IDs: 400
+  - Source theta: min=-1.987, max=2.056, mean=-0.013
+  - Destination theta: min=-1.713, max=2.352, mean=0.006
+  - Source SE: mean=0.500 (Pass 1: 0.500, reduction: 0.0%)
+  - Destination SE: mean=0.500 (Pass 1: 0.500, reduction: 0.0%)
+
+VALIDATION CHECKS:
+  - All purified items calibrated: PASS
+  - All composite_IDs present: PASS
+  - No NaN in item parameters: PASS
+  - No NaN in theta scores: PASS
+  - All a >= 0.4: FAIL
+  - All |b| <= 3.0: FAIL
+  - All theta in [-4, 4]: PASS
+
+SE IMPROVEMENT:
+  - Source: 0.0% reduction (Pass 1: 0.500 -> Pass 2: 0.500)
+  - Destination: 0.0% reduction (Pass 1: 0.500 -> Pass 2: 0.500)
+  - Interpretation: SE similar or increased (check model convergence)
+
+========================================================================
+END OF DIAGNOSTICS
+========================================================================
