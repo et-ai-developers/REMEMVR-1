@@ -374,6 +374,15 @@
 ### rq_5.4.4_complete_execution_irt_ctt_convergence
 **Description:** Complete execution of RQ 5.4.4 (IRT-CTT Convergence for Schema Congruence). All 8 analysis steps executed successfully. Key findings: EXCEPTIONAL static convergence (r=0.87-0.91 with incongruent reaching 0.91), substantial dynamic convergence (Cohen's κ=0.667, agreement=83.3%), both LMMs converged with random slopes on log_TSVR. Validates RQ 5.4.1 NULL schema congruence findings are robust to measurement approach (Common/Congruent/Incongruent all similar trajectories is real empirical finding, not measurement artifact). Fixed missing 4_analysis.yaml by adapting from 5.3.5. Full validation pipeline PASS (rq_inspect, rq_plots, rq_results). 1 anomaly flagged (CTT fit dominance). Chapter 5 IRT-CTT convergence trilogy complete (5.2.4 domains, 5.3.5 paradigms, 5.4.4 congruence). Session 2025-12-04 00:30.
 
+### rq_5.4.5_complete_execution_purified_ctt_congruence
+**Description:** Complete execution of RQ 5.4.5 (Purified CTT Effects for Schema Congruence). 9 analysis steps executed. Purified CTT shows significantly HIGHER correlation with IRT theta (Δr=+0.096 to +0.108, p<0.001) BUT WORSE LMM model fit (ΔAIC +17 to +35). Purification-trajectory paradox confirmed across all 3 factor structures. Incongruent showed lowest retention (54%) and largest reliability improvement (Δα=+0.063). Full validation pipeline PASS (rq_inspect, rq_plots, rq_results). Session 2025-12-04 01:30.
+
+### rq_5.4.6_5.4.7_complete_variance_clustering_congruence
+**Description:** Complete execution of RQ 5.4.6 (Variance Decomposition) and RQ 5.4.7 (Clustering) for Schema Congruence. RQ 5.4.6: ICC_slope=0.000 for all congruence levels (forgetting NOT trait-like), ICC_intercept 0.27-0.37 (Congruent highest). RQ 5.4.7: K=6 clusters, weak quality (silhouette=0.254, Jaccard=0.592), meaningful null finding (no schema-selective memory phenotypes). Congruence section 7/8 complete. Chapter 5 at 81% completion (25/31 RQs). Session 2025-12-04 02:15.
+
+### paradigms_5.3.6_5.3.9_complete_cross_cutting_replication
+**Description:** Complete execution of final 4 Paradigms RQs (5.3.6-5.3.9). All cross-cutting findings replicated: (1) Purification-trajectory paradox confirmed 3rd time, (2) ICC_slope≈0 across all paradigms, (3) Weak clustering with no paradigm-selective phenotypes, (4) Item difficulty paradigm-invariant. Paradigms section 100% complete (9/9 RQs). Chapter 5 at 94% completion (29/31 RQs). Only 2 GLMM RQs remaining (5.1.6, 5.2.8). Session 2025-12-04 03:00.
+
 ---
 
 ## How to Use This Index
