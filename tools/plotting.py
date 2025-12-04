@@ -940,7 +940,8 @@ def plot_piecewise_trajectory(
             para_data = seg_data[seg_data[paradigm_col] == paradigm]
 
             # Plot predictions (smooth line)
-            pred_data = para_data[para_data[data_type_col] == 'prediction']
+            pred_data = para_data[para_data[data_type_col] == 'predicted']  # Note: 'predicted' not 'prediction'
+            pred_sorted = None
             if len(pred_data) > 0:
                 pred_sorted = pred_data.sort_values(time_col)
                 ax.plot(pred_sorted[time_col], pred_sorted[pred_col],
@@ -956,8 +957,8 @@ def plot_piecewise_trajectory(
                            capsize=4, capthick=1.5, alpha=0.7)
 
             # Add slope annotation
-            slope_val = para_data[slope_col].dropna().iloc[0] if len(para_data) > 0 else None
-            if slope_val is not None:
+            slope_val = para_data[slope_col].dropna().iloc[0] if len(para_data) > 0 and slope_col in para_data.columns else None
+            if slope_val is not None and pred_sorted is not None:
                 # Position annotation at end of line
                 if len(pred_sorted) > 0:
                     x_pos = pred_sorted[time_col].iloc[-1]

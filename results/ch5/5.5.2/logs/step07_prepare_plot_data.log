@@ -1,0 +1,40 @@
+[START] Step 7: Prepare Dual-Scale Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] step02_lmm_input_long.csv (800 rows)
+[LOAD] Loading segment-location slopes...
+[LOADED] step04_segment_location_slopes.csv (4 rows)
+[AGGREGATE] Computing observed means per Segment x LocationType...
+  Early-Source: n=196, theta=0.306 [0.199, 0.414]
+  Early-Destination: n=196, theta=0.258 [0.140, 0.375]
+  Late-Source: n=204, theta=-0.339 [-0.453, -0.224]
+  Late-Destination: n=204, theta=-0.204 [-0.306, -0.102]
+[AGGREGATED] 4 observed means computed
+[PREDICT] Generating model-predicted trajectories...
+[PREDICTED] 160 prediction points generated
+[COMBINE] Combining observed and predicted data (theta scale)...
+[COMBINED] 164 total rows
+[SAVE] Saving to step07_piecewise_theta_data.csv...
+[SAVED] step07_piecewise_theta_data.csv
+[TRANSFORM] Converting theta to probability scale...
+[SAVE] Saving to step07_piecewise_probability_data.csv...
+[SAVED] step07_piecewise_probability_data.csv
+[VALIDATION] Checking output data quality...
+[PASS] Theta scale: 164 rows
+[PASS] All 4 Segment x LocationType combinations present
+[PASS] Probability scale: 164 rows
+[PASS] Probability values in valid range [0, 1]
+[PASS] CI ordering valid (lower <= upper)
+[SUCCESS] Step 07 complete
+[SUCCESS] Theta scale data: /home/etai/projects/REMEMVR/results/ch5/5.5.2/data/step07_piecewise_theta_data.csv
+[SUCCESS] Probability scale data: /home/etai/projects/REMEMVR/results/ch5/5.5.2/data/step07_piecewise_probability_data.csv
+[SUCCESS] Decision D069 compliance: Dual-scale plot data prepared
+[SUMMARY] Observed means (theta scale):
+  Early-Source: theta=0.306 [0.199, 0.414]
+  Early-Destination: theta=0.258 [0.140, 0.375]
+  Late-Source: theta=-0.339 [-0.453, -0.224]
+  Late-Destination: theta=-0.204 [-0.306, -0.102]
+[SUMMARY] Observed means (probability scale):
+  Early-Source: p=0.576 [0.550, 0.602]
+  Early-Destination: p=0.564 [0.535, 0.593]
+  Late-Source: p=0.416 [0.389, 0.444]
+  Late-Destination: p=0.449 [0.424, 0.475]

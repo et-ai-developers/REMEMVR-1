@@ -571,3 +571,160 @@ Topic naming format: [topic][task][subtopic]
 **Status:** ✅ **CRITICAL BUG FIX COMPLETE**
 
 Discovered and fixed critical probability conversion bug in multi-dimensional IRT. Factor-specific item difficulties MUST be used when converting theta to probability - otherwise the baseline accuracy difference between factors is completely masked. RQ 5.5.1 plots now correctly show 30-45 percentage point difference between source (70%) and destination (25%) memory. rq_plots agent updated to v4.0.1 with lesson learned. This fix applies to ALL multi-factor IRT analyses (Type 5.2, 5.3, 5.4, 5.5).
+
+## Session (2025-12-05 13:30)
+
+**Task:** Execute RQ 5.5.2 Complete Pipeline (Source-Destination Consolidation Two-Phase)
+
+**Context:** User requested execution of RQ 5.5.2 with g_code step-by-step, debugging each step before proceeding, then final validation with rq_validate.
+
+**Major Accomplishments:**
+
+### 1. Complete RQ 5.5.2 Pipeline Execution (8 Steps)
+
+All 8 analysis steps executed and validated:
+
+| Step | Description | Status | Key Output |
+|------|-------------|--------|------------|
+| **Step 0** | Load dependency data from RQ 5.5.1 | ✅ SUCCESS | 400 rows merged (theta + TSVR) |
+| **Step 1** | Create piecewise time variables | ✅ SUCCESS | 196 Early, 204 Late (48h breakpoint) |
+| **Step 2** | Reshape wide to long | ✅ SUCCESS | 800 rows (400 Source, 400 Destination) |
+| **Step 3** | Fit piecewise LMM | ✅ SUCCESS | Full random structure converged |
+| **Step 4** | Extract segment-location slopes | ✅ SUCCESS | 4 slopes with delta method SEs |
+| **Step 5** | Test consolidation benefit | ✅ SUCCESS | Neither location significant |
+| **Step 6** | Test interaction | ✅ SUCCESS | 3-way p=0.61, f²=0.0005 negligible |
+| **Step 7** | Prepare plot data | ✅ SUCCESS | 164 rows (D069 dual-scale) |
+
+**Key Code Fixes Applied:**
+1. **Step 0:** Extended TSVR range to [0, 360] hours (some participants >7 days)
+2. **Step 1:** Extended Days_within range to [0, 10] (Late segment extends beyond 5 days)
+3. **Step 3:** Rewrote to use statsmodels MixedLM directly (fit_lmm_trajectory_tsvr expects composite_ID column)
+4. **Step 4:** Fixed vcov matrix extraction (11x11 full → 8x8 fixed effects only)
+5. **Step 6:** Rewrote to use coefficients CSV (avoids patsy pickle loading error)
+6. **Step 7:** Rewrote to avoid pickle loading, use slopes CSV + observed data directly
+7. **tools/plotting.py:** Fixed pred_sorted UnboundLocalError + Data_Type value 'predicted' not 'prediction'
+
+### 2. Statistical Results (Primary Hypothesis)
+
+**LMM Model (3-way interaction):**
+- Formula: theta ~ Days_within * Segment * LocationType + (1 + Days_within | UID)
+- Converged: YES (full random structure with random slopes)
+- Observations: 800 | Groups: 100
+
+**Fixed Effects (8 terms):**
+| Term | Estimate | SE | p-value |
+|------|----------|-----|---------|
+| Intercept | 0.432 | 0.079 | <0.001 |
+| Segment[T.Late] | -0.517 | 0.105 | <0.001 |
+| LocationType[T.Destination] | -0.047 | 0.092 | 0.607 |
+| Days_within | -0.206 | 0.081 | 0.010 |
+| Days_within:Segment[T.Late] | 0.102 | 0.085 | 0.227 |
+| Days_within:LocationType[T.Dest] | -0.003 | 0.113 | 0.979 |
+| Segment:LocationType | 0.037 | 0.146 | 0.800 |
+| **Days_within:Segment:LocationType** | **0.061** | **0.119** | **0.610** |
+
+**Primary Hypothesis Test:**
+- 3-way interaction: β=0.061, SE=0.119, z=0.51, **p=0.610**
+- p_bonferroni: 1.000 (2 tests)
+- **Cohen's f²: 0.0005** (negligible, far below 0.02 small threshold)
+
+**Conclusion:** **PRIMARY HYPOTHESIS NOT SUPPORTED**
+- Source and destination memories show SIMILAR consolidation patterns
+- LocationType × Phase interaction is NOT significant
+- Effect size negligible - no meaningful differential consolidation
+
+### 3. Segment-Location Slopes
+
+| Segment | LocationType | Slope | SE | 95% CI | p-value |
+|---------|--------------|-------|-----|--------|---------|
+| Early | Source | -0.206 | 0.081 | [-0.36, -0.05] | 0.010 |
+| Late | Source | -0.104 | 0.029 | [-0.16, -0.05] | <0.001 |
+| Early | Destination | -0.209 | 0.081 | [-0.37, -0.05] | 0.009 |
+| Late | Destination | -0.046 | 0.029 | [-0.10, 0.01] | 0.114 |
+
+**Pattern:** Both location types show similar ~0.10 consolidation benefit (Early steeper than Late), but neither is individually significant after accounting for covariance.
+
+### 4. Validation Pipeline Complete
+
+| Agent | Status | Notes |
+|-------|--------|-------|
+| g_code | ✅ SUCCESS | All 8 steps executed |
+| rq_inspect | ✅ SUCCESS | Outputs validated |
+| rq_plots | ✅ SUCCESS | 3 plots generated (D069 compliant) |
+| rq_results | ✅ SUCCESS | validation.md created |
+| rq_validate | ✅ PASS | Thesis-ready |
+
+**Plots Generated:**
+- piecewise_dual_scale.png (2x2 grid - both scales)
+- piecewise_theta.png (theta only)
+- piecewise_probability.png (probability only)
+
+### 5. Theoretical Interpretation
+
+**Finding:** No differential consolidation between source and destination
+**Hypothesis was:** Destination (weaker encoding) would show steeper Early forgetting
+
+**Interpretation:**
+- Null finding consistent with RQ 5.5.1 (no main effect difference)
+- Supports thesis claim: ecological binding prevents laboratory-style dissociations
+- Source-destination task demands may create unified memory traces
+- Individual differences dominate (random effects var=0.20) over LocationType effects
+
+### 6. Files Modified/Created
+
+**Code (8 scripts):**
+- results/ch5/5.5.2/code/step00_load_dependency_data.py
+- results/ch5/5.5.2/code/step01_create_piecewise_time_variables.py
+- results/ch5/5.5.2/code/step02_reshape_wide_to_long.py
+- results/ch5/5.5.2/code/step03_fit_piecewise_lmm.py
+- results/ch5/5.5.2/code/step04_extract_segment_location_slopes.py
+- results/ch5/5.5.2/code/step05_test_consolidation_benefit.py
+- results/ch5/5.5.2/code/step06_test_interaction.py
+- results/ch5/5.5.2/code/step07_prepare_plot_data.py
+
+**Data (14 files):**
+- results/ch5/5.5.2/data/step00_theta_from_rq551.csv through step07_*.csv
+
+**Plots (3 PNG files):**
+- results/ch5/5.5.2/plots/piecewise_dual_scale.png
+- results/ch5/5.5.2/plots/piecewise_theta.png
+- results/ch5/5.5.2/plots/piecewise_probability.png
+
+**Results:**
+- results/ch5/5.5.2/results/validation.md (PASS)
+- results/ch5/5.5.2/status.yaml (all phases complete)
+
+**Tools Fixed:**
+- tools/plotting.py (pred_sorted UnboundLocalError, Data_Type value)
+
+### Session Metrics
+
+**Chapter 5 Progress:**
+- RQ 5.5.2: ✅ COMPLETE (thesis-ready)
+- Type 5.5: 2/7 RQs complete (5.5.1 + 5.5.2)
+- Chapter 5 Overall: 31/38 RQs complete (82%)
+
+**Tokens:**
+- Session start: ~7k (after /refresh)
+- Session end: ~150k (at /save)
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtopic]
+
+- rq_5.5.2_complete_pipeline_execution_null_finding (Session 2025-12-05 13:30: piecewise_lmm_3way_interaction_p0.61_f2_0.0005_negligible, source_destination_similar_consolidation_patterns, 8_steps_all_success, plots_d069_compliant)
+
+- plotting_tool_bug_fixes (Session 2025-12-05 13:30: pred_sorted_unboundlocalerror_fixed, data_type_predicted_not_prediction, vcov_matrix_8x8_not_11x11)
+
+- statsmodels_pickle_workaround_pattern (Session 2025-12-05 13:30: patsy_eval_env_error_on_pickle_load, solution_export_coefficients_csv_instead, applies_to_all_lmm_steps_needing_loaded_model)
+
+**Relevant Archived Topics (from context-finder):**
+- type_5.5_pipeline_complete.md (2025-12-04 21:00: Type 5.5 specification)
+- type_5.5_validation_fixes_complete.md (2025-12-04 19:00: Validation approval)
+- thesis_reframe_laboratory_artifacts_dissolve.md (2025-12-03 18:45: Null findings as contribution)
+
+**End of Session (2025-12-05 13:30)**
+
+**Status:** ✅ **RQ 5.5.2 COMPLETE - THESIS READY**
+
+RQ 5.5.2 Source-Destination Consolidation (Two-Phase) complete. Primary hypothesis NOT supported: 3-way interaction p=0.610, Cohen's f²=0.0005 (negligible). Source and destination show SIMILAR consolidation patterns - no differential early-phase forgetting. Finding consistent with binding hypothesis and RQ 5.5.1 null main effect. Full validation pipeline passed. Next: Execute remaining Type 5.5 RQs (5.5.3-5.5.7).

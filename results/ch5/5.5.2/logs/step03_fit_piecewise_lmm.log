@@ -1,0 +1,54 @@
+[START] Step 3: Fit Piecewise LMM
+[LOAD] Loading LMM input data...
+[LOADED] step02_lmm_input_long.csv (800 rows, 8 cols)
+[DATA] LocationType distribution: {'Source': 400, 'Destination': 400}
+[DATA] Segment distribution: {'Late': 408, 'Early': 392}
+[DATA] Unique UIDs: 100
+[DATA] theta range: [-1.868, 2.251]
+[DATA] Days_within range: [0.000, 8.015]
+[CODING] Setting treatment coding...
+[CODING] LocationType reference = Source
+[CODING] Segment reference = Early
+[ANALYSIS] Fitting piecewise LMM with 3-way interaction...
+[FORMULA] Fixed: theta ~ Days_within * Segment * LocationType
+[FORMULA] Random: ~Days_within | UID (random intercepts + slopes)
+[FORMULA] Estimation: REML=False (ML for AIC comparison)
+[FIT] Attempting full random structure: (1 + Days_within | UID)...
+[FIT] ✓ Full random structure converged successfully
+[RESULTS] Model converged successfully
+[RESULTS] Random structure used: ~Days_within (random intercepts + slopes)
+[MODEL] Fixed effects:
+  Intercept: β=0.4320, SE=0.0788, z=5.48, p=0.0000
+  Segment[T.Late]: β=-0.5171, SE=0.1046, z=-4.94, p=0.0000
+  LocationType[T.Destination]: β=-0.0471, SE=0.0915, z=-0.51, p=0.6071
+  Segment[T.Late]:LocationType[T.Destination]: β=0.0370, SE=0.1462, z=0.25, p=0.8001
+  Days_within: β=-0.2062, SE=0.0806, z=-2.56, p=0.0105
+  Days_within:Segment[T.Late]: β=0.1022, SE=0.0846, z=1.21, p=0.2269
+  Days_within:LocationType[T.Destination]: β=-0.0029, SE=0.1127, z=-0.03, p=0.9794
+  Days_within:Segment[T.Late]:LocationType[T.Destination]: β=0.0607, SE=0.1189, z=0.51, p=0.6099
+[MODEL] Observations: 800
+[MODEL] Groups (UIDs): 100
+[MODEL] Log-likelihood: -866.26
+[MODEL] AIC: 1756.51
+[MODEL] BIC: 1812.73
+[MODEL] Random effects:
+  Variance (Group): 0.2007
+  Residual variance (Scale): 0.4025
+[CHECK] Number of fixed effects: 8 (expected 8)
+[SAVE] Saving model to step03_piecewise_lmm_model.pkl...
+[SAVED] Model pickle (348882 bytes)
+[SAVE] Saving summary to step03_piecewise_lmm_summary.txt...
+[SAVED] Summary text file
+[SAVE] Saving coefficients to step03_lmm_coefficients.csv...
+[SAVED] Coefficients CSV (8 rows)
+[VALIDATION] Checking model quality...
+[PASS] Model converged
+[PASS] 8 fixed effects as expected
+[PASS] No NaN values in coefficients
+[PASS] Positive random effect variance: 0.2007
+[SUCCESS] Step 03 complete
+[SUCCESS] Model saved to: /home/etai/projects/REMEMVR/results/ch5/5.5.2/data/step03_piecewise_lmm_model.pkl
+[SUCCESS] Summary saved to: /home/etai/projects/REMEMVR/results/ch5/5.5.2/data/step03_piecewise_lmm_summary.txt
+[SUCCESS] Coefficients saved to: /home/etai/projects/REMEMVR/results/ch5/5.5.2/data/step03_lmm_coefficients.csv
+[KEY] 3-way interaction: β=0.0607, p=0.6099
+[KEY] Interaction NOT significant at Bonferroni α=0.025

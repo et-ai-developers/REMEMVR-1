@@ -42,23 +42,39 @@ rq_analysis:
   context_dump: "8 steps specified with validation (Step 0: dependency load, Steps 1-7: piecewise LMM -> LocationType x Phase interaction)"
 
 analysis_steps:
-  step00_load_dependency_data: pending
-  step01_create_piecewise_time_variables: pending
-  step02_reshape_wide_to_long: pending
-  step03_fit_piecewise_lmm: pending
-  step04_extract_segment_location_slopes: pending
-  step05_test_consolidation_benefit: pending
-  step06_test_interaction: pending
-  step07_prepare_plot_data: pending
+  step00_load_dependency_data: success
+  step01_create_piecewise_time_variables: success
+  step02_reshape_wide_to_long: success
+  step03_fit_piecewise_lmm: success
+  step04_extract_segment_location_slopes: success
+  step05_test_consolidation_benefit: success
+  step06_test_interaction: success
+  step07_prepare_plot_data: success
 
 g_code:
-  status: pending
+  status: success
+  timestamp: 2025-12-05T13:00:00Z
+  context_dump: "All 8 steps executed successfully. Piecewise LMM converged with full random structure."
 
 rq_inspect:
-  status: pending
+  status: success
+  timestamp: 2025-12-05T13:30:00Z
+  context_dump: "All steps validated during execution. Outputs verified."
 
 rq_plots:
-  status: pending
+  status: success
+  timestamp: 2025-12-05T13:30:00Z
+  context_dump: |
+    Plots: 3 (piecewise_dual_scale, piecewise_theta, piecewise_probability)
+    Sources: step07_piecewise_theta_data.csv (164 rows), step07_piecewise_probability_data.csv (164 rows)
+    D069 compliance: YES (dual-scale piecewise trajectory in 2x2 grid)
+    Function: plot_piecewise_trajectory from tools/plotting.py
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: 2025-12-05T13:30:00Z
+  context_dump: |
+    Key Finding: 3-way interaction NOT SIGNIFICANT (p=0.61, f²=0.0005)
+    Conclusion: Source and Destination show SIMILAR consolidation patterns
+    Validation: PASS (results/validation.md created)
+    Thesis-ready: YES
