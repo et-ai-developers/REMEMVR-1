@@ -15,20 +15,20 @@ PURIFICATION SUMMARY:
 CALIBRATION SETTINGS:
   - Factors: source, destination
   - Correlated factors: True
-  - Model fit: iw_samples=10, mc_samples=10
-  - Model scores: mc_samples=10, iw_samples=10
+  - Model fit: iw_samples=100, mc_samples=1
+  - Model scores: mc_samples=100, iw_samples=100
 
 ITEM PARAMETERS (PASS 2):
   - Total items: 32
   - Source items: 17
   - Destination items: 15
-  - Discrimination (a): min=0.229, max=2.562, mean=0.997
-  - Difficulty (b): min=-1.458, max=3.961, mean=0.403
+  - Discrimination (a): min=0.234, max=2.411, mean=0.992
+  - Difficulty (b): min=-1.464, max=3.871, mean=0.402
 
 THETA SCORES (PASS 2):
   - Total composite_IDs: 400
-  - Source theta: min=-1.987, max=2.056, mean=-0.013
-  - Destination theta: min=-1.713, max=2.352, mean=0.006
+  - Source theta: min=-1.868, max=1.703, mean=-0.023
+  - Destination theta: min=-1.494, max=2.251, mean=0.022
   - Source SE: mean=0.500 (Pass 1: 0.500, reduction: 0.0%)
   - Destination SE: mean=0.500 (Pass 1: 0.500, reduction: 0.0%)
 

@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2025-12-04 21:15 (context-manager curation)
+**Last Updated:** 2025-12-04 22:00 (context-manager curation)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2025-12-04 21:15
-**Token Count:** ~6.5k tokens (33% of 20k threshold)
+**Last /save:** 2025-12-04 22:00
+**Token Count:** ~3.2k tokens (16% of 20k threshold)
 
 ---
 
@@ -165,116 +165,8 @@
 ### Session (2025-12-04 04:30) - ARCHIVED
 **Note:** Content archived to `type_5.5_pipeline_complete.md` (Type 5.5 RQ creation: 7 RQs created 5.5.1-5.5.7 for pickup vs putdown analysis, story.md updated with 10 new findings, GLMM RQs deprioritized 5.1.6/5.2.8/5.4.8, scholar validation mixed results, hypothesis direction debate about attention vs memory encoding, 3+ sessions old)
 
-## Session (2025-12-04 19:00)
-
-**Task:** Fix Type 5.5 RQ Validation Issues (5.5.3-5.5.7)
-
-**Context:** User provided `results/ch5/5.5_validation_summary.md` as guide for fixing Type 5.5 RQ concept documents. Previous session left 5.5.4 REJECTED and several RQs CONDITIONAL. This session fixed all issues and re-validated.
-
-**Major Accomplishments:**
-
-### 1. Fixed 5 RQ Concept Documents Per Validation Summary
-
-| RQ | Initial Status | Issues Fixed | Final Status |
-|----|----------------|--------------|--------------|
-| **5.5.3** | 9.0 CONDITIONAL | Added Type II power analysis (Step 3.5), 7-criteria LMM assumption validation (Step 2.5) | **9.6 APPROVED** |
-| **5.5.4** | **8.3 REJECTED** | Added comprehensive LMM validation (Step 4), GLMM remedial action for bounded CTT, Bonferroni per D068, restriction of range acknowledgment | **9.3 APPROVED** |
-| **5.5.5** | 9.1 CONDITIONAL | Added practice effects discussion, CTT bounded scale limitations, 7 citations (Lord&Novick, Embretson&Reise, Burnham&Anderson, Gorter 2015, Perlman&Simms 2022, Salthouse 2022, Cogn-IQ 2024) | **9.3 APPROVED** |
-| **5.5.6** | 9.1 CONDITIONAL | Added 7 citations (Hertzog, Stern, Drouin, Barr, Reuter-Lorenz, Oberpriller, Cicchetti 1994), source-destination hypothesis contingency note | **9.4 APPROVED** |
-| **5.5.7** | 9.1 CONDITIONAL | Added bootstrap B=100 parameters with CI, comprehensive remedial actions for weak clustering (LPA alternative, dimensionality reduction, interpretive fallback), 3 citations (Parsons, Hennig, Van Mechelen) | **9.3 APPROVED** |
-
-### 2. Key Edits Applied
-
-**5.5.3 (Age Effects):**
-- Step 2.5: LMM assumption validation (linearity, homoscedasticity, normality, independence, VIF, Cook's D)
-- Step 3.5: Power analysis for null hypothesis testing (simulate 1000 datasets, β=0.01, α=0.025)
-- Success criteria updated to require ≥5/7 assumptions pass + power ≥0.80
-
-**5.5.4 (IRT-CTT Convergence):**
-- Step 4 expanded: 7-criteria validation + thresholds + statistical tests
-- Remedial action hierarchy: Report violations → GLMM logit → arcsine transformation
-- Bonferroni correction explicitly tied to D068
-- Restriction of range acknowledgment with sensitivity analysis plan
-
-**5.5.5 (Purified CTT Effects):**
-- CTT Bounded Scale Limitations section: Floor effects, z-standardization partial mitigation
-- Practice Effects Consideration: 4 mitigation strategies (Latin square, IRT theta, tutorial, LMM Time)
-- 7 new citations (foundational + 2020-2024)
-
-**5.5.6 (Variance Decomposition):**
-- 7 citations added covering: cognitive reserve, individual differences, LMM random effects, ICC interpretation
-- Source-destination hypothesis contingency: ICC comparison depends on 5.5.1 dissociation result
-
-**5.5.7 (Clustering):**
-- Bootstrap parameters: B=100, N=100 per resample, Jaccard with 95% CI
-- Remedial actions: Report null finding → dimensionality reduction → alternative K → descriptive interpretation
-- 3 citations: Parsons (slope reliability), Hennig (Jaccard methodology), Van Mechelen (mixture models)
-
-### 3. Re-Validation Results
-
-**Parallel Agent Execution:** 10 agents launched (5 rq_scholar + 5 rq_stats)
-
-**Final Scores:**
-| RQ | Scholar | Stats | Combined Status |
-|----|---------|-------|-----------------|
-| 5.5.3 | 9.3 ✅ | 9.6 ✅ | **APPROVED** |
-| 5.5.4 | 9.4 ✅ | 9.3 ✅ | **APPROVED** |
-| 5.5.5 | 9.3 ✅ | 9.3 ✅ | **APPROVED** |
-| 5.5.6 | 9.4 ✅ | 9.6 ✅ | **APPROVED** |
-| 5.5.7 | 9.3 ✅ | 9.3 ✅ | **APPROVED** |
-
-**Key Improvement:** 5.5.4 went from 8.3 REJECTED → 9.3 APPROVED (comprehensive methodological fixes)
-
-### 4. Status.yaml Updates
-
-Reset status for all 5 RQs before re-validation:
-- rq_scholar: pending → success
-- rq_stats: pending → success
-
-All status files now reflect validation completion with context dumps.
-
-### 5. Deleted Stale Files
-
-- Removed old `results/ch5/5.5.5/docs/1_scholar.md` (was skipped due to existing file)
-
-### Session Metrics
-
-**Chapter 5 Progress:**
-- Type 5.5 RQs: 5/7 concepts validated and APPROVED (5.5.3-5.5.7)
-- Remaining: 5.5.1 (ROOT, needs hypothesis resolution), 5.5.2 (needs concept rewrite)
-- Total: 28 complete + 5 Type 5.5 validated = 33 RQs ready for execution
-
-**Files Modified:**
-- results/ch5/5.5.3/docs/1_concept.md (added Steps 2.5, 3.5, success criteria)
-- results/ch5/5.5.4/docs/1_concept.md (added Step 4 validation, remedial actions, range restriction)
-- results/ch5/5.5.5/docs/1_concept.md (added citations, practice effects, CTT limitations)
-- results/ch5/5.5.6/docs/1_concept.md (added 7 citations, contingency note)
-- results/ch5/5.5.7/docs/1_concept.md (added bootstrap params, remedial actions, citations)
-- results/ch5/5.5.X/status.yaml (all 5 updated with validation results)
-- results/ch5/5.5.X/docs/1_scholar.md (5 new validation reports)
-- results/ch5/5.5.X/docs/1_stats.md (5 new validation reports)
-
-**Tokens:**
-- Session start: ~12k (after /refresh)
-- Session end: ~95k (at /save)
-
-**Active Topics (For context-manager):**
-
-Topic naming format: [topic][task][subtopic]
-
-- type_5.5_validation_fixes_complete (Session 2025-12-04 19:00: 5_rqs_fixed_5.5.3_to_5.5.7, key_fix_5.5.4_rejected_to_approved, all_now_scholar_stats_approved_9.3_to_9.6, lmm_validation_power_analysis_bounded_data_patterns)
-
-- type_5.5_methodological_patterns (Session 2025-12-04 19:00: lmm_7_criteria_validation_standard, power_analysis_for_null_hypotheses, bounded_ctt_remedial_hierarchy_glmm_arcsine, bootstrap_b100_standard_jaccard_ci, practice_effects_4_mitigations)
-
-**Relevant Archived Topics (from context-finder):**
-- rq55_schema_congruence_complete.md (2025-11-24: Original 5.5 methodology)
-- validation_mass_execution_32_agents_stats_scholar_guide_3_rq_fixes.md (2025-12-01 17:30: Mass validation precedent)
-
-**End of Session (2025-12-04 19:00)**
-
-**Status:** ✅ **TYPE 5.5.3-5.5.7 ALL APPROVED**
-
-All 5 downstream Type 5.5 RQs fixed and validated. Key improvement: 5.5.4 went from REJECTED (8.3) to APPROVED (9.3). Methodological patterns established: LMM 7-criteria validation, power analysis for null hypotheses, bounded CTT remedial hierarchy. Remaining: 5.5.1 ROOT RQ needs hypothesis direction resolution, 5.5.2 needs concept rewrite.
+### Session (2025-12-04 19:00) - ARCHIVED
+**Note:** Content archived to `type_5.5_validation_fixes_complete.md` (Fixed 5 RQ concept documents 5.5.3-5.5.7, all APPROVED status 9.3-9.6, key improvement 5.5.4 REJECTED 8.3 → APPROVED 9.3, methodological patterns established: LMM 7-criteria validation, power analysis for null hypotheses, bounded CTT remedial hierarchy, 3+ sessions old)
 
 ## Session (2025-12-04 21:00)
 
@@ -539,3 +431,141 @@ Topic naming format: [topic][task][subtopic]
 **Status:** ⏳ **RQ 5.5.1 MINIMUM COMPLETE, MEDIUM IN PROGRESS**
 
 All 8 analysis steps executed successfully with MINIMUM IRT settings. Logarithmic model selected (AIC=1830, w=82%). No significant LocationType main effect (p=0.20), marginal interaction (p=0.065). MEDIUM settings IRT running in background (~40 min remaining). After completion, re-run Steps 4-7 for production-quality results.
+
+## Session (2025-12-05 09:30)
+
+**Task:** Complete RQ 5.5.1 Production Execution + IRT Settings Fix + Plots Fix
+
+**Context:** Completed RQ 5.5.1 with corrected IRT settings (mc_samples=1 for model_fit, matching 5.1.1-5.4.1 pattern). Fixed plot style to match 5.2.1 format with individual scatter points. Full validation pipeline complete.
+
+**Major Accomplishments:**
+
+### 1. IRT Settings Fix (CRITICAL)
+
+**Problem Discovered:** RQ 5.5.1 was running 100× slower than other RQs because `model_fit.mc_samples=100` instead of `1`.
+
+**Root Cause Analysis:**
+| Setting | 5.1.1-5.4.1 (correct) | 5.5.1 (wrong) |
+|---------|----------------------|---------------|
+| model_fit.mc_samples | **1** | 100 |
+| model_scores.mc_samples | 100 | 100 |
+
+**Pattern across all ROOT RQs:**
+- `mc_samples=1` for model_fit (point estimates for item params - fast)
+- `mc_samples=100` for model_scores (Monte Carlo integration for theta - accurate)
+
+**Fix Applied:** Changed `model_fit.mc_samples` from 100 to 1 in step03_irt_calibration_pass2.py
+
+**Runtime Impact:** ~161 seconds (vs hours with wrong settings)
+
+### 2. Complete RQ 5.5.1 Pipeline Execution
+
+All 8 steps re-executed with corrected IRT settings:
+
+| Step | Description | Status | Output |
+|------|-------------|--------|--------|
+| **Step 0** | Extract VR data | ✅ SUCCESS | 36 items, 400 composite_IDs |
+| **Step 1** | IRT Pass 1 | ✅ SUCCESS | 36 item params |
+| **Step 2** | Purify items (D039) | ✅ SUCCESS | 32 retained, 4 excluded |
+| **Step 3** | IRT Pass 2 | ✅ SUCCESS | 32 items, mc_samples=1 fit, 100 score |
+| **Step 4** | Merge theta + TSVR | ✅ SUCCESS | 800 rows |
+| **Step 5** | LMM model selection | ✅ SUCCESS | Logarithmic best (AIC=1747.77, w=63.5%) |
+| **Step 6** | Post-hoc contrasts | ✅ SUCCESS | D068 dual p-values |
+| **Step 7** | Plot data | ✅ SUCCESS | Individual trajectories ready |
+
+### 3. Statistical Results (Production Settings)
+
+**LMM Model Selection:**
+| Model | AIC | Weight |
+|-------|-----|--------|
+| **Logarithmic** | 1747.77 | **63.5%** |
+| Quadratic | 1750.22 | 18.6% |
+| Linear+Log | 1750.71 | 14.6% |
+| Quadratic+Log | 1753.92 | 2.9% |
+| Linear | 1758.07 | 0.4% |
+
+**Post-Hoc Contrasts (D068):**
+| Test | Coefficient | p (uncorr) | p (Bonf) |
+|------|-------------|------------|----------|
+| LocationType main | 0.100 | 0.202 | 0.403 |
+| LocationType × Time | -0.137 | **0.025** | **0.050** |
+
+**Key Finding:**
+- Main effect NOT significant (p=0.40) - source ≈ destination overall
+- Interaction MARGINALLY significant (p=0.05 Bonferroni) - destination forgetting faster
+- Effect sizes: Day 0 d=0.05, Day 6 d=-0.24 (small but growing divergence)
+
+### 4. Plot Style Fix (Match 5.2.1 Format)
+
+**Problem:** Original rq_plots agent used binned summary data (4 timepoints) instead of individual scatter.
+
+**Fix Applied:** Rewrote plots.py to match 5.2.1 publication style:
+- **Faded scatter points** (alpha=0.15) from 800 individual observations
+- **Dashed fitted curves** from LMM predictions
+- **95% CI bands** from fixed effects covariance matrix
+- **Continuous TSVR x-axis** (actual hours, not binned)
+
+**Probability Scale Investigation:**
+- Mean discrimination a=0.992 (close to 1.0)
+- Theta range: [-0.68, 0.49] (narrow, ~1.2 SDs)
+- Probability range: [33.7%, 61.8%] (28 percentage points)
+- **Shapes look identical** because logistic is nearly linear in this range (correct behavior)
+
+### 5. Validation Pipeline Complete
+
+| Agent | Status | Notes |
+|-------|--------|-------|
+| rq_inspect | ✅ SUCCESS | Steps 0-6 PASS, Step 7 file naming adapted |
+| rq_plots | ✅ SUCCESS | 2 plots (theta + probability) |
+| rq_results | ✅ SUCCESS | 1 anomaly flagged (wrong direction) |
+
+**Anomaly Documented:** Main effect null contradicts hypothesis that source memory > destination memory. Flagged in summary.md Section 3.
+
+### 6. Files Modified/Created
+
+**Code:**
+- results/ch5/5.5.1/code/step03_irt_calibration_pass2.py (fixed mc_samples=1)
+- results/ch5/5.5.1/plots/plots.py (complete rewrite for 5.2.1 style)
+
+**Data:**
+- results/ch5/5.5.1/data/*.csv (all step outputs refreshed with correct IRT)
+
+**Plots:**
+- results/ch5/5.5.1/plots/trajectory_theta.png (individual scatter + CI bands)
+- results/ch5/5.5.1/plots/trajectory_probability.png (Decision D069)
+
+**Results:**
+- results/ch5/5.5.1/results/summary.md (11.5k words, 1 anomaly documented)
+- results/ch5/5.5.1/status.yaml (all 11 phases complete)
+
+### Session Metrics
+
+**Chapter 5 Progress:**
+- RQ 5.5.1: ✅ COMPLETE (full validation pipeline)
+- Type 5.5: 1/7 RQs complete, 6 pending (5.5.2-5.5.7)
+- Overall: 30/38 RQs complete (79%)
+
+**Tokens:**
+- Session start: ~7k (after /refresh)
+- Session end: ~160k (at /save)
+
+**Active Topics (For context-manager):**
+
+Topic naming format: [topic][task][subtopic]
+
+- rq_5.5.1_complete_production_execution (Session 2025-12-05 09:30: all_8_steps_success, logarithmic_model_aic_1747_weight_63percent, main_effect_null_p0.40_interaction_marginal_p0.05, anomaly_flagged_wrong_direction)
+
+- irt_mc_samples_pattern_discovery (Session 2025-12-05 09:30: model_fit_mc_samples_1_for_all_root_rqs, model_scores_mc_samples_100_for_theta_accuracy, 5.5.1_was_100x_slower_due_to_wrong_setting, pattern_now_documented)
+
+- plots_style_5.2.1_format (Session 2025-12-05 09:30: individual_scatter_alpha_0.15_from_800_obs, ci_bands_from_lmm_fixed_effects_covariance, continuous_tsvr_x_axis_not_binned, probability_looks_like_theta_because_logistic_linear_in_narrow_range)
+
+**Relevant Archived Topics (from context-finder):**
+- type_5.5_pipeline_complete.md (2025-12-04 04:30: Type 5.5 structure)
+- validated_irt_settings_complete.md (2025-11-25: MEDIUM settings specification)
+- type_5.5_validation_fixes_complete.md (2025-12-04 19:00: 5.5.3-5.5.7 fixes)
+
+**End of Session (2025-12-05 09:30)**
+
+**Status:** ✅ **RQ 5.5.1 COMPLETE - FULL VALIDATION PIPELINE**
+
+RQ 5.5.1 Source-Destination analysis complete with production-quality IRT settings. Logarithmic model selected (AIC=1747.77). Main effect null (p=0.40), interaction marginally significant (p=0.05 Bonferroni) - destination forgetting faster than source over time. 1 anomaly flagged: main effect contradicts hypothesis. Plots fixed to 5.2.1 style with individual scatter. Next: Execute RQ 5.5.2-5.5.7.

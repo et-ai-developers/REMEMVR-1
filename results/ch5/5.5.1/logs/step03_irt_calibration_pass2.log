@@ -1,357 +1,171 @@
-[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
-[LOAD] Loading IRT input data (all items)...
-[LOADED] step00_irt_input.csv (400 rows, 37 cols)
-[LOAD] Loading purified items list...
-[LOADED] step02_purified_items.csv (32 items retained)
-[LOAD] Loading Q-matrix (all items)...
-[LOADED] step00_q_matrix.csv (36 rows)
-[FILTER] Filtering IRT input to purified items...
-[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
-[FILTER] Filtering Q-matrix to purified items...
-[FILTERED] Q-matrix: 32 rows (purified items)
-[RESHAPE] Converting wide to long format...
-[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
-[GROUPS] Creating factor groups from Q-matrix...
-[GROUPS] Source factor: 17 items
-[GROUPS] Destination factor: 15 items
-[CONFIG] Setting IRT configuration...
-[CONFIG] ============================================================
-[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
-[CONFIG] ============================================================
-[CONFIG] Phase 1 (MINIMAL TEST - run this first):
-[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
-[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
-[CONFIG]   Expected: Convergence may fail (acceptable for testing)
-[CONFIG] 
-[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
-[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
-[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
-[CONFIG] ============================================================
-[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
-[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
-[CONFIG] ============================================================
-[CONFIG] Factors: ['source', 'destination']
-[CONFIG] Correlated factors: True
-[CONFIG] Device: cpu
-[CONFIG] Seed: 42
-[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
-[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
-[ANALYSIS] Running calibrate_irt (Pass 2)...
-[ANALYSIS] This may take 10-45 minutes depending on settings...
-[ERROR] Missing required columns: ['UID', 'test']
-[TRACEBACK] Full error details:
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 297, in <module>
-    item_params, theta_scores = calibrate_irt(
-                                ^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 472, in calibrate_irt
-    response_matrix, Q_matrix, missing_mask, item_list, composite_ids = prepare_irt_input_from_long(
-                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 67, in prepare_irt_input_from_long
-    raise ValueError(f"Missing required columns: {missing_cols}")
-ValueError: Missing required columns: ['UID', 'test']
-[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
-[LOAD] Loading IRT input data (all items)...
-[LOADED] step00_irt_input.csv (400 rows, 37 cols)
-[LOAD] Loading purified items list...
-[LOADED] step02_purified_items.csv (32 items retained)
-[LOAD] Loading Q-matrix (all items)...
-[LOADED] step00_q_matrix.csv (36 rows)
-[FILTER] Filtering IRT input to purified items...
-[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
-[FILTER] Filtering Q-matrix to purified items...
-[FILTERED] Q-matrix: 32 rows (purified items)
-[RESHAPE] Converting wide to long format...
-[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
-[GROUPS] Creating factor groups from tag patterns...
-[GROUPS] Source factor: 17 items (pattern: '-U-')
-[GROUPS] Destination factor: 15 items (pattern: '-D-')
-[CONFIG] Setting IRT configuration...
-[CONFIG] ============================================================
-[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
-[CONFIG] ============================================================
-[CONFIG] Phase 1 (MINIMAL TEST - run this first):
-[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
-[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
-[CONFIG]   Expected: Convergence may fail (acceptable for testing)
-[CONFIG] 
-[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
-[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
-[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
-[CONFIG] ============================================================
-[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
-[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
-[CONFIG] ============================================================
-[CONFIG] Factors: ['source', 'destination']
-[CONFIG] Correlated factors: True
-[CONFIG] Device: cpu
-[CONFIG] Seed: 42
-[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
-[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
-[ANALYSIS] Running calibrate_irt (Pass 2)...
-[ANALYSIS] This may take 10-45 minutes depending on settings...
-[DONE] IRT calibration complete
-[RESULT] Item parameters: 400 items, 4 columns
-[RESULT] Theta scores: 32 rows, 5 columns
-[REFORMAT] Reformatting item parameters...
-[ERROR] 'item'
-[TRACEBACK] Full error details:
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
-    return self._engine.get_loc(casted_key)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
-  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
-KeyError: 'item'
 
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 327, in <module>
-    'item_tag': item_params['item'],
-                ~~~~~~~~~~~^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
-    indexer = self.columns.get_loc(key)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
-    raise KeyError(key) from err
-KeyError: 'item'
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/deepirtools/data.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
 [START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
 [LOAD] Loading IRT input data (all items)...
-[LOADED] step00_irt_input.csv (400 rows, 37 cols)
-[LOAD] Loading purified items list...
-[LOADED] step02_purified_items.csv (32 items retained)
-[LOAD] Loading Q-matrix (all items)...
-[LOADED] step00_q_matrix.csv (36 rows)
-[FILTER] Filtering IRT input to purified items...
-[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
-[FILTER] Filtering Q-matrix to purified items...
-[FILTERED] Q-matrix: 32 rows (purified items)
-[RESHAPE] Converting wide to long format...
-[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
-[GROUPS] Creating factor groups from tag patterns...
-[GROUPS] Source factor: 17 items (pattern: '-U-')
-[GROUPS] Destination factor: 15 items (pattern: '-D-')
-[CONFIG] Setting IRT configuration...
-[CONFIG] ============================================================
-[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
-[CONFIG] ============================================================
-[CONFIG] Phase 1 (MINIMAL TEST - run this first):
-[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
-[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
-[CONFIG]   Expected: Convergence may fail (acceptable for testing)
-[CONFIG] 
-[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
-[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
-[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
-[CONFIG] ============================================================
-[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
-[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
-[CONFIG] ============================================================
-[CONFIG] Factors: ['source', 'destination']
-[CONFIG] Correlated factors: True
-[CONFIG] Device: cpu
-[CONFIG] Seed: 42
-[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
-[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
-[ANALYSIS] Running calibrate_irt (Pass 2)...
-[ANALYSIS] This may take 10-45 minutes depending on settings...
-[DONE] IRT calibration complete
-[RESULT] Item parameters: 400 items, 4 columns
-[RESULT] Theta scores: 32 rows, 5 columns
-[REFORMAT] Reformatting item parameters...
-[DEBUG] Item params columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
-[ERROR] 'item_name'
-[TRACEBACK] Full error details:
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
-    return self._engine.get_loc(casted_key)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
-  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
-KeyError: 'item_name'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 335, in <module>
-    'item_tag': item_params['item_name'],
-                ~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
-    indexer = self.columns.get_loc(key)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
-    raise KeyError(key) from err
-KeyError: 'item_name'
-[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
 [LOAD] Loading IRT input data (all items)...
 [LOADED] step00_irt_input.csv (400 rows, 37 cols)
-[LOAD] Loading purified items list...
-[LOADED] step02_purified_items.csv (32 items retained)
-[LOAD] Loading Q-matrix (all items)...
-[LOADED] step00_q_matrix.csv (36 rows)
-[FILTER] Filtering IRT input to purified items...
-[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
-[FILTER] Filtering Q-matrix to purified items...
-[FILTERED] Q-matrix: 32 rows (purified items)
-[RESHAPE] Converting wide to long format...
-[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
-[GROUPS] Creating factor groups from tag patterns...
-[GROUPS] Source factor: 17 items (pattern: '-U-')
-[GROUPS] Destination factor: 15 items (pattern: '-D-')
-[CONFIG] Setting IRT configuration...
-[CONFIG] ============================================================
-[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
-[CONFIG] ============================================================
-[CONFIG] Phase 1 (MINIMAL TEST - run this first):
-[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
-[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
-[CONFIG]   Expected: Convergence may fail (acceptable for testing)
-[CONFIG] 
-[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
-[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
-[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
-[CONFIG] ============================================================
-[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
-[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
-[CONFIG] ============================================================
-[CONFIG] Factors: ['source', 'destination']
-[CONFIG] Correlated factors: True
-[CONFIG] Device: cpu
-[CONFIG] Seed: 42
-[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
-[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
-[ANALYSIS] Running calibrate_irt (Pass 2)...
-[ANALYSIS] This may take 10-45 minutes depending on settings...
-[DONE] IRT calibration complete
-[RESULT] Item parameters: 32 items, 5 columns
-[RESULT] Theta scores: 400 rows, 4 columns
-[REFORMAT] Reformatting item parameters...
-[DEBUG] Item params columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_source', 'Discrim_destination']
-[REFORMATTED] Item parameters: (32, 4)
-[REFORMAT] Reformatting theta scores...
-[DEBUG] Theta scores columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
-[REFORMATTED] Theta scores: (400, 5)
-[WARNING] SE not available from calibrate_irt - using placeholder SE=0.5
-[SAVE] Saving item parameters...
-[SAVED] step03_item_parameters.csv (32 rows, 4 cols)
-[SAVE] Saving theta scores...
-[SAVED] step03_theta_scores.csv (400 rows, 5 cols)
-[DIAGNOSTICS] Generating Pass 2 diagnostics...
-[SAVED] step03_pass2_diagnostics.txt
-[VALIDATION] Running validate_irt_convergence...
-[VALIDATION] Converged: False
-[VALIDATION] Message: Model did not converge
-[ERROR] Validation failed: Model did not converge
-[TRACEBACK] Full error details:
-Traceback (most recent call last):
-  File "/home/etai/projects/REMEMVR/results/ch5/5.5.1/code/step03_irt_calibration_pass2.py", line 484, in <module>
-    raise ValueError(f"Validation failed: {validation_result.get('message', 'Unknown error')}")
-ValueError: Validation failed: Model did not converge
-[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
-[LOAD] Loading IRT input data (all items)...
 [LOADED] step00_irt_input.csv (400 rows, 37 cols)
 [LOAD] Loading purified items list...
-[LOADED] step02_purified_items.csv (32 items retained)
-[LOAD] Loading Q-matrix (all items)...
-[LOADED] step00_q_matrix.csv (36 rows)
-[FILTER] Filtering IRT input to purified items...
-[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
-[FILTER] Filtering Q-matrix to purified items...
-[FILTERED] Q-matrix: 32 rows (purified items)
-[RESHAPE] Converting wide to long format...
-[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
-[GROUPS] Creating factor groups from tag patterns...
-[GROUPS] Source factor: 17 items (pattern: '-U-')
-[GROUPS] Destination factor: 15 items (pattern: '-D-')
-[CONFIG] Setting IRT configuration...
-[CONFIG] ============================================================
-[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
-[CONFIG] ============================================================
-[CONFIG] Phase 1 (MINIMAL TEST - run this first):
-[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
-[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
-[CONFIG]   Expected: Convergence may fail (acceptable for testing)
-[CONFIG] 
-[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
-[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
-[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
-[CONFIG] ============================================================
-[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
-[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
-[CONFIG] ============================================================
-[CONFIG] Factors: ['source', 'destination']
-[CONFIG] Correlated factors: True
-[CONFIG] Device: cpu
-[CONFIG] Seed: 42
-[CONFIG] Model fit: batch_size=2048, iw_samples=10, mc_samples=10
-[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=10, iw_samples=10
-[ANALYSIS] Running calibrate_irt (Pass 2)...
-[ANALYSIS] This may take 10-45 minutes depending on settings...
-[DONE] IRT calibration complete
-[RESULT] Item parameters: 32 items, 5 columns
-[RESULT] Theta scores: 400 rows, 4 columns
-[REFORMAT] Reformatting item parameters...
-[DEBUG] Item params columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_source', 'Discrim_destination']
-[REFORMATTED] Item parameters: (32, 4)
-[REFORMAT] Reformatting theta scores...
-[DEBUG] Theta scores columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
-[REFORMATTED] Theta scores: (400, 5)
-[WARNING] SE not available from calibrate_irt - using placeholder SE=0.5
-[SAVE] Saving item parameters...
-[SAVED] step03_item_parameters.csv (32 rows, 4 cols)
-[SAVE] Saving theta scores...
-[SAVED] step03_theta_scores.csv (400 rows, 5 cols)
-[DIAGNOSTICS] Generating Pass 2 diagnostics...
-[SAVED] step03_pass2_diagnostics.txt
-[VALIDATION] Running validate_irt_convergence...
-[VALIDATION] Converged: False
-[VALIDATION] Message: Model did not converge
-[WARNING] validate_irt_convergence reports non-convergence, but loss stabilized at 19.20
-[WARNING] Continuing with IRT results - manual inspection recommended
-[SUCCESS] Step 3 complete
-[NEXT] Run Step 4: Merge theta scores with TSVR time variable
-[START] Step 3: IRT Calibration Pass 2 (Purified Items Only)
-[LOAD] Loading IRT input data (all items)...
-[LOADED] step00_irt_input.csv (400 rows, 37 cols)
 [LOAD] Loading purified items list...
 [LOADED] step02_purified_items.csv (32 items retained)
+[LOADED] step02_purified_items.csv (32 items retained)
+[LOAD] Loading Q-matrix (all items)...
 [LOAD] Loading Q-matrix (all items)...
 [LOADED] step00_q_matrix.csv (36 rows)
+[LOADED] step00_q_matrix.csv (36 rows)
+[FILTER] Filtering IRT input to purified items...
 [FILTER] Filtering IRT input to purified items...
 [FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTERED] IRT input: 400 rows x 33 cols (composite_ID + 32 items)
+[FILTER] Filtering Q-matrix to purified items...
 [FILTER] Filtering Q-matrix to purified items...
 [FILTERED] Q-matrix: 32 rows (purified items)
+[FILTERED] Q-matrix: 32 rows (purified items)
+[RESHAPE] Converting wide to long format...
 [RESHAPE] Converting wide to long format...
 [RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[RESHAPED] Long format: 12800 rows (400 composite_IDs x 32 items)
+[GROUPS] Creating factor groups from tag patterns...
 [GROUPS] Creating factor groups from tag patterns...
 [GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Source factor: 17 items (pattern: '-U-')
+[GROUPS] Destination factor: 15 items (pattern: '-D-')
 [GROUPS] Destination factor: 15 items (pattern: '-D-')
 [CONFIG] Setting IRT configuration...
+[CONFIG] Setting IRT configuration...
+[CONFIG] ============================================================
 [CONFIG] ============================================================
 [CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] IRT TESTING WORKFLOW RECOMMENDATION:
+[CONFIG] ============================================================
 [CONFIG] ============================================================
 [CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG] Phase 1 (MINIMAL TEST - run this first):
+[CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
 [CONFIG]   Set: max_iter=50, mc_samples=10, iw_samples=10
 [CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Runtime: ~10 minutes (validates entire pipeline)
+[CONFIG]   Expected: Convergence may fail (acceptable for testing)
 [CONFIG]   Expected: Convergence may fail (acceptable for testing)
 [CONFIG] 
+[CONFIG] 
+[CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
 [CONFIG] Phase 2 (PRODUCTION - only after Phase 1 passes):
 [CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Set: max_iter=200, mc_samples=100, iw_samples=100
+[CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
 [CONFIG]   Runtime: ~45 minutes (production-quality theta scores)
 [CONFIG] ============================================================
+[CONFIG] ============================================================
+[CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
 [CONFIG] CURRENT SETTINGS: MINIMUM (Phase 1 validation)
 [CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] TO SWITCH TO PRODUCTION: Edit config dict below
+[CONFIG] ============================================================
 [CONFIG] ============================================================
 [CONFIG] Factors: ['source', 'destination']
+[CONFIG] Factors: ['source', 'destination']
+[CONFIG] Correlated factors: True
 [CONFIG] Correlated factors: True
 [CONFIG] Device: cpu
+[CONFIG] Device: cpu
 [CONFIG] Seed: 42
-[CONFIG] Model fit: batch_size=2048, iw_samples=100, mc_samples=100
+[CONFIG] Seed: 42
+[CONFIG] Model fit: batch_size=2048, iw_samples=100, mc_samples=1
+[CONFIG] Model fit: batch_size=2048, iw_samples=100, mc_samples=1
+[CONFIG] Model scores: scoring_batch_size=2048, mc_samples=100, iw_samples=100
 [CONFIG] Model scores: scoring_batch_size=2048, mc_samples=100, iw_samples=100
 [ANALYSIS] Running calibrate_irt (Pass 2)...
+[ANALYSIS] Running calibrate_irt (Pass 2)...
 [ANALYSIS] This may take 10-45 minutes depending on settings...
+[ANALYSIS] This may take 10-45 minutes depending on settings...
+
+============================================================
+IRT CALIBRATION PIPELINE
+============================================================
+
+Step 1: Preparing IRT data...
+  Observations: 400
+  Items: 32
+  Factors: 2
+  Missing data: 0 cells (0.00%)
+
+Step 2: Determining category counts...
+  Category counts: {2}
+
+Step 3: Configuring IRT model...
+
+Initializing model parameters
+Initialization ended in  0.0  seconds
+  Model type: GRM (Graded Response Model)
+  Device: cpu
+  Correlated factors: True
+
+Step 4: Fitting IRT model...
+Fitting IRT model on cpu...
+
+Fitting started
+Epoch =        0 Iter. =        1 Cur. loss =   18.76   Intervals no change =    0Epoch =      100 Iter. =      101 Cur. loss =   19.48   Intervals no change =    0Epoch =      200 Iter. =      201 Cur. loss =   19.75   Intervals no change =    1Epoch =      300 Iter. =      301 Cur. loss =   19.67   Intervals no change =    2Epoch =      400 Iter. =      401 Cur. loss =   19.57   Intervals no change =    3Epoch =      500 Iter. =      501 Cur. loss =   19.49   Intervals no change =    4Epoch =      600 Iter. =      601 Cur. loss =   19.41   Intervals no change =    5Epoch =      700 Iter. =      701 Cur. loss =   19.35   Intervals no change =    6Epoch =      800 Iter. =      801 Cur. loss =   19.31   Intervals no change =    7Epoch =      900 Iter. =      901 Cur. loss =   19.27   Intervals no change =    8Epoch =     1000 Iter. =     1001 Cur. loss =   19.24   Intervals no change =    9Epoch =     1100 Iter. =     1101 Cur. loss =   19.23   Intervals no change =   10Epoch =     1200 Iter. =     1201 Cur. loss =   19.22   Intervals no change =   11Epoch =     1300 Iter. =     1301 Cur. loss =   19.21   Intervals no change =   12Epoch =     1400 Iter. =     1401 Cur. loss =   19.20   Intervals no change =   13Epoch =     1500 Iter. =     1501 Cur. loss =   19.20   Intervals no change =   14Epoch =     1600 Iter. =     1601 Cur. loss =   19.20   Intervals no change =   15Epoch =     1700 Iter. =     1701 Cur. loss =   19.19   Intervals no change =   16Epoch =     1800 Iter. =     1801 Cur. loss =   19.19   Intervals no change =   17Epoch =     1900 Iter. =     1901 Cur. loss =   19.19   Intervals no change =   18Epoch =     2000 Iter. =     2001 Cur. loss =   19.19   Intervals no change =   19Epoch =     2100 Iter. =     2101 Cur. loss =   19.19   Intervals no change =   20Epoch =     2200 Iter. =     2201 Cur. loss =   19.19   Intervals no change =   21Epoch =     2300 Iter. =     2301 Cur. loss =   19.19   Intervals no change =   22Epoch =     2400 Iter. =     2401 Cur. loss =   19.19   Intervals no change =   23Epoch =     2500 Iter. =     2501 Cur. loss =   19.16   Intervals no change =   24Epoch =     2600 Iter. =     2601 Cur. loss =   19.19   Intervals no change =   25Epoch =     2700 Iter. =     2701 Cur. loss =   19.19   Intervals no change =   26Epoch =     2800 Iter. =     2801 Cur. loss =   19.19   Intervals no change =   27Epoch =     2900 Iter. =     2901 Cur. loss =   19.18   Intervals no change =   28Epoch =     3000 Iter. =     3001 Cur. loss =   19.19   Intervals no change =   29Epoch =     3100 Iter. =     3101 Cur. loss =   19.19   Intervals no change =   30Epoch =     3200 Iter. =     3201 Cur. loss =   19.19   Intervals no change =   31Epoch =     3300 Iter. =     3301 Cur. loss =   19.19   Intervals no change =   32Epoch =     3400 Iter. =     3401 Cur. loss =   19.19   Intervals no change =   33Epoch =     3500 Iter. =     3501 Cur. loss =   19.19   Intervals no change =   34Epoch =     3600 Iter. =     3601 Cur. loss =   19.18   Intervals no change =   35Epoch =     3700 Iter. =     3701 Cur. loss =   19.19   Intervals no change =   36Epoch =     3800 Iter. =     3801 Cur. loss =   19.19   Intervals no change =   37Epoch =     3900 Iter. =     3901 Cur. loss =   19.19   Intervals no change =   38Epoch =     4000 Iter. =     4001 Cur. loss =   19.19   Intervals no change =   39Epoch =     4100 Iter. =     4101 Cur. loss =   19.19   Intervals no change =   40Epoch =     4200 Iter. =     4201 Cur. loss =   19.19   Intervals no change =   41Epoch =     4300 Iter. =     4301 Cur. loss =   19.19   Intervals no change =   42Epoch =     4400 Iter. =     4401 Cur. loss =   19.19   Intervals no change =   43Epoch =     4500 Iter. =     4501 Cur. loss =   19.19   Intervals no change =   44Epoch =     4600 Iter. =     4601 Cur. loss =   19.19   Intervals no change =   45Epoch =     4700 Iter. =     4701 Cur. loss =   19.19   Intervals no change =   46Epoch =     4800 Iter. =     4801 Cur. loss =   19.19   Intervals no change =   47Epoch =     4900 Iter. =     4901 Cur. loss =   19.19   Intervals no change =   48Epoch =     5000 Iter. =     5001 Cur. loss =   19.17   Intervals no change =   49Epoch =     5100 Iter. =     5101 Cur. loss =   19.18   Intervals no change =   50Epoch =     5200 Iter. =     5201 Cur. loss =   19.19   Intervals no change =   51Epoch =     5300 Iter. =     5301 Cur. loss =   19.19   Intervals no change =   52Epoch =     5400 Iter. =     5401 Cur. loss =   19.19   Intervals no change =   53Epoch =     5500 Iter. =     5501 Cur. loss =   19.19   Intervals no change =   54Epoch =     5600 Iter. =     5601 Cur. loss =   19.18   Intervals no change =   55Epoch =     5700 Iter. =     5701 Cur. loss =   19.16   Intervals no change =   56Epoch =     5800 Iter. =     5801 Cur. loss =   19.19   Intervals no change =   57Epoch =     5900 Iter. =     5901 Cur. loss =   19.18   Intervals no change =   58Epoch =     6000 Iter. =     6001 Cur. loss =   19.19   Intervals no change =   59Epoch =     6100 Iter. =     6101 Cur. loss =   19.19   Intervals no change =   60Epoch =     6200 Iter. =     6201 Cur. loss =   19.19   Intervals no change =   61Epoch =     6300 Iter. =     6301 Cur. loss =   19.19   Intervals no change =   62Epoch =     6400 Iter. =     6401 Cur. loss =   19.19   Intervals no change =   63Epoch =     6500 Iter. =     6501 Cur. loss =   19.19   Intervals no change =   64Epoch =     6600 Iter. =     6601 Cur. loss =   19.19   Intervals no change =   65Epoch =     6700 Iter. =     6701 Cur. loss =   19.19   Intervals no change =   66Epoch =     6800 Iter. =     6801 Cur. loss =   19.19   Intervals no change =   67Epoch =     6900 Iter. =     6901 Cur. loss =   19.19   Intervals no change =   68Epoch =     7000 Iter. =     7001 Cur. loss =   19.19   Intervals no change =   69Epoch =     7100 Iter. =     7101 Cur. loss =   19.19   Intervals no change =   70Epoch =     7200 Iter. =     7201 Cur. loss =   19.19   Intervals no change =   71Epoch =     7300 Iter. =     7301 Cur. loss =   19.19   Intervals no change =   72Epoch =     7400 Iter. =     7401 Cur. loss =   19.19   Intervals no change =   73Epoch =     7500 Iter. =     7501 Cur. loss =   19.19   Intervals no change =   74Epoch =     7600 Iter. =     7601 Cur. loss =   19.19   Intervals no change =   75Epoch =     7700 Iter. =     7701 Cur. loss =   19.19   Intervals no change =   76Epoch =     7800 Iter. =     7801 Cur. loss =   19.19   Intervals no change =   77Epoch =     7900 Iter. =     7901 Cur. loss =   19.19   Intervals no change =   78Epoch =     8000 Iter. =     8001 Cur. loss =   19.19   Intervals no change =   79Epoch =     8100 Iter. =     8101 Cur. loss =   19.19   Intervals no change =   80Epoch =     8200 Iter. =     8201 Cur. loss =   19.19   Intervals no change =   81Epoch =     8300 Iter. =     8301 Cur. loss =   19.17   Intervals no change =   82Epoch =     8400 Iter. =     8401 Cur. loss =   19.19   Intervals no change =   83Epoch =     8500 Iter. =     8501 Cur. loss =   19.19   Intervals no change =   84Epoch =     8600 Iter. =     8601 Cur. loss =   19.19   Intervals no change =   85Epoch =     8700 Iter. =     8701 Cur. loss =   19.19   Intervals no change =   86Epoch =     8800 Iter. =     8801 Cur. loss =   19.19   Intervals no change =   87Epoch =     8900 Iter. =     8901 Cur. loss =   19.19   Intervals no change =   88Epoch =     9000 Iter. =     9001 Cur. loss =   19.19   Intervals no change =   89Epoch =     9100 Iter. =     9101 Cur. loss =   19.19   Intervals no change =   90Epoch =     9200 Iter. =     9201 Cur. loss =   19.19   Intervals no change =   91Epoch =     9300 Iter. =     9301 Cur. loss =   19.19   Intervals no change =   92Epoch =     9400 Iter. =     9401 Cur. loss =   19.19   Intervals no change =   93Epoch =     9500 Iter. =     9501 Cur. loss =   19.19   Intervals no change =   94Epoch =     9600 Iter. =     9601 Cur. loss =   19.19   Intervals no change =   95Epoch =     9700 Iter. =     9701 Cur. loss =   19.19   Intervals no change =   96Epoch =     9800 Iter. =     9801 Cur. loss =   19.19   Intervals no change =   97Epoch =     9900 Iter. =     9901 Cur. loss =   19.19   Intervals no change =   98Epoch =    10000 Iter. =    10001 Cur. loss =   19.19   Intervals no change =   99Epoch =    10100 Iter. =    10101 Cur. loss =   19.19   Intervals no change =  100
+Fitting ended in  160.89  seconds
+IRT model fitting complete.
+
+Step 5: Extracting theta scores...
+  Theta scores extracted: 400 observations
+
+Step 6: Extracting item parameters...
+  Item parameters extracted: 32 items
+
+============================================================
+IRT CALIBRATION COMPLETE
+============================================================
+Theta scores shape: (400, 4)
+Item parameters shape: (32, 5)
+
+[DONE] IRT calibration complete
+[DONE] IRT calibration complete
+[RESULT] Item parameters: 32 items, 5 columns
+[RESULT] Item parameters: 32 items, 5 columns
+[RESULT] Theta scores: 400 rows, 4 columns
+[RESULT] Theta scores: 400 rows, 4 columns
+[REFORMAT] Reformatting item parameters...
+[REFORMAT] Reformatting item parameters...
+[DEBUG] Item params columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_source', 'Discrim_destination']
+[DEBUG] Item params columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_source', 'Discrim_destination']
+[REFORMATTED] Item parameters: (32, 4)
+[REFORMATTED] Item parameters: (32, 4)
+[REFORMAT] Reformatting theta scores...
+[REFORMAT] Reformatting theta scores...
+[DEBUG] Theta scores columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
+[DEBUG] Theta scores columns: ['UID', 'test', 'Theta_source', 'Theta_destination']
+[REFORMATTED] Theta scores: (400, 5)
+[REFORMATTED] Theta scores: (400, 5)
+[WARNING] SE not available from calibrate_irt - using placeholder SE=0.5
+[WARNING] SE not available from calibrate_irt - using placeholder SE=0.5
+[SAVE] Saving item parameters...
+[SAVE] Saving item parameters...
+[SAVED] step03_item_parameters.csv (32 rows, 4 cols)
+[SAVED] step03_item_parameters.csv (32 rows, 4 cols)
+[SAVE] Saving theta scores...
+[SAVE] Saving theta scores...
+[SAVED] step03_theta_scores.csv (400 rows, 5 cols)
+[SAVED] step03_theta_scores.csv (400 rows, 5 cols)
+[DIAGNOSTICS] Generating Pass 2 diagnostics...
+[DIAGNOSTICS] Generating Pass 2 diagnostics...
+[SAVED] step03_pass2_diagnostics.txt
+[SAVED] step03_pass2_diagnostics.txt
+[VALIDATION] Running validate_irt_convergence...
+[VALIDATION] Running validate_irt_convergence...
+[VALIDATION] Converged: False
+[VALIDATION] Converged: False
+[VALIDATION] Message: Model did not converge
+[VALIDATION] Message: Model did not converge
+[WARNING] validate_irt_convergence reports non-convergence, but loss stabilized at 19.20
+[WARNING] validate_irt_convergence reports non-convergence, but loss stabilized at 19.20
+[WARNING] Continuing with IRT results - manual inspection recommended
+[WARNING] Continuing with IRT results - manual inspection recommended
+[SUCCESS] Step 3 complete
+[SUCCESS] Step 3 complete
+[NEXT] Run Step 4: Merge theta scores with TSVR time variable
+[NEXT] Run Step 4: Merge theta scores with TSVR time variable

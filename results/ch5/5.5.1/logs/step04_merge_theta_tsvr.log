@@ -75,3 +75,83 @@ ValueError: Validation failed: 1 errors detected
   Theta: mean=-0.004, std=0.872, range=[-1.987, 2.352]
   SE: mean=0.500, std=0.000
 [SUCCESS] Step 4 complete
+[START] Step 4: Merge Theta Scores with TSVR Time Variable
+[LOAD] Loading theta scores from Pass 2...
+[START] Step 4: Merge Theta Scores with TSVR Time Variable
+[LOAD] Loading theta scores from Pass 2...
+[LOADED] step03_theta_scores.csv (400 rows, 5 cols)
+[INFO] Columns: ['composite_ID', 'theta_source', 'theta_destination', 'se_source', 'se_destination']
+[LOADED] step03_theta_scores.csv (400 rows, 5 cols)
+[LOAD] Loading TSVR time mapping...
+[INFO] Columns: ['composite_ID', 'theta_source', 'theta_destination', 'se_source', 'se_destination']
+[LOAD] Loading TSVR time mapping...
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'TSVR_hours']
+[MERGE] Merging theta scores with TSVR mapping on composite_ID...
+[MERGE] Merging theta scores with TSVR mapping on composite_ID...
+[DONE] Merge complete: 400 rows retained
+[VALIDATION] All 400 composite_IDs matched successfully
+[RESHAPE] Converting wide format to long format for LocationType...
+[DONE] Merge complete: 400 rows retained
+[VALIDATION] All 400 composite_IDs matched successfully
+[RESHAPE] Converting wide format to long format for LocationType...
+[DONE] Reshape complete: 800 rows (400 x 2 location types)
+[INFO] LocationType value counts:
+[DONE] Reshape complete: 800 rows (400 x 2 location types)
+[INFO] LocationType value counts:
+  source: 400 rows
+  destination: 400 rows
+  source: 400 rows
+  destination: 400 rows
+[TRANSFORM] Creating time transformations...
+[TRANSFORM] Creating time transformations...
+[DONE] Time transformations created
+[DONE] Time transformations created
+[INFO] Days range: [0.04, 10.26]
+[INFO] Days range: [0.04, 10.26]
+[INFO] log_Days_plus1 range: [0.04, 2.42]
+[INFO] log_Days_plus1 range: [0.04, 2.42]
+[INFO] Days_squared range: [0.00, 105.27]
+[SAVE] Reordering columns for LMM analysis...
+[INFO] Days_squared range: [0.00, 105.27]
+[SAVE] Reordering columns for LMM analysis...
+[SAVED] step04_lmm_input.csv (800 rows, 11 cols)
+[VALIDATION] Running validation checks...
+[PASS] 800 rows (400 composite_IDs x 2 location types)
+[SAVED] step04_lmm_input.csv (800 rows, 11 cols)
+[VALIDATION] Running validation checks...
+[PASS] 800 rows (400 composite_IDs x 2 location types)
+[PASS] Each composite_ID appears exactly twice
+[PASS] Each composite_ID appears exactly twice
+[PASS] LocationType balanced: 400 source, 400 destination
+[PASS] LocationType balanced: 400 source, 400 destination
+[PASS] No NaN values in critical columns
+[PASS] No NaN values in critical columns
+[PASS] TSVR_hours in valid range: [1.00, 246.24]
+[PASS] TSVR_hours in valid range: [1.00, 246.24]
+[PASS] Days in reasonable range: [0.04, 10.26]
+[PASS] Days in reasonable range: [0.04, 10.26]
+[PASS] Each UID appears exactly 8 times (4 tests x 2 location types)
+[VALIDATION] All checks passed
+[PASS] Each UID appears exactly 8 times (4 tests x 2 location types)
+[STATS] Descriptive statistics:
+[VALIDATION] All checks passed
+[STATS] Descriptive statistics:
+  Total rows: 800
+  Total rows: 800
+  Unique UIDs: 100
+  Unique UIDs: 100
+  Unique composite_IDs: 400
+  Unique composite_IDs: 400
+  TSVR_hours: mean=64.95, std=58.32
+  TSVR_hours: mean=64.95, std=58.32
+  Days: mean=2.71, std=2.43
+  Days: mean=2.71, std=2.43
+  Theta: mean=-0.000, std=0.841, range=[-1.868, 2.251]
+  Theta: mean=-0.000, std=0.841, range=[-1.868, 2.251]
+  SE: mean=0.500, std=0.000
+  SE: mean=0.500, std=0.000
+[SUCCESS] Step 4 complete
+[SUCCESS] Step 4 complete

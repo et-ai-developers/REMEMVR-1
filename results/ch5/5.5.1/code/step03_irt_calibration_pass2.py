@@ -276,7 +276,7 @@ if __name__ == "__main__":
             'model_fit': {
                 'batch_size': 2048,
                 'iw_samples': 100,     # MEDIUM settings for production
-                'mc_samples': 100      # MEDIUM settings for production
+                'mc_samples': 1        # Point estimates for item params (per 5.1.1-5.4.1)
             },
             'model_scores': {
                 'scoring_batch_size': 2048,

@@ -35,19 +35,19 @@ AIC COMPARISON:
 ================================================================================
 
            model_name         AIC  delta_AIC   weight
-          Logarithmic 1830.151822   0.000000 0.819041
-            Quadratic 1834.477874   4.326051 0.094171
-   Linear+Logarithmic 1835.052505   4.900683 0.070654
-Quadratic+Logarithmic 1838.316844   8.165022 0.013813
-               Linear 1841.883728  11.731906 0.002321
+          Logarithmic 1747.766781   0.000000 0.634835
+            Quadratic 1750.219863   2.453082 0.186201
+   Linear+Logarithmic 1750.705789   2.939009 0.146037
+Quadratic+Logarithmic 1753.922026   6.155245 0.029246
+               Linear 1758.067204  10.300423 0.003681
 
 ================================================================================
 BEST MODEL SELECTED:
 ================================================================================
 
 Model: Logarithmic
-AIC: 1830.15
-Weight: 0.8190
+AIC: 1747.77
+Weight: 0.6348
 
 Model Summary:
 --------------------------------------------------------------------------------
@@ -55,18 +55,18 @@ Model Summary:
 ================================================================================
 Model:                     MixedLM         Dependent Variable:         theta    
 No. Observations:          800             Method:                     ML       
-No. Groups:                100             Scale:                      0.4498   
-Min. group size:           8               Log-Likelihood:             -907.0759
+No. Groups:                100             Scale:                      0.4003   
+Min. group size:           8               Log-Likelihood:             -865.8834
 Max. group size:           8               Converged:                  Yes      
 Mean group size:           8.0                                                  
 --------------------------------------------------------------------------------
                                       Coef.  Std.Err.   z    P>|z| [0.025 0.975]
 --------------------------------------------------------------------------------
-Intercept                              0.382    0.078  4.878 0.000  0.229  0.536
-LocationType[T.source]                 0.108    0.083  1.293 0.196 -0.056  0.271
-log_Days_plus1                        -0.355    0.050 -7.061 0.000 -0.453 -0.256
-log_Days_plus1:LocationType[T.source] -0.119    0.064 -1.846 0.065 -0.246  0.007
-Group Var                              0.266    0.100                           
+Intercept                              0.390    0.076  5.166 0.000  0.242  0.539
+LocationType[T.source]                 0.100    0.079  1.277 0.202 -0.054  0.254
+log_Days_plus1                        -0.347    0.048 -7.246 0.000 -0.441 -0.253
+log_Days_plus1:LocationType[T.source] -0.137    0.061 -2.245 0.025 -0.256 -0.017
+Group Var                              0.262    0.101                           
 Group x log_Days_plus1 Cov            -0.058    0.048                           
-log_Days_plus1 Var                     0.044    0.034                           
+log_Days_plus1 Var                     0.044    0.033                           
 ================================================================================

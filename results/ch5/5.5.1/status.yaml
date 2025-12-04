@@ -48,23 +48,37 @@ rq_analysis:
     8 steps specified with validation (IRT 2-factor -> 2-pass purification -> LMM 5 models -> dual p-values -> dual-scale plots)
 
 analysis_steps:
-  step00_extract_vr_data: pending
-  step01_irt_calibration_pass1: pending
-  step02_purify_items: pending
-  step03_irt_calibration_pass2: pending
-  step04_merge_theta_tsvr: pending
-  step05_fit_lmm: pending
-  step06_compute_post_hoc_contrasts: pending
-  step07_prepare_trajectory_plot_data: pending
+  step00_extract_vr_data: success
+  step01_irt_calibration_pass1: success
+  step02_purify_items: success
+  step03_irt_calibration_pass2: success
+  step04_merge_theta_tsvr: success
+  step05_fit_lmm: success
+  step06_compute_post_hoc_contrasts: success
+  step07_prepare_plot_data: success
 
 g_code:
-  status: pending
+  status: success
 
 rq_inspect:
-  status: pending
+  status: success
+  context_dump: |
+    Steps 0-6: PASS (all outputs validated)
+    Step 7: File naming differs from spec but data valid
+    Adapted: step07_predicted_trajectories.csv, step07_summary_by_timebin.csv used instead
 
 rq_plots:
-  status: pending
+  status: success
+  context_dump: |
+    Plots generated: 2 (trajectory_theta, trajectory_probability)
+    Data sources: step07_predicted_trajectories.csv, step07_summary_by_timebin.csv, step03_item_parameters.csv
+    D069 compliance: YES (dual-scale trajectory plots included)
+    Functions used: plot_trajectory, convert_theta_to_probability
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: "2025-12-04T06:00:00Z"
+  context_dump: |
+    Results validated for scientific plausibility
+    1 anomaly flagged: wrong direction (main effect null, contradicts hypothesis - see summary.md Section 3)
+    Summary documented in results/summary.md

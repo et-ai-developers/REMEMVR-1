@@ -1,0 +1,28 @@
+[START] Step 6: Post-Hoc Contrasts with Dual P-Values
+[LOAD] Checking for Step 5 outputs...
+[INFO] Model file exists: step05_lmm_fitted_model.pkl
+[INFO] Best model: Logarithmic (AIC: 1747.77)
+[LOADED] step04_lmm_input.csv (800 rows)
+[ANALYSIS] Extracting fixed effects coefficients...
+[LOADED] step05_lmm_coefficients.csv (7 parameters)
+[EXTRACTED] Main effect: coef=0.1004, z=1.277, p=0.2017
+[EXTRACTED] Interaction: coef=-0.1366, z=-2.245, p=0.0248
+[ANALYSIS] Applying Bonferroni correction (n_tests=2)...
+[DONE] Bonferroni correction applied
+  Main effect: p_uncorr=0.2017, p_bonf=0.4035
+  Interaction: p_uncorr=0.0248, p_bonf=0.0495
+[ANALYSIS] Computing effect sizes at Days 0, 1, 3, 6...
+[COMPUTED] Day 0: source_mean=0.435, dest_mean=0.395, d=0.050
+[COMPUTED] Day 1: source_mean=0.163, dest_mean=0.106, d=0.072
+[COMPUTED] Day 3: source_mean=-0.151, dest_mean=-0.118, d=-0.044
+[COMPUTED] Day 6: source_mean=-0.497, dest_mean=-0.306, d=-0.239
+[DONE] Effect sizes computed for 4 timepoints
+[SAVE] Saving outputs...
+[SAVED] step06_post_hoc_contrasts.csv (2 rows, 8 cols)
+[SAVED] step06_effect_sizes.csv (4 rows, 7 cols)
+[VALIDATION] Running validate_contrasts_d068...
+[VALIDATION] valid: True
+[VALIDATION] d068_compliant: True
+[VALIDATION] missing_cols: []
+[VALIDATION] message: Decision D068 compliant: Found both p_uncorrected and p_bonferroni columns.
+[SUCCESS] Step 6 complete

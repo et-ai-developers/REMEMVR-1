@@ -202,3 +202,149 @@ TypeError: ufunc 'isfinite' not supported for the input types, and the inputs co
 [VALIDATION] All validation checks passed
 [SUCCESS] Step 5 complete
 [SUMMARY] Best model: Logarithmic (AIC=1830.15, weight=0.8190)
+[START] Step 5: LMM Model Selection (5 Candidate Time Transformations)
+[LOAD] Loading LMM input data...
+[START] Step 5: LMM Model Selection (5 Candidate Time Transformations)
+[LOAD] Loading LMM input data...
+[LOADED] step04_lmm_input.csv (800 rows, 11 cols)
+[LOADED] step04_lmm_input.csv (800 rows, 11 cols)
+[CHECK] All required columns present: ['UID', 'Days', 'log_Days_plus1', 'Days_squared', 'LocationType', 'theta']
+[CHECK] All required columns present: ['UID', 'Days', 'log_Days_plus1', 'Days_squared', 'LocationType', 'theta']
+[INFO] Data summary:
+[INFO] Data summary:
+  - UIDs: 100
+  - UIDs: 100
+  - Location types: ['source', 'destination']
+  - Location types: ['source', 'destination']
+  - Location type counts: {'source': 400, 'destination': 400}
+  - Location type counts: {'source': 400, 'destination': 400}
+  - Days range: [0.04, 10.26]
+  - Theta range: [-1.87, 2.25]
+  - Days range: [0.04, 10.26]
+  - Theta range: [-1.87, 2.25]
+[MODELS] Defining 5 candidate models...
+[MODELS] Defining 5 candidate models...
+[INFO] Candidate models defined:
+[INFO] Candidate models defined:
+  - Linear: Linear time × LocationType interaction
+  - Linear: Linear time × LocationType interaction
+  - Quadratic: Quadratic time (Days + Days²) × LocationType interaction
+  - Logarithmic: Logarithmic time × LocationType interaction
+  - Linear+Logarithmic: Linear + Logarithmic time × LocationType interaction
+  - Quadratic: Quadratic time (Days + Days²) × LocationType interaction
+  - Logarithmic: Logarithmic time × LocationType interaction
+  - Linear+Logarithmic: Linear + Logarithmic time × LocationType interaction
+  - Quadratic+Logarithmic: Quadratic + Logarithmic time × LocationType interaction
+  - Quadratic+Logarithmic: Quadratic + Logarithmic time × LocationType interaction
+[FIT] Fitting 5 candidate models (REML=False for AIC comparison)...
+[FIT] Fitting 5 candidate models (REML=False for AIC comparison)...
+[FIT] Model 1/5: Linear
+[FIT] Model 1/5: Linear
+  Formula: theta ~ Days * LocationType
+  Formula: theta ~ Days * LocationType
+  Random effects: ~Days
+  Random effects: ~Days
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+  [CONVERGED] AIC = 1758.07
+[FIT] Model 2/5: Quadratic
+  Formula: theta ~ (Days + Days_squared) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1758.07
+[FIT] Model 2/5: Quadratic
+  Formula: theta ~ (Days + Days_squared) * LocationType
+  Random effects: ~Days
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+  [CONVERGED] AIC = 1750.22
+[FIT] Model 3/5: Logarithmic
+  Formula: theta ~ log_Days_plus1 * LocationType
+  Random effects: ~log_Days_plus1
+  [CONVERGED] AIC = 1750.22
+[FIT] Model 3/5: Logarithmic
+  Formula: theta ~ log_Days_plus1 * LocationType
+  Random effects: ~log_Days_plus1
+  [CONVERGED] AIC = 1747.77
+[FIT] Model 4/5: Linear+Logarithmic
+  Formula: theta ~ (Days + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  [CONVERGED] AIC = 1747.77
+[FIT] Model 4/5: Linear+Logarithmic
+  Formula: theta ~ (Days + log_Days_plus1) * LocationType
+  Random effects: ~Days
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+  [CONVERGED] AIC = 1750.71
+[FIT] Model 5/5: Quadratic+Logarithmic
+  [CONVERGED] AIC = 1750.71
+  Formula: theta ~ (Days + Days_squared + log_Days_plus1) * LocationType
+[FIT] Model 5/5: Quadratic+Logarithmic
+  Formula: theta ~ (Days + Days_squared + log_Days_plus1) * LocationType
+  Random effects: ~Days
+  Random effects: ~Days
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/regression/mixed_linear_model.py:2237: ConvergenceWarning: The MLE may be on the boundary of the parameter space.
+  warnings.warn(msg, ConvergenceWarning)
+  [CONVERGED] AIC = 1753.92
+[DONE] All 5 models fitted
+  [CONVERGED] AIC = 1753.92
+[CHECK] Verifying all models converged...
+[DONE] All 5 models fitted
+[CHECK] Verifying all models converged...
+[PASS] All 5 models converged successfully
+[PASS] All 5 models converged successfully
+[COMPUTE] Computing AIC comparison table...
+[COMPUTE] Computing AIC comparison table...
+[INFO] Minimum AIC: 1747.77
+[INFO] Minimum AIC: 1747.77
+[COMPUTED] AIC comparison table:
+[COMPUTED] AIC comparison table:
+  Logarithmic               AIC= 1747.77  delta=  0.00  weight=0.6348
+  Logarithmic               AIC= 1747.77  delta=  0.00  weight=0.6348
+  Quadratic                 AIC= 1750.22  delta=  2.45  weight=0.1862
+  Quadratic                 AIC= 1750.22  delta=  2.45  weight=0.1862
+  Linear+Logarithmic        AIC= 1750.71  delta=  2.94  weight=0.1460
+  Linear+Logarithmic        AIC= 1750.71  delta=  2.94  weight=0.1460
+  Quadratic+Logarithmic     AIC= 1753.92  delta=  6.16  weight=0.0292
+  Quadratic+Logarithmic     AIC= 1753.92  delta=  6.16  weight=0.0292
+  Linear                    AIC= 1758.07  delta= 10.30  weight=0.0037
+  Linear                    AIC= 1758.07  delta= 10.30  weight=0.0037
+[CHECK] Akaike weights sum: 1.000000 (should be ~1.0)
+[SELECT] Selecting best model...
+[CHECK] Akaike weights sum: 1.000000 (should be ~1.0)
+[SELECT] Selecting best model...
+[BEST] Logarithmic
+  AIC: 1747.77
+[BEST] Logarithmic
+  Weight: 0.6348
+  AIC: 1747.77
+  Weight: 0.6348
+[PASS] Best model weight (0.6348) > 0.30 (quality threshold met)
+[PASS] Best model weight (0.6348) > 0.30 (quality threshold met)
+[SAVE] Saving analysis outputs...
+[SAVE] Saving analysis outputs...
+[SAVED] step05_model_comparison.csv (5 rows)
+[SAVED] step05_model_comparison.csv (5 rows)
+[SAVED] step05_lmm_fitted_model.pkl (Logarithmic model)
+[SAVED] step05_lmm_fitted_model.pkl (Logarithmic model)
+[SAVED] step05_lmm_coefficients.csv (7 parameters)
+[SAVED] step05_lmm_coefficients.csv (7 parameters)
+[SAVED] step05_lmm_random_effects.csv
+[SAVED] step05_lmm_random_effects.csv
+[SAVED] step05_lmm_summary.txt
+[VALIDATION] Validating model selection results...
+[PASS] Best model converged
+[SAVED] step05_lmm_summary.txt
+[PASS] All AIC values finite
+[PASS] Akaike weights sum to 1.0
+[VALIDATION] Validating model selection results...
+[PASS] Best model converged
+[PASS] All AIC values finite
+[PASS] Akaike weights sum to 1.0
+[PASS] Exactly one model has delta_AIC = 0
+[VALIDATION] All validation checks passed
+[SUCCESS] Step 5 complete
+[SUMMARY] Best model: Logarithmic (AIC=1747.77, weight=0.6348)
+[PASS] Exactly one model has delta_AIC = 0
+[VALIDATION] All validation checks passed
+[SUCCESS] Step 5 complete
+[SUMMARY] Best model: Logarithmic (AIC=1747.77, weight=0.6348)
