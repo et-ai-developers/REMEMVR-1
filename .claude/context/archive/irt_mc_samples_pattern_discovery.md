@@ -14,7 +14,7 @@
 
 **Archived from:** state.md Session (2025-12-05 09:30)
 **Original Date:** 2025-12-05 09:30
-**Reason:** Session current (N), but pattern documentation is orthogonal completed work
+**Reason:** Task completed (IRT pattern documented), 3+ sessions old
 
 ---
 

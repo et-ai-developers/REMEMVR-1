@@ -14,7 +14,7 @@
 
 **Archived from:** state.md Session (2025-12-05 09:30)
 **Original Date:** 2025-12-05 09:30
-**Reason:** Session current (N), but plot formatting is orthogonal completed work
+**Reason:** Task completed (plot formatting standard), 3+ sessions old
 
 ---
 

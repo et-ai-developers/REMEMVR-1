@@ -395,6 +395,12 @@
 ### plots_style_5.2.1_format
 **Description:** Publication-quality trajectory plot formatting standard established. Individual scatter points (alpha=0.15) from 800 observations, dashed fitted curves from LMM predictions, 95% CI bands from covariance matrix, continuous TSVR x-axis (not binned). Dual-scale output (theta + probability) per Decision D069. Template implementation in results/ch5/5.5.1/plots/plots.py. Supersedes binned summary approach from initial rq_plots agent.
 
+### rq_5.5.1_pipeline_execution_minimum_settings_complete
+**Description:** First production execution of Type 5.5 Source-Destination RQ with MINIMUM IRT settings (pipeline validation phase). All 8 analysis steps executed successfully, 6 code fixes applied, statistical results preliminary. MEDIUM settings upgrade in progress with WRONG mc_samples configuration (100/100 instead of 1/100). Superseded by Session 2025-12-05 09:30 production execution with corrected IRT settings.
+
+### rq_5.5.1_complete_production_execution
+**Description:** RQ 5.5.1 Source-Destination memory analysis with corrected IRT settings and publication-quality plots. Complete 8-step pipeline re-execution with mc_samples=1/100 pattern, logarithmic model selected (AIC=1747.77), marginally significant interaction (p=0.05 Bonferroni) showing destination forgetting faster than source. Plot style fixed to 5.2.1 format with individual scatter points. Full validation pipeline complete (rq_inspect + rq_plots + rq_results). 1 anomaly flagged. Production-ready.
+
 ---
 
 ## How to Use This Index
