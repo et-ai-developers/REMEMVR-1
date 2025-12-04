@@ -1,0 +1,31 @@
+[START] Step 05: Prepare Age Tertile Plot Data
+[LOAD] Loading LMM input data...
+[LOADED] 800 observations
+[TERTILE] Computing age tertile cutoffs...
+[CUTOFF] 33rd percentile: 36.7 years
+[CUTOFF] 67th percentile: 52.3 years
+[ASSIGN] Assigning observations to age tertiles...
+[COUNTS] Participants per tertile:
+  Young: 33 participants
+  Middle: 34 participants
+  Older: 33 participants
+[AGGREGATE] Computing means and CIs by group...
+[RESULT] 24 groups created
+[VALIDATION] Running validation checks...
+[PASS] Row count = 24
+[PASS] All 3 age tertiles present
+[PASS] Both locations present
+[PASS] All 4 tests present
+[PASS] No NaN values
+[PASS] Confidence intervals valid
+[PASS] Minimum group size = 33 (>= 5)
+[SAVE] Saving plot data...
+[SAVED] step05_age_tertile_plot_data.csv (24 rows)
+[SUMMARY] Theta means by age tertile and location:
+  Middle - Destination: -0.070
+  Middle - Source: -0.201
+  Older - Destination: 0.006
+  Older - Source: -0.063
+  Young - Destination: 0.134
+  Young - Source: 0.202
+[SUCCESS] Step 05 complete - Plot data prepared

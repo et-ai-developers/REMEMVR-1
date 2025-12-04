@@ -1,0 +1,59 @@
+[START] Step 02: Fit LMM with 3-Way Age x LocationType x Time Interactions
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (800 rows, 10 cols)
+[VALIDATION] Input structure validated: 800 rows, 10 columns
+[ANALYSIS] Fitting LMM with 3-way Age_c x LocationType x Time interactions...
+[FORMULA] Fixed effects: theta ~ TSVR_hours + log_TSVR + Age_c + LocationType + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:LocationType + log_TSVR:LocationType + Age_c:LocationType + TSVR_hours:Age_c:LocationType + log_TSVR:Age_c:LocationType
+[FORMULA] Random effects: ~TSVR_hours
+[FORMULA] Grouping variable: UID
+[DONE] Model fitting complete
+[CONVERGENCE] Converged: True
+[EXTRACT] Extracting model components...
+[ERROR] All arrays must be of the same length
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.3/code/step02_fit_lmm.py", line 219, in <module>
+    fixed_effects = pd.DataFrame({
+                    ^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 782, in __init__
+    mgr = dict_to_mgr(data, index, columns, dtype=dtype, copy=copy, typ=manager)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/construction.py", line 503, in dict_to_mgr
+    return arrays_to_mgr(arrays, columns, index, dtype=dtype, typ=typ, consolidate=copy)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/construction.py", line 114, in arrays_to_mgr
+    index = _extract_index(arrays)
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/internals/construction.py", line 677, in _extract_index
+    raise ValueError("All arrays must be of the same length")
+ValueError: All arrays must be of the same length
+[START] Step 02: Fit LMM with 3-Way Age x LocationType x Time Interactions
+[LOAD] Loading LMM input data...
+[LOADED] step01_lmm_input.csv (800 rows, 10 cols)
+[VALIDATION] Input structure validated: 800 rows, 10 columns
+[ANALYSIS] Fitting LMM with 3-way Age_c x LocationType x Time interactions...
+[FORMULA] Fixed effects: theta ~ TSVR_hours + log_TSVR + Age_c + LocationType + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:LocationType + log_TSVR:LocationType + Age_c:LocationType + TSVR_hours:Age_c:LocationType + log_TSVR:Age_c:LocationType
+[FORMULA] Random effects: ~TSVR_hours
+[FORMULA] Grouping variable: UID
+[DONE] Model fitting complete
+[CONVERGENCE] Converged: True
+[EXTRACT] Extracting model components...
+[EXTRACT] Fixed effects: 12 terms
+[MODEL] AIC: 1756.06, BIC: 1831.01, LogLik: -862.03
+[MODEL] N observations: 800, N groups (UIDs): 100
+[RANDOM] Variance components extracted
+[SAVE] Saving model outputs...
+[SAVED] Model object: step02_lmm_model.pkl
+[SAVED] Model summary: step02_lmm_summary.txt
+[SAVED] Fixed effects table: step02_fixed_effects.csv (12 rows)
+[VALIDATION] Validating model convergence...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[VALIDATION] Model converged successfully
+[VALIDATION] Checking fixed effects count...
+[PASS] 12 fixed effects present as expected
+[VALIDATION] Checking standard errors...
+[PASS] All standard errors positive
+[VALIDATION] Checking AIC/BIC...
+[PASS] AIC and BIC are finite
+[SUCCESS] Step 02 complete

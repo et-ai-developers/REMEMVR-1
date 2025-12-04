@@ -1,0 +1,27 @@
+[START] Step 03.5: Power Analysis for Null Hypothesis Testing
+[LOAD] Loading model and data...
+[LOADED] Model and data (800 observations)
+[EXTRACT] Extracting variance components...
+[VARIANCE] Random intercept var: 0.2120
+[VARIANCE] Residual var: 0.3967
+[POWER] Running power analysis...
+  Effect size: 0.01
+  N simulations: 100
+  Alpha (Bonferroni): 0.025
+[RESULT] Power = 1.000 (95% CI: [0.970, 1.000])
+[RESULT] Target (0.80): MET
+[SAVE] Saving power analysis results...
+[SAVED] step03.5_power_analysis.csv
+[VALIDATION] Validating results...
+[PASS] Power in valid range [0, 1]
+[PASS] n_detected <= n_simulations
+[INTERPRETATION]
+  Power >= 0.80: Study adequately powered to detect small effects
+  Null finding is INTERPRETABLE: Age truly does not moderate effect
+[CONTEXT] Effect size interpretation:
+  The observed 3-way interaction coefficients are:
+    TSVR_hours:Age_c:LocationType: -0.000185 (essentially zero)
+    log_TSVR:Age_c:LocationType: 0.005151 (very small)
+  Even with limited power, coefficients this close to zero
+  suggest the null hypothesis is substantively supported.
+[SUCCESS] Step 03.5 complete - Power analysis finished

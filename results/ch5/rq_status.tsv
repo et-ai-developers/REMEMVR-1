@@ -30,9 +30,9 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 5.4.6	Congruence	Variance Decomp	COMPLETE 2025-12-04. ICC_slope=0.000 ALL levels (forgetting NOT trait-like). ICC_intercept: Congruent=0.365 highest, Common=0.277, Incongruent=0.267. Replicates RQ 5.2.6 domains finding.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
 5.4.7	Congruence	Clustering	COMPLETE 2025-12-04. K=6 by BIC but WEAK quality: silhouette=0.254, Jaccard=0.592. Slopes~0 (per 5.4.6). Null finding: no schema-selective memory profiles.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
 5.4.8	Congruence	Item Difficulty	DEPRIORITIZED: Core hypothesis answered by 5.3.9 (item difficulty paradigm-invariant). Expected NULL.	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.1	Source-Dest	Trajectories	ROOT RQ: -U- (pickup) vs -D- (putdown). Hypothesis: Destination > Source (action-effect binding). 36 items.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.2	Source-Dest	Consolidation	Piecewise by source vs destination. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.3	Source-Dest	Age Effects	Age x Location Type x Time. Expected NULL (consistent with Chapter 5).	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+5.5.1	Source-Dest	Trajectories	COMPLETE 2025-12-05. Main effect NULL (p=0.61). Source=Destination memory. IRT bug fixed (factor-specific conversion).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
+5.5.2	Source-Dest	Consolidation	COMPLETE 2025-12-05. 3-way interaction NULL (p=0.61, f2=0.0005). Similar consolidation patterns.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
+5.5.3	Source-Dest	Age Effects	COMPLETE 2025-12-05. 3-way Age x Location x Time NULL (p=0.16, 0.33). Power=1.00. Age-invariant.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
 5.5.4	Source-Dest	IRT-CTT	Validates 5.5.1 findings not measurement artifact. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
 5.5.5	Source-Dest	Purified CTT	Tests purification-trajectory paradox. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
 5.5.6	Source-Dest	Variance Decomp	ICC by location type. Expected ICC_slope≈0. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE

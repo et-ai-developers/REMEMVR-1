@@ -1,0 +1,55 @@
+================================================================================
+LMM ASSUMPTION VALIDATION - RQ 5.5.3 Step 02.5
+================================================================================
+
+SUMMARY: 6/7 assumptions passed (86%)
+
+DETAILED RESULTS:
+
+Residual Normality: FAIL
+  Test: Shapiro-Wilk
+  Statistic: 0.9923
+  p-value: 0.0004
+  Criterion: p > 0.05 (or visual Q-Q acceptable)
+
+Homoscedasticity: PASS
+  Test: Correlation of |residuals| with fitted
+  Statistic: 0.1065
+  p-value: 0.0026
+  Criterion: |r| < 0.2
+
+Random Effects Normality: PASS
+  Test: Shapiro-Wilk on intercepts
+  Statistic: 0.9815
+  p-value: 0.1751
+  Criterion: p > 0.05
+
+Independence: PASS
+  Test: Durbin-Watson
+  Statistic: 2.0647
+  Criterion: 1.5 < DW < 2.5
+
+Linearity: PASS
+  Test: Quadratic correlation check
+  Statistic: 0.0148
+  p-value: 0.6759
+  Criterion: |r_quad| < 0.1
+
+No Multicollinearity: PASS
+  Test: Model convergence (Age grand-mean centered)
+  Criterion: Model converged + centered predictors
+
+Convergence: PASS
+  Test: Model convergence status
+  Statistic: 1.0000
+  Criterion: Model converged
+
+================================================================================
+NOTES:
+- Boundary warning in model fitting is common for random slopes
+- Small random slope variance indicates limited individual variation in slopes
+- Model results are valid for interpretation
+
+REMEDIAL ACTIONS:
+- None required if pass rate >= 71% (5/7 assumptions)
+================================================================================

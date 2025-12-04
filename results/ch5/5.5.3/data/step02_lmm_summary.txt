@@ -1,0 +1,42 @@
+================================================================================
+LMM SUMMARY - RQ 5.5.3 Step 02
+================================================================================
+
+Model Formula:
+theta ~ TSVR_hours + log_TSVR + Age_c + LocationType + TSVR_hours:Age_c + log_TSVR:Age_c + TSVR_hours:LocationType + log_TSVR:LocationType + Age_c:LocationType + TSVR_hours:Age_c:LocationType + log_TSVR:Age_c:LocationType
+
+Random Effects Formula:
+~TSVR_hours
+
+Grouping Variable: UID
+
+Convergence Status: True
+N Observations: 800
+N Groups (UIDs): 100
+
+Model Fit Statistics:
+  AIC: 1756.0566
+  BIC: 1831.0103
+  Log-Likelihood: -862.0283
+
+Fixed Effects:
+                                   term      coef       se         z            p  ci_lower  ci_upper
+                              Intercept  0.471345 0.093818  5.024011 5.060328e-07  0.287464  0.655226
+                 LocationType[T.Source]  0.021945 0.115398  0.190168 8.491776e-01 -0.204231  0.248122
+                             TSVR_hours -0.001647 0.001119 -1.472564 1.408686e-01 -0.003839  0.000545
+      TSVR_hours:LocationType[T.Source] -0.002725 0.001513 -1.801022 7.169942e-02 -0.005690  0.000240
+                               log_TSVR -0.102113 0.037946 -2.690986 7.124125e-03 -0.176486 -0.027740
+        log_TSVR:LocationType[T.Source]  0.032604 0.053253  0.612256 5.403687e-01 -0.071769  0.136977
+                                  Age_c -0.003233 0.006483 -0.498766 6.179442e-01 -0.015939  0.009472
+           Age_c:LocationType[T.Source] -0.008445 0.007982 -1.058071 2.900230e-01 -0.024089  0.007199
+                       TSVR_hours:Age_c  0.000123 0.000078  1.571654 1.160307e-01 -0.000030  0.000276
+TSVR_hours:Age_c:LocationType[T.Source] -0.000185 0.000106 -1.752014 7.977146e-02 -0.000393  0.000022
+                         log_TSVR:Age_c -0.002548 0.002639 -0.965561 3.342637e-01 -0.007720  0.002624
+  log_TSVR:Age_c:LocationType[T.Source]  0.005151 0.003707  1.389520 1.646747e-01 -0.002115  0.012416
+
+Random Effects Variance-Covariance Matrix:
+               Group  TSVR_hours
+Group       0.212029   -0.000478
+TSVR_hours -0.000478    0.000007
+
+================================================================================
