@@ -42,24 +42,31 @@ rq_analysis:
   context_dump: "8 steps specified with validation (Step 0: RQ 5.5.1 dependency load, Steps 1-6: CTT/correlations/LMMs/comparisons, Steps 7-8: plot data)"
 
 analysis_steps:
-  step00_load_dependencies_from_rq551: pending
-  step01_compute_ctt_scores: pending
-  step02_compute_correlations: pending
-  step03_fit_parallel_lmms: pending
-  step04_validate_lmm_assumptions: pending
-  step05_compare_fixed_effects: pending
-  step06_compare_model_fit: pending
-  step07_prepare_scatterplot_data: pending
-  step08_prepare_trajectory_comparison_data: pending
+  step00_load_dependencies_from_rq551: success
+  step01_compute_ctt_scores: success
+  step02_compute_correlations: success
+  step03_fit_parallel_lmms: success
+  step04_validate_lmm_assumptions: success
+  step05_compare_fixed_effects: success
+  step06_compare_model_fit: success
+  step07_prepare_scatterplot_data: success
+  step08_prepare_trajectory_comparison_data: success
 
 g_code:
-  status: pending
+  status: success
 
 rq_inspect:
-  status: pending
+  status: success
 
 rq_plots:
-  status: pending
+  status: success
 
 rq_results:
-  status: pending
+  status: success
+  timestamp: 2025-12-05 14:30
+  context_dump: |
+    Measurement convergence CONFIRMED (r > 0.70 all locations)
+    Source r=0.944 (exceptional), Destination r=0.871 (strong), Overall r=0.746
+    LMM agreement: kappa=0.00 (significance divergence despite perfect sign match 4/4)
+    Interpretation: Strong construct convergence, IRT more sensitive to location effects
+    Key finding: RQ 5.5.1 source-destination dissociation NOT measurement artifact

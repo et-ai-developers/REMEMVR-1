@@ -1,0 +1,78 @@
+================================================================================
+LMM ASSUMPTION VALIDATION DIAGNOSTICS
+RQ 5.5.4 - IRT-CTT Convergence Analysis
+================================================================================
+
+--------------------------------------------------------------------------------
+IRT MODEL DIAGNOSTICS
+--------------------------------------------------------------------------------
+Overall Validation: FAIL
+Message: LMM assumption violations detected (3/7 checks failed):
+  - Residual normality violated (Shapiro-Wilk p < 0.05)
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.174 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Consider using robust standard errors or transforming the outcome variable
+  2. Model variance structure explicitly or use weighted least squares
+  3. Add AR(1) correlation structure to account for temporal dependencies
+
+
+VIOLATIONS DETECTED (7 assumptions failed):
+  - Linearity: Method: unknown, CSVs: 0
+  - Homoscedasticity: Test: Breusch-Pagan
+  - Normality_residuals: Test: Shapiro-Wilk
+  - Normality_random_effects_intercepts: Test: Shapiro-Wilk, Component: Intercepts
+  - Normality_random_effects_slopes: Test: Shapiro-Wilk, Component: Slopes
+  - Independence: Lag-1 ACF: -0.1735
+  - Influential_observations: Max Cook's D: nan, N outliers: 0
+
+--------------------------------------------------------------------------------
+CTT MODEL DIAGNOSTICS
+--------------------------------------------------------------------------------
+Overall Validation: FAIL
+Message: LMM assumption violations detected (2/7 checks failed):
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.135 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Model variance structure explicitly or use weighted least squares
+  2. Add AR(1) correlation structure to account for temporal dependencies
+
+
+VIOLATIONS DETECTED (7 assumptions failed):
+  - Linearity: Method: unknown, CSVs: 0
+  - Homoscedasticity: Test: Breusch-Pagan
+  - Normality_residuals: Test: Shapiro-Wilk
+  - Normality_random_effects_intercepts: Test: Shapiro-Wilk, Component: Intercepts
+  - Normality_random_effects_slopes: Test: Shapiro-Wilk, Component: Slopes
+  - Independence: Lag-1 ACF: -0.1352
+  - Influential_observations: Max Cook's D: nan, N outliers: 0
+
+NOTE: CTT model bounded outcome [0,1] may violate normality.
+This is EXPECTED and documented (not a blocking error).
+
+--------------------------------------------------------------------------------
+COMPARISON SUMMARY
+--------------------------------------------------------------------------------
+IRT Model: 7/7 assumptions violated
+CTT Model: 7/7 assumptions violated
+
+--------------------------------------------------------------------------------
+REMEDIAL ACTION RECOMMENDATIONS
+--------------------------------------------------------------------------------
+VIOLATIONS DETECTED:
+  - Residual normality: With N=800, minor violations acceptable per CLT.
+    Consider robust standard errors if severe.
+
+  - Homoscedasticity: Consider weighted least squares or robust SEs.
+
+  - Independence: Consider AR(1) error structure in LMM.
+
+  - Influential observations: Review high Cook's D cases.
+    Consider sensitivity analysis with/without outliers.
+
+
+================================================================================
+END OF DIAGNOSTICS REPORT
+================================================================================

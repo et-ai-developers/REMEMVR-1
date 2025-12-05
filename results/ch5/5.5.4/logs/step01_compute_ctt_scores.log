@@ -1,0 +1,89 @@
+[START] Step 01: Compute CTT Mean Scores per Location Type
+[LOAD] Loading input data...
+[LOADED] step00_raw_responses_filtered.csv (400 rows, 35 cols)
+[LOADED] step00_purified_items_from_rq551.csv (32 rows, 2 cols)
+[INFO] Purified items: 32 items across 2 location types
+[LOADED] step00_irt_theta_from_rq551.csv (800 rows, 7 cols)
+[ANALYSIS] Running compute_ctt_mean_scores_by_factor...
+[ANALYSIS] Computing CTT mean scores per location type...
+[ANALYSIS] Factor column: 'location_type'
+[ANALYSIS] Item column: 'item_code'
+[ERROR] Missing required columns in df_wide: ['TEST']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.4/code/step01_compute_ctt_scores.py", line 174, in <module>
+    ctt_scores = compute_ctt_mean_scores_by_factor(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_ctt.py", line 328, in compute_ctt_mean_scores_by_factor
+    raise ValueError(f"Missing required columns in df_wide: {missing_cols}")
+ValueError: Missing required columns in df_wide: ['TEST']
+[START] Step 01: Compute CTT Mean Scores per Location Type
+[LOAD] Loading input data...
+[LOADED] step00_raw_responses_filtered.csv (400 rows, 35 cols)
+[INFO] Renamed 'test' -> 'TEST' for tool compatibility
+[LOADED] step00_purified_items_from_rq551.csv (32 rows, 2 cols)
+[INFO] Purified items: 32 items across 2 location types
+[LOADED] step00_irt_theta_from_rq551.csv (800 rows, 7 cols)
+[ANALYSIS] Running compute_ctt_mean_scores_by_factor...
+[ANALYSIS] Computing CTT mean scores per location type...
+[ANALYSIS] Factor column: 'location_type'
+[ANALYSIS] Item column: 'item_code'
+[DONE] CTT mean score computation complete
+[INFO] CTT scores computed: 800 rows (expected: 800 = 400 participant-tests × 2 location types)
+[MERGE] Merging TSVR_hours from IRT theta scores...
+[ERROR] 'location_type'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.4/code/step01_compute_ctt_scores.py", line 201, in <module>
+    ctt_scores_with_tsvr = ctt_scores.merge(
+                           ^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 10859, in merge
+    return merge(
+           ^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 170, in merge
+    op = _MergeOperation(
+         ^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 794, in __init__
+    ) = self._get_merge_keys()
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1311, in _get_merge_keys
+    left_keys.append(left._get_label_or_level_values(lk))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1914, in _get_label_or_level_values
+    raise KeyError(key)
+KeyError: 'location_type'
+[START] Step 01: Compute CTT Mean Scores per Location Type
+[LOAD] Loading input data...
+[LOADED] step00_raw_responses_filtered.csv (400 rows, 35 cols)
+[INFO] Renamed 'test' -> 'TEST' for tool compatibility
+[LOADED] step00_purified_items_from_rq551.csv (32 rows, 2 cols)
+[INFO] Purified items: 32 items across 2 location types
+[LOADED] step00_irt_theta_from_rq551.csv (800 rows, 7 cols)
+[ANALYSIS] Running compute_ctt_mean_scores_by_factor...
+[ANALYSIS] Computing CTT mean scores per location type...
+[ANALYSIS] Factor column: 'location_type'
+[ANALYSIS] Item column: 'item_code'
+[DONE] CTT mean score computation complete
+[INFO] CTT scores computed: 800 rows (expected: 800 = 400 participant-tests × 2 location types)
+[INFO] CTT output columns: ['composite_ID', 'UID', 'test', 'factor', 'CTT_score', 'n_items']
+[INFO] Renamed 'factor' -> 'location_type'
+[INFO] Renamed 'CTT_score' -> 'ctt_mean_score'
+[MERGE] Merging TSVR_hours from IRT theta scores...
+[PASS] All 800 rows have TSVR_hours
+[DONE] TSVR merge complete
+[SAVE] Saving data/step01_ctt_scores.csv...
+[SAVED] data/step01_ctt_scores.csv (800 rows, 7 cols)
+[INFO] Columns: ['composite_ID', 'UID', 'test', 'location_type', 'ctt_mean_score', 'n_items', 'TSVR_hours']
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] Checking ctt_mean_score in [0, 1] range...
+[VALIDATION] [PASS] ctt_mean_score: All values within range [0.0, 1.0] (n=800).
+[VALIDATION] Running additional checks...
+[VALIDATION] [PASS] Expected N: 800 rows
+[VALIDATION] Location type distribution:
+[VALIDATION]   destination: 400 rows
+[VALIDATION]   source: 400 rows
+[VALIDATION] [PASS] Location balance: 400 rows per location type
+[VALIDATION] [PASS] All rows have n_items > 0
+[VALIDATION] [PASS] No NaN values in ctt_mean_score
+[VALIDATION] [PASS] TSVR_hours in valid range: [1.00, 246.24] hours
+[SUCCESS] Step 01 complete

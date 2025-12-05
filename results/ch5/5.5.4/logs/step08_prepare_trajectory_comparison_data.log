@@ -1,0 +1,23 @@
+[START] Step 8: Prepare trajectory comparison data
+[LOAD] Loading IRT theta scores from step 0...
+[LOADED] IRT theta data (800 rows, 7 cols)
+[LOAD] Loading CTT scores from step 1...
+[LOADED] CTT scores data (800 rows, 7 cols)
+[ANALYSIS] Aggregating IRT data by location_type + test...
+[AGGREGATED] IRT data (8 rows)
+[ANALYSIS] Aggregating CTT data by location_type + test...
+[AGGREGATED] CTT data (8 rows)
+[ANALYSIS] Stacking IRT and CTT aggregated data...
+[STACKED] Combined data (16 rows)
+[SAVE] Saving trajectory comparison data to /home/etai/projects/REMEMVR/results/ch5/5.5.4/data/step08_trajectory_comparison_data.csv...
+[SAVED] step08_trajectory_comparison_data.csv (16 rows, 8 cols)
+[VALIDATION] Running inline validation...
+[VALIDATION] Row count: 16 [PASS]
+[VALIDATION] All combinations present [PASS]
+[VALIDATION] No NaN in critical columns [PASS]
+[VALIDATION] CI bounds valid (ci_upper > ci_lower) [PASS]
+[VALIDATION] All n = 100 [PASS]
+[VALIDATION] IRT mean_score in [-3, 3] [PASS]
+[VALIDATION] CTT mean_score in [0, 1] [PASS]
+[VALIDATION] time in [0, 168] hours [PASS]
+[SUCCESS] Step 8 complete

@@ -1,0 +1,19 @@
+                                  Mixed Linear Model Regression Results
+=========================================================================================================
+Model:                           MixedLM                Dependent Variable:                ctt_mean_score
+No. Observations:                800                    Method:                            ML            
+No. Groups:                      100                    Scale:                             0.0206        
+Min. group size:                 8                      Log-Likelihood:                    350.5924      
+Max. group size:                 8                      Converged:                         Yes           
+Mean group size:                 8.0                                                                     
+---------------------------------------------------------------------------------------------------------
+                                                              Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+---------------------------------------------------------------------------------------------------------
+Intercept                                                      0.829    0.019  44.772 0.000  0.793  0.865
+C(location_type, Treatment('source'))[T.destination]          -0.288    0.023 -12.555 0.000 -0.333 -0.243
+log_TSVR                                                      -0.043    0.004  -9.821 0.000 -0.051 -0.034
+C(location_type, Treatment('source'))[T.destination]:log_TSVR  0.017    0.006   2.761 0.006  0.005  0.029
+Group Var                                                      0.008    0.022                            
+Group x log_TSVR Cov                                          -0.000    0.004                            
+log_TSVR Var                                                   0.000    0.001                            
+=========================================================================================================

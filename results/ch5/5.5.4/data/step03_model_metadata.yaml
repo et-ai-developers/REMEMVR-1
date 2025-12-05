@@ -1,0 +1,17 @@
+ctt_model:
+  aic: -685.1847029525188
+  bic: -647.7078091311754
+  converged: true
+  n_groups: 100
+  n_obs: 800
+formula: score ~ C(location_type, Treatment('source')) * log_TSVR
+irt_model:
+  aic: 1764.2573314258334
+  bic: 1801.7342252471767
+  converged: true
+  n_groups: 100
+  n_obs: 800
+random_structure: ~log_TSVR (intercepts + slopes)
+reml: false
+simplified: false
+timestamp: '2025-12-05T09:38:33.232266'

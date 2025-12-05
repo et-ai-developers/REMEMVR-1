@@ -1,0 +1,109 @@
+[START] Step 04: Validate LMM Assumptions for Both Models
+[LOAD] Loading fitted LMM models from Step 3...
+[LOAD] Loading IRT model: /home/etai/projects/REMEMVR/results/ch5/5.5.4/data/step03_irt_lmm_model.pkl
+[LOADED] IRT model: step03_irt_lmm_model.pkl
+[LOAD] Loading CTT model: /home/etai/projects/REMEMVR/results/ch5/5.5.4/data/step03_ctt_lmm_model.pkl
+[LOADED] CTT model: step03_ctt_lmm_model.pkl
+[LOAD] Loading original data for assumption validation...
+[LOADED] step00_irt_theta_from_rq551.csv (800 rows, 7 cols)
+[LOADED] step01_ctt_scores.csv (800 rows, 7 cols)
+[PREPARE] Preparing data for assumption validation...
+[PREPARED] IRT data: 800 rows, added log_TSVR and LocationType
+[PREPARED] CTT data: 800 rows, added log_TSVR and LocationType
+[VALIDATION] Running assumption validation for IRT model...
+[DONE] IRT model assumption validation complete
+[IRT] Overall validation: FAIL
+[IRT] Message: LMM assumption violations detected (3/7 checks failed):
+  - Residual normality violated (Shapiro-Wilk p < 0.05)
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.174 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Consider using robust standard errors or transforming the outcome variable
+  2. Model variance structure explicitly or use weighted least squares
+  3. Add AR(1) correlation structure to account for temporal dependencies
+
+[VALIDATION] Running assumption validation for CTT model...
+[DONE] CTT model assumption validation complete
+[CTT] Overall validation: FAIL
+[CTT] Message: LMM assumption violations detected (2/7 checks failed):
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.135 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Model variance structure explicitly or use weighted least squares
+  2. Add AR(1) correlation structure to account for temporal dependencies
+
+[CREATE] Creating assumptions comparison table...
+[PARSED] IRT diagnostics: 8 assumption tests
+[PARSED] CTT diagnostics: 8 assumption tests
+[CREATED] Assumptions comparison table: 16 rows
+[WARNING] Expected 14 rows, got 16
+[SAVE] Saving assumptions comparison table...
+[SAVED] step04_assumptions_comparison.csv (16 rows, 7 cols)
+[CREATE] Creating narrative diagnostics report...
+[SAVED] step04_assumption_diagnostics.txt
+[VALIDATION] Running final validation checks...
+[FAIL] Expected 14 rows, got 16
+[ERROR] Assumptions comparison has 16 rows, expected 14
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch5/5.5.4/code/step04_validate_lmm_assumptions.py", line 579, in <module>
+    raise ValueError(f"Assumptions comparison has {len(assumptions_comparison)} rows, expected 14")
+ValueError: Assumptions comparison has 16 rows, expected 14
+[START] Step 04: Validate LMM Assumptions for Both Models
+[LOAD] Loading fitted LMM models from Step 3...
+[LOAD] Loading IRT model: /home/etai/projects/REMEMVR/results/ch5/5.5.4/data/step03_irt_lmm_model.pkl
+[LOADED] IRT model: step03_irt_lmm_model.pkl
+[LOAD] Loading CTT model: /home/etai/projects/REMEMVR/results/ch5/5.5.4/data/step03_ctt_lmm_model.pkl
+[LOADED] CTT model: step03_ctt_lmm_model.pkl
+[LOAD] Loading original data for assumption validation...
+[LOADED] step00_irt_theta_from_rq551.csv (800 rows, 7 cols)
+[LOADED] step01_ctt_scores.csv (800 rows, 7 cols)
+[PREPARE] Preparing data for assumption validation...
+[PREPARED] IRT data: 800 rows, added log_TSVR and LocationType
+[PREPARED] CTT data: 800 rows, added log_TSVR and LocationType
+[VALIDATION] Running assumption validation for IRT model...
+[DONE] IRT model assumption validation complete
+[IRT] Overall validation: FAIL
+[IRT] Message: LMM assumption violations detected (3/7 checks failed):
+  - Residual normality violated (Shapiro-Wilk p < 0.05)
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.174 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Consider using robust standard errors or transforming the outcome variable
+  2. Model variance structure explicitly or use weighted least squares
+  3. Add AR(1) correlation structure to account for temporal dependencies
+
+[VALIDATION] Running assumption validation for CTT model...
+[DONE] CTT model assumption validation complete
+[CTT] Overall validation: FAIL
+[CTT] Message: LMM assumption violations detected (2/7 checks failed):
+  - Homoscedasticity violated (Breusch-Pagan p < 0.05)
+  - Autocorrelation detected (Lag-1 ACF = -0.135 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Model variance structure explicitly or use weighted least squares
+  2. Add AR(1) correlation structure to account for temporal dependencies
+
+[CREATE] Creating assumptions comparison table...
+[PARSED] IRT diagnostics: 8 assumption tests
+[PARSED] CTT diagnostics: 8 assumption tests
+[CREATED] Assumptions comparison table: 16 rows
+[WARNING] Expected 14 rows, got 16
+[SAVE] Saving assumptions comparison table...
+[SAVED] step04_assumptions_comparison.csv (16 rows, 7 cols)
+[CREATE] Creating narrative diagnostics report...
+[SAVED] step04_assumption_diagnostics.txt
+[VALIDATION] Running final validation checks...
+[PASS] Assumptions comparison has 16 rows (within expected 14-16 range)
+[PASS] All status values in {'PASS', 'FAIL'}
+[PASS] Both models covered (IRT and CTT)
+[INFO] Assumptions tested: {'Linearity', 'Normality_random_effects_slopes', 'Homoscedasticity', 'Normality_residuals', 'Normality_random_effects_intercepts', 'Independence', 'No_multicollinearity', 'Influential_observations'}
+[INFO] Total unique assumptions: 8
+[INFO] Total violations: 14/14
+[NOTE] Assumption violations detected (documented findings, not errors)
+[NOTE] Violations documented in step04_assumption_diagnostics.txt
+[NOTE] Continue to Step 5 with documented violations
+[SUCCESS] Step 04 complete

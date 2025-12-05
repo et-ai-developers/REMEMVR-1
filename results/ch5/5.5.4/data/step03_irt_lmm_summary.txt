@@ -1,0 +1,19 @@
+                                 Mixed Linear Model Regression Results
+========================================================================================================
+Model:                             MixedLM                 Dependent Variable:                 irt_theta
+No. Observations:                  800                     Method:                             ML       
+No. Groups:                        100                     Scale:                              0.4039   
+Min. group size:                   8                       Log-Likelihood:                     -874.1287
+Max. group size:                   8                       Converged:                          Yes      
+Mean group size:                   8.0                                                                  
+--------------------------------------------------------------------------------------------------------
+                                                              Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+--------------------------------------------------------------------------------------------------------
+Intercept                                                      0.653    0.094  6.918 0.000  0.468  0.838
+C(location_type, Treatment('source'))[T.destination]          -0.123    0.102 -1.209 0.227 -0.322  0.076
+log_TSVR                                                      -0.201    0.022 -9.302 0.000 -0.244 -0.159
+C(location_type, Treatment('source'))[T.destination]:log_TSVR  0.050    0.027  1.839 0.066 -0.003  0.103
+Group Var                                                      0.374    0.163                           
+Group x log_TSVR Cov                                          -0.042    0.030                           
+log_TSVR Var                                                   0.010    0.007                           
+========================================================================================================

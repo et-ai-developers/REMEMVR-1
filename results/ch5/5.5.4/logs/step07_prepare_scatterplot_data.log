@@ -1,0 +1,28 @@
+[START] Step 7: Prepare Scatterplot Data (IRT vs CTT)
+[LOAD] Loading IRT theta scores from RQ 5.5.1...
+[LOADED] IRT theta scores (800 rows, 7 cols)
+[LOAD] Loading CTT mean scores...
+[LOADED] CTT scores (800 rows, 7 cols)
+[MERGE] Merging IRT theta and CTT scores on composite_ID + location_type...
+[MERGED] Combined dataset (800 rows, 6 cols)
+[SELECT] Selecting final columns for scatterplot...
+[SORT] Sorting by location_type, UID, test for consistent ordering...
+[SORTED] Final dataset (800 rows)
+[SAVE] Saving scatterplot data to data/step07_scatterplot_data.csv...
+[SAVED] step07_scatterplot_data.csv (800 rows, 5 cols)
+[VALIDATION] Running inline validation checks...
+[VALIDATION] Row count: 800 rows (expected 800) [PASS]
+[VALIDATION] No NaN in irt_theta or ctt_mean_score [PASS]
+[VALIDATION] Location type counts: {'destination': 400, 'source': 400}
+[VALIDATION] Location balance: 400 source, 400 destination [PASS]
+[VALIDATION] IRT theta range: [-1.87, 2.25]
+[VALIDATION] IRT theta in typical [-3, 3] range [PASS]
+[VALIDATION] CTT mean score range: [0.100, 1.000]
+[VALIDATION] CTT mean score in [0, 1] range [PASS]
+[VALIDATION] Unique UIDs: 100
+[VALIDATION] 100 unique UIDs present [PASS]
+[VALIDATION] Unique tests: 4 (values: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)])
+[VALIDATION] 4 unique tests present [PASS]
+[SUCCESS] Step 7 complete
+[OUTPUT] Generated: /home/etai/projects/REMEMVR/results/ch5/5.5.4/data/step07_scatterplot_data.csv
+[OUTPUT] Rows: 800, Columns: ['UID', 'test', 'location_type', 'irt_theta', 'ctt_mean_score']
