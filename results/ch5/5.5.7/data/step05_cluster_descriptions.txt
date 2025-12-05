@@ -1,0 +1,70 @@
+======================================================================
+RQ 5.5.7: Source-Destination Memory Clustering - Cluster Descriptions
+======================================================================
+
+
+Cluster 0 (N=20, 'Dual High: Source declines, Destination maintains'):
+  This cluster contains 20 participants (20% of sample).
+
+  Source Memory:
+    - Baseline (intercept): 0.298 theta (above average)
+    - Trajectory (slope): 0.0305 theta/day (faster forgetting)
+
+  Destination Memory:
+    - Baseline (intercept): 0.531 theta (above average)
+    - Trajectory (slope): -0.0631 theta/day (slower forgetting)
+
+  Interpretation: Participants in this cluster show dual high: source declines, destination maintains.
+
+
+Cluster 1 (N=26, 'Dual Low: Source maintains, Destination declines'):
+  This cluster contains 26 participants (26% of sample).
+
+  Source Memory:
+    - Baseline (intercept): -0.368 theta (below average)
+    - Trajectory (slope): -0.0375 theta/day (slower forgetting)
+
+  Destination Memory:
+    - Baseline (intercept): -0.460 theta (below average)
+    - Trajectory (slope): 0.0546 theta/day (faster forgetting)
+
+  Interpretation: Participants in this cluster show dual low: source maintains, destination declines.
+
+
+Cluster 2 (N=35, 'Source > Destination: Both decline'):
+  This cluster contains 35 participants (35% of sample).
+
+  Source Memory:
+    - Baseline (intercept): 0.157 theta (above average)
+    - Trajectory (slope): 0.0177 theta/day (faster forgetting)
+
+  Destination Memory:
+    - Baseline (intercept): -0.081 theta (below average)
+    - Trajectory (slope): 0.0203 theta/day (faster forgetting)
+
+  Interpretation: Participants in this cluster show source > destination: both decline.
+
+
+Cluster 3 (N=19, 'Destination > Source: Both maintain'):
+  This cluster contains 19 participants (19% of sample).
+
+  Source Memory:
+    - Baseline (intercept): -0.100 theta (below average)
+    - Trajectory (slope): -0.0134 theta/day (slower forgetting)
+
+  Destination Memory:
+    - Baseline (intercept): 0.219 theta (above average)
+    - Trajectory (slope): -0.0457 theta/day (slower forgetting)
+
+  Interpretation: Participants in this cluster show destination > source: both maintain.
+
+----------------------------------------------------------------------
+
+NOTE ON INTERCEPT-SLOPE PATTERNS:
+
+RQ 5.5.6 discovered that source and destination memory show OPPOSITE
+intercept-slope correlations:
+  - Source: r = +0.99 (high baseline = faster forgetting = regression to mean)
+  - Destination: r = -0.90 (high baseline = slower forgetting = advantage maintenance)
+
+These opposite patterns are reflected in the cluster profiles above.

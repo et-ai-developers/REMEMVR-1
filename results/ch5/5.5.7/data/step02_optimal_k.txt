@@ -1,0 +1,10 @@
+Optimal K: 4
+Justification: K=4 selected as BIC minimum (BIC=164.76)
+
+BIC values for all K:
+  K=1: BIC=418.42
+  K=2: BIC=231.59
+  K=3: BIC=183.60
+  K=4: BIC=164.76
+  K=5: BIC=168.34
+  K=6: BIC=174.28
