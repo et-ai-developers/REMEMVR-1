@@ -1,0 +1,25 @@
+[START] Step 01: Item Mapping
+[LOAD] Loading purified items from RQ 5.5.1...
+[LOADED] Purified items: 32 rows, 5 cols
+[INFO] Retained items by location: Source=17, Destination=15
+[INFO] Retained item tags: 32 unique items
+[LOAD] Loading dfData.csv to extract all TQ item columns...
+[INFO] Total TQ items found in dfData.csv: 36
+[INFO] TQ items by location: Source=18, Destination=18
+[PROCESS] Creating item mapping with retention status...
+[CREATED] Item mapping: 36 rows
+[VALIDATION] Validating item mapping...
+[VALIDATION] Source: 17 retained, 1 removed
+[VALIDATION] Destination: 15 retained, 3 removed
+[VALIDATION] Retention rates: Source=94.44%, Destination=83.33%
+[WARNING] Source retention rate outside expected range [0.55, 0.85]: 94.44%
+[VALIDATION] All validation checks passed
+[SAVE] Saving item mapping to /home/etai/projects/REMEMVR/results/ch5/5.5.5/data/step01_item_mapping.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.5.5/data/step01_item_mapping.csv (36 rows, 6 cols)
+
+[SUMMARY] Item Mapping Statistics:
+  Total items: 36
+  Source items: 18 (17 retained, 1 removed)
+  Destination items: 18 (15 retained, 3 removed)
+  Overall retention rate: 88.89%
+[SUCCESS] Step 01 complete

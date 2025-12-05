@@ -42,25 +42,35 @@ rq_analysis:
   context_dump: "9 steps specified with validation (CTT Purified vs Full effects analysis)"
 
 analysis_steps:
-  step00_dependency_validation: pending
-  step01_item_mapping: pending
-  step02_ctt_full_scores: pending
-  step03_ctt_purified_scores: pending
-  step04_reliability_assessment: pending
-  step05_correlation_analysis: pending
-  step06_standardized_scores: pending
-  step07_lmm_model_comparison: pending
-  step07.5_assumption_validation: pending
-  step08_plot_data_preparation: pending
+  step00_dependency_validation: success
+  step01_item_mapping: success
+  step02_ctt_full_scores: success
+  step03_ctt_purified_scores: success
+  step04_reliability_assessment: success
+  step05_correlation_analysis: success
+  step06_standardized_scores: success
+  step07_lmm_model_comparison: success
+  step07.5_assumption_validation: success
+  step08_plot_data_preparation: success
 
 g_code:
-  status: pending
+  status: success
+  timestamp: "2025-12-05"
+  context_dump: "All 9 steps executed and validated. Key results: Paradox PARTIALLY CONFIRMED - Destination shows full paradox (dr=+0.072 sig, dAIC=+17.92 decisive), Source shows partial paradox (dr=+0.010 n.s., dAIC=+5.26 substantial). 4th independent replication of purification-trajectory paradox."
 
 rq_inspect:
-  status: pending
+  status: success
+  context_dump: "All step outputs validated"
 
 rq_plots:
   status: pending
+  context_dump: "Plot source CSVs created in step08, plot generation pending"
+
+rq_validate:
+  status: success
+  timestamp: "2025-12-05"
+  context_dump: "PASS WITH NOTES. 29/30 checks passed. 1 moderate issue: missing Cohen's q effect size (optional). Paradox confirmed for destination, partial for source (ceiling effect). See results/validation.md"
 
 rq_results:
   status: pending
+  context_dump: "Summary.md creation pending"

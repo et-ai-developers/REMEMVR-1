@@ -1,0 +1,25 @@
+[START] Step 3: Compute Purified CTT Sum Scores
+[LOAD] Loading item mapping from Step 1...
+[LOADED] item_mapping: 36 items
+[FILTER] Retained items: 32 / 36 items
+[RETAINED] Source items: 17
+[RETAINED] Destination items: 15
+[LOAD] Loading raw binary responses from dfData.csv...
+[LOADED] dfData: 400 rows, 214 columns
+[VALIDATED] All retained items found in dfData
+[COMPUTE] Computing purified CTT scores...
+[COMPUTED] Purified CTT scores: 800 rows
+[VALIDATION] Validating purified CTT scores...
+[PASS] Row count: 800 = 800
+[PASS] No NaN values
+[PASS] CTT scores in [0,1]: min=0.1000, max=1.0000
+[VALIDATION] Computing correlation with Full CTT...
+[CORRELATION] Purified vs Full CTT: r = 0.9817
+[PASS] Correlation r = 0.9817 > 0.85 (high convergence)
+[SAVE] Saving purified CTT scores...
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.5.5/data/step03_ctt_purified_scores.csv
+[SAVED] 800 rows, 4 columns
+[SUMMARY] Purified CTT Score Statistics:
+  Source: mean=0.6850, SD=0.1871, min=0.2206, max=1.0000
+  Destination: mean=0.4536, SD=0.1658, min=0.1000, max=0.9333
+[SUCCESS] Step 3 complete

@@ -1,0 +1,42 @@
+[START] Step 5: Correlation Analysis with Steiger's Z-Test
+[LOAD] Loading theta scores from RQ 5.5.1...
+[LOADED] Theta scores: 400 rows, 5 cols
+[INFO] Theta columns: ['composite_ID', 'theta_source', 'theta_destination', 'se_source', 'se_destination']
+[TRANSFORM] Parsing composite_ID into UID and test...
+[DONE] Parsed UID and test from composite_ID
+[LOAD] Loading Full CTT scores from Step 2...
+[LOADED] Full CTT scores: 800 rows, 4 cols
+[LOAD] Loading Purified CTT scores from Step 3...
+[LOADED] Purified CTT scores: 800 rows, 4 cols
+[MERGE] Merging theta with CTT scores...
+[RESHAPE] Theta reshaped to long format: 800 rows
+[MERGED] Theta + Full CTT: 800 rows
+[MERGED] All three measurements: 800 rows
+[INFO] Merged columns: ['UID', 'test', 'theta', 'location_type', 'ctt_full_score', 'ctt_purified_score']
+[ANALYSIS] Running Steiger's z-test per location type...
+[ANALYSIS] Processing source memory...
+[INFO] source: n=400 observations
+[CORRELATION] source r(theta, Full_CTT) = 0.9337
+[CORRELATION] source r(theta, Purified_CTT) = 0.9439
+[CORRELATION] source r(Full_CTT, Purified_CTT) = 0.9930
+[STEIGER] source z=1.7169, p_uncorrected=0.0860, p_bonferroni=0.1720
+[DELTA] source delta_r=0.0102 (Purified - Full)
+[ANALYSIS] Processing destination memory...
+[INFO] destination: n=400 observations
+[CORRELATION] destination r(theta, Full_CTT) = 0.8000
+[CORRELATION] destination r(theta, Purified_CTT) = 0.8715
+[CORRELATION] destination r(Full_CTT, Purified_CTT) = 0.9486
+[STEIGER] destination z=4.6773, p_uncorrected=0.0000, p_bonferroni=0.0000
+[DELTA] destination delta_r=0.0715 (Purified - Full)
+[DONE] Steiger's z-test complete for both location types
+[SAVE] Saving results to /home/etai/projects/REMEMVR/results/ch5/5.5.5/data/step05_correlation_analysis.csv...
+[SAVED] step05_correlation_analysis.csv (2 rows, 9 cols)
+[VALIDATION] Running validate_correlation_test_d068...
+[VALIDATION] PASS - Decision D068 compliant
+[VALIDATION] d068_compliant: True
+[VALIDATION] All required columns present
+[VALIDATION] Running additional checks...
+[VALIDATION] PASS - All correlations in reasonable range [0.50, 1.00]
+[VALIDATION] PASS - p_bonferroni >= p_uncorrected (as expected)
+[VALIDATION] PASS - All correlations positive (CTT and IRT agree)
+[SUCCESS] Step 5 complete

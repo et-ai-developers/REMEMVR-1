@@ -1,0 +1,46 @@
+[START] Step 7: LMM Model Comparison
+[LOAD] Loading input data...
+[LOADED] standardized_scores: 800 rows, 6 cols
+[INFO] Columns: ['UID', 'test', 'location_type', 'irt_z', 'ctt_full_z', 'ctt_purified_z']
+[INFO] Test format in scores: ['T1' 'T2' 'T3' 'T4']
+[LOADED] tsvr_mapping: 400 rows, 4 cols
+[INFO] Test format in TSVR: [1 2 3 4]
+[MERGE] Converting TSVR test format and merging datasets...
+[INFO] TSVR test format after conversion: ['T1' 'T2' 'T3' 'T4']
+[MERGED] Combined dataset: 800 rows
+[INFO] Time variable created: min=0.04, max=10.26 days
+[ANALYSIS] Fitting 6 parallel LMMs...
+[FIT] Fitting Source_IRT...
+[INFO] Source_IRT: 400 observations
+[DONE] Source_IRT: AIC=1020.71, converged=False
+[FIT] Fitting Source_Full_CTT...
+[INFO] Source_Full_CTT: 400 observations
+[DONE] Source_Full_CTT: AIC=974.49, converged=True
+[FIT] Fitting Source_Purified_CTT...
+[INFO] Source_Purified_CTT: 400 observations
+[DONE] Source_Purified_CTT: AIC=979.75, converged=False
+[FIT] Fitting Destination_IRT...
+[INFO] Destination_IRT: 400 observations
+[DONE] Destination_IRT: AIC=1111.09, converged=False
+[FIT] Fitting Destination_Full_CTT...
+[INFO] Destination_Full_CTT: 400 observations
+[DONE] Destination_Full_CTT: AIC=1098.00, converged=True
+[FIT] Fitting Destination_Purified_CTT...
+[INFO] Destination_Purified_CTT: 400 observations
+[DONE] Destination_Purified_CTT: AIC=1115.92, converged=True
+[COMPARE] Computing AIC comparisons...
+[RESULT] source: delta_aic=5.26, interpretation='Full CTT favored'
+[RESULT] destination: delta_aic=17.92, interpretation='Full CTT favored'
+[SAVE] Saving AIC comparison results...
+[SAVED] step07_lmm_model_comparison.csv (2 rows, 8 cols)
+[VALIDATION] Running validate_model_convergence...
+[VALIDATION] Source_IRT: Model did not converge. Check for collinearity, insufficient data, or model specification issues.
+[VALIDATION] Source_Full_CTT: Model converged successfully.
+[VALIDATION] Source_Purified_CTT: Model did not converge. Check for collinearity, insufficient data, or model specification issues.
+[VALIDATION] Destination_IRT: Model did not converge. Check for collinearity, insufficient data, or model specification issues.
+[VALIDATION] Destination_Full_CTT: Model converged successfully.
+[VALIDATION] Destination_Purified_CTT: Model converged successfully.
+[WARNING] Some models did not converge - check results carefully
+[WARNING] source: Not all models converged
+[WARNING] destination: Not all models converged
+[SUCCESS] Step 7 complete
