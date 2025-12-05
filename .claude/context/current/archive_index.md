@@ -401,6 +401,15 @@
 ### rq_5.5.1_complete_production_execution
 **Description:** RQ 5.5.1 Source-Destination memory analysis with corrected IRT settings and publication-quality plots. Complete 8-step pipeline re-execution with mc_samples=1/100 pattern, logarithmic model selected (AIC=1747.77), marginally significant interaction (p=0.05 Bonferroni) showing destination forgetting faster than source. Plot style fixed to 5.2.1 format with individual scatter points. Full validation pipeline complete (rq_inspect + rq_plots + rq_results). 1 anomaly flagged. Production-ready.
 
+### rq_5.5.4_complete_irt_ctt_convergence_validation
+**Description:** Complete RQ 5.5.4 execution (IRT-CTT Convergence for Source-Destination Memory). All 9 analysis steps successful. Primary hypothesis SUPPORTED: correlations exceed r>0.70 threshold (Source r=0.944 exceptional, Destination r=0.871 strong). Secondary finding: Cohen's kappa=0.000 (significance agreement 50%) indicates inferential divergence despite measurement convergence. Key insight: IRT and CTT measure SAME constructs (high r) but IRT MORE SENSITIVE for detecting location-specific effects (bounded CTT compresses variance). Fourth in IRT-CTT convergence series (5.2.4 domains, 5.3.5 paradigms, 5.4.4 congruence, 5.5.4 source-destination).
+
+### irt_ctt_inferential_divergence_pattern
+**Description:** Documentation of measurement convergence vs inferential divergence pattern across IRT-CTT analyses. High correlations (r>0.87) validate same constructs measured, but divergent significance patterns (kappa varies 0.00-0.667) reflect IRT's superior sensitivity. Mechanism: CTT bounded [0,1] scale compresses variance near boundaries, attenuating effect sizes. Pattern varies by factor structure and effect magnitude. Methodological implications: report both static convergence (correlations) and dynamic convergence (kappa), interpret divergence as sensitivity difference not measurement failure. Cross-RQ evidence from 5.3.5, 5.4.4, 5.5.4.
+
+### statsmodels_coefficient_extraction_pattern
+**Description:** Documentation of statsmodels LMM coefficient extraction patterns and common errors. Problem: model.params/tvalues/pvalues include random effects, not just fixed effects. Solution: slice to fixed effects only using [:n_fe] where n_fe = len(model.model.exog_names). Alternative: export coefficients to CSV immediately after fitting to avoid pickle loading errors (patsy eval_env failures). Applies to ALL LMM coefficient comparisons (RQ 5.5.2 segment slopes, 5.5.3 interactions, 5.5.4 parallel LMMs). Tool development pattern for compare_lmm_coefficients() and downstream analysis steps.
+
 ---
 
 ## How to Use This Index
