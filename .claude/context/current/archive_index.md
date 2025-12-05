@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-04 02:15 (context-manager curation)
+**Last Updated:** 2025-12-05 16:45 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -409,6 +409,30 @@
 
 ### statsmodels_coefficient_extraction_pattern
 **Description:** Documentation of statsmodels LMM coefficient extraction patterns and common errors. Problem: model.params/tvalues/pvalues include random effects, not just fixed effects. Solution: slice to fixed effects only using [:n_fe] where n_fe = len(model.model.exog_names). Alternative: export coefficients to CSV immediately after fitting to avoid pickle loading errors (patsy eval_env failures). Applies to ALL LMM coefficient comparisons (RQ 5.5.2 segment slopes, 5.5.3 interactions, 5.5.4 parallel LMMs). Tool development pattern for compare_lmm_coefficients() and downstream analysis steps.
+
+### multidimensional_irt_probability_conversion_bug_fix
+**Description:** Critical bug discovery and fix for multi-dimensional IRT models requiring factor-specific item difficulties when converting theta to probability scale. 2-dimensional IRT (source vs destination) creates TWO SEPARATE theta scales with different item difficulty distributions (Source b=-0.453 easy, Destination b=+1.371 hard). Using difficulty=0.0 for all factors masks 25-30 percentage point baseline accuracy difference. Factor-specific conversion reveals 30-45 percentage point effect. Bug fix applied to results/ch5/5.5.1/plots/plots.py. Pattern documented from .archive/v1/plots.py lines 543-561 which correctly used factor-specific difficulties.
+
+### rq_plots_agent_v4.0.1_update
+**Description:** rq_plots agent enhancement adding critical multi-dimensional IRT probability conversion guidance (v4.0.1). Added "CRITICAL: Multi-Dimensional IRT Probability Conversion" section explaining problem (factor-specific difficulties create different theta scales), wrong approach (difficulty=0.0 for all), correct approach (loop through factors with factor-specific b values), validation check (compare to raw accuracy). Includes code example and RQ 5.5.1 lesson learned. Prevents masking of large baseline effects in multi-factor IRT analyses.
+
+### rq_5.5.2_complete_pipeline_execution_null_finding
+**Description:** Complete RQ 5.5.2 Source-Destination Consolidation (Two-Phase) pipeline execution with null hypothesis result. All 8 steps successful (load dependencies, create piecewise variables, reshape, fit LMM, extract slopes, test benefit, test interaction, plot data). Primary finding: 3-way Days_within × Segment × LocationType interaction NOT significant (p=0.61, f²=0.0005 negligible). Source and destination show SIMILAR consolidation patterns (~0.10 benefit Early→Late for both). Null finding supports ecological binding hypothesis (no dissociation). 7 code fixes applied (TSVR range, statsmodels direct use, vcov extraction, pickle workaround, plotting bugs). Full validation PASS. D069 dual-scale plots generated.
+
+### plotting_tool_bug_fixes
+**Description:** Collection of bug fixes in tools/plotting.py discovered during RQ execution. Bug 1: pred_sorted UnboundLocalError (variable referenced before assignment in conditional branches). Bug 2: Data_Type value mismatch ('prediction' vs 'predicted'). Bug 3: vcov matrix extraction wrong dimensions (11x11 full matrix vs 8x8 fixed effects only). All discovered during RQ 5.5.2 piecewise trajectory plot generation.
+
+### statsmodels_pickle_workaround_pattern
+**Description:** Workaround pattern for statsmodels/patsy pickle loading errors (f_locals eval_env failures). Problem: loading pickled MixedLM models fails with patsy eval error preventing coefficient access. Solution: Export coefficients to CSV immediately after fitting, read from CSV in downstream steps instead of loading pickle. Alternative monkey-patch approach fragile and not recommended. Pattern applies to ALL LMM steps needing loaded models for coefficient extraction (interactions, contrasts, hypothesis tests). Emerged from RQ 5.5.2 Step 6 failure, used extensively in RQ 5.5.4.
+
+### rq_5.5.3_complete_age_effects_null_hypothesis_supported
+**Description:** Complete RQ 5.5.3 Age Effects on Source-Destination Memory with null hypothesis supported and 100% statistical power. All 8 steps successful (load, prepare, fit LMM, validate assumptions 6/7, extract interactions, power analysis, contrasts, plot tertiles). Primary finding: 3-way Age × LocationType × Time interaction NOT significant (p=0.16, 0.33 Bonferroni). Age effects identical for Source (-0.005/year) and Destination (-0.005/year), contrast p=0.99, Cohen's d=-0.02. Power=1.00 (100%) ensures null is interpretable. Third replication of universal null age pattern (5.3.4, 5.4.3, 5.5.3). Supports VR ecological encoding creates age-resistant memory traces. Thesis-ready validated.
+
+### power_analysis_simulation_method
+**Description:** Parametric bootstrap power analysis approach for LMM 3-way interactions. Method: 100 simulated datasets with true effect β=0.01 (small), fit LMM, extract Bonferroni-corrected p-value, compute power as rejection proportion, binomial exact CI (Clopper-Pearson). RQ 5.5.3 results: Power=1.00 [0.97-1.00], target 0.80 met. Interpretation: null finding completely interpretable (not Type II error). Mandatory for null findings to distinguish "no effect" from "insufficient power". Generalizes to any LMM 3-way interaction.
+
+### age_tertile_plot_methodology
+**Description:** Methodology for creating age tertile trajectory plots with factor-specific IRT probability conversion. Uses pd.qcut(Age, q=3) for equal group sizes (33rd/67th percentiles). RQ 5.5.3 cutoffs: Young ≤37y (33p), Middle 37-52y (34p), Older >52y (33p). Plot data: 24 rows (3 tertiles × 2 locations × 4 tests). CRITICAL: Must use location-specific item parameters for probability conversion (Source b=-0.453 easy, Destination b=+1.371 hard). Validation: compare plot probabilities to raw accuracy. Applies to RQ 5.3.4, 5.4.3, 5.5.3 (any Age × Factor × Time plots).
 
 ---
 
