@@ -49,6 +49,29 @@ model_scores.mc_samples = 100  # Monte Carlo for theta scores (ACCURATE)
 # WRONG: mc_samples=100 for fitting → hours instead of minutes
 ```
 
+### IRT Background Process Management (CRITICAL - context window)
+```
+# CORRECT: Run IRT as background process, wait for completion
+1. Launch: poetry run python -u stepXX_*.py (as background process)
+   → MUST use -u flag (unbuffered output) to see progress in log file
+2. WAIT: Do NOT poll epoch status repeatedly
+3. Check ONCE when process finishes (exit code 0)
+
+# WRONG: Repeatedly checking BashOutput for epoch status
+# → Blows up context window with thousands of epoch lines
+# → Model will converge on its own; no intervention needed
+
+# WRONG: Running without -u flag
+# → Log file stays empty until process finishes (Python buffers stdout)
+
+# REQUIRED: log() function must flush
+def log(msg):
+    with open(LOG_FILE, 'a') as f:
+        f.write(f"{msg}\n")
+        f.flush()  # ← CRITICAL
+    print(msg, flush=True)  # ← CRITICAL
+```
+
 ### LMM Coefficient Extraction (CRITICAL)
 ```python
 # CORRECT: Extract fixed effects ONLY
