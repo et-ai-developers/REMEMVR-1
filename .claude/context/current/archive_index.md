@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-05 16:45 (context-manager curation)
+**Last Updated:** 2025-12-06 17:45 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -436,6 +436,12 @@
 
 ### age_tertile_plot_methodology
 **Description:** Methodology for creating age tertile trajectory plots with factor-specific IRT probability conversion. Uses pd.qcut(Age, q=3) for equal group sizes (33rd/67th percentiles). RQ 5.5.3 cutoffs: Young ≤37y (33p), Middle 37-52y (34p), Older >52y (33p). Plot data: 24 rows (3 tertiles × 2 locations × 4 tests). CRITICAL: Must use location-specific item parameters for probability conversion (Source b=-0.453 easy, Destination b=+1.371 hard). Validation: compare plot probabilities to raw accuracy. Applies to RQ 5.3.4, 5.4.3, 5.5.3 (any Age × Factor × Time plots).
+
+### rq_5.5.6_complete_variance_decomposition_opposite_correlations_discovery
+**Description:** Complete RQ 5.5.6 Source-Destination Variance Decomposition execution (Session 2025-12-05 16:30). All 6 analysis steps successful with MAJOR NOVEL FINDING: Source and destination memory show OPPOSITE intercept-slope correlations (Source r=+0.989 regression to mean, Destination r=-0.903 fan effect, both p<10^-37). ICC_intercept: Destination (0.42 Fair) 75% higher than Source (0.24 Poor). ICC_slope near zero both (design limitation confirmed). Cross-location correlations: intercept r=0.66, slope r=-0.44. Extracted 200 random effects (100 UID × 2 locations) for RQ 5.5.7 clustering dependency. rq_validate PASS WITH NOTES (2 moderate: no bootstrap CIs, no residual plots - mitigated by convergence + large N). Type 5.5: 6/7 complete, Chapter 5: 37/38 complete (97%). Theoretical significance: First demonstration source vs destination memory show opposite forgetting dynamics, supports binding hypothesis dissociation, important for thesis narrative on ecological memory patterns.
+
+### rq_5.5.7_complete_clustering_exceptional_silhouette
+**Description:** Complete RQ 5.5.7 Source-Destination Clustering execution (Session 2025-12-06 14:30). All 7 analysis steps successful with EXCEPTIONAL FINDING: This is the ONLY Chapter 5 clustering RQ with Silhouette ≥ 0.40 threshold met (actual: 0.417). All three quality metrics PASSED (Silhouette=0.417, Davies-Bouldin=0.785, Jaccard=0.831). K=4 clusters identified via BIC minimum (BIC=164.76). Cluster profiles directly reflect opposite intercept-slope correlations from RQ 5.5.6: Cluster 0 (N=20) Dual High with source declining/destination maintaining, Cluster 1 (N=26) Dual Low reversed pattern. Source-destination memory shows STRONGER clustering structure than all other Ch5 analyses (5.1.5, 5.2.7, 5.3.8, 5.4.7 all had Silhouette < 0.40). rq_validate PASS with 1 moderate issue (borderline Silhouette +0.017 margin, mitigated by other metrics). TYPE 5.5 COMPLETE: 7/7 RQs (100%). CHAPTER 5 EFFECTIVELY COMPLETE: 38/38 RQs minus 2 BLOCKED by GLMM (5.1.6, 5.2.8). Ready for Chapter 6.
 
 ---
 
