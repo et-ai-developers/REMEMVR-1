@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-06 17:45 (context-manager curation)
+**Last Updated:** 2025-12-07 11:00 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -442,6 +442,15 @@
 
 ### rq_5.5.7_complete_clustering_exceptional_silhouette
 **Description:** Complete RQ 5.5.7 Source-Destination Clustering execution (Session 2025-12-06 14:30). All 7 analysis steps successful with EXCEPTIONAL FINDING: This is the ONLY Chapter 5 clustering RQ with Silhouette ≥ 0.40 threshold met (actual: 0.417). All three quality metrics PASSED (Silhouette=0.417, Davies-Bouldin=0.785, Jaccard=0.831). K=4 clusters identified via BIC minimum (BIC=164.76). Cluster profiles directly reflect opposite intercept-slope correlations from RQ 5.5.6: Cluster 0 (N=20) Dual High with source declining/destination maintaining, Cluster 1 (N=26) Dual Low reversed pattern. Source-destination memory shows STRONGER clustering structure than all other Ch5 analyses (5.1.5, 5.2.7, 5.3.8, 5.4.7 all had Silhouette < 0.40). rq_validate PASS with 1 moderate issue (borderline Silhouette +0.017 margin, mitigated by other metrics). TYPE 5.5 COMPLETE: 7/7 RQs (100%). CHAPTER 5 EFFECTIVELY COMPLETE: 38/38 RQs minus 2 BLOCKED by GLMM (5.1.6, 5.2.8). Ready for Chapter 6.
+
+### ch6_planning_31_rqs_8_types
+**Description:** Complete Chapter 6 planning session (2025-12-06 16:30). Created comprehensive Ch6 analysis plan with 31 RQs across 8 hierarchical types (General Confidence, Calibration, Domain Confidence, Paradigm Confidence, Schema Confidence, High-Confidence Errors, Predictive Validity, Source-Destination). Updated Ch5 story.md with 36 RQ elevator pitches. Created rq_info.tsv specification (11 columns per RQ). 4 critical hypotheses (H1: ICC_slope > 0.10, H2: null replication, H3: calibration dynamics, H4: source-dest opposite correlations). 5-category GRM specified for all IRT analyses. Removed redundant IRT-CTT convergence RQs (proven 4× in Ch5).
+
+### ch6_mass_parallelization_186_agents
+**Description:** Complete Chapter 6 mass parallelization infrastructure (2025-12-06 17:45). Created 31 RQ folders with complete structure (code/data/docs/plots/results/logs/, status.yaml). Executed 186 agent invocations (31 RQs × 6 agents). Results: rq_concept 31/31 success, rq_planner 31/31 success, rq_tools 30/31 success (6.2.3 blocked by missing gamma tools), rq_analysis 30/31 success, rq_scholar 30/31 (6.7.1 rejected), rq_stats ~25/31 (3 conditional, 3 rejected). Created rq_status.tsv tracking. 97% success rate (30/31 RQs ready for g_code). Largest parallel agent execution in project.
+
+### ch6_concept_fixes_execution_protocol
+**Description:** Fixed 5 CONDITIONAL/REJECTED RQ concepts to gold standard quality (2025-12-06 19:30). RQ 6.4.2 added reliability check and Lord's paradox mitigation. RQ 6.6.3 CRITICAL fix from LMM to GLMM binomial with overdispersion validation. RQ 6.7.1 terminology fix (retrieval confidence) with normality validation. RQ 6.7.2 added aggregation strategy and SD constraint sensitivity. RQ 6.8.1 added enactment effect and VR validity. Created ch6/execute.md execution protocol (~2k tokens) with Ch5 lessons learned (IRT mc_samples, LMM coefficient extraction, CSV not pickle), common mistakes, step execution template, validation workflow.
 
 ---
 
