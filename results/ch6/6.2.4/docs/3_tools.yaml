@@ -1,0 +1,156 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.2.4
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (each tool listed once)
+# RQ: 6.2.4 - Calibration by Accuracy Level
+# Analysis Type: Cross-RQ derived data analysis (descriptive + inferential statistics)
+
+# =============================================================================
+# CRITICAL NOTE: NO CUSTOM ANALYSIS TOOLS REQUIRED
+# =============================================================================
+# This RQ uses ONLY standard library functions (pandas, scipy, numpy) for:
+# - Data merging (pandas.merge)
+# - Tertile creation (pandas.qcut)
+# - Statistical tests (scipy.stats: ANOVA, Kruskal-Wallis, t-test, Pearson, Spearman)
+# - Normality tests (scipy.stats.shapiro)
+# - Variance tests (scipy.stats.levene)
+#
+# All analysis steps are implemented via stdlib (no tools.analysis_* imports).
+# Validation tools from tools.validation ARE used for output validation.
+# =============================================================================
+
+analysis_tools:
+  # No custom analysis tools required for this RQ
+  # All analysis uses pandas + scipy stdlib functions
+  # Step 0-5 implement data manipulation and statistical tests directly
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    purpose: "Validate DataFrame has expected structure (rows, columns, types)"
+
+    used_in_steps:
+      - step00_merge_metrics
+      - step01_create_tertiles
+      - step05_prepare_plot_data
+
+    criteria:
+      - "Row count matches expected (exact or range)"
+      - "All required columns present"
+      - "Column types match specifications (if provided)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (human-readable summary)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    source_reference: "tools_inventory.md line 628"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    purpose: "Validate numeric values fall within specified range"
+
+    used_in_steps:
+      - step00_merge_metrics (baseline_accuracy, baseline_confidence, mean_calibration, mean_gamma ranges)
+      - step02_tertile_comparison (test statistics and p-values)
+      - step03_dunning_kruger_test (p-values, CI bounds)
+      - step04_correlation (r/rho, p-values, CI bounds)
+
+    criteria:
+      - "All values >= min_val (inclusive)"
+      - "All values <= max_val (inclusive)"
+      - "No NaN values"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (summary with violations if any)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 violating values)"
+
+    source_reference: "tools_inventory.md line 540"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    purpose: "Validate hypothesis test results include Decision D068 dual p-value reporting"
+
+    used_in_steps:
+      - step03_dunning_kruger_test (p_uncorrected + p_bonferroni)
+      - step04_correlation (p_uncorrected + p_bonferroni)
+
+    criteria:
+      - "p_uncorrected column present"
+      - "One correction method column present (p_bonferroni, p_holm, or p_fdr)"
+      - "Both p-values in [0, 1] range"
+      - "All required terms present in results"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-value check)"
+        missing_terms: "List[str] (required terms not found)"
+        missing_cols: "List[str] (required columns not found)"
+        message: "str (compliance summary)"
+
+    source_reference: "tools_inventory.md line 434"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    purpose: "Verify all tertile groups present in plot data"
+
+    used_in_steps:
+      - step05_prepare_plot_data (check all 3 tertiles represented)
+
+    criteria:
+      - "All required groups present (Low, Med, High)"
+      - "No missing tertile_label values"
+      - "Complete factorial design for visualization"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all groups present)"
+        message: "str (completeness summary)"
+        missing_domains: "List[str] (missing categories)"
+        missing_groups: "List[str] (missing groups)"
+
+    source_reference: "tools_inventory.md line 638"
+
+summary:
+  total_unique_tools: 4
+  analysis_tools_count: 0
+  validation_tools_count: 4
+
+  notes:
+    - "This RQ uses NO custom analysis tools (all pandas + scipy stdlib)"
+    - "All 4 validation tools are from tools.validation module"
+    - "Decision D068 compliance enforced via validate_hypothesis_test_dual_pvalues"
+    - "Step-specific analysis logic implemented directly in generated scripts"
+    - "Validation tools selected based on 2_plan.md validation requirements"
+
+  mandatory_decisions_applied:
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni for Steps 3-4)"
+
+# =============================================================================
+# WORKFLOW INTEGRATION
+# =============================================================================
+# Next step: rq_analysis reads this catalog + 2_plan.md -> creates 4_analysis.yaml
+# rq_analysis will map validation tools to analysis steps (one validation per step)
+# g_code will generate stepNN_name.py scripts with validation function calls
+# =============================================================================

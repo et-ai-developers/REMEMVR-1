@@ -1,0 +1,775 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T13:14:04+11:00
+# RQ: ch6/6.5.1
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.5.1"
+  total_steps: 8
+  analysis_type: "IRT→LMM trajectory analysis (confidence ratings with schema congruence)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T13:14:04+11:00"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Confidence Data with Congruence Tags
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_confidence_data"
+    step_number: "00"
+    description: "Extract 5-level Likert confidence ratings (TC_*) from dfData.csv with congruence tags (i1-i6), create 3-factor Q-matrix (Common/Congruent/Incongruent)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_confidence_items"
+      signature: "extract_confidence_items(df_source: pd.DataFrame, congruence_tags: List[str], paradigms: List[str]) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "TEST", "TC_*"]
+          variable_name: "df_source"
+          description: "Project-level data source with all TC_* confidence columns"
+
+      output_files:
+        - path: "data/step00_irt_input.csv"
+          variable_name: "irt_input"
+          format: "CSV, wide format (composite_ID x TC_* items)"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test concatenation (e.g., P001_T1)"}
+            - {name: "TC_* items", type: "int", description: "Ordinal values 0-4 (recoded from Likert 0/0.25/0.5/0.75/1.0)"}
+          expected_rows: 400
+          description: "Wide-format IRT input with ordinal confidence ratings"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          variable_name: "tsvr_mapping"
+          format: "CSV, time variable mapping"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "TSVR_hours", type: "float", description: "Actual hours since encoding per Decision D070"}
+            - {name: "test", type: "str", description: "T1/T2/T3/T4"}
+          expected_rows: 400
+          description: "TSVR time mapping per Decision D070"
+
+        - path: "data/step00_q_matrix.csv"
+          variable_name: "q_matrix"
+          format: "CSV, 3-factor Q-matrix"
+          columns:
+            - {name: "item_name", type: "str", description: "TC_* item identifier"}
+            - {name: "factor_common", type: "int", description: "Binary indicator for Common factor (i1/i2 items)"}
+            - {name: "factor_congruent", type: "int", description: "Binary indicator for Congruent factor (i3/i4 items)"}
+            - {name: "factor_incongruent", type: "int", description: "Binary indicator for Incongruent factor (i5/i6 items)"}
+          expected_rows: "60-120"
+          description: "3-factor Q-matrix for congruence GRM (each row sums to 1)"
+
+      parameters:
+        congruence_tags: ["i1", "i2", "i3", "i4", "i5", "i6"]
+        paradigms: ["IFR", "ICR", "IRE"]
+        n_factors: 3
+        likert_to_ordinal: {0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1.0: 4}
+
+      returns:
+        type: "Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]"
+        unpacking: "irt_input, tsvr_mapping, q_matrix"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_extraction_outputs"
+      signature: "validate_extraction_outputs(irt_input: pd.DataFrame, tsvr_mapping: pd.DataFrame, q_matrix: pd.DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          variable_name: "irt_input"
+          source: "analysis call output (extract_confidence_items return[0])"
+        - path: "data/step00_tsvr_mapping.csv"
+          variable_name: "tsvr_mapping"
+          source: "analysis call output (extract_confidence_items return[1])"
+        - path: "data/step00_q_matrix.csv"
+          variable_name: "q_matrix"
+          source: "analysis call output (extract_confidence_items return[2])"
+
+      parameters:
+        irt_input: "irt_input"
+        tsvr_mapping: "tsvr_mapping"
+        q_matrix: "q_matrix"
+        expected_rows: 400
+        expected_item_range: [60, 120]
+        ordinal_values: [0, 1, 2, 3, 4]
+        tsvr_range: [0, 200]
+        min_items_per_factor: 10
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 output files exist"
+        - "irt_input: 400 rows, values in {0,1,2,3,4}"
+        - "tsvr_mapping: 400 rows, TSVR_hours in [0,200]"
+        - "q_matrix: rows in [60,120], factor loadings binary, rows sum to 1"
+        - "composite_ID unique across all files"
+        - "At least 10 items per factor"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_confidence_data.log"
+
+    log_file: "logs/step00_extract_confidence_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: IRT Calibration Pass 1 (All Items)
+  # --------------------------------------------------------------------------
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
+    description: "Calibrate 3-factor GRM on all TC_* confidence items (5-category ordinal) - Pass 1 for purification"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: pd.DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[pd.DataFrame, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID", "TC_*"]
+          variable_name: "irt_data"
+          expected_rows: 400
+        - path: "data/step00_q_matrix.csv"
+          required_columns: ["item_name", "factor_common", "factor_congruent", "factor_incongruent"]
+          variable_name: "q_matrix"
+          expected_rows: "60-120"
+
+      output_files:
+        - path: "data/step01_pass1_item_params.csv"
+          variable_name: "item_params"
+          format: "CSV, GRM item parameters"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str", description: "common/congruent/incongruent"}
+            - {name: "a", type: "float", description: "Discrimination parameter"}
+            - {name: "b1", type: "float", description: "GRM threshold 1"}
+            - {name: "b2", type: "float", description: "GRM threshold 2"}
+            - {name: "b3", type: "float", description: "GRM threshold 3"}
+            - {name: "b4", type: "float", description: "GRM threshold 4"}
+          expected_rows: "60-120"
+          description: "Pass 1 item parameters from 3-factor GRM (5-category ordinal)"
+
+        - path: "data/step01_pass1_theta.csv"
+          variable_name: "theta_scores"
+          format: "CSV, theta estimates"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_common", type: "float"}
+            - {name: "theta_congruent", type: "float"}
+            - {name: "theta_incongruent", type: "float"}
+            - {name: "se_common", type: "float"}
+            - {name: "se_congruent", type: "float"}
+            - {name: "se_incongruent", type: "float"}
+          expected_rows: 400
+          description: "Pass 1 theta estimates (diagnostic)"
+
+      parameters:
+        df_long: "irt_data"
+        groups:
+          common: ["i1", "i2"]
+          congruent: ["i3", "i4"]
+          incongruent: ["i5", "i6"]
+        config:
+          model_type: "GRM"
+          n_cats: 5
+          correlated_factors: true
+          device: "cpu"
+          max_iter: 200
+
+      returns:
+        type: "Tuple[pd.DataFrame, pd.DataFrame]"
+        unpacking: "item_params, theta_scores"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          variable_name: "item_params"
+          source: "analysis call output (calibrate_irt return[0])"
+        - path: "data/step01_pass1_theta.csv"
+          variable_name: "theta_scores"
+          source: "analysis call output (calibrate_irt return[1])"
+
+      parameters:
+        results:
+          item_params: "item_params"
+          theta_scores: "theta_scores"
+        disc_range: [0, 10]
+        threshold_range: [-6, 6]
+        theta_range: [-4, 4]
+        se_range: [0.1, 2.0]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged"
+        - "Discrimination a in [0,10]"
+        - "Thresholds b1-b4 in [-6,6], ordered b1<b2<b3<b4"
+        - "Theta in [-4,4], SE in [0.1,2.0]"
+        - "All 400 composite_IDs present"
+        - "No NaN in item parameters or theta"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_irt_calibration_pass1.log"
+
+    log_file: "logs/step01_irt_calibration_pass1.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Item Purification (Decision D039)
+  # --------------------------------------------------------------------------
+  - name: "step02_purify_items"
+    step_number: "02"
+    description: "Filter items by Decision D039 thresholds (a>=0.4, |b_avg|<=3.0 for GRM)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: pd.DataFrame, a_threshold: float, b_threshold: float) -> Tuple[pd.DataFrame, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          required_columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+          variable_name: "pass1_params"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          variable_name: "purified_items"
+          format: "CSV, retained items"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b_avg", type: "float", description: "Average of b1-b4 thresholds"}
+            - {name: "retained", type: "bool"}
+          expected_rows: "30-70% of Pass 1 items"
+          description: "Items retained after purification"
+
+        - path: "data/step02_purification_report.txt"
+          variable_name: "purification_report"
+          format: "Plain text"
+          description: "Text report listing excluded items with reasons"
+
+      parameters:
+        df_items: "pass1_params"
+        a_threshold: 0.4
+        b_threshold: 3.0
+        b_metric: "average"
+
+      returns:
+        type: "Tuple[pd.DataFrame, pd.DataFrame]"
+        unpacking: "purified_items, purification_report"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_parameters"
+      signature: "validate_irt_parameters(df_items: pd.DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_purified_items.csv"
+          variable_name: "purified_items"
+          source: "analysis call output (filter_items_by_quality return[0])"
+
+      parameters:
+        df_items: "purified_items"
+        a_min: 0.4
+        b_max: 3.0
+        a_col: "a"
+        b_col: "b_avg"
+        retention_range: [0.20, 0.90]
+        min_items_per_factor: 10
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All a >= 0.4"
+        - "All |b_avg| <= 3.0"
+        - "At least 10 items per factor"
+        - "Retention rate per factor in [0.20, 0.90]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_purify_items.log"
+
+    log_file: "logs/step02_purify_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: IRT Calibration Pass 2 (Purified Items)
+  # --------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Re-calibrate 3-factor GRM on purified items to obtain FINAL theta_confidence estimates"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "calibrate_irt"
+      signature: "calibrate_irt(df_long: pd.DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[pd.DataFrame, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID", "TC_*"]
+          variable_name: "irt_data"
+          expected_rows: 400
+        - path: "data/step02_purified_items.csv"
+          required_columns: ["item_name", "dimension"]
+          variable_name: "purified_items"
+          description: "Used to filter irt_data to purified items only"
+
+      output_files:
+        - path: "data/step03_theta_confidence_congruence.csv"
+          variable_name: "theta_confidence"
+          format: "CSV, FINAL theta estimates"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_common", type: "float"}
+            - {name: "theta_congruent", type: "float"}
+            - {name: "theta_incongruent", type: "float"}
+            - {name: "se_common", type: "float"}
+            - {name: "se_congruent", type: "float"}
+            - {name: "se_incongruent", type: "float"}
+          expected_rows: 400
+          description: "FINAL theta estimates from Pass 2 (used in LMM)"
+
+        - path: "data/step03_item_parameters.csv"
+          variable_name: "item_parameters"
+          format: "CSV, FINAL item parameters"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b1", type: "float"}
+            - {name: "b2", type: "float"}
+            - {name: "b3", type: "float"}
+            - {name: "b4", type: "float"}
+          expected_rows: "20-80"
+          description: "FINAL item parameters from Pass 2"
+
+      parameters:
+        df_long: "irt_data"
+        groups:
+          common: ["i1", "i2"]
+          congruent: ["i3", "i4"]
+          incongruent: ["i5", "i6"]
+        config:
+          model_type: "GRM"
+          n_cats: 5
+          correlated_factors: true
+          device: "cpu"
+          max_iter: 200
+          filter_to_purified: true
+          purified_items: "purified_items"
+
+      returns:
+        type: "Tuple[pd.DataFrame, pd.DataFrame]"
+        unpacking: "theta_confidence, item_parameters"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_theta_confidence_congruence.csv"
+          variable_name: "theta_confidence"
+          source: "analysis call output (calibrate_irt return[0])"
+        - path: "data/step03_item_parameters.csv"
+          variable_name: "item_parameters"
+          source: "analysis call output (calibrate_irt return[1])"
+
+      parameters:
+        results:
+          item_params: "item_parameters"
+          theta_scores: "theta_confidence"
+        disc_range: [0.4, 10]
+        threshold_range: [-6, 6]
+        theta_range: [-4, 4]
+        se_range: [0.1, 1.5]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged"
+        - "Pass 2 calibration complete"
+        - "All 400 composite_IDs present"
+        - "Theta in [-4,4], SE in [0.1,1.5]"
+        - "SE improvement vs Pass 1 (median SE reduced)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_irt_calibration_pass2.log"
+
+    log_file: "logs/step03_irt_calibration_pass2.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Merge Theta with TSVR (Decision D070)
+  # --------------------------------------------------------------------------
+  - name: "step04_merge_theta_tsvr"
+    step_number: "04"
+    description: "Merge final theta_confidence with TSVR time variable, reshape to long format for LMM (1200 rows = 400 x 3 congruence levels)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_theta_confidence_congruence.csv (composite_ID, theta_common, theta_congruent, theta_incongruent, se_*)"
+        - "Load data/step00_tsvr_mapping.csv (composite_ID, TSVR_hours, test)"
+        - "Merge on composite_ID (left join, keep all theta scores)"
+        - "Verify all composite_IDs matched (no missing TSVR values)"
+        - "Reshape to long format: 400 rows x 3 theta columns -> 1200 rows x 1 theta column"
+        - "Create congruence factor column (categorical: Common/Congruent/Incongruent)"
+        - "Create UID column (extract from composite_ID before '_')"
+        - "Save data/step04_lmm_input.csv (composite_ID, UID, test, TSVR_hours, congruence, theta_confidence, se_confidence)"
+
+      input_files:
+        - path: "data/step03_theta_confidence_congruence.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          variable_name: "theta_wide"
+          expected_rows: 400
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+          variable_name: "tsvr_mapping"
+          expected_rows: 400
+
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "lmm_input"
+          format: "CSV, long format"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "TSVR_hours", type: "float"}
+            - {name: "congruence", type: "str", description: "Common/Congruent/Incongruent"}
+            - {name: "theta_confidence", type: "float"}
+            - {name: "se_confidence", type: "float"}
+          expected_rows: 1200
+          description: "Long-format LMM input (400 composite_IDs x 3 congruence levels)"
+
+      parameters: {}
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "lmm_input"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: int, expected_cols: List[str], required_dtypes: Dict[str, str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "stdlib operations output"
+
+      parameters:
+        df: "lmm_input"
+        expected_rows: 1200
+        expected_cols: ["composite_ID", "UID", "test", "TSVR_hours", "congruence", "theta_confidence", "se_confidence"]
+        required_dtypes:
+          composite_ID: "object"
+          UID: "object"
+          test: "object"
+          TSVR_hours: "float64"
+          congruence: "object"
+          theta_confidence: "float64"
+          se_confidence: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 1200 rows (400 composite_IDs x 3 congruence levels)"
+        - "Each composite_ID appears exactly 3 times"
+        - "Each UID appears 12 times (4 tests x 3 congruence levels)"
+        - "No NaN in TSVR_hours"
+        - "Congruence factor has exactly 3 categories: Common, Congruent, Incongruent"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_merge_theta_tsvr.log"
+
+    log_file: "logs/step04_merge_theta_tsvr.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Fit LMM with Schema x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit LMM to test Schema x Time interaction (primary: NULL expected) and Congruence main effect (secondary: exploratory)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: pd.DataFrame, tsvr_data: pd.DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["UID", "TSVR_hours", "congruence", "theta_confidence"]
+          variable_name: "lmm_data"
+          expected_rows: 1200
+
+      output_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          variable_name: "lmm_summary"
+          format: "Plain text summary"
+          description: "LMM summary with Schema x Time interaction test"
+
+      parameters:
+        theta_scores: "lmm_data"
+        tsvr_data: "lmm_data"
+        formula: "theta_confidence ~ congruence * TSVR_hours"
+        groups: "UID"
+        re_formula: "~1 + TSVR_hours | UID"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        required_terms: ["Intercept", "congruence", "TSVR_hours", "congruence:TSVR_hours"]
+        min_observations: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged"
+        - "All fixed effects terms present"
+        - "Random effects variances > 0"
+        - "p-values in [0,1]"
+        - "No singular fit (warning acceptable)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_fit_lmm.log"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Compute Post-Hoc Contrasts (If Effects Detected)
+  # --------------------------------------------------------------------------
+  - name: "step06_compute_post_hoc_contrasts"
+    step_number: "06"
+    description: "Compute pairwise contrasts with dual p-value reporting (Decision D068) IF significant effects detected, else document NULL result"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          variable_name: "lmm_summary"
+          description: "LMM results for checking significance"
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "lmm_data"
+          description: "Re-fit data for contrast computation if needed"
+
+      output_files:
+        - path: "data/step06_post_hoc_contrasts.csv"
+          variable_name: "contrasts"
+          format: "CSV, pairwise contrasts"
+          columns:
+            - {name: "contrast", type: "str", description: "Common vs Congruent, Common vs Incongruent, Congruent vs Incongruent"}
+            - {name: "estimate", type: "float"}
+            - {name: "SE", type: "float"}
+            - {name: "z", type: "float"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value per Decision D068"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value per Decision D068"}
+            - {name: "timepoint", type: "str", description: "Baseline or T1/T2/T3/T4 if interaction"}
+          expected_rows: "0 if NULL, 3 if main effect only, 12 if interaction (3 contrasts x 4 timepoints)"
+          description: "Pairwise contrasts with dual p-values per Decision D068"
+
+        - path: "data/step06_effect_sizes.csv"
+          variable_name: "effect_sizes"
+          format: "CSV, Cohen's d"
+          columns:
+            - {name: "contrast", type: "str"}
+            - {name: "cohens_d", type: "float"}
+            - {name: "timepoint", type: "str"}
+          expected_rows: "0 if NULL, 3 if main effect, 12 if interaction"
+          description: "Cohen's d effect sizes"
+
+      parameters:
+        lmm_result: "lmm_summary"
+        comparisons: ["Common vs Congruent", "Common vs Incongruent", "Congruent vs Incongruent"]
+        family_alpha: 0.05
+        n_comparisons: 3
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "contrasts"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: pd.DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_post_hoc_contrasts.csv"
+          variable_name: "contrasts"
+          source: "analysis call output (compute_contrasts_pairwise return value)"
+
+      parameters:
+        contrasts_df: "contrasts"
+        required_columns: ["p_uncorrected", "p_bonferroni"]
+        n_comparisons: 3
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+        - "p_bonferroni >= p_uncorrected for all rows"
+        - "All 3 pairwise contrasts present (if any rows)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compute_post_hoc_contrasts.log"
+
+    log_file: "logs/step06_compute_post_hoc_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Prepare Trajectory Plot Data (Decision D069 Dual-Scale)
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_trajectory_plot_data"
+    step_number: "07"
+    description: "Aggregate data for dual-scale trajectory plots (theta + probability scales per Decision D069)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.plotting"
+      function: "prepare_trajectory_plot_data"
+      signature: "prepare_trajectory_plot_data(df_input: pd.DataFrame, lmm_result: MixedLMResults, time_col: str, theta_col: str, group_col: str) -> Tuple[pd.DataFrame, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["TSVR_hours", "theta_confidence", "congruence"]
+          variable_name: "lmm_data"
+        - path: "data/step05_lmm_model_summary.txt"
+          variable_name: "lmm_summary"
+          description: "LMM for predictions"
+
+      output_files:
+        - path: "data/step07_trajectory_theta_data.csv"
+          variable_name: "theta_data"
+          format: "CSV, theta-scale plot data"
+          columns:
+            - {name: "time", type: "float", description: "TSVR_hours"}
+            - {name: "theta", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "congruence", type: "str"}
+            - {name: "source", type: "str", description: "Observed or Predicted"}
+          expected_rows: "12-24"
+          description: "Theta-scale trajectory data (Decision D069)"
+
+        - path: "data/step07_trajectory_probability_data.csv"
+          variable_name: "probability_data"
+          format: "CSV, probability-scale plot data"
+          columns:
+            - {name: "time", type: "float"}
+            - {name: "probability", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "congruence", type: "str"}
+            - {name: "source", type: "str"}
+          expected_rows: "12-24"
+          description: "Probability-scale trajectory data (Decision D069)"
+
+      parameters:
+        df_input: "lmm_data"
+        lmm_result: "lmm_summary"
+        time_col: "TSVR_hours"
+        theta_col: "theta_confidence"
+        group_col: "congruence"
+        scales: ["theta", "probability"]
+
+      returns:
+        type: "Tuple[pd.DataFrame, pd.DataFrame]"
+        unpacking: "theta_data, probability_data"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str, group_col: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step07_trajectory_theta_data.csv"
+          variable_name: "theta_data"
+          source: "analysis call output (prepare_trajectory_plot_data return[0])"
+        - path: "data/step07_trajectory_probability_data.csv"
+          variable_name: "probability_data"
+          source: "analysis call output (prepare_trajectory_plot_data return[1])"
+
+      parameters:
+        plot_data: "theta_data"
+        required_domains: []
+        required_groups: ["Common", "Congruent", "Incongruent"]
+        domain_col: "time"
+        group_col: "congruence"
+        required_congruence: ["Common", "Congruent", "Incongruent"]
+        required_timepoints: 4
+        theta_range: [-4, 4]
+        probability_range: [0, 1]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Both theta and probability files created (Decision D069)"
+        - "All 3 congruence levels present"
+        - "All 4 timepoints present"
+        - "Row counts match between files"
+        - "theta in [-4,4], probability in [0,1]"
+        - "CI_upper > CI_lower for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step07_prepare_trajectory_plot_data.log"
+
+    log_file: "logs/step07_prepare_trajectory_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

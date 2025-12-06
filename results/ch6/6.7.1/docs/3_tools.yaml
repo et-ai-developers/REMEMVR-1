@@ -1,0 +1,169 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.7.1
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 6.7.1 - Initial Confidence Predicting Forgetting Rates
+
+analysis_tools:
+  # Step 1: Load Day 0 Confidence Data
+  read_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer, **kwargs) -> DataFrame"
+    validation_tool: "validate_data_columns"
+    description: "Load Day 0 confidence estimates from RQ 6.1.1 output"
+
+  # Step 2: Load Forgetting Slopes Data
+  # Uses read_csv (already listed above - deduplication)
+
+  # Step 3: Merge Confidence and Slopes Data
+  merge:
+    module: "pandas"
+    function: "merge"
+    signature: "merge(left: DataFrame, right: DataFrame, how: str = 'inner', on: Union[str, List[str]] = None, **kwargs) -> DataFrame"
+    validation_tool: "check_missing_data"
+    description: "Merge Day 0 confidence with forgetting slopes on UID"
+
+  # Step 4: Compute Correlation and Tertile Analysis
+  pearsonr:
+    module: "scipy.stats"
+    function: "pearsonr"
+    signature: "pearsonr(x: ArrayLike, y: ArrayLike) -> Tuple[float, float]"
+    validation_tool: "validate_correlation_test_d068"
+    description: "Compute Pearson correlation between confidence and forgetting slope"
+
+  qcut:
+    module: "pandas"
+    function: "qcut"
+    signature: "qcut(x: Series, q: int, labels: Optional[List[str]] = None, **kwargs) -> Series"
+    validation_tool: "validate_dataframe_structure"
+    description: "Create tertiles of Day 0 confidence (Low/Med/High)"
+
+  groupby:
+    module: "pandas"
+    function: "groupby"
+    signature: "DataFrame.groupby(by: Union[str, List[str]], **kwargs) -> DataFrameGroupBy"
+    validation_tool: "validate_dataframe_structure"
+    description: "Aggregate statistics by tertile groups"
+
+  ttest_ind:
+    module: "scipy.stats"
+    function: "ttest_ind"
+    signature: "ttest_ind(a: ArrayLike, b: ArrayLike, **kwargs) -> Tuple[float, float]"
+    validation_tool: "validate_correlation_test_d068"
+    description: "Test High vs Low tertile difference in forgetting slopes"
+
+  # Step 5: Prepare Plot Data
+  concat:
+    module: "pandas"
+    function: "concat"
+    signature: "concat(objs: List[DataFrame], **kwargs) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+    description: "Combine individual points and tertile means for scatterplot"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing columns"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+    behavior_on_failure:
+      action: "raise ValueError"
+      invoke: "g_debug"
+    description: "Validate required columns exist in loaded data"
+
+  check_missing_data:
+    module: "tools.validation"
+    function: "check_missing_data"
+    signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+    criteria:
+      - "No NaN values in critical columns"
+      - "Expected row count preserved after merge"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        has_missing: "bool"
+        total_missing: "int"
+        percent_missing: "float"
+    behavior_on_failure:
+      action: "raise ValueError"
+      invoke: "g_debug"
+    description: "Validate no data loss from merge operation"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+    criteria:
+      - "Decision D068: Both p_uncorrected AND p_bonferroni present"
+      - "Correlation coefficient in [-1, 1]"
+      - "p-values in [0, 1]"
+      - "p_bonferroni >= p_uncorrected"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+    behavior_on_failure:
+      action: "raise ValueError"
+      invoke: "g_debug"
+    description: "Validate correlation results include Decision D068 dual p-values"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    criteria:
+      - "Expected row count (exact or range)"
+      - "All required columns present"
+      - "Column types match specification (if provided)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+    behavior_on_failure:
+      action: "raise ValueError"
+      invoke: "g_debug"
+    description: "Validate DataFrame structure (rows, columns, types)"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+    criteria:
+      - "All tertile groups present (Low/Med/High)"
+      - "100 individual points + 3 tertile means = 103 rows"
+      - "No missing coordinates"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+    behavior_on_failure:
+      action: "raise ValueError"
+      invoke: "g_debug"
+    description: "Validate plot data contains all required groups for visualization"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 5
+  total_unique_tools: 13
+  stdlib_functions: 7
+  custom_validation_tools: 5
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Stdlib functions (pandas, scipy.stats) exempt from tools_inventory.md verification per best_practices/code.md"
+    - "All validation tools verified exist in tools_inventory.md"
+    - "Decision D068 dual p-value reporting enforced via validate_correlation_test_d068"
+    - "Tool catalog approach: Each tool listed ONCE (deduplication across 5 steps)"

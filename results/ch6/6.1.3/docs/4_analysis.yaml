@@ -1,0 +1,474 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T16:45:00Z
+# RQ: ch6/6.1.3 (Age Effects on Confidence)
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.1.3"
+  total_steps: 6
+  analysis_type: "LMM-only age effects analysis (uses derived theta from RQ 6.1.1)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T16:45:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Theta Confidence and Merge with TSVR and Age
+  # --------------------------------------------------------------------------
+  - name: "step00_load_data"
+    step_number: "00"
+    description: "Load theta confidence from RQ 6.1.1, merge with TSVR and Age demographics"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load results/ch6/6.1.1/data/step03_theta_confidence.csv (theta scores from RQ 6.1.1)"
+        - "Load results/ch6/6.1.1/data/step00_tsvr_mapping.csv (TSVR time variable)"
+        - "Merge theta with TSVR on composite_ID (left join - keep all theta rows)"
+        - "Parse UID from composite_ID (extract substring before underscore)"
+        - "Load data/cache/dfData.csv and extract Age column"
+        - "Merge with Age on UID (left join - add Age to each composite_ID row)"
+        - "Verify no missing TSVR_hours or Age values (all 400 rows complete)"
+        - "Save merged data to data/step00_lmm_input_raw.csv"
+
+      input_files:
+        - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+          required_columns: ["composite_ID", "theta_confidence", "se_confidence"]
+          expected_rows: 400
+          description: "IRT theta estimates from RQ 6.1.1 Pass 2"
+        - path: "results/ch6/6.1.1/data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+          expected_rows: 400
+          description: "Time variable mapping (actual hours since encoding per Decision D070)"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          expected_rows: ">=100"
+          description: "Master demographics file (participant Age)"
+
+      output_files:
+        - path: "data/step00_lmm_input_raw.csv"
+          columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Age"]
+          expected_rows: 400
+          description: "Merged data (theta + TSVR + Age) ready for centering"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Expected row count"
+          check: "Exactly 400 rows (100 participants x 4 tests)"
+          severity: "CRITICAL"
+        - name: "Expected column count"
+          check: "7 columns (composite_ID, UID, test, theta_confidence, se_confidence, TSVR_hours, Age)"
+          severity: "CRITICAL"
+        - name: "No missing values"
+          check: "All columns non-null (0 NaN across all 400 rows x 7 columns)"
+          severity: "CRITICAL"
+        - name: "Theta range"
+          check: "theta_confidence in [-3, 3] (typical IRT ability range)"
+          severity: "CRITICAL"
+        - name: "SE range"
+          check: "se_confidence in [0.1, 1.0] (reliable estimates only)"
+          severity: "CRITICAL"
+        - name: "TSVR range"
+          check: "TSVR_hours in [0, 200] (reasonable retention interval)"
+          severity: "CRITICAL"
+        - name: "Age range"
+          check: "Age in [18, 90] (adult sample)"
+          severity: "CRITICAL"
+        - name: "Unique UIDs"
+          check: "Exactly 100 unique UIDs (all participants present)"
+          severity: "CRITICAL"
+        - name: "No duplicate composite_IDs"
+          check: "Each composite_ID appears exactly once"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Data merge validation failed - see logs/step00_load_data.log"
+
+    log_file: "logs/step00_load_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Center Age Variable
+  # --------------------------------------------------------------------------
+  - name: "step01_center_age"
+    step_number: "01"
+    description: "Center Age variable for LMM interpretability (intercept = average-age participant)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_lmm_input_raw.csv"
+        - "Compute mean(Age) across all participants (grand mean centering)"
+        - "Create Age_c column: Age_c = Age - mean(Age) for each row"
+        - "Verify Age_c has mean approximately 0 (within tolerance |mean(Age_c)| < 0.001)"
+        - "Add Age_c column to DataFrame"
+        - "Save to data/step01_lmm_input.csv"
+
+      input_files:
+        - path: "data/step00_lmm_input_raw.csv"
+          required_columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Age"]
+          expected_rows: 400
+          description: "Merged data from Step 0"
+
+      output_files:
+        - path: "data/step01_lmm_input.csv"
+          columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Age", "Age_c"]
+          expected_rows: 400
+          description: "LMM input with centered Age variable"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Age_c mean"
+          check: "|mean(Age_c)| < 0.001 (centered successfully)"
+          severity: "CRITICAL"
+        - name: "Age_c SD"
+          check: "SD(Age_c) == SD(Age) (centering doesn't change spread)"
+          severity: "MODERATE"
+        - name: "No missing Age_c"
+          check: "All 400 rows have non-null Age_c"
+          severity: "CRITICAL"
+        - name: "Expected row count"
+          check: "400 rows preserved"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Age centering validation failed - see logs/step01_center_age.log"
+
+    log_file: "logs/step01_center_age.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Determine Time Predictors from RQ 6.1.1
+  # --------------------------------------------------------------------------
+  - name: "step02_create_time_predictors"
+    step_number: "02"
+    description: "Create time predictor columns matching RQ 6.1.1 functional form selection"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_lmm_input.csv"
+        - "Read RQ 6.1.1 functional form selection (determine optimal time predictors)"
+        - "Create time predictor columns matching 6.1.1 selection:"
+        - "  - If Time only: Time = TSVR_hours"
+        - "  - If Time + Time_log: Time = TSVR_hours, Time_log = log(TSVR_hours + 1)"
+        - "  - If Time + Time_quad: Time = TSVR_hours, Time_quad = TSVR_hours^2"
+        - "  - If Time_log only: Time_log = log(TSVR_hours + 1)"
+        - "Add time predictor column(s) to DataFrame"
+        - "Save to data/step02_lmm_input_with_time.csv"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Age", "Age_c"]
+          expected_rows: 400
+          description: "LMM input with centered Age"
+        - path: "results/ch6/6.1.1/data/step05_functional_form_selection.csv"
+          required_columns: ["selected_form"]
+          expected_rows: 1
+          description: "RQ 6.1.1 functional form selection (or read from 6.1.1 2_plan.md if file unavailable)"
+
+      output_files:
+        - path: "data/step02_lmm_input_with_time.csv"
+          columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Age", "Age_c", "Time"]
+          expected_rows: 400
+          description: "LMM input with time predictors (Time, Time_log, etc. - columns depend on 6.1.1 selection)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Time predictor created"
+          check: "Time column present (or Time_log/Time_quad based on 6.1.1 selection)"
+          severity: "CRITICAL"
+        - name: "Time values match TSVR"
+          check: "If Time used: Time == TSVR_hours exactly"
+          severity: "CRITICAL"
+        - name: "No missing time values"
+          check: "All 400 rows have non-null time predictor values"
+          severity: "CRITICAL"
+        - name: "Time_log range"
+          check: "If Time_log used: Time_log in [0, 5.5] approximately"
+          severity: "MODERATE"
+        - name: "Expected row count"
+          check: "400 rows preserved"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Time predictor creation validation failed - see logs/step02_create_time_predictors.log"
+
+    log_file: "logs/step02_create_time_predictors.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit LMM with Age x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_lmm"
+    step_number: "03"
+    description: "Fit LMM with Age x Time interaction (random slopes for Time by UID)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step02_lmm_input_with_time.csv"
+          required_columns: ["composite_ID", "UID", "test", "theta_confidence", "TSVR_hours", "Age_c", "Time"]
+          variable_name: "lmm_data"
+          description: "LMM input with time predictors and Age_c"
+
+      output_files:
+        - path: "data/step03_lmm_summary.txt"
+          variable_name: "lmm_model"
+          description: "Full statsmodels LMM summary (fixed/random effects, fit indices)"
+        - path: "data/step03_lmm_fixed_effects.csv"
+          variable_name: "fixed_effects"
+          description: "LMM fixed effects coefficients table"
+
+      parameters:
+        theta_scores: "lmm_data"
+        tsvr_data: "lmm_data"
+        formula: "theta_confidence ~ Time * Age_c + (Time | UID)"
+        groups: "UID"
+        re_formula: "~Time"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with Age x Time interaction using TSVR as time variable (Decision D070), random slopes for individual variation in decline rates"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_lmm_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+        - "Age_c term present in fixed effects"
+        - "Time:Age_c interaction term present in fixed effects"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_fit_lmm.log"
+
+      description: "Validate LMM converged successfully, no singular fit, all estimates finite"
+
+    log_file: "logs/step03_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract Age Effects with Dual P-Values
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_age_effects"
+    step_number: "04"
+    description: "Extract Age_c and Time:Age_c effects with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_lmm_fixed_effects.csv"
+        - "Extract rows for Age_c main effect and Time:Age_c interaction"
+        - "Apply Bonferroni correction per Decision D068:"
+        - "  - Three comparisons: Time, Age_c, Time:Age_c"
+        - "  - Bonferroni alpha = 0.05 / 3 = 0.0167"
+        - "Create dual p-value columns:"
+        - "  - p_uncorrected (original p-value)"
+        - "  - p_bonferroni (same value, interpreted against alpha = 0.0167)"
+        - "Flag significance at both thresholds:"
+        - "  - sig_uncorrected (p < 0.05)"
+        - "  - sig_bonferroni (p < 0.0167)"
+        - "Save extracted effects to data/step04_age_effects.csv"
+
+      input_files:
+        - path: "data/step03_lmm_fixed_effects.csv"
+          required_columns: ["term", "estimate", "se", "z", "p"]
+          expected_rows: "3-7"
+          description: "LMM fixed effects table from Step 3"
+
+      output_files:
+        - path: "data/step04_age_effects.csv"
+          columns: ["term", "estimate", "se", "z", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni"]
+          expected_rows: 2
+          description: "Age effects (Age_c + Time:Age_c) with dual p-values"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Expected row count"
+          check: "Exactly 2 rows (Age_c main effect + Time:Age_c interaction)"
+          severity: "CRITICAL"
+        - name: "Both age terms present"
+          check: "Age_c row present AND Time:Age_c row present"
+          severity: "CRITICAL"
+        - name: "p-value columns identical"
+          check: "p_uncorrected == p_bonferroni (correction is in threshold, not value)"
+          severity: "CRITICAL"
+        - name: "p-value range"
+          check: "All p-values in [0, 1]"
+          severity: "CRITICAL"
+        - name: "Significance flags correct"
+          check: "sig_uncorrected = (p < 0.05), sig_bonferroni = (p < 0.0167)"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Age effects extraction validation failed - see logs/step04_extract_age_effects.log"
+
+    log_file: "logs/step04_extract_age_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compute Effect Size at Day 6
+  # --------------------------------------------------------------------------
+  - name: "step05_compute_effect_size"
+    step_number: "05"
+    description: "Compute predicted confidence difference between younger/older adults at Day 6 retention test"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_lmm_fixed_effects.csv (coefficients for prediction)"
+        - "Load data/step02_lmm_input_with_time.csv (for Age SD computation)"
+        - "Compute SD(Age) from original Age column (before centering)"
+        - "Define comparison points:"
+        - "  - Younger: Age_c = -1 * SD(Age)"
+        - "  - Older: Age_c = +1 * SD(Age)"
+        - "  - Time point: Day 6 retention test (max TSVR_hours, ~144 hours)"
+        - "Extract LMM coefficients (Intercept, Time, Age_c, Time:Age_c)"
+        - "Predict theta_confidence for younger group at Day 6:"
+        - "  - Younger = Intercept + (Time coef * TSVR_Day6) + (Age_c coef * [-1*SD]) + (Time:Age_c coef * TSVR_Day6 * [-1*SD])"
+        - "Predict theta_confidence for older group at Day 6:"
+        - "  - Older = Intercept + (Time coef * TSVR_Day6) + (Age_c coef * [+1*SD]) + (Time:Age_c coef * TSVR_Day6 * [+1*SD])"
+        - "Compute difference: Older - Younger (in theta units)"
+        - "Save effect size to data/step05_effect_size_day6.csv"
+
+      input_files:
+        - path: "data/step03_lmm_fixed_effects.csv"
+          required_columns: ["term", "estimate"]
+          expected_rows: "3-7"
+          description: "LMM coefficients for prediction"
+        - path: "data/step02_lmm_input_with_time.csv"
+          required_columns: ["Age", "TSVR_hours"]
+          expected_rows: 400
+          description: "For Age SD and max TSVR_hours computation"
+
+      output_files:
+        - path: "data/step05_effect_size_day6.csv"
+          columns: ["comparison", "younger_theta", "older_theta", "difference", "age_younger", "age_older", "tsvr_hours"]
+          expected_rows: 1
+          description: "Effect size at Day 6 (predicted difference in theta units)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Expected row count"
+          check: "Exactly 1 row"
+          severity: "CRITICAL"
+        - name: "Theta predictions in range"
+          check: "younger_theta in [-3, 3] AND older_theta in [-3, 3]"
+          severity: "CRITICAL"
+        - name: "Difference reasonable"
+          check: "difference in [-2, 2] (unreasonably large differences suggest computation error)"
+          severity: "MODERATE"
+        - name: "Age ordering"
+          check: "age_older > age_younger"
+          severity: "CRITICAL"
+        - name: "TSVR positive"
+          check: "tsvr_hours > 0 (Day 6 is not encoding session)"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Effect size computation validation failed - see logs/step05_compute_effect_size.log"
+
+    log_file: "logs/step05_compute_effect_size.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Age Tertile Comparison Data
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_tertile_data"
+    step_number: "06"
+    description: "Assign participants to age tertiles and aggregate observed means for plotting"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step02_lmm_input_with_time.csv"
+        - "Assign participants to age tertiles based on Age variable:"
+        - "  - Low: Age <= 33rd percentile"
+        - "  - Medium: 33rd percentile < Age <= 67th percentile"
+        - "  - High: Age > 67th percentile"
+        - "Compute observed means for each tertile x test combination:"
+        - "  - Group by: age_tertile (Low/Medium/High) and test (T1/T2/T3/T4)"
+        - "  - Aggregate: mean(theta_confidence), SE(theta_confidence), N participants"
+        - "Compute 95% CI: mean +/- 1.96 * SE"
+        - "Save aggregated data to data/step06_age_tertile_data.csv"
+
+      input_files:
+        - path: "data/step02_lmm_input_with_time.csv"
+          required_columns: ["UID", "test", "theta_confidence", "Age"]
+          expected_rows: 400
+          description: "LMM input with Age for tertile assignment"
+
+      output_files:
+        - path: "data/step06_age_tertile_data.csv"
+          columns: ["age_tertile", "test", "mean_theta", "se_theta", "CI_lower", "CI_upper", "N"]
+          expected_rows: 12
+          description: "Aggregated means for tertile plot (3 tertiles x 4 tests)"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Expected row count"
+          check: "Exactly 12 rows (3 tertiles x 4 tests)"
+          severity: "CRITICAL"
+        - name: "All tertiles present"
+          check: "Low, Medium, High tertiles all present"
+          severity: "CRITICAL"
+        - name: "All tests present"
+          check: "T1, T2, T3, T4 tests all present"
+          severity: "CRITICAL"
+        - name: "No duplicate combinations"
+          check: "Each tertile x test combination appears exactly once"
+          severity: "CRITICAL"
+        - name: "CI ordering"
+          check: "CI_upper > CI_lower for all rows"
+          severity: "CRITICAL"
+        - name: "Mean theta in range"
+          check: "mean_theta in [-3, 3]"
+          severity: "MODERATE"
+        - name: "SE in range"
+          check: "se_theta in [0.1, 1.0]"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "QUIT"
+        message: "Tertile data preparation validation failed - see logs/step06_prepare_tertile_data.log"
+
+    log_file: "logs/step06_prepare_tertile_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

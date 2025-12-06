@@ -1,0 +1,41 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+rq_tools: success
+rq_analysis: success
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+rq_scholar_context_dump: |
+  9.3/10 APPROVED - Strong TAP+fluency+metacognition theory, needs 2020-2024 cites & dual-process alternative
+  14 papers reviewed (6 high-relevance), 5 suggested improvements for publication quality
+  Critical: acknowledge dual-process (familiarity vs recollection) predicts opposite of NULL interaction
+
+rq_stats_context_dump: |
+  9.5/10 APPROVED. Category 1: 3.0/3 (appropriate GRM+LMM). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (well-specified). Category 4: 2.0/2 (comprehensive). Category 5: 0.5/1 (5 concerns, could be more thorough).
+
+rq_tools_context_dump: |
+  9 analysis + 7 validation tools cataloged for IRT->LMM paradigm confidence analysis
+  GRM 5-category ordinal (TC_* confidence items) vs 2PL dichotomous (TQ_* accuracy)
+  All tools verified in tools_inventory.md, D039/D068/D069/D070 embedded
+
+rq_analysis_context_dump: |
+  8 steps specified with validation (IRT 2-pass GRM -> LMM Paradigm x Time -> dual-scale plots)
+  All steps have complete specifications (analysis + validation calls)
+  All output paths comply with folder conventions (CSV->data/, LOG->logs/)
+
+analysis_steps:
+  step00_extract_confidence_data: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_merge_theta_tsvr: pending
+  step05_fit_lmm: pending
+  step06_compute_post_hoc_contrasts: pending
+  step07_compare_to_ch5: pending
+  step08_prepare_trajectory_plot_data: pending

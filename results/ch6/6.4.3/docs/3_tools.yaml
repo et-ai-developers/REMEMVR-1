@@ -1,0 +1,354 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.4.3
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: Age x Paradigm Interaction for Confidence Decline
+
+analysis_tools:
+  # Step 0: Data Preparation
+  prepare_lmm_input_age_paradigm:
+    module: "pandas"
+    function: "merge"
+    signature: "pd.merge(left: DataFrame, right: DataFrame, on: str, how: str) -> DataFrame"
+    validation_tool: "validate_data_merge"
+
+    description: "Merge RQ 6.4.1 confidence theta scores with age data, center age variable, prepare LMM input"
+
+    input_files:
+      - path: "results/ch6/6.4.1/data/step03_theta_confidence_paradigm.csv"
+        required_columns: ["composite_ID", "Paradigm", "test", "TSVR_hours", "log_TSVR", "theta_confidence", "se_confidence"]
+        expected_rows: 1200
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          Paradigm: "string (values: IFR, ICR, IRE)"
+          test: "string (values: T1, T2, T3, T4)"
+          TSVR_hours: "float (0-168 hours)"
+          log_TSVR: "float (log-transformed time)"
+          theta_confidence: "float (IRT ability estimate)"
+          se_confidence: "float (standard error)"
+
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "Age"]
+        expected_rows: 100
+        data_types:
+          UID: "string (participant identifier)"
+          Age: "int (participant age in years)"
+
+    output_files:
+      - path: "data/step00_lmm_input.csv"
+        columns: ["UID", "Age", "Age_c", "Paradigm", "test", "TSVR_hours", "log_TSVR", "theta_confidence", "se_confidence"]
+        description: "Long-format LMM input with centered age and merged confidence data"
+
+    parameters:
+      merge_on: "UID"
+      merge_how: "left"
+      center_variable: "Age"
+      output_age_centered: "Age_c"
+
+    source_reference: "pandas.merge documentation, standard library function"
+
+  # Step 1: Fit LMM with 3-Way Interaction
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit LMM testing Age x Paradigm x Time 3-way interaction for confidence decline (Decision D070 TSVR time variable)"
+
+    input_files:
+      - path: "data/step00_lmm_input.csv"
+        required_columns: ["UID", "Age_c", "Paradigm", "log_TSVR", "theta_confidence"]
+        expected_rows: 1200
+        source: "Step 0 output"
+
+    output_files:
+      - path: "data/step01_lmm_model_summary.txt"
+        description: "LMM summary with fixed effects, random effects, fit statistics"
+
+    parameters:
+      formula: "theta_confidence ~ log_TSVR * Paradigm * Age_c"
+      re_formula: "~log_TSVR"
+      groups: "UID"
+      reml: false
+
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm'"
+
+  # Step 2: Extract Interaction Terms with Dual P-Values
+  extract_age_interaction_terms_d068:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    description: "Extract Age_c terms (main, 2-way, 3-way) with dual p-value reporting (Decision D068: Wald + LRT)"
+
+    input_files:
+      - path: "data/step01_lmm_model_summary.txt"
+        source: "Step 1 LMM output"
+
+    output_files:
+      - path: "data/step02_interaction_terms.csv"
+        columns: ["term", "coef", "se", "z_wald", "p_wald_uncorrected", "p_wald_bonferroni", "chi2_lrt", "df_lrt", "p_lrt_uncorrected", "p_lrt_bonferroni", "significant_bonferroni"]
+        description: "Age_c terms with dual p-values (Wald + LRT) and Bonferroni correction"
+
+    parameters:
+      required_terms: ["Age_c", "Age_c:log_TSVR", "Age_c:log_TSVR:Paradigm"]
+      family_alpha: 0.05
+      bonferroni_n: 3
+
+    source_reference: "tools_inventory.md section 'compute_contrasts_pairwise'"
+
+  # Step 3: Compute Effect Sizes
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+    validation_tool: "validate_effect_sizes"
+
+    description: "Compute Cohen's f-squared effect sizes for Age_c terms (main, 2-way, 3-way interaction)"
+
+    input_files:
+      - path: "data/step01_lmm_model_summary.txt"
+        source: "Step 1 LMM output (re-loaded model object)"
+
+    output_files:
+      - path: "data/step03_effect_sizes.csv"
+        columns: ["term", "f_squared", "interpretation"]
+        description: "Cohen's f-squared effect sizes with interpretation thresholds"
+
+    parameters:
+      include_interactions: true
+      target_terms: ["Age_c", "Age_c:log_TSVR", "Age_c:log_TSVR:Paradigm"]
+
+    source_reference: "tools_inventory.md section 'compute_effect_sizes_cohens'"
+
+  # Step 4: Compare to Chapter 5 Results
+  compare_ch5_ch6_results:
+    module: "pandas"
+    function: "merge"
+    signature: "pd.merge(left: DataFrame, right: DataFrame, on: str, how: str) -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    description: "Compare Ch6 confidence interaction results to Ch5 accuracy interaction results (test generalization hypothesis)"
+
+    input_files:
+      - path: "data/step02_interaction_terms.csv"
+        required_columns: ["term", "p_wald_bonferroni", "p_lrt_bonferroni", "significant_bonferroni"]
+        source: "Step 2 output (Ch6 confidence)"
+
+      - path: "results/ch5/5.3.4/data/step02_interaction_terms.csv"
+        required_columns: ["term", "p_wald_bonferroni", "p_lrt_bonferroni", "significant_bonferroni"]
+        source: "Ch5 RQ 5.3.4 output (accuracy)"
+        optional: true
+
+    output_files:
+      - path: "data/step04_ch5_comparison.csv"
+        columns: ["term", "domain", "p_wald_bonferroni", "p_lrt_bonferroni", "significant_bonferroni", "interpretation"]
+        description: "Cross-chapter comparison (Ch5 accuracy vs Ch6 confidence)"
+
+    parameters:
+      merge_on: "term"
+      merge_how: "outer"
+      domains: ["Accuracy", "Confidence"]
+
+    source_reference: "pandas.merge documentation, standard library function"
+
+validation_tools:
+  # Step 0 Validation
+  validate_data_merge:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_lmm_input.csv"
+        required_columns: ["UID", "Age", "Age_c", "Paradigm", "test", "TSVR_hours", "log_TSVR", "theta_confidence", "se_confidence"]
+        source: "Step 0 analysis output"
+
+    parameters:
+      expected_rows: 1200
+      expected_columns: ["UID", "Age", "Age_c", "Paradigm", "test", "TSVR_hours", "log_TSVR", "theta_confidence", "se_confidence"]
+      check_age_centering: true
+      age_mean_tolerance: 0.01
+
+    criteria:
+      - "Exactly 1200 rows (100 participants x 4 tests x 3 paradigms)"
+      - "All 9 required columns present"
+      - "No NaN values in any column (complete merge)"
+      - "Age_c mean approximately 0 (within 0.01 tolerance)"
+      - "All 100 unique UIDs present"
+      - "Paradigm distribution: 400 rows each (IFR, ICR, IRE)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_prepare_lmm_input.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate data merge completeness, structure, age centering accuracy"
+    source_reference: "tools_inventory.md section 'validate_dataframe_structure'"
+
+  # Step 1 Validation
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_lmm_model_summary.txt"
+        source: "Step 1 analysis output"
+
+    parameters:
+      check_singularity: true
+      min_observations: 1200
+      expected_groups: 100
+
+    criteria:
+      - "Model converged successfully (converged = True)"
+      - "No singularity warnings (random effects variance > 0)"
+      - "All 8 fixed effects estimated (3 main + 3 two-way + 2 three-way dummy codes)"
+      - "Random effects present for intercepts and slopes"
+      - "Exactly 1200 observations used"
+      - "Exactly 100 groups (UIDs)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError (if singularity or non-convergence)"
+      log_to: "logs/step01_fit_lmm_3way.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate LMM convergence, no singularity, expected structure"
+    source_reference: "tools_inventory.md section 'validate_lmm_convergence'"
+
+  # Step 2 Validation
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_interaction_terms.csv"
+        required_columns: ["term", "p_wald_uncorrected", "p_wald_bonferroni", "p_lrt_uncorrected", "p_lrt_bonferroni"]
+        source: "Step 2 analysis output"
+
+    parameters:
+      required_terms: ["Age_c", "Age_c:log_TSVR", "Age_c:log_TSVR:Paradigm"]
+      alpha_bonferroni: 0.05
+
+    criteria:
+      - "All 3 required terms present (Age_c main, 2-way, 3-way)"
+      - "BOTH Wald and LRT p-values present (Decision D068 compliance)"
+      - "Bonferroni correction applied correctly (p_bonf = p_uncorr * 3)"
+      - "No NaN p-values (all tests executed successfully)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError (if terms missing or D068 non-compliant)"
+      log_to: "logs/step02_extract_interaction_terms.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate dual p-value reporting per Decision D068, all required terms extracted"
+    source_reference: "tools_inventory.md section 'validate_hypothesis_test_dual_pvalues'"
+
+  # Step 3 Validation
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_effect_sizes.csv"
+        required_columns: ["term", "f_squared", "interpretation"]
+        source: "Step 3 analysis output"
+
+    parameters:
+      f2_column: "f_squared"
+      allow_large_values: true
+
+    criteria:
+      - "All 3 effect sizes computed (no NaN)"
+      - "f_squared values >= 0 (non-negative required)"
+      - "Interpretation consistent with thresholds (small/medium/large)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError (if negative f_squared)"
+      log_to: "logs/step03_compute_effect_sizes.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate effect sizes non-negative, interpretation correct"
+    source_reference: "tools_inventory.md section 'validate_effect_sizes'"
+
+  # Step 4 Validation
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_ch5_comparison.csv"
+        required_columns: ["term", "domain", "p_wald_bonferroni", "p_lrt_bonferroni", "significant_bonferroni", "interpretation"]
+        source: "Step 4 analysis output"
+
+    parameters:
+      required_cols: ["term", "domain", "p_wald_bonferroni", "p_lrt_bonferroni", "significant_bonferroni", "interpretation"]
+      expected_rows: [3, 6]
+
+    criteria:
+      - "Required columns present"
+      - "Expected rows: 6 if Ch5 available (3 terms x 2 domains), 3 if Ch5 pending (Confidence only)"
+      - "No NaN in p-value columns (unless Ch5 unavailable)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_cols: "List[str]"
+
+    behavior_on_failure:
+      action: "Log warning if Ch5 missing, proceed with Ch6-only table"
+      log_to: "logs/step04_compare_to_ch5.log"
+      invoke: "g_debug only if structural errors (not Ch5 availability)"
+
+    description: "Validate comparison table structure, handle Ch5 availability gracefully"
+    source_reference: "tools_inventory.md section 'validate_data_format'"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 5
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "LMM-only pipeline (no IRT calibration in this RQ)"
+    - "Theta scores inherited from RQ 6.4.1"
+    - "Cross-RQ dependency on RQ 6.4.1 (confidence theta) and RQ 5.3.4 (Ch5 accuracy comparison)"
+    - "Decision D068: Dual p-value reporting (Wald + LRT) for all hypothesis tests"
+    - "Decision D070: TSVR (log-transformed hours) as time variable, not nominal days"
+    - "Step 4 validation handles Ch5 availability gracefully (proceeds if Ch5 not ready)"

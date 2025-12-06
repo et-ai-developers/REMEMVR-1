@@ -1,0 +1,440 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: ch6/6.4.4
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.4.4"
+  total_steps: 6
+  analysis_type: "LMM variance decomposition + ICC computation"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Import Theta Confidence Data
+  # --------------------------------------------------------------------------
+  - name: "step00_import_data"
+    step_number: "00"
+    description: "Import theta_confidence scores from RQ 6.4.1, merge with TSVR_hours, create LMM input"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/ch6/6.4.1/data/step03_theta_confidence_paradigm.csv"
+        - "Parse composite_ID to extract UID and test (format: {UID}_{test})"
+        - "Load TSVR_hours from data/cache/dfData.csv (Time Since VR in actual hours per Decision D070)"
+        - "Merge theta_confidence data with TSVR_hours on (UID, test)"
+        - "Verify all 3 paradigms present (IFR, ICR, IRE)"
+        - "Save to data/step00_lmm_input.csv"
+
+      input_files:
+        - path: "results/ch6/6.4.1/data/step03_theta_confidence_paradigm.csv"
+          description: "Theta confidence scores by paradigm from RQ 6.4.1"
+          required_columns: ["composite_ID", "paradigm", "theta_confidence", "se_confidence"]
+          expected_rows: 1200
+        - path: "data/cache/dfData.csv"
+          description: "Master data cache with TSVR_hours"
+          required_columns: ["UID", "TEST", "TSVR"]
+
+      output_files:
+        - path: "data/step00_lmm_input.csv"
+          description: "Long-format LMM input with theta_confidence + TSVR_hours"
+          columns: ["UID", "test", "TSVR_hours", "paradigm", "theta_confidence", "se_confidence"]
+          expected_rows: 1200
+          data_types:
+            UID: "string"
+            test: "string"
+            TSVR_hours: "float64"
+            paradigm: "string"
+            theta_confidence: "float64"
+            se_confidence: "float64"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "analysis call output (stdlib data import)"
+
+      parameters:
+        df: "lmm_input"
+        required_cols: ["UID", "test", "TSVR_hours", "paradigm", "theta_confidence", "se_confidence"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All required columns present: UID, test, TSVR_hours, paradigm, theta_confidence, se_confidence"
+        - "Expected 1200 rows (100 participants x 4 tests x 3 paradigms)"
+        - "All 3 paradigms present: IFR, ICR, IRE"
+        - "TSVR_hours in [0, 168] hours"
+        - "theta_confidence in [-3, 3] (typical IRT ability range)"
+        - "No NaN values in theta_confidence"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_import_data.log"
+
+      description: "Validate LMM input has correct structure and expected data quality"
+
+    log_file: "logs/step00_import_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Fit Paradigm-Stratified LMMs with Random Slopes
+  # --------------------------------------------------------------------------
+  - name: "step01_fit_lmm"
+    step_number: "01"
+    description: "Fit 3 separate LMMs (IFR, ICR, IRE) with random slopes to estimate variance in confidence decline rates"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step00_lmm_input.csv"
+          required_columns: ["UID", "test", "TSVR_hours", "paradigm", "theta_confidence", "se_confidence"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step01_lmm_ifr_summary.txt"
+          variable_name: "lmm_ifr_summary"
+          description: "LMM summary for Free Recall (IFR) paradigm"
+        - path: "data/step01_lmm_icr_summary.txt"
+          variable_name: "lmm_icr_summary"
+          description: "LMM summary for Cued Recall (ICR) paradigm"
+        - path: "data/step01_lmm_ire_summary.txt"
+          variable_name: "lmm_ire_summary"
+          description: "LMM summary for Recognition (IRE) paradigm"
+
+      parameters:
+        formula: "theta_confidence ~ TSVR_hours + (TSVR_hours | UID)"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit paradigm-stratified LMMs with random slopes to estimate variance in confidence decline rates. Decision D070 uses TSVR_hours (actual hours) not nominal days."
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "fitted LMM models (in-memory)"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (converged attribute = True)"
+        - "No singular fit warnings (random effects variance > 0)"
+        - "All variance components finite (no NaN/Inf)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_fit_lmm.log"
+
+      description: "Validate LMM converged successfully with no singular fit issues"
+
+    log_file: "logs/step01_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Extract Variance Components Per Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step02_extract_variance"
+    step_number: "02"
+    description: "Extract variance components (intercept, slope, covariance, residual) from fitted LMMs for ICC computation"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "fitted LMM models (in-memory Python objects)"
+          source: "Step 1 LMM fitting output"
+          variable_name: "lmm_models"
+
+      output_files:
+        - path: "data/step02_variance_components.csv"
+          variable_name: "variance_components"
+          description: "Variance components per paradigm (3 rows: IFR, ICR, IRE)"
+          columns: ["paradigm", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "var_total"]
+          expected_rows: 3
+
+      parameters:
+        extract_variance_components: true
+        extract_icc: false
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "variance_dict"
+
+      description: "Extract variance components (intercept, slope, covariance, residual) from fitted LMMs for ICC computation"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_variance_positivity"
+      signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          required_columns: ["paradigm", "var_intercept", "var_slope", "var_residual"]
+          variable_name: "variance_components"
+          source: "Step 2 variance extraction output"
+
+      parameters:
+        variance_df: "variance_components"
+        component_col: "component"
+        value_col: "variance"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All variance components > 0 (negative variance impossible)"
+        - "No NaN values in variance columns"
+        - "var_total = var_intercept + var_slope + var_residual (sanity check)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_extract_variance.log"
+
+      description: "Validate all variance components are positive (negative variance indicates estimation error)"
+
+    log_file: "logs/step02_extract_variance.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute ICC Per Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_icc"
+    step_number: "03"
+    description: "Compute 3 ICC estimates per paradigm: baseline variance (ICC_intercept), unconditional slope variance (ICC_slope_simple), conditional slope variance at Day 6 (ICC_slope_conditional)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_icc_from_variance_components"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          required_columns: ["paradigm", "var_intercept", "var_slope", "cov_int_slope", "var_residual"]
+          variable_name: "variance_components"
+          source: "Step 2 variance extraction output"
+
+      output_files:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_estimates"
+          description: "ICC estimates per paradigm with interpretations"
+          columns: ["paradigm", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional", "interpretation_intercept", "interpretation_slope"]
+          expected_rows: 3
+
+      parameters:
+        variance_components_df: "variance_components"
+        slope_name: "TSVR_hours"
+        timepoint: 6.0
+
+      returns:
+        type: "DataFrame"
+        variable_name: "icc_estimates"
+
+      description: "Compute 3 ICC estimates per paradigm: baseline variance (ICC_intercept), unconditional slope variance (ICC_slope_simple), and conditional slope variance at Day 6 (ICC_slope_conditional)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          required_columns: ["paradigm", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+          variable_name: "icc_estimates"
+          source: "Step 3 ICC computation output"
+
+      parameters:
+        icc_df: "icc_estimates"
+        icc_col: "icc_value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All ICC values in [0, 1] range (outside indicates computation error)"
+        - "No NaN values in ICC columns"
+        - "Interpretation strings match ICC value ranges"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_compute_icc.log"
+
+      description: "Validate ICC values are in valid [0, 1] range (proportion of variance)"
+
+    log_file: "logs/step03_compute_icc.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compare ICC_slope Across Paradigms
+  # --------------------------------------------------------------------------
+  - name: "step04_compare_paradigms"
+    step_number: "04"
+    description: "Compare ICC_slope across paradigms (IFR, ICR, IRE) to determine if Free Recall shows highest trait variance"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_icc_estimates.csv"
+        - "Order paradigms by ICC_slope_simple (highest to lowest)"
+        - "Compute pairwise ICC_slope differences (IFR-ICR, IFR-IRE, ICR-IRE)"
+        - "Compute pairwise ICC_slope_conditional differences"
+        - "Determine if Free Recall shows highest ICC_slope (as hypothesized)"
+        - "Summarize paradigm-specific trait variance pattern"
+        - "Save data/step04_paradigm_icc_comparison.csv"
+        - "Save data/step04_paradigm_summary.txt"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          description: "ICC estimates from Step 3"
+          required_columns: ["paradigm", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+          expected_rows: 3
+
+      output_files:
+        - path: "data/step04_paradigm_icc_comparison.csv"
+          description: "Pairwise ICC differences"
+          columns: ["comparison", "ICC_slope_diff_simple", "ICC_slope_diff_conditional", "direction"]
+          expected_rows: 3
+        - path: "data/step04_paradigm_summary.txt"
+          description: "Text summary of paradigm ICC pattern"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_paradigm_icc_comparison.csv"
+          variable_name: "paradigm_comparison"
+          source: "analysis call output (stdlib comparison)"
+
+      parameters:
+        df: "paradigm_comparison"
+        required_cols: ["comparison", "ICC_slope_diff_simple", "ICC_slope_diff_conditional", "direction"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 3 rows (IFR-ICR, IFR-IRE, ICR-IRE pairwise comparisons)"
+        - "ICC differences in [-1, 1] range"
+        - "Direction strings match sign of differences"
+        - "All comparisons present"
+        - "Summary text file exists and contains paradigm order"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compare_paradigms.log"
+
+      description: "Validate paradigm comparison has all pairwise comparisons with valid ICC differences"
+
+    log_file: "logs/step04_compare_paradigms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare to Ch5 5.3.7 (Accuracy ICC)
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_ch5"
+    step_number: "05"
+    description: "Compare confidence ICC estimates to accuracy ICC estimates from Ch5 5.3.7 to determine if 5-level confidence data reveals paradigm-specific slope variance that dichotomous accuracy data missed"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_icc_estimates.csv (confidence ICC from this RQ)"
+        - "Load results/ch5/5.3.7/data/step03_icc_estimates.csv (accuracy ICC from Ch5 5.3.7)"
+        - "Merge on paradigm (IFR, ICR, IRE)"
+        - "Compute ICC_intercept_diff = ICC_intercept_confidence - ICC_intercept_accuracy"
+        - "Compute ICC_slope_diff = ICC_slope_confidence - ICC_slope_accuracy"
+        - "Interpret differences (confidence > accuracy? confidence ≈ accuracy?)"
+        - "Document comparison results"
+        - "Save data/step05_ch5_comparison.csv"
+        - "Save data/step05_ch5_summary.txt"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          description: "Confidence ICC estimates from this RQ"
+          required_columns: ["paradigm", "ICC_intercept", "ICC_slope_simple"]
+          expected_rows: 3
+        - path: "results/ch5/5.3.7/data/step03_icc_estimates.csv"
+          description: "Accuracy ICC estimates from Ch5 5.3.7"
+          required_columns: ["paradigm", "ICC_intercept", "ICC_slope_simple"]
+          expected_rows: 3
+
+      output_files:
+        - path: "data/step05_ch5_comparison.csv"
+          description: "Confidence vs accuracy ICC comparison"
+          columns: ["paradigm", "ICC_intercept_confidence", "ICC_intercept_accuracy", "ICC_intercept_diff", "ICC_slope_confidence", "ICC_slope_accuracy", "ICC_slope_diff", "interpretation"]
+          expected_rows: 3
+        - path: "data/step05_ch5_summary.txt"
+          description: "Text summary of accuracy vs confidence ICC comparison"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_ch5_comparison.csv"
+          variable_name: "ch5_comparison"
+          source: "analysis call output (stdlib comparison)"
+
+      parameters:
+        df: "ch5_comparison"
+        required_cols: ["paradigm", "ICC_intercept_confidence", "ICC_intercept_accuracy", "ICC_intercept_diff", "ICC_slope_confidence", "ICC_slope_accuracy", "ICC_slope_diff", "interpretation"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 3 rows (IFR, ICR, IRE)"
+        - "All ICC values in [0, 1]"
+        - "ICC differences in [-1, 1]"
+        - "No NaN values"
+        - "All 3 paradigms matched"
+        - "Summary text file exists and contains overall pattern"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_compare_ch5.log"
+
+      description: "Validate Ch5 comparison has all paradigms matched with valid ICC values and differences"
+
+    log_file: "logs/step05_compare_ch5.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

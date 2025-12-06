@@ -1,0 +1,25 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+rq_tools: success
+rq_analysis: success
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+context_dumps:
+  rq_tools: "2 analysis + 2 validation tools cataloged for LMM-only age effects analysis"
+  rq_analysis: "6 steps specified with validation (LMM-only age effects - uses derived theta from RQ 6.1.1)"
+
+analysis_steps:
+  step00_load_data: pending
+  step01_center_age: pending
+  step02_create_time_predictors: pending
+  step03_fit_lmm: pending
+  step04_extract_age_effects: pending
+  step05_compute_effect_size: pending
+  step06_prepare_tertile_data: pending

@@ -1,0 +1,38 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+context_dump: "9.5/10 APPROVED. Category 1: 3.0/3 (GRM ordinal appropriate). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.8/2 (minor gaps in diagnostics). Category 5: 0.7/1 (4 concerns, good quality but below ≥5 target)."
+rq_planner: success
+context_dump: |
+  Analysis plan created: 8 steps planned (Step 0: extraction + Steps 1-7: analysis).
+  Tool requirements: IRT calibration (GRM 3-factor for ordinal TC_* confidence data), 2-pass purification (D039), LMM Domain x Time interaction (D070 TSVR), post-hoc contrasts (D068 dual p-values), dual-scale trajectory plots (D069).
+  Expected outputs: 11 data files, 8 log files. When domain conditional (exclude if <10 items post-purification). Validation required at every step.
+rq_tools: success
+context_dump: |
+  11 analysis + 7 validation tools cataloged for IRT->LMM confidence trajectory analysis.
+  GRM 3-factor ordinal model (5-category TC_* items), Decision D039/D068/D069/D070 embedded.
+  When domain conditional (2-factor if <10 items post-purification, else 3-factor).
+  All tools verified exist in tools_inventory.md, all naming conventions verified in names.md.
+rq_analysis: success
+context_dump: |
+  8 steps specified with validation (IRT 2-pass GRM ordinal → LMM Domain x Time → dual-scale plots).
+  All steps have complete specifications: catalogued tools (11 analysis + 7 validation) with full signatures OR stdlib operations with inline validation.
+  Output path folder conventions validated: ALL CSV/TXT to data/, ALL logs to logs/, plots/ empty until rq_plots, results/ empty until rq_results.
+  When domain conditional (2-factor if <10 items post-purification, else 3-factor). Decisions D039/D068/D069/D070 embedded.
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_extract_confidence_data: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_merge_theta_tsvr: pending
+  step05_fit_lmm: pending
+  step06_compute_post_hoc_contrasts: pending
+  step07_prepare_trajectory_plot_data: pending
+  step08_document_ch5_comparison: pending

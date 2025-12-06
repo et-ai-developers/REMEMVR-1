@@ -1,0 +1,431 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T18:30:00Z
+# RQ: ch6/6.4.2
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.4.2"
+  total_steps: 5
+  analysis_type: "Calibration Analysis (Confidence-Accuracy Alignment by Paradigm)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T18:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Merge Accuracy and Confidence Theta Estimates
+  # --------------------------------------------------------------------------
+  - name: "step00_merge_accuracy_confidence"
+    step_number: "00"
+    description: "Merge accuracy theta (from RQ 5.3.1) and confidence theta (from RQ 6.4.1) on (UID, test, paradigm)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/ch5/5.3.1/data/step03_theta_accuracy_paradigm.csv"
+        - "Read results/ch6/6.4.1/data/step03_theta_confidence_paradigm.csv"
+        - "Inner join on (UID, test, paradigm)"
+        - "Verify TSVR_hours values match between files"
+        - "Retain columns: UID, test, paradigm, TSVR_hours, theta_accuracy, se_accuracy, theta_confidence, se_confidence"
+        - "Save to data/step00_merged_accuracy_confidence.csv"
+
+      input_files:
+        - path: "results/ch5/5.3.1/data/step03_theta_accuracy_paradigm.csv"
+          required_columns: ["UID", "test", "paradigm", "theta_accuracy", "se_accuracy", "TSVR_hours"]
+          expected_rows: 1200
+          data_types:
+            UID: "object"
+            test: "object"
+            paradigm: "object"
+            theta_accuracy: "float64"
+            se_accuracy: "float64"
+            TSVR_hours: "float64"
+          variable_name: "df_accuracy"
+        - path: "results/ch6/6.4.1/data/step03_theta_confidence_paradigm.csv"
+          required_columns: ["UID", "test", "paradigm", "theta_confidence", "se_confidence", "TSVR_hours"]
+          expected_rows: 1200
+          data_types:
+            UID: "object"
+            test: "object"
+            paradigm: "object"
+            theta_confidence: "float64"
+            se_confidence: "float64"
+            TSVR_hours: "float64"
+          variable_name: "df_confidence"
+
+      output_files:
+        - path: "data/step00_merged_accuracy_confidence.csv"
+          columns: ["UID", "test", "paradigm", "TSVR_hours", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+          expected_rows: 1200
+          data_types:
+            UID: "object"
+            test: "object"
+            paradigm: "object"
+            TSVR_hours: "float64"
+            theta_accuracy: "float64"
+            se_accuracy: "float64"
+            theta_confidence: "float64"
+            se_confidence: "float64"
+          description: "Merged accuracy and confidence theta estimates by participant-test-paradigm"
+
+      parameters:
+        merge_on: ["UID", "test", "paradigm"]
+        merge_how: "inner"
+        verify_tsvr_match: true
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_merged_accuracy_confidence.csv"
+          source: "analysis call output (pandas merge)"
+          variable_name: "df_merged"
+
+      parameters:
+        df: "df_merged"
+        expected_rows: 1200
+        expected_columns: ["UID", "test", "paradigm", "TSVR_hours", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+        column_types:
+          UID: "object"
+          test: "object"
+          paradigm: "object"
+          TSVR_hours: "float64"
+          theta_accuracy: "float64"
+          se_accuracy: "float64"
+          theta_confidence: "float64"
+          se_confidence: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 1200 rows (100 participants x 4 tests x 3 paradigms)"
+        - "All 8 required columns present"
+        - "Column types match specification"
+        - "No duplicate (UID, test, paradigm) combinations"
+        - "No NaN values in theta columns"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_merge_accuracy_confidence.log"
+
+      description: "Validate merged accuracy-confidence data has expected structure (rows, columns, types)"
+
+    log_file: "logs/step00_merge_accuracy_confidence.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute Calibration Metric by Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_calibration"
+    step_number: "01"
+    description: "Z-standardize theta_accuracy and theta_confidence, compute calibration = z_confidence - z_accuracy"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step00_merged_accuracy_confidence.csv"
+        - "Z-standardize theta_accuracy across all observations (scipy.stats.zscore)"
+        - "Z-standardize theta_confidence across all observations (scipy.stats.zscore)"
+        - "Compute calibration = z_confidence - z_accuracy"
+        - "Retain all columns + z_accuracy, z_confidence, calibration"
+        - "Save to data/step01_calibration_by_paradigm.csv"
+
+      input_files:
+        - path: "data/step00_merged_accuracy_confidence.csv"
+          required_columns: ["UID", "test", "paradigm", "TSVR_hours", "theta_accuracy", "theta_confidence"]
+          variable_name: "df_merged"
+
+      output_files:
+        - path: "data/step01_calibration_by_paradigm.csv"
+          columns: ["UID", "test", "paradigm", "TSVR_hours", "theta_accuracy", "theta_confidence", "z_accuracy", "z_confidence", "calibration"]
+          expected_rows: 1200
+          data_types:
+            UID: "object"
+            test: "object"
+            paradigm: "object"
+            TSVR_hours: "float64"
+            theta_accuracy: "float64"
+            theta_confidence: "float64"
+            z_accuracy: "float64"
+            z_confidence: "float64"
+            calibration: "float64"
+          description: "Standardized theta scores with calibration metric (z_confidence - z_accuracy)"
+
+      parameters:
+        standardize_columns: ["theta_accuracy", "theta_confidence"]
+        axis: 0
+        ddof: 0
+        nan_policy: "propagate"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_calibration_by_paradigm.csv"
+          required_columns: ["z_accuracy", "z_confidence"]
+          source: "analysis call output (scipy zscore)"
+          variable_name: "df_calibration"
+
+      parameters:
+        df: "df_calibration"
+        column_names: ["z_accuracy", "z_confidence"]
+        tolerance: 0.01
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "z_accuracy mean within ±0.01 of 0"
+        - "z_accuracy SD within ±0.01 of 1"
+        - "z_confidence mean within ±0.01 of 0"
+        - "z_confidence SD within ±0.01 of 1"
+        - "No NaN values in standardized columns"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_compute_calibration.log"
+
+      description: "Validate z-standardization successful (mean≈0, SD≈1 within tolerance)"
+
+    log_file: "logs/step01_compute_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM Testing Paradigm x Time Effects on Calibration
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm_calibration"
+    step_number: "02"
+    description: "Fit LMM testing paradigm x time effects on calibration (Decision D070: TSVR as time variable)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_calibration_by_paradigm.csv"
+          required_columns: ["UID", "paradigm", "TSVR_hours", "calibration"]
+          expected_rows: 1200
+          variable_name: "df_calibration"
+
+      output_files:
+        - path: "data/step02_lmm_calibration_summary.txt"
+          description: "LMM summary (fixed effects, random effects, fit indices)"
+        - path: "data/step02_lmm_fixed_effects.csv"
+          columns: ["term", "estimate", "se", "z_value", "p_value"]
+          expected_rows: 7
+          description: "Fixed effects table from LMM"
+
+      parameters:
+        theta_scores: "df_calibration"
+        tsvr_data: "df_calibration"
+        formula: "calibration ~ paradigm * TSVR_hours"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_result"
+
+      description: "Fit LMM with paradigm main effects, time, and paradigm x time interaction"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_calibration_summary.txt"
+          source: "analysis call output (fit_lmm_trajectory_tsvr)"
+          variable_name: "lmm_result"
+
+      parameters:
+        lmm_result: "lmm_result"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (converged=True)"
+        - "No singular fit warnings"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+        - "Random effects variance components > 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm_calibration.log"
+
+      description: "Validate LMM converged successfully with no singular fit issues"
+
+    log_file: "logs/step02_fit_lmm_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Paradigm Contrasts with Dual P-Values
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_contrasts"
+    step_number: "03"
+    description: "Compute pairwise paradigm contrasts with uncorrected + Bonferroni p-values (Decision D068)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_calibration_summary.txt"
+          source: "step02 LMM fitting"
+          variable_name: "lmm_result"
+
+      output_files:
+        - path: "data/step03_paradigm_contrasts.csv"
+          columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+          expected_rows: 3
+          data_types:
+            comparison: "object"
+            beta: "float64"
+            se: "float64"
+            z: "float64"
+            p_uncorrected: "float64"
+            alpha_corrected: "float64"
+            p_corrected: "float64"
+            sig_uncorrected: "bool"
+            sig_corrected: "bool"
+          description: "Pairwise paradigm contrasts with Decision D068 dual p-values"
+
+      parameters:
+        lmm_result: "lmm_result"
+        comparisons: ["IRE-IFR", "ICR-IFR", "IRE-ICR"]
+        family_alpha: 0.05
+
+      returns:
+        type: "DataFrame"
+        variable_name: "df_contrasts"
+
+      description: "Compute pairwise paradigm contrasts (IRE vs IFR, ICR vs IFR, IRE vs ICR)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_paradigm_contrasts.csv"
+          source: "analysis call output (compute_contrasts_pairwise)"
+          variable_name: "df_contrasts"
+
+      parameters:
+        contrasts_df: "df_contrasts"
+        required_comparisons: ["IRE-IFR", "ICR-IFR", "IRE-ICR"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 required contrasts present (IRE-IFR, ICR-IFR, IRE-ICR)"
+        - "Decision D068: BOTH p_uncorrected AND p_corrected columns present"
+        - "p_corrected >= p_uncorrected for all contrasts"
+        - "No NaN values in any column"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_compute_contrasts.log"
+
+      description: "Validate contrasts include required comparisons and Decision D068 dual p-values"
+
+    log_file: "logs/step03_compute_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Prepare Calibration by Paradigm Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step04_prepare_plot_data"
+    step_number: "04"
+    description: "Aggregate calibration by paradigm x timepoint, compute means and 95% CIs for plotting"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step01_calibration_by_paradigm.csv"
+        - "Group by (paradigm, TSVR_hours)"
+        - "Compute mean(calibration) per group"
+        - "Compute 95% CI (mean ± 1.96 * SE) per group"
+        - "Retain columns: paradigm, TSVR_hours, calibration_mean, CI_lower, CI_upper"
+        - "Sort by paradigm, then TSVR_hours"
+        - "Save to data/step04_calibration_paradigm_plot_data.csv"
+
+      input_files:
+        - path: "data/step01_calibration_by_paradigm.csv"
+          required_columns: ["paradigm", "TSVR_hours", "calibration"]
+          variable_name: "df_calibration"
+
+      output_files:
+        - path: "data/step04_calibration_paradigm_plot_data.csv"
+          columns: ["paradigm", "TSVR_hours", "calibration_mean", "CI_lower", "CI_upper"]
+          expected_rows: 12
+          data_types:
+            paradigm: "object"
+            TSVR_hours: "float64"
+            calibration_mean: "float64"
+            CI_lower: "float64"
+            CI_upper: "float64"
+          description: "Plot source CSV for calibration trajectory by paradigm (12 rows: 3 paradigms x 4 timepoints)"
+
+      parameters:
+        group_by: ["paradigm", "TSVR_hours"]
+        aggregations:
+          calibration: ["mean", "std", "count"]
+        ci_level: 0.95
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_calibration_paradigm_plot_data.csv"
+          source: "analysis call output (pandas groupby)"
+          variable_name: "df_plot"
+
+      parameters:
+        plot_data: "df_plot"
+        required_domains: ["IFR", "ICR", "IRE"]
+        required_groups: []
+        domain_col: "paradigm"
+        group_col: ""
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 paradigms present (IFR, ICR, IRE)"
+        - "Expected 12 rows (3 paradigms x 4 timepoints)"
+        - "All required columns present"
+        - "No NaN values"
+        - "CI_upper > CI_lower for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_prepare_plot_data.log"
+
+      description: "Validate plot data includes all paradigms and expected timepoints"
+
+    log_file: "logs/step04_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

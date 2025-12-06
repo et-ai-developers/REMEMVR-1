@@ -1,0 +1,367 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T17:30:00Z
+# RQ: ch6/6.6.2
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.6.2"
+  total_steps: 5
+  analysis_type: "Multiple regression (OLS) - Individual difference predictors of HCE"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T17:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Merge Predictor Data Sources
+  # --------------------------------------------------------------------------
+  - name: "step00_merge_predictor_data"
+    step_number: "00"
+    description: "Extract and merge HCE rates, baseline accuracy/confidence, age, and compute confidence bias into single analysis dataset"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch6/6.6.1/data/step01_hce_rates.csv') → HCE rates per composite_ID"
+        - "Group by UID, compute mean(HCE_rate) across 4 timepoints → HCE_rate_mean"
+        - "pd.read_csv('results/ch5/5.1.1/data/step03_theta_scores.csv') → baseline accuracy"
+        - "Filter composite_ID ending in '_T1' (Day 0 only)"
+        - "Extract theta_All, rename to baseline_accuracy"
+        - "pd.read_csv('results/ch6/6.1.1/data/step03_theta_confidence.csv') → baseline confidence"
+        - "Filter composite_ID ending in '_T1' (Day 0 only)"
+        - "Extract theta_confidence, rename to baseline_confidence"
+        - "pd.read_csv('data/cache/dfData.csv') → Age"
+        - "Extract UID, Age columns"
+        - "Left join all on UID → merged dataset (100 participants x 6 columns)"
+        - "Z-standardize baseline_accuracy and baseline_confidence"
+        - "Compute confidence_bias = z(baseline_confidence) - z(baseline_accuracy)"
+        - "Validate: No NaN values, all 100 participants present"
+        - "Save to data/step00_predictor_data.csv"
+
+      input_files:
+        - path: "results/ch6/6.6.1/data/step01_hce_rates.csv"
+          required_columns: ["composite_ID", "HCE_rate"]
+          description: "HCE rates from RQ 6.6.1 (400 rows: 100 participants × 4 tests)"
+        - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_All", "se_All"]
+          description: "Accuracy theta from Ch5 5.1.1 (400 rows)"
+        - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+          required_columns: ["composite_ID", "theta_confidence", "se_confidence"]
+          description: "Confidence theta from RQ 6.1.1 (400 rows)"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          description: "Master data file (100 unique participants)"
+
+      output_files:
+        - path: "data/step00_predictor_data.csv"
+          description: "Merged predictors (100 participants × 6 columns: UID, HCE_rate_mean, baseline_accuracy, baseline_confidence, Age, confidence_bias)"
+
+      parameters:
+        filter_test: "T1"
+        agg_function: "mean"
+        merge_key: "UID"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_predictor_data.csv"
+          variable_name: "predictor_data"
+          source: "analysis call output (merged dataset)"
+
+      parameters:
+        df: "predictor_data"
+        required_cols: ["UID", "HCE_rate_mean", "baseline_accuracy", "baseline_confidence", "Age", "confidence_bias"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 6 required columns present"
+        - "Exactly 100 rows (all participants)"
+        - "No NaN values (complete case analysis required)"
+        - "HCE_rate_mean in [0, 1]"
+        - "baseline_accuracy in [-3, 3] (typical IRT range)"
+        - "baseline_confidence in [-3, 3] (typical IRT range)"
+        - "Age in [18, 90] (study inclusion criteria)"
+        - "confidence_bias in [-6, 6] (difference of z-scores)"
+        - "No duplicate UIDs"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_merge_predictor_data.log"
+
+    log_file: "logs/step00_merge_predictor_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Standardize Predictors
+  # --------------------------------------------------------------------------
+  - name: "step01_standardize_predictors"
+    step_number: "01"
+    description: "Z-score standardize all 4 predictors for effect size comparison in regression"
+
+    analysis_call:
+      module: "scipy.stats"
+      function: "zscore"
+      signature: "scipy.stats.zscore(a: ArrayLike, axis: int = 0, ddof: int = 0) -> ndarray"
+
+      input_files:
+        - path: "data/step00_predictor_data.csv"
+          required_columns: ["UID", "HCE_rate_mean", "baseline_accuracy", "baseline_confidence", "Age", "confidence_bias"]
+          variable_name: "predictor_data"
+
+      output_files:
+        - path: "data/step01_standardized_predictors.csv"
+          variable_name: "standardized_data"
+          description: "Standardized predictors (100 participants × 6 columns: UID, HCE_rate_mean, z_baseline_accuracy, z_baseline_confidence, z_Age, z_confidence_bias)"
+
+      parameters:
+        a: "predictor_data[['baseline_accuracy', 'baseline_confidence', 'Age', 'confidence_bias']]"
+        axis: 0
+        ddof: 0
+
+      returns:
+        type: "ndarray"
+        variable_name: "z_scores"
+
+      description: "Standardize predictors to enable effect size comparison (beta weights). Leave outcome HCE_rate_mean unstandardized for interpretability."
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_standardized_predictors.csv"
+          variable_name: "standardized_data"
+          source: "analysis call output (z-scored predictors)"
+
+      parameters:
+        df: "standardized_data"
+        column_names: ["z_baseline_accuracy", "z_baseline_confidence", "z_Age", "z_confidence_bias"]
+        tolerance: 0.01
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All z-scored variables have mean within 0.01 of 0"
+        - "All z-scored variables have SD within 0.01 of 1"
+        - "No NaN values"
+        - "HCE_rate_mean unchanged from Step 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_standardize_predictors.log"
+
+    log_file: "logs/step01_standardize_predictors.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Multiple Regression Model
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_regression"
+    step_number: "02"
+    description: "Fit OLS regression predicting HCE_rate_mean from 4 standardized predictors"
+
+    analysis_call:
+      module: "statsmodels.formula.api"
+      function: "ols"
+      signature: "statsmodels.formula.api.ols(formula: str, data: DataFrame) -> OLS"
+
+      input_files:
+        - path: "data/step01_standardized_predictors.csv"
+          required_columns: ["UID", "HCE_rate_mean", "z_baseline_accuracy", "z_baseline_confidence", "z_Age", "z_confidence_bias"]
+          variable_name: "model_data"
+
+      output_files:
+        - path: "data/step02_regression_model_summary.txt"
+          variable_name: "model_summary"
+          description: "OLS regression model summary (R-squared, F-statistic, coefficients table)"
+
+      parameters:
+        formula: "HCE_rate_mean ~ z_baseline_accuracy + z_baseline_confidence + z_Age + z_confidence_bias"
+        data: "model_data"
+
+      returns:
+        type: "OLS"
+        variable_name: "regression_model"
+
+      description: "Fit OLS regression testing Dunning-Kruger hypothesis (low accuracy + high confidence_bias → high HCE rate)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_regression_model_summary.txt"
+          variable_name: "regression_model"
+          source: "analysis call output (fitted OLS model)"
+
+      parameters:
+        lmm_result: "regression_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (no warnings)"
+        - "R-squared in [0, 1]"
+        - "F-statistic > 0"
+        - "All coefficients finite (no NaN or inf)"
+        - "All SE > 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_regression.log"
+
+    log_file: "logs/step02_fit_regression.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract Coefficients with Dual P-Values (Decision D068)
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_coefficients"
+    step_number: "03"
+    description: "Extract regression coefficients with uncorrected + Bonferroni-corrected p-values per Decision D068"
+
+    analysis_call:
+      module: "statsmodels"
+      function: "OLSResults.summary"
+      signature: "OLSResults.summary() -> Summary"
+
+      input_files:
+        - path: "data/step02_regression_model_summary.txt"
+          variable_name: "regression_model"
+          description: "Fitted OLS model from Step 2"
+
+      output_files:
+        - path: "data/step03_regression_coefficients.csv"
+          variable_name: "coefficients_table"
+          description: "Regression coefficients with dual p-values (5 rows: Intercept + 4 predictors × 8 columns)"
+
+      parameters:
+        model: "regression_model"
+        n_predictors: 4
+        bonferroni_alpha: 0.0125  # 0.05 / 4 predictors
+
+      returns:
+        type: "Summary"
+        variable_name: "model_summary"
+
+      description: "Extract coefficient table, compute p_bonferroni = min(p_uncorrected × 4, 1.0), flag significance at alpha=0.05 for both"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_regression_coefficients.csv"
+          variable_name: "coefficients_table"
+          source: "analysis call output (coefficients with dual p-values)"
+
+      parameters:
+        interaction_df: "coefficients_table"
+        required_terms: ["Intercept", "z_baseline_accuracy", "z_baseline_confidence", "z_Age", "z_confidence_bias"]
+        alpha_bonferroni: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068 compliance)"
+        - "All 5 rows present (Intercept + 4 predictors)"
+        - "p_bonferroni >= p_uncorrected (correction weakens significance)"
+        - "All p-values in [0, 1]"
+        - "All SE > 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_coefficients.log"
+
+    log_file: "logs/step03_extract_coefficients.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Effect Sizes
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_effect_sizes"
+    step_number: "04"
+    description: "Compute R-squared and partial R-squared for overall model and individual predictors"
+
+    analysis_call:
+      module: "statsmodels"
+      function: "OLSResults.rsquared"
+      signature: "OLSResults.rsquared -> float"
+
+      input_files:
+        - path: "data/step02_regression_model_summary.txt"
+          variable_name: "regression_model"
+          description: "Fitted OLS model from Step 2"
+        - path: "data/step01_standardized_predictors.csv"
+          variable_name: "model_data"
+          description: "Standardized predictors (for partial R-squared computation)"
+
+      output_files:
+        - path: "data/step04_effect_sizes.csv"
+          variable_name: "effect_sizes_table"
+          description: "Effect size metrics (6 rows: R_squared, Adjusted_R_squared, partial_R2 per predictor × 2 columns)"
+
+      parameters:
+        model_full: "regression_model"
+        data: "model_data"
+        predictors: ["z_baseline_accuracy", "z_baseline_confidence", "z_Age", "z_confidence_bias"]
+
+      returns:
+        type: "float"
+        variable_name: "r_squared"
+
+      description: "Compute overall R-squared, Adjusted R-squared, and partial R-squared per predictor (unique variance explained)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: ArrayLike, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_effect_sizes.csv"
+          variable_name: "effect_sizes_table"
+          source: "analysis call output (R-squared metrics)"
+
+      parameters:
+        data: "effect_sizes_table['value']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All R-squared values in [0, 1]"
+        - "Adjusted_R_squared <= R_squared"
+        - "Sum(partial R-squared) <= R_squared (non-additive due to correlation)"
+        - "No NaN values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_effect_sizes.log"
+
+    log_file: "logs/step04_compute_effect_sizes.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

@@ -1,0 +1,221 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 6.8.2 - Source-Destination Calibration
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  merge_dataframes:
+    module: "pandas"
+    function: "merge"
+    signature: "merge(left: DataFrame, right: DataFrame, on: Union[str, List[str]], how: str = 'inner') -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    description: "Merge accuracy theta (Ch5 5.5.1) with confidence theta (Ch6 6.8.1) by UID x TEST x LocationType"
+
+  compute_standardization_by_group:
+    module: "pandas"
+    function: "groupby + transform"
+    signature: "df.groupby(group_col)[value_cols].transform(lambda x: (x - x.mean()) / x.std())"
+    validation_tool: "validate_standardization"
+
+    description: "Z-standardize theta_accuracy and theta_confidence within each LocationType separately"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~TSVR_hours', reml: bool = True) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit LMM testing LocationType effects on calibration using TSVR time variable (Decision D070)"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    description: "Extract fixed effects table with dual p-values (uncorrected + Bonferroni per Decision D068)"
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = True) -> DataFrame"
+    validation_tool: "validate_effect_sizes"
+
+    description: "Compute Cohen's f-squared effect sizes for LocationType and interaction effects"
+
+  aggregate_plot_data:
+    module: "pandas"
+    function: "groupby + agg"
+    signature: "df.groupby(group_cols).agg({'value_col': ['mean', 'sem']}).reset_index()"
+    validation_tool: "validate_plot_data_completeness"
+
+    description: "Aggregate calibration by LocationType x TSVR_hours with 95% CI for trajectory visualization"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    criteria:
+      - "Expected row count: 800 (100 UID x 4 tests x 2 LocationTypes)"
+      - "All required columns present: UID, TEST, LocationType, theta_accuracy, SE_accuracy, theta_confidence, SE_confidence"
+      - "No NaN values in theta or SE columns"
+      - "All UIDs matched between accuracy and confidence files"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_merge_accuracy_confidence.log"
+      invoke: "g_debug"
+
+    description: "Validate merged DataFrame has correct structure and no data loss"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    criteria:
+      - "Within each LocationType: mean(Z_accuracy) H 0 (tolerance 0.01)"
+      - "Within each LocationType: SD(Z_accuracy) H 1 (tolerance 0.01)"
+      - "Within each LocationType: mean(Z_confidence) H 0 (tolerance 0.01)"
+      - "Within each LocationType: SD(Z_confidence) H 1 (tolerance 0.01)"
+      - "No NaN values in standardized columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_calibration.log"
+      invoke: "g_debug"
+
+    description: "Validate z-standardization within LocationType groups"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    criteria:
+      - "Model converged successfully (converged attribute = True)"
+      - "No singular fit warnings"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+      - "Log-likelihood is finite"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_calibration.log"
+      invoke: "g_debug"
+
+    description: "Validate LMM converged successfully with no estimation issues"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    criteria:
+      - "All required effects present: LocationType, TSVR_hours, LocationType:TSVR_hours"
+      - "Dual p-values present for ALL effects (p_uncorrected + p_bonferroni per Decision D068)"
+      - "p_bonferroni >= p_uncorrected for all effects"
+      - "All p-values in [0, 1]"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_calibration.log"
+      invoke: "g_debug"
+
+    description: "Validate LocationType effects table includes dual p-values per Decision D068"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    criteria:
+      - "All Cohen's f² values >= 0 (non-negative)"
+      - "No NaN or infinite values"
+      - "Effect sizes for LocationType, TSVR_hours, interaction present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_calibration.log"
+      invoke: "g_debug"
+
+    description: "Validate effect sizes are non-negative and finite"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'LocationType', group_col: str = 'TSVR_hours') -> Dict[str, Any]"
+
+    criteria:
+      - "Exactly 8 rows (2 LocationTypes x 4 timepoints)"
+      - "Both LocationTypes present: Source, Destination"
+      - "All 4 timepoints present per LocationType"
+      - "No NaN values in mean_calibration, CI_lower, CI_upper"
+      - "CI_upper > CI_lower for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_prepare_calibration_plot_data.log"
+      invoke: "g_debug"
+
+    description: "Validate plot data includes all LocationType x Time combinations"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All validation tools paired with analysis tools"
+    - "Stdlib functions (pandas operations) exempted from tools_inventory.md verification"

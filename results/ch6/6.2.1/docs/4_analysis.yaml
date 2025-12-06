@@ -1,0 +1,679 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T00:00:00Z
+# RQ: ch6/6.2.1
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.2.1"
+  total_steps: 7
+  analysis_type: "Calibration trajectory analysis (theta merge → metrics → LMM)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0a: Load Accuracy Theta Scores
+  # --------------------------------------------------------------------------
+  - name: "step00a_load_accuracy_theta"
+    step_number: "00a"
+    description: "Load accuracy theta scores from RQ 5.1.1"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch5/5.1.1/data/step03_theta_scores.csv')"
+        - "Rename theta_all -> theta_accuracy, se_all -> se_accuracy"
+        - "Verify 400 rows (100 participants x 4 tests)"
+        - "Save to data/step00a_accuracy_theta.csv"
+
+    inputs:
+      accuracy_theta_file:
+        path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "object", description: "UID_test identifier"}
+          - {name: "theta_all", type: "float64", description: "Omnibus accuracy ability estimate"}
+          - {name: "se_all", type: "float64", description: "Standard error"}
+        expected_rows: 400
+        description: "Accuracy theta scores from RQ 5.1.1 IRT calibration"
+
+    outputs:
+      accuracy_theta:
+        path: "data/step00a_accuracy_theta.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "object"}
+          - {name: "theta_accuracy", type: "float64"}
+          - {name: "se_accuracy", type: "float64"}
+        expected_rows: 400
+        description: "Accuracy theta with renamed columns"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "File exists"
+          check: "results/ch5/5.1.1/data/step03_theta_scores.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count"
+          check: "Loaded DataFrame has 400 rows"
+          severity: "CRITICAL"
+        - name: "Required columns"
+          check: "Columns: composite_ID, theta_accuracy, se_accuracy"
+          severity: "CRITICAL"
+        - name: "No NaN values"
+          check: "No NaN in theta_accuracy or se_accuracy"
+          severity: "CRITICAL"
+        - name: "Theta range"
+          check: "theta_accuracy in [-3, 3]"
+          severity: "MODERATE"
+        - name: "SE range"
+          check: "se_accuracy in [0.1, 1.0]"
+          severity: "MODERATE"
+      on_failure:
+        action: "QUIT"
+        message: "EXPECTATIONS ERROR: RQ 5.1.1 output file missing or corrupted - g_debug investigates dependency RQ"
+
+    log_file: "logs/step00a_load_accuracy_theta.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 0b: Load Confidence Theta Scores
+  # --------------------------------------------------------------------------
+  - name: "step00b_load_confidence_theta"
+    step_number: "00b"
+    description: "Load confidence theta scores from RQ 6.1.1"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch6/6.1.1/data/step03_theta_confidence.csv')"
+        - "Verify 400 rows"
+        - "Columns already named theta_confidence, se_confidence (no renaming)"
+        - "Save to data/step00b_confidence_theta.csv"
+
+    inputs:
+      confidence_theta_file:
+        path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "object"}
+          - {name: "theta_confidence", type: "float64"}
+          - {name: "se_confidence", type: "float64"}
+        expected_rows: 400
+        description: "Confidence theta scores from RQ 6.1.1 IRT calibration"
+
+    outputs:
+      confidence_theta:
+        path: "data/step00b_confidence_theta.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "object"}
+          - {name: "theta_confidence", type: "float64"}
+          - {name: "se_confidence", type: "float64"}
+        expected_rows: 400
+        description: "Confidence theta (passthrough, no renaming)"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "File exists"
+          check: "results/ch6/6.1.1/data/step03_theta_confidence.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count"
+          check: "400 rows"
+          severity: "CRITICAL"
+        - name: "Required columns"
+          check: "composite_ID, theta_confidence, se_confidence"
+          severity: "CRITICAL"
+        - name: "No NaN"
+          check: "No NaN values"
+          severity: "CRITICAL"
+        - name: "Theta range"
+          check: "theta_confidence in [-3, 3]"
+          severity: "MODERATE"
+      on_failure:
+        action: "QUIT"
+        message: "EXPECTATIONS ERROR: RQ 6.1.1 output file missing - g_debug investigates"
+
+    log_file: "logs/step00b_load_confidence_theta.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 0c: Load TSVR Mapping
+  # --------------------------------------------------------------------------
+  - name: "step00c_load_tsvr_mapping"
+    step_number: "00c"
+    description: "Load TSVR time variable mapping from RQ 6.1.1"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch6/6.1.1/data/step00_tsvr_mapping.csv')"
+        - "Verify TSVR_hours >= 0 (non-negative time)"
+        - "Verify 400 rows"
+        - "Save to data/step00c_tsvr_mapping.csv"
+
+    inputs:
+      tsvr_file:
+        path: "results/ch6/6.1.1/data/step00_tsvr_mapping.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "object"}
+          - {name: "TSVR_hours", type: "float64", description: "Actual hours since encoding"}
+          - {name: "test", type: "object", description: "Test session: T1, T2, T3, T4"}
+        expected_rows: 400
+        description: "TSVR time variable from RQ 6.1.1 (Decision D070)"
+
+    outputs:
+      tsvr_mapping:
+        path: "data/step00c_tsvr_mapping.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "composite_ID", type: "object"}
+          - {name: "TSVR_hours", type: "float64"}
+          - {name: "test", type: "object"}
+        expected_rows: 400
+        description: "TSVR mapping (passthrough)"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "File exists"
+          check: "results/ch6/6.1.1/data/step00_tsvr_mapping.csv exists"
+          severity: "CRITICAL"
+        - name: "Row count"
+          check: "400 rows"
+          severity: "CRITICAL"
+        - name: "TSVR non-negative"
+          check: "TSVR_hours >= 0"
+          severity: "CRITICAL"
+        - name: "TSVR range"
+          check: "TSVR_hours in [0, 168] approximately"
+          severity: "MODERATE"
+        - name: "Test values"
+          check: "test in {T1, T2, T3, T4}"
+          severity: "CRITICAL"
+      on_failure:
+        action: "QUIT"
+        message: "EXPECTATIONS ERROR: TSVR mapping invalid - g_debug checks extraction"
+
+    log_file: "logs/step00c_load_tsvr_mapping.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Merge Theta Scores with TSVR and Standardize
+  # --------------------------------------------------------------------------
+  - name: "step01_merge_theta"
+    step_number: "01"
+    description: "Merge accuracy, confidence, TSVR with z-standardization"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00a_accuracy_theta.csv"
+        - "Load data/step00b_confidence_theta.csv"
+        - "Load data/step00c_tsvr_mapping.csv"
+        - "Inner join all three on composite_ID"
+        - "Extract UID from composite_ID (split on '_', take first part)"
+        - "Z-standardize: z_theta_accuracy = (theta_accuracy - mean) / std"
+        - "Z-standardize: z_theta_confidence = (theta_confidence - mean) / std"
+        - "Verify 400 rows after merge (no data loss)"
+        - "Save to data/step01_merged_theta.csv"
+
+    inputs:
+      accuracy_theta:
+        path: "data/step00a_accuracy_theta.csv"
+        required_columns: ["composite_ID", "theta_accuracy", "se_accuracy"]
+      confidence_theta:
+        path: "data/step00b_confidence_theta.csv"
+        required_columns: ["composite_ID", "theta_confidence", "se_confidence"]
+      tsvr_mapping:
+        path: "data/step00c_tsvr_mapping.csv"
+        required_columns: ["composite_ID", "TSVR_hours", "test"]
+
+    outputs:
+      merged_theta:
+        path: "data/step01_merged_theta.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "UID", type: "object", description: "Participant identifier"}
+          - {name: "test", type: "object", description: "Test session"}
+          - {name: "composite_ID", type: "object"}
+          - {name: "TSVR_hours", type: "float64"}
+          - {name: "theta_accuracy", type: "float64"}
+          - {name: "se_accuracy", type: "float64"}
+          - {name: "theta_confidence", type: "float64"}
+          - {name: "se_confidence", type: "float64"}
+          - {name: "z_theta_accuracy", type: "float64", description: "Z-standardized accuracy theta"}
+          - {name: "z_theta_confidence", type: "float64", description: "Z-standardized confidence theta"}
+        expected_rows: 400
+        description: "Merged theta scores with z-standardization"
+
+    validation:
+      type: "catalogued"
+      tool:
+        module: "tools.validation"
+        function: "validate_standardization"
+        signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      inputs:
+        df:
+          path: "data/step01_merged_theta.csv"
+          description: "Merged DataFrame with z-standardized columns"
+        column_names:
+          value: ["z_theta_accuracy", "z_theta_confidence"]
+        tolerance:
+          value: 0.01
+
+      criteria:
+        - name: "Row count preserved"
+          check: "400 rows (no data loss during merge)"
+          severity: "CRITICAL"
+        - name: "Z-standardization accuracy"
+          check: "mean(z_theta_accuracy) approximately 0, std approximately 1 (within 0.01 tolerance)"
+          severity: "CRITICAL"
+        - name: "Z-standardization confidence"
+          check: "mean(z_theta_confidence) approximately 0, std approximately 1"
+          severity: "CRITICAL"
+        - name: "No NaN values"
+          check: "No NaN in any column"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Merge or z-standardization failed - g_debug checks composite_ID format inconsistencies"
+
+    log_file: "logs/step01_merge_theta.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Calibration Metric
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_calibration"
+    step_number: "02"
+    description: "Compute calibration = z_theta_confidence - z_theta_accuracy"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_merged_theta.csv"
+        - "Compute: calibration = z_theta_confidence - z_theta_accuracy"
+        - "Positive calibration = overconfidence"
+        - "Negative calibration = underconfidence"
+        - "Save to data/step02_calibration_scores.csv"
+
+    inputs:
+      merged_theta:
+        path: "data/step01_merged_theta.csv"
+        required_columns: ["z_theta_accuracy", "z_theta_confidence"]
+
+    outputs:
+      calibration_scores:
+        path: "data/step02_calibration_scores.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "UID", type: "object"}
+          - {name: "test", type: "object"}
+          - {name: "composite_ID", type: "object"}
+          - {name: "TSVR_hours", type: "float64"}
+          - {name: "z_theta_accuracy", type: "float64"}
+          - {name: "z_theta_confidence", type: "float64"}
+          - {name: "calibration", type: "float64", description: "Difference score: z_confidence - z_accuracy"}
+        expected_rows: 400
+        description: "Calibration metric per person-timepoint"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "Calibration computed"
+          check: "calibration column exists"
+          severity: "CRITICAL"
+        - name: "Row count"
+          check: "400 rows"
+          severity: "CRITICAL"
+        - name: "No NaN"
+          check: "No NaN in calibration"
+          severity: "CRITICAL"
+        - name: "Calibration range"
+          check: "calibration approximately in [-6, 6] (difference of z-scores)"
+          severity: "MODERATE"
+        - name: "Arithmetic verification"
+          check: "Sample rows: calibration = z_theta_confidence - z_theta_accuracy"
+          severity: "CRITICAL"
+      on_failure:
+        action: "QUIT"
+        message: "Calibration computation failed - g_debug checks arithmetic"
+
+    log_file: "logs/step02_compute_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Brier Score
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_brier"
+    step_number: "03"
+    description: "Compute item-level Brier score for calibration assessment"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/cache/dfData.csv"
+        - "Filter: Interactive paradigm items (IFR, ICR, IRE) matching omnibus All factor"
+        - "Extract TQ_* (accuracy: 0/1) and TC_* (confidence: 0, 0.25, 0.5, 0.75, 1.0) columns"
+        - "For each participant-test-item: squared_error = (confidence - accuracy)^2"
+        - "Aggregate per participant-test: brier_score = mean(squared_error)"
+        - "Save to data/step03_brier_scores.csv"
+
+    inputs:
+      dfdata:
+        path: "data/cache/dfData.csv"
+        required_columns: ["UID", "TEST", "TQ_*", "TC_*"]
+        description: "Raw item-level data from master.xlsx"
+
+    outputs:
+      brier_scores:
+        path: "data/step03_brier_scores.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "UID", type: "object"}
+          - {name: "TEST", type: "object"}
+          - {name: "composite_ID", type: "object"}
+          - {name: "brier_score", type: "float64", description: "Mean squared error across items"}
+          - {name: "n_items", type: "int64", description: "Items included in computation"}
+        expected_rows: 400
+        description: "Brier scores per participant-test"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "Row count"
+          check: "400 rows"
+          severity: "CRITICAL"
+        - name: "Brier range"
+          check: "brier_score in [0, 1] (squared error bounded)"
+          severity: "CRITICAL"
+        - name: "Brier non-negative"
+          check: "All brier_score >= 0"
+          severity: "CRITICAL"
+        - name: "Items counted"
+          check: "n_items > 0 for all rows"
+          severity: "CRITICAL"
+        - name: "No NaN"
+          check: "No NaN in brier_score"
+          severity: "CRITICAL"
+      on_failure:
+        action: "QUIT"
+        message: "Brier computation failed - g_debug checks item extraction or confidence-accuracy alignment"
+
+    log_file: "logs/step03_compute_brier.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Expected Calibration Error (ECE)
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_ece"
+    step_number: "04"
+    description: "Compute ECE per timepoint by binning confidence levels"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/cache/dfData.csv"
+        - "For each test session (T1, T2, T3, T4):"
+        - "  Bin item responses by confidence (5 bins: 0, 0.25, 0.5, 0.75, 1.0)"
+        - "  Within each bin: compute mean_confidence, mean_accuracy, bin_error = abs(mean_conf - mean_acc)"
+        - "  Compute ECE = weighted average of bin_error (weighted by n_items_in_bin)"
+        - "Save to data/step04_ece_by_time.csv"
+
+    inputs:
+      dfdata:
+        path: "data/cache/dfData.csv"
+        required_columns: ["UID", "TEST", "TQ_*", "TC_*"]
+
+    outputs:
+      ece_by_time:
+        path: "data/step04_ece_by_time.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "test", type: "object", description: "T1, T2, T3, T4"}
+          - {name: "ECE", type: "float64", description: "Expected calibration error"}
+          - {name: "n_items", type: "int64", description: "Total items across bins"}
+          - {name: "bin_0_error", type: "float64"}
+          - {name: "bin_025_error", type: "float64"}
+          - {name: "bin_05_error", type: "float64"}
+          - {name: "bin_075_error", type: "float64"}
+          - {name: "bin_1_error", type: "float64"}
+        expected_rows: 4
+        description: "ECE per test session with bin-specific errors"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "Row count"
+          check: "4 rows (T1, T2, T3, T4)"
+          severity: "CRITICAL"
+        - name: "ECE range"
+          check: "ECE in [0, 1]"
+          severity: "CRITICAL"
+        - name: "Bin errors range"
+          check: "All bin_*_error in [0, 1]"
+          severity: "CRITICAL"
+        - name: "Test values"
+          check: "test in {T1, T2, T3, T4}"
+          severity: "CRITICAL"
+        - name: "No NaN"
+          check: "No NaN in ECE"
+          severity: "CRITICAL"
+      on_failure:
+        action: "QUIT"
+        message: "ECE computation failed - g_debug checks binning logic"
+
+    log_file: "logs/step04_compute_ece.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Fit LMM for Calibration Trajectory
+  # --------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit LMM: calibration ~ TSVR_hours + (TSVR_hours | UID)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+    inputs:
+      calibration_scores:
+        path: "data/step02_calibration_scores.csv"
+        required_columns: ["UID", "TSVR_hours", "calibration"]
+        expected_rows: 400
+        description: "Calibration scores for LMM input"
+
+    parameters:
+      formula: "calibration ~ TSVR_hours"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+      description: "Decision D070: TSVR_hours as time variable (actual hours, not nominal days)"
+
+    outputs:
+      lmm_model_summary:
+        path: "data/step05_lmm_model_summary.txt"
+        format: "Text file"
+        description: "LMM fitted model summary (fixed effects, random effects, fit indices, convergence status)"
+        expected_content:
+          - "Model formula"
+          - "Fixed effects table (coefficient, SE, z, p-value)"
+          - "Random effects variance components"
+          - "AIC, BIC, log-likelihood"
+          - "Convergence status"
+
+    validation:
+      type: "catalogued"
+      tool:
+        module: "tools.validation"
+        function: "validate_lmm_convergence"
+        signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      inputs:
+        lmm_result:
+          description: "MixedLMResults object from fit_lmm_trajectory_tsvr"
+
+      criteria:
+        - name: "Convergence"
+          check: "Model converged successfully"
+          severity: "CRITICAL"
+        - name: "Variance components"
+          check: "Random effects variance > 0 (no boundary estimates)"
+          severity: "CRITICAL"
+        - name: "Fit indices"
+          check: "AIC, BIC finite (not NaN or inf)"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "LMM convergence failed - g_debug checks for insufficient variance or collinearity"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Test Time Effect with Dual P-Values
+  # --------------------------------------------------------------------------
+  - name: "step06_test_time_effect"
+    step_number: "06"
+    description: "Extract Time effect with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+
+    inputs:
+      lmm_result:
+        source: "LMM fitted model from step05"
+        description: "MixedLMResults object"
+
+    parameters:
+      result:
+        description: "MixedLMResults from step05_fit_lmm"
+      compute_lrt:
+        value: true
+        description: "Compute Likelihood Ratio Test for corrected p-value (Decision D068)"
+
+    outputs:
+      time_effect:
+        path: "data/step06_time_effect.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "effect", type: "object", value: "TSVR_hours"}
+          - {name: "coefficient", type: "float64", description: "Time effect size"}
+          - {name: "se", type: "float64", description: "Standard error"}
+          - {name: "p_uncorrected", type: "float64", description: "Wald p-value"}
+          - {name: "p_corrected", type: "float64", description: "LRT p-value (Decision D068)"}
+          - {name: "interpretation", type: "object", description: "Significant/Marginal/Not significant"}
+          - {name: "direction", type: "object", description: "Positive/Negative/Null"}
+        expected_rows: 1
+        description: "Time effect with dual p-values per Decision D068"
+
+    validation:
+      type: "catalogued"
+      tool:
+        module: "tools.validation"
+        function: "validate_hypothesis_test_dual_pvalues"
+        signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      inputs:
+        interaction_df:
+          path: "data/step06_time_effect.csv"
+        required_terms:
+          value: ["TSVR_hours"]
+        alpha_bonferroni:
+          value: 0.05
+
+      criteria:
+        - name: "Required term present"
+          check: "TSVR_hours in results"
+          severity: "CRITICAL"
+        - name: "Dual p-values present"
+          check: "Both p_uncorrected and p_corrected columns exist (Decision D068)"
+          severity: "CRITICAL"
+        - name: "P-value range"
+          check: "p-values in [0, 1]"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Time effect extraction failed - g_debug checks LRT computation"
+
+    log_file: "logs/step06_test_time_effect.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Prepare Calibration Trajectory Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_trajectory_plot"
+    step_number: "07"
+    description: "Create plot source CSV for calibration trajectory (Decision D069 dual-scale)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step02_calibration_scores.csv"
+        - "Load LMM predictions from step05 fitted model"
+        - "Group calibration by test session (T1, T2, T3, T4)"
+        - "Compute mean calibration + 95% CI per test"
+        - "Extract LMM predictions for mean trajectory"
+        - "Merge observed means + model predictions + CIs"
+        - "Save to data/step07_calibration_trajectory_theta_data.csv"
+
+    inputs:
+      calibration_scores:
+        path: "data/step02_calibration_scores.csv"
+        required_columns: ["test", "TSVR_hours", "calibration"]
+      lmm_model:
+        source: "Fitted model from step05"
+        description: "LMM predictions with confidence intervals"
+
+    outputs:
+      trajectory_plot_data:
+        path: "data/step07_calibration_trajectory_theta_data.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "time", type: "float64", description: "TSVR hours aggregated by test"}
+          - {name: "calibration", type: "float64", description: "Mean calibration per timepoint"}
+          - {name: "CI_lower", type: "float64", description: "Lower 95% confidence bound"}
+          - {name: "CI_upper", type: "float64", description: "Upper 95% confidence bound"}
+          - {name: "test", type: "object", description: "Test session: T1, T2, T3, T4"}
+        expected_rows: 4
+        description: "Plot source data for theta-scale trajectory (Decision D069)"
+
+    validation:
+      type: "inline"
+      criteria:
+        - name: "Row count"
+          check: "4 rows (T1, T2, T3, T4)"
+          severity: "CRITICAL"
+        - name: "All tests represented"
+          check: "test in {T1, T2, T3, T4}"
+          severity: "CRITICAL"
+        - name: "CI ordering"
+          check: "CI_lower < CI_upper for all rows"
+          severity: "CRITICAL"
+        - name: "Time range"
+          check: "time in [0, 168] approximately"
+          severity: "MODERATE"
+        - name: "No NaN"
+          check: "No NaN values"
+          severity: "CRITICAL"
+      on_failure:
+        action: "QUIT"
+        message: "Plot data preparation failed - g_debug checks aggregation logic or CI computation"
+
+    log_file: "logs/step07_prepare_trajectory_plot.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

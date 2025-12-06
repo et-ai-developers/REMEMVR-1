@@ -1,0 +1,381 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.2.5
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "6.2.5"
+  total_steps: 6
+  analysis_type: "LMM Age x Time Interaction on Calibration"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Calibration Data and Merge Age
+  # --------------------------------------------------------------------------
+  - name: "step00_load_calibration_age"
+    step_number: "00"
+    description: "Load calibration scores from RQ 6.2.1 and merge with participant age from dfData.csv"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load calibration scores: pd.read_csv('results/ch6/6.2.1/data/step02_calibration_scores.csv')"
+        - "Load participant demographics: pd.read_csv('data/cache/dfData.csv')"
+        - "Merge on UID (left join): calibration.merge(demographics[['UID', 'Age']], on='UID', how='left')"
+        - "Validate merge: check all 400 observations have Age values (no NaN)"
+        - "Save merged dataset to data/step00_calibration_age.csv"
+
+      input_files:
+        - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+          required_columns: ["UID", "test", "composite_ID", "theta_accuracy", "theta_confidence", "calibration", "TSVR_hours"]
+          expected_rows: 400
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          expected_rows: 100
+
+      output_files:
+        - path: "data/step00_calibration_age.csv"
+          columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+          description: "Calibration scores merged with participant age"
+
+      parameters:
+        merge_on: "UID"
+        merge_how: "left"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_calibration_age.csv"
+          variable_name: "calibration_age"
+          source: "analysis call output (pandas merge)"
+
+      parameters:
+        df: "calibration_age"
+        required_columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+
+      criteria:
+        - "All required columns present (UID, test, composite_ID, calibration, TSVR_hours, Age)"
+        - "Expected rows: 400 (100 participants x 4 tests)"
+        - "No NaN values in any column (merge must be complete)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step00_load_calibration_age.log"
+
+    log_file: "logs/step00_load_calibration_age.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Center Age Variable
+  # --------------------------------------------------------------------------
+  - name: "step01_center_age"
+    step_number: "01"
+    description: "Center Age variable (Age_c = Age - mean(Age)) for interpretable LMM intercept"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Compute mean Age: mean_age = df['Age'].mean()"
+        - "Create centered Age: df['Age_c'] = df['Age'] - mean_age"
+        - "Add mean_Age column (constant): df['mean_Age'] = mean_age"
+        - "Validate centering: assert abs(df['Age_c'].mean()) < 0.001"
+        - "Save dataset with Age_c to data/step01_calibration_age_centered.csv"
+
+      input_files:
+        - path: "data/step00_calibration_age.csv"
+          required_columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+
+      output_files:
+        - path: "data/step01_calibration_age_centered.csv"
+          columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age", "Age_c", "mean_Age"]
+          description: "Calibration data with centered age variable"
+
+      parameters:
+        centering_variable: "Age"
+        output_variable: "Age_c"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_calibration_age_centered.csv"
+          variable_name: "calibration_centered"
+          source: "analysis call output (pandas transform)"
+
+      parameters:
+        df: "calibration_centered"
+        column_names: ["Age_c"]
+        tolerance: 0.001
+        expected_mean: 0.0
+
+      criteria:
+        - "mean(Age_c) approximately 0 (tolerance: abs(mean) < 0.001)"
+        - "SD(Age_c) equals SD(Age) (centering preserves variance)"
+        - "Relationship: Age = Age_c + mean_Age for all rows"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step01_center_age.log"
+
+    log_file: "logs/step01_center_age.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with Age x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm_age_interaction"
+    step_number: "02"
+    description: "Fit Linear Mixed Model testing whether age moderates calibration trajectory"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_calibration_age_centered.csv"
+          required_columns: ["UID", "calibration", "TSVR_hours", "Age_c"]
+          variable_name: "calibration_data"
+
+      output_files:
+        - path: "data/step02_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          description: "LMM model summary (fixed effects, random effects, fit statistics)"
+        - path: "data/step02_lmm_fixed_effects.csv"
+          columns: ["term", "estimate", "se", "z_value", "p_value"]
+          description: "Fixed effects table (Intercept, TSVR_hours, Age_c, TSVR_hours:Age_c)"
+        - path: "data/step02_lmm_random_effects.csv"
+          columns: ["component", "value", "sd"]
+          description: "Random effects variance components"
+
+      parameters:
+        theta_scores: "calibration_data"
+        tsvr_data: "calibration_data"
+        formula: "calibration ~ TSVR_hours + Age_c + TSVR_hours:Age_c"
+        re_formula: "~TSVR_hours"
+        groups: "UID"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        min_observations: 100
+        check_singularity: true
+
+      criteria:
+        - "Model converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "Minimum 100 observations used"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step02_fit_lmm_age_interaction.log"
+
+    log_file: "logs/step02_fit_lmm_age_interaction.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract Age Effects with Bonferroni Correction
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_age_effects"
+    step_number: "03"
+    description: "Extract Age_c main effect and Age_c x TSVR_hours interaction with dual p-values (Decision D068)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load fixed effects: pd.read_csv('data/step02_lmm_fixed_effects.csv')"
+        - "Filter age effects: df[df['term'].isin(['Age_c', 'TSVR_hours:Age_c'])]"
+        - "Apply Bonferroni correction: p_bonferroni = np.minimum(p_uncorrected * 3, 1.0)"
+        - "Add significance flags: sig_uncorrected = (p_uncorrected < 0.05), sig_bonferroni = (p_bonferroni < 0.0167)"
+        - "Save age effects with dual p-values to data/step03_age_effects.csv"
+
+      input_files:
+        - path: "data/step02_lmm_fixed_effects.csv"
+          required_columns: ["term", "estimate", "se", "z_value", "p_value"]
+
+      output_files:
+        - path: "data/step03_age_effects.csv"
+          columns: ["term", "estimate", "se", "z_value", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni"]
+          description: "Age_c and Age_c:TSVR_hours effects with dual p-values (Decision D068)"
+
+      parameters:
+        terms_to_extract: ["Age_c", "TSVR_hours:Age_c"]
+        bonferroni_n: 3
+        alpha: 0.05
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_age_effects.csv"
+          variable_name: "age_effects"
+          source: "analysis call output (pandas filter)"
+
+      parameters:
+        contrasts_df: "age_effects"
+        required_terms: ["Age_c", "TSVR_hours:Age_c"]
+
+      criteria:
+        - "Dual p-values present (p_uncorrected + p_bonferroni columns exist)"
+        - "p_bonferroni >= p_uncorrected (correction never decreases p-value)"
+        - "p_bonferroni <= min(p_uncorrected x 3, 1.0) (Bonferroni formula)"
+        - "Significance flags match thresholds (sig_uncorrected = p < 0.05, sig_bonferroni = p < 0.0167)"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step03_extract_age_effects.log"
+
+    log_file: "logs/step03_extract_age_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Create Age Tertile Trajectories
+  # --------------------------------------------------------------------------
+  - name: "step04_create_age_tertiles"
+    step_number: "04"
+    description: "Split participants into age tertiles and compute observed calibration means per tertile x test"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load centered data: pd.read_csv('data/step01_calibration_age_centered.csv')"
+        - "Compute age tertiles: pd.qcut(df['Age'], q=3, labels=['Young', 'Middle', 'Older'])"
+        - "Group by tertile x test: df.groupby(['age_tertile', 'test']).agg({'calibration': ['mean', 'sem'], 'TSVR_hours': 'mean', 'UID': 'count'})"
+        - "Compute 95% CI: CI_lower = mean - 1.96*SE, CI_upper = mean + 1.96*SE"
+        - "Save aggregated data to data/step04_age_tertile_trajectories.csv"
+
+      input_files:
+        - path: "data/step01_calibration_age_centered.csv"
+          required_columns: ["UID", "test", "calibration", "TSVR_hours", "Age"]
+
+      output_files:
+        - path: "data/step04_age_tertile_trajectories.csv"
+          columns: ["age_tertile", "test", "TSVR_hours", "mean_calibration", "CI_lower", "CI_upper", "N"]
+          description: "Age tertile (Young/Middle/Older) trajectories for visualization"
+
+      parameters:
+        tertile_method: "qcut"
+        q: 3
+        labels: ["Young", "Middle", "Older"]
+        groupby_vars: ["age_tertile", "test"]
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_age_tertile_trajectories.csv"
+          variable_name: "tertile_trajectories"
+          source: "analysis call output (pandas groupby)"
+
+      parameters:
+        plot_data: "tertile_trajectories"
+        required_groups: ["Young", "Middle", "Older"]
+        required_categories: ["T1", "T2", "T3", "T4"]
+        group_col: "age_tertile"
+        category_col: "test"
+
+      criteria:
+        - "All 3 tertiles present (Young, Middle, Older)"
+        - "All 4 tests present per tertile (T1, T2, T3, T4)"
+        - "Expected rows: 12 (3 tertiles x 4 tests)"
+        - "CI_lower < mean_calibration < CI_upper for all rows"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step04_create_age_tertiles.log"
+
+    log_file: "logs/step04_create_age_tertiles.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare to Chapter 5 Age Null Findings
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_ch5_age_null"
+    step_number: "05"
+    description: "Compare this RQ's age x time interaction to Chapter 5 universal age null pattern"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load age effects: pd.read_csv('data/step03_age_effects.csv')"
+        - "Extract TSVR_hours:Age_c interaction row"
+        - "Create comparison table with 5 rows (RQs 5.1.3, 5.2.3, 5.3.4, 5.4.3, 6.2.5)"
+        - "Document Chapter 5 p-values (from prior analyses, not re-computed)"
+        - "Add RQ 6.2.5 row with current interaction p-values"
+        - "Add Pattern column: 'NULL' if p_bonferroni > 0.0167, 'SIGNIFICANT' otherwise"
+        - "Save comparison to data/step05_ch5_comparison.csv"
+
+      input_files:
+        - path: "data/step03_age_effects.csv"
+          required_columns: ["term", "p_uncorrected", "p_bonferroni"]
+
+      output_files:
+        - path: "data/step05_ch5_comparison.csv"
+          columns: ["RQ", "Analysis_Type", "Age_x_Time_p_uncorrected", "Age_x_Time_p_corrected", "Significant_uncorrected", "Significant_corrected", "Pattern"]
+          description: "Comparison to Chapter 5 age null pattern"
+
+      parameters:
+        ch5_rqs: ["5.1.3", "5.2.3", "5.3.4", "5.4.3"]
+        current_rq: "6.2.5"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_ch5_comparison.csv"
+          variable_name: "ch5_comparison"
+          source: "analysis call output (pandas concat)"
+
+      parameters:
+        df: "ch5_comparison"
+        expected_rows: 5
+        expected_columns: ["RQ", "Analysis_Type", "Age_x_Time_p_uncorrected", "Age_x_Time_p_corrected", "Significant_uncorrected", "Significant_corrected", "Pattern"]
+        required_rqs: ["5.1.3", "5.2.3", "5.3.4", "5.4.3", "6.2.5"]
+
+      criteria:
+        - "Expected rows: 5 (RQs 5.1.3, 5.2.3, 5.3.4, 5.4.3, 6.2.5)"
+        - "All 5 RQs present"
+        - "RQ 6.2.5 p-values match Step 3 Age_c:TSVR_hours interaction exactly"
+        - "p-values in [0, 1]"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step05_compare_ch5_age_null.log"
+
+    log_file: "logs/step05_compare_ch5_age_null.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

@@ -1,0 +1,351 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.7.1
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.7.1"
+  total_steps: 5
+  analysis_type: "DERIVED data correlation and tertile analysis"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 1: Load Day 0 Confidence Data
+  # --------------------------------------------------------------------------
+  - name: "step01_load_day0_confidence"
+    step_number: "01"
+    description: "Load Day 0 confidence estimates from RQ 6.1.1, filter to T1 only"
+
+    # Analysis call specification (stdlib operations)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/ch6/6.1.1/data/step03_theta_confidence.csv"
+        - "Filter to test == 'T1' (Day 0 baseline only)"
+        - "Extract UID from composite_ID (split on underscore, take first part)"
+        - "Rename theta_confidence -> Day0_confidence for clarity"
+        - "Select columns: UID, Day0_confidence, se_confidence"
+        - "Save to data/step01_day0_confidence.csv"
+
+      input_files:
+        - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+          required_columns: ["composite_ID", "theta_confidence", "se_confidence", "test"]
+          description: "RQ 6.1.1 Step 3 output - confidence theta scores for all tests"
+
+      output_files:
+        - path: "data/step01_day0_confidence.csv"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "Day0_confidence", type: "float", description: "Confidence theta at T1"}
+            - {name: "se_confidence", type: "float", description: "Standard error of confidence estimate"}
+          expected_rows: 100
+          description: "Day 0 confidence estimates for all participants"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      inputs:
+        df_path: "data/step01_day0_confidence.csv"
+        required_columns: ["UID", "Day0_confidence", "se_confidence"]
+
+      criteria:
+        - "All required columns present (UID, Day0_confidence, se_confidence)"
+        - "Expected rows: 100 (one per participant)"
+        - "No NaN values in any column"
+        - "Day0_confidence in [-3, 3] (IRT theta range)"
+        - "se_confidence in [0.1, 1.5] (reasonable SE bounds)"
+        - "UID format: P### with leading zeros"
+        - "No duplicate UIDs"
+
+      on_failure:
+        action: "QUIT"
+        message: "Day 0 confidence data validation failed - check RQ 6.1.1 completion"
+
+    log_file: "logs/step01_load_day0_confidence.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Load Forgetting Slopes Data
+  # --------------------------------------------------------------------------
+  - name: "step02_load_forgetting_slopes"
+    step_number: "02"
+    description: "Load individual forgetting slopes from Ch5 RQ 5.1.4 random effects"
+
+    # Analysis call specification (stdlib operations)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/ch5/5.1.4/data/step04_random_effects.csv"
+        - "Select columns: UID, random_slope, se_slope"
+        - "Rename random_slope -> forgetting_slope for clarity"
+        - "Sort by UID for consistent ordering"
+        - "Save to data/step02_forgetting_slopes.csv"
+
+      input_files:
+        - path: "results/ch5/5.1.4/data/step04_random_effects.csv"
+          required_columns: ["UID", "random_slope", "se_slope"]
+          description: "Ch5 RQ 5.1.4 Step 4 output - random effects from accuracy LMM"
+
+      output_files:
+        - path: "data/step02_forgetting_slopes.csv"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "forgetting_slope", type: "float", description: "Individual forgetting rate"}
+            - {name: "se_slope", type: "float", description: "Standard error of slope"}
+          expected_rows: 100
+          description: "Individual forgetting slopes for all participants"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      inputs:
+        df_path: "data/step02_forgetting_slopes.csv"
+        required_columns: ["UID", "forgetting_slope", "se_slope"]
+
+      criteria:
+        - "All required columns present (UID, forgetting_slope, se_slope)"
+        - "Expected rows: 100 (one per participant)"
+        - "No NaN values in any column"
+        - "forgetting_slope in [-0.5, 0.2] (negative = forgetting)"
+        - "se_slope in [0.01, 0.2] (reasonable SE bounds)"
+        - "No duplicate UIDs"
+
+      on_failure:
+        action: "QUIT"
+        message: "Forgetting slopes data validation failed - check Ch5 RQ 5.1.4 completion"
+
+    log_file: "logs/step02_load_forgetting_slopes.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Merge Confidence and Slopes Data
+  # --------------------------------------------------------------------------
+  - name: "step03_merge_data"
+    step_number: "03"
+    description: "Create analysis-ready dataset combining Day 0 confidence with forgetting slopes"
+
+    # Analysis call specification
+    analysis_call:
+      module: "pandas"
+      function: "merge"
+      signature: "merge(left: DataFrame, right: DataFrame, how: str = 'inner', on: Union[str, List[str]] = None, **kwargs) -> DataFrame"
+
+      input_files:
+        - path: "data/step01_day0_confidence.csv"
+          variable_name: "day0_confidence"
+          description: "Step 1 output - Day 0 confidence estimates"
+        - path: "data/step02_forgetting_slopes.csv"
+          variable_name: "forgetting_slopes"
+          description: "Step 2 output - individual forgetting slopes"
+
+      output_files:
+        - path: "data/step03_predictive_data.csv"
+          variable_name: "predictive_data"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "Day0_confidence", type: "float", description: "Confidence theta at T1"}
+            - {name: "se_confidence", type: "float", description: "Standard error of confidence"}
+            - {name: "forgetting_slope", type: "float", description: "Individual forgetting rate"}
+            - {name: "se_slope", type: "float", description: "Standard error of slope"}
+          expected_rows: 100
+          description: "Merged analysis dataset"
+
+      parameters:
+        left: "day0_confidence"
+        right: "forgetting_slopes"
+        how: "inner"
+        on: "UID"
+
+      returns:
+        type: "DataFrame"
+        variable_name: "predictive_data"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "check_missing_data"
+      signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+      inputs:
+        df: "predictive_data"
+
+      criteria:
+        - "Expected rows: 100 (no data loss from merge)"
+        - "No NaN values in any column"
+        - "All UIDs from Step 1 present"
+        - "All UIDs from Step 2 present"
+
+      on_failure:
+        action: "QUIT"
+        message: "Merge validation failed - incomplete participant data"
+
+    log_file: "logs/step03_merge_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Correlation and Tertile Analysis
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_statistics"
+    step_number: "04"
+    description: "Compute correlation and tertile analysis with Decision D068 dual p-values"
+
+    # Analysis call specification
+    analysis_call:
+      module: "scipy.stats"
+      function: "pearsonr"
+      signature: "pearsonr(x: ArrayLike, y: ArrayLike) -> Tuple[float, float]"
+
+      input_files:
+        - path: "data/step03_predictive_data.csv"
+          variable_name: "predictive_data"
+          required_columns: ["Day0_confidence", "forgetting_slope"]
+          description: "Step 3 output - merged analysis dataset"
+
+      output_files:
+        - path: "data/step04_correlation.csv"
+          variable_name: "correlation_results"
+          columns:
+            - {name: "correlation_r", type: "float", description: "Pearson correlation coefficient"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% CI bound"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% CI bound"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (Decision D068)"}
+            - {name: "N", type: "int", description: "Sample size"}
+            - {name: "direction", type: "str", description: "Effect direction"}
+          expected_rows: 1
+          description: "Correlation results with dual p-values"
+
+        - path: "data/step04_tertile_analysis.csv"
+          variable_name: "tertile_analysis"
+          columns:
+            - {name: "tertile", type: "str", description: "Tertile group (Low/Med/High)"}
+            - {name: "N", type: "int", description: "Participants per tertile"}
+            - {name: "mean_Day0_confidence", type: "float", description: "Mean confidence per tertile"}
+            - {name: "mean_forgetting_slope", type: "float", description: "Mean forgetting rate per tertile"}
+            - {name: "se_forgetting_slope", type: "float", description: "SE of mean slope"}
+          expected_rows: 3
+          description: "Tertile group statistics"
+
+        - path: "data/step04_tertile_test.csv"
+          variable_name: "tertile_test"
+          columns:
+            - {name: "comparison", type: "str", description: "Comparison groups"}
+            - {name: "cohens_d", type: "float", description: "Effect size"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected t-test p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (Decision D068)"}
+            - {name: "interpretation", type: "str", description: "Effect direction"}
+          expected_rows: 1
+          description: "High vs Low tertile comparison"
+
+      parameters:
+        x: "Day0_confidence"
+        y: "forgetting_slope"
+
+      returns:
+        type: "Tuple[float, float]"
+        unpacking: "r_value, p_value"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      inputs:
+        correlation_df: "correlation_results"
+
+      criteria:
+        - "Decision D068: Both p_uncorrected AND p_bonferroni present"
+        - "Correlation coefficient in [-1, 1]"
+        - "p-values in [0, 1]"
+        - "p_bonferroni >= p_uncorrected"
+        - "CI_upper > CI_lower"
+        - "Tertile N in [30, 35] (balanced groups)"
+        - "Sum of tertile Ns = 100"
+
+      on_failure:
+        action: "QUIT"
+        message: "Statistical validation failed - check correlation computation"
+
+    log_file: "logs/step04_compute_statistics.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create plot source CSV showing confidence predicting forgetting trajectories"
+
+    # Analysis call specification
+    analysis_call:
+      module: "pandas"
+      function: "concat"
+      signature: "concat(objs: List[DataFrame], **kwargs) -> DataFrame"
+
+      input_files:
+        - path: "data/step03_predictive_data.csv"
+          variable_name: "predictive_data"
+          description: "Step 3 output - individual participant data"
+        - path: "data/step04_tertile_analysis.csv"
+          variable_name: "tertile_analysis"
+          description: "Step 4 output - tertile summary statistics"
+
+      output_files:
+        - path: "data/step05_confidence_predicts_forgetting_data.csv"
+          variable_name: "plot_data"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "Day0_confidence", type: "float", description: "X-axis value"}
+            - {name: "forgetting_slope", type: "float", description: "Y-axis value"}
+            - {name: "tertile", type: "str", description: "Tertile group (Low/Med/High)"}
+            - {name: "is_mean", type: "bool", description: "True for tertile means, False for individuals"}
+            - {name: "se_slope", type: "float", description: "Error bar size (NaN for individuals)"}
+          expected_rows: 103
+          description: "Plot source data (100 individuals + 3 tertile means)"
+
+      parameters:
+        objs: ["predictive_data", "tertile_analysis"]
+
+      returns:
+        type: "DataFrame"
+        variable_name: "plot_data"
+
+    # Validation call specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      inputs:
+        plot_data: "plot_data"
+        required_groups: ["Low", "Med", "High"]
+
+      criteria:
+        - "Expected rows: 103 (100 individuals + 3 tertile means)"
+        - "Exactly 3 rows with is_mean == True"
+        - "Exactly 100 rows with is_mean == False"
+        - "All tertiles represented: Low, Med, High"
+        - "No NaN in Day0_confidence or forgetting_slope"
+
+      on_failure:
+        action: "QUIT"
+        message: "Plot data validation failed - incomplete data for visualization"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

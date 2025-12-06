@@ -1,0 +1,292 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.3.3
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  # Step 0: Load data and merge
+  load_theta_with_age:
+    module: "pandas"
+    function: "read_csv + merge"
+    signature: "pd.read_csv(filepath: str) -> DataFrame; pd.merge(left: DataFrame, right: DataFrame, on: str) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "results/ch6/6.3.1/data/step03_theta_confidence_domain.csv"
+        required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+        expected_rows: "400 (100 participants x 4 tests)"
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "Age"]
+        expected_rows: "100 participants"
+
+    output_files:
+      - path: "data/step00_theta_with_age.csv"
+        columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+        description: "Confidence theta scores merged with participant age"
+
+    parameters:
+      merge_on: "UID"
+      how: "left"
+
+    description: "Load confidence theta from RQ 6.3.1 and merge with Age from dfData.csv"
+    source_reference: "Standard pandas operations (stdlib exempt from tools_inventory.md)"
+
+  # Step 1: Transform data
+  center_age_and_reshape:
+    module: "pandas"
+    function: "transform + melt"
+    signature: "DataFrame transform and melt operations"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step00_theta_with_age.csv"
+        required_columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when"]
+
+    output_files:
+      - path: "data/step01_lmm_input.csv"
+        columns: ["UID", "Age_c", "Domain", "test", "TSVR_hours", "theta_confidence", "se_confidence"]
+        description: "Long format LMM input with centered age and domain stacking"
+
+    parameters:
+      centering_method: "grand_mean"
+      id_vars: ["UID", "Age_c"]
+      value_vars: ["theta_what", "theta_where", "theta_when"]
+      var_name: "Domain"
+      value_name: "theta_confidence"
+
+    description: "Center Age, reshape wide to long format (3 domains), add TSVR time variable"
+    source_reference: "Standard pandas operations (stdlib exempt from tools_inventory.md)"
+
+  # Step 2: Fit LMM with 3-way interaction
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_lmm_input.csv"
+        required_columns: ["UID", "Age_c", "Domain", "TSVR_hours", "theta_confidence"]
+        expected_rows: "1200 (400 obs x 3 domains)"
+
+    output_files:
+      - path: "data/step02_lmm_summary.txt"
+        description: "Full LMM model summary (fixed effects, random effects, fit indices)"
+      - path: "data/step02_interaction_terms.csv"
+        columns: ["term", "coef", "se", "z", "p_uncorrected", "p_bonferroni"]
+        description: "3-way Age x Domain x Time interaction coefficients with dual p-values"
+
+    parameters:
+      formula: "theta_confidence ~ (TSVR_hours + log_TSVR) * Age_c * Domain"
+      re_formula: "~TSVR_hours | UID"
+      groups: "UID"
+      reml: false
+
+    description: "Fit LMM with 3-way Age x Domain x Time interaction (TSVR time variable per D070)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  # Step 2: Extract interaction terms with dual p-values
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    input_files:
+      - path: "data/step02_lmm_summary.txt"
+        description: "LMM results from fit_lmm_trajectory_tsvr"
+
+    output_files:
+      - path: "data/step02_interaction_terms.csv"
+        columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+        description: "3-way interaction terms with Decision D068 dual p-value reporting"
+
+    parameters:
+      comparisons: ["Age_c:Domain[Where]:TSVR_hours", "Age_c:Domain[When]:TSVR_hours", "Age_c:Domain[Where]:log_TSVR", "Age_c:Domain[When]:log_TSVR"]
+      family_alpha: 0.05
+      n_tests: 2
+
+    description: "Extract 3-way interaction coefficients with Bonferroni correction (Decision D068)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compute_contrasts_pairwise"
+
+  # Step 3: Compare to Chapter 5
+  compare_interaction_terms:
+    module: "pandas"
+    function: "read_csv + merge"
+    signature: "pd.read_csv + pd.merge operations"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step02_interaction_terms.csv"
+        required_columns: ["term", "coef", "p_bonferroni"]
+      - path: "results/ch5/5.2.3/data/stepNN_interaction_terms.csv"
+        required_columns: ["term", "coef", "p_bonferroni"]
+        optional: true
+
+    output_files:
+      - path: "data/step03_ch5_comparison.csv"
+        columns: ["term", "confidence_coef", "confidence_p_bonferroni", "accuracy_coef", "accuracy_p_bonferroni", "both_null", "interpretation"]
+        description: "Side-by-side comparison of confidence vs accuracy interaction results"
+
+    parameters:
+      merge_on: "term"
+      how: "outer"
+
+    description: "Compare confidence interaction (this RQ) to accuracy interaction (Ch5 5.2.3)"
+    source_reference: "Standard pandas operations (stdlib exempt from tools_inventory.md)"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_theta_with_age.csv"
+        required_columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when"]
+        source: "analysis tool output (load_theta_with_age)"
+
+    parameters:
+      expected_rows: 400
+      expected_columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+      column_types:
+        Age: "int"
+        theta_what: "float"
+
+    criteria:
+      - "Expected 400 rows (100 participants x 4 tests)"
+      - "All required columns present"
+      - "No NaN in Age column"
+      - "Age values in [18, 80] range"
+      - "Theta values in [-3, 3] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate DataFrame structure, row count, columns, types, value ranges"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_dataframe_structure"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_lmm_input.csv"
+        required_columns: ["Age_c"]
+        source: "analysis tool output (center_age_and_reshape)"
+
+    parameters:
+      column_names: ["Age_c"]
+      tolerance: 0.01
+
+    criteria:
+      - "Age_c mean approximately 0 (within tolerance)"
+      - "Age_c SD preserved from original Age"
+      - "No NaN values in Age_c"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_transform_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate Age centering (mean H 0, SD preserved)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_standardization"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_lmm_summary.txt"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr)"
+
+    parameters:
+      check_singularity: true
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate LMM converged successfully, no singular fit"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_interaction_terms.csv"
+        required_columns: ["term", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (compute_contrasts_pairwise)"
+
+    parameters:
+      required_terms: ["Age_c:Domain[Where]:TSVR_hours", "Age_c:Domain[When]:TSVR_hours", "Age_c:Domain[Where]:log_TSVR", "Age_c:Domain[When]:log_TSVR"]
+      alpha_bonferroni: 0.0167
+
+    criteria:
+      - "All 4 interaction terms present"
+      - "Dual p-values present (uncorrected + Bonferroni)"
+      - "p_bonferroni >= p_uncorrected (correction increases p-value)"
+      - "No NaN in coefficients or p-values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate 3-way interaction terms present with Decision D068 dual p-values"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_hypothesis_test_dual_pvalues"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 4
+  total_unique_tools: 9
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "RQ 6.3.3 uses outputs from RQ 6.3.1 (no IRT calibration in this RQ)"
+    - "Standard library functions (pandas) exempt from tools_inventory.md verification"
+    - "All custom tools from tools.analysis_lmm and tools.validation verified in tools_inventory.md"
+    - "Each tool listed ONCE (deduplication), rq_analysis will map to steps"
+    - "Comparison to Ch5 5.2.3 optional (proceeds with warning if file missing)"

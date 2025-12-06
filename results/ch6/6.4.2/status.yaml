@@ -1,0 +1,32 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+context_dump: |
+  Analysis plan created: 5 steps (Step 0: merge accuracy+confidence theta, Steps 1-4: calibration computation, LMM, contrasts, plot prep).
+  Tool requirements: Data merge, standardization, LMM fitting (TSVR), post-hoc contrasts (dual p-values per D068), plot data aggregation.
+  Expected outputs: 4 data files (merged theta, calibration by paradigm, LMM results, contrasts), 1 plot source CSV. Validation required at every step.
+  Statistical validation: 7.8/10 REJECTED. Cat1: 2.0/3 (diff scores lack justification). Cat2: 2.0/2 (100% reuse). Cat3: 1.6/2 (z-score pooling ambiguous). Cat4: 1.6/2 (no z-score validation). Cat5: 0.6/1 (6 concerns). Required: specify pooling, acknowledge diff score limits, add z-score validation, specify random structure selection.
+rq_tools: success
+context_dump: |
+  5 analysis + 5 validation tools cataloged for calibration analysis
+  Tool types: pandas merge/groupby, scipy zscore, LMM fitting/contrasts
+  Decisions: D068 dual p-values, D070 TSVR time variable
+rq_analysis: success
+context_dump: |
+  5 steps specified with validation (calibration = z_confidence - z_accuracy by paradigm)
+  Tool types: stdlib merge/zscore, LMM fitting, pairwise contrasts, plot data aggregation
+  All steps validated: dataframe structure, standardization, LMM convergence, dual p-values, plot completeness
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_merge_accuracy_confidence: pending
+  step01_compute_calibration: pending
+  step02_fit_lmm_calibration: pending
+  step03_compute_contrasts: pending
+  step04_prepare_plot_data: pending

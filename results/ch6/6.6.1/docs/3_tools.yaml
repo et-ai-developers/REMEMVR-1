@@ -1,0 +1,343 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 6.6.1 - High-Confidence Errors Over Time
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Pipeline: LMM only (no IRT calibration)
+
+analysis_tools:
+  # Step 0: Extract item-level confidence-accuracy data from dfData.csv
+  extract_item_level_confidence_accuracy:
+    module: "tools.data_extraction"
+    function: "extract_confidence_accuracy_data"
+    signature: "extract_confidence_accuracy_data(df: pd.DataFrame, paradigms: List[str], output_path: Path) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "TEST", "TSVR", "TC_*", "TQ_*"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          UID: "string (participant identifier)"
+          TEST: "string (test session: T1, T2, T3, T4)"
+          TSVR: "float (hours since encoding)"
+          TC_columns: "float (confidence: 0, 0.25, 0.5, 0.75, 1.0)"
+          TQ_columns: "int (accuracy: 0 or 1)"
+
+    output_files:
+      - path: "data/step00_item_level.csv"
+        columns: ["UID", "TEST", "TSVR", "item_code", "confidence", "accuracy"]
+        description: "Item-level confidence-accuracy pairs from interactive paradigms (IFR, ICR, IRE)"
+
+    parameters:
+      paradigms: ["IFR", "ICR", "IRE"]
+      exclude_paradigms: ["RFR", "TCR", "RRE"]
+      confidence_levels: [0, 0.25, 0.5, 0.75, 1.0]
+
+    description: "Extract item-level confidence-accuracy data from dfData.csv, filter to interactive paradigms with confidence ratings"
+    source_reference: "Standard data extraction from master.xlsx cache"
+
+  # Step 1: Compute HCE rate per participant per timepoint
+  compute_hce_rates:
+    module: "pandas"
+    function: "groupby"
+    signature: "DataFrame.groupby(by: List[str]).agg(func: Dict[str, Callable]) -> DataFrame"
+    validation_tool: "validate_probability_range"
+
+    input_files:
+      - path: "data/step00_item_level.csv"
+        required_columns: ["UID", "TEST", "TSVR", "item_code", "confidence", "accuracy"]
+        expected_rows: "~27,200 (item-level)"
+        source: "Step 0 output"
+
+    output_files:
+      - path: "data/step01_hce_rates.csv"
+        columns: ["UID", "TEST", "TSVR", "HCE_rate", "n_HCE", "n_total"]
+        description: "HCE rates aggregated per participant per test (400 rows)"
+
+    parameters:
+      hce_definition: "confidence >= 0.75 AND accuracy = 0"
+      group_by: ["UID", "TEST"]
+      aggregation:
+        n_HCE: "sum((confidence >= 0.75) & (accuracy == 0))"
+        n_total: "count(non-NaN confidence AND accuracy)"
+        HCE_rate: "n_HCE / n_total"
+
+    description: "Aggregate item-level data to compute HCE rate per participant-test combination"
+    source_reference: "Standard pandas aggregation"
+
+  # Step 2: Fit LMM for HCE trajectory
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: pd.DataFrame, tsvr_data: pd.DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~TSVR_hours', reml: bool = True) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_hce_rates.csv"
+        required_columns: ["UID", "TEST", "TSVR", "HCE_rate"]
+        expected_rows: "400 (100 participants x 4 tests)"
+        source: "Step 1 output"
+
+    output_files:
+      - path: "data/step02_hce_lmm.txt"
+        description: "LMM model summary (fixed effects, random effects, fit statistics)"
+
+    parameters:
+      formula: "HCE_rate ~ TSVR + (TSVR | UID)"
+      groups: "UID"
+      re_formula: "~TSVR"
+      reml: true
+      family: "Gaussian"
+
+    description: "Fit Linear Mixed Model with TSVR as time variable per Decision D070, random intercepts and slopes"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  # Step 3: Test Time effect on HCE rate with dual p-values
+  extract_time_effect_dual_pvalues:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> pd.DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    input_files:
+      - path: "data/step02_hce_lmm.txt"
+        source: "Step 2 fitted model"
+
+    output_files:
+      - path: "data/step03_time_effect.csv"
+        columns: ["effect", "coefficient", "SE", "p_wald", "p_lrt", "significant"]
+        description: "Time effect (TSVR) test results with dual p-values per Decision D068"
+
+    parameters:
+      effect_name: "TSVR"
+      test_types: ["wald", "lrt"]
+      alpha: 0.05
+
+    description: "Extract TSVR fixed effect and compute dual p-values (Wald + LRT) per Decision D068"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - extract_fixed_effects_from_lmm"
+
+  # Step 4: Compute mean HCE rate by timepoint for plotting
+  aggregate_trajectory_data:
+    module: "pandas"
+    function: "groupby"
+    signature: "DataFrame.groupby(by: str).agg(func: Dict[str, Callable]) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step01_hce_rates.csv"
+        required_columns: ["UID", "TEST", "TSVR", "HCE_rate"]
+        source: "Step 1 output"
+
+    output_files:
+      - path: "data/step04_hce_trajectory_data.csv"
+        columns: ["time", "HCE_rate_mean", "CI_lower", "CI_upper", "test"]
+        description: "Mean HCE rates by timepoint for trajectory visualization (4 rows)"
+
+    parameters:
+      group_by: "TEST"
+      aggregations:
+        HCE_rate_mean: "mean(HCE_rate)"
+        SE: "std(HCE_rate) / sqrt(N)"
+        CI_lower: "mean - 1.96*SE"
+        CI_upper: "mean + 1.96*SE"
+        time: "mean(TSVR)"
+
+    description: "Aggregate HCE rates by timepoint for trajectory plot with 95% confidence intervals"
+    source_reference: "Standard pandas aggregation"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_item_level.csv"
+        required_columns: ["UID", "TEST", "TSVR", "item_code", "confidence", "accuracy"]
+        source: "Step 0 extraction output"
+
+    parameters:
+      required_cols: ["UID", "TEST", "TSVR", "item_code", "confidence", "accuracy"]
+
+    criteria:
+      - "All required columns present: UID, TEST, TSVR, item_code, confidence, accuracy"
+      - "No extra unexpected columns (strict schema validation)"
+      - "Column order matches specification"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (missing column names if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_item_level.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame has all required columns present (Step 0 extraction check)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_data_format"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_hce_rates.csv"
+        required_columns: ["HCE_rate"]
+        source: "Step 1 aggregation output"
+
+    parameters:
+      prob_columns: ["HCE_rate"]
+      range: [0, 1]
+      allow_boundary: true
+
+    criteria:
+      - "HCE_rate values in [0, 1] range (proportion validation)"
+      - "No NaN values in HCE_rate column (all participants must have computable rate)"
+      - "No infinite values (computation errors)"
+      - "n_HCE <= n_total (logical constraint)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in [0,1])"
+        message: "str (human-readable explanation)"
+        violations: "List[Dict] (out-of-range values with details)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_hce_rates.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate HCE_rate values are valid proportions in [0, 1] range"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_probability_range"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_hce_lmm.txt"
+        source: "Step 2 fitted model summary"
+
+    parameters:
+      check_singularity: true
+      min_observations: 100
+
+    criteria:
+      - "Model converged successfully (lmm_result.converged = True)"
+      - "No singular fit (random effects variance > 0)"
+      - "Minimum 100 observations used (sufficient data)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        message: "str (convergence status message)"
+        warnings: "List[str] (any convergence warnings)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_hce_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully, no singular fit, all estimates finite"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_lmm_convergence"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_time_effect.csv"
+        required_columns: ["effect", "coefficient", "SE", "p_wald", "p_lrt"]
+        source: "Step 3 hypothesis test output"
+
+    parameters:
+      required_terms: ["TSVR"]
+      alpha_bonferroni: 0.05
+      check_d068_compliance: true
+
+    criteria:
+      - "TSVR effect present in results (required term)"
+      - "Both p_wald and p_lrt present (Decision D068 dual p-values)"
+      - "p-values in [0, 1] valid range"
+      - "SE > 0 (positive standard error)"
+      - "Coefficient in scientifically reasonable range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-values present)"
+        missing_terms: "List[str] (missing required effects)"
+        missing_cols: "List[str] (missing p-value columns)"
+        message: "str (validation result message)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_test_time_effect.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Time effect test includes TSVR term and Decision D068 dual p-values (Wald + LRT)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_hypothesis_test_dual_pvalues"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_hce_trajectory_data.csv"
+        required_columns: ["time", "HCE_rate_mean", "CI_lower", "CI_upper", "test"]
+        source: "Step 4 plot data output"
+
+    parameters:
+      required_tests: ["T1", "T2", "T3", "T4"]
+      test_col: "test"
+      check_monotonic_time: true
+
+    criteria:
+      - "All 4 tests present (T1, T2, T3, T4)"
+      - "Exactly 4 rows (one per timepoint, no more/less)"
+      - "No NaN values in any column (complete data)"
+      - "CI_upper > CI_lower for all rows (valid confidence intervals)"
+      - "time values monotonically increasing (chronological order)"
+      - "HCE_rate_mean in [0, 1] range (proportion)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all tests present)"
+        message: "str (validation result)"
+        missing_domains: "List[str] (unused in this RQ)"
+        missing_groups: "List[str] (missing test sessions if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_prepare_trajectory_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate all 4 test sessions present in trajectory plot data with complete values"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_plot_data_completeness"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 5
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068", "D070"]
+  pipeline_type: "LMM only (no IRT calibration)"
+  rq_number: "6.6.1"
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Standard library functions (pandas) NOT cataloged in tools_inventory.md"

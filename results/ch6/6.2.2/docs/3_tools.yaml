@@ -1,0 +1,385 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.2.2
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  pandas_read_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer, **kwargs) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+        required_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+        expected_rows: "400 (100 participants x 4 tests)"
+        data_types:
+          UID: "object (string, format: P### with leading zeros)"
+          test: "object (string, categorical: T1, T2, T3, T4)"
+          theta_accuracy: "float64"
+          theta_confidence: "float64"
+          Calibration: "float64 (z-standardized difference)"
+          SE_accuracy: "float64"
+          SE_confidence: "float64"
+
+    output_files:
+      - path: "data/step00_calibration_loaded.csv"
+        columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+        description: "Loaded calibration data from RQ 6.2.1 (lineage tracking)"
+
+    parameters:
+      filepath_or_buffer: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+
+    description: "Load calibration scores from RQ 6.2.1 for classification and trend analysis"
+    source_reference: "pandas documentation, standard library"
+
+  classify_observations:
+    module: "pandas"
+    function: "DataFrame operations"
+    signature: "Custom classification logic using DataFrame.apply or vectorized operations"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/step00_calibration_loaded.csv"
+        required_columns: ["UID", "test", "Calibration"]
+
+    output_files:
+      - path: "data/step01_calibration_classified.csv"
+        columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence", "Classification"]
+        description: "Calibration data with classification column added (Overconfident/Underconfident/Calibrated)"
+
+    parameters:
+      epsilon: 0.1  # Threshold for classification (SD units)
+      classification_logic: "Overconfident if Calibration > epsilon, Underconfident if Calibration < -epsilon, Calibrated otherwise"
+
+    description: "Classify observations by calibration sign using epsilon threshold (0.1 SD units)"
+    source_reference: "pandas documentation, standard library"
+
+  compute_proportion_overconfident:
+    module: "pandas"
+    function: "groupby with binomial CI"
+    signature: "Custom aggregation using DataFrame.groupby + statsmodels proportion_confint"
+    validation_tool: "validate_probability_range"
+
+    input_files:
+      - path: "data/step01_calibration_classified.csv"
+        required_columns: ["test", "Classification"]
+
+    output_files:
+      - path: "data/step02_proportion_overconfident.csv"
+        columns: ["test", "N_total", "N_overconfident", "proportion_overconfident", "CI_lower", "CI_upper"]
+        description: "Proportion overconfident per timepoint with Wilson score 95% CI"
+
+    parameters:
+      groupby_col: "test"
+      classification_target: "Overconfident"
+      ci_method: "wilson"  # Wilson score method for binomial proportions
+      alpha: 0.05  # 95% confidence level
+
+    description: "Compute proportion overconfident per test session with Wilson score confidence intervals"
+    source_reference: "pandas groupby, statsmodels.stats.proportion.proportion_confint"
+
+  fit_logistic_regression:
+    module: "statsmodels.api"
+    function: "Logit"
+    signature: "Logit(endog, exog, **kwargs).fit() -> BinaryResultsWrapper"
+    validation_tool: "validate_model_convergence"
+
+    input_files:
+      - path: "data/step01_calibration_classified.csv"
+        required_columns: ["test", "Classification"]
+
+    output_files:
+      - path: "data/step03_trend_test.csv"
+        columns: ["term", "estimate", "SE", "z", "p_value", "OR", "OR_CI_lower", "OR_CI_upper"]
+        description: "Logistic regression results testing overconfidence trend over time"
+
+    parameters:
+      outcome_variable: "overconfident_binary (1 if Classification == 'Overconfident', else 0)"
+      predictor_variable: "time_ordinal (T1=0, T2=1, T3=3, T4=6, nominal days)"
+      method: "newton"  # Optimization method
+      maxiter: 100
+
+    description: "Fit logistic regression testing if overconfidence increases over time (trend test)"
+    source_reference: "statsmodels.api.Logit"
+
+  compute_mean_calibration:
+    module: "pandas"
+    function: "groupby with scipy stats"
+    signature: "Custom aggregation using DataFrame.groupby + scipy.stats for CI"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step00_calibration_loaded.csv"
+        required_columns: ["test", "Calibration"]
+
+    output_files:
+      - path: "data/step04_mean_calibration.csv"
+        columns: ["test", "N", "mean_calibration", "SD_calibration", "SE_calibration", "CI_lower", "CI_upper"]
+        description: "Mean calibration per timepoint with 95% CI"
+
+    parameters:
+      groupby_col: "test"
+      value_col: "Calibration"
+      ci_method: "normal"  # Normal approximation (mean +/- 1.96*SE)
+      alpha: 0.05
+
+    description: "Compute mean calibration score per test session with 95% confidence intervals"
+    source_reference: "pandas groupby, scipy.stats for CI computation"
+
+  merge_plot_data:
+    module: "pandas"
+    function: "merge"
+    signature: "merge(left, right, on, how='inner', **kwargs) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step02_proportion_overconfident.csv"
+        required_columns: ["test", "proportion_overconfident", "CI_lower", "CI_upper"]
+      - path: "data/step04_mean_calibration.csv"
+        required_columns: ["test", "mean_calibration", "CI_lower", "CI_upper"]
+
+    output_files:
+      - path: "data/step05_overconfidence_trajectory_data.csv"
+        columns: ["test", "time_numeric", "proportion_overconfident", "prop_CI_lower", "prop_CI_upper", "mean_calibration", "mean_CI_lower", "mean_CI_upper"]
+        description: "Merged plot source data for dual-axis trajectory (proportion + mean)"
+
+    parameters:
+      on: "test"
+      how: "inner"
+      suffixes: ["_prop", "_mean"]  # Avoid CI column name collisions
+
+    description: "Merge proportion and mean data for dual-axis trajectory plot"
+    source_reference: "pandas.merge documentation"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_calibration_loaded.csv"
+        required_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+        source: "analysis tool output (pandas_read_csv)"
+
+    parameters:
+      expected_rows: 400
+      expected_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+      column_types:
+        UID: "object"
+        test: "object"
+        theta_accuracy: "float64"
+        theta_confidence: "float64"
+        Calibration: "float64"
+        SE_accuracy: "float64"
+        SE_confidence: "float64"
+
+    criteria:
+      - "Expected row count: 400 (100 participants x 4 tests)"
+      - "All 7 required columns present"
+      - "Data types match expected types"
+      - "No NaN values in Calibration column"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_calibration_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate loaded calibration data structure and completeness"
+    source_reference: "tools_inventory.md section 'validate_dataframe_structure'"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_calibration_classified.csv"
+        required_columns: ["UID", "test", "Classification"]
+        source: "analysis tool output (classify_observations)"
+
+    parameters:
+      required_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence", "Classification"]
+
+    criteria:
+      - "All 8 columns present (7 original + Classification)"
+      - "Classification column populated (no NaN)"
+      - "Classification contains only: Overconfident, Underconfident, Calibrated"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_classify_observations.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate classification column added and populated correctly"
+    source_reference: "tools_inventory.md section 'validate_data_columns'"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_proportion_overconfident.csv"
+        required_columns: ["proportion_overconfident", "CI_lower", "CI_upper"]
+        source: "analysis tool output (compute_proportion_overconfident)"
+
+    parameters:
+      prob_columns: ["proportion_overconfident", "CI_lower", "CI_upper"]
+
+    criteria:
+      - "All proportion values in [0, 1] range"
+      - "CI_lower < proportion_overconfident < CI_upper for all rows"
+      - "No NaN values in proportion columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violations: "List[Dict]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_proportions.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate proportion values in valid probability range with consistent CIs"
+    source_reference: "tools_inventory.md section 'validate_probability_range'"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_trend_test.csv"
+        source: "analysis tool output (fit_logistic_regression)"
+
+    parameters:
+      model_type: "logistic regression"
+
+    criteria:
+      - "Model converged successfully (convergence flag = True)"
+      - "All parameter estimates finite (no NaN/Inf)"
+      - "Standard errors positive"
+      - "Odds ratio > 0"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_trend_test.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate logistic regression converged and all estimates valid"
+    source_reference: "tools_inventory.md section 'validate_model_convergence'"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_mean_calibration.csv"
+        required_columns: ["mean_calibration", "SD_calibration", "SE_calibration"]
+        source: "analysis tool output (compute_mean_calibration)"
+
+    parameters:
+      min_val: -3.0  # Z-score typical range
+      max_val: 3.0
+      column_name: "mean_calibration"
+
+    criteria:
+      - "Mean calibration in [-3, 3] range (scientifically reasonable z-scores)"
+      - "SD_calibration > 0 (positive variance)"
+      - "SE_calibration > 0 (positive standard error)"
+      - "SE = SD / sqrt(N) consistency check"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_compute_mean_calibration.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate mean calibration scores in scientifically reasonable range"
+    source_reference: "tools_inventory.md section 'validate_numeric_range'"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_overconfidence_trajectory_data.csv"
+        required_columns: ["test", "time_numeric", "proportion_overconfident", "mean_calibration"]
+        source: "analysis tool output (merge_plot_data)"
+
+    parameters:
+      required_tests: ["T1", "T2", "T3", "T4"]
+      test_col: "test"
+
+    criteria:
+      - "All 4 test sessions present (T1, T2, T3, T4)"
+      - "No NaN values in plot data"
+      - "Merge successful (4 rows after inner join)"
+      - "All required columns present with correct names"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_prepare_plot_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate plot data merge complete with all timepoints present"
+    source_reference: "tools_inventory.md section 'validate_plot_data_completeness'"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  rq_type: "Derived data analysis (depends on RQ 6.2.1)"
+  analysis_complexity: "Low (descriptive statistics + logistic regression)"
+  mandatory_decisions_embedded: []
+  notes:
+    - "All analysis uses standard library (pandas, statsmodels) + existing validation tools"
+    - "No custom tool development required"
+    - "Tool catalog enables sequential validation per v4.X architecture"
+    - "Each analysis step has paired validation tool for error detection"

@@ -1,0 +1,72 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.5.3
+# Created by: rq_tools agent
+# Created: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  # pandas extraction (stdlib - not cataloged)
+  # pandas binary flagging (stdlib - not cataloged)
+  # pandas aggregation (stdlib - not cataloged)
+  # statsmodels GLMM (stdlib - not cataloged)
+  # statsmodels contrasts (stdlib - not cataloged)
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    description: "Validate required columns exist in DataFrame"
+    source_reference: "tools_inventory.md lines 402-411"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    description: "Validate numeric values fall within specified range [min_val, max_val]"
+    source_reference: "tools_inventory.md lines 540-549"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+    description: "Validate probability values are in [0, 1] with no NaN/infinite values"
+    source_reference: "tools_inventory.md lines 576-585"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+    description: "Validate statsmodels LMM model converged successfully"
+    source_reference: "tools_inventory.md lines 588-597"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+    description: "Validate all LMM variance components > 0"
+    source_reference: "tools_inventory.md lines 608-617"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+    description: "Validate Decision D068 compliance in contrast results by checking for dual p-value reporting"
+    source_reference: "tools_inventory.md lines 424-433"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+    description: "Verify all domains/groups present in plot data"
+    source_reference: "tools_inventory.md lines 638-647"
+
+summary:
+  analysis_tools_count: 0  # All stdlib (pandas, statsmodels)
+  validation_tools_count: 7
+  total_unique_tools: 7
+  mandatory_decisions_embedded: [D068]
+  notes: |
+    RQ 6.5.3 uses item-level CTT analysis (no IRT).
+    Analysis tools are stdlib (pandas extraction/aggregation, statsmodels GLMM/contrasts).
+    Only validation tools cataloged per v4.X architecture.
+    Decision D068 enforced via validate_contrasts_d068 for dual p-value reporting.

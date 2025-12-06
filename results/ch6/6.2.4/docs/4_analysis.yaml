@@ -1,0 +1,520 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: 6.2.4 - Calibration by Accuracy Level
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "6.2.4"
+  total_steps: 6
+  analysis_type: "Cross-RQ derived data analysis (descriptive + inferential statistics)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Merge Calibration Metrics from Prior RQs
+  # --------------------------------------------------------------------------
+  - name: "step00_merge_metrics"
+    step_number: "00"
+    description: "Load and merge baseline accuracy (Ch5 5.1.1), baseline confidence (RQ 6.1.1), calibration scores (RQ 6.2.1), and gamma scores (RQ 6.2.3) into single dataset for N=100 participants"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load results/ch5/5.1.1/data/step03_theta_scores.csv -> filter TEST=T1 -> extract UID, theta_all"
+        - "Load results/ch6/6.1.1/data/step03_theta_confidence.csv -> filter TEST=T1 -> extract UID, theta_confidence"
+        - "Load results/ch6/6.2.1/data/step02_calibration_scores.csv -> filter TEST=T1 OR compute mean per UID"
+        - "Load results/ch6/6.2.3/data/step01_gamma_scores.csv -> filter TEST=T1 OR compute mean per UID"
+        - "Merge all 4 sources on UID (left join, all participants must have all metrics)"
+        - "Create final dataset: UID, baseline_accuracy, baseline_confidence, mean_calibration, mean_gamma"
+        - "Validate: 100 rows, no NaN values"
+        - "Save data/step00_merged_metrics.csv"
+
+      input_files:
+        - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_all", "se_all"]
+          variable_name: "df_accuracy"
+        - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+          required_columns: ["composite_ID", "theta_confidence", "se_confidence"]
+          variable_name: "df_confidence"
+        - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+          required_columns: ["composite_ID", "calibration"]
+          variable_name: "df_calibration"
+        - path: "results/ch6/6.2.3/data/step01_gamma_scores.csv"
+          required_columns: ["composite_ID", "gamma"]
+          variable_name: "df_gamma"
+
+      output_files:
+        - path: "data/step00_merged_metrics.csv"
+          variable_name: "merged_metrics"
+          description: "Merged calibration metrics for N=100 participants"
+          expected_rows: 100
+          expected_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+
+      parameters:
+        filter_test: "T1"
+        aggregation_method: "mean"
+        merge_key: "UID"
+
+      description: "Merge derived data from 4 source RQs (pandas merge operations)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_merged_metrics.csv"
+          variable_name: "merged_metrics"
+          source: "analysis call output (pandas merge result)"
+
+      parameters:
+        df: "merged_metrics"
+        expected_rows: 100
+        expected_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+        column_types:
+          UID: "str"
+          baseline_accuracy: "float"
+          baseline_confidence: "float"
+          mean_calibration: "float"
+          mean_gamma: "float"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "100 rows (all participants)"
+        - "5 columns (UID + 4 metrics)"
+        - "No NaN values"
+        - "Correct column types"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_merge_metrics.log"
+
+      description: "Validate merged metrics structure and completeness"
+
+    log_file: "logs/step00_merge_metrics.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Create Accuracy Tertiles
+  # --------------------------------------------------------------------------
+  - name: "step01_create_tertiles"
+    step_number: "01"
+    description: "Split participants into three equal groups (Low, Medium, High baseline performers) based on baseline_accuracy distribution for tertile comparison analysis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_merged_metrics.csv"
+        - "Sort participants by baseline_accuracy (ascending)"
+        - "Split into 3 approximately equal groups using pandas.qcut (tertiles)"
+        - "Assign tertile_label (Low/Med/High) to each participant"
+        - "Assign tertile_numeric (1/2/3) for statistical tests"
+        - "Compute tertile boundaries (min, max baseline_accuracy per tertile)"
+        - "Save data/step01_accuracy_tertiles.csv"
+        - "Generate text summary: data/step01_tertile_summary.txt"
+
+      input_files:
+        - path: "data/step00_merged_metrics.csv"
+          required_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+          variable_name: "merged_metrics"
+
+      output_files:
+        - path: "data/step01_accuracy_tertiles.csv"
+          variable_name: "tertiles"
+          description: "Tertile assignments for all participants"
+          expected_rows: 100
+          expected_columns: ["UID", "baseline_accuracy", "tertile_label", "tertile_numeric"]
+        - path: "data/step01_tertile_summary.txt"
+          variable_name: "tertile_summary"
+          description: "Text report with tertile boundaries and N per tertile"
+
+      parameters:
+        tertile_method: "qcut"
+        tertile_labels: ["Low", "Med", "High"]
+        tertile_numeric: [1, 2, 3]
+
+      description: "Create tertile groups using pandas.qcut"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_accuracy_tertiles.csv"
+          variable_name: "tertiles"
+          source: "analysis call output (pandas qcut result)"
+
+      parameters:
+        df: "tertiles"
+        expected_rows: 100
+        expected_columns: ["UID", "baseline_accuracy", "tertile_label", "tertile_numeric"]
+        column_types:
+          UID: "str"
+          baseline_accuracy: "float"
+          tertile_label: "str"
+          tertile_numeric: "int"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "100 rows (all participants assigned)"
+        - "4 columns (UID, baseline_accuracy, tertile_label, tertile_numeric)"
+        - "No NaN values"
+        - "Tertile distribution: 30-35 participants per tertile"
+        - "tertile_label in {Low, Med, High}"
+        - "tertile_numeric in {1, 2, 3}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_create_tertiles.log"
+
+      description: "Validate tertile assignments structure and distribution"
+
+    log_file: "logs/step01_create_tertiles.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compare Calibration Metrics Across Tertiles
+  # --------------------------------------------------------------------------
+  - name: "step02_tertile_comparison"
+    step_number: "02"
+    description: "Test whether calibration quality (absolute calibration, gamma) differs significantly across baseline accuracy tertiles using ANOVA or Kruskal-Wallis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_merged_metrics.csv"
+        - "Load data/step01_accuracy_tertiles.csv"
+        - "Merge on UID (inner join, 100 rows expected)"
+        - "Compute abs_calibration = |mean_calibration| (unsigned calibration error)"
+        - "For EACH metric (abs_calibration, mean_gamma):"
+        - "  Test normality within tertiles (scipy.stats.shapiro per group)"
+        - "  Test homogeneity of variance (scipy.stats.levene)"
+        - "  IF normality + homogeneity PASS: Use scipy.stats.f_oneway (ANOVA)"
+        - "  ELSE: Use scipy.stats.kruskal (Kruskal-Wallis)"
+        - "  Compute descriptive statistics per tertile: mean, sd, median, iqr"
+        - "Save data/step02_tertile_comparison.csv (test results + descriptives)"
+        - "Save data/step02_normality_tests.csv (Shapiro-Wilk results)"
+        - "Save data/step02_variance_tests.csv (Levene results)"
+
+      input_files:
+        - path: "data/step00_merged_metrics.csv"
+          required_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+          variable_name: "merged_metrics"
+        - path: "data/step01_accuracy_tertiles.csv"
+          required_columns: ["UID", "baseline_accuracy", "tertile_label", "tertile_numeric"]
+          variable_name: "tertiles"
+
+      output_files:
+        - path: "data/step02_tertile_comparison.csv"
+          variable_name: "tertile_comparison"
+          description: "ANOVA/Kruskal-Wallis results + descriptive statistics per tertile"
+          expected_rows: 6
+          expected_columns: ["metric", "test_used", "statistic", "p_value", "tertile", "mean", "sd", "median", "iqr"]
+        - path: "data/step02_normality_tests.csv"
+          variable_name: "normality_tests"
+          description: "Shapiro-Wilk normality test results"
+          expected_rows: 6
+          expected_columns: ["metric", "tertile", "shapiro_statistic", "shapiro_p"]
+        - path: "data/step02_variance_tests.csv"
+          variable_name: "variance_tests"
+          description: "Levene homogeneity of variance test results"
+          expected_rows: 2
+          expected_columns: ["metric", "levene_statistic", "levene_p"]
+
+      parameters:
+        metrics_to_test: ["abs_calibration", "mean_gamma"]
+        alpha: 0.05
+        normality_test: "shapiro"
+        variance_test: "levene"
+
+      description: "Tertile comparison using scipy ANOVA or Kruskal-Wallis"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_tertile_comparison.csv"
+          variable_name: "tertile_comparison"
+          source: "analysis call output (scipy test results)"
+
+      parameters:
+        data: "tertile_comparison['p_value']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "p_value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All p-values in [0, 1]"
+        - "No NaN test statistics"
+        - "All descriptives non-negative (for abs_calibration)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_tertile_comparison.log"
+
+      description: "Validate p-values and test statistics in acceptable ranges"
+
+    log_file: "logs/step02_tertile_comparison.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Test Dunning-Kruger Hypothesis (One-Sample t-Tests)
+  # --------------------------------------------------------------------------
+  - name: "step03_dunning_kruger_test"
+    step_number: "03"
+    description: "Test whether low performers exhibit overconfidence (mean_calibration > 0) and whether high performers are accurately calibrated (mean_calibration near zero) using one-sample t-tests against mu=0"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_merged_metrics.csv"
+        - "Load data/step01_accuracy_tertiles.csv"
+        - "Merge on UID"
+        - "For EACH tertile (Low, Med, High):"
+        - "  Extract mean_calibration values for that tertile"
+        - "  Perform scipy.stats.ttest_1samp against mu=0 (H0: calibration=0)"
+        - "  Report: t-statistic, df, p_uncorrected, mean calibration, SD, 95% CI"
+        - "  Compute p_bonferroni = p_uncorrected x 3 (capped at 1.0) per Decision D068"
+        - "Save data/step03_dunning_kruger_test.csv"
+
+      input_files:
+        - path: "data/step00_merged_metrics.csv"
+          required_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+          variable_name: "merged_metrics"
+        - path: "data/step01_accuracy_tertiles.csv"
+          required_columns: ["UID", "baseline_accuracy", "tertile_label", "tertile_numeric"]
+          variable_name: "tertiles"
+
+      output_files:
+        - path: "data/step03_dunning_kruger_test.csv"
+          variable_name: "dunning_kruger"
+          description: "One-sample t-test results per tertile with Decision D068 dual p-values"
+          expected_rows: 3
+          expected_columns: ["tertile", "N", "mean_calibration", "sd_calibration", "t_statistic", "df", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+
+      parameters:
+        test_value_mu: 0.0
+        alpha: 0.05
+        bonferroni_n_comparisons: 3
+
+      description: "One-sample t-tests using scipy.stats.ttest_1samp"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_dunning_kruger_test.csv"
+          variable_name: "dunning_kruger"
+          source: "analysis call output (scipy ttest_1samp results)"
+
+      parameters:
+        interaction_df: "dunning_kruger"
+        required_terms: ["Low", "Med", "High"]
+        alpha_bonferroni: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "p_uncorrected column present"
+        - "p_bonferroni column present (Decision D068)"
+        - "Both p-values in [0, 1]"
+        - "All 3 tertiles present"
+        - "p_bonferroni = p_uncorrected x 3 (capped at 1.0)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_dunning_kruger_test.log"
+
+      description: "Validate Decision D068 dual p-value compliance"
+
+    log_file: "logs/step03_dunning_kruger_test.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Correlations (Baseline Accuracy vs Calibration Metrics)
+  # --------------------------------------------------------------------------
+  - name: "step04_correlation"
+    step_number: "04"
+    description: "Test whether baseline accuracy correlates with calibration quality continuously: (1) baseline_accuracy vs abs_calibration, (2) baseline_accuracy vs mean_gamma using Pearson or Spearman correlation"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_merged_metrics.csv"
+        - "Compute abs_calibration = |mean_calibration|"
+        - "For EACH correlation (baseline_accuracy vs abs_calibration, baseline_accuracy vs mean_gamma):"
+        - "  Test normality (scipy.stats.shapiro on both variables)"
+        - "  IF normality PASS: Use scipy.stats.pearsonr (parametric)"
+        - "  ELSE: Use scipy.stats.spearmanr (non-parametric)"
+        - "  Report: r or rho, p_uncorrected, 95% CI, N=100"
+        - "  Compute p_bonferroni = p_uncorrected x 2 (capped at 1.0) per Decision D068"
+        - "Save data/step04_correlation.csv (correlation results)"
+        - "Save data/step04_normality_tests.csv (Shapiro-Wilk results)"
+
+      input_files:
+        - path: "data/step00_merged_metrics.csv"
+          required_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+          variable_name: "merged_metrics"
+
+      output_files:
+        - path: "data/step04_correlation.csv"
+          variable_name: "correlation"
+          description: "Pearson/Spearman correlation results with Decision D068 dual p-values"
+          expected_rows: 2
+          expected_columns: ["comparison", "method", "r_or_rho", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper", "N"]
+        - path: "data/step04_normality_tests.csv"
+          variable_name: "normality_tests"
+          description: "Shapiro-Wilk normality test results for correlation variables"
+          expected_rows: 3
+          expected_columns: ["variable", "shapiro_statistic", "shapiro_p"]
+
+      parameters:
+        correlations:
+          - "baseline_accuracy vs abs_calibration"
+          - "baseline_accuracy vs mean_gamma"
+        alpha: 0.05
+        bonferroni_n_comparisons: 2
+
+      description: "Correlations using scipy.stats.pearsonr or spearmanr"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_correlation.csv"
+          variable_name: "correlation"
+          source: "analysis call output (scipy correlation results)"
+
+      parameters:
+        interaction_df: "correlation"
+        required_terms: ["baseline_accuracy vs abs_calibration", "baseline_accuracy vs mean_gamma"]
+        alpha_bonferroni: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "p_uncorrected column present"
+        - "p_bonferroni column present (Decision D068)"
+        - "Both p-values in [0, 1]"
+        - "Both correlations present"
+        - "r_or_rho in [-1, 1]"
+        - "p_bonferroni = p_uncorrected x 2 (capped at 1.0)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_correlation.log"
+
+      description: "Validate Decision D068 dual p-value compliance for correlations"
+
+    log_file: "logs/step04_correlation.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Calibration by Accuracy Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Create plot source CSV for visualizing calibration metrics (abs_calibration, gamma) by baseline accuracy with tertile groupings and correlation trends (two-panel scatterplot)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_merged_metrics.csv"
+        - "Load data/step01_accuracy_tertiles.csv"
+        - "Load data/step04_correlation.csv (for r/rho annotation)"
+        - "Merge metrics with tertiles on UID"
+        - "Compute abs_calibration = |mean_calibration|"
+        - "Add tertile_color column (hex codes): Low=#D62728, Med=#FF7F0E, High=#2CA02C"
+        - "Create plot source CSV with columns: UID, baseline_accuracy, abs_calibration, mean_gamma, tertile_label, tertile_color"
+        - "Save data/step05_calibration_by_accuracy_plot_data.csv"
+
+      input_files:
+        - path: "data/step00_merged_metrics.csv"
+          required_columns: ["UID", "baseline_accuracy", "baseline_confidence", "mean_calibration", "mean_gamma"]
+          variable_name: "merged_metrics"
+        - path: "data/step01_accuracy_tertiles.csv"
+          required_columns: ["UID", "baseline_accuracy", "tertile_label", "tertile_numeric"]
+          variable_name: "tertiles"
+        - path: "data/step04_correlation.csv"
+          required_columns: ["comparison", "method", "r_or_rho", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper", "N"]
+          variable_name: "correlation"
+
+      output_files:
+        - path: "data/step05_calibration_by_accuracy_plot_data.csv"
+          variable_name: "plot_data"
+          description: "Plot source CSV for two-panel scatterplot with tertile coloring"
+          expected_rows: 100
+          expected_columns: ["UID", "baseline_accuracy", "abs_calibration", "mean_gamma", "tertile_label", "tertile_color"]
+
+      parameters:
+        tertile_colors:
+          Low: "#D62728"
+          Med: "#FF7F0E"
+          High: "#2CA02C"
+
+      description: "Plot data preparation using pandas merge and compute"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_calibration_by_accuracy_plot_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (pandas merge result)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: []
+        required_groups: ["Low", "Med", "High"]
+        domain_col: "tertile_label"
+        group_col: "tertile_label"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 tertile groups present (Low, Med, High)"
+        - "100 rows (all participants)"
+        - "6 columns (UID, baseline_accuracy, abs_calibration, mean_gamma, tertile_label, tertile_color)"
+        - "No NaN values"
+        - "Tertile distribution: 30-35 participants per tertile"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+      description: "Validate all tertile groups present in plot data"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

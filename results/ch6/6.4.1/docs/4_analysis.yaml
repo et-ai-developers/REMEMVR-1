@@ -1,0 +1,809 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: ch6/6.4.1
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.4.1"
+  total_steps: 8
+  analysis_type: "IRT->LMM paradigm confidence analysis (5-category ordinal GRM)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract TC_* Confidence Items by Paradigm
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_confidence_data"
+    step_number: "00"
+    description: "Extract 5-category ordinal confidence items from dfData.csv, filter to interactive paradigms (IFR, ICR, IRE), create Q-matrix for 3-factor IRT structure"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/cache/dfData.csv"
+        - "Filter to TC_* confidence items with IFR/ICR/IRE paradigm tags"
+        - "Create composite_ID = UID_test"
+        - "Reshape to wide format: composite_ID x TC_* items"
+        - "Extract TSVR_hours mapping (composite_ID -> TSVR_hours)"
+        - "Create Q-matrix: 3 factors (IFR/ICR/IRE confidence)"
+        - "Validate: All values in {0, 0.25, 0.5, 0.75, 1.0, NaN}"
+        - "Save outputs to CSV"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "test", "TSVR_hours"]
+          notes: "TC_* confidence items with IFR/ICR/IRE tags"
+
+      output_files:
+        - path: "data/step00_irt_input.csv"
+          format: "CSV, wide format (composite_ID x TC_* items)"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test format"}
+            - {name: "TC_*", type: "float", description: "5-category ordinal: {0, 0.25, 0.5, 0.75, 1.0, NaN}"}
+          expected_rows: 400
+          expected_columns: 103
+
+        - path: "data/step00_tsvr_mapping.csv"
+          format: "CSV, time mapping"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "TSVR_hours", type: "float"}
+          expected_rows: 400
+
+        - path: "data/step00_q_matrix.csv"
+          format: "CSV, Q-matrix for 3-factor IRT structure"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "factor1_IFR", type: "int", description: "0/1 loading"}
+            - {name: "factor2_ICR", type: "int", description: "0/1 loading"}
+            - {name: "factor3_IRE", type: "int", description: "0/1 loading"}
+          expected_rows: 102
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          variable_name: "irt_input"
+          source: "extraction output"
+
+      parameters:
+        df: "irt_input"
+        required_columns: ["composite_ID"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "composite_ID column present"
+        - "~102 TC_* item columns present"
+        - "~400 rows (100 participants x 4 tests)"
+        - "Values in {0, 0.25, 0.5, 0.75, 1.0, NaN} only"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_confidence_data.log"
+
+    log_file: "logs/step00_extract_confidence_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: IRT Calibration Pass 1 (All Items)
+  # --------------------------------------------------------------------------
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
+    description: "Calibrate Graded Response Model (GRM) on all TC_* confidence items (3-factor structure: IFR/ICR/IRE) to obtain Pass 1 item parameters for purification (Decision D039)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "fit_irt_grm"
+      signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID"]
+          variable_name: "irt_input"
+
+        - path: "data/step00_q_matrix.csv"
+          required_columns: ["item_name", "factor1_IFR", "factor2_ICR", "factor3_IRE"]
+          variable_name: "q_matrix"
+
+      output_files:
+        - path: "data/step01_pass1_item_params.csv"
+          format: "CSV, item parameters"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "factor", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "a", type: "float", description: "discrimination > 0"}
+            - {name: "b1", type: "float", description: "threshold 1"}
+            - {name: "b2", type: "float", description: "threshold 2"}
+            - {name: "b3", type: "float", description: "threshold 3"}
+            - {name: "b4", type: "float", description: "threshold 4"}
+          expected_rows: 102
+          description: "IRT item parameters for Pass 1 calibration"
+
+        - path: "data/step01_pass1_theta.csv"
+          format: "CSV, theta estimates (diagnostic)"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_IFR", type: "float"}
+            - {name: "theta_ICR", type: "float"}
+            - {name: "theta_IRE", type: "float"}
+            - {name: "se_IFR", type: "float"}
+            - {name: "se_ICR", type: "float"}
+            - {name: "se_IRE", type: "float"}
+          expected_rows: 400
+          description: "Person ability estimates (theta scores)"
+
+      parameters:
+        n_items: 102
+        n_factors: 3
+        n_cats: 5
+        Q_matrix: "q_matrix"
+        correlated_factors: true
+        device: "cpu"
+        seed: 42
+        model_fit:
+          batch_size: 2048
+          iw_samples: 100
+          mc_samples: 1
+        model_scores:
+          scoring_batch_size: 2048
+          mc_samples: 100
+          iw_samples: 100
+
+      returns:
+        type: "IWAVE"
+        variable_name: "fitted_model"
+
+      description: "Calibrate multidimensional GRM on all 102 items (Pass 1 of 2-pass purification per Decision D039)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          variable_name: "item_params"
+          source: "extract_parameters_from_irt output"
+
+      parameters:
+        results:
+          converged: true
+          item_params: "item_params"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged: True"
+        - "Discrimination (a) in (0, 10]"
+        - "Thresholds ordered: b1 < b2 < b3 < b4 (MANDATORY for GRM)"
+        - "Theta in [-4, 4]"
+        - "SE in [0.1, 1.5]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_irt_calibration_pass1.log"
+
+    log_file: "logs/step01_irt_calibration_pass1.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Purify Items (Decision D039)
+  # --------------------------------------------------------------------------
+  - name: "step02_purify_items"
+    step_number: "02"
+    description: "Filter items by quality thresholds to identify well-performing items for Pass 2 calibration (Decision D039: 2-pass IRT purification)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float, b_threshold: float) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          required_columns: ["item_name", "factor", "a", "b1", "b2", "b3", "b4"]
+          variable_name: "pass1_params"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          format: "CSV, retained items"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "factor", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b_mean", type: "float"}
+          expected_rows: 50
+          description: "Items retained after purification (40-50% retention)"
+
+        - path: "data/step02_purification_report.txt"
+          format: "Plain text report"
+          description: "Exclusion reasons breakdown"
+
+      parameters:
+        df_items: "pass1_params"
+        a_threshold: 0.4
+        b_threshold: 3.0
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "purified_items, excluded_items"
+
+      description: "Filter items meeting quality thresholds (2-pass IRT purification per Decision D039)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_parameters"
+      signature: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_purified_items.csv"
+          variable_name: "purified_items"
+          source: "filter_items_by_quality output"
+
+      parameters:
+        df_items: "purified_items"
+        a_min: 0.4
+        b_max: 3.0
+        a_col: "a"
+        b_col: "b_mean"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All retained items have a >= 0.4"
+        - "All retained items have |b_mean| <= 3.0"
+        - "Minimum 10 items per factor retained"
+        - "Retention rate 30-70% per factor"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_purify_items.log"
+
+    log_file: "logs/step02_purify_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: IRT Calibration Pass 2 (Purified Items)
+  # --------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Re-calibrate GRM on purified items only to obtain final theta_confidence estimates (Decision D039 Pass 2)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "fit_irt_grm"
+      signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID"]
+          variable_name: "irt_input"
+          notes: "Filter to purified items only"
+
+        - path: "data/step02_purified_items.csv"
+          required_columns: ["item_name", "factor"]
+          variable_name: "purified_items"
+
+        - path: "data/step00_q_matrix.csv"
+          required_columns: ["item_name", "factor1_IFR", "factor2_ICR", "factor3_IRE"]
+          variable_name: "q_matrix"
+          notes: "Filter to purified items only"
+
+      output_files:
+        - path: "data/step03_item_parameters.csv"
+          format: "CSV, final item parameters"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "factor", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b1", type: "float"}
+            - {name: "b2", type: "float"}
+            - {name: "b3", type: "float"}
+            - {name: "b4", type: "float"}
+          expected_rows: 50
+          description: "Final item parameters from Pass 2"
+
+        - path: "data/step03_theta_confidence_paradigm.csv"
+          format: "CSV, final theta estimates"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_IFR", type: "float"}
+            - {name: "theta_ICR", type: "float"}
+            - {name: "theta_IRE", type: "float"}
+            - {name: "se_IFR", type: "float"}
+            - {name: "se_ICR", type: "float"}
+            - {name: "se_IRE", type: "float"}
+          expected_rows: 400
+          description: "Final person ability estimates"
+
+      parameters:
+        n_items: "len(purified_items)"
+        n_factors: 3
+        n_cats: 5
+        Q_matrix: "q_matrix_filtered"
+        correlated_factors: true
+        device: "cpu"
+        seed: 42
+        model_fit:
+          batch_size: 2048
+          iw_samples: 100
+          mc_samples: 1
+        model_scores:
+          scoring_batch_size: 2048
+          mc_samples: 100
+          iw_samples: 100
+
+      returns:
+        type: "IWAVE"
+        variable_name: "fitted_model_pass2"
+
+      description: "Re-calibrate GRM on purified items (expect better convergence than Pass 1)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_item_parameters.csv"
+          variable_name: "item_params_pass2"
+          source: "extract_parameters_from_irt output"
+
+      parameters:
+        results:
+          converged: true
+          item_params: "item_params_pass2"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Pass 2 converged: True"
+        - "Mean SE Pass 2 < Mean SE Pass 1 (precision improvement)"
+        - "Discrimination a in [0.4, 10]"
+        - "Thresholds ordered: b1 < b2 < b3 < b4"
+        - "All ~400 composite_IDs present (no participant loss)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_irt_calibration_pass2.log"
+
+    log_file: "logs/step03_irt_calibration_pass2.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Merge Theta with TSVR and Create Time Transformations
+  # --------------------------------------------------------------------------
+  - name: "step04_merge_theta_tsvr"
+    step_number: "04"
+    description: "Merge theta_confidence with TSVR_hours time variable, create Days and log_Days_plus1 transformations for LMM candidate models (Decision D070)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_theta_confidence_paradigm.csv"
+        - "Load data/step00_tsvr_mapping.csv"
+        - "Left join: theta_confidence LEFT JOIN tsvr_mapping ON composite_ID"
+        - "If any TSVR_hours missing: CRITICAL ERROR"
+        - "Create Days = TSVR_hours / 24"
+        - "Create log_Days_plus1 = log(Days + 1)"
+        - "Reshape to long format: wide (theta_IFR, theta_ICR, theta_IRE) -> long (theta_confidence, paradigm)"
+        - "Result: 1200 rows (100 participants x 4 tests x 3 paradigms)"
+        - "Save data/step04_lmm_input.csv"
+
+      input_files:
+        - path: "data/step03_theta_confidence_paradigm.csv"
+          required_columns: ["composite_ID", "theta_IFR", "theta_ICR", "theta_IRE", "se_IFR", "se_ICR", "se_IRE"]
+          variable_name: "theta_data"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "UID", "test", "TSVR_hours"]
+          variable_name: "tsvr_data"
+
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          format: "CSV, long format (one row per paradigm observation)"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "composite_ID", type: "str"}
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "theta_confidence", type: "float"}
+            - {name: "se_confidence", type: "float"}
+            - {name: "TSVR_hours", type: "float", description: "Actual time since encoding"}
+            - {name: "Days", type: "float", description: "TSVR_hours / 24"}
+            - {name: "log_Days_plus1", type: "float", description: "log(Days + 1)"}
+          expected_rows: 1200
+          description: "LMM input data in long format"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: ndarray or Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "merge and reshape output"
+
+      parameters:
+        data: "lmm_input['TSVR_hours']"
+        min_val: 0.0
+        max_val: 168.0
+        column_name: "TSVR_hours"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 1200 rows (100 x 4 x 3)"
+        - "No NaN in TSVR_hours, Days, log_Days_plus1"
+        - "TSVR_hours in [0, 168]"
+        - "Days in [0, 7]"
+        - "paradigm in {IFR, ICR, IRE} only"
+        - "All 100 UIDs present with 12 rows each"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_merge_theta_tsvr.log"
+
+    log_file: "logs/step04_merge_theta_tsvr.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Fit LMM with Paradigm x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit Linear Mixed Model to test Paradigm x Time interaction (primary hypothesis: interaction NULL, paralleling Ch5 5.3.1-5.3.2 accuracy findings)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["UID", "test", "paradigm", "theta_confidence", "TSVR_hours", "Days", "log_Days_plus1"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          format: "Plain text"
+          description: "LMM model summary (fixed effects, random effects, fit statistics)"
+
+        - path: "data/step05_fixed_effects.csv"
+          format: "CSV"
+          columns:
+            - {name: "term", type: "str"}
+            - {name: "estimate", type: "float"}
+            - {name: "se", type: "float"}
+            - {name: "z_value", type: "float"}
+            - {name: "p_value", type: "float"}
+          expected_rows: 10
+          description: "Fixed effects table"
+
+        - path: "data/step05_random_effects.csv"
+          format: "CSV"
+          columns:
+            - {name: "component", type: "str"}
+            - {name: "variance", type: "float"}
+            - {name: "sd", type: "float"}
+          expected_rows: 6
+          description: "Random effects variance components"
+
+      parameters:
+        theta_scores: "lmm_input"
+        tsvr_data: "lmm_input"
+        formula: "theta_confidence ~ Paradigm * (Days + log_Days_plus1)"
+        groups: "UID"
+        re_formula: "~Days + log_Days_plus1"
+        reml: true
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with Paradigm x Time interaction using TSVR-derived Days per Decision D070"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          source: "fit_lmm_trajectory_tsvr output"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged: True"
+        - "All variance components positive"
+        - "ICC in [0, 1]"
+        - "No NaN in fixed effects"
+        - "Coefficients in [-5, 5]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_fit_lmm.log"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Post-Hoc Paradigm Contrasts
+  # --------------------------------------------------------------------------
+  - name: "step06_compute_post_hoc_contrasts"
+    step_number: "06"
+    description: "Compute pairwise paradigm comparisons for baseline confidence (Day 0) and slope differences with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float) -> DataFrame"
+
+      input_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          variable_name: "lmm_model"
+          source: "fit_lmm_trajectory_tsvr output"
+
+      output_files:
+        - path: "data/step06_paradigm_contrasts.csv"
+          format: "CSV"
+          columns:
+            - {name: "contrast", type: "str"}
+            - {name: "estimate", type: "float"}
+            - {name: "se", type: "float"}
+            - {name: "z_value", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float"}
+            - {name: "cohens_d", type: "float"}
+          expected_rows: 9
+          description: "Paradigm contrasts with dual p-values per Decision D068"
+
+        - path: "data/step06_effect_sizes.csv"
+          format: "CSV"
+          columns:
+            - {name: "contrast", type: "str"}
+            - {name: "cohens_d", type: "float"}
+            - {name: "interpretation", type: "str"}
+          expected_rows: 9
+          description: "Effect sizes (Cohen's d)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        comparisons:
+          - "IFR vs ICR baseline"
+          - "IFR vs IRE baseline"
+          - "ICR vs IRE baseline"
+          - "IFR vs ICR slope (linear)"
+          - "IFR vs IRE slope (linear)"
+          - "ICR vs IRE slope (linear)"
+          - "IFR vs ICR slope (nonlinear)"
+          - "IFR vs IRE slope (nonlinear)"
+          - "ICR vs IRE slope (nonlinear)"
+        family_alpha: 0.05
+
+      returns:
+        type: "DataFrame"
+        variable_name: "contrasts_df"
+
+      description: "Compute pairwise paradigm comparisons with Bonferroni correction (9 comparisons, alpha = 0.05/9 = 0.0056)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_paradigm_contrasts.csv"
+          variable_name: "contrasts_df"
+          source: "compute_contrasts_pairwise output"
+
+      parameters:
+        contrasts_df: "contrasts_df"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "p_uncorrected column present"
+        - "p_bonferroni column present (Decision D068 dual p-value reporting)"
+        - "p_bonferroni >= p_uncorrected for all rows"
+        - "All 9 contrasts present"
+        - "No NaN in estimate or p-values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compute_post_hoc_contrasts.log"
+
+    log_file: "logs/step06_compute_post_hoc_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Compare to Ch5 5.3.1 Accuracy Paradigm Analysis
+  # --------------------------------------------------------------------------
+  - name: "step07_compare_to_ch5"
+    step_number: "07"
+    description: "Document how confidence paradigm effects compare to accuracy paradigm effects from Ch5 5.3.1-5.3.2 (test if confidence replicates accuracy NULL slope findings)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step06_paradigm_contrasts.csv (confidence contrasts)"
+        - "Attempt to load results/ch5/5.3.1/data/step06_paradigm_contrasts.csv (accuracy contrasts)"
+        - "If Ch5 5.3.1 not available: create placeholder comparison with NA values for accuracy metrics"
+        - "If Ch5 5.3.1 available: compare Cohen's d effect sizes (confidence vs accuracy)"
+        - "Compare baseline effects: Recognition > Cued > Free?"
+        - "Compare slope effects: Both NULL interaction (parallel decline)?"
+        - "Save comparison table to data/step07_ch5_comparison.csv"
+
+      input_files:
+        - path: "data/step06_paradigm_contrasts.csv"
+          required_columns: ["contrast", "cohens_d", "p_uncorrected"]
+          variable_name: "confidence_contrasts"
+
+        - path: "results/ch5/5.3.1/data/step06_paradigm_contrasts.csv"
+          required_columns: ["contrast", "cohens_d", "p_uncorrected"]
+          variable_name: "accuracy_contrasts"
+          notes: "Optional - may not exist if Ch5 5.3.1 not completed"
+
+      output_files:
+        - path: "data/step07_ch5_comparison.csv"
+          format: "CSV"
+          columns:
+            - {name: "contrast", type: "str"}
+            - {name: "confidence_d", type: "float"}
+            - {name: "confidence_p", type: "float"}
+            - {name: "accuracy_d", type: "float", description: "NA if Ch5 5.3.1 pending"}
+            - {name: "accuracy_p", type: "float", description: "NA if Ch5 5.3.1 pending"}
+            - {name: "pattern_match", type: "str", description: "YES/NO/PENDING"}
+            - {name: "interpretation", type: "str"}
+          expected_rows: 9
+          description: "Confidence vs accuracy paradigm effects comparison"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step07_ch5_comparison.csv"
+          variable_name: "comparison_df"
+          source: "comparison output"
+
+      parameters:
+        df: "comparison_df"
+        required_columns: ["contrast", "confidence_d", "confidence_p", "accuracy_d", "accuracy_p", "pattern_match", "interpretation"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 9 contrasts present"
+        - "Required columns present"
+        - "pattern_match in {YES, NO, PENDING}"
+        - "If Ch5 5.3.1 available: accuracy_d and accuracy_p not NA"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step07_compare_to_ch5.log"
+
+    log_file: "logs/step07_compare_to_ch5.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Prepare Trajectory Plot Data (Dual-Scale per D069)
+  # --------------------------------------------------------------------------
+  - name: "step08_prepare_trajectory_plot_data"
+    step_number: "08"
+    description: "Create plot source CSVs for trajectory visualization with dual-scale (theta + probability) per Decision D069. Option B architecture: g_code creates plot source CSV during analysis, rq_plots reads CSV and generates PNG later"
+
+    analysis_call:
+      module: "tools.plotting"
+      function: "convert_theta_to_probability"
+      signature: "convert_theta_to_probability(theta: ndarray, discrimination: float, difficulty: float) -> ndarray"
+
+      input_files:
+        - path: "data/step03_theta_confidence_paradigm.csv"
+          required_columns: ["composite_ID", "theta_IFR", "theta_ICR", "theta_IRE"]
+          variable_name: "theta_data"
+
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["UID", "test", "paradigm", "theta_confidence", "TSVR_hours", "Days"]
+          variable_name: "lmm_input"
+
+      output_files:
+        - path: "data/step08_trajectory_theta_data.csv"
+          format: "CSV, plot source data for theta-scale trajectory"
+          columns:
+            - {name: "paradigm", type: "str", description: "IFR/ICR/IRE"}
+            - {name: "Days", type: "float", description: "0, 1, 3, 6"}
+            - {name: "theta_mean", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "n", type: "int"}
+          expected_rows: 12
+          description: "Aggregated theta data for trajectory plot (3 paradigms x 4 timepoints)"
+
+        - path: "data/step08_trajectory_probability_data.csv"
+          format: "CSV, plot source data for probability-scale trajectory (Decision D069 dual-scale)"
+          columns:
+            - {name: "paradigm", type: "str"}
+            - {name: "Days", type: "float"}
+            - {name: "probability_mean", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "n", type: "int"}
+          expected_rows: 12
+          description: "Aggregated probability data for trajectory plot"
+
+      parameters:
+        theta: "theta_data"
+        discrimination: 1.0
+        difficulty: 0.0
+
+      returns:
+        type: "ndarray"
+        variable_name: "probability_data"
+
+      description: "Aggregate theta data by paradigm x timepoint, convert to probability scale for dual-scale plots per Decision D069"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step08_trajectory_probability_data.csv"
+          variable_name: "probability_df"
+          source: "convert_theta_to_probability output aggregated"
+
+      parameters:
+        probability_df: "probability_df"
+        prob_columns: ["probability_mean", "CI_lower", "CI_upper"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 12 rows per file (3 paradigms x 4 timepoints)"
+        - "All paradigms represented: IFR, ICR, IRE"
+        - "All timepoints represented: 0, 1, 3, 6 Days"
+        - "Probability values in [0, 1] range"
+        - "CI_lower < mean < CI_upper"
+        - "No NaN in theta_mean, probability_mean, CI bounds"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step08_prepare_trajectory_plot_data.log"
+
+    log_file: "logs/step08_prepare_trajectory_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

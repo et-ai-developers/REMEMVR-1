@@ -1,0 +1,198 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.8.3
+# Created by: rq_tools agent
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  # Step 0: Extract confidence theta data from RQ 6.8.1
+  extract_theta_from_rq:
+    module: "pandas"
+    function: "read_csv + merge + reshape"
+    validation_tool: "validate_dataframe_structure"
+    description: "Extract confidence theta scores from RQ 6.8.1, reshape wide to long, merge TSVR"
+    notes:
+      - "Uses pandas (stdlib) for data extraction and transformation"
+      - "Not a custom tools/ function - uses standard pandas operations"
+      - "Validation ensures 800 rows (100 participants x 4 tests x 2 location types)"
+
+  # Step 1 & 2: Fit LMMs with random slopes for Source and Destination
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    validation_tool: "validate_lmm_convergence"
+    description: "Fit LMM using TSVR (actual hours) as time variable with random intercepts and slopes"
+    notes:
+      - "Decision D070: TSVR_hours as time variable (not nominal days)"
+      - "Random structure: ~TSVR_hours | UID (random intercepts and slopes)"
+      - "REML estimation with full variance-covariance matrix"
+      - "Used for BOTH Source (Step 1) and Destination (Step 2) LMMs"
+
+  # Step 1 & 2: Extract variance components from LMM
+  extract_variance_components:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    validation_tool: "validate_variance_positivity"
+    description: "Extract variance components and ICC from fitted LMM"
+    notes:
+      - "Returns dict with variance_components and icc"
+      - "Includes var_intercept, var_slope, cov_int_slope, var_residual, corr_int_slope"
+      - "Used to create variance decomposition CSVs in Steps 1 and 2"
+
+  # Step 3: Extract random effects
+  extract_random_effects:
+    module: "statsmodels"
+    function: "MixedLMResults.random_effects"
+    validation_tool: "validate_dataframe_structure"
+    description: "Extract participant-level random intercepts and slopes from fitted LMM"
+    notes:
+      - "Uses statsmodels API (not custom tools/ function)"
+      - "Output required for RQ 6.8.4 clustering analysis"
+      - "200 rows expected: 100 participants x 2 location types"
+
+  # Step 4: Compute intercept-slope correlations with Fisher's z CIs
+  compute_correlation_with_fishers_z:
+    module: "scipy.stats"
+    function: "pearsonr + Fisher's z transformation"
+    validation_tool: "validate_correlation_test_d068"
+    description: "Compute intercept-slope correlation with Fisher's z confidence intervals and dual p-values"
+    notes:
+      - "Uses scipy.stats.pearsonr (stdlib) for correlation test"
+      - "Fisher's z transformation for 95% CI"
+      - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni)"
+      - "Bonferroni correction: p_bonf = min(p_uncorr * 2, 1.0) for 2 location types"
+
+  # Step 5: Compare to Ch5 5.5.6 accuracy correlations
+  merge_cross_rq_data:
+    module: "pandas"
+    function: "read_csv + merge"
+    validation_tool: "validate_dataframe_structure"
+    description: "Merge confidence correlations with Ch5 5.5.6 accuracy correlations for comparison"
+    notes:
+      - "Uses pandas (stdlib) for cross-RQ data merge"
+      - "Validates Ch5 5.5.6 file exists before merge"
+      - "Creates side-by-side comparison with direction_match, magnitude_difference, CI_overlap"
+
+  # Step 6: Prepare ICC summary plot data
+  compute_icc_components:
+    module: "custom calculation"
+    function: "variance decomposition to ICC"
+    validation_tool: "validate_icc_bounds"
+    description: "Compute ICC components from variance estimates"
+    notes:
+      - "ICC_intercept = var_intercept / (var_intercept + var_residual)"
+      - "ICC_slope_simple = var_slope / (var_slope + var_residual)"
+      - "ICC_total = (var_intercept + var_slope) / (var_intercept + var_slope + var_residual)"
+      - "All ICC values must be in [0, 1] range"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    description: "Validate DataFrame has expected rows, columns, and types"
+    criteria:
+      - "Expected row count matches (exact or range)"
+      - "All required columns present"
+      - "Column types match specification (if provided)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (individual check results)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    description: "Check LMM model convergence status and warnings"
+    criteria:
+      - "Model converged successfully (converged=True)"
+      - "No convergence warnings present"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        message: "str (human-readable explanation)"
+        warnings: "List[str] (convergence warnings if any)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    description: "Validate all variance components are strictly positive"
+    criteria:
+      - "var_intercept > 0 (variance must be positive)"
+      - "var_slope > 0 (variance must be positive)"
+      - "var_residual > 0 (variance must be positive)"
+      - "Random effects covariance matrix is positive definite"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all variances positive)"
+        message: "str (human-readable explanation)"
+        negative_components: "List[str] (components with negative/zero variance)"
+        variance_range: "Tuple[float, float] (min, max variance values)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    description: "Validate correlation test results include Decision D068 dual p-value reporting"
+    criteria:
+      - "BOTH p_uncorrected AND p_bonferroni columns present"
+      - "Correlation in [-1, 1] range"
+      - "CIs contain point estimate (CI_lower <= correlation <= CI_upper)"
+      - "p-values in [0, 1] range"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-values present)"
+        missing_cols: "List[str] (missing columns if invalid)"
+        message: "str (human-readable explanation)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_compute_correlations.log"
+      invoke: "g_debug (master invokes after error)"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    description: "Validate ICC values are in [0, 1] range"
+    criteria:
+      - "All ICC values in [0, 1] range (proportion of variance)"
+      - "No NaN values in ICC estimates"
+      - "No infinite values"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all ICCs in bounds)"
+        message: "str (human-readable explanation)"
+        out_of_bounds: "List[Dict] (violations if any)"
+        icc_range: "Tuple[float, float] (min, max ICC values)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_prepare_icc_plot_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 5
+  total_unique_tools: 12
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni for correlations)"
+    - "D070: TSVR_hours as time variable (actual elapsed time, not nominal days)"
+  notes:
+    - "Tool catalog approach: Each tool listed ONCE (even if used multiple times)"
+    - "Standard library functions (pandas, scipy, statsmodels) cataloged for completeness"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these specifications for pre-generation validation"
+    - "All validation tools paired with analysis tools"

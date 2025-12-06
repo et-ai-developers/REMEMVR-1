@@ -1,0 +1,420 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.7.3
+# Created by: rq_tools agent
+# Created: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 6.7.3 - Calibration Predicts Trajectory Stability
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+
+  # Step 0: Extract calibration and residuals data
+  load_csv_file:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer: str, **kwargs) -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    description: "Load CSV files from dependency RQs (RQ 6.2.1 calibration scores, Ch5 5.1.1 residuals)"
+
+    input_files:
+      - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+        source: "RQ 6.2.1 Step 2 output"
+        required_columns: ["composite_ID", "calibration", "test"]
+      - path: "results/ch5/5.1.1/data/step05_lmm_residuals.csv"
+        source: "Ch5 5.1.1 Step 5 output (or recompute from lmm_input.csv)"
+        required_columns: ["composite_ID", "residual"]
+
+    output_files:
+      - path: "data/step00_calibration_day0.csv"
+        columns: ["UID", "calibration"]
+        description: "Day 0 calibration scores (100 participants)"
+      - path: "data/step00_trajectory_residuals.csv"
+        columns: ["composite_ID", "UID", "test", "residual"]
+        description: "Trajectory residuals from Ch5 5.1.1 (400 observations)"
+
+    parameters:
+      filepath_or_buffer: "str (path to CSV file)"
+      sep: "str (default ',')"
+      header: "int (default 0)"
+
+    notes:
+      - "Standard library function (pandas)"
+      - "Used to load DERIVED data from dependency RQs"
+      - "Filter calibration to T1 only (Day 0) in post-processing"
+      - "Extract UID from composite_ID via string operations"
+
+  # Step 1: Compute trajectory variability
+  groupby_aggregate:
+    module: "pandas"
+    function: "DataFrame.groupby"
+    signature: "groupby(by: str, **kwargs) -> DataFrameGroupBy"
+    validation_tool: "validate_numeric_range"
+
+    description: "Group residuals by UID and compute SD (trajectory variability measure)"
+
+    input_files:
+      - path: "data/step00_trajectory_residuals.csv"
+        required_columns: ["UID", "residual"]
+        source: "Step 0 output"
+
+    output_files:
+      - path: "data/step01_trajectory_variability.csv"
+        columns: ["UID", "trajectory_variability"]
+        description: "SD of residuals per participant (100 rows)"
+
+    parameters:
+      by: "str (grouping column: 'UID')"
+      agg_func: "str ('std' for standard deviation)"
+
+    notes:
+      - "Standard library function (pandas)"
+      - "Computes SD across 4 timepoints per participant"
+      - "Trajectory variability = within-person residual variability"
+
+  # Step 2: Merge calibration and variability
+  merge_dataframes:
+    module: "pandas"
+    function: "DataFrame.merge"
+    signature: "merge(right: DataFrame, on: str, how: str, **kwargs) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+
+    description: "Merge Day 0 calibration with trajectory variability for correlation analysis"
+
+    input_files:
+      - path: "data/step00_calibration_day0.csv"
+        required_columns: ["UID", "calibration"]
+        source: "Step 0 output"
+      - path: "data/step01_trajectory_variability.csv"
+        required_columns: ["UID", "trajectory_variability"]
+        source: "Step 1 output"
+
+    output_files:
+      - path: "data/step02_calibration_variability.csv"
+        columns: ["UID", "calibration", "trajectory_variability"]
+        description: "Merged dataset for correlation (100 rows)"
+
+    parameters:
+      right: "DataFrame (second DataFrame to merge)"
+      on: "str (merge key: 'UID')"
+      how: "str ('inner' to ensure complete data)"
+
+    notes:
+      - "Standard library function (pandas)"
+      - "Inner join ensures only participants with both calibration and variability"
+      - "Expected 100 participants after merge"
+
+  # Step 3: Compute correlation with dual p-values
+  pearson_correlation:
+    module: "scipy.stats"
+    function: "pearsonr"
+    signature: "pearsonr(x: ArrayLike, y: ArrayLike) -> Tuple[float, float]"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "Compute Pearson correlation between calibration and trajectory variability with dual p-value reporting (Decision D068)"
+
+    input_files:
+      - path: "data/step02_calibration_variability.csv"
+        required_columns: ["calibration", "trajectory_variability"]
+        source: "Step 2 output"
+
+    output_files:
+      - path: "data/step03_correlation.csv"
+        columns: ["r", "p_one_tailed", "p_two_tailed", "n", "effect_size", "direction"]
+        description: "Correlation result with dual p-values (Decision D068)"
+
+    parameters:
+      x: "ArrayLike (calibration scores)"
+      y: "ArrayLike (trajectory variability scores)"
+      alternative: "str ('two-sided' for p_two_tailed, 'less' for p_one_tailed)"
+
+    notes:
+      - "Standard library function (scipy.stats)"
+      - "Decision D068: Report BOTH one-tailed (H1: r < 0) and two-tailed (H1: r != 0) p-values"
+      - "One-tailed hypothesis: better calibration (lower |error|) predicts lower variability"
+      - "Effect size thresholds: |r| > 0.20 (small), > 0.30 (moderate), > 0.50 (large)"
+      - "Must call pearsonr twice with different 'alternative' parameter for dual p-values"
+
+  # Step 4: Prepare scatterplot data
+  linear_regression:
+    module: "scipy.stats"
+    function: "linregress"
+    signature: "linregress(x: ArrayLike, y: ArrayLike) -> LinregressResult"
+    validation_tool: "validate_plot_data_completeness"
+
+    description: "Compute regression line for scatterplot visualization (Option B architecture)"
+
+    input_files:
+      - path: "data/step02_calibration_variability.csv"
+        required_columns: ["calibration", "trajectory_variability"]
+        source: "Step 2 output"
+
+    output_files:
+      - path: "data/step04_scatterplot_data.csv"
+        columns: ["calibration", "trajectory_variability", "y_predicted"]
+        description: "Plot source CSV with regression line predictions (100 rows)"
+
+    parameters:
+      x: "ArrayLike (calibration, independent variable)"
+      y: "ArrayLike (trajectory_variability, dependent variable)"
+
+    notes:
+      - "Standard library function (scipy.stats)"
+      - "Option B plotting architecture: rq_plots reads CSV, generates PNG"
+      - "Regression line computed for visualization only (hypothesis test in Step 3)"
+      - "y_predicted = slope * calibration + intercept"
+
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+
+  # Step 0: Validate extracted data structure
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    description: "Validate DataFrame has expected structure (rows, columns, types)"
+
+    input_files:
+      - path: "data/step00_calibration_day0.csv"
+        source: "Analysis tool output (Step 0 load_csv_file)"
+        required_columns: ["UID", "calibration"]
+      - path: "data/step00_trajectory_residuals.csv"
+        source: "Analysis tool output (Step 0 load_csv_file)"
+        required_columns: ["composite_ID", "UID", "test", "residual"]
+
+    parameters:
+      expected_rows: "int (100 for calibration_day0, 400 for trajectory_residuals)"
+      expected_columns: "List[str] (required column names)"
+      column_types: "Optional[Dict[str, type]] (UID: object, calibration: float64, residual: float64)"
+
+    criteria:
+      - "Expected row count matches (100 or 400)"
+      - "All required columns present"
+      - "Column types correct (object for strings, float64 for numeric)"
+      - "No unexpected columns present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (detailed check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_data.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_dataframe_structure"
+
+  # Step 1: Validate trajectory variability values
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    description: "Validate trajectory variability values >= 0 and in reasonable range"
+
+    input_files:
+      - path: "data/step01_trajectory_variability.csv"
+        source: "Analysis tool output (Step 1 groupby_aggregate)"
+        required_columns: ["UID", "trajectory_variability"]
+
+    parameters:
+      data: "pd.Series (trajectory_variability column)"
+      min_val: "float (0.0, SD cannot be negative)"
+      max_val: "float (3.0, upper bound for reasonable residual SD)"
+      column_name: "str ('trajectory_variability')"
+
+    criteria:
+      - "All trajectory_variability values >= 0 (SD definition)"
+      - "All trajectory_variability values <= 3.0 (reasonable upper bound)"
+      - "No NaN values in trajectory_variability column"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        out_of_range_count: "int (number of violations)"
+        violations: "List (specific violation values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_variability.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_numeric_range"
+
+  # Step 2: Validate merged data format
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    description: "Validate merged DataFrame has all required columns present"
+
+    input_files:
+      - path: "data/step02_calibration_variability.csv"
+        source: "Analysis tool output (Step 2 merge_dataframes)"
+        required_columns: ["UID", "calibration", "trajectory_variability"]
+
+    parameters:
+      df: "pd.DataFrame (merged data)"
+      required_cols: "List[str] (['UID', 'calibration', 'trajectory_variability'])"
+
+    criteria:
+      - "All required columns present (UID, calibration, trajectory_variability)"
+      - "No missing columns"
+      - "Expected 100 rows after merge (inner join)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (missing column names, empty if valid)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_merge_data.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_data_format"
+
+  # Step 3: Validate correlation test Decision D068 compliance
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: pd.DataFrame, required_cols: Optional[List[str]] = None) -> Dict[str, Any]"
+
+    description: "Validate correlation results include Decision D068 dual p-value reporting"
+
+    input_files:
+      - path: "data/step03_correlation.csv"
+        source: "Analysis tool output (Step 3 pearson_correlation)"
+        required_columns: ["r", "p_one_tailed", "p_two_tailed", "n", "effect_size", "direction"]
+
+    parameters:
+      correlation_df: "pd.DataFrame (correlation results)"
+      required_cols: "Optional[List[str]] (defaults to D068 spec: p_uncorrected + one correction method)"
+
+    criteria:
+      - "BOTH p_one_tailed and p_two_tailed present (Decision D068 requirement)"
+      - "r value in [-1, 1]"
+      - "p-values in [0, 1]"
+      - "n = 100 (sample size)"
+      - "effect_size classification present (small/moderate/large/negligible)"
+      - "direction classification present (positive/negative/null)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_cols: "List[str] (missing columns, empty if valid)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_correlation.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_correlation_test_d068"
+
+  # Step 4: Validate plot data completeness
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    description: "Verify plot data has all required columns for scatterplot visualization"
+
+    input_files:
+      - path: "data/step04_scatterplot_data.csv"
+        source: "Analysis tool output (Step 4 linear_regression)"
+        required_columns: ["calibration", "trajectory_variability", "y_predicted"]
+
+    parameters:
+      plot_data: "pd.DataFrame (scatterplot source data)"
+      required_domains: "List[str] (not applicable for this RQ, single scatterplot)"
+      required_groups: "List[str] (not applicable for this RQ, single scatterplot)"
+      domain_col: "str (not used for this RQ)"
+      group_col: "str (not used for this RQ)"
+
+    criteria:
+      - "All required columns present (calibration, trajectory_variability, y_predicted)"
+      - "No NaN values in any column"
+      - "Expected 100 rows (one per participant)"
+      - "y_predicted values are linear function of calibration (monotonic)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        missing_domains: "List[str] (not used for this RQ)"
+        missing_groups: "List[str] (not used for this RQ)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_prepare_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_plot_data_completeness"
+
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  rq_id: "6.7.3"
+  rq_title: "Calibration Predicts Trajectory Stability"
+  analysis_type: "Correlation analysis (no IRT, no LMM)"
+
+  analysis_tools_count: 5
+  validation_tools_count: 5
+  total_unique_tools: 10
+
+  analysis_tools_list:
+    - "load_csv_file (pandas.read_csv)"
+    - "groupby_aggregate (pandas.DataFrame.groupby)"
+    - "merge_dataframes (pandas.DataFrame.merge)"
+    - "pearson_correlation (scipy.stats.pearsonr)"
+    - "linear_regression (scipy.stats.linregress)"
+
+  validation_tools_list:
+    - "validate_dataframe_structure"
+    - "validate_numeric_range"
+    - "validate_data_format"
+    - "validate_correlation_test_d068"
+    - "validate_plot_data_completeness"
+
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (p_one_tailed + p_two_tailed for correlation)"
+
+  stdlib_tools_used: true
+  stdlib_tools_note: "All analysis tools are standard library (pandas, scipy). No custom tools/ functions required. Validation tools are custom (tools.validation)."
+
+  cross_rq_dependencies:
+    - "RQ 6.2.1 (Step 2 calibration_scores.csv)"
+    - "Ch5 5.1.1 (Step 5 lmm_residuals.csv)"
+
+  estimated_runtime: "Low (<5 minutes total)"
+
+  notes:
+    - "Simple correlation analysis with no IRT or LMM fitting"
+    - "DERIVED data from dependency RQs only (no RAW data extraction)"
+    - "Option B plotting architecture (plot data prepared in Step 4, rq_plots generates PNG)"
+    - "Decision D068 applied to correlation test (dual p-value reporting)"
+    - "All analysis tools exempt from tools_inventory.md verification (stdlib)"
+    - "All validation tools verified exist in tools_inventory.md (custom tools.validation functions)"

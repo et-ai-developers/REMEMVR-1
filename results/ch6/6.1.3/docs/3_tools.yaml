@@ -1,0 +1,143 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# RQ: 6.1.3 (Age Effects on Confidence)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step02_lmm_input_with_time.csv"
+        required_columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Age", "Age_c", "Time"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+        data_types:
+          composite_ID: "string (format: {UID}_{test})"
+          UID: "string (participant identifier)"
+          test: "string (T1, T2, T3, T4)"
+          theta_confidence: "float64 (IRT ability estimate)"
+          se_confidence: "float64 (standard error)"
+          TSVR_hours: "float64 (actual hours since encoding per D070)"
+          Age: "int64 or float64 (participant age)"
+          Age_c: "float64 (centered age)"
+          Time: "float64 (time predictor from RQ 6.1.1 functional form)"
+
+    output_files:
+      - path: "data/step03_lmm_summary.txt"
+        description: "Full statsmodels LMM summary with fixed/random effects, fit indices"
+      - path: "data/step03_lmm_fixed_effects.csv"
+        columns: ["term", "estimate", "se", "z", "p"]
+        description: "LMM fixed effects coefficients table"
+
+    parameters:
+      formula: "theta_confidence ~ Time * Age_c + (Time | UID)"
+      groups: "UID"
+      re_formula: "~Time"
+      reml: false
+
+    description: "Fit LMM with Age × Time interaction using TSVR as time variable (Decision D070), random slopes for individual variation in decline rates"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/step03_lmm_fixed_effects.csv"
+        required_columns: ["term", "estimate", "se", "z", "p"]
+        source: "LMM fitted model object from Step 3"
+
+    output_files:
+      - path: "data/step03_lmm_fixed_effects.csv"
+        columns: ["term", "estimate", "se", "z", "p"]
+        description: "Fixed effects table with Age_c and Time:Age_c interaction"
+
+    parameters:
+      result: "MixedLMResults (fitted LMM from Step 3)"
+
+    description: "Extract fixed effects table from fitted LMM, including Age_c and Time:Age_c interaction coefficients"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_fixed_effects_from_lmm"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_lmm_summary.txt"
+        source: "LMM fitted model from Step 3 (fit_lmm_trajectory_tsvr)"
+
+    parameters:
+      lmm_result: "MixedLMResults object"
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if optimizer succeeded)"
+        message: "str (human-readable explanation)"
+        warnings: "list (any convergence warnings)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully, no singular fit, all estimates finite"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_lmm_fixed_effects.csv"
+        required_columns: ["term", "estimate", "se", "z", "p"]
+        source: "Fixed effects extraction from Step 3"
+
+    parameters:
+      df: "DataFrame to validate"
+      required_cols: ["term", "estimate", "se", "z", "p"]
+
+    criteria:
+      - "All required columns present (term, estimate, se, z, p)"
+      - "Expected terms present: Intercept, Time, Age_c, Time:Age_c"
+      - "No missing columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (any missing columns)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate fixed effects table has all required columns and expected terms"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+summary:
+  analysis_tools_count: 2
+  validation_tools_count: 2
+  total_unique_tools: 4
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Step 0-2 use pandas stdlib operations (exempt from tool catalog)"
+    - "Step 4-6 use pandas/numpy operations for filtering, prediction, aggregation (exempt)"
+    - "Only custom LMM tools cataloged (fit_lmm_trajectory_tsvr, extract_fixed_effects_from_lmm)"
+    - "Decision D068: Dual p-values implemented in Step 4 via pandas filtering (not tools/ function)"
+    - "Decision D070: TSVR time variable enforced via fit_lmm_trajectory_tsvr parameter"

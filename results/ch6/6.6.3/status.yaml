@@ -1,0 +1,27 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+  timestamp: "2025-12-06T17:00:00Z"
+  context_dump: "9.3/10 APPROVED. Strong theory, missing recent lit (bias vs efficiency), CRITICAL omissions (practice effects, guessing mechanism)."
+rq_stats: success
+  timestamp: "2025-12-06T17:15:00Z"
+  context_dump: "7.8/10 REJECTED. Cat1: 2.0/3 (aggregation violates LMM assumptions - use GLMM). Cat2: 2.0/2 (100% reuse). Cat3: 1.5/2 (params OK, transformation missing). Cat4: 1.5/2 (validation incomplete). Cat5: 0.8/1 (8 concerns, 2 CRITICAL: GLMM not LMM)."
+rq_planner: success
+rq_tools: success
+rq_analysis: success
+  timestamp: "2025-12-06T14:45:00Z"
+  context_dump: "7 steps specified with validation (Item-level HCE analysis -> LMM Domain x Time interaction -> domain ranking -> plot data)"
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_extract_item_level: pending
+  step01_compute_hce_flags: pending
+  step02_aggregate_hce_rates: pending
+  step03_fit_domain_hce_lmm: pending
+  step04_test_domain_effects: pending
+  step05_rank_domains: pending
+  step06_prepare_hce_plot_data: pending

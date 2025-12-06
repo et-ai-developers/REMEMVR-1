@@ -1,0 +1,29 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+rq_tools: success
+rq_analysis: success
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+# Context Dumps
+rq_tools_context: "4 analysis + 4 validation tools cataloged for calibration trajectory analysis"
+rq_analysis_context: "7 steps specified with validation (theta merge → calibration metrics → LMM trajectory)"
+
+# Analysis Steps
+analysis_steps:
+  step00a_load_accuracy_theta: pending
+  step00b_load_confidence_theta: pending
+  step00c_load_tsvr_mapping: pending
+  step01_merge_theta: pending
+  step02_compute_calibration: pending
+  step03_compute_brier: pending
+  step04_compute_ece: pending
+  step05_fit_lmm: pending
+  step06_test_time_effect: pending
+  step07_prepare_trajectory_plot: pending

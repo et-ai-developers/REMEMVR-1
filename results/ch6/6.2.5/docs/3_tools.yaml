@@ -1,0 +1,384 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 6.2.5 - Calibration Age Effects
+# Architecture: Tool Catalog (each tool listed once, deduplication)
+
+analysis_tools:
+  # Step 0: Load calibration data and merge with age
+  pandas_merge:
+    module: "pandas"
+    function: "merge"
+    signature: "pd.merge(left: DataFrame, right: DataFrame, on: str, how: str) -> DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+        required_columns: ["UID", "test", "composite_ID", "theta_accuracy", "theta_confidence", "calibration", "TSVR_hours"]
+        expected_rows: "400 (100 participants x 4 tests)"
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "Age"]
+        expected_rows: "100 participants"
+
+    output_files:
+      - path: "data/step00_calibration_age.csv"
+        columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+        description: "Calibration scores merged with participant age"
+
+    parameters:
+      on: "UID"
+      how: "left"
+
+    description: "Merge calibration scores from RQ 6.2.1 with participant age from dfData.csv"
+    source_reference: "Standard pandas merge operation"
+
+  # Step 1: Center age variable
+  pandas_transform:
+    module: "pandas"
+    function: "transform"
+    signature: "df.assign(**kwargs) -> DataFrame"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step00_calibration_age.csv"
+        required_columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+
+    output_files:
+      - path: "data/step01_calibration_age_centered.csv"
+        columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age", "Age_c", "mean_Age"]
+        description: "Calibration data with centered age variable (Age_c = Age - mean(Age))"
+
+    parameters:
+      centering_variable: "Age"
+      output_variable: "Age_c"
+
+    description: "Center Age variable for interpretable LMM intercept estimates"
+    source_reference: "Standard pandas transformation"
+
+  # Step 2: Fit LMM with Age x Time interaction
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_calibration_age_centered.csv"
+        required_columns: ["UID", "calibration", "TSVR_hours", "Age_c"]
+        expected_rows: "400"
+
+    output_files:
+      - path: "data/step02_lmm_model_summary.txt"
+        description: "LMM fixed effects, random effects, fit statistics"
+      - path: "data/step02_lmm_fixed_effects.csv"
+        columns: ["term", "estimate", "se", "z_value", "p_value"]
+        description: "Fixed effects table (Intercept, TSVR_hours, Age_c, TSVR_hours:Age_c)"
+      - path: "data/step02_lmm_random_effects.csv"
+        columns: ["component", "value", "sd"]
+        description: "Random effects variance components"
+
+    parameters:
+      formula: "calibration ~ TSVR_hours + Age_c + TSVR_hours:Age_c"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Fit LMM testing Age x Time interaction on calibration trajectory (Decision D070: TSVR as time variable)"
+    source_reference: "tools_inventory.md - tools.analysis_lmm.fit_lmm_trajectory_tsvr"
+
+  # Step 3: Extract age effects with Bonferroni correction
+  pandas_filter:
+    module: "pandas"
+    function: "filter"
+    signature: "df[df['column'].isin(values)] -> DataFrame"
+    validation_tool: "validate_contrasts_d068"
+
+    input_files:
+      - path: "data/step02_lmm_fixed_effects.csv"
+        required_columns: ["term", "estimate", "se", "z_value", "p_value"]
+
+    output_files:
+      - path: "data/step03_age_effects.csv"
+        columns: ["term", "estimate", "se", "z_value", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni"]
+        description: "Age_c and Age_c:TSVR_hours effects with dual p-values (Decision D068)"
+
+    parameters:
+      terms_to_extract: ["Age_c", "TSVR_hours:Age_c"]
+      bonferroni_n: 3
+      alpha: 0.05
+
+    description: "Extract age effects with Bonferroni correction (Decision D068: dual p-value reporting)"
+    source_reference: "Decision D068 dual p-value reporting requirement"
+
+  # Step 4: Create age tertile trajectories
+  pandas_groupby:
+    module: "pandas"
+    function: "groupby"
+    signature: "df.groupby(by: List[str]).agg(dict) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step01_calibration_age_centered.csv"
+        required_columns: ["UID", "test", "calibration", "TSVR_hours", "Age"]
+
+    output_files:
+      - path: "data/step04_age_tertile_trajectories.csv"
+        columns: ["age_tertile", "test", "TSVR_hours", "mean_calibration", "CI_lower", "CI_upper", "N"]
+        description: "Age tertile (Young/Middle/Older) trajectories for visualization"
+
+    parameters:
+      tertile_method: "qcut"
+      q: 3
+      labels: ["Young", "Middle", "Older"]
+      groupby_vars: ["age_tertile", "test"]
+
+    description: "Create age tertiles and aggregate calibration means per tertile x test for plotting"
+    source_reference: "Standard pandas aggregation"
+
+  # Step 5: Compare to Chapter 5 age null findings
+  pandas_concat:
+    module: "pandas"
+    function: "concat"
+    signature: "pd.concat(objs: List[DataFrame], axis: int) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step03_age_effects.csv"
+        required_columns: ["term", "estimate", "se", "z_value", "p_uncorrected", "p_bonferroni"]
+
+    output_files:
+      - path: "data/step05_ch5_comparison.csv"
+        columns: ["RQ", "Analysis_Type", "Age_x_Time_p_uncorrected", "Age_x_Time_p_corrected", "Significant_uncorrected", "Significant_corrected", "Pattern"]
+        description: "Comparison to Chapter 5 age null pattern (RQs 5.1.3, 5.2.3, 5.3.4, 5.4.3)"
+
+    parameters:
+      ch5_rqs: ["5.1.3", "5.2.3", "5.3.4", "5.4.3"]
+      current_rq: "6.2.5"
+
+    description: "Compare RQ 6.2.5 Age x Time interaction to Chapter 5 universal age null pattern"
+    source_reference: "Cross-RQ comparison for theoretical consistency"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_calibration_age.csv"
+        required_columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+        source: "analysis tool output (pandas_merge)"
+
+    parameters:
+      required_columns: ["UID", "test", "composite_ID", "calibration", "TSVR_hours", "Age"]
+
+    criteria:
+      - "All required columns present (UID, test, composite_ID, calibration, TSVR_hours, Age)"
+      - "Expected rows: 400 (100 participants x 4 tests)"
+      - "No NaN values in any column (merge must be complete)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_calibration_age.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate all required columns present after merge, no missing data"
+    source_reference: "tools_inventory.md - tools.validation.validate_data_columns"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_calibration_age_centered.csv"
+        required_columns: ["Age_c"]
+        source: "analysis tool output (pandas_transform)"
+
+    parameters:
+      column_names: ["Age_c"]
+      tolerance: 0.001
+      expected_mean: 0.0
+
+    criteria:
+      - "mean(Age_c) approximately 0 (tolerance: abs(mean) < 0.001)"
+      - "SD(Age_c) equals SD(Age) (centering preserves variance)"
+      - "Relationship: Age = Age_c + mean_Age for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_center_age.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate age centering: mean(Age_c) H 0, SD preserved"
+    source_reference: "tools_inventory.md - tools.validation.validate_standardization"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_lmm_model_summary.txt"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr)"
+
+    parameters:
+      min_observations: 100
+      check_singularity: true
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "Minimum 100 observations used"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_age_interaction.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate LMM converged successfully, no singular fit, all estimates finite"
+    source_reference: "tools_inventory.md - tools.validation.validate_lmm_convergence"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_age_effects.csv"
+        required_columns: ["term", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (pandas_filter)"
+
+    parameters:
+      required_terms: ["Age_c", "TSVR_hours:Age_c"]
+
+    criteria:
+      - "Dual p-values present (p_uncorrected + p_bonferroni columns exist)"
+      - "p_bonferroni >= p_uncorrected (correction never decreases p-value)"
+      - "p_bonferroni <= min(p_uncorrected x 3, 1.0) (Bonferroni formula)"
+      - "Significance flags match thresholds (sig_uncorrected = p < 0.05, sig_bonferroni = p < 0.0167)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_age_effects.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate Decision D068 compliance: dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md - tools.validation.validate_contrasts_d068"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_age_tertile_trajectories.csv"
+        required_columns: ["age_tertile", "test", "mean_calibration"]
+        source: "analysis tool output (pandas_groupby)"
+
+    parameters:
+      required_groups: ["Young", "Middle", "Older"]
+      required_categories: ["T1", "T2", "T3", "T4"]
+      group_col: "age_tertile"
+      category_col: "test"
+
+    criteria:
+      - "All 3 tertiles present (Young, Middle, Older)"
+      - "All 4 tests present per tertile (T1, T2, T3, T4)"
+      - "Expected rows: 12 (3 tertiles x 4 tests)"
+      - "CI_lower < mean_calibration < CI_upper for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_create_age_tertiles.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate all tertiles and tests present in plot data, CI bounds valid"
+    source_reference: "tools_inventory.md - tools.validation.validate_plot_data_completeness"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_ch5_comparison.csv"
+        required_columns: ["RQ", "Analysis_Type", "Age_x_Time_p_uncorrected", "Age_x_Time_p_corrected"]
+        source: "analysis tool output (pandas_concat)"
+
+    parameters:
+      expected_rows: 5
+      expected_columns: ["RQ", "Analysis_Type", "Age_x_Time_p_uncorrected", "Age_x_Time_p_corrected", "Significant_uncorrected", "Significant_corrected", "Pattern"]
+      required_rqs: ["5.1.3", "5.2.3", "5.3.4", "5.4.3", "6.2.5"]
+
+    criteria:
+      - "Expected rows: 5 (RQs 5.1.3, 5.2.3, 5.3.4, 5.4.3, 6.2.5)"
+      - "All 5 RQs present"
+      - "RQ 6.2.5 p-values match Step 3 Age_c:TSVR_hours interaction exactly"
+      - "p-values in [0, 1]"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_compare_ch5_age_null.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate comparison table structure: 5 RQs, all columns present, p-values valid"
+    source_reference: "tools_inventory.md - tools.validation.validate_dataframe_structure"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "All stdlib functions (pandas) exempted from tools_inventory.md verification"
+    - "Custom tools (fit_lmm_trajectory_tsvr) verified against tools_inventory.md"
+    - "All validation tools verified against tools_inventory.md"
+    - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni)"
+    - "Decision D070: TSVR_hours as time variable (actual hours, not nominal days)"

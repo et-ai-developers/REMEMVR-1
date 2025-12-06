@@ -1,0 +1,159 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.6.2
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Standard library functions only
+
+# RQ 6.6.2: Individual Difference Predictors of High-Confidence Errors
+# Analysis Type: Multiple regression (OLS) - NO IRT, NO LMM
+# Pipeline: Data merging -> Standardization -> Regression -> Coefficients -> Effect sizes
+
+analysis_tools:
+  # Step 0: Merge predictor data from multiple sources
+  merge_predictor_data:
+    module: "pandas"
+    function: "merge"
+    signature: "pd.merge(left: DataFrame, right: DataFrame, on: str, how: str = 'left') -> DataFrame"
+    description: "Standard pandas merge to combine HCE rates, baseline accuracy/confidence, age, and computed confidence bias into single analysis dataset"
+    stdlib: true
+    validation_tool: "validate_data_format"
+
+  # Step 1: Standardize predictors (z-scores)
+  standardize_predictors:
+    module: "scipy.stats"
+    function: "zscore"
+    signature: "scipy.stats.zscore(a: ArrayLike, axis: int = 0, ddof: int = 0) -> ndarray"
+    description: "Compute z-scores for all 4 predictors to enable effect size comparison in regression model"
+    stdlib: true
+    validation_tool: "validate_standardization"
+
+  # Step 2: Fit OLS regression model
+  fit_ols_regression:
+    module: "statsmodels.formula.api"
+    function: "ols"
+    signature: "statsmodels.formula.api.ols(formula: str, data: DataFrame) -> OLS"
+    description: "Fit ordinary least squares regression predicting HCE_rate_mean from 4 standardized predictors"
+    stdlib: true
+    validation_tool: "validate_model_convergence"
+
+  # Step 3: Extract coefficients with Bonferroni correction
+  extract_coefficients_with_bonferroni:
+    module: "statsmodels"
+    function: "OLSResults.summary"
+    signature: "OLSResults.summary() -> Summary"
+    description: "Extract regression coefficients and compute Bonferroni-corrected p-values per Decision D068"
+    stdlib: true
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+  # Step 4: Compute effect sizes (R-squared, partial R-squared)
+  compute_effect_sizes:
+    module: "statsmodels"
+    function: "OLSResults.rsquared"
+    signature: "OLSResults.rsquared -> float"
+    description: "Extract R-squared and compute partial R-squared for each predictor"
+    stdlib: true
+    validation_tool: "validate_numeric_range"
+
+validation_tools:
+  # Validation for Step 0: Data merging
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    description: "Validate merged dataset has all required columns (UID, HCE_rate_mean, baseline_accuracy, baseline_confidence, Age, confidence_bias)"
+    criteria:
+      - "All 6 required columns present"
+      - "100 participants (rows)"
+      - "No NaN values"
+      - "HCE_rate_mean in [0, 1]"
+      - "Age in [18, 90]"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_cols: "List[str]"
+
+  # Validation for Step 1: Standardization
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+    description: "Validate z-scored predictors have mean H 0 and SD H 1 within tolerance"
+    criteria:
+      - "All z-scored variables have mean within 0.01 of 0"
+      - "All z-scored variables have SD within 0.01 of 1"
+      - "No NaN values"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+  # Validation for Step 2: Model convergence
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+    description: "Validate OLS regression model converged successfully with finite coefficients"
+    criteria:
+      - "Model converged (no warnings)"
+      - "R-squared in [0, 1]"
+      - "All coefficients finite (no NaN or inf)"
+      - "All SE > 0"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+
+  # Validation for Step 3: Decision D068 compliance
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+    description: "Validate coefficients table includes BOTH uncorrected and Bonferroni-corrected p-values per Decision D068"
+    criteria:
+      - "BOTH p_uncorrected AND p_bonferroni columns present"
+      - "All 5 rows (Intercept + 4 predictors)"
+      - "p_bonferroni >= p_uncorrected (correction weakens significance)"
+      - "All p-values in [0, 1]"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+  # Validation for Step 4: Effect sizes
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: ArrayLike, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    description: "Validate R-squared values in [0, 1] range with Adjusted_R_squared <= R_squared"
+    criteria:
+      - "All R-squared values in [0, 1]"
+      - "Adjusted_R_squared <= R_squared"
+      - "No NaN values"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 5
+  total_unique_tools: 10
+  stdlib_only: true
+  custom_tools: 0
+  mandatory_decisions: ["D068"]
+  notes:
+    - "RQ 6.6.2 uses ONLY standard library functions (pandas, scipy, statsmodels)"
+    - "No custom tools from tools/ module required"
+    - "All validation tools from tools.validation module"
+    - "Decision D068 enforced: dual p-value reporting (uncorrected + Bonferroni)"

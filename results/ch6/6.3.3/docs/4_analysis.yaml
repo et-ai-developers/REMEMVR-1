@@ -1,0 +1,419 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T17:00:00Z
+# RQ: ch6/6.3.3
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.3.3"
+  total_steps: 4
+  analysis_type: "LMM Age x Domain interaction (no IRT - uses RQ 6.3.1 theta)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T17:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Confidence Theta Scores and Merge with Age
+  # --------------------------------------------------------------------------
+  - name: "step00_load_theta_with_age"
+    step_number: "00"
+    description: "Load confidence theta from RQ 6.3.1 and merge with Age from dfData.csv"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load results/ch6/6.3.1/data/step03_theta_confidence_domain.csv (400 rows: 100 participants x 4 tests)"
+        - "Load data/cache/dfData.csv, extract UID and Age columns (100 participants)"
+        - "Parse composite_ID to extract UID (format: P001_T1 -> P001)"
+        - "Merge theta scores with Age on UID (left join to preserve all theta observations)"
+        - "Validate all participants have Age values (no missing data expected)"
+        - "Save to data/step00_theta_with_age.csv"
+
+      input_files:
+        - path: "results/ch6/6.3.1/data/step03_theta_confidence_domain.csv"
+          required_columns: ["composite_ID", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+          expected_rows: 400
+          description: "Confidence theta scores from RQ 6.3.1 (3-factor GRM)"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "Age"]
+          expected_rows: 100
+          description: "Participant metadata including age at T1 encoding"
+
+      output_files:
+        - path: "data/step00_theta_with_age.csv"
+          columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+          expected_rows: 400
+          description: "Confidence theta scores merged with participant age"
+
+      parameters:
+        merge_on: "UID"
+        merge_how: "left"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_theta_with_age.csv"
+          variable_name: "theta_with_age"
+          source: "analysis call output (pandas merge)"
+
+      parameters:
+        df: "theta_with_age"
+        expected_rows: 400
+        expected_columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+        column_types:
+          composite_ID: "str"
+          UID: "str"
+          Age: "int"
+          theta_what: "float"
+          theta_where: "float"
+          theta_when: "float"
+          se_what: "float"
+          se_where: "float"
+          se_when: "float"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 400 rows (100 participants x 4 tests)"
+        - "All required columns present (9 total)"
+        - "No NaN in Age column (all participants must have age)"
+        - "Age values in [18, 80] range"
+        - "Theta values in [-3, 3] range (typical IRT ability range)"
+        - "SE values in [0.1, 1.0] range (values >1.0 indicate unreliable estimates)"
+        - "No duplicate composite_IDs"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_load_theta_with_age.log"
+        invoke: "g_debug (master invokes)"
+
+      description: "Validate DataFrame structure, row count, columns, types, value ranges for merged theta + age data"
+
+    log_file: "logs/step00_load_theta_with_age.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Center Age and Reshape to Long Format
+  # --------------------------------------------------------------------------
+  - name: "step01_center_age_reshape_long"
+    step_number: "01"
+    description: "Center Age variable and reshape from wide to long format for LMM (3 domains stacked)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_theta_with_age.csv"
+        - "Center Age variable: Age_c = Age - mean(Age)"
+        - "Reshape from wide to long format:"
+        - "  - Stack theta_what, theta_where, theta_when into single theta_confidence column"
+        - "  - Stack se_what, se_where, se_when into single se_confidence column"
+        - "  - Add domain factor column (What/Where/When)"
+        - "Parse test number from composite_ID (e.g., P001_T1 -> test=1)"
+        - "Add TSVR_hours from dfData.csv (merge on UID + test)"
+        - "Create log_TSVR = log(TSVR_hours + 1) for potential logarithmic decline"
+        - "Save to data/step01_lmm_input.csv"
+
+      input_files:
+        - path: "data/step00_theta_with_age.csv"
+          required_columns: ["composite_ID", "UID", "Age", "theta_what", "theta_where", "theta_when", "se_what", "se_where", "se_when"]
+          expected_rows: 400
+          description: "Wide format theta scores with age"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "TEST", "TSVR"]
+          expected_rows: 400
+          description: "TSVR time variable (actual hours per Decision D070)"
+
+      output_files:
+        - path: "data/step01_lmm_input.csv"
+          columns: ["UID", "Age_c", "Domain", "test", "TSVR_hours", "log_TSVR", "theta_confidence", "se_confidence"]
+          expected_rows: 1200
+          description: "Long format LMM input (1200 rows = 400 obs x 3 domains)"
+
+      parameters:
+        centering_method: "grand_mean"
+        id_vars: ["UID", "Age"]
+        value_vars: ["theta_what", "theta_where", "theta_when"]
+        var_name: "Domain"
+        value_name: "theta_confidence"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          variable_name: "lmm_input"
+          source: "analysis call output (pandas melt + transform)"
+
+      parameters:
+        df: "lmm_input"
+        column_names: ["Age_c"]
+        tolerance: 0.5
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Age_c mean approximately 0 (within tolerance ±0.5)"
+        - "Age_c SD preserved from original Age"
+        - "No NaN values in Age_c"
+        - "Expected 1200 rows (400 obs x 3 domains)"
+        - "Balanced design: 400 rows per domain (What, Where, When)"
+        - "All participants present: 100 unique UIDs"
+        - "Each UID has exactly 12 rows (4 tests x 3 domains)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_center_age_reshape_long.log"
+        invoke: "g_debug (master invokes)"
+
+      description: "Validate Age centering (mean ≈ 0, SD preserved) and balanced long-format structure"
+
+    log_file: "logs/step01_center_age_reshape_long.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM with 3-Way Interaction (Age x Domain x Time)
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm_age_domain_interaction"
+    step_number: "02"
+    description: "Fit LMM with 3-way Age x Domain x Time interaction using TSVR time variable (Decision D070)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_lmm_input.csv"
+          required_columns: ["UID", "Age_c", "Domain", "TSVR_hours", "log_TSVR", "theta_confidence"]
+          expected_rows: 1200
+          variable_name: "lmm_input"
+          description: "Long format LMM input with centered age and domain stacking"
+
+      output_files:
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_model"
+          description: "Full LMM model summary (fixed effects, random effects, fit indices)"
+        - path: "data/step02_lmm_coefficients.csv"
+          variable_name: "lmm_coeffs"
+          description: "Fixed effect coefficients table extracted from model"
+
+      parameters:
+        theta_scores: "lmm_input"
+        tsvr_data: "lmm_input"
+        formula: "theta_confidence ~ (TSVR_hours + log_TSVR) * Age_c * Domain"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with 3-way Age x Domain x Time interaction (TSVR per D070, log_TSVR per RQ 6.1.1)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effects have finite estimates"
+        - "3-way interaction terms estimated (Age_c:Domain:TSVR_hours, Age_c:Domain:log_TSVR)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm_age_domain_interaction.log"
+        invoke: "g_debug (master invokes)"
+
+      description: "Validate LMM converged successfully, no singular fit, 3-way interaction estimated"
+
+    log_file: "logs/step02_fit_lmm_age_domain_interaction.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract 3-Way Interaction Terms with Dual P-Values
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_interaction_dual_pvalues"
+    step_number: "03"
+    description: "Extract 3-way interaction coefficients with Decision D068 dual p-value reporting"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_model"
+          description: "LMM results from fit_lmm_trajectory_tsvr"
+
+      output_files:
+        - path: "data/step03_interaction_terms.csv"
+          columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+          expected_rows: 4
+          variable_name: "interaction_terms"
+          description: "3-way interaction terms with Decision D068 dual p-value reporting"
+
+      parameters:
+        lmm_result: "lmm_model"
+        comparisons: ["Age_c:Domain[Where]:TSVR_hours", "Age_c:Domain[When]:TSVR_hours", "Age_c:Domain[Where]:log_TSVR", "Age_c:Domain[When]:log_TSVR"]
+        family_alpha: 0.05
+        n_tests: 2
+
+      returns:
+        type: "DataFrame"
+        variable_name: "interaction_terms"
+
+      description: "Extract 3-way Age x Domain x Time interaction coefficients with Bonferroni correction (Decision D068)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_interaction_terms.csv"
+          variable_name: "interaction_terms"
+          source: "analysis call output (compute_contrasts_pairwise return value)"
+
+      parameters:
+        interaction_df: "interaction_terms"
+        required_terms: ["Age_c:Domain[Where]:TSVR_hours", "Age_c:Domain[When]:TSVR_hours", "Age_c:Domain[Where]:log_TSVR", "Age_c:Domain[When]:log_TSVR"]
+        alpha_bonferroni: 0.0167
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 4 interaction terms present (2 domains x 2 time variables)"
+        - "Dual p-values present (uncorrected + Bonferroni columns)"
+        - "p_corrected >= p_uncorrected (correction increases p-value)"
+        - "No NaN in coefficients or p-values"
+        - "Decision D068 compliance (both p-values reported)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_interaction_dual_pvalues.log"
+        invoke: "g_debug (master invokes)"
+
+      description: "Validate 3-way interaction terms present with Decision D068 dual p-values (uncorrected + Bonferroni)"
+
+    log_file: "logs/step03_extract_interaction_dual_pvalues.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compare to Chapter 5 RQ 5.2.3 (Accuracy Results) - OPTIONAL
+  # --------------------------------------------------------------------------
+  - name: "step04_compare_to_ch5_accuracy"
+    step_number: "04"
+    description: "Compare confidence interaction (this RQ) to accuracy interaction (Ch5 5.2.3) - optional if Ch5 available"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step03_interaction_terms.csv (confidence 3-way interaction from this RQ)"
+        - "Attempt to load results/ch5/5.2.3/data/stepNN_interaction_terms.csv (accuracy 3-way interaction)"
+        - "If Ch5 file exists:"
+        - "  - Merge confidence and accuracy interaction terms on term name"
+        - "  - Create comparison table with side-by-side coefficients and p-values"
+        - "  - Add both_null column: True if both p_corrected > 0.05"
+        - "  - Add interpretation: 'Confidence replicates accuracy null pattern' if both null"
+        - "If Ch5 file missing:"
+        - "  - Create comparison table with confidence-only data"
+        - "  - Set accuracy columns to NaN"
+        - "  - Set interpretation to 'Ch5 5.2.3 not available for comparison'"
+        - "  - Log warning (not error)"
+        - "Save to data/step04_ch5_comparison.csv"
+
+      input_files:
+        - path: "data/step03_interaction_terms.csv"
+          required_columns: ["comparison", "beta", "p_corrected"]
+          expected_rows: 4
+          description: "Confidence 3-way interaction terms from this RQ"
+        - path: "results/ch5/5.2.3/data/stepNN_interaction_terms.csv"
+          required_columns: ["comparison", "beta", "p_corrected"]
+          expected_rows: 4
+          optional: true
+          description: "Accuracy 3-way interaction terms from Ch5 5.2.3 (if available)"
+
+      output_files:
+        - path: "data/step04_ch5_comparison.csv"
+          columns: ["term", "confidence_coef", "confidence_p_bonferroni", "accuracy_coef", "accuracy_p_bonferroni", "both_null", "interpretation"]
+          expected_rows: 4
+          description: "Side-by-side comparison of confidence vs accuracy interaction results"
+
+      parameters:
+        merge_on: "comparison"
+        merge_how: "outer"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_ch5_comparison.csv"
+          variable_name: "ch5_comparison"
+          source: "analysis call output (pandas merge)"
+
+      parameters:
+        df: "ch5_comparison"
+        expected_rows: 4
+        expected_columns: ["term", "confidence_coef", "confidence_p_bonferroni", "accuracy_coef", "accuracy_p_bonferroni", "both_null", "interpretation"]
+        column_types:
+          term: "str"
+          confidence_coef: "float"
+          confidence_p_bonferroni: "float"
+          both_null: "bool"
+          interpretation: "str"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 4 rows (matching interaction_terms.csv)"
+        - "All required columns present (7 total)"
+        - "No NaN in confidence columns"
+        - "If Ch5 file found: No NaN in accuracy columns"
+        - "If Ch5 file missing: NaN in accuracy columns acceptable, interpretation documents this"
+
+      on_failure:
+        action: "if ch5_file_missing: log_warning() else: raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compare_to_ch5_accuracy.log"
+        invoke: "g_debug (master invokes) - only if structural error, not if Ch5 missing"
+
+      description: "Validate comparison table structure (4 rows, 7 columns, confidence data always present)"
+
+    log_file: "logs/step04_compare_to_ch5_accuracy.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

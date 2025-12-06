@@ -1,0 +1,423 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.5.1
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: Schema Congruence Effects on Confidence Trajectories
+
+analysis_tools:
+  extract_confidence_items:
+    module: "tools.data"
+    function: "extract_confidence_items"
+    signature: "extract_confidence_items(df_source: pd.DataFrame, congruence_tags: List[str], paradigms: List[str]) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]"
+    validation_tool: "validate_extraction_outputs"
+
+    input_files:
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "TEST", "TC_*"]
+        data_types:
+          UID: "string (P### format)"
+          TEST: "string (T1/T2/T3/T4)"
+          TC_columns: "float (0, 0.25, 0.5, 0.75, 1.0)"
+
+    output_files:
+      - path: "data/step00_irt_input.csv"
+        columns: ["composite_ID", "TC_* items (ordinal 0-4 encoding)"]
+        description: "Wide-format IRT input with 5-category ordinal confidence ratings"
+      - path: "data/step00_tsvr_mapping.csv"
+        columns: ["composite_ID", "TSVR_hours", "test"]
+        description: "TSVR time mapping per Decision D070"
+      - path: "data/step00_q_matrix.csv"
+        columns: ["item_name", "factor_common", "factor_congruent", "factor_incongruent"]
+        description: "3-factor Q-matrix for congruence GRM"
+
+    parameters:
+      congruence_tags: ["i1", "i2", "i3", "i4", "i5", "i6"]
+      paradigms: ["IFR", "ICR", "IRE"]
+      n_factors: 3
+      likert_to_ordinal: {0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1.0: 4}
+
+    description: "Extract TC_* confidence items with congruence tags, create 3-factor Q-matrix, recode Likert to ordinal for GRM"
+    source_reference: "tools_inventory.md section 'Data Extraction Tools'"
+
+  calibrate_irt:
+    module: "tools.analysis_irt"
+    function: "calibrate_irt"
+    signature: "calibrate_irt(df_long: pd.DataFrame, groups: Dict[str, List[str]], config: dict) -> Tuple[pd.DataFrame, pd.DataFrame]"
+    validation_tool: "validate_irt_calibration"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        required_columns: ["composite_ID", "TC_* items"]
+        expected_rows: 400
+      - path: "data/step00_q_matrix.csv"
+        required_columns: ["item_name", "factor_*"]
+        expected_rows: "60-120"
+
+    output_files:
+      - path: "data/step01_pass1_item_params.csv"
+        columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+        description: "GRM item parameters from Pass 1 (5-category ordinal)"
+      - path: "data/step01_pass1_theta.csv"
+        columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_*"]
+        description: "Pass 1 theta estimates (diagnostic)"
+
+    parameters:
+      model_type: "GRM"
+      n_cats: 5
+      correlated_factors: true
+      device: "cpu"
+      max_iter: 200
+
+    description: "Calibrate 3-factor GRM on all TC_* items (Pass 1 of 2-pass purification per Decision D039)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - calibrate_irt"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: pd.DataFrame, a_threshold: float, b_threshold: float) -> Tuple[pd.DataFrame, pd.DataFrame]"
+    validation_tool: "validate_irt_parameters"
+
+    input_files:
+      - path: "data/step01_pass1_item_params.csv"
+        required_columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+
+    output_files:
+      - path: "data/step02_purified_items.csv"
+        columns: ["item_name", "dimension", "a", "b_avg", "retained"]
+        description: "Items retained after purification"
+      - path: "data/step02_purification_report.txt"
+        description: "Text report listing excluded items with reasons"
+
+    parameters:
+      a_threshold: 0.4
+      b_threshold: 3.0
+      b_metric: "average"
+
+    description: "Filter items by Decision D039 thresholds (a>=0.4, |b_avg|<=3.0 for GRM)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - filter_items_by_quality"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: pd.DataFrame, tsvr_data: pd.DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["UID", "TSVR_hours", "congruence", "theta_confidence"]
+        expected_rows: 1200
+
+    output_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        description: "LMM summary with Schema x Time interaction test"
+
+    parameters:
+      formula: "theta_confidence ~ congruence * TSVR_hours"
+      re_formula: "~1 + TSVR_hours | UID"
+      groups: "UID"
+      reml: false
+
+    description: "Fit LMM with Schema x Time interaction (Decision D070 TSVR time variable)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float) -> pd.DataFrame"
+    validation_tool: "validate_contrasts_d068"
+
+    input_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        description: "LMM results for extracting contrasts"
+      - path: "data/step04_lmm_input.csv"
+        description: "Re-fit data for contrast computation if needed"
+
+    output_files:
+      - path: "data/step06_post_hoc_contrasts.csv"
+        columns: ["contrast", "estimate", "SE", "z", "p_uncorrected", "p_bonferroni", "timepoint"]
+        description: "Pairwise contrasts with dual p-values per Decision D068"
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["contrast", "cohens_d", "timepoint"]
+        description: "Cohen's d effect sizes"
+
+    parameters:
+      comparisons: ["Common vs Congruent", "Common vs Incongruent", "Congruent vs Incongruent"]
+      family_alpha: 0.05
+      n_comparisons: 3
+
+    description: "Compute post-hoc contrasts with Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compute_contrasts_pairwise"
+
+  prepare_trajectory_plot_data:
+    module: "tools.plotting"
+    function: "prepare_trajectory_plot_data"
+    signature: "prepare_trajectory_plot_data(df_input: pd.DataFrame, lmm_result: MixedLMResults, time_col: str, theta_col: str, group_col: str) -> Tuple[pd.DataFrame, pd.DataFrame]"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["TSVR_hours", "theta_confidence", "congruence"]
+      - path: "data/step05_lmm_model_summary.txt"
+        description: "LMM for predictions"
+
+    output_files:
+      - path: "data/step07_trajectory_theta_data.csv"
+        columns: ["time", "theta", "CI_lower", "CI_upper", "congruence", "source"]
+        description: "Theta-scale trajectory data (Decision D069)"
+      - path: "data/step07_trajectory_probability_data.csv"
+        columns: ["time", "probability", "CI_lower", "CI_upper", "congruence", "source"]
+        description: "Probability-scale trajectory data (Decision D069)"
+
+    parameters:
+      time_col: "TSVR_hours"
+      theta_col: "theta_confidence"
+      group_col: "congruence"
+      scales: ["theta", "probability"]
+
+    description: "Aggregate plot source data for dual-scale trajectory plots (Decision D069)"
+    source_reference: "tools_inventory.md section 'Module: tools.plotting' - prepare_trajectory_plot_data"
+
+validation_tools:
+  validate_extraction_outputs:
+    module: "tools.validation"
+    function: "validate_extraction_outputs"
+    signature: "validate_extraction_outputs(irt_input: pd.DataFrame, tsvr_mapping: pd.DataFrame, q_matrix: pd.DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        source: "analysis tool output (extract_confidence_items)"
+      - path: "data/step00_tsvr_mapping.csv"
+        source: "analysis tool output (extract_confidence_items)"
+      - path: "data/step00_q_matrix.csv"
+        source: "analysis tool output (extract_confidence_items)"
+
+    parameters:
+      expected_rows: 400
+      expected_item_range: [60, 120]
+      ordinal_values: [0, 1, 2, 3, 4]
+      tsvr_range: [0, 200]
+      min_items_per_factor: 10
+
+    criteria:
+      - "All 3 output files exist"
+      - "irt_input: 400 rows, values in {0,1,2,3,4}"
+      - "tsvr_mapping: 400 rows, TSVR_hours in [0,200]"
+      - "q_matrix: rows in [60,120], factor loadings binary, rows sum to 1"
+      - "composite_ID unique across all files"
+      - "At least 10 items per factor"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        file_checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_vr_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate data extraction outputs meet structure and quality requirements"
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+  validate_irt_calibration:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_pass1_item_params.csv"
+        source: "analysis tool output (calibrate_irt Pass 1)"
+      - path: "data/step01_pass1_theta.csv"
+        source: "analysis tool output (calibrate_irt Pass 1)"
+
+    parameters:
+      disc_range: [0, 10]
+      threshold_range: [-6, 6]
+      theta_range: [-4, 4]
+      se_range: [0.1, 2.0]
+
+    criteria:
+      - "Model converged"
+      - "Discrimination a in [0,10]"
+      - "Thresholds b1-b4 in [-6,6], ordered b1<b2<b3<b4"
+      - "Theta in [-4,4], SE in [0.1,2.0]"
+      - "All 400 composite_IDs present"
+      - "No NaN in item parameters or theta"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+        checks: "List[Dict]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate GRM calibration convergence and parameter quality"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: pd.DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_purified_items.csv"
+        source: "analysis tool output (filter_items_by_quality)"
+
+    parameters:
+      a_min: 0.4
+      b_max: 3.0
+      retention_range: [0.20, 0.90]
+      min_items_per_factor: 10
+
+    criteria:
+      - "All a >= 0.4"
+      - "All |b_avg| <= 3.0"
+      - "At least 10 items per factor"
+      - "Retention rate per factor in [0.20, 0.90]"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        n_retained: "int"
+        retention_rate: "float"
+
+    behavior_on_failure:
+      action: "raise ValueError (if 0 items); WARNING (if <10 items per factor)"
+      log_to: "logs/step02_purify_items.log"
+      invoke: "g_debug if error; user review if warning"
+
+    description: "Validate purified items meet Decision D039 thresholds"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_parameters"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr)"
+
+    parameters:
+      required_terms: ["Intercept", "congruence", "TSVR_hours", "congruence:TSVR_hours"]
+      min_observations: 100
+
+    criteria:
+      - "Model converged"
+      - "All fixed effects terms present"
+      - "Random effects variances > 0"
+      - "p-values in [0,1]"
+      - "No singular fit (warning acceptable)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        converged: "bool"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError (if convergence failed); WARNING (if singular fit)"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "g_debug if error; user review if warning"
+
+    description: "Validate LMM convergence and fixed effects structure"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: pd.DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_post_hoc_contrasts.csv"
+        source: "analysis tool output (compute_contrasts_pairwise)"
+
+    parameters:
+      required_columns: ["p_uncorrected", "p_bonferroni"]
+      n_comparisons: 3
+
+    criteria:
+      - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+      - "p_bonferroni >= p_uncorrected for all rows"
+      - "All 3 pairwise contrasts present (if any rows)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        message: "str"
+        missing_cols: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_compute_post_hoc_contrasts.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate Decision D068 dual p-value reporting in contrasts"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_contrasts_d068"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str, group_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step07_trajectory_theta_data.csv"
+        source: "analysis tool output (prepare_trajectory_plot_data)"
+      - path: "data/step07_trajectory_probability_data.csv"
+        source: "analysis tool output (prepare_trajectory_plot_data)"
+
+    parameters:
+      required_congruence: ["Common", "Congruent", "Incongruent"]
+      required_timepoints: 4
+      theta_range: [-4, 4]
+      probability_range: [0, 1]
+
+    criteria:
+      - "Both theta and probability files created (Decision D069)"
+      - "All 3 congruence levels present"
+      - "All 4 timepoints present"
+      - "Row counts match between files"
+      - "theta in [-4,4], probability in [0,1]"
+      - "CI_upper > CI_lower for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_prepare_trajectory_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate plot data completeness for dual-scale trajectory plots"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_plot_data_completeness"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D039", "D068", "D069", "D070"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "GRM-specific: 5-category ordinal model for confidence Likert data"
+    - "Congruence-specific: 3-factor Q-matrix (Common/Congruent/Incongruent)"

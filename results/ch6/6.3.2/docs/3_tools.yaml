@@ -1,0 +1,281 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.3.2
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    description: "Fit LMM with TSVR (actual hours) as time variable per Decision D070. Tests Domain × Time interaction on calibration (confidence - accuracy difference)."
+
+    source_reference: "tools_inventory.md lines 98-104"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+
+    description: "Compute pairwise domain contrasts (What vs Where, What vs When, Where vs When) with Decision D068 dual p-value reporting (uncorrected + Bonferroni)."
+
+    source_reference: "tools_inventory.md lines 129-136"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names case-sensitive match"
+      - "No missing columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        message: "str (human-readable summary)"
+        missing_cols: "List[str] (empty if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame has all required columns present. Used for Step 0 merge output and Step 3 ranking output."
+
+    source_reference: "tools_inventory.md lines 552-561"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[ndarray, Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    criteria:
+      - "All values in [min_val, max_val] range (inclusive)"
+      - "No NaN values detected"
+      - "No infinite values detected"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (human-readable summary)"
+        out_of_range_count: "int (0 if valid=True)"
+        violations: "list (first 10 violations if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate numeric values within specified range. Used for theta, SE, TSVR_hours, calibration metrics validation across all steps."
+
+    source_reference: "tools_inventory.md lines 540-548"
+
+  check_missing_data:
+    module: "tools.validation"
+    function: "check_missing_data"
+    signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+    criteria:
+      - "No NaN values in any column"
+      - "Zero total missing cells"
+      - "Zero percent missing"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        has_missing: "bool (True if any NaN detected)"
+        total_missing: "int (count of NaN cells)"
+        total_cells: "int (total cells in DataFrame)"
+        percent_missing: "float (percentage NaN)"
+        missing_by_column: "Dict[str, int] (NaN count per column)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_merge_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Comprehensive missing data check. Used for Step 0 merge output validation - NO NaN values tolerated after merge."
+
+    source_reference: "tools_inventory.md lines 392-401"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    criteria:
+      - "Mean within tolerance of 0 (default ±0.01)"
+      - "SD within tolerance of 1 (default ±0.01)"
+      - "Z-standardization successful for all specified columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns standardized)"
+        message: "str (human-readable summary)"
+        mean_values: "Dict[str, float] (actual mean per column)"
+        sd_values: "Dict[str, float] (actual SD per column)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_merge_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate z-standardization (theta_accuracy_z, theta_confidence_z) has mean~0, SD~1. Used in Step 0 after computing standardized theta."
+
+    source_reference: "tools_inventory.md lines 599-607"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    criteria:
+      - "Model converged (lmm_result.converged = True)"
+      - "No convergence warnings"
+      - "Optimization algorithm reached solution"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        message: "str (convergence status summary)"
+        warnings: "list (any convergence warnings)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully. Used for Step 1 Domain × Time interaction model."
+
+    source_reference: "tools_inventory.md lines 327-334"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    criteria:
+      - "All required interaction terms present (e.g., Domain_main, Domain_x_Time_interaction)"
+      - "Decision D068 compliance: p_uncorrected AND p_bonferroni columns present"
+      - "p_bonferroni >= p_uncorrected for all rows (correction should not decrease p-value)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all terms present AND D068 compliant)"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_terms: "List[str] (empty if all terms present)"
+        missing_cols: "List[str] (empty if D068 compliant)"
+        message: "str (validation summary)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM hypothesis tests include required terms AND Decision D068 dual p-values. Used for Step 1 domain_effects.csv validation."
+
+    source_reference: "tools_inventory.md lines 434-442"
+
+  validate_contrasts_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_contrasts_dual_pvalues"
+    signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+    criteria:
+      - "All required pairwise comparisons present (e.g., What vs Where, What vs When, Where vs When)"
+      - "Decision D068 compliance: p_uncorrected AND correction method (p_bonferroni/p_tukey/p_holm) present"
+      - "p_corrected >= p_uncorrected for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all comparisons present AND D068 compliant)"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_comparisons: "List[str] (empty if all present)"
+        message: "str (validation summary)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_contrasts.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate post-hoc contrasts include required comparisons AND Decision D068 dual p-values. Used for Step 2 post_hoc_contrasts.csv validation."
+
+    source_reference: "tools_inventory.md lines 444-453"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    criteria:
+      - "All required domains present (What, Where, When or subset)"
+      - "All required groups/timepoints present (T1, T2, T3, T4)"
+      - "No missing categories in factorial design"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all domains and groups present)"
+        message: "str (validation summary)"
+        missing_domains: "List[str] (empty if all present)"
+        missing_groups: "List[str] (empty if all present)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_prepare_plot_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate plot data has all required domains and timepoints. Used for Step 4 trajectory plot data validation."
+
+    source_reference: "tools_inventory.md lines 638-647"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    criteria:
+      - "Row count matches expected (exact or range)"
+      - "All required columns present"
+      - "Column types match specification (if provided)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (validation summary)"
+        checks: "Dict[str, bool] (row_count, columns_present, types_match)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Generic DataFrame structure validation. Used for Step 3 ranking output and Step 4 plot data validation."
+
+    source_reference: "tools_inventory.md lines 629-637"
+
+summary:
+  analysis_tools_count: 2
+  validation_tools_count: 9
+  total_unique_tools: 11
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Step 0 uses pandas stdlib operations (no custom analysis tools)"
+    - "Step 3 uses pandas groupby (no custom analysis tools)"
+    - "Step 4 uses pandas groupby (no custom analysis tools)"
+    - "All validation tools paired with analysis steps"
+    - "Decision D068: Dual p-value reporting in LMM and contrasts"
+    - "Decision D070: TSVR as time variable in LMM"

@@ -1,0 +1,561 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.8.1
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  prepare_irt_input_from_long:
+    module: "tools.analysis_irt"
+    function: "prepare_irt_input_from_long"
+    signature: "prepare_irt_input_from_long(df_long: DataFrame, groups: Dict[str, List[str]]) -> Tuple[Tensor, Tensor, Tensor, List, List]"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "TEST", "TC_*-U-*", "TC_*-D-*", "TSVR_hours"]
+        expected_rows: "~100000 (100 participants x 4 tests x ~250 items)"
+        data_types:
+          UID: "string (participant identifier)"
+          TEST: "string (T1, T2, T3, T4)"
+          TC_items: "float (5-category ordinal: 0, 0.25, 0.5, 0.75, 1.0)"
+          TSVR_hours: "float (actual elapsed time)"
+
+    output_files:
+      - path: "data/step00_irt_input.csv"
+        columns: ["composite_ID", "TC_*-U-*", "TC_*-D-*"]
+        description: "Wide-format IRT input (composite_ID x confidence items)"
+      - path: "data/step00_q_matrix.csv"
+        columns: ["item_name", "Source", "Destination"]
+        description: "Q-matrix defining 2-factor structure"
+      - path: "data/step00_tsvr_mapping.csv"
+        columns: ["composite_ID", "UID", "TEST", "TSVR_hours"]
+        description: "Time mapping for LMM"
+
+    parameters:
+      groups:
+        Source: ["TC_*-U-*"]
+        Destination: ["TC_*-D-*"]
+
+    description: "Extract 5-category ordinal confidence data for source (-U-) and destination (-D-) locations from dfData.csv"
+    source_reference: "tools_inventory.md section 'tools.analysis_irt' - prepare_irt_input_from_long"
+
+  configure_irt_model:
+    module: "tools.analysis_irt"
+    function: "configure_irt_model"
+    signature: "configure_irt_model(n_items: int, n_factors: int, n_cats: int, Q_matrix: Tensor, correlated_factors: bool, device: str, seed: int) -> IWAVE"
+    validation_tool: "check_file_exists"
+
+    input_files:
+      - path: "data/step00_q_matrix.csv"
+        required_columns: ["item_name", "Source", "Destination"]
+        source: "Step 0 extraction output"
+
+    output_files: []
+
+    parameters:
+      n_factors: 2
+      n_cats: 5
+      correlated_factors: true
+      device: "cpu"
+      seed: 42
+
+    description: "Configure 2-factor GRM with 5-category ordinal response structure for confidence data"
+    source_reference: "tools_inventory.md section 'tools.analysis_irt' - configure_irt_model"
+
+  fit_irt_grm:
+    module: "tools.analysis_irt"
+    function: "fit_irt_grm"
+    signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        required_columns: ["composite_ID", "TC_*"]
+        source: "Step 0 extraction output"
+
+    output_files: []
+
+    parameters:
+      batch_size: 32
+      iw_samples: 5
+      mc_samples: 1
+
+    description: "Fit GRM using IWAVE variational inference (Pass 1 or Pass 2)"
+    source_reference: "tools_inventory.md section 'tools.analysis_irt' - fit_irt_grm"
+
+  extract_parameters_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_parameters_from_irt"
+    signature: "extract_parameters_from_irt(model: IWAVE, item_list: List, factor_names: List, n_cats: int) -> DataFrame"
+    validation_tool: "validate_irt_parameters"
+
+    input_files: []
+
+    output_files:
+      - path: "data/step01_pass1_item_params.csv"
+        columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+        description: "GRM item parameters (Pass 1) with 4 thresholds per item"
+
+    parameters:
+      factor_names: ["Source", "Destination"]
+      n_cats: 5
+
+    description: "Extract GRM item parameters (discrimination a, thresholds b1-b4) from fitted model"
+    source_reference: "tools_inventory.md section 'tools.analysis_irt' - extract_parameters_from_irt"
+
+  extract_theta_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_theta_from_irt"
+    signature: "extract_theta_from_irt(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, composite_ids: List, factor_names: List, scoring_batch_size: int, mc_samples: int, iw_samples: int, invert_scale: bool) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files: []
+
+    output_files:
+      - path: "data/step01_pass1_theta.csv"
+        columns: ["composite_ID", "theta_Source", "theta_Destination", "se_Source", "se_Destination"]
+        description: "Theta estimates from Pass 1 calibration"
+
+    parameters:
+      factor_names: ["Source", "Destination"]
+      scoring_batch_size: 32
+      mc_samples: 1
+      iw_samples: 5
+      invert_scale: false
+
+    description: "Extract participant confidence ability estimates (theta) from fitted GRM"
+    source_reference: "tools_inventory.md section 'tools.analysis_irt' - extract_theta_from_irt"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float, b_threshold: float) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_parameters"
+
+    input_files:
+      - path: "data/step01_pass1_item_params.csv"
+        required_columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+        source: "Pass 1 item parameters"
+
+    output_files:
+      - path: "data/step02_purified_items.csv"
+        columns: ["item_name", "dimension", "a", "mean_abs_b"]
+        description: "Items retained after purification (Decision D039)"
+      - path: "data/step02_purification_report.txt"
+        description: "Text report of excluded items with reasons"
+
+    parameters:
+      a_threshold: 0.4
+      b_threshold: 3.0
+
+    description: "Filter items by quality thresholds (Decision D039): a >= 0.4, mean(|b1|,|b2|,|b3|,|b4|) <= 3.0"
+    source_reference: "tools_inventory.md section 'tools.analysis_irt' - filter_items_by_quality"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["UID", "TEST", "TSVR_hours", "TSVR_hours_z", "LocationType", "theta_confidence", "se"]
+        source: "Step 4 merge output"
+
+    output_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        description: "LMM model summary (fixed effects, random effects, fit statistics)"
+      - path: "data/step05_fixed_effects.csv"
+        columns: ["term", "coefficient", "se", "t_value", "p_value"]
+        description: "Fixed effects table from LMM"
+      - path: "data/step05_random_effects_variance.csv"
+        columns: ["component", "variance", "sd"]
+        description: "Random effects variance components"
+
+    parameters:
+      formula: "theta_confidence ~ LocationType * TSVR_hours_z"
+      groups: "UID"
+      re_formula: "~TSVR_hours_z"
+      reml: false
+
+    description: "Fit LMM testing LocationType x Time interaction using TSVR_hours (Decision D070)"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files: []
+
+    output_files:
+      - path: "data/step05_fixed_effects.csv"
+        columns: ["effect", "coefficient", "std_error", "z_value", "p_value"]
+        description: "Fixed effects extracted from LMM"
+
+    parameters: {}
+
+    description: "Extract fixed effects table from fitted LMM result"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - extract_fixed_effects_from_lmm"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float) -> DataFrame"
+    validation_tool: "validate_contrasts_d068"
+
+    input_files:
+      - path: "data/step05_fixed_effects.csv"
+        required_columns: ["effect", "coefficient", "std_error", "p_value"]
+        source: "Step 5 LMM fixed effects"
+
+    output_files:
+      - path: "data/step06_location_contrasts.csv"
+        columns: ["contrast", "estimate", "se", "t_value", "p_uncorrected", "p_bonferroni"]
+        description: "Location contrasts with dual p-values (Decision D068)"
+      - path: "data/step06_marginal_slopes.csv"
+        columns: ["LocationType", "slope", "se"]
+        description: "Marginal slopes by location type"
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["term", "cohens_f2", "interpretation"]
+        description: "Effect sizes for interaction term"
+
+    parameters:
+      comparisons: ["Destination-Source"]
+      family_alpha: 0.05
+
+    description: "Compute source vs destination slope contrasts with dual p-value reporting (Decision D068)"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - compute_contrasts_pairwise"
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool) -> DataFrame"
+    validation_tool: "validate_effect_sizes"
+
+    input_files: []
+
+    output_files:
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["effect", "f_squared", "interpretation"]
+        description: "Cohen's f-squared effect sizes"
+
+    parameters:
+      include_interactions: true
+
+    description: "Compute Cohen's f-squared effect sizes for LMM fixed effects"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - compute_effect_sizes_cohens"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        required_columns: ["composite_ID"]
+        source: "Step 0 extraction output"
+
+    parameters:
+      required_columns: ["composite_ID", "UID", "TEST"]
+
+    criteria:
+      - "All required columns present in extracted data"
+      - "No missing critical identifier columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        missing_columns: "List[str] (empty if valid=True)"
+        existing_columns: "List[str] (all columns found)"
+        n_required: "int (count of required columns)"
+        n_missing: "int (0 if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_vr_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate required columns present in extracted data"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_data_columns"
+
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_q_matrix.csv"
+        source: "Step 0 extraction output"
+
+    parameters:
+      min_size_bytes: 100
+
+    criteria:
+      - "Q-matrix file exists"
+      - "File size >= 100 bytes (not empty)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if file exists and meets size requirement)"
+        file_path: "str (path checked)"
+        size_bytes: "int (actual file size)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Q-matrix file exists before IRT model configuration"
+    source_reference: "tools_inventory.md section 'tools.validation' - check_file_exists"
+
+  validate_irt_convergence:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+    input_files: []
+
+    parameters: {}
+
+    criteria:
+      - "Model converged (loss stabilized)"
+      - "Parameter estimates finite (no NaN/Inf)"
+      - "Loss decreased monotonically"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        checks: "list (convergence check results)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate IRT model convergence after fitting"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_irt_convergence"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_pass1_item_params.csv"
+        required_columns: ["item_name", "a", "b1", "b2", "b3", "b4"]
+        source: "Pass 1 item parameters"
+
+    parameters:
+      a_min: 0.1
+      b_max: 10.0
+      a_col: "a"
+      b_col: "b1"
+
+    criteria:
+      - "All discrimination parameters a > 0 (negative discrimination invalid)"
+      - "Threshold ordering b1 < b2 < b3 < b4 (GRM requirement)"
+      - "No NaN values in parameters (estimation failure)"
+      - "Discrimination parameters in reasonable range [0.1, 10.0]"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all parameters meet criteria)"
+        n_items: "int (total items)"
+        n_valid: "int (items passing validation)"
+        n_invalid: "int (items failing validation)"
+        invalid_items: "list (item names with violations)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate GRM item parameters meet quality criteria (discrimination > 0, threshold ordering)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_irt_parameters"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_pass1_theta.csv"
+        required_columns: ["theta_Source", "theta_Destination"]
+        source: "Pass 1 theta estimates"
+
+    parameters:
+      min_val: -4.0
+      max_val: 4.0
+      column_name: "theta"
+
+    criteria:
+      - "All theta values in [-4, 4] (typical IRT ability range)"
+      - "No NaN values (all participants estimated)"
+      - "No infinite values (estimation error)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (human-readable explanation)"
+        out_of_range_count: "int (0 if valid=True)"
+        violations: "list (first 10 violating values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate theta estimates in acceptable IRT ability range"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_numeric_range"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files: []
+
+    parameters: {}
+
+    criteria:
+      - "Model converged successfully"
+      - "No singular fit warnings"
+      - "All fixed effects finite (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if converged)"
+        message: "str (human-readable explanation)"
+        warnings: "list (convergence warnings if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate LMM converged successfully before extracting results"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_lmm_convergence"
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_fixed_effects.csv"
+        required_columns: ["effect", "coefficient", "std_error", "p_value"]
+        source: "LMM fixed effects table"
+
+    parameters:
+      required_cols: ["effect", "coefficient", "std_error", "p_value"]
+
+    criteria:
+      - "All required columns present"
+      - "No missing column names"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (empty if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate fixed effects table has required columns"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_data_format"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_location_contrasts.csv"
+        required_columns: ["contrast", "p_uncorrected", "p_bonferroni"]
+        source: "Step 6 contrast computation"
+
+    parameters: {}
+
+    criteria:
+      - "Both p_uncorrected AND p_bonferroni columns present (Decision D068)"
+      - "p_bonferroni >= p_uncorrected for all rows (correction logic)"
+      - "All p-values in [0, 1] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-value reporting present)"
+        missing_cols: "List[str] (empty if compliant)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_compute_post_hoc_contrasts.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate contrasts include dual p-value reporting per Decision D068"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_contrasts_d068"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_effect_sizes.csv"
+        required_columns: ["effect", "cohens_f2", "interpretation"]
+        source: "Step 6 effect size computation"
+
+    parameters:
+      f2_column: "cohens_f2"
+
+    criteria:
+      - "All Cohen's f2 values >= 0 (non-negative)"
+      - "No NaN or infinite values"
+      - "Very large values (f2 > 1.0) flagged with warnings"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all effect sizes valid)"
+        message: "str (human-readable explanation)"
+        warnings: "List[str] (warnings for unusual values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_compute_post_hoc_contrasts.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Cohen's f-squared effect sizes are within reasonable bounds"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_effect_sizes"
+
+summary:
+  analysis_tools_count: 11
+  validation_tools_count: 10
+  total_unique_tools: 21
+  mandatory_decisions_embedded: ["D039", "D068", "D069", "D070"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "GRM-specific validations (5-category ordinal, threshold ordering)"
+    - "Decision D070: TSVR_hours (actual time) not nominal days"

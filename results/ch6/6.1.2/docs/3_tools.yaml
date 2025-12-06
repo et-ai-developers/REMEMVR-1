@@ -1,0 +1,360 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.1.2
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Purpose: Catalog analysis + validation tools for two-phase confidence decline pattern testing
+
+analysis_tools:
+  # Step 0: Load theta confidence scores from RQ 6.1.1
+  load_theta_confidence:
+    module: "pandas"
+    function: "read_csv + merge"
+    signature: "pd.read_csv(filepath: str) -> DataFrame; pd.merge(left: DataFrame, right: DataFrame, on: str) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+        required_columns: ["composite_ID", "theta_confidence", "se_confidence"]
+        expected_rows: "~400"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          theta_confidence: "float (IRT ability)"
+          se_confidence: "float (standard error)"
+      - path: "results/ch6/6.1.1/data/step00_tsvr_mapping.csv"
+        required_columns: ["UID", "test", "TSVR_hours", "composite_ID"]
+        expected_rows: "~400"
+        data_types:
+          UID: "string"
+          test: "string (T1/T2/T3/T4)"
+          TSVR_hours: "float"
+          composite_ID: "string"
+
+    output_files:
+      - path: "data/step00_lmm_input.csv"
+        columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours"]
+        description: "Merged theta confidence + TSVR data for LMM analysis"
+
+    parameters:
+      merge_on: "composite_ID"
+      merge_how: "left"
+
+    description: "Load IRT-derived confidence theta scores from RQ 6.1.1 and merge with TSVR time mapping"
+    source_reference: "Standard pandas operations (not custom tool)"
+
+  # Step 1: Create piecewise time variables
+  create_piecewise_variables:
+    module: "pandas"
+    function: "DataFrame operations (vectorized)"
+    signature: "df['Segment'] = np.where(df['TSVR_hours'] < breakpoint, 'Early', 'Late')"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step00_lmm_input.csv"
+        required_columns: ["composite_ID", "UID", "test", "theta_confidence", "TSVR_hours"]
+
+    output_files:
+      - path: "data/step01_piecewise_input.csv"
+        columns: ["composite_ID", "UID", "test", "theta_confidence", "se_confidence", "TSVR_hours", "Segment", "Time_Early", "Time_Late"]
+        description: "Piecewise time variables for segment-specific LMM slopes"
+
+    parameters:
+      breakpoint_hours: 48.0
+      segment_early: "Early"
+      segment_late: "Late"
+
+    description: "Create Early/Late segment indicators and time-within-segment variables for piecewise LMM"
+    source_reference: "Standard pandas vectorized operations"
+
+  # Step 2: Fit quadratic LMM
+  fit_quadratic_lmm:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step00_lmm_input.csv"
+        required_columns: ["UID", "TSVR_hours", "theta_confidence"]
+
+    output_files:
+      - path: "data/step02_quadratic_model_summary.txt"
+        description: "LMM summary with quadratic term"
+      - path: "data/step02_quadratic_test.csv"
+        columns: ["term", "estimate", "se", "z", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
+        description: "Fixed effects table with dual p-values (Decision D068)"
+
+    parameters:
+      formula: "theta_confidence ~ TSVR_hours + I(TSVR_hours**2)"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Test for two-phase pattern via significant quadratic term (curvature detection)"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  # Step 3: Compare piecewise vs continuous models
+  compare_piecewise_continuous:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_piecewise_input.csv"
+        required_columns: ["UID", "TSVR_hours", "Time_Early", "Time_Late", "theta_confidence"]
+
+    output_files:
+      - path: "data/step03_piecewise_comparison.csv"
+        columns: ["model", "AIC", "delta_AIC", "piecewise_preferred"]
+        description: "AIC comparison between continuous and piecewise models"
+
+    parameters:
+      continuous_formula: "theta_confidence ~ TSVR_hours"
+      piecewise_formula: "theta_confidence ~ Time_Early + Time_Late"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Test for two-phase pattern by comparing piecewise model (separate Early/Late slopes) to continuous linear model"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  # Step 4: Extract segment slopes and compute ratio
+  extract_segment_slopes:
+    module: "tools.analysis_lmm"
+    function: "extract_segment_slopes_from_lmm"
+    signature: "extract_segment_slopes_from_lmm(lmm_result: MixedLMResults, segment_col: str = 'Segment', time_col: str = 'Days_within') -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step03_piecewise_comparison.csv"
+        description: "Piecewise model from Step 3 (re-fitted or model object)"
+
+    output_files:
+      - path: "data/step04_slope_ratio.csv"
+        columns: ["segment", "slope", "se", "ratio_value", "two_phase_evidence"]
+        description: "Early/Late slopes and ratio (Late/Early < 0.5 = two-phase evidence)"
+
+    parameters:
+      segment_col: "Segment"
+      time_col: "Days_within"
+
+    description: "Extract Early and Late segment slopes, compute ratio to test for two-phase pattern"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - extract_segment_slopes_from_lmm"
+
+  # Step 5: Compare to Ch5 5.1.2 accuracy pattern
+  compare_to_accuracy:
+    module: "pandas"
+    function: "DataFrame operations (comparison table)"
+    signature: "pd.DataFrame(data: dict) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step02_quadratic_test.csv"
+        description: "Quadratic test results from Step 2"
+      - path: "data/step03_piecewise_comparison.csv"
+        description: "Piecewise comparison from Step 3"
+      - path: "data/step04_slope_ratio.csv"
+        description: "Slope ratio from Step 4"
+      - path: "results/ch5/5.1.2/data/step0X_two_phase_summary.csv"
+        description: "Accuracy two-phase findings (optional, comparison skipped if unavailable)"
+
+    output_files:
+      - path: "data/step05_ch5_comparison.csv"
+        columns: ["measure", "quadratic_significant", "piecewise_preferred", "slope_ratio_small", "evidence_count", "conclusion", "pattern_match"]
+        description: "Comparison of confidence vs accuracy two-phase patterns"
+
+    parameters:
+      confidence_measure: "Confidence (Ch6 6.1.2)"
+      accuracy_measure: "Accuracy (Ch5 5.1.2)"
+      threshold_ratio: 0.5
+
+    description: "Document whether confidence two-phase pattern replicates accuracy two-phase pattern from Chapter 5"
+    source_reference: "Standard pandas DataFrame construction"
+
+  # Step 6: Prepare two-phase plot data
+  prepare_twophase_plot_data:
+    module: "pandas"
+    function: "DataFrame aggregation + IRT transformation"
+    signature: "df.groupby(['Segment', 'TSVR_hours']).agg({'theta_confidence': ['mean', 'sem']}) -> DataFrame"
+    validation_tool: "validate_plot_data_completeness"
+
+    input_files:
+      - path: "data/step01_piecewise_input.csv"
+        required_columns: ["Segment", "TSVR_hours", "theta_confidence"]
+      - path: "data/step03_piecewise_comparison.csv"
+        description: "Piecewise model predictions (fitted values)"
+
+    output_files:
+      - path: "data/step06_twophase_theta_data.csv"
+        columns: ["TSVR_hours", "theta_confidence", "CI_lower", "CI_upper", "Segment", "fitted"]
+        description: "Theta-scale plot data for two-phase trajectory visualization"
+      - path: "data/step06_twophase_probability_data.csv"
+        columns: ["TSVR_hours", "probability", "CI_lower", "CI_upper", "Segment", "fitted"]
+        description: "Probability-scale plot data (Decision D069 dual-scale requirement)"
+
+    parameters:
+      theta_to_prob_formula: "1 / (1 + exp(-1.702 * theta))"
+      aggregation_method: "mean"
+      ci_level: 0.95
+
+    description: "Create plot source CSVs for visualizing two-phase pattern (theta + probability scales per Decision D069)"
+    source_reference: "Standard pandas aggregation + IRT 2PL transformation"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "varies by step"
+        description: "Analysis tool output (CSV file)"
+
+    parameters:
+      expected_rows: "varies by step (400 for full data, 20-30 for aggregated)"
+      expected_columns: "varies by step"
+      column_types: "optional type checking"
+
+    criteria:
+      - "Row count matches expected (exact or range)"
+      - "All required columns present"
+      - "Column types match specification (if provided)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (per-check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame structure (rows, columns, types)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_dataframe_structure"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "LMM model object (in-memory)"
+        description: "Fitted MixedLMResults from statsmodels"
+
+    parameters:
+      check_converged: true
+      check_warnings: true
+
+    criteria:
+      - "Model converged (lmm_result.converged == True)"
+      - "No convergence warnings in model output"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_fit_*.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate LMM model convergence status and warnings"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_lmm_convergence"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "varies by step"
+        description: "Numeric column from DataFrame"
+
+    parameters:
+      min_val: "varies by metric (e.g., -3 for theta, 0 for probabilities)"
+      max_val: "varies by metric (e.g., 3 for theta, 1 for probabilities)"
+      column_name: "for error messages"
+
+    criteria:
+      - "All values >= min_val (inclusive)"
+      - "All values <= max_val (inclusive)"
+      - "No NaN values"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "List (first 10 violations)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate numeric values fall within specified range (inclusive)"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_numeric_range"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_twophase_*.csv"
+        description: "Plot source CSV files"
+
+    parameters:
+      required_domains: ["Segment"] # Using Segment as grouping variable
+      required_groups: ["Early", "Late"]
+      domain_col: "Segment"
+      group_col: "Segment"
+
+    criteria:
+      - "Both segments (Early, Late) represented in data"
+      - "All expected timepoints present per segment"
+      - "No NaN values in key columns (theta, CI_lower, CI_upper)"
+      - "CI_upper > CI_lower for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_domains: "List[str]"
+        missing_groups: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_prepare_twophase_plot_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Verify all segments/groups present in plot data for complete visualization"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_plot_data_completeness"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 4
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068", "D069", "D070"]
+  notes:
+    - "Step 0: Data loading uses standard pandas (read_csv + merge)"
+    - "Step 1: Piecewise variables use pandas vectorized operations"
+    - "Steps 2-3: LMM fitting uses tools.analysis_lmm.fit_lmm_trajectory_tsvr"
+    - "Step 4: Slope extraction uses tools.analysis_lmm.extract_segment_slopes_from_lmm"
+    - "Steps 5-6: Comparison and plot data use standard pandas operations"
+    - "All validation tools from tools.validation module (4 unique validators)"
+    - "Decision D068: Dual p-value reporting in quadratic test (uncorrected + Bonferroni)"
+    - "Decision D069: Dual-scale plot data (theta + probability)"
+    - "Decision D070: TSVR_hours as time variable (actual hours, not nominal days)"
+    - "Cross-RQ dependency: RQ 6.1.1 (theta_confidence + tsvr_mapping)"
+    - "Cross-RQ dependency: RQ 5.1.2 (accuracy two-phase pattern comparison, optional)"

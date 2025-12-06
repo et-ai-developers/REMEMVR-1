@@ -1,0 +1,259 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.5.2
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.5.2"
+  total_steps: 3
+  analysis_type: "Calibration analysis (merge accuracy/confidence theta → LMM congruence effects)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Merge Accuracy and Confidence Theta Scores
+  # --------------------------------------------------------------------------
+  - name: "step00_merge_accuracy_confidence"
+    step_number: "00"
+    description: "Merge accuracy theta (from RQ 5.4.1) and confidence theta (from RQ 6.5.1), reshape to long format with congruence as factor"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read results/ch5/5.4.1/data/step03_theta_scores.csv (accuracy theta by congruence)"
+        - "Read results/ch6/6.5.1/data/step03_theta_confidence_scores.csv (confidence theta by congruence)"
+        - "Merge on composite_ID (inner join - must have both accuracy and confidence)"
+        - "Verify all composite_IDs matched (no unmatched rows)"
+        - "Reshape to long format: each composite_ID contributes 3 rows (Common, Congruent, Incongruent)"
+        - "Parse composite_ID to extract UID and test (format: UID_test)"
+        - "Create columns: composite_ID, UID, test, congruence, theta_accuracy, se_accuracy, theta_confidence, se_confidence"
+        - "Save to data/step00_merged_accuracy_confidence.csv"
+
+      input_files:
+        - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+          required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+          expected_rows: "~400"
+          description: "Accuracy theta from RQ 5.4.1 (schema effects on accuracy)"
+
+        - path: "results/ch6/6.5.1/data/step03_theta_confidence_scores.csv"
+          required_columns: ["composite_ID", "theta_confidence_common", "theta_confidence_congruent", "theta_confidence_incongruent", "se_confidence_common", "se_confidence_congruent", "se_confidence_incongruent"]
+          expected_rows: "~400"
+          description: "Confidence theta from RQ 6.5.1 (schema effects on confidence)"
+
+      output_files:
+        - path: "data/step00_merged_accuracy_confidence.csv"
+          columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+          expected_rows: "~1200"
+          description: "Long-format merged accuracy and confidence theta scores by congruence level"
+
+      parameters:
+        merge_key: "composite_ID"
+        merge_how: "inner"
+        congruence_levels: ["Common", "Congruent", "Incongruent"]
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_merged_accuracy_confidence.csv"
+          variable_name: "merged_data"
+          source: "stdlib merge operation output"
+
+      parameters:
+        df: "merged_data"
+        required_columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All required columns present"
+        - "Expected row count ~1200 (400 composite_IDs x 3 congruence levels)"
+        - "Congruence factor has exactly 3 levels: Common, Congruent, Incongruent"
+        - "No NaN values in theta columns"
+        - "All composite_IDs matched successfully (100% match rate)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_merge_accuracy_confidence.log"
+
+      description: "Validate merged data has all required columns and correct structure"
+
+    log_file: "logs/step00_merge_accuracy_confidence.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute Calibration Scores
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_calibration"
+    step_number: "01"
+    description: "Z-standardize theta scores within congruence levels, compute calibration = confidence_z - accuracy_z, merge with TSVR timing"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step00_merged_accuracy_confidence.csv"
+        - "Z-standardize theta_accuracy WITHIN each congruence level (mean=0, SD=1 per congruence)"
+        - "Z-standardize theta_confidence WITHIN each congruence level (mean=0, SD=1 per congruence)"
+        - "Compute calibration = theta_confidence_z - theta_accuracy_z"
+        - "Merge with TSVR timing data (if not already present in composite_ID parse)"
+        - "Add TSVR_hours column for LMM time variable (Decision D070)"
+        - "Save to data/step01_calibration_by_congruence.csv"
+
+      input_files:
+        - path: "data/step00_merged_accuracy_confidence.csv"
+          required_columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+          expected_rows: "~1200"
+          description: "Merged accuracy and confidence data from Step 0"
+
+      output_files:
+        - path: "data/step01_calibration_by_congruence.csv"
+          columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy_z", "theta_confidence_z", "calibration", "TSVR_hours"]
+          expected_rows: "~1200"
+          description: "Calibration scores with z-standardized theta and TSVR time variable"
+
+      parameters:
+        groupby_col: "congruence"
+        standardize_accuracy: true
+        standardize_confidence: true
+        calibration_formula: "theta_confidence_z - theta_accuracy_z"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_calibration_by_congruence.csv"
+          variable_name: "calibration_data"
+          source: "stdlib standardization operation output"
+
+      parameters:
+        df: "calibration_data"
+        column_names: ["theta_accuracy_z", "theta_confidence_z"]
+        tolerance: 0.01
+        groupby_col: "congruence"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "mean(theta_accuracy_z) ~= 0 within each congruence level (tolerance ± 0.01)"
+        - "SD(theta_accuracy_z) ~= 1 within each congruence level (tolerance ± 0.01)"
+        - "mean(theta_confidence_z) ~= 0 within each congruence level (tolerance ± 0.01)"
+        - "SD(theta_confidence_z) ~= 1 within each congruence level (tolerance ± 0.01)"
+        - "No NaN in calibration column"
+        - "TSVR_hours increases with test number within each UID"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_compute_calibration.log"
+
+      description: "Validate z-score standardization correctness within congruence levels"
+
+    log_file: "logs/step01_compute_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit LMM and Test Congruence Effects
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm_congruence"
+    step_number: "02"
+    description: "Fit LMM testing Congruence main effect and Congruence x Time interaction with TSVR as time variable, compute post-hoc contrasts and effect sizes"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: pd.DataFrame, tsvr_data: pd.DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_calibration_by_congruence.csv"
+          required_columns: ["composite_ID", "UID", "test", "congruence", "calibration", "TSVR_hours"]
+          expected_rows: "~1200"
+          variable_name: "calibration_data"
+          description: "Calibration scores with TSVR time variable from Step 1"
+
+      output_files:
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_summary_text"
+          description: "LMM fitted model summary (fixed effects, random effects, fit indices)"
+
+        - path: "data/step02_congruence_effects.csv"
+          columns: ["effect", "coefficient", "SE", "z", "p_parametric", "p_bootstrap", "CI_lower", "CI_upper"]
+          variable_name: "congruence_effects"
+          description: "Hypothesis test results with dual p-value reporting (Decision D068)"
+
+        - path: "data/step02_post_hoc_contrasts.csv"
+          columns: ["contrast", "estimate", "SE", "z", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+          variable_name: "post_hoc_contrasts"
+          description: "Pairwise contrasts testing overconfidence hypothesis"
+
+        - path: "data/step02_effect_sizes.csv"
+          columns: ["effect", "f_squared", "interpretation"]
+          variable_name: "effect_sizes"
+          description: "Cohen's f-squared effect sizes for fixed effects"
+
+      parameters:
+        theta_scores: "calibration_data"
+        tsvr_data: "calibration_data"
+        formula: "calibration ~ congruence * TSVR_hours"
+        re_formula: "~TSVR_hours"
+        groups: "UID"
+        reml: false
+        reference_level: "Common"
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM testing Congruence main effect and Congruence x Time interaction with TSVR as time variable (Decision D070)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+        check_singularity: true
+        min_observations: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "Minimum 100 observations used"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+        - "Dual p-values present: BOTH p_parametric AND p_bootstrap for all effects (Decision D068)"
+        - "Bonferroni correction applied correctly (p_bonferroni = min(p_uncorrected * 3, 1.0))"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm_congruence.log"
+
+      description: "Validate LMM converged successfully with no singular fit or extreme estimates"
+
+    log_file: "logs/step02_fit_lmm_congruence.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

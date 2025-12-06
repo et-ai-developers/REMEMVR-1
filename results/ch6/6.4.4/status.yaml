@@ -1,0 +1,26 @@
+rq_builder: success
+rq_concept: success
+rq_scholar:
+  status: success
+  timestamp: "2025-12-06T07:15:00Z"
+  context_dump: "9.3/10 APPROVED. 1 CRITICAL omission (test-retest confound), 6 MODERATE concerns. High-priority cites: Kelley 2023, Korkki 2021, Uittenhove 2024."
+rq_stats:
+  status: success
+  timestamp: "2025-12-06T07:30:00Z"
+  context_dump: "9.3/10 APPROVED. Cat1: 2.8/3 (appropriate, minor power concern). Cat2: 2.0/2 (100% reuse). Cat3: 1.8/2 (missing convergence specs). Cat4: 1.8/2 (missing multiple testing). Cat5: 0.9/1 (9 concerns, well-grounded). Key: add Bonferroni + bootstrap CIs."
+rq_planner: pending
+rq_tools: pending
+rq_analysis: pending
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_import_data: pending
+  step01_fit_lmm: pending
+  step02_extract_variance: pending
+  step03_compute_icc: pending
+  step04_compare_paradigms: pending
+  step05_compare_ch5: pending

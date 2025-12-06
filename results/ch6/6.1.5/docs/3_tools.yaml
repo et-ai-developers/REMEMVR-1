@@ -1,0 +1,577 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.1.5 (Trajectory Clustering)
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  load_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer, sep=',', header='infer', names=None, index_col=None, usecols=None, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skipinitialspace=False, skiprows=None, skipfooter=0, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, skip_blank_lines=True, parse_dates=False, infer_datetime_format=False, keep_date_col=False, date_parser=None, dayfirst=False, cache_dates=True, iterator=False, chunksize=None, compression='infer', thousands=None, decimal='.', lineterminator=None, quotechar='\"', quoting=0, doublequote=True, escapechar=None, comment=None, encoding=None, encoding_errors='strict', dialect=None, error_bad_lines=None, warn_bad_lines=None, on_bad_lines=None, delim_whitespace=False, low_memory=True, memory_map=False, float_precision=None, storage_options=None) -> DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch6/6.1.4/data/step04_random_effects.csv"
+        required_columns: ["UID", "intercept", "slope"]
+        expected_rows: "100 (one per participant)"
+        data_types:
+          UID: "string (format: P###)"
+          intercept: "float (random intercept)"
+          slope: "float (random slope)"
+
+    output_files:
+      - path: "data/step01_random_effects_loaded.csv"
+        columns: ["UID", "intercept", "slope"]
+        description: "Pass-through validation of loaded random effects"
+
+    parameters:
+      filepath_or_buffer: "str (path to CSV file)"
+      sep: "str (default: ',')"
+      header: "int or 'infer' (default: 'infer')"
+
+    description: "Load random effects from RQ 6.1.4 Step 4 output (dependency)"
+    source_reference: "Standard pandas function (not in tools_inventory.md - stdlib exemption)"
+
+  standardize_features:
+    module: "scipy.stats"
+    function: "zscore"
+    signature: "zscore(a, axis=0, ddof=0, nan_policy='propagate') -> ndarray"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step01_random_effects_loaded.csv"
+        required_columns: ["UID", "intercept", "slope"]
+        source: "step01 output"
+
+    output_files:
+      - path: "data/step02_standardized_features.csv"
+        columns: ["UID", "intercept", "slope", "intercept_z", "slope_z"]
+        description: "Z-score standardized features for equalized K-means weighting"
+
+    parameters:
+      a: "ndarray (data to standardize)"
+      axis: "int (default: 0, standardize columns)"
+      ddof: "int (default: 0, population SD)"
+
+    description: "Standardize intercept and slope to z-scores (mean=0, SD=1) for equal feature weighting in K-means distance metric"
+    source_reference: "Standard scipy function (not in tools_inventory.md - stdlib exemption)"
+
+  kmeans_selection:
+    module: "sklearn.cluster"
+    function: "KMeans"
+    signature: "KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, precompute_distances='deprecated', verbose=0, random_state=None, copy_x=True, n_jobs='deprecated', algorithm='auto') -> KMeans"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step02_standardized_features.csv"
+        required_columns: ["UID", "intercept_z", "slope_z"]
+        source: "step02 output"
+
+    output_files:
+      - path: "data/step03_cluster_selection.csv"
+        columns: ["K", "SSE", "BIC", "optimal"]
+        description: "BIC selection results for K=1-6 clustering candidates"
+      - path: "data/step03_bic_plot_data.csv"
+        columns: ["K", "BIC"]
+        description: "Plot source data for BIC elbow curve"
+
+    parameters:
+      n_clusters: "int (K value, range: 1-6)"
+      init: "str (default: 'k-means++' for smart initialization)"
+      random_state: "int (default: 42 for reproducibility)"
+
+    description: "Fit K-means for K=1-6, compute SSE and BIC, select optimal K via BIC minimization"
+    source_reference: "Standard scikit-learn function (not in tools_inventory.md - stdlib exemption)"
+
+  kmeans_fit_final:
+    module: "sklearn.cluster"
+    function: "KMeans"
+    signature: "KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, precompute_distances='deprecated', verbose=0, random_state=None, copy_x=True, n_jobs='deprecated', algorithm='auto') -> KMeans"
+    validation_tool: "validate_cluster_assignment"
+
+    input_files:
+      - path: "data/step02_standardized_features.csv"
+        required_columns: ["UID", "intercept_z", "slope_z"]
+        source: "step02 output (features)"
+      - path: "data/step03_cluster_selection.csv"
+        required_columns: ["K", "optimal"]
+        source: "step03 output (optimal K)"
+
+    output_files:
+      - path: "data/step04_cluster_assignments.csv"
+        columns: ["UID", "cluster_label", "intercept_z", "slope_z"]
+        description: "Final cluster assignments for all 100 participants"
+
+    parameters:
+      n_clusters: "int (optimal K from step03)"
+      random_state: "int (42 for reproducibility)"
+
+    description: "Fit final K-means model with optimal K, assign cluster labels"
+    source_reference: "Standard scikit-learn function (not in tools_inventory.md - stdlib exemption)"
+
+  compute_silhouette:
+    module: "sklearn.metrics"
+    function: "silhouette_score"
+    signature: "silhouette_score(X, labels, metric='euclidean', sample_size=None, random_state=None, **kwds) -> float"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step04_cluster_assignments.csv"
+        required_columns: ["intercept_z", "slope_z", "cluster_label"]
+        source: "step04 output"
+
+    output_files:
+      - path: "data/step05_validation_metrics.csv"
+        columns: ["metric", "value", "threshold", "pass"]
+        description: "Cluster quality metrics (silhouette, Davies-Bouldin, Jaccard)"
+
+    parameters:
+      X: "ndarray (features: intercept_z, slope_z)"
+      labels: "ndarray (cluster assignments)"
+      metric: "str (default: 'euclidean')"
+
+    description: "Compute silhouette score for cluster quality (range: -1 to +1, >0.40 = acceptable)"
+    source_reference: "Standard scikit-learn function (not in tools_inventory.md - stdlib exemption)"
+
+  compute_davies_bouldin:
+    module: "sklearn.metrics"
+    function: "davies_bouldin_score"
+    signature: "davies_bouldin_score(X, labels) -> float"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step04_cluster_assignments.csv"
+        required_columns: ["intercept_z", "slope_z", "cluster_label"]
+        source: "step04 output"
+
+    output_files:
+      - path: "data/step05_validation_metrics.csv"
+        columns: ["metric", "value", "threshold", "pass"]
+        description: "Cluster quality metrics (combined with silhouette and Jaccard)"
+
+    parameters:
+      X: "ndarray (features)"
+      labels: "ndarray (cluster assignments)"
+
+    description: "Compute Davies-Bouldin index for cluster separation (lower is better, <1.0 = good)"
+    source_reference: "Standard scikit-learn function (not in tools_inventory.md - stdlib exemption)"
+
+  bootstrap_jaccard_stability:
+    module: "custom (inline implementation)"
+    function: "compute_jaccard_bootstrap"
+    signature: "compute_jaccard_bootstrap(X: ndarray, labels: ndarray, n_bootstrap: int = 1000, random_state: int = 42) -> Tuple[float, float, float]"
+    validation_tool: "validate_bootstrap_stability"
+
+    input_files:
+      - path: "data/step04_cluster_assignments.csv"
+        required_columns: ["intercept_z", "slope_z", "cluster_label"]
+        source: "step04 output"
+
+    output_files:
+      - path: "data/step05_validation_metrics.csv"
+        columns: ["metric", "value", "threshold", "pass"]
+        description: "Jaccard stability metrics (mean, CI_lower, CI_upper)"
+
+    parameters:
+      X: "ndarray (features)"
+      labels: "ndarray (original cluster assignments)"
+      n_bootstrap: "int (default: 1000 iterations)"
+      random_state: "int (default: 42)"
+
+    description: "Bootstrap Jaccard coefficient for cluster stability (mean, 95% CI, threshold >0.75 = stable)"
+    source_reference: "Custom implementation (not in tools_inventory.md - inline code generation required)"
+
+  compute_cluster_means:
+    module: "pandas"
+    function: "groupby"
+    signature: "groupby(by=None, axis=0, level=None, as_index=True, sort=True, group_keys=True, squeeze=False, observed=False, dropna=True) -> DataFrameGroupBy"
+    validation_tool: "validate_cluster_summary_stats"
+
+    input_files:
+      - path: "data/step04_cluster_assignments.csv"
+        required_columns: ["UID", "cluster_label"]
+        source: "step04 output (assignments)"
+      - path: "data/step01_random_effects_loaded.csv"
+        required_columns: ["UID", "intercept", "slope"]
+        source: "step01 output (original random effects)"
+
+    output_files:
+      - path: "data/step06_cluster_characterization.csv"
+        columns: ["cluster_label", "N", "mean_intercept", "sd_intercept", "mean_slope", "sd_slope", "phenotype"]
+        description: "Cluster characterization with mean intercept/slope and phenotype labels"
+      - path: "data/step06_phenotype_descriptions.txt"
+        description: "Text report with phenotype interpretations per cluster"
+
+    parameters:
+      by: "str or list (cluster_label column)"
+      as_index: "bool (default: True)"
+
+    description: "Compute mean intercept and slope per cluster for phenotype characterization"
+    source_reference: "Standard pandas function (not in tools_inventory.md - stdlib exemption)"
+
+  crosstab_confidence_accuracy:
+    module: "pandas"
+    function: "crosstab"
+    signature: "crosstab(index, columns, values=None, rownames=None, colnames=None, aggfunc=None, margins=False, margins_name='All', dropna=True, normalize=False) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step04_cluster_assignments.csv"
+        required_columns: ["UID", "cluster_label"]
+        source: "step04 output (confidence clusters)"
+      - path: "results/ch5/5.1.5/data/step04_cluster_assignments.csv"
+        required_columns: ["UID", "cluster_label"]
+        source: "Ch5 5.1.5 step04 output (accuracy clusters)"
+
+    output_files:
+      - path: "data/step07_crosstab_confidence_accuracy.csv"
+        columns: "K_confidence rows x K_accuracy columns (counts)"
+        description: "Contingency table for chi-square test"
+      - path: "data/step07_crosstab_row_percentages.csv"
+        columns: "K_confidence rows x K_accuracy columns (row %)"
+        description: "Row percentages (each row sums to 100%)"
+      - path: "data/step07_crosstab_column_percentages.csv"
+        columns: "K_confidence rows x K_accuracy columns (column %)"
+        description: "Column percentages (each column sums to 100%)"
+
+    parameters:
+      index: "Series (confidence cluster labels)"
+      columns: "Series (accuracy cluster labels)"
+      normalize: "str or bool (False for counts, 'index' for row %, 'columns' for column %)"
+
+    description: "Cross-tabulate confidence clusters (RQ 6.1.5) with accuracy clusters (Ch5 5.1.5)"
+    source_reference: "Standard pandas function (not in tools_inventory.md - stdlib exemption)"
+
+  chi_square_test:
+    module: "scipy.stats"
+    function: "chi2_contingency"
+    signature: "chi2_contingency(observed, correction=True, lambda_=None) -> Tuple[float, float, int, ndarray]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step07_crosstab_confidence_accuracy.csv"
+        required_columns: "K_confidence x K_accuracy contingency table"
+        source: "step07 output"
+
+    output_files:
+      - path: "data/step08_chi_square_test.csv"
+        columns: ["statistic", "value", "interpretation"]
+        description: "Chi-square test results (chi2, df, p_value, cramers_v)"
+      - path: "data/step08_association_interpretation.txt"
+        description: "Text report with integration vs dissociation interpretation"
+
+    parameters:
+      observed: "ndarray (contingency table)"
+      correction: "bool (default: True, Yates' correction for 2x2)"
+
+    description: "Chi-square test of independence (integration vs dissociation hypothesis)"
+    source_reference: "Standard scipy function (not in tools_inventory.md - stdlib exemption)"
+
+  compute_cramers_v:
+    module: "custom (inline implementation)"
+    function: "cramers_v"
+    signature: "cramers_v(chi2: float, n: int, k: int, r: int) -> float"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step07_crosstab_confidence_accuracy.csv"
+        required_columns: "K_confidence x K_accuracy contingency table"
+        source: "step07 output (for n, k, r dimensions)"
+
+    output_files:
+      - path: "data/step08_chi_square_test.csv"
+        columns: ["statistic", "value", "interpretation"]
+        description: "Cramer's V effect size for association"
+
+    parameters:
+      chi2: "float (chi-square statistic)"
+      n: "int (total sample size)"
+      k: "int (number of rows)"
+      r: "int (number of columns)"
+
+    description: "Compute Cramer's V effect size for chi-square association (range: 0-1)"
+    source_reference: "Custom implementation (formula: V = sqrt(chi2 / (n * min(k-1, r-1))))"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_random_effects_loaded.csv"
+        required_columns: ["UID", "intercept", "slope"]
+        source: "analysis tool output (step01_load_csv)"
+
+    parameters:
+      df: "DataFrame (data to validate)"
+      required_columns: "List[str] (expected columns)"
+
+    criteria:
+      - "All required columns present (UID, intercept, slope)"
+      - "No missing columns"
+      - "Column names case-sensitive match"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        missing_columns: "List[str] (empty if valid)"
+        existing_columns: "List[str] (columns found)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_load_random_effects.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate required columns present in loaded data"
+    source_reference: "tools_inventory.md lines 402-411"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_standardized_features.csv"
+        required_columns: ["intercept_z", "slope_z"]
+        source: "analysis tool output (step02_standardize)"
+
+    parameters:
+      df: "DataFrame (standardized data)"
+      column_names: "List[str] (z-score columns to validate)"
+      tolerance: "float (default: 0.01 for mean/SD checks)"
+
+    criteria:
+      - "Mean of z-scores within tolerance of 0 (|mean| < 0.01)"
+      - "SD of z-scores within tolerance of 1 (0.95 < SD < 1.05)"
+      - "No NaN values in z-score columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if mean and SD within tolerance)"
+        message: "str (validation result)"
+        mean_values: "Dict[str, float] (actual means per column)"
+        sd_values: "Dict[str, float] (actual SDs per column)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_standardize_features.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate z-score standardization (mean H 0, SD H 1)"
+    source_reference: "tools_inventory.md lines 598-607"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_cluster_selection.csv"
+        expected_rows: 6
+        expected_columns: ["K", "SSE", "BIC", "optimal"]
+        source: "analysis tool output (step03_kmeans_selection)"
+
+    parameters:
+      df: "DataFrame (data to validate)"
+      expected_rows: "int (exact row count expected)"
+      expected_columns: "List[str] (required columns)"
+      column_types: "Dict[str, type] (optional type checking)"
+
+    criteria:
+      - "Row count equals expected_rows"
+      - "All expected columns present"
+      - "Column types match (if specified)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (validation result)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_cluster_selection.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame structure (rows, columns, types)"
+    source_reference: "tools_inventory.md lines 628-637"
+
+  validate_cluster_assignment:
+    module: "tools.validation"
+    function: "validate_cluster_assignment"
+    signature: "validate_cluster_assignment(cluster_labels: Union[np.ndarray, pd.Series], n_expected: int, min_cluster_size: int) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_cluster_assignments.csv"
+        required_columns: ["cluster_label"]
+        source: "analysis tool output (step04_kmeans_fit_final)"
+
+    parameters:
+      cluster_labels: "ndarray or Series (cluster assignments)"
+      n_expected: "int (100 participants expected)"
+      min_cluster_size: "int (default: 10 for 10% threshold)"
+
+    criteria:
+      - "All 100 participants assigned (length = n_expected)"
+      - "Cluster IDs consecutive starting from 0"
+      - "Each cluster has >= min_cluster_size members (no trivial clusters)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks pass)"
+        message: "str (validation result)"
+        cluster_sizes: "Dict[int, int] (participant count per cluster)"
+        n_clusters: "int (total number of clusters)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_fit_final_kmeans.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate K-means cluster assignments (consecutive IDs, minimum size)"
+    source_reference: "tools_inventory.md lines 648-657"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_validation_metrics.csv"
+        required_columns: ["metric", "value"]
+        source: "analysis tool output (step05_bootstrap_jaccard)"
+
+    parameters:
+      jaccard_values: "ndarray or list (Jaccard coefficients from bootstrap)"
+      min_jaccard_threshold: "float (default: 0.75 for stability threshold)"
+
+    criteria:
+      - "Jaccard values in [0, 1] range"
+      - "Mean Jaccard >= 0.75 indicates stable clusters"
+      - "95% CI computed via percentile method"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if Jaccard values in range)"
+        message: "str (validation result)"
+        mean_jaccard: "float (mean of bootstrap distribution)"
+        ci_lower: "float (2.5th percentile)"
+        ci_upper: "float (97.5th percentile)"
+        above_threshold: "bool (True if mean >= threshold)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_validate_cluster_quality.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate clustering stability via Jaccard coefficient bootstrap"
+    source_reference: "tools_inventory.md lines 658-667"
+
+  validate_cluster_summary_stats:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str, mean_col: str, max_col: str, sd_col: str, n_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_cluster_characterization.csv"
+        required_columns: ["mean_intercept", "sd_intercept", "mean_slope", "sd_slope", "N"]
+        source: "analysis tool output (step06_compute_cluster_means)"
+
+    parameters:
+      summary_df: "DataFrame (cluster summary statistics)"
+      min_col: "str (default: 'min')"
+      mean_col: "str (default: 'mean')"
+      max_col: "str (default: 'max')"
+      sd_col: "str (default: 'sd')"
+      n_col: "str (default: 'N')"
+
+    criteria:
+      - "SD >= 0 for all clusters"
+      - "N > 0 for all clusters"
+      - "N sums to 100 (all participants accounted for)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all constraints satisfied)"
+        message: "str (validation result)"
+        failed_checks: "List[str] (specific violations)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_characterize_clusters.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate cluster summary statistics consistency (SD >= 0, N > 0)"
+    source_reference: "tools_inventory.md lines 668-677"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_validation_metrics.csv"
+        required_columns: ["metric", "value"]
+        source: "analysis tool output (step05 validation metrics)"
+
+    parameters:
+      data: "ndarray or Series (numeric values to validate)"
+      min_val: "float (minimum allowed value, inclusive)"
+      max_val: "float (maximum allowed value, inclusive)"
+      column_name: "str (for error messages)"
+
+    criteria:
+      - "All values >= min_val"
+      - "All values <= max_val"
+      - "No NaN values"
+      - "No infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        message: "str (validation result)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 violating values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_validate_cluster_quality.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate numeric values fall within specified range"
+    source_reference: "tools_inventory.md lines 540-549"
+
+summary:
+  analysis_tools_count: 11
+  validation_tools_count: 8
+  total_unique_tools: 19
+  clustering_approach: "K-means with BIC selection, bootstrap stability validation"
+  cross_rq_dependencies:
+    - "RQ 6.1.4 Step 4 (random effects)"
+    - "Ch5 5.1.5 Step 4 (accuracy clusters)"
+  stdlib_exemptions:
+    - "pandas.read_csv (data loading)"
+    - "pandas.groupby (aggregation)"
+    - "pandas.crosstab (contingency table)"
+    - "scipy.stats.zscore (standardization)"
+    - "scipy.stats.chi2_contingency (hypothesis test)"
+    - "sklearn.cluster.KMeans (clustering)"
+    - "sklearn.metrics.silhouette_score (quality metric)"
+    - "sklearn.metrics.davies_bouldin_score (quality metric)"
+  custom_implementations:
+    - "compute_jaccard_bootstrap (bootstrap stability testing)"
+    - "cramers_v (effect size for chi-square)"
+  notes:
+    - "All analysis tools paired with validation tools (100% coverage)"
+    - "Stdlib functions (pandas, numpy, scipy, sklearn) exempted from tools_inventory.md verification"
+    - "Custom implementations require inline code generation by g_code"
+    - "Each tool listed ONCE (deduplication across 8 steps)"
+    - "rq_analysis will map tools to steps with concrete file paths in 4_analysis.yaml"

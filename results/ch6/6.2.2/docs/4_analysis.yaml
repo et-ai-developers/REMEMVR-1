@@ -1,0 +1,419 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: ch6/6.2.2
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.2.2"
+  total_steps: 6
+  analysis_type: "Derived data analysis (classification + trend test + descriptive)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Calibration Data
+  # --------------------------------------------------------------------------
+  - name: "step00_load_calibration_data"
+    step_number: "00"
+    description: "Load calibration scores from RQ 6.2.1 (400 observations)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch6/6.2.1/data/step02_calibration_scores.csv')"
+        - "Validate expected structure (400 rows, 7 columns)"
+        - "Check for missing values in Calibration column"
+        - "Verify UID and test combinations match expected pattern"
+        - "Save to data/step00_calibration_loaded.csv"
+
+      input_files:
+        - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+          required_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+          expected_rows: 400
+          data_types:
+            UID: "object"
+            test: "object"
+            theta_accuracy: "float64"
+            theta_confidence: "float64"
+            Calibration: "float64"
+            SE_accuracy: "float64"
+            SE_confidence: "float64"
+
+      output_files:
+        - path: "data/step00_calibration_loaded.csv"
+          columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+          expected_rows: 400
+          description: "Loaded calibration data from RQ 6.2.1 (lineage tracking)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_calibration_loaded.csv"
+          variable_name: "calibration_data"
+          source: "analysis call output (pandas read_csv)"
+
+      parameters:
+        df: "calibration_data"
+        expected_rows: 400
+        expected_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence"]
+        column_types:
+          UID: "object"
+          test: "object"
+          theta_accuracy: "float64"
+          theta_confidence: "float64"
+          Calibration: "float64"
+          SE_accuracy: "float64"
+          SE_confidence: "float64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected row count: 400 (100 participants x 4 tests)"
+        - "All 7 required columns present"
+        - "Data types match expected types"
+        - "No NaN values in Calibration column"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_load_calibration_data.log"
+
+      description: "Validate loaded calibration data structure and completeness"
+
+    log_file: "logs/step00_load_calibration_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Classify Observations by Calibration Sign
+  # --------------------------------------------------------------------------
+  - name: "step01_classify_observations"
+    step_number: "01"
+    description: "Classify observations as Overconfident/Underconfident/Calibrated using epsilon=0.1"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_calibration_loaded.csv"
+        - "Create classification variable based on Calibration sign:"
+        - "  Overconfident: Calibration > 0.1"
+        - "  Underconfident: Calibration < -0.1"
+        - "  Calibrated: |Calibration| <= 0.1"
+        - "Add Classification column to DataFrame"
+        - "Save to data/step01_calibration_classified.csv"
+
+      input_files:
+        - path: "data/step00_calibration_loaded.csv"
+          required_columns: ["UID", "test", "Calibration"]
+
+      output_files:
+        - path: "data/step01_calibration_classified.csv"
+          columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence", "Classification"]
+          expected_rows: 400
+          description: "Calibration data with classification column added"
+
+      parameters:
+        epsilon: 0.1
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_calibration_classified.csv"
+          variable_name: "classified_data"
+          source: "analysis call output (classification operations)"
+
+      parameters:
+        df: "classified_data"
+        required_columns: ["UID", "test", "theta_accuracy", "theta_confidence", "Calibration", "SE_accuracy", "SE_confidence", "Classification"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 8 columns present (7 original + Classification)"
+        - "Classification column populated (no NaN)"
+        - "Classification contains only: Overconfident, Underconfident, Calibrated"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_classify_observations.log"
+
+      description: "Validate classification column added and populated correctly"
+
+    log_file: "logs/step01_classify_observations.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Proportion Overconfident Per Timepoint
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_proportions"
+    step_number: "02"
+    description: "Compute proportion overconfident per test with Wilson score 95% CI"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_calibration_classified.csv"
+        - "Group by test (T1, T2, T3, T4)"
+        - "For each test, compute:"
+        - "  N_total: Total observations per test (should be 100)"
+        - "  N_overconfident: Count of 'Overconfident' observations"
+        - "  proportion_overconfident: N_overconfident / N_total"
+        - "  CI_lower, CI_upper: Binomial proportion 95% CI (Wilson score method)"
+        - "Save to data/step02_proportion_overconfident.csv"
+
+      input_files:
+        - path: "data/step01_calibration_classified.csv"
+          required_columns: ["test", "Classification"]
+
+      output_files:
+        - path: "data/step02_proportion_overconfident.csv"
+          columns: ["test", "N_total", "N_overconfident", "proportion_overconfident", "CI_lower", "CI_upper"]
+          expected_rows: 4
+          description: "Proportion overconfident per timepoint with Wilson score 95% CI"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_proportion_overconfident.csv"
+          variable_name: "proportion_data"
+          source: "analysis call output (groupby aggregation)"
+
+      parameters:
+        probability_df: "proportion_data"
+        prob_columns: ["proportion_overconfident", "CI_lower", "CI_upper"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All proportion values in [0, 1] range"
+        - "CI_lower < proportion_overconfident < CI_upper for all rows"
+        - "No NaN values in proportion columns"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_compute_proportions.log"
+
+      description: "Validate proportion values in valid probability range with consistent CIs"
+
+    log_file: "logs/step02_compute_proportions.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Trend Test (Logistic Regression)
+  # --------------------------------------------------------------------------
+  - name: "step03_trend_test"
+    step_number: "03"
+    description: "Fit logistic regression testing if overconfidence increases over time"
+
+    analysis_call:
+      module: "statsmodels.api"
+      function: "Logit"
+      signature: "Logit(endog, exog, **kwargs).fit() -> BinaryResultsWrapper"
+
+      input_files:
+        - path: "data/step01_calibration_classified.csv"
+          required_columns: ["test", "Classification"]
+          variable_name: "classified_data"
+
+      output_files:
+        - path: "data/step03_trend_test.csv"
+          variable_name: "trend_results"
+          columns: ["term", "estimate", "SE", "z", "p_value", "OR", "OR_CI_lower", "OR_CI_upper"]
+          expected_rows: 2
+          description: "Logistic regression results testing overconfidence trend over time"
+
+      parameters:
+        outcome_variable: "overconfident_binary (1 if Classification == 'Overconfident', else 0)"
+        predictor_variable: "time_ordinal (T1=0, T2=1, T3=3, T4=6, nominal days)"
+        method: "newton"
+        maxiter: 100
+
+      returns:
+        type: "BinaryResultsWrapper"
+        variable_name: "lmm_result"
+
+      description: "Fit logistic regression testing if overconfidence increases over time (trend test)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_trend_test.csv"
+          variable_name: "trend_results"
+          source: "analysis call output (logistic regression)"
+
+      parameters:
+        lmm_result: "lmm_result"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (convergence flag = True)"
+        - "All parameter estimates finite (no NaN/Inf)"
+        - "Standard errors positive"
+        - "Odds ratio > 0"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_trend_test.log"
+
+      description: "Validate logistic regression converged and all estimates valid"
+
+    log_file: "logs/step03_trend_test.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Mean Calibration Per Timepoint
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_mean_calibration"
+    step_number: "04"
+    description: "Compute mean calibration score per test session with 95% CI"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_calibration_loaded.csv"
+        - "Group by test (T1, T2, T3, T4)"
+        - "For each test, compute:"
+        - "  mean_calibration: Mean(Calibration)"
+        - "  SD_calibration: Standard deviation of Calibration"
+        - "  SE_calibration: Standard error of mean (SD / sqrt(N))"
+        - "  N: Number of observations per test (should be 100)"
+        - "  CI_lower, CI_upper: 95% CI for mean (mean +/- 1.96 * SE)"
+        - "Save to data/step04_mean_calibration.csv"
+
+      input_files:
+        - path: "data/step00_calibration_loaded.csv"
+          required_columns: ["test", "Calibration"]
+
+      output_files:
+        - path: "data/step04_mean_calibration.csv"
+          columns: ["test", "N", "mean_calibration", "SD_calibration", "SE_calibration", "CI_lower", "CI_upper"]
+          expected_rows: 4
+          description: "Mean calibration per timepoint with 95% CI"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_mean_calibration.csv"
+          variable_name: "mean_data"
+          source: "analysis call output (groupby aggregation)"
+
+      parameters:
+        data: "mean_data['mean_calibration']"
+        min_val: -3.0
+        max_val: 3.0
+        column_name: "mean_calibration"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Mean calibration in [-3, 3] range (scientifically reasonable z-scores)"
+        - "SD_calibration > 0 (positive variance)"
+        - "SE_calibration > 0 (positive standard error)"
+        - "SE = SD / sqrt(N) consistency check"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_mean_calibration.log"
+
+      description: "Validate mean calibration scores in scientifically reasonable range"
+
+    log_file: "logs/step04_compute_mean_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Prepare Overconfidence Trajectory Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step05_prepare_plot_data"
+    step_number: "05"
+    description: "Merge proportion and mean data for dual-axis trajectory plot"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step02_proportion_overconfident.csv"
+        - "Load data/step04_mean_calibration.csv"
+        - "Merge on test (T1, T2, T3, T4) using inner join"
+        - "Rename columns to avoid collision:"
+        - "  proportion_overconfident, prop_CI_lower, prop_CI_upper (from step02)"
+        - "  mean_calibration, mean_CI_lower, mean_CI_upper (from step04)"
+        - "Add time_numeric column: T1=0, T2=1, T3=3, T4=6 (nominal days)"
+        - "Sort by time_numeric"
+        - "Save to data/step05_overconfidence_trajectory_data.csv"
+
+      input_files:
+        - path: "data/step02_proportion_overconfident.csv"
+          required_columns: ["test", "proportion_overconfident", "CI_lower", "CI_upper"]
+        - path: "data/step04_mean_calibration.csv"
+          required_columns: ["test", "mean_calibration", "CI_lower", "CI_upper"]
+
+      output_files:
+        - path: "data/step05_overconfidence_trajectory_data.csv"
+          columns: ["test", "time_numeric", "proportion_overconfident", "prop_CI_lower", "prop_CI_upper", "mean_calibration", "mean_CI_lower", "mean_CI_upper"]
+          expected_rows: 4
+          description: "Merged plot source data for dual-axis trajectory (proportion + mean)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_overconfidence_trajectory_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (merge operations)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["T1", "T2", "T3", "T4"]
+        required_groups: []
+        domain_col: "test"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 4 test sessions present (T1, T2, T3, T4)"
+        - "No NaN values in plot data"
+        - "Merge successful (4 rows after inner join)"
+        - "All required columns present with correct names"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_prepare_plot_data.log"
+
+      description: "Validate plot data merge complete with all timepoints present"
+
+    log_file: "logs/step05_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

@@ -1,0 +1,591 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.1.1
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.1.1"
+  total_steps: 8
+  analysis_type: "IRT (GRM 5-category) → LMM (5 functional forms) → Model Selection"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Confidence Data from dfData.csv
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_vr_data"
+    step_number: "00"
+    description: "Extract 5-category ordinal confidence ratings (TC_* items) from dfData.csv for omnibus 'All' factor analysis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "Filter to TC_* columns (confidence ratings, 5-category ordinal: 0, 0.25, 0.5, 0.75, 1.0)"
+        - "Filter to interactive paradigms (IFR, ICR, IRE)"
+        - "Create composite_ID = UID + '_' + TEST (format: P001_T1)"
+        - "Pivot to wide format (composite_ID x TC_* items)"
+        - "Extract TSVR_hours mapping (composite_ID -> TSVR)"
+        - "Create Q-matrix (single 'All' factor, all TC_* items load on one dimension)"
+        - "Save outputs to CSV"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          columns:
+            - {name: "UID", type: "str", description: "Participant unique ID (format: P### with leading zeros)"}
+            - {name: "TEST", type: "str", description: "Test session (T1/T2/T3/T4 for Days 0/1/3/6)"}
+            - {name: "TSVR", type: "float", description: "Time Since VR in hours (actual elapsed time)"}
+            - {name: "TC_*", type: "float", description: "5-category ordinal confidence ratings (0, 0.25, 0.5, 0.75, 1.0)"}
+          filters:
+            - "Paradigm codes: IFR, ICR, IRE (interactive paradigms only)"
+            - "Exclude: RFR, TCR, RRE (room paradigms)"
+
+      output_files:
+        - path: "data/step00_irt_input.csv"
+          format: "CSV, wide format (one row per composite_ID)"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_TEST (e.g., P001_T1)"}
+            - {name: "TC_*", type: "float", description: "5-category ordinal (0, 0.25, 0.5, 0.75, 1.0, NaN)"}
+          expected_rows: 400
+          expected_columns: "~103 (composite_ID + ~102 TC_* items)"
+        - path: "data/step00_tsvr_mapping.csv"
+          format: "CSV with composite_ID -> TSVR hours mapping"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "TSVR_hours", type: "float", description: "Actual hours since encoding per Decision D070"}
+            - {name: "test", type: "str", description: "T1/T2/T3/T4"}
+          expected_rows: 400
+        - path: "data/step00_q_matrix.csv"
+          format: "CSV with item x factor loading structure"
+          columns:
+            - {name: "item_name", type: "str", description: "TC_* item codes"}
+            - {name: "All", type: "int", description: "1 for all items (single omnibus factor)"}
+          expected_rows: "~102 items"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      inputs:
+        - name: "irt_input"
+          path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID"]
+        - name: "tsvr_mapping"
+          path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+        - name: "q_matrix"
+          path: "data/step00_q_matrix.csv"
+          required_columns: ["item_name", "All"]
+
+      criteria:
+        - "Output files exist (irt_input.csv, tsvr_mapping.csv, q_matrix.csv)"
+        - "Expected column counts (irt_input: ~103, tsvr_mapping: 3, q_matrix: 2)"
+        - "Expected row counts (irt_input: 400, tsvr_mapping: 400, q_matrix: ~102)"
+        - "TC_* values in {0, 0.25, 0.5, 0.75, 1.0, NaN} (5-category ordinal + missing)"
+        - "TSVR_hours in [0, 168] (reasonable time range)"
+        - "No fully missing items or participants"
+        - "composite_ID format correct (UID_TEST pattern)"
+
+      on_failure:
+        action: "QUIT"
+        message: "Data extraction validation failed - see logs/step00_extract_vr_data.log"
+
+    log_file: "logs/step00_extract_vr_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: IRT Calibration Pass 1 (All Items, GRM)
+  # --------------------------------------------------------------------------
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
+    description: "Calibrate Graded Response Model (GRM) on all TC_* confidence items (Pass 1 of Decision D039 2-pass purification)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "fit_irt_grm"
+      signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          columns: ["composite_ID", "TC_*"]
+          expected_rows: 400
+        - path: "data/step00_q_matrix.csv"
+          columns: ["item_name", "All"]
+          expected_rows: "~102"
+
+      output_files:
+        - path: "data/step01_pass1_item_params.csv"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str", description: "All for all items (omnibus factor)"}
+            - {name: "a", type: "float", description: "Discrimination parameter (must be > 0)"}
+            - {name: "b1", type: "float", description: "Threshold 1 (0 vs 0.25)"}
+            - {name: "b2", type: "float", description: "Threshold 2 (0.25 vs 0.5)"}
+            - {name: "b3", type: "float", description: "Threshold 3 (0.5 vs 0.75)"}
+            - {name: "b4", type: "float", description: "Threshold 4 (0.75 vs 1.0)"}
+          expected_rows: "~102 items"
+        - path: "data/step01_pass1_theta.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_All", type: "float", description: "Latent ability estimate for omnibus factor"}
+            - {name: "se_All", type: "float", description: "Standard error of theta"}
+          expected_rows: 400
+
+      parameters:
+        model_type: "GRM"
+        n_cats: 5
+        n_factors: 1
+        dimension_names: ["All"]
+        correlated_factors: false
+        device: "cpu"
+        seed: 42
+        prior: "p1_med"
+        batch_size: 400
+        max_iter: 50
+        mc_samples: 10
+        iw_samples: 10
+        note: "Minimal settings for testing first. If validation passes, re-run with production settings (max_iter=200, mc_samples=100, iw_samples=100)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      inputs:
+        item_params:
+          path: "data/step01_pass1_item_params.csv"
+        theta:
+          path: "data/step01_pass1_theta.csv"
+
+      criteria:
+        - "Model converged (loss stable)"
+        - "No NaN parameters detected"
+        - "All discrimination a > 0"
+        - "Discrimination a in [0.01, 10.0]"
+        - "Thresholds b1-b4 typically in [-6, 6]"
+        - "Threshold ordering: b1 < b2 < b3 < b4 (GRM constraint)"
+        - "Theta estimates in [-4, 4]"
+        - "SE in [0.1, 1.5]"
+        - "Expected row counts (item_params: ~102, theta: 400)"
+
+      on_failure:
+        action: "QUIT"
+        message: "IRT Pass 1 calibration failed validation - see logs/step01_irt_calibration_pass1.log"
+
+    log_file: "logs/step01_irt_calibration_pass1.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Purify Items (Decision D039 Thresholds)
+  # --------------------------------------------------------------------------
+  - name: "step02_purify_items"
+    step_number: "02"
+    description: "Apply Decision D039 purification thresholds to exclude poorly performing items"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float, b_threshold: float) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+          expected_rows: "~102"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          columns: ["item_name"]
+          expected_rows: "31-71 items (30-70% retention)"
+          description: "List of retained item names that passed thresholds"
+        - path: "data/step02_purification_report.txt"
+          format: "Plain text report"
+          description: "Exclusion report with reasons (low discrimination or extreme difficulty)"
+
+      parameters:
+        a_threshold: 0.4
+        b_threshold: 3.0
+        note: "For GRM, computes b_mean = mean(b1, b2, b3, b4) and evaluates |b_mean| against 3.0 cutoff"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      inputs:
+        purified_items:
+          path: "data/step02_purified_items.csv"
+
+      criteria:
+        - "Output files exist (purified_items.csv, purification_report.txt)"
+        - "Retention rate in [0.30, 0.70] (expected range per Decision D039)"
+        - "All retained items exist in pass1_item_params.csv"
+        - "No duplicate item_name in purified_items.csv"
+        - "Exclusion reasons sum to total excluded count"
+
+      on_failure:
+        action: "QUIT"
+        message: "Item purification validation failed - see logs/step02_purify_items.log"
+
+    log_file: "logs/step02_purify_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: IRT Calibration Pass 2 (Purified Items, GRM)
+  # --------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Re-calibrate GRM on purified items only (Pass 2 of Decision D039)"
+
+    analysis_call:
+      module: "tools.analysis_irt"
+      function: "fit_irt_grm"
+      signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          columns: ["composite_ID", "TC_*"]
+          expected_rows: 400
+          note: "Filter to retained items from step02_purified_items.csv"
+        - path: "data/step02_purified_items.csv"
+          columns: ["item_name"]
+          expected_rows: "31-71"
+
+      output_files:
+        - path: "data/step03_theta_confidence.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_All", type: "float", description: "Final confidence ability estimate"}
+            - {name: "se_All", type: "float", description: "Standard error of theta"}
+          expected_rows: 400
+        - path: "data/step03_item_parameters.csv"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b1", type: "float"}
+            - {name: "b2", type: "float"}
+            - {name: "b3", type: "float"}
+            - {name: "b4", type: "float"}
+          expected_rows: "31-71 items (matches purified_items.csv row count)"
+
+      parameters:
+        model_type: "GRM"
+        n_cats: 5
+        n_factors: 1
+        dimension_names: ["All"]
+        correlated_factors: false
+        device: "cpu"
+        seed: 42
+        prior: "p1_med"
+        batch_size: 400
+        max_iter: 50
+        mc_samples: 10
+        iw_samples: 10
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      inputs:
+        item_params:
+          path: "data/step03_item_parameters.csv"
+        theta:
+          path: "data/step03_theta_confidence.csv"
+
+      criteria:
+        - "Model converged (loss stable)"
+        - "No NaN in theta_confidence.csv (all composite_IDs must estimate)"
+        - "No NaN in item_parameters.csv (all items must estimate)"
+        - "Expected N: 400 composite_IDs (no participant loss from Pass 1 to Pass 2)"
+        - "Item count matches purified_items.csv (no silent item loss)"
+        - "Theta in [-4, 4], SE in [0.1, 1.5]"
+        - "Discrimination a in [0.01, 10.0]"
+        - "Threshold ordering: b1 < b2 < b3 < b4"
+
+      on_failure:
+        action: "QUIT"
+        message: "IRT Pass 2 calibration failed validation - see logs/step03_irt_calibration_pass2.log"
+
+    log_file: "logs/step03_irt_calibration_pass2.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Merge Theta with TSVR (Decision D070)
+  # --------------------------------------------------------------------------
+  - name: "step04_merge_theta_tsvr"
+    step_number: "04"
+    description: "Merge theta_confidence scores with TSVR time variable (Decision D070: actual hours since encoding)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step03_theta_confidence.csv')"
+        - "pd.read_csv('data/step00_tsvr_mapping.csv')"
+        - "Merge on composite_ID (left join - keep all theta rows)"
+        - "Verify all composite_IDs matched (no missing TSVR)"
+        - "Create time transformations:"
+        - "  - Days = TSVR_hours / 24"
+        - "  - Days_squared = Days^2"
+        - "  - log_Days_plus1 = log(Days + 1) (handles Day 0)"
+        - "Extract UID from composite_ID (split on '_', take first part)"
+        - "Save merged data to CSV"
+
+      input_files:
+        - path: "data/step03_theta_confidence.csv"
+          columns: ["composite_ID", "theta_All", "se_All"]
+          expected_rows: 400
+        - path: "data/step00_tsvr_mapping.csv"
+          columns: ["composite_ID", "TSVR_hours", "test"]
+          expected_rows: 400
+
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          format: "CSV, long format (one row per observation)"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "UID", type: "str", description: "Participant identifier (e.g., P001)"}
+            - {name: "test", type: "str", description: "T1/T2/T3/T4"}
+            - {name: "theta_All", type: "float"}
+            - {name: "se_All", type: "float"}
+            - {name: "TSVR_hours", type: "float", description: "Actual hours since encoding"}
+            - {name: "Days", type: "float", description: "TSVR_hours / 24"}
+            - {name: "Days_squared", type: "float", description: "Days^2"}
+            - {name: "log_Days_plus1", type: "float", description: "log(Days + 1)"}
+          expected_rows: 400
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      inputs:
+        lmm_input:
+          path: "data/step04_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "test", "theta_All", "se_All", "TSVR_hours", "Days", "Days_squared", "log_Days_plus1"]
+
+      criteria:
+        - "Output file exists (lmm_input.csv)"
+        - "Expected columns present (9 total)"
+        - "Expected row count (400, no data loss from merge)"
+        - "No NaN in any column (all theta rows matched with TSVR)"
+        - "TSVR_hours in [0, 168], Days in [0, 7]"
+        - "Days_squared in [0, 49], log_Days_plus1 in [0, 2.08]"
+        - "100 unique UIDs present"
+
+      on_failure:
+        action: "QUIT"
+        message: "TSVR merge validation failed - see logs/step04_merge_theta_tsvr.log"
+
+    log_file: "logs/step04_merge_theta_tsvr.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Fit 5 Candidate LMM Models (Model Comparison)
+  # --------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit 5 candidate functional forms for confidence decline trajectory"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          columns: ["UID", "test", "theta_All", "TSVR_hours", "Days", "Days_squared", "log_Days_plus1"]
+          expected_rows: 400
+
+      output_files:
+        - path: "data/step05_model_comparison.csv"
+          columns:
+            - {name: "model_name", type: "str", description: "Linear, Quadratic, Logarithmic, Linear+Logarithmic, Quadratic+Logarithmic"}
+            - {name: "AIC", type: "float", description: "Akaike Information Criterion (lower is better)"}
+            - {name: "BIC", type: "float", description: "Bayesian Information Criterion"}
+            - {name: "log_likelihood", type: "float"}
+            - {name: "num_params", type: "int"}
+            - {name: "converged", type: "bool"}
+          expected_rows: 5
+        - path: "data/step05_model1_linear.pkl"
+          description: "Fitted Linear LMM"
+        - path: "data/step05_model2_quadratic.pkl"
+          description: "Fitted Quadratic LMM"
+        - path: "data/step05_model3_logarithmic.pkl"
+          description: "Fitted Logarithmic LMM"
+        - path: "data/step05_model4_linear_logarithmic.pkl"
+          description: "Fitted Linear+Logarithmic LMM"
+        - path: "data/step05_model5_quadratic_logarithmic.pkl"
+          description: "Fitted Quadratic+Logarithmic LMM"
+
+      parameters:
+        groups: "UID"
+        re_formula: "~Days"
+        reml: false
+        formulas:
+          model1: "theta_All ~ Days"
+          model2: "theta_All ~ Days + Days_squared"
+          model3: "theta_All ~ log_Days_plus1"
+          model4: "theta_All ~ Days + log_Days_plus1"
+          model5: "theta_All ~ Days + Days_squared + log_Days_plus1"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      inputs:
+        model_comparison:
+          path: "data/step05_model_comparison.csv"
+
+      criteria:
+        - "Output files exist (model_comparison.csv, 5 pkl files)"
+        - "Expected row count (5 models)"
+        - "All models converged=True"
+        - "AIC, BIC, log_likelihood finite (not NaN/Inf)"
+        - "Model names match expected set"
+
+      on_failure:
+        action: "QUIT"
+        message: "LMM fitting validation failed - see logs/step05_fit_lmm.log"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Select Best Model via AIC (Akaike Weights)
+  # --------------------------------------------------------------------------
+  - name: "step06_select_best_model"
+    step_number: "06"
+    description: "Compute Akaike weights (model probabilities) from AIC values, identify best model"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compare_lmm_models_by_aic"
+      signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+
+      input_files:
+        - path: "data/step05_model_comparison.csv"
+          columns: ["model_name", "AIC", "BIC", "log_likelihood", "num_params", "converged"]
+          expected_rows: 5
+
+      output_files:
+        - path: "data/step06_aic_comparison.csv"
+          columns:
+            - {name: "model_name", type: "str"}
+            - {name: "AIC", type: "float"}
+            - {name: "delta_AIC", type: "float", description: "AIC - min(AIC)"}
+            - {name: "relative_likelihood", type: "float", description: "exp(-0.5 * delta_AIC)"}
+            - {name: "akaike_weight", type: "float", description: "Model probability"}
+            - {name: "is_best", type: "bool", description: "True for model with lowest AIC"}
+          expected_rows: 5
+          note: "Rows sorted by AIC ascending (best model first)"
+        - path: "data/step06_best_model.pkl"
+          description: "Copy of best model for canonical reference"
+
+      parameters:
+        n_factors: 1
+        reference_group: null
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      inputs:
+        aic_comparison:
+          path: "data/step06_aic_comparison.csv"
+
+      criteria:
+        - "Output files exist (aic_comparison.csv, best_model.pkl)"
+        - "Expected row count (5 models)"
+        - "Exactly one is_best=True"
+        - "Akaike weights sum to 1.0 +/- 0.01"
+        - "Best model has delta_AIC=0"
+        - "AIC values finite (not NaN/Inf)"
+        - "delta_AIC in [0, Inf)"
+        - "relative_likelihood in (0, 1]"
+        - "akaike_weight in (0, 1)"
+
+      on_failure:
+        action: "QUIT"
+        message: "Model selection validation failed - see logs/step06_select_best_model.log"
+
+    log_file: "logs/step06_select_best_model.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Compare to Ch5 5.1.1 Accuracy Model Selection
+  # --------------------------------------------------------------------------
+  - name: "step07_compare_to_ch5"
+    step_number: "07"
+    description: "Compare confidence functional form (this RQ) to accuracy functional form (Ch5 RQ 5.1.1)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step06_aic_comparison.csv') → confidence models"
+        - "pd.read_csv('results/ch5/5.1.1/data/step06_aic_comparison.csv') → accuracy models"
+        - "Extract best model for each (where is_best=True)"
+        - "Compare Akaike weights for each model across RQs"
+        - "Create comparison table: model_name, confidence_weight, accuracy_weight, weight_difference"
+        - "Document conclusion:"
+        - "  - If same best model: 'Confidence parallels accuracy ({model_name})'"
+        - "  - If different: 'Confidence diverges from accuracy (Conf={X}, Acc={Y})'"
+        - "Save comparison table to CSV"
+
+      input_files:
+        - path: "data/step06_aic_comparison.csv"
+          columns: ["model_name", "AIC", "delta_AIC", "relative_likelihood", "akaike_weight", "is_best"]
+          expected_rows: 5
+          source: "This RQ (confidence)"
+        - path: "results/ch5/5.1.1/data/step06_aic_comparison.csv"
+          columns: ["model_name", "AIC", "delta_AIC", "relative_likelihood", "akaike_weight", "is_best"]
+          expected_rows: 5
+          source: "Ch5 RQ 5.1.1 (accuracy)"
+          note: "Must be complete before this step runs (soft dependency)"
+
+      output_files:
+        - path: "data/step07_ch5_comparison.csv"
+          columns:
+            - {name: "model_name", type: "str"}
+            - {name: "confidence_weight", type: "float", description: "Akaike weight from this RQ"}
+            - {name: "accuracy_weight", type: "float", description: "Akaike weight from Ch5 5.1.1"}
+            - {name: "weight_difference", type: "float", description: "confidence_weight - accuracy_weight"}
+            - {name: "best_in_confidence", type: "bool"}
+            - {name: "best_in_accuracy", type: "bool"}
+          expected_rows: 5
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      inputs:
+        ch5_comparison:
+          path: "data/step07_ch5_comparison.csv"
+          required_columns: ["model_name", "confidence_weight", "accuracy_weight", "weight_difference", "best_in_confidence", "best_in_accuracy"]
+
+      criteria:
+        - "Output file exists (ch5_comparison.csv)"
+        - "Expected N: Exactly 5 rows (one per model)"
+        - "Exactly one row with best_in_confidence=True"
+        - "Exactly one row with best_in_accuracy=True"
+        - "Model names: exact set {Linear, Quadratic, Logarithmic, Linear+Logarithmic, Quadratic+Logarithmic}"
+        - "No NaN values in any column"
+        - "Confidence weights sum to 1.0 +/- 0.01"
+        - "Accuracy weights sum to 1.0 +/- 0.01"
+        - "weight_difference in (-1, 1)"
+
+      on_failure:
+        action: "WARN_IF_CH5_MISSING_ELSE_QUIT"
+        message: "If Ch5 5.1.1 file missing: Log warning and skip step (not fatal). If data validation fails: Raise error, log failure, quit."
+
+    log_file: "logs/step07_compare_to_ch5.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

@@ -1,0 +1,532 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:45:00Z
+# RQ: 6.6.3
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "6.6.3"
+  total_steps: 7
+  analysis_type: "Item-level HCE analysis with LMM testing Domain x Time interaction"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:45:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Item-Level Confidence and Accuracy Data
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_item_level"
+    step_number: "00"
+    description: "Extract TQ_* and TC_* item responses, reshape to long format, tag by domain"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "Filter TQ_* (accuracy) and TC_* (confidence) columns for interactive paradigms only"
+        - "Reshape to long format using pd.melt (one row per item-response)"
+        - "Tag each item by domain based on tag patterns: What (-N-), Where (-L-/-U-/-D-), When (-O-)"
+        - "Create composite_ID = UID + '_' + TEST"
+        - "Save to data/step00_item_level.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "TEST", "TQ_*", "TC_*"]
+          expected_rows: "~400 (100 participants x 4 tests)"
+          data_types:
+            UID: "string"
+            TEST: "string (T1, T2, T3, T4)"
+            TQ_columns: "int (0/1)"
+            TC_columns: "float (0, 0.25, 0.5, 0.75, 1.0)"
+
+      output_files:
+        - path: "data/step00_item_level.csv"
+          variable_name: "item_level_df"
+          columns: ["UID", "TEST", "item_id", "domain", "TQ_accuracy", "TC_confidence"]
+          expected_rows: "~27,200 (68 items x 100 participants x 4 tests)"
+          description: "Item-level accuracy and confidence with domain tags"
+
+      parameters:
+        tag_patterns:
+          What: ["-N-"]
+          Where: ["-L-", "-U-", "-D-"]
+          When: ["-O-"]
+        reshape_method: "long"
+        interactive_only: true
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_item_level.csv"
+          variable_name: "item_level_df"
+          source: "analysis call output"
+
+      parameters:
+        df: "item_level_df"
+        required_columns: ["UID", "TEST", "item_id", "domain", "TQ_accuracy", "TC_confidence"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 6 required columns present"
+        - "No unexpected columns that suggest extraction error"
+        - "Column names match naming convention exactly"
+        - "domain values in {What, Where, When}"
+        - "TEST values in {T1, T2, T3, T4}"
+        - "TQ_accuracy in {0, 1}"
+        - "TC_confidence in {0, 0.25, 0.5, 0.75, 1.0}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_item_level.log"
+
+      description: "Validate required columns present and data types correct"
+
+    log_file: "logs/step00_extract_item_level.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute High-Confidence Error Flags
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_hce_flags"
+    step_number: "01"
+    description: "Compute HCE flag: HCE = 1 if (TQ_accuracy = 0 AND TC_confidence >= 0.75), else 0"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step00_item_level.csv')"
+        - "Compute HCE column: np.where((TQ_accuracy == 0) & (TC_confidence >= 0.75), 1, 0)"
+        - "Save to data/step01_hce_by_domain.csv"
+
+      input_files:
+        - path: "data/step00_item_level.csv"
+          required_columns: ["UID", "TEST", "item_id", "domain", "TQ_accuracy", "TC_confidence"]
+          variable_name: "item_level_df"
+          source: "step00 extraction output"
+
+      output_files:
+        - path: "data/step01_hce_by_domain.csv"
+          variable_name: "hce_df"
+          columns: ["UID", "TEST", "item_id", "domain", "TQ_accuracy", "TC_confidence", "HCE"]
+          expected_rows: "~27,200 (same as input)"
+          description: "Item-level data with HCE flag (high-confidence error = Confidence >= 0.75 AND Accuracy = 0)"
+
+      parameters:
+        hce_threshold_confidence: 0.75
+        hce_threshold_accuracy: 0
+        hce_logic: "AND"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_hce_by_domain.csv"
+          variable_name: "hce_df"
+          source: "analysis call output"
+
+      parameters:
+        data: "hce_df['HCE']"
+        min_val: 0
+        max_val: 1
+        column_name: "HCE"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All HCE values in {0, 1} (binary)"
+        - "No NaN values in HCE column"
+        - "HCE = 1 only when TQ_accuracy = 0 AND TC_confidence >= 0.75"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_compute_hce_flags.log"
+
+      description: "Validate HCE flags are binary (0 or 1) with no invalid values"
+
+    log_file: "logs/step01_compute_hce_flags.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Aggregate HCE Rates by Domain x Timepoint
+  # --------------------------------------------------------------------------
+  - name: "step02_aggregate_hce_rates"
+    step_number: "02"
+    description: "Group by domain x TEST, compute mean(HCE) to get HCE rate per cell"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step01_hce_by_domain.csv')"
+        - "Group by ['domain', 'TEST']"
+        - "Compute HCE_rate = mean(HCE), N_items = count(HCE), N_HCE = sum(HCE)"
+        - "Save to data/step02_hce_rates_summary.csv"
+
+      input_files:
+        - path: "data/step01_hce_by_domain.csv"
+          required_columns: ["domain", "TEST", "HCE"]
+          variable_name: "hce_df"
+          source: "step01 HCE computation output"
+
+      output_files:
+        - path: "data/step02_hce_rates_summary.csv"
+          variable_name: "hce_summary_df"
+          columns: ["domain", "TEST", "HCE_rate", "N_items", "N_HCE"]
+          expected_rows: "12 (3 domains x 4 tests)"
+          description: "Aggregated HCE rates by domain x test (12 cells = 3 domains x 4 tests)"
+
+      parameters:
+        groupby_vars: ["domain", "TEST"]
+        agg_functions:
+          HCE_rate: "mean"
+          N_items: "count"
+          N_HCE: "sum"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_hce_rates_summary.csv"
+          variable_name: "hce_summary_df"
+          source: "analysis call output"
+
+      parameters:
+        df: "hce_summary_df"
+        expected_rows: 12
+        expected_columns: ["domain", "TEST", "HCE_rate", "N_items", "N_HCE"]
+        column_types:
+          domain: "object"
+          TEST: "object"
+          HCE_rate: "float64"
+          N_items: "int64"
+          N_HCE: "int64"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 12 rows (3 domains x 4 tests)"
+        - "All 5 required columns present"
+        - "Column types match expected dtypes"
+        - "No missing cells (complete factorial design)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_aggregate_hce_rates.log"
+
+      description: "Validate summary table has exactly 12 rows with correct structure"
+
+    log_file: "logs/step02_aggregate_hce_rates.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Linear Mixed Model Testing Domain x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_domain_hce_lmm"
+    step_number: "03"
+    description: "Fit LMM testing Domain x Time interaction on HCE rates using TSVR_hours (Decision D070)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step02_hce_rates_summary.csv"
+          required_columns: ["domain", "TEST", "HCE_rate"]
+          variable_name: "hce_summary_df"
+          source: "step02 aggregation output"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "TEST", "TSVR_hours"]
+          variable_name: "tsvr_df"
+          source: "master data (TSVR extraction)"
+
+      output_files:
+        - path: "data/step03_domain_hce_lmm.txt"
+          variable_name: "lmm_model"
+          description: "LMM summary output (fixed effects, random effects, fit statistics)"
+
+      parameters:
+        theta_scores: "hce_summary_df"
+        tsvr_data: "tsvr_df"
+        formula: "HCE_rate ~ domain * TSVR_hours"
+        re_formula: "~TSVR_hours"
+        groups: "UID"
+        reml: true
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with Domain x Time interaction, random slopes by participant (Decision D070 TSVR as time variable)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_domain_hce_lmm.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged (no convergence warnings)"
+        - "No singular fit (random effects variance > 0)"
+        - "All fixed effects have finite estimates"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_fit_domain_hce_lmm.log"
+
+      description: "Validate LMM converged successfully with no singularity warnings"
+
+    log_file: "logs/step03_fit_domain_hce_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Test Domain Main Effect and Domain x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step04_test_domain_effects"
+    step_number: "04"
+    description: "Extract fixed effects tests with dual p-values (Decision D068: uncorrected + Bonferroni)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load LMM model from step03 (via pickle or model object)"
+        - "Extract fixed effects for Domain main effect and Domain x Time interaction"
+        - "Compute test statistics (F-tests or Wald chi-square tests)"
+        - "Compute p_uncorrected from test statistic"
+        - "Compute p_bonferroni = min(1.0, p_uncorrected * 2) for 2 tests (Decision D068)"
+        - "Compute significant_bonferroni = (p_bonferroni < 0.025)"
+        - "Save to data/step04_domain_effects.csv"
+
+      input_files:
+        - path: "data/step03_domain_hce_lmm.txt"
+          variable_name: "lmm_model"
+          source: "step03 fitted model"
+
+      output_files:
+        - path: "data/step04_domain_effects.csv"
+          variable_name: "domain_effects_df"
+          columns: ["effect", "test_statistic", "df1", "df2", "p_uncorrected", "p_bonferroni", "significant_bonferroni"]
+          expected_rows: "2 (Domain main effect + Domain x Time interaction)"
+          description: "Hypothesis tests for Domain main effect and Domain x Time interaction with Decision D068 dual p-values"
+
+      parameters:
+        effects_to_test: ["Domain main effect", "Domain x Time interaction"]
+        bonferroni_n_tests: 2
+        alpha: 0.05
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_domain_effects.csv"
+          variable_name: "domain_effects_df"
+          source: "analysis call output"
+
+      parameters:
+        interaction_df: "domain_effects_df"
+        required_terms: ["Domain main effect", "Domain x Time interaction"]
+        alpha_bonferroni: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Both required effects present in results"
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+        - "p_bonferroni = min(1.0, p_uncorrected * 2) for 2 tests"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_test_domain_effects.log"
+
+      description: "Validate hypothesis tests include required terms and Decision D068 dual p-values"
+
+    log_file: "logs/step04_test_domain_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Rank Domains by Mean HCE Rate
+  # --------------------------------------------------------------------------
+  - name: "step05_rank_domains"
+    step_number: "05"
+    description: "Compute overall mean HCE rate per domain, rank from highest to lowest, compare to hypothesis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step02_hce_rates_summary.csv')"
+        - "Group by domain, compute mean(HCE_rate) across all timepoints"
+        - "Rank domains: 1=highest HCE rate, 3=lowest HCE rate"
+        - "Add hypothesis_rank column: When=1, Where=2, What=3"
+        - "Add matches_hypothesis column: observed rank == hypothesis rank"
+        - "Save to data/step05_domain_ranking.csv"
+
+      input_files:
+        - path: "data/step02_hce_rates_summary.csv"
+          required_columns: ["domain", "HCE_rate"]
+          variable_name: "hce_summary_df"
+          source: "step02 aggregation output"
+
+      output_files:
+        - path: "data/step05_domain_ranking.csv"
+          variable_name: "domain_ranking_df"
+          columns: ["domain", "mean_HCE_rate", "rank", "hypothesis_rank", "matches_hypothesis"]
+          expected_rows: "3 (What, Where, When)"
+          description: "Domains ranked by overall mean HCE rate with hypothesis comparison"
+
+      parameters:
+        hypothesis_ranking:
+          When: 1
+          Where: 2
+          What: 3
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_domain_ranking.csv"
+          variable_name: "domain_ranking_df"
+          source: "analysis call output"
+
+      parameters:
+        df: "domain_ranking_df"
+        expected_rows: 3
+        expected_columns: ["domain", "mean_HCE_rate", "rank", "hypothesis_rank", "matches_hypothesis"]
+        column_types:
+          domain: "object"
+          mean_HCE_rate: "float64"
+          rank: "int64"
+          hypothesis_rank: "int64"
+          matches_hypothesis: "bool"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 3 rows (What, Where, When)"
+        - "All 5 required columns present"
+        - "Ranks in {1, 2, 3}, unique (no ties)"
+        - "Hypothesis ranks correct (When=1, Where=2, What=3)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_rank_domains.log"
+
+      description: "Validate domain ranking table has exactly 3 rows with correct structure"
+
+    log_file: "logs/step05_rank_domains.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare Plot Data for Domain x Time HCE Visualization
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_hce_plot_data"
+    step_number: "06"
+    description: "Merge observed HCE rates with TSVR_hours, generate LMM predictions with CIs for plotting"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step02_hce_rates_summary.csv')"
+        - "pd.read_csv('data/cache/dfData.csv') to extract TSVR_hours mapping (TEST -> TSVR_hours)"
+        - "Merge HCE rates with TSVR_hours on TEST"
+        - "Load LMM model from step03 (via pickle or model object)"
+        - "Generate LMM predictions for all domain x TSVR_hours combinations using fitted model"
+        - "Compute 95% confidence intervals for predictions"
+        - "Combine observed means (HCE_rate_observed) + predicted values (HCE_rate_predicted) + CIs"
+        - "Sort by domain, then time"
+        - "Save to data/step06_hce_by_domain_plot_data.csv"
+
+      input_files:
+        - path: "data/step02_hce_rates_summary.csv"
+          required_columns: ["domain", "TEST", "HCE_rate", "N_items", "N_HCE"]
+          variable_name: "hce_summary_df"
+          source: "step02 aggregation output"
+        - path: "data/step03_domain_hce_lmm.txt"
+          variable_name: "lmm_model"
+          source: "step03 fitted model for predictions"
+        - path: "data/cache/dfData.csv"
+          required_columns: ["TEST", "TSVR_hours"]
+          variable_name: "tsvr_df"
+          source: "master data (TSVR mapping)"
+
+      output_files:
+        - path: "data/step06_hce_by_domain_plot_data.csv"
+          variable_name: "plot_data_df"
+          columns: ["time", "domain", "HCE_rate_observed", "HCE_rate_predicted", "CI_lower", "CI_upper"]
+          expected_rows: "12 (3 domains x 4 timepoints)"
+          description: "Plot source data with observed HCE rates, LMM predictions, and 95% CIs"
+
+      parameters:
+        merge_key: "TEST"
+        ci_level: 0.95
+        grid_points: 4
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_hce_by_domain_plot_data.csv"
+          variable_name: "plot_data_df"
+          source: "analysis call output"
+
+      parameters:
+        plot_data: "plot_data_df"
+        required_domains: ["What", "Where", "When"]
+        required_groups: []
+        domain_col: "domain"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 domains present (What, Where, When)"
+        - "Exactly 12 rows (3 domains x 4 timepoints)"
+        - "No NaN in any column"
+        - "CI_lower <= HCE_rate_predicted <= CI_upper"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_prepare_hce_plot_data.log"
+
+      description: "Validate plot data has all domains and complete factorial structure"
+
+    log_file: "logs/step06_prepare_hce_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

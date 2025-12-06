@@ -1,0 +1,754 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.3.1
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.3.1"
+  total_steps: 8
+  analysis_type: "IRT (GRM 3-factor ordinal confidence) → LMM Domain x Time interaction"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Confidence Item Data
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_confidence_data"
+    step_number: "00"
+    description: "Extract TC_* confidence items from dfData.csv, filter by domain tags, create 3-factor Q-matrix"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/cache/dfData.csv"
+        - "Filter to TC_* columns (5-category ordinal: 0, 0.25, 0.5, 0.75, 1.0)"
+        - "Filter to interactive paradigms only (IFR, ICR, IRE)"
+        - "Parse item tags to assign domain (What: -N-, Where: -L-/-U-/-D-, When: -O-)"
+        - "Create composite_ID (UID_test format)"
+        - "Reshape to wide format (composite_ID x items)"
+        - "Create 3-factor Q-matrix (What, Where, When)"
+        - "Extract TSVR time mapping (composite_ID -> TSVR_hours)"
+        - "Save outputs to CSV"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          required_columns: ["UID", "test"]
+          description: "Project-level RAW data source with TC_* confidence items"
+
+      output_files:
+        - path: "data/step00_irt_input.csv"
+          columns:
+            - {name: "composite_ID", type: "str", description: "UID_test format"}
+            - {name: "TC_* items", type: "float", description: "Ordinal values: 0, 0.25, 0.5, 0.75, 1.0"}
+          expected_rows: 400
+          expected_columns: "~103 (composite_ID + ~102 TC_* items)"
+          description: "Wide-format IRT input for GRM calibration"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "TSVR_hours", type: "float", description: "Actual hours since encoding per Decision D070"}
+            - {name: "test", type: "str", description: "T1/T2/T3/T4"}
+          expected_rows: 400
+          description: "Time Since VR mapping for LMM"
+
+        - path: "data/step00_q_matrix.csv"
+          columns:
+            - {name: "item_name", type: "str", description: "TC_* tag"}
+            - {name: "dimension", type: "int", description: "1=What, 2=Where, 3=When"}
+            - {name: "domain", type: "str", description: "What/Where/When for readability"}
+          expected_rows: "~102 items"
+          description: "Q-matrix for 3-factor GRM structure"
+
+      parameters:
+        item_pattern: "TC_*"
+        paradigm_filter: ["IFR", "ICR", "IRE"]
+        domain_tags:
+          What: "-N-"
+          Where: ["-L-", "-U-", "-D-"]
+          When: "-O-"
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Output files exist"
+          check: "All 3 files created (irt_input, tsvr_mapping, q_matrix)"
+          severity: "CRITICAL"
+        - name: "Expected dimensions"
+          check: "irt_input: 400 rows x ~103 columns"
+          severity: "CRITICAL"
+        - name: "TC_* item values"
+          check: "Values in {0.0, 0.25, 0.5, 0.75, 1.0}"
+          severity: "CRITICAL"
+        - name: "TSVR_hours range"
+          check: "TSVR_hours in [0, 168] hours"
+          severity: "CRITICAL"
+        - name: "Q-matrix dimensions"
+          check: "All 3 dimensions represented (What, Where, When)"
+          severity: "CRITICAL"
+        - name: "Missing data acceptable"
+          check: "NaN acceptable for TC_* items (<10% per item expected)"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 0 extraction failed - see logs/step00_extract_confidence_data.log"
+
+    log_file: "logs/step00_extract_confidence_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: IRT Calibration Pass 1 (All Items)
+  # --------------------------------------------------------------------------
+  - name: "step01_irt_calibration_pass1"
+    step_number: "01"
+    description: "Calibrate GRM on all TC_* items using 3-factor structure (What/Where/When) - Pass 1 for purification"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "fit_irt_grm"
+      signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID", "TC_* items"]
+          description: "Wide-format IRT input from Step 0"
+
+        - path: "data/step00_q_matrix.csv"
+          required_columns: ["item_name", "dimension", "domain"]
+          description: "3-factor Q-matrix from Step 0"
+
+      output_files:
+        - path: "data/step01_pass1_item_params.csv"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str", description: "What/Where/When"}
+            - {name: "a", type: "float", description: "Discrimination parameter"}
+            - {name: "b1", type: "float", description: "Difficulty threshold 1"}
+            - {name: "b2", type: "float", description: "Difficulty threshold 2"}
+            - {name: "b3", type: "float", description: "Difficulty threshold 3"}
+            - {name: "b4", type: "float", description: "Difficulty threshold 4"}
+          expected_rows: "~102 items"
+          description: "Pass 1 item parameters for purification"
+
+        - path: "data/step01_pass1_theta.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_What", type: "float"}
+            - {name: "se_What", type: "float"}
+            - {name: "theta_Where", type: "float"}
+            - {name: "se_Where", type: "float"}
+            - {name: "theta_When", type: "float"}
+            - {name: "se_When", type: "float"}
+          expected_rows: 400
+          description: "Pass 1 theta estimates (diagnostic)"
+
+      parameters:
+        model_type: "GRM"
+        n_cats: 5
+        correlated_factors: true
+        device: "cpu"
+        seed: 42
+        model_fit:
+          batch_size: 2048
+          iw_samples: 100
+          mc_samples: 1
+        model_scores:
+          scoring_batch_size: 2048
+          mc_samples: 100
+          iw_samples: 100
+        minimal_test_settings:
+          max_iter: 50
+          mc_samples: 10
+          iw_samples: 10
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          source: "analysis call output"
+
+      criteria:
+        - name: "Model converged"
+          check: "Loss stable, model converged successfully"
+          severity: "CRITICAL"
+        - name: "Parameter bounds"
+          check: "a in [0.0, 10.0], b in [-6.0, 6.0]"
+          severity: "CRITICAL"
+        - name: "No NaN parameters"
+          check: "All items have valid parameter estimates"
+          severity: "CRITICAL"
+        - name: "Theta estimates valid"
+          check: "theta in [-4, 4], se in [0.1, 1.5]"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 1 IRT Pass 1 calibration failed - see logs/step01_irt_calibration_pass1.log"
+
+    log_file: "logs/step01_irt_calibration_pass1.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Item Purification (Decision D039)
+  # --------------------------------------------------------------------------
+  - name: "step02_purify_items"
+    step_number: "02"
+    description: "Filter items by quality thresholds (|b|≤3.0, a≥0.4), check When domain status"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "filter_items_by_quality"
+      signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float, b_threshold: float) -> Tuple[DataFrame, DataFrame]"
+
+      input_files:
+        - path: "data/step01_pass1_item_params.csv"
+          required_columns: ["item_name", "dimension", "a", "b1"]
+          description: "Pass 1 item parameters from Step 1"
+
+      output_files:
+        - path: "data/step02_purified_items.csv"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b1", type: "float"}
+            - {name: "b2", type: "float"}
+            - {name: "b3", type: "float"}
+            - {name: "b4", type: "float"}
+            - {name: "retention_reason", type: "str"}
+          expected_rows: "40-60 items (40-50% retention expected)"
+          description: "Items retained after purification"
+
+        - path: "data/step02_purification_report.txt"
+          description: "Text report with When domain status (included/excluded)"
+
+        - path: "data/step02_q_matrix_purified.csv"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "int"}
+            - {name: "domain", type: "str"}
+          expected_rows: "Matches purified_items count"
+          description: "Updated Q-matrix for Pass 2 (2-factor or 3-factor based on When status)"
+
+      parameters:
+        a_threshold: 0.4
+        b_threshold: 3.0
+        min_items_per_dimension: 10
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_irt_parameters"
+      signature: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_purified_items.csv"
+          source: "analysis call output"
+
+      criteria:
+        - name: "Thresholds enforced"
+          check: "All retained items: a ≥ 0.4, |b| ≤ 3.0"
+          severity: "CRITICAL"
+        - name: "Retention rate"
+          check: "20-80% retention (outside suggests calibration problem)"
+          severity: "MODERATE"
+        - name: "Minimum items per dimension"
+          check: "At least 10 items per dimension (except When if excluded)"
+          severity: "CRITICAL"
+        - name: "When domain status"
+          check: "Documented in purification_report.txt"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 2 purification failed - see logs/step02_purify_items.log"
+
+    log_file: "logs/step02_purify_items.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: IRT Calibration Pass 2 (Purified Items Only)
+  # --------------------------------------------------------------------------
+  - name: "step03_irt_calibration_pass2"
+    step_number: "03"
+    description: "Re-calibrate GRM on purified items (2-factor or 3-factor based on When status)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_irt"
+      function: "fit_irt_grm"
+      signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+
+      input_files:
+        - path: "data/step00_irt_input.csv"
+          required_columns: ["composite_ID"]
+          description: "Original wide data (will filter to purified items)"
+
+        - path: "data/step02_purified_items.csv"
+          required_columns: ["item_name"]
+          description: "List of retained items from Step 2"
+
+        - path: "data/step02_q_matrix_purified.csv"
+          required_columns: ["item_name", "dimension", "domain"]
+          description: "Updated Q-matrix from Step 2"
+
+      output_files:
+        - path: "data/step03_item_parameters.csv"
+          columns:
+            - {name: "item_name", type: "str"}
+            - {name: "dimension", type: "str"}
+            - {name: "a", type: "float"}
+            - {name: "b1", type: "float"}
+            - {name: "b2", type: "float"}
+            - {name: "b3", type: "float"}
+            - {name: "b4", type: "float"}
+          expected_rows: "40-60 items (matches purified count)"
+          description: "Final item parameters from Pass 2"
+
+        - path: "data/step03_theta_scores.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "theta_What", type: "float"}
+            - {name: "se_What", type: "float"}
+            - {name: "theta_Where", type: "float"}
+            - {name: "se_Where", type: "float"}
+            - {name: "theta_When", type: "float", description: "Only if When included"}
+            - {name: "se_When", type: "float", description: "Only if When included"}
+          expected_rows: 400
+          description: "Final theta estimates (wide format)"
+
+        - path: "data/step03_theta_long.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "domain", type: "str"}
+            - {name: "theta", type: "float"}
+            - {name: "se", type: "float"}
+          expected_rows: "800 (if When excluded) OR 1200 (if When included)"
+          description: "Final theta in long format for LMM"
+
+      parameters:
+        model_type: "GRM"
+        n_cats: 5
+        correlated_factors: true
+        device: "cpu"
+        seed: 42
+        model_fit:
+          batch_size: 2048
+          iw_samples: 100
+          mc_samples: 1
+        model_scores:
+          scoring_batch_size: 2048
+          mc_samples: 100
+          iw_samples: 100
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_irt_convergence"
+      signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_item_parameters.csv"
+          source: "analysis call output"
+        - path: "data/step03_theta_long.csv"
+          source: "analysis call output"
+
+      criteria:
+        - name: "Pass 2 convergence"
+          check: "Model converged, improved fit vs Pass 1"
+          severity: "CRITICAL"
+        - name: "Parameter bounds"
+          check: "a in [0.4, 10.0], b in [-3.0, 3.0] (enforced by purification)"
+          severity: "CRITICAL"
+        - name: "No NaN parameters"
+          check: "All purified items calibrated successfully"
+          severity: "CRITICAL"
+        - name: "Theta row count"
+          check: "theta_long: 800 or 1200 rows based on When status"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 3 IRT Pass 2 calibration failed - see logs/step03_irt_calibration_pass2.log"
+
+    log_file: "logs/step03_irt_calibration_pass2.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Merge Theta with TSVR Time Data
+  # --------------------------------------------------------------------------
+  - name: "step04_merge_theta_tsvr"
+    step_number: "04"
+    description: "Merge theta_confidence estimates with TSVR time variable (actual hours per Decision D070)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load theta_long from Step 3"
+        - "Load TSVR mapping from Step 0"
+        - "Merge on composite_ID (left join - keep all theta observations)"
+        - "Verify 100% merge rate (no missing TSVR data)"
+        - "Parse UID from composite_ID for LMM random effects grouping"
+        - "Add time transformations: log_TSVR, TSVR_squared"
+        - "Save LMM-ready input to CSV"
+
+      input_files:
+        - path: "data/step03_theta_long.csv"
+          required_columns: ["composite_ID", "domain", "theta", "se"]
+          description: "Theta estimates from Step 3"
+
+        - path: "data/step00_tsvr_mapping.csv"
+          required_columns: ["composite_ID", "TSVR_hours", "test"]
+          description: "Time mapping from Step 0"
+
+      output_files:
+        - path: "data/step04_lmm_input.csv"
+          columns:
+            - {name: "composite_ID", type: "str"}
+            - {name: "UID", type: "str", description: "Participant identifier for random effects"}
+            - {name: "test", type: "str", description: "T1/T2/T3/T4"}
+            - {name: "domain", type: "str", description: "What/Where or What/Where/When"}
+            - {name: "theta", type: "float"}
+            - {name: "se", type: "float"}
+            - {name: "TSVR_hours", type: "float", description: "Time since encoding - Decision D070"}
+            - {name: "log_TSVR", type: "float", description: "Log-transformed time"}
+            - {name: "TSVR_squared", type: "float", description: "Quadratic time term"}
+          expected_rows: "800 (if When excluded) OR 1200 (if When included)"
+          description: "LMM-ready input with TSVR time variable"
+
+      parameters: {}
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Merge completeness"
+          check: "All composite_IDs matched with TSVR (100% merge rate)"
+          severity: "CRITICAL"
+        - name: "Row count preserved"
+          check: "Output rows match theta_long rows (no data loss)"
+          severity: "CRITICAL"
+        - name: "TSVR range"
+          check: "TSVR_hours in [0, 168], log_TSVR in [-inf, 5.2], TSVR_squared in [0, 28224]"
+          severity: "CRITICAL"
+        - name: "No missing TSVR"
+          check: "No NaN in TSVR_hours (all observations have time data)"
+          severity: "CRITICAL"
+        - name: "UID parsing"
+          check: "UID correctly extracted from composite_ID (before underscore)"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 4 merge failed - see logs/step04_merge_theta_tsvr.log"
+
+    log_file: "logs/step04_merge_theta_tsvr.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Fit LMM with Domain x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step05_fit_lmm"
+    step_number: "05"
+    description: "Fit LMM to test Domain x Time interaction (primary hypothesis)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["composite_ID", "UID", "domain", "theta", "log_TSVR"]
+          description: "LMM input from Step 4"
+
+      output_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          description: "LMM summary with fixed effects, random effects, fit indices"
+
+        - path: "data/step05_fixed_effects.csv"
+          columns:
+            - {name: "term", type: "str", description: "e.g., Intercept, Domain[Where], log_TSVR, Domain[Where]:log_TSVR"}
+            - {name: "coef", type: "float"}
+            - {name: "se", type: "float"}
+            - {name: "z", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float", description: "Decision D068 dual p-values"}
+          expected_rows: "Variable (depends on 2-factor vs 3-factor model)"
+          description: "Fixed effects table with dual p-values"
+
+        - path: "data/step05_effect_sizes.csv"
+          columns:
+            - {name: "term", type: "str"}
+            - {name: "cohens_f2", type: "float"}
+            - {name: "interpretation", type: "str", description: "small/medium/large"}
+          expected_rows: "Matches fixed_effects row count"
+          description: "Effect sizes for main effects and interaction"
+
+      parameters:
+        formula: "theta ~ domain * log_TSVR"
+        re_formula: "~log_TSVR"
+        groups: "UID"
+        reml: false
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_lmm_model_summary.txt"
+          source: "analysis call output"
+
+      criteria:
+        - name: "Model convergence"
+          check: "LMM converged successfully, no warnings"
+          severity: "CRITICAL"
+        - name: "Domain x Time interaction"
+          check: "Interaction term present in fixed_effects"
+          severity: "CRITICAL"
+        - name: "Dual p-values"
+          check: "All terms have p_uncorrected AND p_bonferroni (Decision D068)"
+          severity: "CRITICAL"
+        - name: "Residual normality"
+          check: "Residuals approximately normal (diagnostic check)"
+          severity: "MODERATE"
+        - name: "No heteroscedasticity"
+          check: "No severe heteroscedasticity (diagnostic check)"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 5 LMM fitting failed - see logs/step05_fit_lmm.log"
+
+    log_file: "logs/step05_fit_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Post-Hoc Contrasts (If Interaction Significant)
+  # --------------------------------------------------------------------------
+  - name: "step06_compute_post_hoc_contrasts"
+    step_number: "06"
+    description: "If Domain x Time interaction significant (p < 0.05), compute post-hoc contrasts with dual p-values"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float) -> DataFrame"
+
+      input_files:
+        - path: "data/step05_fixed_effects.csv"
+          required_columns: ["term", "p_uncorrected"]
+          description: "Fixed effects from Step 5 (check interaction p-value)"
+
+      output_files:
+        - path: "data/step06_post_hoc_contrasts.csv"
+          columns:
+            - {name: "contrast", type: "str", description: "e.g., What vs Where"}
+            - {name: "estimate", type: "float"}
+            - {name: "se", type: "float"}
+            - {name: "t", type: "float"}
+            - {name: "p_uncorrected", type: "float"}
+            - {name: "p_bonferroni", type: "float", description: "Decision D068"}
+            - {name: "cohens_d", type: "float"}
+          expected_rows: "0 (if interaction NULL) OR 2-3 (if interaction significant)"
+          description: "Post-hoc contrasts with dual p-values"
+
+        - path: "data/step06_contrast_decision.txt"
+          description: "Documents whether contrasts computed or skipped based on interaction significance"
+
+      parameters:
+        comparisons: ["Where-What", "When-What", "When-Where"]
+        family_alpha: 0.05
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_post_hoc_contrasts.csv"
+          source: "analysis call output"
+
+      criteria:
+        - name: "Dual p-values"
+          check: "If contrasts computed: ALL have p_uncorrected AND p_bonferroni (Decision D068)"
+          severity: "CRITICAL"
+        - name: "Bonferroni correction"
+          check: "p_bonferroni = min(p_uncorrected * N_contrasts, 1.0)"
+          severity: "CRITICAL"
+        - name: "Contrast decision documented"
+          check: "contrast_decision.txt states COMPUTED or SKIPPED"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 6 contrast computation failed - see logs/step06_compute_post_hoc_contrasts.log"
+
+    log_file: "logs/step06_compute_post_hoc_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Prepare Trajectory Plot Data (Dual-Scale per Decision D069)
+  # --------------------------------------------------------------------------
+  - name: "step07_prepare_trajectory_plot_data"
+    step_number: "07"
+    description: "Create plot source CSVs for trajectory visualization (theta + probability scales per Decision D069)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.plotting"
+      function: "convert_theta_to_probability"
+      signature: "convert_theta_to_probability(theta: ndarray, discrimination: float, difficulty: float) -> ndarray"
+
+      input_files:
+        - path: "data/step03_theta_long.csv"
+          required_columns: ["composite_ID", "domain", "theta"]
+          description: "Theta estimates from Step 3"
+
+        - path: "data/step04_lmm_input.csv"
+          required_columns: ["composite_ID", "TSVR_hours"]
+          description: "TSVR time variable from Step 4"
+
+        - path: "data/step03_item_parameters.csv"
+          required_columns: ["a"]
+          description: "Item parameters from Step 3 (for mean discrimination)"
+
+      output_files:
+        - path: "data/step07_trajectory_theta_data.csv"
+          columns:
+            - {name: "time", type: "float", description: "TSVR_hours: 0, 24, 72, 144 nominal"}
+            - {name: "theta", type: "float", description: "Mean theta per domain per timepoint"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% CI"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% CI"}
+            - {name: "domain", type: "str", description: "What/Where or What/Where/When"}
+            - {name: "n", type: "int", description: "Sample size per cell"}
+          expected_rows: "8 (if When excluded: 2 domains x 4 timepoints) OR 12 (if When included: 3 domains x 4 timepoints)"
+          description: "Plot source CSV for theta-scale trajectory"
+
+        - path: "data/step07_trajectory_probability_data.csv"
+          columns:
+            - {name: "time", type: "float"}
+            - {name: "probability", type: "float", description: "Transformed from theta (0-1 scale)"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+            - {name: "domain", type: "str"}
+            - {name: "n", type: "int"}
+          expected_rows: "8 OR 12 (matches theta_data)"
+          description: "Plot source CSV for probability-scale trajectory (Decision D069)"
+
+      parameters:
+        use_mean_discrimination: true
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step07_trajectory_probability_data.csv"
+          source: "analysis call output"
+
+      criteria:
+        - name: "Dual-scale data created"
+          check: "Both theta_data and probability_data exist"
+          severity: "CRITICAL"
+        - name: "Expected row count"
+          check: "8 or 12 rows based on When status"
+          severity: "CRITICAL"
+        - name: "No NaN values"
+          check: "All cells have valid values"
+          severity: "CRITICAL"
+        - name: "CI bounds valid"
+          check: "CI_lower < CI_upper for all rows"
+          severity: "CRITICAL"
+        - name: "Probability range"
+          check: "All probability values in [0, 1]"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 7 plot data preparation failed - see logs/step07_prepare_trajectory_plot_data.log"
+
+    log_file: "logs/step07_prepare_trajectory_plot_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Document Comparison to Ch5 5.2.1 Accuracy Findings
+  # --------------------------------------------------------------------------
+  - name: "step08_document_ch5_comparison"
+    step_number: "08"
+    description: "Compare confidence domain findings (this RQ) to accuracy domain findings (Ch5 5.2.1)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load this RQ's Domain x Time interaction p-value from Step 5"
+        - "Load Ch5 5.2.1 accuracy Domain x Time interaction p-value (if available)"
+        - "Document convergence or divergence (both NULL, or confidence significant but accuracy NULL)"
+        - "Document When domain status (included/excluded) and rationale"
+        - "Create comparison summary table"
+        - "Save comparison CSV and When status TXT"
+
+      input_files:
+        - path: "data/step05_fixed_effects.csv"
+          required_columns: ["term", "p_uncorrected"]
+          description: "Fixed effects from this RQ (Step 5)"
+
+        - path: "results/ch5/5.2.1/data/step05_fixed_effects.csv"
+          required_columns: ["term", "p_uncorrected"]
+          description: "Ch5 accuracy domain interaction (optional - if Ch5 incomplete, note pending)"
+
+      output_files:
+        - path: "data/step08_ch5_comparison.csv"
+          columns:
+            - {name: "measure", type: "str", description: "Confidence vs Accuracy"}
+            - {name: "rq_id", type: "str", description: "6.3.1 vs 5.2.1"}
+            - {name: "domain_time_interaction_p", type: "float"}
+            - {name: "result", type: "str", description: "NULL or SIGNIFICANT"}
+            - {name: "interpretation", type: "str", description: "Brief summary"}
+          expected_rows: 2
+          description: "Comparison summary table"
+
+        - path: "data/step08_when_domain_status.txt"
+          description: "When domain status (INCLUDED or EXCLUDED), post-purification item count, rationale, impact on analysis"
+
+      parameters: {}
+
+    validation_call:
+      type: "inline"
+      criteria:
+        - name: "Comparison rows"
+          check: "ch5_comparison.csv has 2 rows (Confidence + Accuracy)"
+          severity: "CRITICAL"
+        - name: "Confidence row matches Step 5"
+          check: "Confidence row domain_time_interaction_p matches Step 5 finding"
+          severity: "CRITICAL"
+        - name: "When status documented"
+          check: "when_domain_status.txt explicitly states INCLUDED or EXCLUDED"
+          severity: "CRITICAL"
+        - name: "Interpretation non-empty"
+          check: "All rows have interpretation field populated"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 8 Ch5 comparison failed - see logs/step08_document_ch5_comparison.log"
+
+    log_file: "logs/step08_document_ch5_comparison.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

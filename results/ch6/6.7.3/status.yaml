@@ -1,0 +1,31 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+rq_tools: success
+rq_analysis: success
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+# Context dumps
+rq_tools_context: |
+  5 analysis + 5 validation tools cataloged for correlation analysis
+  All analysis tools stdlib (pandas, scipy) - exempt from verification
+  All validation tools verified in tools_inventory.md
+  Decision D068 embedded in correlation test validation
+  Cross-RQ dependencies: RQ 6.2.1, Ch5 5.1.1
+
+rq_analysis_context: |
+  4 steps specified with validation (correlation: calibration → trajectory stability)
+
+# Analysis steps
+analysis_steps:
+  step00_extract_data: pending
+  step01_compute_variability: pending
+  step02_merge_data: pending
+  step03_correlation: pending
+  step04_prepare_plot_data: pending

@@ -1,0 +1,510 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T18:30:00Z
+# RQ: ch6/6.3.2
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.3.2"
+  total_steps: 5
+  analysis_type: "LMM-only calibration analysis (no IRT - uses derived theta from Ch5 5.2.1 + Ch6 6.3.1)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T18:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load and Merge Accuracy and Confidence Data
+  # --------------------------------------------------------------------------
+  - name: "step00_load_merge_calibration_data"
+    step_number: "00"
+    description: "Load domain-stratified accuracy theta from Ch5 5.2.1 and confidence theta from Ch6 6.3.1, merge by UID x TEST x Domain, compute z-standardization and calibration metrics"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load accuracy data: pd.read_csv('results/ch5/5.2.1/data/step03_theta_accuracy_domain.csv')"
+        - "Load confidence data: pd.read_csv('results/ch6/6.3.1/data/step03_theta_confidence_domain.csv')"
+        - "Check domain compatibility: verify both files have same Domain set"
+        - "Merge datasets: inner join on (UID, TEST, Domain)"
+        - "Compute z-standardized theta: theta_accuracy_z = (theta_accuracy - mean) / sd"
+        - "Compute z-standardized theta: theta_confidence_z = (theta_confidence - mean) / sd"
+        - "Compute calibration: calibration = theta_confidence_z - theta_accuracy_z"
+        - "Compute absolute calibration: abs_calibration = |calibration|"
+        - "Add TSVR_hours: load from master.xlsx or Ch5 5.2.1, merge by UID x TEST"
+        - "Save output: data/step00_calibration_by_domain.csv"
+
+      input_files:
+        - path: "results/ch5/5.2.1/data/step03_theta_accuracy_domain.csv"
+          required_columns: ["UID", "TEST", "Domain", "theta_accuracy", "se_accuracy"]
+          variable_name: "df_accuracy"
+          description: "Domain-stratified accuracy theta from Ch5 5.2.1 Pass 2"
+
+        - path: "results/ch6/6.3.1/data/step03_theta_confidence_domain.csv"
+          required_columns: ["UID", "TEST", "Domain", "theta_confidence", "se_confidence"]
+          variable_name: "df_confidence"
+          description: "Domain-stratified confidence theta from Ch6 6.3.1 Pass 2"
+
+      output_files:
+        - path: "data/step00_calibration_by_domain.csv"
+          variable_name: "df_calibration"
+          description: "Merged calibration data with z-standardized theta and calibration metrics"
+          expected_columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "TEST", type: "str", description: "Test session T1-T4"}
+            - {name: "Domain", type: "str", description: "What/Where/When"}
+            - {name: "TSVR_hours", type: "float", description: "Time since VR in hours"}
+            - {name: "theta_accuracy", type: "float", description: "Raw accuracy theta"}
+            - {name: "se_accuracy", type: "float", description: "Accuracy SE"}
+            - {name: "theta_confidence", type: "float", description: "Raw confidence theta"}
+            - {name: "se_confidence", type: "float", description: "Confidence SE"}
+            - {name: "theta_accuracy_z", type: "float", description: "Z-standardized accuracy theta"}
+            - {name: "theta_confidence_z", type: "float", description: "Z-standardized confidence theta"}
+            - {name: "calibration", type: "float", description: "Signed calibration (confidence - accuracy)"}
+            - {name: "abs_calibration", type: "float", description: "Absolute calibration magnitude"}
+          expected_rows: "1200 (100 participants x 4 tests x 3 domains) OR 800 if When domain excluded"
+
+      parameters:
+        z_standardize: true
+        merge_key: ["UID", "TEST", "Domain"]
+        tsvr_mapping:
+          T1: 0
+          T2: 24
+          T3: 72
+          T4: 144
+
+    validation_call:
+      module: "tools.validation"
+      function: "check_missing_data"
+      signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_calibration_by_domain.csv"
+          variable_name: "df_calibration"
+          source: "analysis call output (merge result)"
+
+      parameters:
+        df: "df_calibration"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_missing"
+
+      criteria:
+        - "No NaN values in any column"
+        - "Zero total missing cells"
+        - "Expected rows: 1200 (or 800 if When excluded)"
+
+      on_failure:
+        action: "raise ValueError(validation_result_missing['message'])"
+        log_to: "logs/step00_load_merge_calibration_data.log"
+
+      description: "Validate merge completeness - no NaN values tolerated"
+
+    additional_validations:
+      - module: "tools.validation"
+        function: "validate_standardization"
+        signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+        parameters:
+          df: "df_calibration"
+          column_names: ["theta_accuracy_z", "theta_confidence_z"]
+          tolerance: 0.1
+        criteria:
+          - "theta_accuracy_z: mean ~ 0, SD ~ 1 (tolerance +/- 0.1)"
+          - "theta_confidence_z: mean ~ 0, SD ~ 1 (tolerance +/- 0.1)"
+
+      - module: "tools.validation"
+        function: "validate_numeric_range"
+        signature: "validate_numeric_range(data: Union[ndarray, Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+        parameters:
+          data: "df_calibration['theta_accuracy']"
+          min_val: -3.0
+          max_val: 3.0
+          column_name: "theta_accuracy"
+        criteria:
+          - "theta_accuracy in [-3, 3]"
+
+      - module: "tools.validation"
+        function: "validate_numeric_range"
+        signature: "validate_numeric_range(data: Union[ndarray, Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+        parameters:
+          data: "df_calibration['theta_confidence']"
+          min_val: -3.0
+          max_val: 3.0
+          column_name: "theta_confidence"
+        criteria:
+          - "theta_confidence in [-3, 3]"
+
+      - module: "tools.validation"
+        function: "validate_numeric_range"
+        signature: "validate_numeric_range(data: Union[ndarray, Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+        parameters:
+          data: "df_calibration['TSVR_hours']"
+          min_val: 0.0
+          max_val: 168.0
+          column_name: "TSVR_hours"
+        criteria:
+          - "TSVR_hours in [0, 168]"
+
+    log_file: "logs/step00_load_merge_calibration_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Fit LMM with Domain x Time Interaction
+  # --------------------------------------------------------------------------
+  - name: "step01_fit_lmm_domain_time"
+    step_number: "01"
+    description: "Fit Linear Mixed Model to test Domain main effect and Domain x Time interaction on calibration"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step00_calibration_by_domain.csv"
+          required_columns: ["UID", "TEST", "Domain", "TSVR_hours", "calibration"]
+          variable_name: "df_calibration"
+          description: "Calibration data from Step 0"
+
+      output_files:
+        - path: "data/step01_lmm_model_summary.txt"
+          variable_name: "lmm_summary"
+          description: "LMM fitted model summary (fixed effects, random effects, fit indices)"
+
+        - path: "data/step01_domain_effects.csv"
+          variable_name: "df_domain_effects"
+          description: "Domain main effect and Domain x Time interaction hypothesis tests with dual p-values (Decision D068)"
+          expected_columns:
+            - {name: "term", type: "str", description: "Domain_main or Domain_x_Time_interaction"}
+            - {name: "statistic", type: "float", description: "F-statistic or chi-square"}
+            - {name: "df_num", type: "int", description: "Numerator degrees of freedom"}
+            - {name: "df_denom", type: "int", description: "Denominator degrees of freedom (if F-test)"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (Decision D068)"}
+            - {name: "interpretation", type: "str", description: "significant or not significant"}
+          expected_rows: 2
+
+      parameters:
+        theta_scores: "df_calibration"
+        tsvr_data: "df_calibration"
+        formula: "calibration ~ Domain * TSVR_centered"
+        groups: "UID"
+        re_formula: "~TSVR_centered"
+        reml: false
+        center_tsvr: true
+        contrast_coding: "effect"
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_result"
+
+      description: "Fit LMM with Domain x TSVR_centered interaction, random slope for TSVR per participant (Decision D070)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_lmm_model_summary.txt"
+          variable_name: "lmm_result"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_result"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_convergence"
+
+      criteria:
+        - "Model converged (lmm_result.converged = True)"
+        - "No convergence warnings"
+        - "No NaN in fixed effects table"
+        - "No NaN in variance components"
+
+      on_failure:
+        action: "raise ValueError(validation_result_convergence['message'])"
+        log_to: "logs/step01_fit_lmm_domain_time.log"
+
+      description: "Validate LMM converged successfully"
+
+    additional_validations:
+      - module: "tools.validation"
+        function: "validate_hypothesis_test_dual_pvalues"
+        signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+        parameters:
+          interaction_df: "df_domain_effects"
+          required_terms: ["Domain_main", "Domain_x_Time_interaction"]
+          alpha_bonferroni: 0.05
+        criteria:
+          - "All required terms present (Domain_main, Domain_x_Time_interaction)"
+          - "Decision D068 compliance: p_uncorrected AND p_bonferroni columns present"
+          - "p_bonferroni >= p_uncorrected for all rows"
+
+    log_file: "logs/step01_fit_lmm_domain_time.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Post-Hoc Domain Contrasts
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_post_hoc_contrasts"
+    step_number: "02"
+    description: "Perform pairwise post-hoc contrasts between domains (What vs Where, What vs When, Where vs When)"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_contrasts_pairwise"
+      signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> DataFrame"
+
+      input_files:
+        - path: "data/step00_calibration_by_domain.csv"
+          required_columns: ["UID", "Domain", "calibration"]
+          variable_name: "df_calibration"
+          description: "Calibration data for contrast computation"
+
+      output_files:
+        - path: "data/step02_post_hoc_contrasts.csv"
+          variable_name: "df_contrasts"
+          description: "Pairwise domain contrasts with dual p-values (Decision D068)"
+          expected_columns:
+            - {name: "contrast", type: "str", description: "What vs Where, What vs When, Where vs When"}
+            - {name: "estimate", type: "float", description: "Difference in calibration between domains"}
+            - {name: "SE", type: "float", description: "Standard error of estimate"}
+            - {name: "z", type: "float", description: "Test statistic"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected two-tailed p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value for 3 comparisons"}
+            - {name: "cohens_d", type: "float", description: "Standardized effect size"}
+            - {name: "interpretation", type: "str", description: "significant or not significant"}
+          expected_rows: "3 (all pairwise comparisons) OR 1 if When domain excluded"
+
+      parameters:
+        lmm_result: "lmm_result"
+        comparisons: ["What vs Where", "What vs When", "Where vs When"]
+        family_alpha: 0.05
+        bonferroni_n: 3
+
+      returns:
+        type: "DataFrame"
+        variable_name: "df_contrasts"
+
+      description: "Compute pairwise contrasts with Bonferroni correction for 3 comparisons (Decision D068)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_dual_pvalues"
+      signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_post_hoc_contrasts.csv"
+          variable_name: "df_contrasts"
+          source: "analysis call output (compute_contrasts_pairwise return value)"
+
+      parameters:
+        contrasts_df: "df_contrasts"
+        required_comparisons: ["What vs Where", "What vs When", "Where vs When"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_contrasts"
+
+      criteria:
+        - "All required pairwise comparisons present"
+        - "Decision D068 compliance: p_uncorrected AND p_bonferroni columns present"
+        - "p_bonferroni >= p_uncorrected for all rows"
+        - "p_bonferroni = min(p_uncorrected * 3, 1.0)"
+
+      on_failure:
+        action: "raise ValueError(validation_result_contrasts['message'])"
+        log_to: "logs/step02_compute_post_hoc_contrasts.log"
+
+      description: "Validate contrasts include required comparisons and Decision D068 dual p-values"
+
+    log_file: "logs/step02_compute_post_hoc_contrasts.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Rank Domains by Calibration Quality
+  # --------------------------------------------------------------------------
+  - name: "step03_rank_domains_by_calibration"
+    step_number: "03"
+    description: "Compute mean absolute calibration per domain and rank from best-calibrated to worst-calibrated"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data: pd.read_csv('data/step00_calibration_by_domain.csv')"
+        - "Group by Domain: aggregate abs_calibration"
+        - "Compute mean |calibration|: mean of abs_calibration per domain"
+        - "Compute SD |calibration|: SD of abs_calibration per domain"
+        - "Compute N: count observations per domain"
+        - "Rank domains: order by mean_abs_calibration ascending (lower = better)"
+        - "Assign ranks: 1 = best, 2 = middle, 3 = worst"
+        - "Save output: data/step03_domain_ranking.csv"
+
+      input_files:
+        - path: "data/step00_calibration_by_domain.csv"
+          required_columns: ["Domain", "abs_calibration"]
+          variable_name: "df_calibration"
+          description: "Calibration data from Step 0"
+
+      output_files:
+        - path: "data/step03_domain_ranking.csv"
+          variable_name: "df_ranking"
+          description: "Domain-level calibration summaries with ranks"
+          expected_columns:
+            - {name: "Domain", type: "str", description: "What/Where/When"}
+            - {name: "mean_abs_calibration", type: "float", description: "Mean absolute calibration"}
+            - {name: "sd_abs_calibration", type: "float", description: "SD of absolute calibration"}
+            - {name: "N", type: "int", description: "Number of observations"}
+            - {name: "rank", type: "int", description: "1=best, 2=middle, 3=worst"}
+            - {name: "interpretation", type: "str", description: "Best calibrated, Middle, Worst calibrated"}
+          expected_rows: "3 (What, Where, When) OR 2 if When excluded"
+
+      parameters:
+        groupby_col: "Domain"
+        metric_col: "abs_calibration"
+        rank_order: "ascending"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_domain_ranking.csv"
+          variable_name: "df_ranking"
+          source: "analysis call output (ranking result)"
+
+      parameters:
+        df: "df_ranking"
+        required_cols: ["Domain", "mean_abs_calibration", "sd_abs_calibration", "N", "rank", "interpretation"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_format"
+
+      criteria:
+        - "All required columns present"
+        - "Expected rows: 3 (or 2 if When excluded)"
+        - "No NaN values"
+        - "Ranks consecutive: 1, 2, 3"
+
+      on_failure:
+        action: "raise ValueError(validation_result_format['message'])"
+        log_to: "logs/step03_rank_domains_by_calibration.log"
+
+      description: "Validate ranking output format and completeness"
+
+    additional_validations:
+      - module: "tools.validation"
+        function: "validate_numeric_range"
+        signature: "validate_numeric_range(data: Union[ndarray, Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+        parameters:
+          data: "df_ranking['mean_abs_calibration']"
+          min_val: 0.0
+          max_val: 3.0
+          column_name: "mean_abs_calibration"
+        criteria:
+          - "mean_abs_calibration in [0, 3]"
+
+    log_file: "logs/step03_rank_domains_by_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Prepare Calibration Trajectory Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step04_prepare_calibration_trajectory_plot"
+    step_number: "04"
+    description: "Aggregate calibration data for trajectory visualization (calibration over time by domain)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data: pd.read_csv('data/step00_calibration_by_domain.csv')"
+        - "Group by Domain x TEST: aggregate calibration"
+        - "Compute mean calibration: mean per Domain x TEST"
+        - "Compute SE: standard error of mean (SD / sqrt(N))"
+        - "Compute 95% CI: CI_lower = mean - 1.96*SE, CI_upper = mean + 1.96*SE"
+        - "Map TEST to TSVR_hours: extract mean TSVR_hours per TEST"
+        - "Select columns: Domain, TSVR_hours, mean_calibration, CI_lower, CI_upper"
+        - "Sort by Domain, then TSVR_hours ascending"
+        - "Save output: data/step04_calibration_trajectory_data.csv"
+
+      input_files:
+        - path: "data/step00_calibration_by_domain.csv"
+          required_columns: ["UID", "TEST", "Domain", "TSVR_hours", "calibration"]
+          variable_name: "df_calibration"
+          description: "Calibration data from Step 0"
+
+      output_files:
+        - path: "data/step04_calibration_trajectory_data.csv"
+          variable_name: "df_plot_data"
+          description: "Plot source CSV for calibration trajectory visualization"
+          expected_columns:
+            - {name: "Domain", type: "str", description: "What/Where/When"}
+            - {name: "TSVR_hours", type: "float", description: "Mean time per TEST"}
+            - {name: "mean_calibration", type: "float", description: "Mean calibration per Domain x TEST"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% confidence bound"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% confidence bound"}
+          expected_rows: "12 (3 domains x 4 timepoints) OR 8 if When excluded"
+
+      parameters:
+        groupby_cols: ["Domain", "TEST"]
+        metric_col: "calibration"
+        ci_level: 0.95
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_calibration_trajectory_data.csv"
+          variable_name: "df_plot_data"
+          source: "analysis call output (plot data aggregation result)"
+
+      parameters:
+        plot_data: "df_plot_data"
+        required_domains: ["What", "Where", "When"]
+        required_groups: ["T1", "T2", "T3", "T4"]
+        domain_col: "Domain"
+        group_col: "TEST"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result_plot"
+
+      criteria:
+        - "All domains represented: {What, Where, When} OR {What, Where} subset"
+        - "All 4 timepoints per domain present"
+        - "No NaN values"
+        - "CI_upper > CI_lower for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result_plot['message'])"
+        log_to: "logs/step04_prepare_calibration_trajectory_plot.log"
+
+      description: "Validate plot data has all required domains and timepoints"
+
+    additional_validations:
+      - module: "tools.validation"
+        function: "validate_dataframe_structure"
+        signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+        parameters:
+          df: "df_plot_data"
+          expected_rows: [8, 12]
+          expected_columns: ["Domain", "TSVR_hours", "mean_calibration", "CI_lower", "CI_upper"]
+          column_types: null
+        criteria:
+          - "Expected rows: 12 (or 8 if When excluded)"
+          - "All required columns present"
+
+    log_file: "logs/step04_prepare_calibration_trajectory_plot.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

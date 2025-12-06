@@ -1,0 +1,478 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T18:30:00
+# RQ: 6.3.4 - ICC by Domain
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "6.3.4"
+  total_steps: 6
+  analysis_type: "LMM variance decomposition → ICC estimation by domain"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T18:30:00"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 1: Fit Domain-Stratified LMMs with Random Slopes
+  # --------------------------------------------------------------------------
+  - name: "step01_fit_domain_lmms"
+    step_number: "01"
+    description: "Fit separate random-effects LMMs per domain (What, Where, When) to estimate variance components for ICC computation"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+
+      input_files:
+        - path: "results/ch6/6.3.1/data/step03_theta_confidence_domain.csv"
+          required_columns: ["UID", "test", "domain", "theta_confidence", "se_confidence", "TSVR_hours"]
+          variable_name: "theta_data"
+          description: "Domain-specific confidence theta scores from RQ 6.3.1 (1200 rows: 100 UIDs × 4 tests × 3 domains)"
+
+      output_files:
+        - path: "data/step01_lmm_what_model_summary.txt"
+          variable_name: "lmm_what_summary"
+          description: "LMM summary for What domain (fixed effects, random effects, fit statistics)"
+        - path: "data/step01_lmm_where_model_summary.txt"
+          variable_name: "lmm_where_summary"
+          description: "LMM summary for Where domain"
+        - path: "data/step01_lmm_when_model_summary.txt"
+          variable_name: "lmm_when_summary"
+          description: "LMM summary for When domain"
+        - path: "data/step01_variance_components_by_domain.csv"
+          variable_name: "variance_components"
+          description: "Variance components extracted from 3 domain-specific LMMs (3 rows)"
+
+      parameters:
+        theta_scores: "theta_data"
+        tsvr_data: "theta_data"
+        formula: "theta_confidence ~ TSVR_hours + (TSVR_hours | UID)"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: false
+        separate_by_domain: true
+        domains: ["What", "Where", "When"]
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_results_by_domain"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_lmm_what_model_summary.txt"
+          variable_name: "lmm_what_summary"
+          source: "analysis call output (fit_lmm_trajectory_tsvr for What domain)"
+        - path: "data/step01_lmm_where_model_summary.txt"
+          variable_name: "lmm_where_summary"
+          source: "analysis call output (fit_lmm_trajectory_tsvr for Where domain)"
+        - path: "data/step01_lmm_when_model_summary.txt"
+          variable_name: "lmm_when_summary"
+          source: "analysis call output (fit_lmm_trajectory_tsvr for When domain)"
+
+      parameters:
+        lmm_result: "lmm_results_by_domain"
+        check_singularity: true
+        min_observations: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 domain LMMs converged successfully (model.converged = True)"
+        - "No singular fit warnings (random effects variance > 0)"
+        - "Variance components all non-negative (var_intercept >= 0, var_slope >= 0, var_residual > 0)"
+        - "Minimum 100 observations per domain"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_fit_domain_lmms.log"
+
+      description: "Validate all 3 domain LMMs converged, variance components valid, no singular fits"
+
+    log_file: "logs/step01_fit_domain_lmms.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Extract Variance Components Per Domain
+  # --------------------------------------------------------------------------
+  - name: "step02_extract_variance_components"
+    step_number: "02"
+    description: "Create variance components table with total variance computed for ICC denominator"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "data/step01_variance_components_by_domain.csv"
+          required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual"]
+          variable_name: "variance_components_raw"
+          description: "Raw variance components from Step 1 (3 rows)"
+
+      output_files:
+        - path: "data/step02_variance_components.csv"
+          variable_name: "variance_components"
+          description: "Variance components with total_variance computed (3 rows: What, Where, When)"
+
+      parameters:
+        result: "variance_components_raw"
+        compute_total_variance: true
+
+      returns:
+        type: "Dict"
+        variable_name: "variance_components"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+          variable_name: "variance_components"
+          source: "analysis call output (extract_random_effects_from_lmm)"
+
+      parameters:
+        df: "variance_components"
+        expected_rows: 3
+        expected_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected row count matches (3 for variance components)"
+        - "All required columns present"
+        - "No NaN values in critical columns"
+        - "total_variance computed correctly (sum of var_intercept + var_slope + var_residual)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_extract_variance_components.log"
+
+      description: "Validate DataFrame structure (rows, columns, types) for variance components table"
+
+    log_file: "logs/step02_extract_variance_components.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute ICC Per Domain
+  # --------------------------------------------------------------------------
+  - name: "step03_compute_icc"
+    step_number: "03"
+    description: "Compute three ICC estimates per domain (intercept, slope_simple, slope_conditional) using variance components"
+
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_icc_from_variance_components"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+
+      input_files:
+        - path: "data/step02_variance_components.csv"
+          required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+          variable_name: "variance_components"
+          description: "Variance components with total_variance from Step 2"
+
+      output_files:
+        - path: "data/step03_icc_estimates.csv"
+          variable_name: "icc_estimates"
+          description: "Three ICC types per domain (intercept, slope_simple, slope_conditional) - 3 rows"
+
+      parameters:
+        variance_components_df: "variance_components"
+        slope_name: "TSVR_hours"
+        timepoint: 144.0
+        icc_types: ["intercept", "slope_simple", "slope_conditional"]
+
+      returns:
+        type: "DataFrame"
+        variable_name: "icc_estimates"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          required_columns: ["domain", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+          variable_name: "icc_estimates"
+          source: "analysis call output (compute_icc_from_variance_components)"
+
+      parameters:
+        icc_df: "icc_estimates"
+        icc_columns: ["ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+        allow_conditional_exceeding_1: true
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "ICC_intercept in [0, 1] (by definition)"
+        - "ICC_slope_simple in [0, 1] (by definition)"
+        - "ICC_slope_conditional typically in [0, 1] (can exceed 1.0 if unusual covariance structure - flag for review)"
+        - "No negative ICC values (computation error)"
+        - "No NaN values (indicates computation failure)"
+
+      on_failure:
+        action: "raise ValueError if ICC < 0; log warning if ICC_slope_conditional > 1.0"
+        log_to: "logs/step03_compute_icc.log"
+
+      description: "Validate ICC values in valid range [0, 1], flag unusual conditional ICCs for review"
+
+    log_file: "logs/step03_compute_icc.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Extract Random Effects Per Domain
+  # --------------------------------------------------------------------------
+  - name: "step04_extract_random_effects"
+    step_number: "04"
+    description: "Extract participant-specific random intercepts and slopes from each domain LMM for downstream clustering analyses"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read fitted LMM objects from Step 1 (in-memory or pickled)"
+        - "For each domain (What, Where, When):"
+        - "  Extract random_intercept_UID (participant deviation from mean baseline)"
+        - "  Extract random_slope_UID (participant deviation from mean decline rate)"
+        - "Create long-format table with UID, domain, random_intercept, random_slope"
+        - "Combine all 3 domains into single table"
+        - "Save to CSV"
+
+      input_files:
+        - path: "data/step01_variance_components_by_domain.csv"
+          required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual"]
+          variable_name: "variance_components_raw"
+          description: "Reference for domain list (What, Where, When)"
+
+      output_files:
+        - path: "data/step04_random_effects.csv"
+          variable_name: "random_effects"
+          description: "Participant random effects per domain (300 rows: 100 UIDs × 3 domains)"
+
+      parameters: {}
+
+      returns:
+        type: "DataFrame"
+        variable_name: "random_effects"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_random_effects.csv"
+          required_columns: ["UID", "domain", "random_intercept", "random_slope"]
+          variable_name: "random_effects"
+          source: "analysis call output (stdlib operations)"
+
+      parameters:
+        df: "random_effects"
+        expected_rows: 300
+        expected_columns: ["UID", "domain", "random_intercept", "random_slope"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected row count matches (300: 100 participants × 3 domains)"
+        - "All required columns present"
+        - "No NaN values"
+        - "No duplicate UID × domain combinations"
+        - "All 100 participants present for all 3 domains (complete factorial)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_extract_random_effects.log"
+
+      description: "Validate DataFrame structure for participant random effects table"
+
+    log_file: "logs/step04_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare ICC_slope Across Domains
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_icc_across_domains"
+    step_number: "05"
+    description: "Test whether ICC_slope differs significantly between domains and rank domains by trait-like variance"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read ICC estimates from Step 3"
+        - "Rank domains by ICC_slope_simple (highest to lowest)"
+        - "  Highest ICC_slope = most trait-like (individual differences dominate)"
+        - "  Lowest ICC_slope = most state-like (within-person variation dominates)"
+        - "Compute pairwise differences:"
+        - "  Delta_ICC_What_Where = ICC_slope_What - ICC_slope_Where"
+        - "  Delta_ICC_What_When = ICC_slope_What - ICC_slope_When"
+        - "  Delta_ICC_Where_When = ICC_slope_Where - ICC_slope_When"
+        - "Interpret differences:"
+        - "  If all ICC_slope < 0.10: Parallel Ch5 5.2.6 pattern (no trait variance)"
+        - "  If any ICC_slope > 0.10: Evidence of trait variance in that domain"
+        - "  If difference > 0.05 between domains: Meaningful domain-specific trait difference"
+        - "Save comparison tables"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          required_columns: ["domain", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+          variable_name: "icc_estimates"
+          description: "ICC estimates from Step 3 (3 rows)"
+
+      output_files:
+        - path: "data/step05_domain_icc_comparison.csv"
+          variable_name: "domain_comparison"
+          description: "Domain ranking by ICC_slope_simple (3 rows with rank and interpretation)"
+        - path: "data/step05_pairwise_icc_differences.csv"
+          variable_name: "pairwise_differences"
+          description: "Pairwise ICC differences (3 rows: What vs Where, What vs When, Where vs When)"
+
+      parameters: {}
+
+      returns:
+        type: "Tuple[DataFrame, DataFrame]"
+        unpacking: "domain_comparison, pairwise_differences"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_domain_icc_comparison.csv"
+          required_columns: ["domain", "ICC_slope_simple", "rank", "interpretation"]
+          variable_name: "domain_comparison"
+          source: "analysis call output (stdlib operations)"
+        - path: "data/step05_pairwise_icc_differences.csv"
+          required_columns: ["comparison", "delta_ICC", "interpretation"]
+          variable_name: "pairwise_differences"
+          source: "analysis call output (stdlib operations)"
+
+      parameters:
+        df: "domain_comparison"
+        expected_rows: 3
+        expected_columns: ["domain", "ICC_slope_simple", "rank", "interpretation"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 3 domains present in comparison table"
+        - "All 3 pairwise comparisons present in differences table"
+        - "rank in {1, 2, 3} (no duplicates, all values present)"
+        - "No NaN values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_compare_icc_across_domains.log"
+
+      description: "Validate ICC comparison tables structure"
+
+    log_file: "logs/step05_compare_icc_across_domains.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Compare to Ch5 5.2.6
+  # --------------------------------------------------------------------------
+  - name: "step06_compare_to_ch5"
+    step_number: "06"
+    description: "Compare confidence ICC_slope (this RQ) to accuracy ICC_slope (Ch5 5.2.6) to test measurement richness hypothesis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read ICC estimates from Step 3 (this RQ - confidence)"
+        - "Attempt to read ICC estimates from Ch5 5.2.6 (accuracy)"
+        - "If Ch5 5.2.6 file exists:"
+        - "  Merge on domain (What, Where, When)"
+        - "  Compute delta_ICC = ICC_slope_confidence - ICC_slope_accuracy"
+        - "  Interpret findings:"
+        - "    If delta > 0.05: 5-level confidence reveals more trait variance"
+        - "    If all delta ≈ 0: Both measures show equivalent trait variance"
+        - "    If delta < -0.05: Accuracy shows more trait variance (unexpected - flag for review)"
+        - "  Save comparison table"
+        - "Else (Ch5 5.2.6 not executed):"
+        - "  Create placeholder comparison table with 'pending' status"
+        - "  Log warning (not error - this is optional dependency)"
+
+      input_files:
+        - path: "data/step03_icc_estimates.csv"
+          required_columns: ["domain", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+          variable_name: "icc_estimates_confidence"
+          description: "ICC estimates from this RQ (confidence)"
+        - path: "results/ch5/5.2.6/data/step03_icc_estimates.csv"
+          required_columns: ["domain", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+          variable_name: "icc_estimates_accuracy"
+          description: "ICC estimates from Ch5 5.2.6 (accuracy) - OPTIONAL"
+
+      output_files:
+        - path: "data/step06_ch5_comparison.csv"
+          variable_name: "ch5_comparison"
+          description: "Cross-chapter ICC comparison (3 rows if Ch5 5.2.6 exists, else placeholder)"
+
+      parameters: {}
+
+      returns:
+        type: "DataFrame"
+        variable_name: "ch5_comparison"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_ch5_comparison.csv"
+          required_columns: ["domain", "ICC_slope_confidence", "ICC_slope_accuracy", "delta_ICC", "interpretation"]
+          variable_name: "ch5_comparison"
+          source: "analysis call output (stdlib operations)"
+
+      parameters:
+        df: "ch5_comparison"
+        expected_rows: 3
+        expected_columns: ["domain", "ICC_slope_confidence", "ICC_slope_accuracy", "delta_ICC", "interpretation"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected rows (3)"
+        - "Expected columns (5)"
+        - "All 3 domains present"
+        - "Domains match between RQs (What, Where, When)"
+        - "If Ch5 5.2.6 not executed: placeholder with 'comparison pending' status acceptable"
+
+      on_failure:
+        action: "If Ch5 5.2.6 missing: log warning, create placeholder, proceed; else raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_compare_to_ch5.log"
+
+      description: "Validate cross-chapter comparison table structure (allows placeholder if Ch5 5.2.6 not executed)"
+
+    log_file: "logs/step06_compare_to_ch5.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

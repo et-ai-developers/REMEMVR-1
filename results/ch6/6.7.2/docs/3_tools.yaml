@@ -1,0 +1,240 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.7.2
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once
+
+# =============================================================================
+# RQ 6.7.2: Confidence Variability Predicts Memory Variability
+# Analysis: Correlation analysis (no IRT/LMM - raw item-level data only)
+# Pipeline: pandas aggregation + scipy correlation + permutation test
+# =============================================================================
+
+analysis_tools:
+  # NOTE: This RQ uses ONLY standard library functions (pandas, scipy, numpy)
+  # NO custom tools from tools.analysis_* modules required
+  # Standard library functions are EXEMPTED from tools_inventory.md verification
+
+  groupby_std:
+    module: "pandas.core.groupby"
+    function: "DataFrameGroupBy.std"
+    signature: "DataFrameGroupBy.std(ddof: int = 1) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    description: "Compute standard deviation of confidence/accuracy across items per participant x test"
+    stdlib: true
+    usage: |
+      # Step 1: Confidence variability
+      confidence_sd = df.groupby(['UID', 'test'])[confidence_cols].std()
+
+      # Step 2: Accuracy variability
+      accuracy_sd = df.groupby(['UID', 'test'])[accuracy_cols].std()
+    notes: "Standard pandas operation - exempted from tools_inventory.md verification"
+
+  pearsonr:
+    module: "scipy.stats"
+    function: "pearsonr"
+    signature: "pearsonr(x: ArrayLike, y: ArrayLike) -> Tuple[float, float]"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "Parametric Pearson correlation test (Decision D068 dual p-value requirement)"
+    stdlib: true
+    usage: |
+      # Step 3: Parametric correlation
+      from scipy.stats import pearsonr
+      r, p_parametric = pearsonr(SD_confidence, SD_accuracy)
+    notes: "Standard scipy function - parametric component of Decision D068"
+
+  permutation_correlation:
+    module: "numpy.random"
+    function: "permutation"
+    signature: "permutation(x: ArrayLike, axis: int = 0) -> ndarray"
+    validation_tool: "validate_correlation_test_d068"
+
+    description: "Permutation-based correlation test (Decision D068 non-parametric component)"
+    stdlib: true
+    usage: |
+      # Step 3: Permutation test (10,000 iterations)
+      null_dist = []
+      for i in range(10000):
+          perm_x = np.random.permutation(SD_confidence)
+          null_r, _ = pearsonr(perm_x, SD_accuracy)
+          null_dist.append(null_r)
+      p_permutation = (np.abs(null_dist) >= np.abs(r)).mean()
+    notes: "Standard numpy function - non-parametric component of Decision D068"
+
+  linregress:
+    module: "scipy.stats"
+    function: "linregress"
+    signature: "linregress(x: ArrayLike, y: ArrayLike) -> LinregressResult"
+    validation_tool: "validate_plot_data_completeness"
+
+    description: "Linear regression for scatterplot regression line"
+    stdlib: true
+    usage: |
+      # Step 4: Regression line for plot
+      from scipy.stats import linregress
+      slope, intercept, r_value, p_value, std_err = linregress(SD_confidence, SD_accuracy)
+      x_grid = np.linspace(SD_confidence.min(), SD_confidence.max(), 100)
+      y_pred = intercept + slope * x_grid
+    notes: "Standard scipy function - generates regression line coordinates for scatterplot"
+
+validation_tools:
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_sd_confidence.csv"
+        required_columns: ["UID", "test", "SD_confidence", "N_items"]
+        source: "Step 1 aggregation output"
+      - path: "data/step02_sd_accuracy.csv"
+        required_columns: ["UID", "test", "SD_accuracy", "N_items"]
+        source: "Step 2 aggregation output"
+
+    parameters:
+      expected_rows: [380, 400]  # Range: 100 participants x 4 tests, some missing allowed
+      expected_columns:
+        step01: ["UID", "test", "SD_confidence", "N_items"]
+        step02: ["UID", "test", "SD_accuracy", "N_items"]
+      column_types:
+        UID: "object"
+        test: "object"
+        SD_confidence: "float64"
+        SD_accuracy: "float64"
+        N_items: "int64"
+
+    criteria:
+      - "Row count in expected range [380, 400]"
+      - "All required columns present"
+      - "Column types match specification"
+      - "No NaN values in SD columns"
+      - "No duplicate UID x test combinations"
+      - "N_items >= 10 for all observations"
+      - "SD values in [0, 0.5] (valid range for binary/Likert SD)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable summary)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step0X_compute_sd.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate SD aggregation outputs have expected structure and value ranges"
+    source_reference: "tools_inventory.md section 'tools.validation' line 629"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_correlation.csv"
+        required_columns: ["r", "p_parametric", "p_permutation", "CI_lower", "CI_upper", "N", "effect_size_category"]
+        source: "Step 3 correlation output"
+
+    parameters:
+      required_cols: ["r", "p_parametric", "p_permutation", "CI_lower", "CI_upper"]
+      check_d068: true
+      alpha: 0.05
+
+    criteria:
+      - "DUAL p-values present: p_parametric AND p_permutation (Decision D068 compliance)"
+      - "r in [-1, 1] (correlation coefficient bounds)"
+      - "p_parametric in [0, 1] (p-value bounds)"
+      - "p_permutation in [0, 1] (p-value bounds)"
+      - "CI_lower <= r <= CI_upper (confidence interval consistency)"
+      - "N >= 300 (sufficient observations for correlation)"
+      - "effect_size_category in {strong, moderate, weak} (valid categories)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant and all checks passed)"
+        d068_compliant: "bool (True if dual p-values present)"
+        missing_cols: "List[str] (empty if valid)"
+        message: "str (human-readable summary)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_correlate_variability.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate correlation test includes Decision D068 dual p-value reporting and all results are valid"
+    source_reference: "tools_inventory.md section 'tools.validation' line 454"
+
+  validate_plot_data_completeness:
+    module: "tools.validation"
+    function: "validate_plot_data_completeness"
+    signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_variability_scatterplot_data.csv"
+        required_columns: ["UID", "test", "SD_confidence", "SD_accuracy"]
+        source: "Step 4 scatterplot data output"
+      - path: "data/step04_variability_regression_line.csv"
+        required_columns: ["SD_confidence", "SD_accuracy_predicted"]
+        source: "Step 4 regression line output"
+
+    parameters:
+      check_scatterplot:
+        expected_rows: [380, 400]
+        expected_columns: ["UID", "test", "SD_confidence", "SD_accuracy"]
+        no_duplicates: ["UID", "test"]
+        value_ranges:
+          SD_confidence: [0, 0.5]
+          SD_accuracy: [0, 0.5]
+      check_regression_line:
+        expected_rows: 100  # Fixed grid points
+        expected_columns: ["SD_confidence", "SD_accuracy_predicted"]
+        sorted_ascending: "SD_confidence"
+        value_ranges:
+          SD_confidence: [0, 0.5]
+          SD_accuracy_predicted: [0, 0.5]
+
+    criteria:
+      - "Scatterplot data: 380-400 rows (one per observation)"
+      - "Regression line: 100 rows (smooth line)"
+      - "No NaN values in any column (both files)"
+      - "No duplicate UID x test combinations (scatterplot)"
+      - "SD_confidence in [0, 0.5] (both files)"
+      - "SD_accuracy in [0, 0.5] (scatterplot)"
+      - "SD_accuracy_predicted in [0, 0.5] (regression line)"
+      - "Regression line x values sorted ascending"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (human-readable summary)"
+        missing_domains: "List[str] (not applicable for this RQ - no domain grouping)"
+        missing_groups: "List[str] (not applicable for this RQ - no group variable)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_prepare_scatterplot_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate scatterplot data and regression line are complete and correctly formatted"
+    source_reference: "tools_inventory.md section 'tools.validation' line 638"
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 3
+  total_unique_tools: 7
+  stdlib_tools: 4  # groupby_std, pearsonr, permutation_correlation, linregress
+  custom_tools: 3  # validate_dataframe_structure, validate_correlation_test_d068, validate_plot_data_completeness
+  mandatory_decisions_embedded: ["D068"]
+  notes: |
+    This RQ uses primarily standard library functions (pandas, scipy, numpy).
+    NO custom analysis tools from tools.analysis_* modules required.
+    Standard library functions exempted from tools_inventory.md verification per agent spec.
+    Validation tools are custom (from tools.validation) and verified in tools_inventory.md.
+
+    Decision D068 compliance: Step 3 uses BOTH parametric (scipy.stats.pearsonr)
+    and permutation-based correlation test for dual p-value reporting.

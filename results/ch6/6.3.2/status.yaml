@@ -1,0 +1,25 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+rq_tools:
+  status: success
+  completed: 2025-12-06 18:15
+  context_dump: "2 analysis + 9 validation tools cataloged for LMM-only calibration analysis"
+rq_analysis:
+  status: success
+  completed: 2025-12-06 18:30
+  context_dump: "5 steps specified with validation (LMM-only calibration analysis - no IRT, uses Ch5 5.2.1 + Ch6 6.3.1 derived theta)"
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_load_merge_calibration_data: pending
+  step01_fit_lmm_domain_time: pending
+  step02_compute_post_hoc_contrasts: pending
+  step03_rank_domains_by_calibration: pending
+  step04_prepare_calibration_trajectory_plot: pending

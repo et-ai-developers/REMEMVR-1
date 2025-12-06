@@ -1,0 +1,25 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+rq_tools:
+  status: success
+  completed: 2025-12-06 16:45
+  context_dump: "5 analysis + 5 validation tools cataloged for LMM trajectory analysis (HCE rates over time)"
+rq_analysis:
+  status: success
+  completed: 2025-12-06 16:50
+  context_dump: "4 steps specified with validation (LMM trajectory: HCE rates over time)"
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_extract_item_level: pending
+  step01_compute_hce_rates: pending
+  step02_fit_lmm_trajectory: pending
+  step03_test_time_effect: pending
+  step04_prepare_trajectory_data: pending

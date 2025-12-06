@@ -1,0 +1,31 @@
+rq_builder: success
+rq_concept: success
+rq_scholar:
+  status: success
+  completed: 2025-12-06 17:15
+  context_dump: "9.1/10 CONDITIONAL. Strong theory/interpretation, needs practice effects discussion. 1 required change (add practice effects to limitations), 5 suggested improvements, 10 literature-grounded criticisms."
+rq_stats: success
+rq_planner: success
+rq_tools:
+  status: success
+  completed: 2025-12-06 17:00
+  context_dump: "11 analysis + 10 validation tools cataloged for IRT->LMM source-destination confidence trajectory analysis"
+rq_analysis:
+  status: success
+  completed: 2025-12-06 17:05
+  context_dump: "8 steps specified with validation (IRT 2-pass GRM -> LMM LocationType x Time -> dual-scale plots)"
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step00_extract_vr_data: pending
+  step01_irt_calibration_pass1: pending
+  step02_purify_items: pending
+  step03_irt_calibration_pass2: pending
+  step04_merge_theta_tsvr: pending
+  step05_fit_lmm: pending
+  step06_compute_post_hoc_contrasts: pending
+  step07_prepare_trajectory_plot_data: pending

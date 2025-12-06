@@ -1,0 +1,445 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T17:15:00Z
+# RQ: ch6/6.1.4
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.1.4"
+  total_steps: 6
+  analysis_type: "LMM variance decomposition (ICC computation)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T17:15:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Load Best-Fitting LMM
+  # --------------------------------------------------------------------------
+  - name: "step00_load_best_model"
+    step_number: "00"
+    description: "Load fitted LMM model object from RQ 6.1.1 functional form comparison winner"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Open results/ch6/6.1.1/data/step06_best_model.pkl in binary read mode"
+        - "Load pickle object using pickle.load()"
+        - "Verify model.converged attribute = True"
+        - "Extract model.formula for metadata"
+        - "Extract model.nobs for sample size"
+        - "Write metadata to data/step00_model_metadata.txt"
+
+      input_files:
+        - path: "results/ch6/6.1.1/data/step06_best_model.pkl"
+          format: "Python pickle file (binary)"
+          description: "Fitted statsmodels MixedLMResults object from RQ 6.1.1"
+
+      output_files:
+        - path: "data/step00_model_metadata.txt"
+          format: "Plain text file"
+          description: "Model metadata (formula, sample size, convergence status, source path, timestamp)"
+
+      parameters:
+        source_path: "results/ch6/6.1.1/data/step06_best_model.pkl"
+        mode: "rb"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "In-memory model object"
+          variable_name: "lmm_model"
+          source: "Loaded from step00 pickle file"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (model.converged = True)"
+        - "Random effects structure includes intercept and slope variance"
+        - "No convergence warnings"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_load_best_model.log"
+
+      description: "Validate loaded LMM model converged and has required random effects structure"
+
+    log_file: "logs/step00_load_best_model.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Extract Variance Components
+  # --------------------------------------------------------------------------
+  - name: "step01_extract_variance_components"
+    step_number: "01"
+    description: "Extract 4 variance components from LMM random effects for ICC computation"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+
+      input_files:
+        - path: "In-memory model object"
+          variable_name: "lmm_model"
+          source: "Loaded from step00"
+
+      output_files:
+        - path: "data/step01_variance_components.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "component", type: "str", description: "Variance component name"}
+            - {name: "value", type: "float", description: "Variance/covariance estimate"}
+            - {name: "SE", type: "float", description: "Standard error of estimate (NA if unavailable)"}
+          row_count: 4
+          description: "4 variance components: var_intercept, var_slope, cov_int_slope, var_residual"
+
+      parameters:
+        result: "lmm_model"
+
+      returns:
+        type: "Dict"
+        variable_name: "variance_components"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_variance_positivity"
+      signature: "validate_variance_positivity(variance_df: DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict"
+
+      input_files:
+        - path: "data/step01_variance_components.csv"
+          variable_name: "variance_df"
+          source: "Output from extract_random_effects_from_lmm"
+
+      parameters:
+        variance_df: "variance_df"
+        component_col: "component"
+        value_col: "value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "var_intercept > 0 (variance must be positive)"
+        - "var_residual > 0 (residual variance must be positive)"
+        - "var_slope >= 0 (can be zero if no individual differences)"
+        - "Covariance within correlation bounds: |cov| <= sqrt(var_intercept * var_slope)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_extract_variance_components.log"
+
+      description: "Validate variance components are positive and covariance within bounds"
+
+    log_file: "logs/step01_extract_variance_components.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute ICC Estimates
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_icc_estimates"
+    step_number: "02"
+    description: "Compute 3 ICC estimates following Hoffman & Stawski (2009) methodology"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "compute_icc_from_variance_components"
+      signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+
+      input_files:
+        - path: "data/step01_variance_components.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["component", "value"]
+          variable_name: "variance_components_df"
+
+      output_files:
+        - path: "data/step02_icc_estimates.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "icc_type", type: "str", description: "ICC type (ICC_intercept, ICC_slope_simple, ICC_slope_conditional)"}
+            - {name: "value", type: "float", description: "ICC estimate in [0, 1]"}
+            - {name: "interpretation", type: "str", description: "Verbal interpretation (negligible, small, moderate, substantial)"}
+          row_count: 3
+          description: "3 ICC estimates following Hoffman & Stawski (2009)"
+
+      parameters:
+        variance_components_df: "variance_components_df"
+        slope_name: "TSVR_hours"
+        timepoint: 6.0
+
+      returns:
+        type: "DataFrame"
+        variable_name: "icc_estimates"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict"
+
+      input_files:
+        - path: "data/step02_icc_estimates.csv"
+          variable_name: "icc_df"
+          source: "Output from compute_icc_from_variance_components"
+
+      parameters:
+        icc_df: "icc_estimates"
+        icc_col: "value"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All ICC values in [0, 1] range (mathematical constraint)"
+        - "ICC_slope_conditional >= ICC_slope_simple (mathematical property)"
+        - "No NaN values"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_compute_icc_estimates.log"
+
+      description: "Validate ICC values in [0,1] range and conditional >= simple ICC"
+
+    log_file: "logs/step02_compute_icc_estimates.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract Participant-Level Random Effects
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_random_effects"
+    step_number: "03"
+    description: "Extract 100 participant-level random effects (REQUIRED for RQ 6.1.5 clustering)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Access model.random_effects attribute (dict with UID keys)"
+        - "Extract intercept and slope deviations for each participant"
+        - "Convert to DataFrame with columns: UID, random_intercept, random_slope"
+        - "Save to data/step03_random_effects.csv"
+
+      input_files:
+        - path: "In-memory model object"
+          variable_name: "lmm_model"
+          source: "Loaded from step00"
+
+      output_files:
+        - path: "data/step03_random_effects.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier (Pxxx format)"}
+            - {name: "random_intercept", type: "float", description: "Intercept deviation from population mean"}
+            - {name: "random_slope", type: "float", description: "Slope deviation from population mean slope"}
+          row_count: 100
+          description: "100 participant-level random effects for downstream RQ 6.1.5 clustering"
+
+      parameters: {}
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict"
+
+      input_files:
+        - path: "data/step03_random_effects.csv"
+          variable_name: "random_effects_df"
+          source: "Output from random effects extraction"
+
+      parameters:
+        df: "random_effects_df"
+        expected_rows: 100
+        expected_columns: ["UID", "random_intercept", "random_slope"]
+        column_types: {"UID": "object", "random_intercept": "float64", "random_slope": "float64"}
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 100 rows (all participants present)"
+        - "All required columns present"
+        - "No NaN values in any column"
+        - "No duplicate UIDs"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_random_effects.log"
+
+      description: "Validate 100 participants with complete random effects data"
+
+    log_file: "logs/step03_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Test Intercept-Slope Correlation
+  # --------------------------------------------------------------------------
+  - name: "step04_test_intercept_slope_correlation"
+    step_number: "04"
+    description: "Test correlation between baseline confidence and forgetting rate with Decision D068 dual p-values"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "test_intercept_slope_correlation_d068"
+      signature: "test_intercept_slope_correlation_d068(random_effects_df: DataFrame, family_alpha: float = 0.05, n_tests: int = 15, intercept_col: str = 'Group Var', slope_col: str = 'Group x TSVR_hours Var') -> Dict"
+
+      input_files:
+        - path: "data/step03_random_effects.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "random_intercept", "random_slope"]
+          variable_name: "random_effects_df"
+
+      output_files:
+        - path: "data/step04_intercept_slope_correlation.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "correlation_r", type: "float", description: "Pearson correlation coefficient in [-1, 1]"}
+            - {name: "CI_lower", type: "float", description: "Lower bound of 95% CI"}
+            - {name: "CI_upper", type: "float", description: "Upper bound of 95% CI"}
+            - {name: "N", type: "int", description: "Sample size (100)"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value"}
+            - {name: "interpretation", type: "str", description: "Verbal interpretation"}
+          row_count: 1
+          description: "Intercept-slope correlation with Decision D068 dual p-value reporting"
+
+      parameters:
+        random_effects_df: "random_effects_df"
+        family_alpha: 0.05
+        n_tests: 1
+        intercept_col: "random_intercept"
+        slope_col: "random_slope"
+
+      returns:
+        type: "Dict"
+        variable_name: "correlation_result"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict"
+
+      input_files:
+        - path: "data/step04_intercept_slope_correlation.csv"
+          variable_name: "correlation_df"
+          source: "Output from test_intercept_slope_correlation_d068"
+
+      parameters:
+        correlation_df: "correlation_df"
+        required_cols: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "p_uncorrected column present (Decision D068 requirement)"
+        - "p_bonferroni column present (Decision D068 requirement)"
+        - "Correlation r in [-1, 1] range"
+        - "CI_lower < correlation_r < CI_upper"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_test_intercept_slope_correlation.log"
+
+      description: "Validate correlation test includes Decision D068 dual p-value reporting"
+
+    log_file: "logs/step04_test_intercept_slope_correlation.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare ICC_slope with Chapter 5 Accuracy Data
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_icc_ch5"
+    step_number: "05"
+    description: "CRITICAL comparison testing measurement artifact vs universal forgetting hypothesis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read data/step02_icc_estimates.csv"
+        - "Extract ICC_slope_simple value (confidence data from this RQ)"
+        - "Set ICC_slope_accuracy = 0.0005 (hard-coded from Chapter 5 RQ 5.1.4)"
+        - "Compute delta_ICC = ICC_slope_confidence - ICC_slope_accuracy"
+        - "Compute ratio_ICC = ICC_slope_confidence / ICC_slope_accuracy"
+        - "Classify hypothesis_supported based on ICC_slope_confidence magnitude"
+        - "Generate interpretation string"
+        - "Save to data/step05_ch5_icc_comparison.csv"
+
+      input_files:
+        - path: "data/step02_icc_estimates.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["icc_type", "value"]
+          variable_name: "icc_estimates"
+
+      output_files:
+        - path: "data/step05_ch5_icc_comparison.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "ICC_slope_confidence", type: "float", description: "From this RQ Step 2 (5-level ordinal data)"}
+            - {name: "ICC_slope_accuracy", type: "float", description: "From Chapter 5 RQ 5.1.4 (dichotomous data, hard-coded 0.0005)"}
+            - {name: "delta_ICC", type: "float", description: "Difference (confidence - accuracy)"}
+            - {name: "ratio_ICC", type: "float", description: "Ratio (confidence / accuracy)"}
+            - {name: "hypothesis_supported", type: "str", description: "Measurement Artifact / Universal Forgetting / Inconclusive"}
+            - {name: "interpretation", type: "str", description: "Verbal interpretation"}
+          row_count: 1
+          description: "Critical comparison testing measurement artifact vs universal forgetting hypothesis"
+
+      parameters:
+        ICC_slope_accuracy: 0.0005
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict"
+
+      input_files:
+        - path: "data/step05_ch5_icc_comparison.csv"
+          variable_name: "comparison_df"
+          source: "Output from Chapter 5 comparison"
+
+      parameters:
+        df: "comparison_df"
+        expected_rows: 1
+        expected_columns: ["ICC_slope_confidence", "ICC_slope_accuracy", "delta_ICC", "ratio_ICC", "hypothesis_supported", "interpretation"]
+        column_types: null
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 1 row (single comparison)"
+        - "All required columns present"
+        - "ICC_slope_accuracy = 0.0005 exactly"
+        - "hypothesis_supported in valid set {Measurement Artifact, Universal Forgetting, Inconclusive}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_compare_icc_ch5.log"
+
+      description: "Validate Chapter 5 comparison structure and hypothesis classification"
+
+    log_file: "logs/step05_compare_icc_ch5.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

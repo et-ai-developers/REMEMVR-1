@@ -1,0 +1,428 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# RQ: 6.1.1 (Functional Form Comparison for Confidence Decline)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  prepare_irt_input_from_long:
+    module: "tools.analysis_irt"
+    function: "prepare_irt_input_from_long"
+    signature: "prepare_irt_input_from_long(df_long: DataFrame, groups: Dict[str, List[str]]) -> Tuple[Tensor, Tensor, Tensor, List, List]"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/cache/dfData.csv"
+        required_columns: ["UID", "TEST", "TSVR"]
+        expected_rows: "~37,000 (100 participants × 4 tests × ~92 items)"
+        data_types:
+          UID: "string (format: P###)"
+          TEST: "string (values: T1/T2/T3/T4)"
+          TC_*: "float (values: 0, 0.25, 0.5, 0.75, 1.0, NaN)"
+          TSVR: "float (hours since VR encoding)"
+
+    output_files:
+      - path: "data/step00_irt_input.csv"
+        columns: ["composite_ID", "TC_*"]
+        description: "Wide-format IRT input (400 rows × ~103 columns)"
+      - path: "data/step00_tsvr_mapping.csv"
+        columns: ["composite_ID", "TSVR_hours", "test"]
+        description: "TSVR time variable mapping (400 rows)"
+      - path: "data/step00_q_matrix.csv"
+        columns: ["item_name", "All"]
+        description: "Q-matrix for single omnibus factor (~102 items)"
+
+    parameters:
+      groups:
+        All: "list of TC_* item names (single factor structure)"
+      output_format: "wide (composite_ID × items)"
+
+    description: "Extract 5-category confidence ratings from dfData.csv, create IRT input (wide format), TSVR mapping, and Q-matrix for omnibus 'All' factor"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - prepare_irt_input_from_long"
+
+  configure_irt_model:
+    module: "tools.analysis_irt"
+    function: "configure_irt_model"
+    signature: "configure_irt_model(n_items: int, n_factors: int, n_cats: int, Q_matrix: Tensor, correlated_factors: bool, device: str, seed: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+
+    input_files:
+      - path: "data/step00_q_matrix.csv"
+        required_columns: ["item_name", "All"]
+        source: "prepare_irt_input_from_long output"
+
+    output_files:
+      - path: "data/step01_model_config.pkl"
+        description: "Configured IWAVE GRM model object (before fitting)"
+
+    parameters:
+      n_cats: 5  # 5-category ordinal: 0, 0.25, 0.5, 0.75, 1.0
+      n_factors: 1  # Single "All" omnibus factor
+      correlated_factors: false  # Not applicable for single factor
+      device: "cpu"
+      seed: 42
+      prior: "p1_med"  # Medium-strength prior for stability
+
+    description: "Configure Graded Response Model for 5-category ordinal confidence ratings (GRM, NOT 2PL)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - configure_irt_model"
+
+  fit_irt_grm:
+    module: "tools.analysis_irt"
+    function: "fit_irt_grm"
+    signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        required_columns: ["composite_ID", "TC_*"]
+        source: "prepare_irt_input_from_long output"
+      - path: "data/step01_model_config.pkl"
+        source: "configure_irt_model output"
+
+    output_files:
+      - path: "data/step01_pass1_fitted_model.pkl"
+        description: "Fitted GRM model (Pass 1)"
+      - path: "data/step03_pass2_fitted_model.pkl"
+        description: "Fitted GRM model (Pass 2, on purified items)"
+
+    parameters:
+      batch_size: 400
+      max_iter: 50  # Minimal settings for testing first
+      mc_samples: 10
+      iw_samples: 10
+      # Production settings (after validation): max_iter=200, mc_samples=100, iw_samples=100
+
+    description: "Fit GRM via IWAVE variational inference on 5-category confidence data (Steps 1 and 3)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - fit_irt_grm"
+
+  extract_parameters_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_parameters_from_irt"
+    signature: "extract_parameters_from_irt(model: IWAVE, item_list: List, factor_names: List, n_cats: int) -> DataFrame"
+    validation_tool: "validate_irt_parameters"
+
+    input_files:
+      - path: "data/step01_pass1_fitted_model.pkl"
+        source: "fit_irt_grm output (Pass 1)"
+      - path: "data/step03_pass2_fitted_model.pkl"
+        source: "fit_irt_grm output (Pass 2)"
+
+    output_files:
+      - path: "data/step01_pass1_item_params.csv"
+        columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+        description: "Pass 1 GRM item parameters (discrimination + 4 thresholds)"
+      - path: "data/step03_item_parameters.csv"
+        columns: ["item_name", "dimension", "a", "b1", "b2", "b3", "b4"]
+        description: "Pass 2 final GRM item parameters"
+
+    parameters:
+      n_cats: 5  # 5-category ordinal model
+      factor_names: ["All"]
+
+    description: "Extract GRM item parameters (discrimination a, thresholds b1-b4) from fitted model"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - extract_parameters_from_irt"
+
+  extract_theta_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_theta_from_irt"
+    signature: "extract_theta_from_irt(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, composite_ids: List, factor_names: List, scoring_batch_size: int, mc_samples: int, iw_samples: int, invert_scale: bool) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step01_pass1_fitted_model.pkl"
+        source: "fit_irt_grm output (Pass 1)"
+      - path: "data/step03_pass2_fitted_model.pkl"
+        source: "fit_irt_grm output (Pass 2)"
+
+    output_files:
+      - path: "data/step01_pass1_theta.csv"
+        columns: ["composite_ID", "theta_All", "se_All"]
+        description: "Pass 1 theta estimates (diagnostic)"
+      - path: "data/step03_theta_confidence.csv"
+        columns: ["composite_ID", "theta_All", "se_All"]
+        description: "Pass 2 final confidence ability estimates"
+
+    parameters:
+      factor_names: ["All"]
+      scoring_batch_size: 400
+      mc_samples: 10
+      iw_samples: 10
+      invert_scale: false
+
+    description: "Extract participant ability estimates (theta scores) from fitted GRM model"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - extract_theta_from_irt"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float, b_threshold: float) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step01_pass1_item_params.csv"
+        required_columns: ["item_name", "a", "b1", "b2", "b3", "b4"]
+        source: "extract_parameters_from_irt output (Pass 1)"
+
+    output_files:
+      - path: "data/step02_purified_items.csv"
+        columns: ["item_name"]
+        description: "Retained items after purification (31-71 items)"
+      - path: "data/step02_purification_report.txt"
+        description: "Exclusion report with reasons"
+
+    parameters:
+      a_threshold: 0.4  # Decision D039: discrimination e 0.4
+      b_threshold: 3.0  # Decision D039: |b_mean| d 3.0
+
+    description: "Purify items using Decision D039 thresholds (|b_mean| d 3.0, a e 0.4) for GRM with 4 thresholds"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_irt' - filter_items_by_quality"
+    notes: "For GRM, computes b_mean = mean(b1, b2, b3, b4) and evaluates |b_mean| against threshold"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step04_lmm_input.csv"
+        required_columns: ["UID", "test", "theta_All", "TSVR_hours", "Days", "Days_squared", "log_Days_plus1"]
+        source: "Step 4 merge output"
+
+    output_files:
+      - path: "data/step05_model1_linear.pkl"
+        description: "Fitted Linear LMM"
+      - path: "data/step05_model2_quadratic.pkl"
+        description: "Fitted Quadratic LMM"
+      - path: "data/step05_model3_logarithmic.pkl"
+        description: "Fitted Logarithmic LMM"
+      - path: "data/step05_model4_linear_logarithmic.pkl"
+        description: "Fitted Linear+Logarithmic LMM"
+      - path: "data/step05_model5_quadratic_logarithmic.pkl"
+        description: "Fitted Quadratic+Logarithmic LMM"
+
+    parameters:
+      groups: "UID"
+      re_formula: "~Days"  # Random intercepts + slopes
+      reml: false  # ML for AIC comparison
+      formulas:
+        model1: "theta_All ~ Days"
+        model2: "theta_All ~ Days + Days_squared"
+        model3: "theta_All ~ log_Days_plus1"
+        model4: "theta_All ~ Days + log_Days_plus1"
+        model5: "theta_All ~ Days + Days_squared + log_Days_plus1"
+
+    description: "Fit 5 candidate LMM functional forms using TSVR (Decision D070) with REML=False for AIC comparison"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  compare_lmm_models_by_aic:
+    module: "tools.analysis_lmm"
+    function: "compare_lmm_models_by_aic"
+    signature: "compare_lmm_models_by_aic(data: DataFrame, n_factors: int, reference_group: str, groups: str, save_dir: Path) -> Dict"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step05_model_comparison.csv"
+        required_columns: ["model_name", "AIC", "BIC", "log_likelihood", "num_params", "converged"]
+        source: "Step 5 LMM fitting output"
+
+    output_files:
+      - path: "data/step06_aic_comparison.csv"
+        columns: ["model_name", "AIC", "delta_AIC", "relative_likelihood", "akaike_weight", "is_best"]
+        description: "AIC comparison with Akaike weights"
+      - path: "data/step06_best_model.pkl"
+        description: "Copy of best model for canonical reference"
+
+    parameters:
+      n_factors: 1  # Single "All" factor
+      reference_group: null  # Not applicable for single factor
+
+    description: "Compute Akaike weights from AIC values, identify best model (lowest AIC, highest weight)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compare_lmm_models_by_aic"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_irt_input.csv"
+        required_columns: ["composite_ID"]
+        source: "prepare_irt_input_from_long output"
+
+    parameters:
+      required_columns: ["composite_ID", "TC_*"]
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing required columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        missing_columns: "List[str] (empty if valid)"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_vr_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate required columns exist in extracted data"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_columns"
+
+  validate_irt_convergence:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_pass1_fitted_model.pkl"
+        source: "fit_irt_grm output"
+
+    parameters:
+      loss_threshold: 0.001
+      max_iterations: 50
+
+    criteria:
+      - "Model converged (loss stable)"
+      - "No NaN parameters detected"
+      - "All discrimination a > 0"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if model converged)"
+        checks: "list of check results"
+        message: "str (explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate GRM model converged successfully"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_convergence"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_pass1_item_params.csv"
+        required_columns: ["item_name", "a", "b1", "b2", "b3", "b4"]
+        source: "extract_parameters_from_irt output"
+
+    parameters:
+      a_min: 0.01  # Discrimination must be positive
+      b_max: 10.0  # Extreme difficulty threshold
+      a_col: "a"
+      b_col: "b1"  # Check first threshold (representative)
+
+    criteria:
+      - "All discrimination a in [0.01, 10.0]"
+      - "All thresholds b1-b4 finite (no NaN/Inf)"
+      - "Threshold ordering: b1 < b2 < b3 < b4"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        n_items: "int"
+        n_valid: "int"
+        n_invalid: "int"
+        invalid_items: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_irt_calibration_pass1.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate GRM item parameters in acceptable ranges, threshold ordering correct"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_irt_parameters"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_theta_confidence.csv"
+        required_columns: ["theta_All", "se_All"]
+        source: "extract_theta_from_irt output"
+
+    parameters:
+      theta_range: [-4.0, 4.0]
+      se_range: [0.1, 1.5]
+
+    criteria:
+      - "All theta values in [-4, 4]"
+      - "All SE values in [0.1, 1.5]"
+      - "No NaN or infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list (first 10 violations)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_irt_calibration_pass2.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate theta scores and SEs in expected ranges"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_model1_linear.pkl"
+        source: "fit_lmm_trajectory_tsvr output"
+
+    parameters:
+      check_singularity: true
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "All fixed effects have finite estimates"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate LMM converged successfully, no singular fit"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+summary:
+  analysis_tools_count: 9
+  validation_tools_count: 5
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D039", "D070"]
+  rq: "6.1.1"
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "GRM for 5-category ordinal confidence ratings (NOT 2PL for dichotomous)"

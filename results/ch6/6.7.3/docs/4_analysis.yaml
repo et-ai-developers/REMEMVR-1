@@ -1,0 +1,431 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: ch6/6.7.3
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.7.3"
+  total_steps: 4
+  analysis_type: "Correlation analysis (no IRT, no LMM)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Calibration and Residuals Data
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_data"
+    step_number: "00"
+    description: "Load Day 0 calibration scores from RQ 6.2.1 and trajectory residuals from Ch5 5.1.1"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load calibration scores: pd.read_csv('results/ch6/6.2.1/data/step02_calibration_scores.csv')"
+        - "Filter to T1 (Day 0) only: df[df['test'] == 'T1']"
+        - "Extract UID from composite_ID: df['UID'] = df['composite_ID'].str.split('_').str[0]"
+        - "Select columns [UID, calibration]"
+        - "Save to data/step00_calibration_day0.csv"
+        - "Load trajectory residuals: pd.read_csv('results/ch5/5.1.1/data/step05_lmm_residuals.csv')"
+        - "Extract UID from composite_ID: df['UID'] = df['composite_ID'].str.split('_').str[0]"
+        - "Extract test from composite_ID: df['test'] = df['composite_ID'].str.split('_').str[1]"
+        - "Select columns [composite_ID, UID, test, residual]"
+        - "Save to data/step00_trajectory_residuals.csv"
+
+      input_files:
+        - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "Participant-test ID (UID_test)"}
+            - {name: "calibration", type: "float", description: "Z-standardized calibration quality"}
+            - {name: "test", type: "str", description: "Test session (T1, T2, T3, T4)"}
+          row_count: 400
+          description: "Calibration scores from RQ 6.2.1 (all 4 timepoints)"
+          source: "RQ 6.2.1 Step 2 output"
+
+        - path: "results/ch5/5.1.1/data/step05_lmm_residuals.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "Participant-test ID"}
+            - {name: "residual", type: "float", description: "Deviation from LMM prediction"}
+          row_count: 400
+          description: "Trajectory residuals from Ch5 5.1.1 LMM fit"
+          source: "Ch5 5.1.1 Step 5 output"
+
+      output_files:
+        - path: "data/step00_calibration_day0.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant unique ID"}
+            - {name: "calibration", type: "float", description: "Day 0 calibration quality"}
+          row_count: 100
+          description: "Day 0 calibration scores (predictor variable)"
+
+        - path: "data/step00_trajectory_residuals.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "composite_ID", type: "str", description: "Participant-test ID"}
+            - {name: "UID", type: "str", description: "Participant unique ID"}
+            - {name: "test", type: "str", description: "Test session"}
+            - {name: "residual", type: "float", description: "LMM residual"}
+          row_count: 400
+          description: "Trajectory residuals for variability computation"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_calibration_day0.csv"
+          source: "Analysis call output (stdlib load + filter)"
+          variable_name: "calibration_day0"
+
+        - path: "data/step00_trajectory_residuals.csv"
+          source: "Analysis call output (stdlib load)"
+          variable_name: "trajectory_residuals"
+
+      parameters:
+        # Validate calibration_day0.csv
+        df: "calibration_day0"
+        expected_rows: 100
+        expected_columns: ["UID", "calibration"]
+        column_types:
+          UID: "object"
+          calibration: "float64"
+
+      criteria:
+        - "Calibration: 100 rows (one per participant)"
+        - "Calibration: Required columns [UID, calibration]"
+        - "Calibration: No NaN values in calibration column"
+        - "Residuals: 400 rows (100 participants × 4 tests)"
+        - "Residuals: Required columns [composite_ID, UID, test, residual]"
+        - "Residuals: No NaN values in residual column"
+        - "All 100 UIDs from calibration present in residuals"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_data.log"
+
+      description: "Validate extracted data has expected structure (rows, columns, types)"
+
+    log_file: "logs/step00_extract_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute Trajectory Variability Per Participant
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_variability"
+    step_number: "01"
+    description: "Compute SD of residuals across 4 timepoints for each participant (trajectory variability measure)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_trajectory_residuals.csv"
+        - "Group by UID: df.groupby('UID')"
+        - "Compute SD of residuals: grouped['residual'].std()"
+        - "Create trajectory_variability column"
+        - "Validate all 100 participants have exactly 4 residuals"
+        - "Save to data/step01_trajectory_variability.csv"
+
+      input_files:
+        - path: "data/step00_trajectory_residuals.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "test", type: "str"}
+            - {name: "residual", type: "float"}
+          row_count: 400
+          description: "Trajectory residuals from Step 0"
+
+      output_files:
+        - path: "data/step01_trajectory_variability.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant ID"}
+            - {name: "trajectory_variability", type: "float", description: "SD of residuals across 4 tests"}
+          row_count: 100
+          description: "Trajectory variability per participant"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_trajectory_variability.csv"
+          source: "Analysis call output (stdlib groupby + std)"
+          variable_name: "trajectory_variability"
+
+      parameters:
+        data: "trajectory_variability['trajectory_variability']"
+        min_val: 0.0
+        max_val: 3.0
+        column_name: "trajectory_variability"
+
+      criteria:
+        - "All trajectory_variability values >= 0 (SD definition)"
+        - "All trajectory_variability values <= 3.0 (reasonable upper bound)"
+        - "No NaN values"
+        - "No infinite values"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_compute_variability.log"
+
+      description: "Validate trajectory variability values >= 0 and in reasonable range"
+
+    log_file: "logs/step01_compute_variability.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Merge Calibration and Variability
+  # --------------------------------------------------------------------------
+  - name: "step02_merge_data"
+    step_number: "02"
+    description: "Merge Day 0 calibration with trajectory variability for correlation analysis"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_calibration_day0.csv"
+        - "Load data/step01_trajectory_variability.csv"
+        - "Merge on UID (inner join)"
+        - "Validate 100 rows after merge (all participants with complete data)"
+        - "Save to data/step02_calibration_variability.csv"
+
+      input_files:
+        - path: "data/step00_calibration_day0.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "calibration"]
+          row_count: 100
+
+        - path: "data/step01_trajectory_variability.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "trajectory_variability"]
+          row_count: 100
+
+      output_files:
+        - path: "data/step02_calibration_variability.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant ID"}
+            - {name: "calibration", type: "float", description: "Day 0 calibration quality"}
+            - {name: "trajectory_variability", type: "float", description: "SD of residuals"}
+          row_count: 100
+          description: "Merged dataset for correlation"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_calibration_variability.csv"
+          source: "Analysis call output (stdlib merge)"
+          variable_name: "calibration_variability"
+
+      parameters:
+        df: "calibration_variability"
+        required_cols: ["UID", "calibration", "trajectory_variability"]
+
+      criteria:
+        - "All required columns present [UID, calibration, trajectory_variability]"
+        - "Expected 100 rows after merge"
+        - "No NaN values in any column"
+        - "No duplicate UIDs"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_merge_data.log"
+
+      description: "Validate merged DataFrame has all required columns present"
+
+    log_file: "logs/step02_merge_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Compute Correlation with Dual P-Values
+  # --------------------------------------------------------------------------
+  - name: "step03_correlation"
+    step_number: "03"
+    description: "Test correlation between Day 0 calibration and trajectory variability with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      module: "scipy.stats"
+      function: "pearsonr"
+      signature: "pearsonr(x: ArrayLike, y: ArrayLike) -> Tuple[float, float]"
+
+      input_files:
+        - path: "data/step02_calibration_variability.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["calibration", "trajectory_variability"]
+          row_count: 100
+          description: "Merged data from Step 2"
+
+      output_files:
+        - path: "data/step03_correlation.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "r", type: "float", description: "Pearson correlation coefficient"}
+            - {name: "p_one_tailed", type: "float", description: "One-tailed p-value (H1: r < 0)"}
+            - {name: "p_two_tailed", type: "float", description: "Two-tailed p-value (H1: r != 0)"}
+            - {name: "n", type: "int", description: "Sample size"}
+            - {name: "effect_size", type: "str", description: "Classification: negligible/small/moderate/large"}
+            - {name: "direction", type: "str", description: "positive/negative/null"}
+          row_count: 1
+          description: "Correlation result with dual p-values (Decision D068)"
+
+      parameters:
+        x: "calibration_variability['calibration']"
+        y: "calibration_variability['trajectory_variability']"
+        # Note: Must call pearsonr twice with alternative='two-sided' and alternative='less' for dual p-values
+
+      processing:
+        - "Call scipy.stats.pearsonr(x, y) for correlation r and two-tailed p-value"
+        - "Compute one-tailed p-value: p_one_tailed = p_two_tailed / 2 if r < 0 else 1 - p_two_tailed / 2"
+        - "Classify effect size: |r| > 0.50 (large), > 0.30 (moderate), > 0.20 (small), else negligible"
+        - "Determine direction: positive (r > 0), negative (r < 0), null (|r| < 0.1)"
+        - "Create result DataFrame with all 6 columns"
+
+      returns:
+        type: "Tuple[float, float]"
+        unpacking: "r, p_two_tailed"
+
+      description: "Compute Pearson correlation with dual p-value reporting per Decision D068"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: pd.DataFrame, required_cols: Optional[List[str]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_correlation.csv"
+          source: "Analysis call output (pearsonr + dual p-values)"
+          variable_name: "correlation_result"
+
+      parameters:
+        correlation_df: "correlation_result"
+        required_cols: ["r", "p_one_tailed", "p_two_tailed", "n", "effect_size", "direction"]
+
+      criteria:
+        - "BOTH p_one_tailed and p_two_tailed present (Decision D068)"
+        - "r value in [-1, 1]"
+        - "p-values in [0, 1]"
+        - "n = 100 (sample size)"
+        - "effect_size classification present (negligible/small/moderate/large)"
+        - "direction classification present (positive/negative/null)"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_correlation.log"
+
+      description: "Validate correlation results include Decision D068 dual p-value reporting"
+
+    log_file: "logs/step03_correlation.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Prepare Scatterplot Data
+  # --------------------------------------------------------------------------
+  - name: "step04_prepare_plot_data"
+    step_number: "04"
+    description: "Prepare plot source CSV for scatterplot visualization (Option B architecture)"
+
+    analysis_call:
+      module: "scipy.stats"
+      function: "linregress"
+      signature: "linregress(x: ArrayLike, y: ArrayLike) -> LinregressResult"
+
+      input_files:
+        - path: "data/step02_calibration_variability.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["calibration", "trajectory_variability"]
+          row_count: 100
+          description: "Merged data from Step 2"
+
+      output_files:
+        - path: "data/step04_scatterplot_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "calibration", type: "float", description: "X-axis variable"}
+            - {name: "trajectory_variability", type: "float", description: "Y-axis variable (observed)"}
+            - {name: "y_predicted", type: "float", description: "Regression line predictions"}
+          row_count: 100
+          description: "Plot source CSV with regression line (for rq_plots)"
+
+      parameters:
+        x: "calibration_variability['calibration']"
+        y: "calibration_variability['trajectory_variability']"
+
+      processing:
+        - "Call scipy.stats.linregress(x, y) to get slope and intercept"
+        - "Compute y_predicted = slope * calibration + intercept"
+        - "Create DataFrame with columns [calibration, trajectory_variability, y_predicted]"
+        - "Save to data/step04_scatterplot_data.csv"
+
+      returns:
+        type: "LinregressResult"
+        variable_name: "regression_result"
+
+      description: "Compute regression line for scatterplot visualization (Option B architecture)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: pd.DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_scatterplot_data.csv"
+          source: "Analysis call output (linregress + y_predicted)"
+          variable_name: "scatterplot_data"
+
+      parameters:
+        plot_data: "scatterplot_data"
+        required_domains: []  # Not applicable for single scatterplot
+        required_groups: []   # Not applicable for single scatterplot
+        domain_col: "domain"  # Not used
+        group_col: "group"    # Not used
+
+      criteria:
+        - "All required columns present [calibration, trajectory_variability, y_predicted]"
+        - "No NaN values in any column"
+        - "Expected 100 rows (one per participant)"
+        - "y_predicted values are linear function of calibration (monotonic)"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_prepare_plot_data.log"
+
+      description: "Verify plot data has all required columns for scatterplot visualization"
+
+    log_file: "logs/step04_prepare_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

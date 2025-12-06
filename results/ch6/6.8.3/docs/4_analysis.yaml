@@ -1,0 +1,554 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: ch6/6.8.3
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.8.3"
+  total_steps: 7
+  analysis_type: "LMM variance decomposition + ICC analysis (confidence data)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Confidence Theta Data from RQ 6.8.1
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_confidence_theta"
+    step_number: "00"
+    description: "Extract location-stratified confidence theta scores from RQ 6.8.1, reshape wide to long, merge TSVR"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch6/6.8.1/data/step03_theta_confidence_location.csv')"
+        - "Parse composite_ID -> extract UID and test"
+        - "Reshape wide to long: 1 row per (UID, test, location_type)"
+        - "Create location_type column: 'Source' or 'Destination'"
+        - "Create theta column: theta_source for Source rows, theta_destination for Destination rows"
+        - "Create se column: se_source for Source rows, se_destination for Destination rows"
+        - "Read TSVR_lookup from master.xlsx"
+        - "Left join theta data with TSVR on composite_ID"
+        - "Validate: All composite_IDs matched (no missing TSVR values)"
+        - "Save to data/step00_lmm_input_confidence_location.csv"
+
+      input_files:
+        - path: "results/ch6/6.8.1/data/step03_theta_confidence_location.csv"
+          required_columns: ["composite_ID", "theta_source", "se_source", "theta_destination", "se_destination"]
+          variable_name: "theta_confidence_wide"
+          description: "RQ 6.8.1 output: 2-factor confidence theta scores"
+        - path: "data/master.xlsx"
+          sheet_name: "TSVR_lookup"
+          required_columns: ["composite_ID", "TSVR_hours"]
+          variable_name: "tsvr_data"
+          description: "Project-level timing data"
+
+      output_files:
+        - path: "data/step00_lmm_input_confidence_location.csv"
+          variable_name: "lmm_input"
+          description: "Long-format LMM input (800 rows: 100 participants x 4 tests x 2 location types)"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "test", type: "str", description: "Test session (T1, T2, T3, T4)"}
+            - {name: "location_type", type: "str", description: "Source or Destination"}
+            - {name: "theta", type: "float", description: "Confidence ability estimate"}
+            - {name: "se", type: "float", description: "Standard error of theta"}
+            - {name: "TSVR_hours", type: "float", description: "Actual time since encoding (Decision D070)"}
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: int, expected_cols: int, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_lmm_input_confidence_location.csv"
+          variable_name: "lmm_input"
+          source: "analysis output (extraction + reshape + merge)"
+
+      parameters:
+        df: "lmm_input"
+        expected_rows: 800
+        expected_cols: 6
+        required_columns: ["UID", "test", "location_type", "theta", "se", "TSVR_hours"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 800 rows (100 participants x 4 tests x 2 location types)"
+        - "Expected 6 columns (UID, test, location_type, theta, se, TSVR_hours)"
+        - "No NaN values allowed"
+        - "location_type in {Source, Destination}"
+        - "Balanced design: 400 Source + 400 Destination rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_confidence_theta.log"
+
+    log_file: "logs/step00_extract_confidence_theta.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Fit Source Confidence LMM with Random Slopes
+  # --------------------------------------------------------------------------
+  - name: "step01_fit_source_lmm"
+    step_number: "01"
+    description: "Fit LMM for Source confidence trajectories with random intercepts and slopes"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(data: pd.DataFrame, outcome_col: str, time_col: str, group_col: str, random_slope: bool) -> Tuple[Any, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step00_lmm_input_confidence_location.csv"
+          required_columns: ["UID", "test", "location_type", "theta", "TSVR_hours"]
+          variable_name: "lmm_input"
+          filter_condition: "location_type == 'Source'"
+
+      output_files:
+        - path: "data/step01_source_lmm_model_summary.txt"
+          variable_name: "source_model"
+          description: "Source LMM fitted model summary"
+        - path: "data/step01_source_variance_components.csv"
+          variable_name: "source_variance"
+          description: "Source variance decomposition (5 rows: var_intercept, var_slope, cov_int_slope, var_residual, corr_int_slope)"
+
+      parameters:
+        data: "lmm_input[lmm_input['location_type'] == 'Source']"
+        outcome_col: "theta"
+        time_col: "TSVR_hours"
+        group_col: "UID"
+        random_slope: true
+        formula: "theta ~ TSVR_hours + (TSVR_hours | UID)"
+
+      returns:
+        type: "Tuple[Any, pd.DataFrame]"
+        unpacking: "source_model, source_variance"
+
+      description: "Fit Source confidence LMM with TSVR (Decision D070) and random slopes for variance decomposition"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(model: Any, expected_groups: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_source_lmm_model_summary.txt"
+          variable_name: "source_model"
+          source: "analysis output (fit_lmm_trajectory_tsvr return[0])"
+
+      parameters:
+        model: "source_model"
+        expected_groups: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (converged=True)"
+        - "No convergence warnings"
+        - "Random effects covariance matrix is positive definite"
+        - "100 participant groups fitted"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_fit_source_lmm.log"
+
+    log_file: "logs/step01_fit_source_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Fit Destination Confidence LMM with Random Slopes
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_destination_lmm"
+    step_number: "02"
+    description: "Fit LMM for Destination confidence trajectories with random intercepts and slopes"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(data: pd.DataFrame, outcome_col: str, time_col: str, group_col: str, random_slope: bool) -> Tuple[Any, pd.DataFrame]"
+
+      input_files:
+        - path: "data/step00_lmm_input_confidence_location.csv"
+          required_columns: ["UID", "test", "location_type", "theta", "TSVR_hours"]
+          variable_name: "lmm_input"
+          filter_condition: "location_type == 'Destination'"
+
+      output_files:
+        - path: "data/step02_destination_lmm_model_summary.txt"
+          variable_name: "destination_model"
+          description: "Destination LMM fitted model summary"
+        - path: "data/step02_destination_variance_components.csv"
+          variable_name: "destination_variance"
+          description: "Destination variance decomposition (5 rows)"
+
+      parameters:
+        data: "lmm_input[lmm_input['location_type'] == 'Destination']"
+        outcome_col: "theta"
+        time_col: "TSVR_hours"
+        group_col: "UID"
+        random_slope: true
+        formula: "theta ~ TSVR_hours + (TSVR_hours | UID)"
+
+      returns:
+        type: "Tuple[Any, pd.DataFrame]"
+        unpacking: "destination_model, destination_variance"
+
+      description: "Fit Destination confidence LMM with TSVR (Decision D070) and random slopes for variance decomposition"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(model: Any, expected_groups: int) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_destination_lmm_model_summary.txt"
+          variable_name: "destination_model"
+          source: "analysis output (fit_lmm_trajectory_tsvr return[0])"
+
+      parameters:
+        model: "destination_model"
+        expected_groups: 100
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully"
+        - "No convergence warnings"
+        - "Random effects covariance matrix is positive definite"
+        - "100 participant groups fitted"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_destination_lmm.log"
+
+    log_file: "logs/step02_fit_destination_lmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Extract Random Effects for Both Location Types
+  # --------------------------------------------------------------------------
+  - name: "step03_extract_random_effects"
+    step_number: "03"
+    description: "Extract participant-level random intercepts and slopes from Source and Destination LMMs for RQ 6.8.4 clustering"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load Source LMM model from step01"
+        - "Extract Source random intercepts per UID"
+        - "Extract Source random slopes per UID"
+        - "Create Source DataFrame: UID, location_type='Source', random_intercept, random_slope"
+        - "Load Destination LMM model from step02"
+        - "Extract Destination random intercepts per UID"
+        - "Extract Destination random slopes per UID"
+        - "Create Destination DataFrame: UID, location_type='Destination', random_intercept, random_slope"
+        - "Stack Source and Destination DataFrames (vertical concatenation)"
+        - "Save to data/step03_random_effects.csv"
+
+      input_files:
+        - path: "data/step01_source_lmm_model_summary.txt"
+          variable_name: "source_model"
+          description: "Source LMM fitted model"
+        - path: "data/step02_destination_lmm_model_summary.txt"
+          variable_name: "destination_model"
+          description: "Destination LMM fitted model"
+
+      output_files:
+        - path: "data/step03_random_effects.csv"
+          variable_name: "random_effects"
+          description: "Random effects for RQ 6.8.4 clustering (200 rows: 100 participants x 2 location types)"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "location_type", type: "str", description: "Source or Destination"}
+            - {name: "random_intercept", type: "float", description: "Individual baseline confidence deviation"}
+            - {name: "random_slope", type: "float", description: "Individual forgetting rate deviation"}
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: int, expected_cols: int, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_random_effects.csv"
+          variable_name: "random_effects"
+          source: "analysis output (random effects extraction)"
+
+      parameters:
+        df: "random_effects"
+        expected_rows: 200
+        expected_cols: 4
+        required_columns: ["UID", "location_type", "random_intercept", "random_slope"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 200 rows (100 participants x 2 location types)"
+        - "Expected 4 columns"
+        - "No NaN values"
+        - "Each UID appears exactly 2 times (Source + Destination)"
+        - "Balanced design: 100 Source + 100 Destination rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_extract_random_effects.log"
+
+    log_file: "logs/step03_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Compute Intercept-Slope Correlations Per Location Type
+  # --------------------------------------------------------------------------
+  - name: "step04_compute_correlations"
+    step_number: "04"
+    description: "Compute intercept-slope correlations with Fisher's z CIs and dual p-values (Decision D068)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read Source variance components from step01"
+        - "Extract corr_int_slope for Source"
+        - "Read Destination variance components from step02"
+        - "Extract corr_int_slope for Destination"
+        - "For each location type:"
+        - "  - Compute Fisher's z transformation: z = 0.5 * ln((1+r)/(1-r))"
+        - "  - Compute SE_z = 1 / sqrt(N - 3) where N=100"
+        - "  - Compute 95% CI_z = z +/- 1.96 * SE_z"
+        - "  - Back-transform to r scale: r = (exp(2*z)-1)/(exp(2*z)+1)"
+        - "  - Test H0: rho=0 using t = r*sqrt(N-2)/sqrt(1-r^2)"
+        - "  - Compute p_uncorrected (two-tailed t-test, df=N-2)"
+        - "  - Compute p_bonferroni = min(p_uncorrected * 2, 1.0) (Decision D068)"
+        - "Save to data/step04_intercept_slope_correlations.csv"
+
+      input_files:
+        - path: "data/step01_source_variance_components.csv"
+          required_columns: ["component", "estimate"]
+          variable_name: "source_variance"
+        - path: "data/step02_destination_variance_components.csv"
+          required_columns: ["component", "estimate"]
+          variable_name: "destination_variance"
+
+      output_files:
+        - path: "data/step04_intercept_slope_correlations.csv"
+          variable_name: "correlations"
+          description: "Intercept-slope correlations per location type with CIs and dual p-values"
+          columns:
+            - {name: "location_type", type: "str", description: "Source or Destination"}
+            - {name: "correlation", type: "float", description: "Intercept-slope correlation r"}
+            - {name: "CI_lower", type: "float", description: "95% CI lower bound"}
+            - {name: "CI_upper", type: "float", description: "95% CI upper bound"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (Decision D068)"}
+            - {name: "N", type: "int", description: "Sample size (100 participants)"}
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(corr_df: pd.DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_intercept_slope_correlations.csv"
+          variable_name: "correlations"
+          source: "analysis output (correlation computation)"
+
+      parameters:
+        corr_df: "correlations"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "BOTH p_uncorrected AND p_bonferroni columns present (Decision D068)"
+        - "Correlation in [-1, 1] range"
+        - "CIs contain point estimate (CI_lower <= correlation <= CI_upper)"
+        - "p-values in [0, 1] range"
+        - "2 location types present (Source and Destination)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_compute_correlations.log"
+
+    log_file: "logs/step04_compute_correlations.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare Confidence Correlations to Ch5 5.5.6 Accuracy Correlations
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_to_ch5"
+    step_number: "05"
+    description: "Compare confidence correlations to Ch5 5.5.6 accuracy correlations (pattern replication test)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read confidence correlations from step04"
+        - "Read accuracy correlations from results/ch5/5.5.6/data/intercept_slope_correlations.csv"
+        - "Validate both files have same structure (location_type with Source/Destination)"
+        - "Merge on location_type"
+        - "Rename columns: correlation_confidence, correlation_accuracy, CI_lower_confidence, CI_lower_accuracy, etc."
+        - "Compute direction_match: Same sign in both datasets?"
+        - "Compute magnitude_difference: |r_confidence - r_accuracy|"
+        - "Compute CI_overlap: Do confidence CIs overlap with accuracy CIs?"
+        - "Save comparison to data/step05_ch5_comparison.csv"
+        - "Generate text summary: data/step05_pattern_replication_summary.txt"
+        - "  - Ch5 pattern: Source r=+0.99, Destination r=-0.90"
+        - "  - RQ 6.8.3 pattern: Source r=[value], Destination r=[value]"
+        - "  - Direction consistency, magnitude similarity, statistical significance"
+
+      input_files:
+        - path: "data/step04_intercept_slope_correlations.csv"
+          required_columns: ["location_type", "correlation", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni"]
+          variable_name: "confidence_corr"
+        - path: "results/ch5/5.5.6/data/intercept_slope_correlations.csv"
+          required_columns: ["location_type", "correlation", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni"]
+          variable_name: "accuracy_corr"
+          description: "Ch5 5.5.6 output (cross-RQ dependency)"
+
+      output_files:
+        - path: "data/step05_ch5_comparison.csv"
+          variable_name: "comparison"
+          description: "Side-by-side comparison (2 rows: Source and Destination)"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "correlation_confidence", type: "float"}
+            - {name: "CI_lower_confidence", type: "float"}
+            - {name: "CI_upper_confidence", type: "float"}
+            - {name: "p_uncorrected_confidence", type: "float"}
+            - {name: "p_bonferroni_confidence", type: "float"}
+            - {name: "correlation_accuracy", type: "float"}
+            - {name: "CI_lower_accuracy", type: "float"}
+            - {name: "CI_upper_accuracy", type: "float"}
+            - {name: "p_uncorrected_accuracy", type: "float"}
+            - {name: "p_bonferroni_accuracy", type: "float"}
+            - {name: "direction_match", type: "bool"}
+            - {name: "magnitude_difference", type: "float"}
+            - {name: "CI_overlap", type: "bool"}
+        - path: "data/step05_pattern_replication_summary.txt"
+          variable_name: "summary_text"
+          description: "Text interpretation of pattern replication"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: int, expected_cols: int, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step05_ch5_comparison.csv"
+          variable_name: "comparison"
+          source: "analysis output (cross-RQ comparison)"
+
+      parameters:
+        df: "comparison"
+        expected_rows: 2
+        expected_cols: 14
+        required_columns: ["location_type", "correlation_confidence", "correlation_accuracy", "direction_match", "magnitude_difference", "CI_overlap"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected 2 rows (Source and Destination)"
+        - "Expected 14 columns (merged confidence + accuracy data)"
+        - "No NaN values (both datasets must have valid correlations)"
+        - "direction_match and CI_overlap computed correctly"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step05_compare_to_ch5.log"
+
+    log_file: "logs/step05_compare_to_ch5.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Prepare ICC Summary Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step06_prepare_icc_plot_data"
+    step_number: "06"
+    description: "Create plot source CSV with variance decomposition and ICC components per location type"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Read Source variance components from step01"
+        - "Compute Source ICC components:"
+        - "  - ICC_intercept = var_intercept / (var_intercept + var_residual)"
+        - "  - ICC_slope_simple = var_slope / (var_slope + var_residual)"
+        - "  - ICC_total = (var_intercept + var_slope) / (var_intercept + var_slope + var_residual)"
+        - "Read Destination variance components from step02"
+        - "Compute Destination ICC components (same formulas)"
+        - "Read correlations from step04"
+        - "Merge variance components, ICC estimates, and correlations"
+        - "Create long-format CSV with one row per location type"
+        - "Save to data/step06_icc_summary_plot_data.csv"
+
+      input_files:
+        - path: "data/step01_source_variance_components.csv"
+          variable_name: "source_variance"
+        - path: "data/step02_destination_variance_components.csv"
+          variable_name: "destination_variance"
+        - path: "data/step04_intercept_slope_correlations.csv"
+          variable_name: "correlations"
+
+      output_files:
+        - path: "data/step06_icc_summary_plot_data.csv"
+          variable_name: "plot_data"
+          description: "ICC summary plot source data (2 rows: Source and Destination)"
+          columns:
+            - {name: "location_type", type: "str"}
+            - {name: "var_intercept", type: "float"}
+            - {name: "var_slope", type: "float"}
+            - {name: "var_residual", type: "float"}
+            - {name: "ICC_intercept", type: "float"}
+            - {name: "ICC_slope_simple", type: "float"}
+            - {name: "ICC_total", type: "float"}
+            - {name: "correlation", type: "float"}
+            - {name: "CI_lower", type: "float"}
+            - {name: "CI_upper", type: "float"}
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_icc_bounds"
+      signature: "validate_icc_bounds(icc_df: pd.DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step06_icc_summary_plot_data.csv"
+          variable_name: "plot_data"
+          source: "analysis output (ICC computation)"
+
+      parameters:
+        icc_df: "plot_data"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All ICC values in [0, 1] range (proportion of variance)"
+        - "All variance components > 0 (positive definite)"
+        - "Correlation in [-1, 1] range"
+        - "CIs contain point estimate"
+        - "2 location types present"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step06_prepare_icc_plot_data.log"
+
+    log_file: "logs/step06_prepare_icc_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

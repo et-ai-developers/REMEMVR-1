@@ -1,0 +1,242 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.4.1
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once
+
+analysis_tools:
+  prepare_irt_input_from_long:
+    module: "tools.analysis_irt"
+    function: "prepare_irt_input_from_long"
+    signature: "prepare_irt_input_from_long(df_long: DataFrame, groups: Dict[str, List[str]]) -> Tuple[Tensor, Tensor, Tensor, List, List]"
+    validation_tool: "validate_data_columns"
+    description: "Convert long-format TC_* confidence items to IRT tensors for 3-factor GRM calibration"
+    source_reference: "tools_inventory.md line 12"
+
+  configure_irt_model:
+    module: "tools.analysis_irt"
+    function: "configure_irt_model"
+    signature: "configure_irt_model(n_items: int, n_factors: int, n_cats: int, Q_matrix: Tensor, correlated_factors: bool, device: str, seed: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+    description: "Build IWAVE GRM for 5-category ordinal confidence data (3 paradigm factors)"
+    source_reference: "tools_inventory.md line 20"
+
+  fit_irt_grm:
+    module: "tools.analysis_irt"
+    function: "fit_irt_grm"
+    signature: "fit_irt_grm(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, batch_size: int, iw_samples: int, mc_samples: int) -> IWAVE"
+    validation_tool: "validate_irt_convergence"
+    description: "Fit GRM via IWAVE variational inference with convergence validation"
+    source_reference: "tools_inventory.md line 28"
+
+  extract_theta_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_theta_from_irt"
+    signature: "extract_theta_from_irt(model: IWAVE, response_matrix: Tensor, missing_mask: Tensor, composite_ids: List, factor_names: List, scoring_batch_size: int, mc_samples: int, iw_samples: int, invert_scale: bool) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+    description: "Extract theta_confidence estimates for IFR/ICR/IRE paradigms"
+    source_reference: "tools_inventory.md line 36"
+
+  extract_parameters_from_irt:
+    module: "tools.analysis_irt"
+    function: "extract_parameters_from_irt"
+    signature: "extract_parameters_from_irt(model: IWAVE, item_list: List, factor_names: List, n_cats: int) -> DataFrame"
+    validation_tool: "validate_irt_parameters"
+    description: "Extract GRM item parameters (discrimination a, thresholds b1-b4)"
+    source_reference: "tools_inventory.md line 44"
+
+  filter_items_by_quality:
+    module: "tools.analysis_irt"
+    function: "filter_items_by_quality"
+    signature: "filter_items_by_quality(df_items: DataFrame, a_threshold: float, b_threshold: float) -> Tuple[DataFrame, DataFrame]"
+    validation_tool: "validate_irt_parameters"
+    description: "D039 2-pass purification: filter by a >= 0.4, |b_mean| <= 3.0"
+    source_reference: "tools_inventory.md line 60"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str, re_formula: str, reml: bool) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+    description: "D070: Fit LMM with Paradigm x Time interaction using TSVR_hours"
+    source_reference: "tools_inventory.md line 98"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float) -> DataFrame"
+    validation_tool: "validate_contrasts_d068"
+    description: "D068: Post-hoc paradigm contrasts with dual p-value reporting"
+    source_reference: "tools_inventory.md line 129"
+
+  convert_theta_to_probability:
+    module: "tools.plotting"
+    function: "convert_theta_to_probability"
+    signature: "convert_theta_to_probability(theta: ndarray, discrimination: float, difficulty: float) -> ndarray"
+    validation_tool: "validate_probability_range"
+    description: "D069: Transform theta to probability scale for dual-scale trajectory plots"
+    source_reference: "tools_inventory.md line 229"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names match exactly (case-sensitive)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        missing_columns: "List[str] (columns not found)"
+        existing_columns: "List[str] (columns found)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate DataFrame has required columns for analysis"
+    source_reference: "tools_inventory.md line 402"
+
+  validate_irt_convergence:
+    module: "tools.validation"
+    function: "validate_irt_convergence"
+    signature: "validate_irt_convergence(results: Dict[str, Any]) -> Dict[str, Any]"
+    criteria:
+      - "Model converged (loss stability)"
+      - "Parameters within bounds"
+      - "No NaN in estimates"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        checks: "list of check results"
+        message: "str"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate IRT model convergence and parameter quality"
+    source_reference: "tools_inventory.md line 311"
+
+  validate_irt_parameters:
+    module: "tools.validation"
+    function: "validate_irt_parameters"
+    signature: "validate_irt_parameters(df_items: DataFrame, a_min: float, b_max: float, a_col: str, b_col: str) -> Dict[str, Any]"
+    criteria:
+      - "Discrimination a >= a_min (default 0.4)"
+      - "Difficulty |b| <= b_max (default 3.0)"
+      - "No NaN in parameters"
+      - "Thresholds ordered: b1 < b2 < b3 < b4 (GRM requirement)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        n_items: "int"
+        n_valid: "int"
+        n_invalid: "int"
+        invalid_items: "list"
+        message: "str"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate IRT item parameters meet quality thresholds"
+    source_reference: "tools_inventory.md line 319"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: ndarray or Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    criteria:
+      - "All values in [min_val, max_val] range"
+      - "No NaN values (if allow_none=False)"
+      - "No infinite values"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate numeric values fall within expected range"
+    source_reference: "tools_inventory.md line 541"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+    criteria:
+      - "Model converged successfully"
+      - "No convergence warnings"
+      - "All variance components positive"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "list"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate LMM convergence status"
+    source_reference: "tools_inventory.md line 327"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+    criteria:
+      - "p_uncorrected column present"
+      - "At least one correction method present (p_bonferroni/p_tukey/p_holm)"
+      - "D068 dual p-value reporting compliance"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate Decision D068 dual p-value reporting in contrasts"
+    source_reference: "tools_inventory.md line 424"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+    criteria:
+      - "All probability values in [0, 1] range"
+      - "No NaN values in probability columns"
+      - "No infinite values"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violations: "List[Dict]"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug"
+    description: "Validate probability values from theta transformation"
+    source_reference: "tools_inventory.md line 577"
+
+summary:
+  analysis_tools_count: 9
+  validation_tools_count: 7
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D039", "D068", "D069", "D070"]
+  notes:
+    - "5-category ordinal GRM (TC_* confidence items) vs 2PL (TQ_* accuracy items)"
+    - "3 paradigm factors: IFR/ICR/IRE confidence abilities"
+    - "All tools verified exist in tools_inventory.md"
+    - "All naming conventions verified exist in names.md"
+    - "stdlib functions (pandas, numpy, pathlib) exempt from verification"

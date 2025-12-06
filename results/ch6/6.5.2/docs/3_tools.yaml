@@ -1,0 +1,347 @@
+# 3_tools.yaml - Tool Catalog for RQ 6.5.2
+# Created by: rq_tools agent
+# Date: 2025-12-06
+# Architecture: v4.X Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  merge_accuracy_confidence:
+    module: "pandas"
+    function: "merge"
+    signature: "pd.merge(left: pd.DataFrame, right: pd.DataFrame, on: str, how: str) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch5/5.4.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_common", "theta_congruent", "theta_incongruent", "se_common", "se_congruent", "se_incongruent"]
+        expected_rows: "~400"
+        data_types:
+          composite_ID: "string"
+          theta_common: "float64"
+          theta_congruent: "float64"
+          theta_incongruent: "float64"
+
+      - path: "results/ch6/6.5.1/data/step03_theta_confidence_scores.csv"
+        required_columns: ["composite_ID", "theta_confidence_common", "theta_confidence_congruent", "theta_confidence_incongruent", "se_confidence_common", "se_confidence_congruent", "se_confidence_incongruent"]
+        expected_rows: "~400"
+        data_types:
+          composite_ID: "string"
+          theta_confidence_common: "float64"
+          theta_confidence_congruent: "float64"
+          theta_confidence_incongruent: "float64"
+
+    output_files:
+      - path: "data/step00_merged_accuracy_confidence.csv"
+        columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+        description: "Long format merged accuracy and confidence theta scores by congruence level"
+
+    parameters:
+      on: "composite_ID"
+      how: "inner"
+      validate: "one_to_one"
+
+    description: "Merge accuracy theta (from RQ 5.4.1) and confidence theta (from RQ 6.5.1) on composite_ID, reshape to long format with congruence as factor"
+    source_reference: "Standard pandas merge operation"
+
+  compute_calibration_scores:
+    module: "pandas"
+    function: "apply"
+    signature: "pd.DataFrame.apply(func: Callable, axis: int) -> pd.Series"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step00_merged_accuracy_confidence.csv"
+        required_columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+        expected_rows: "~1200"
+        data_types:
+          theta_accuracy: "float64"
+          theta_confidence: "float64"
+
+    output_files:
+      - path: "data/step01_calibration_by_congruence.csv"
+        columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy_z", "theta_confidence_z", "calibration", "TSVR_hours"]
+        description: "Calibration scores (confidence_z - accuracy_z) with z-standardization within congruence levels"
+
+    parameters:
+      groupby_col: "congruence"
+      standardize_accuracy: true
+      standardize_confidence: true
+      calibration_formula: "theta_confidence_z - theta_accuracy_z"
+
+    description: "Z-standardize theta scores within congruence levels and compute calibration as confidence_z - accuracy_z"
+    source_reference: "Standard pandas groupby + zscore transformation"
+
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: pd.DataFrame, tsvr_data: pd.DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step01_calibration_by_congruence.csv"
+        required_columns: ["composite_ID", "UID", "test", "congruence", "calibration", "TSVR_hours"]
+        expected_rows: "~1200"
+        data_types:
+          UID: "string"
+          congruence: "string"
+          calibration: "float64"
+          TSVR_hours: "float64"
+
+    output_files:
+      - path: "data/step02_lmm_summary.txt"
+        description: "LMM fitted model summary (fixed effects, random effects, fit indices)"
+
+      - path: "data/step02_congruence_effects.csv"
+        columns: ["effect", "coefficient", "SE", "z", "p_parametric", "p_bootstrap", "CI_lower", "CI_upper"]
+        description: "Hypothesis test results with dual p-value reporting (Decision D068)"
+
+      - path: "data/step02_post_hoc_contrasts.csv"
+        columns: ["contrast", "estimate", "SE", "z", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+        description: "Pairwise contrasts testing overconfidence hypothesis"
+
+      - path: "data/step02_effect_sizes.csv"
+        columns: ["effect", "f_squared", "interpretation"]
+        description: "Cohen's f-squared effect sizes for fixed effects"
+
+    parameters:
+      formula: "calibration ~ congruence * TSVR_hours"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+      reference_level: "Common"
+
+    description: "Fit LMM testing Congruence main effect and Congruence x Time interaction with TSVR as time variable (Decision D070)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  compute_contrasts_pairwise:
+    module: "tools.analysis_lmm"
+    function: "compute_contrasts_pairwise"
+    signature: "compute_contrasts_pairwise(lmm_result: MixedLMResults, comparisons: List[str], family_alpha: float = 0.05) -> pd.DataFrame"
+    validation_tool: "validate_contrasts_d068"
+
+    input_files:
+      - path: "data/step02_lmm_summary.txt"
+        source: "LMM fitted results from fit_lmm_trajectory_tsvr"
+
+    output_files:
+      - path: "data/step02_post_hoc_contrasts.csv"
+        columns: ["comparison", "beta", "se", "z", "p_uncorrected", "alpha_corrected", "p_corrected", "sig_uncorrected", "sig_corrected"]
+        description: "Post-hoc contrasts with dual p-value reporting (Decision D068)"
+
+    parameters:
+      comparisons: ["Congruent-Common", "Incongruent-Common", "Congruent-Incongruent"]
+      family_alpha: 0.05
+      correction: "bonferroni"
+      n_comparisons: 3
+
+    description: "Post-hoc pairwise contrasts testing overconfidence hypothesis (Congruent > Common) with Bonferroni correction"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compute_contrasts_pairwise"
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> pd.DataFrame"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step02_lmm_summary.txt"
+        source: "LMM fitted results from fit_lmm_trajectory_tsvr"
+
+    output_files:
+      - path: "data/step02_effect_sizes.csv"
+        columns: ["effect", "f_squared", "interpretation"]
+        description: "Cohen's f-squared effect sizes with interpretation thresholds"
+
+    parameters:
+      include_interactions: true
+
+    description: "Compute Cohen's f-squared effect sizes for Congruence main effect and Congruence x Time interaction"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compute_effect_sizes_cohens"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_merged_accuracy_confidence.csv"
+        required_columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+        source: "merge_accuracy_confidence output"
+
+    parameters:
+      required_columns: ["composite_ID", "UID", "test", "congruence", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence"]
+
+    criteria:
+      - "All required columns present"
+      - "No missing column names"
+      - "Expected row count ~1200 (400 composite_IDs x 3 congruence levels)"
+      - "Congruence factor has exactly 3 levels: Common, Congruent, Incongruent"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_merge_accuracy_confidence.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate merged data has all required columns for calibration computation"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_columns"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_calibration_by_congruence.csv"
+        required_columns: ["theta_accuracy_z", "theta_confidence_z"]
+        source: "compute_calibration_scores output"
+
+    parameters:
+      column_names: ["theta_accuracy_z", "theta_confidence_z"]
+      tolerance: 0.01
+      groupby_col: "congruence"
+
+    criteria:
+      - "mean(theta_accuracy_z) ~= 0 within each congruence level (tolerance ± 0.01)"
+      - "SD(theta_accuracy_z) ~= 1 within each congruence level (tolerance ± 0.01)"
+      - "mean(theta_confidence_z) ~= 0 within each congruence level (tolerance ± 0.01)"
+      - "SD(theta_confidence_z) ~= 1 within each congruence level (tolerance ± 0.01)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_compute_calibration.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate z-score standardization correctness within congruence levels"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_standardization"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_lmm_summary.txt"
+        source: "fit_lmm_trajectory_tsvr output"
+
+    parameters:
+      check_singularity: true
+      min_observations: 100
+
+    criteria:
+      - "Model converged (no convergence warnings)"
+      - "No singular fit (random effects variance > 0)"
+      - "Minimum 100 observations used"
+      - "All fixed effects have finite estimates (no NaN/Inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_congruence.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate LMM converged successfully with no singular fit or extreme estimates"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: pd.DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_post_hoc_contrasts.csv"
+        required_columns: ["comparison", "p_uncorrected", "p_corrected"]
+        source: "compute_contrasts_pairwise output"
+
+    parameters:
+      required_p_columns: ["p_uncorrected", "p_bonferroni"]
+
+    criteria:
+      - "Dual p-value reporting present (Decision D068)"
+      - "Both p_uncorrected and p_bonferroni columns exist"
+      - "All p-values in [0, 1] range"
+      - "Bonferroni correction applied correctly (p_bonf = min(p_uncorr * 3, 1.0))"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_congruence.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate post-hoc contrasts include Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_contrasts_d068"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_effect_sizes.csv"
+        required_columns: ["effect", "f_squared", "interpretation"]
+        source: "compute_effect_sizes_cohens output"
+
+    parameters:
+      f2_column: "f_squared"
+
+    criteria:
+      - "All f-squared values >= 0 (Cohen's f² non-negative by definition)"
+      - "No NaN or infinite values"
+      - "Very large values f² > 1.0 trigger warnings but are valid"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lmm_congruence.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate Cohen's f-squared effect sizes within reasonable bounds"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_effect_sizes"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 5
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Step 0: Data merging uses standard pandas operations (not custom tools/ function)"
+    - "Step 1: Calibration computation uses standard pandas operations with z-score standardization"
+    - "Step 2: LMM fitting uses tools.analysis_lmm.fit_lmm_trajectory_tsvr with TSVR time variable (D070)"
+    - "Decision D068: Dual p-value reporting enforced via compute_contrasts_pairwise and validate_contrasts_d068"
+    - "All 5 analysis tools paired with validation tools (100% validation coverage)"
+    - "Bootstrap p-values mentioned in 2_plan.md but not implemented in tools (parametric + Bonferroni only)"

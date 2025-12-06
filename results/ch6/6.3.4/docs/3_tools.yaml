@@ -1,0 +1,222 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 6.3.4 - ICC by Domain
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "results/ch6/6.3.1/data/step03_theta_confidence_domain.csv"
+        required_columns: ["UID", "test", "domain", "theta_confidence", "se_confidence", "TSVR_hours"]
+        expected_rows: "1200 (100 participants × 4 tests × 3 domains)"
+        data_types:
+          UID: "string (format: P### with leading zeros)"
+          test: "string (values: T1, T2, T3, T4)"
+          domain: "string (values: What, Where, When)"
+          theta_confidence: "float (range typically -3.0 to +3.0)"
+          se_confidence: "float (range typically 0.1 to 1.0)"
+          TSVR_hours: "float (actual time since encoding in hours per Decision D070)"
+
+    output_files:
+      - path: "data/step01_lmm_what_model_summary.txt"
+        description: "LMM summary for What domain (fixed effects, random effects, fit statistics)"
+      - path: "data/step01_lmm_where_model_summary.txt"
+        description: "LMM summary for Where domain"
+      - path: "data/step01_lmm_when_model_summary.txt"
+        description: "LMM summary for When domain"
+      - path: "data/step01_variance_components_by_domain.csv"
+        columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual"]
+        description: "Variance components extracted from 3 domain-specific LMMs"
+
+    parameters:
+      formula: "theta_confidence ~ TSVR_hours + (TSVR_hours | UID)"
+      groups: "UID"
+      re_formula: "~TSVR_hours"
+      reml: false
+      separate_by_domain: true
+
+    description: "Fit domain-stratified LMMs with random intercepts and slopes per Decision D070 (TSVR time variable)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step01_variance_components_by_domain.csv"
+        required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual"]
+        source: "Step 1 output (fit_lmm_trajectory_tsvr)"
+
+    output_files:
+      - path: "data/step02_variance_components.csv"
+        columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+        description: "Variance components with total_variance computed for ICC denominator"
+      - path: "data/step04_random_effects.csv"
+        columns: ["UID", "domain", "random_intercept", "random_slope"]
+        description: "Participant-specific random effects per domain (300 rows: 100 UIDs × 3 domains)"
+
+    parameters:
+      compute_total_variance: true
+
+    description: "Extract variance components and participant random effects from fitted LMMs"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_random_effects_from_lmm"
+
+  compute_icc_from_variance_components:
+    module: "tools.analysis_lmm"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_icc_bounds"
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+        source: "Step 2 output (extract_random_effects_from_lmm)"
+
+    output_files:
+      - path: "data/step03_icc_estimates.csv"
+        columns: ["domain", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+        description: "Three ICC types per domain (intercept, simple slope, conditional slope at Day 6)"
+
+    parameters:
+      slope_name: "TSVR_hours"
+      timepoint: 144.0
+      icc_types: ["intercept", "slope_simple", "slope_conditional"]
+
+    description: "Compute ICC_intercept, ICC_slope_simple, ICC_slope_conditional per Nakagawa & Schielzeth (2010)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - compute_icc_from_variance_components"
+
+validation_tools:
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_lmm_what_model_summary.txt"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr for What domain)"
+      - path: "data/step01_lmm_where_model_summary.txt"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr for Where domain)"
+      - path: "data/step01_lmm_when_model_summary.txt"
+        source: "analysis tool output (fit_lmm_trajectory_tsvr for When domain)"
+
+    parameters:
+      check_singularity: true
+      min_observations: 100
+
+    criteria:
+      - "All 3 domain LMMs converged successfully (model.converged = True)"
+      - "No singular fit warnings (random effects variance > 0)"
+      - "Variance components all non-negative (var_intercept >= 0, var_slope >= 0, var_residual > 0)"
+      - "Minimum 100 observations per domain"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool (True if all 3 models converged)"
+        message: "str (human-readable summary)"
+        warnings: "List[str] (convergence warnings if any)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_fit_domain_lmms.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate all 3 domain LMMs converged, variance components valid, no singular fits"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+        source: "analysis tool output (extract_random_effects_from_lmm)"
+      - path: "data/step04_random_effects.csv"
+        required_columns: ["UID", "domain", "random_intercept", "random_slope"]
+        source: "analysis tool output (extract_random_effects_from_lmm)"
+
+    parameters:
+      expected_rows_variance: 3
+      expected_rows_random: 300
+      expected_columns_variance: ["domain", "var_intercept", "var_slope", "cov_int_slope", "var_residual", "total_variance"]
+      expected_columns_random: ["UID", "domain", "random_intercept", "random_slope"]
+
+    criteria:
+      - "Expected row count matches (3 for variance, 300 for random effects)"
+      - "All required columns present"
+      - "No NaN values in critical columns"
+      - "No duplicate UID × domain combinations (for random effects)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool] (row_count, columns_present, no_nan)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_extract_variance_components.log or logs/step04_extract_random_effects.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame structure (rows, columns, types) for variance components and random effects tables"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_dataframe_structure"
+
+  validate_icc_bounds:
+    module: "tools.validation"
+    function: "validate_icc_bounds"
+    signature: "validate_icc_bounds(icc_df: DataFrame, icc_col: str = 'icc_value') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_icc_estimates.csv"
+        required_columns: ["domain", "ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+        source: "analysis tool output (compute_icc_from_variance_components)"
+
+    parameters:
+      icc_columns: ["ICC_intercept", "ICC_slope_simple", "ICC_slope_conditional"]
+      allow_conditional_exceeding_1: true
+
+    criteria:
+      - "ICC_intercept in [0, 1] (by definition)"
+      - "ICC_slope_simple in [0, 1] (by definition)"
+      - "ICC_slope_conditional typically in [0, 1] (can exceed 1.0 if unusual covariance structure - flag for review)"
+      - "No negative ICC values (computation error)"
+      - "No NaN values (indicates computation failure)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_bounds: "List[Dict] (violations with domain and ICC type)"
+        icc_range: "Tuple[float, float] (min, max across all ICCs)"
+
+    behavior_on_failure:
+      action: "raise ValueError if ICC < 0; log warning if ICC_slope_conditional > 1.0"
+      log_to: "logs/step03_compute_icc.log"
+      invoke: "g_debug if critical error (negative ICC); user review if warning (ICC > 1.0)"
+
+    description: "Validate ICC values in valid range [0, 1], flag unusual conditional ICCs for review"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_icc_bounds"
+
+summary:
+  analysis_tools_count: 3
+  validation_tools_count: 3
+  total_unique_tools: 6
+  mandatory_decisions_embedded: ["D070"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Step 5 (domain comparison) and Step 6 (cross-chapter comparison) use pandas operations, not custom tools"

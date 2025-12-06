@@ -1,0 +1,26 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_stats: success
+rq_planner: success
+  context_dump: |
+    3 steps planned: Step 0 (merge accuracy/confidence theta), Step 1 (calibration scores), Step 2 (LMM congruence effects).
+    Tool requirements: Data merging, z-standardization, LMM fitting with bootstrap (Decision D068 dual p-values).
+    Expected outputs: 4 data files (merged data, calibration scores, LMM summary, contrasts). Dependencies: RQ 5.4.1 + 6.5.1.
+rq_tools: success
+  context_dump: |
+    5 analysis + 5 validation tools cataloged for calibration analysis.
+    Tools: merge (pandas), calibration (pandas), LMM (tools.analysis_lmm), contrasts, effect sizes.
+    100% validation coverage. D068 dual p-values + D070 TSVR enforced.
+rq_analysis: success
+  timestamp: "2025-12-06T14:30:00Z"
+  context_dump: "3 steps specified with validation (merge accuracy/confidence → calibration scores → LMM congruence effects)"
+analysis_steps:
+  step00_merge_accuracy_confidence: pending
+  step01_compute_calibration: pending
+  step02_fit_lmm_congruence: pending
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending

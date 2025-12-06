@@ -1,0 +1,25 @@
+rq_builder: success
+rq_concept: success
+rq_scholar: success
+rq_scholar_context: "9.3/10 APPROVED. Strong theory/interpretation, missing recent metacognition lit, reframe hypothesis as exploratory (domain-general alternative). Ready for stats."
+rq_stats: success
+rq_stats_context: "9.3/10 APPROVED. Category 1: 2.7/3 (appropriate, -0.3 for ICC_slope interpretation). Category 2: 2.0/2 (100% reuse). Category 3: 1.9/2 (parameters, -0.1 conditional ICC). Category 4: 1.9/2 (validation, -0.1 assumption checks). Category 5: 0.8/1 (9 concerns, good coverage)."
+rq_planner: success
+rq_tools: success
+rq_tools_context: "3 analysis + 3 validation tools cataloged for domain-stratified LMM variance decomposition"
+rq_analysis: success
+rq_analysis_timestamp: "2025-12-06T18:30:00"
+rq_analysis_context: "6 steps specified with validation (LMM variance decomposition -> ICC estimation by domain)"
+g_code: pending
+rq_inspect: pending
+rq_plots: pending
+rq_results: pending
+rq_validate: pending
+
+analysis_steps:
+  step01_fit_domain_lmms: pending
+  step02_extract_variance_components: pending
+  step03_compute_icc: pending
+  step04_extract_random_effects: pending
+  step05_compare_icc_across_domains: pending
+  step06_compare_to_ch5: pending

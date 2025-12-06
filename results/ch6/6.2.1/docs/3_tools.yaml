@@ -1,0 +1,260 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 6.2.1 (Calibration Over Time)
+# Date: 2025-12-06
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  # Step 0a: Load Accuracy Theta Scores
+  read_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer, **kwargs) -> DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_all", "se_all"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          theta_all: "float64"
+          se_all: "float64"
+
+    output_files:
+      - path: "data/step00a_accuracy_theta.csv"
+        columns: ["composite_ID", "theta_accuracy", "se_accuracy"]
+        description: "Accuracy theta scores from RQ 5.1.1"
+
+    parameters:
+      filepath_or_buffer: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+
+    description: "Load accuracy theta scores from RQ 5.1.1 (omnibus ability estimates)"
+    source_reference: "pandas standard library (no tools_inventory.md entry needed)"
+
+  # Step 1: Merge and Standardize
+  merge:
+    module: "pandas"
+    function: "merge"
+    signature: "merge(left, right, how='inner', on=None, **kwargs) -> DataFrame"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step00a_accuracy_theta.csv"
+        required_columns: ["composite_ID", "theta_accuracy", "se_accuracy"]
+      - path: "data/step00b_confidence_theta.csv"
+        required_columns: ["composite_ID", "theta_confidence", "se_confidence"]
+      - path: "data/step00c_tsvr_mapping.csv"
+        required_columns: ["composite_ID", "TSVR_hours", "test"]
+
+    output_files:
+      - path: "data/step01_merged_theta.csv"
+        columns: ["UID", "test", "composite_ID", "TSVR_hours", "theta_accuracy", "se_accuracy", "theta_confidence", "se_confidence", "z_theta_accuracy", "z_theta_confidence"]
+        description: "Merged theta scores with TSVR and z-standardization"
+
+    parameters:
+      how: "inner"
+      on: "composite_ID"
+
+    description: "Merge accuracy, confidence, and TSVR data with z-standardization"
+    source_reference: "pandas standard library"
+
+  # Step 5: Fit LMM for Calibration Trajectory
+  fit_lmm_trajectory_tsvr:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~Days', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step02_calibration_scores.csv"
+        required_columns: ["UID", "TSVR_hours", "calibration"]
+        expected_rows: "~400"
+        data_types:
+          UID: "string"
+          TSVR_hours: "float64"
+          calibration: "float64"
+
+    output_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        description: "LMM model summary with fixed effects, random effects, fit indices"
+
+    parameters:
+      formula: "calibration ~ TSVR_hours"
+      re_formula: "~TSVR_hours"
+      groups: "UID"
+      reml: false
+
+    description: "Fit LMM for calibration trajectory using TSVR_hours as time variable (Decision D070)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - fit_lmm_trajectory_tsvr"
+
+  # Step 6: Compute Dual P-Values
+  extract_fixed_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_fixed_effects_from_lmm"
+    signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    input_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        source: "LMM fitted model from step05"
+
+    output_files:
+      - path: "data/step06_time_effect.csv"
+        columns: ["effect", "coefficient", "se", "p_uncorrected", "p_corrected", "interpretation", "direction"]
+        description: "Time effect with dual p-values per Decision D068"
+
+    parameters:
+      result: "MixedLMResults object from step05"
+
+    description: "Extract Time effect with dual p-value reporting (uncorrected + LRT)"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_fixed_effects_from_lmm"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00a_accuracy_theta.csv"
+        required_columns: ["composite_ID", "theta_accuracy", "se_accuracy"]
+        source: "read_csv output"
+
+    parameters:
+      required_columns: ["composite_ID", "theta_accuracy", "se_accuracy"]
+
+    criteria:
+      - "All required columns present (composite_ID, theta_accuracy, se_accuracy)"
+      - "No missing column names"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present, False otherwise)"
+        missing_columns: "List[str] (empty if valid=True)"
+        existing_columns: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00a_load_accuracy.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate required columns exist in loaded DataFrame"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_columns"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_merged_theta.csv"
+        required_columns: ["z_theta_accuracy", "z_theta_confidence"]
+        source: "merge output with z-standardization"
+
+    parameters:
+      column_names: ["z_theta_accuracy", "z_theta_confidence"]
+      tolerance: 0.01
+
+    criteria:
+      - "mean(z_theta_accuracy) approximately 0 (within 0.01 tolerance)"
+      - "std(z_theta_accuracy) approximately 1 (within 0.01 tolerance)"
+      - "mean(z_theta_confidence) approximately 0"
+      - "std(z_theta_confidence) approximately 1"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_merge_theta.log"
+      invoke: "g_debug"
+
+    description: "Validate z-score standardization (mean=0, sd=1)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_standardization"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_lmm_model_summary.txt"
+        source: "LMM fitted model"
+
+    parameters:
+      lmm_result: "MixedLMResults object"
+
+    criteria:
+      - "Model converged successfully (no convergence warnings)"
+      - "Random effects variance components > 0 (no boundary estimates)"
+      - "AIC, BIC finite (not NaN or inf)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        converged: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_fit_lmm.log"
+      invoke: "g_debug"
+
+    description: "Validate LMM converged successfully with valid variance estimates"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_lmm_convergence"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_time_effect.csv"
+        required_columns: ["effect", "p_uncorrected", "p_corrected"]
+        source: "extract_fixed_effects_from_lmm output"
+
+    parameters:
+      required_terms: ["TSVR_hours"]
+      alpha_bonferroni: 0.05
+
+    criteria:
+      - "Required term 'TSVR_hours' present in results"
+      - "Both p_uncorrected and p_corrected columns present (Decision D068)"
+      - "p-values in [0, 1] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_time_effect.log"
+      invoke: "g_debug"
+
+    description: "Validate Time effect includes required terms AND Decision D068 dual p-values"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_hypothesis_test_dual_pvalues"
+
+summary:
+  analysis_tools_count: 4
+  validation_tools_count: 4
+  total_unique_tools: 8
+  mandatory_decisions_embedded: ["D068", "D070"]
+  notes:
+    - "Stdlib functions (pandas.read_csv, pandas.merge) cataloged for completeness"
+    - "Custom tools from tools.analysis_lmm and tools.validation modules"
+    - "All tools verified exist in tools_inventory.md"
+    - "Decision D068: Dual p-value reporting (uncorrected + corrected)"
+    - "Decision D070: TSVR_hours as time variable (not nominal days)"

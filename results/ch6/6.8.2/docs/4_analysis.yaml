@@ -1,0 +1,479 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T16:45:00Z
+# RQ: ch6/6.8.2 - Source-Destination Calibration
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.8.2"
+  total_steps: 4
+  analysis_type: "LMM calibration analysis (no IRT - uses theta from prior RQs)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T16:45:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Merge Accuracy and Confidence by Location Type
+  # --------------------------------------------------------------------------
+  - name: "step00_merge_accuracy_confidence"
+    step_number: "00"
+    description: "Merge IRT-derived accuracy (Ch5 5.5.1) with confidence (Ch6 6.8.1) by UID x TEST x LocationType"
+
+    # Analysis tool specification (stdlib - pandas merge)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load accuracy theta from results/ch5/5.5.1/data/step03_theta_accuracy_location.csv"
+        - "Load confidence theta from results/ch6/6.8.1/data/step03_theta_confidence_location.csv"
+        - "Inner join on UID x TEST x LocationType (expect 100% match)"
+        - "Combine theta_accuracy + theta_confidence into single DataFrame"
+        - "Save to data/step00_accuracy_confidence_merged.csv"
+
+      input_files:
+        - path: "../../ch5/5.5.1/data/step03_theta_accuracy_location.csv"
+          required_columns: ["UID", "TEST", "LocationType", "theta_accuracy", "SE_accuracy"]
+          variable_name: "accuracy_data"
+          description: "IRT accuracy estimates from Ch5 RQ 5.5.1"
+        - path: "../6.8.1/data/step03_theta_confidence_location.csv"
+          required_columns: ["UID", "TEST", "LocationType", "theta_confidence", "SE_confidence"]
+          variable_name: "confidence_data"
+          description: "IRT confidence estimates from Ch6 RQ 6.8.1"
+
+      output_files:
+        - path: "data/step00_accuracy_confidence_merged.csv"
+          variable_name: "merged_data"
+          description: "Merged accuracy + confidence by UID x TEST x LocationType"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "TEST", type: "str", description: "Test session (T1/T2/T3/T4)"}
+            - {name: "LocationType", type: "str", description: "Source or Destination"}
+            - {name: "theta_accuracy", type: "float", description: "IRT accuracy estimate"}
+            - {name: "SE_accuracy", type: "float", description: "Standard error of accuracy"}
+            - {name: "theta_confidence", type: "float", description: "IRT confidence estimate"}
+            - {name: "SE_confidence", type: "float", description: "Standard error of confidence"}
+          expected_rows: 800
+
+      parameters:
+        merge_on: ["UID", "TEST", "LocationType"]
+        merge_how: "inner"
+
+    # Validation tool specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_accuracy_confidence_merged.csv"
+          variable_name: "merged_data"
+          source: "analysis call output (pandas merge result)"
+
+      parameters:
+        df: "merged_data"
+        expected_rows: 800
+        expected_columns: ["UID", "TEST", "LocationType", "theta_accuracy", "SE_accuracy", "theta_confidence", "SE_confidence"]
+        column_types:
+          UID: "str"
+          TEST: "str"
+          LocationType: "str"
+          theta_accuracy: "float"
+          SE_accuracy: "float"
+          theta_confidence: "float"
+          SE_confidence: "float"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Expected row count: 800 (100 UID x 4 tests x 2 LocationTypes)"
+        - "All required columns present: UID, TEST, LocationType, theta_accuracy, SE_accuracy, theta_confidence, SE_confidence"
+        - "No NaN values in theta or SE columns"
+        - "All UIDs matched between accuracy and confidence files"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_merge_accuracy_confidence.log"
+
+      description: "Validate merged DataFrame has correct structure and no data loss"
+
+    log_file: "logs/step00_merge_accuracy_confidence.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute Calibration per Location Type
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_calibration"
+    step_number: "01"
+    description: "Z-standardize accuracy and confidence within LocationType, compute calibration = Z_confidence - Z_accuracy"
+
+    # Analysis tool specification (stdlib - pandas groupby + transform)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step00_accuracy_confidence_merged.csv"
+        - "Z-standardize theta_accuracy within each LocationType separately"
+        - "Z-standardize theta_confidence within each LocationType separately"
+        - "Compute calibration = Z_confidence - Z_accuracy"
+        - "Save to data/step01_calibration_by_location.csv"
+
+      input_files:
+        - path: "data/step00_accuracy_confidence_merged.csv"
+          required_columns: ["UID", "TEST", "LocationType", "theta_accuracy", "theta_confidence"]
+          variable_name: "merged_data"
+          description: "Merged accuracy + confidence from Step 0"
+
+      output_files:
+        - path: "data/step01_calibration_by_location.csv"
+          variable_name: "calibration_data"
+          description: "Calibration scores by UID x TEST x LocationType"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "TEST", type: "str", description: "Test session"}
+            - {name: "LocationType", type: "str", description: "Source or Destination"}
+            - {name: "theta_accuracy", type: "float", description: "Raw IRT accuracy"}
+            - {name: "theta_confidence", type: "float", description: "Raw IRT confidence"}
+            - {name: "Z_accuracy", type: "float", description: "Standardized accuracy within location type"}
+            - {name: "Z_confidence", type: "float", description: "Standardized confidence within location type"}
+            - {name: "calibration", type: "float", description: "Z_confidence - Z_accuracy"}
+          expected_rows: 800
+
+      parameters:
+        groupby_column: "LocationType"
+        standardize_columns: ["theta_accuracy", "theta_confidence"]
+
+    # Validation tool specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_calibration_by_location.csv"
+          variable_name: "calibration_data"
+          source: "analysis call output (standardization result)"
+
+      parameters:
+        df: "calibration_data"
+        column_names: ["Z_accuracy", "Z_confidence"]
+        tolerance: 0.01
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Within each LocationType: mean(Z_accuracy) ≈ 0 (tolerance 0.01)"
+        - "Within each LocationType: SD(Z_accuracy) ≈ 1 (tolerance 0.01)"
+        - "Within each LocationType: mean(Z_confidence) ≈ 0 (tolerance 0.01)"
+        - "Within each LocationType: SD(Z_confidence) ≈ 1 (tolerance 0.01)"
+        - "No NaN values in standardized columns"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_compute_calibration.log"
+
+      description: "Validate z-standardization within LocationType groups"
+
+    log_file: "logs/step01_compute_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Test Location Effects on Calibration
+  # --------------------------------------------------------------------------
+  - name: "step02_fit_lmm_calibration"
+    step_number: "02"
+    description: "Fit LMM testing LocationType effects on calibration using TSVR time variable (Decision D070)"
+
+    # Analysis tool specification
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "fit_lmm_trajectory_tsvr"
+      signature: "fit_lmm_trajectory_tsvr(theta_scores: DataFrame, tsvr_data: DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~TSVR_hours', reml: bool = True) -> MixedLMResults"
+
+      input_files:
+        - path: "data/step01_calibration_by_location.csv"
+          required_columns: ["UID", "TEST", "LocationType", "calibration"]
+          variable_name: "calibration_data"
+          description: "Calibration scores from Step 1"
+
+      output_files:
+        - path: "data/step02_lmm_calibration_summary.txt"
+          variable_name: "lmm_summary_text"
+          description: "Plain text model summary (fixed effects, random effects, fit indices)"
+        - path: "data/step02_location_effects.csv"
+          variable_name: "location_effects"
+          description: "Fixed effects table with dual p-values (Decision D068)"
+          columns:
+            - {name: "Effect", type: "str", description: "Effect name"}
+            - {name: "Estimate", type: "float", description: "Coefficient value"}
+            - {name: "SE", type: "float", description: "Standard error"}
+            - {name: "t", type: "float", description: "t-statistic"}
+            - {name: "p_uncorrected", type: "float", description: "Standard p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value (Decision D068)"}
+          expected_rows: 4
+        - path: "data/step02_effect_sizes.csv"
+          variable_name: "effect_sizes"
+          description: "Effect size estimates (Cohen's f-squared)"
+          columns:
+            - {name: "Effect", type: "str", description: "Effect name"}
+            - {name: "Cohens_f2", type: "float", description: "Cohen's f-squared effect size"}
+          expected_rows: 3
+
+      parameters:
+        theta_scores: "calibration_data"
+        tsvr_data: "tsvr_lookup"  # Will be loaded from master.xlsx or TSVR table
+        formula: "calibration ~ LocationType * TSVR_hours"
+        groups: "UID"
+        re_formula: "~TSVR_hours"
+        reml: true
+
+      returns:
+        type: "MixedLMResults"
+        variable_name: "lmm_model"
+
+      description: "Fit LMM with LocationType x TSVR_hours interaction per Decision D070"
+
+    # Validation tool specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_lmm_convergence"
+      signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_lmm_calibration_summary.txt"
+          variable_name: "lmm_model"
+          source: "analysis call output (fit_lmm_trajectory_tsvr return value)"
+
+      parameters:
+        lmm_result: "lmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (converged attribute = True)"
+        - "No singular fit warnings"
+        - "All fixed effects have finite estimates (no NaN/Inf)"
+        - "Log-likelihood is finite"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm_calibration.log"
+
+      description: "Validate LMM converged successfully with no estimation issues"
+
+    log_file: "logs/step02_fit_lmm_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2 (continued): Extract Fixed Effects with Dual P-Values
+  # --------------------------------------------------------------------------
+  # Note: This is executed immediately after Step 2 LMM fit, uses same step number
+  - name: "step02_extract_fixed_effects"
+    step_number: "02"
+    description: "Extract fixed effects from LMM with dual p-values (uncorrected + Bonferroni per Decision D068)"
+
+    # Analysis tool specification
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "extract_fixed_effects_from_lmm"
+      signature: "extract_fixed_effects_from_lmm(result: MixedLMResults) -> DataFrame"
+
+      input_files: []  # Uses lmm_model from previous substep
+
+      output_files:
+        - path: "data/step02_location_effects.csv"
+          variable_name: "location_effects"
+          description: "Fixed effects table with dual p-values"
+
+      parameters:
+        result: "lmm_model"  # From fit_lmm_trajectory_tsvr
+
+      returns:
+        type: "DataFrame"
+        variable_name: "location_effects"
+
+      description: "Extract LocationType effects with dual p-value reporting"
+
+    # Validation tool specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_location_effects.csv"
+          variable_name: "location_effects"
+          source: "analysis call output (extract_fixed_effects_from_lmm result)"
+
+      parameters:
+        interaction_df: "location_effects"
+        required_terms: ["LocationType", "TSVR_hours", "LocationType:TSVR_hours"]
+        alpha_bonferroni: 0.05
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All required effects present: LocationType, TSVR_hours, LocationType:TSVR_hours"
+        - "Dual p-values present for ALL effects (p_uncorrected + p_bonferroni per Decision D068)"
+        - "p_bonferroni >= p_uncorrected for all effects"
+        - "All p-values in [0, 1]"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm_calibration.log"
+
+      description: "Validate LocationType effects table includes dual p-values per Decision D068"
+
+    log_file: "logs/step02_fit_lmm_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2 (continued): Compute Effect Sizes
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_effect_sizes"
+    step_number: "02"
+    description: "Compute Cohen's f-squared effect sizes for LocationType and interaction effects"
+
+    # Analysis tool specification
+    analysis_call:
+      module: "tools.analysis_lmm"
+      function: "compute_effect_sizes_cohens"
+      signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = True) -> DataFrame"
+
+      input_files: []  # Uses lmm_model from LMM fit substep
+
+      output_files:
+        - path: "data/step02_effect_sizes.csv"
+          variable_name: "effect_sizes"
+          description: "Cohen's f-squared effect sizes"
+
+      parameters:
+        lmm_result: "lmm_model"
+        include_interactions: true
+
+      returns:
+        type: "DataFrame"
+        variable_name: "effect_sizes"
+
+      description: "Compute Cohen's f-squared for LocationType effects"
+
+    # Validation tool specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_effect_sizes"
+      signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_effect_sizes.csv"
+          variable_name: "effect_sizes"
+          source: "analysis call output (compute_effect_sizes_cohens result)"
+
+      parameters:
+        effect_sizes_df: "effect_sizes"
+        f2_column: "Cohens_f2"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All Cohen's f² values >= 0 (non-negative)"
+        - "No NaN or infinite values"
+        - "Effect sizes for LocationType, TSVR_hours, interaction present"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_fit_lmm_calibration.log"
+
+      description: "Validate effect sizes are non-negative and finite"
+
+    log_file: "logs/step02_fit_lmm_calibration.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Prepare Calibration Plot Data
+  # --------------------------------------------------------------------------
+  - name: "step03_prepare_calibration_plot_data"
+    step_number: "03"
+    description: "Aggregate calibration by LocationType x Time for trajectory visualization"
+
+    # Analysis tool specification (stdlib - pandas groupby + agg)
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_calibration_by_location.csv"
+        - "Group by LocationType x TEST"
+        - "Compute mean(calibration), 95% CI for each group"
+        - "Convert TEST to TSVR_hours (T1=0, T2=24, T3=72, T4=144 hours approximately)"
+        - "Save to data/step03_calibration_plot_data.csv"
+
+      input_files:
+        - path: "data/step01_calibration_by_location.csv"
+          required_columns: ["LocationType", "TEST", "calibration"]
+          variable_name: "calibration_data"
+          description: "Calibration scores from Step 1"
+
+      output_files:
+        - path: "data/step03_calibration_plot_data.csv"
+          variable_name: "plot_data"
+          description: "Plot source CSV for trajectory visualization (Option B)"
+          columns:
+            - {name: "LocationType", type: "str", description: "Source or Destination"}
+            - {name: "TSVR_hours", type: "float", description: "Time since encoding"}
+            - {name: "mean_calibration", type: "float", description: "Mean calibration per location x time"}
+            - {name: "CI_lower", type: "float", description: "Lower 95% confidence bound"}
+            - {name: "CI_upper", type: "float", description: "Upper 95% confidence bound"}
+          expected_rows: 8
+
+      parameters:
+        groupby_columns: ["LocationType", "TEST"]
+        aggregation_function: "mean"
+        confidence_level: 0.95
+
+    # Validation tool specification
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'LocationType', group_col: str = 'TSVR_hours') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_calibration_plot_data.csv"
+          variable_name: "plot_data"
+          source: "analysis call output (aggregation result)"
+
+      parameters:
+        plot_data: "plot_data"
+        required_domains: ["Source", "Destination"]
+        required_groups: [0, 24, 72, 144]  # Approximate TSVR hours for T1-T4
+        domain_col: "LocationType"
+        group_col: "TSVR_hours"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Exactly 8 rows (2 LocationTypes x 4 timepoints)"
+        - "Both LocationTypes present: Source, Destination"
+        - "All 4 timepoints present per LocationType"
+        - "No NaN values in mean_calibration, CI_lower, CI_upper"
+        - "CI_upper > CI_lower for all rows"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_prepare_calibration_plot_data.log"
+
+      description: "Validate plot data includes all LocationType x Time combinations"
+
+    log_file: "logs/step03_prepare_calibration_plot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

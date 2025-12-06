@@ -1,0 +1,756 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.8.4
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.8.4"
+  total_steps: 9
+  analysis_type: "K-means clustering (source-destination confidence random effects)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Reshape Random Effects Data
+  # --------------------------------------------------------------------------
+  - name: "step00_reshape_random_effects"
+    step_number: "00"
+    description: "Reshape location-stratified random effects from long format (200 rows) to wide format (100 rows, 4 features per participant)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('results/ch6/6.8.3/data/step04_random_effects.csv')"
+        - "Filter location_type == 'source' -> extract intercept and slope"
+        - "Filter location_type == 'destination' -> extract intercept and slope"
+        - "Merge on UID to create 4-column feature matrix"
+        - "Rename columns: Source_intercept, Source_slope, Destination_intercept, Destination_slope"
+        - "Save to data/step00_clustering_input.csv"
+
+    inputs:
+      dependency_file:
+        path: "results/ch6/6.8.3/data/step04_random_effects.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "UID", type: "str", description: "Participant unique ID"}
+          - {name: "location_type", type: "str", description: "source or destination"}
+          - {name: "intercept", type: "float", description: "Random intercept"}
+          - {name: "slope", type: "float", description: "Random slope"}
+        row_count: 200
+        description: "Long-format random effects from RQ 6.8.3 LMM (100 participants x 2 locations)"
+
+    outputs:
+      clustering_input:
+        path: "data/step00_clustering_input.csv"
+        format: "CSV with UTF-8 encoding"
+        columns:
+          - {name: "UID", type: "str", description: "Participant identifier"}
+          - {name: "Source_intercept", type: "float", description: "Source random intercept"}
+          - {name: "Source_slope", type: "float", description: "Source random slope"}
+          - {name: "Destination_intercept", type: "float", description: "Destination random intercept"}
+          - {name: "Destination_slope", type: "float", description: "Destination random slope"}
+        row_count: 100
+        description: "Wide-format clustering input (one row per participant, 4 features)"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_dataframe_structure"
+        signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+      inputs:
+        df:
+          path: "data/step00_clustering_input.csv"
+          description: "Output from reshape operation"
+
+      parameters:
+        df: "clustering_input"
+        expected_rows: 100
+        expected_columns: ["UID", "Source_intercept", "Source_slope", "Destination_intercept", "Destination_slope"]
+        column_types: {"UID": "object", "Source_intercept": "float64", "Source_slope": "float64", "Destination_intercept": "float64", "Destination_slope": "float64"}
+
+      criteria:
+        - name: "Row count matches 100 participants"
+          check: "len(df) == 100"
+          severity: "CRITICAL"
+        - name: "All required columns present"
+          check: "All 5 columns exist"
+          severity: "CRITICAL"
+        - name: "No NaN values"
+          check: "df.isna().sum() == 0"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 0 reshape failed validation - see logs/step00_reshape_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Standardize Features
+  # --------------------------------------------------------------------------
+  - name: "step01_standardize_features"
+    step_number: "01"
+    description: "Z-score standardization of 4 features (mean=0, SD=1) for equal weighting in K-means"
+
+    analysis_call:
+      module: "sklearn.preprocessing"
+      function: "StandardScaler"
+      signature: "StandardScaler().fit_transform(X: np.ndarray) -> np.ndarray"
+
+      inputs:
+        clustering_input:
+          path: "data/step00_clustering_input.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "Source_intercept", "Source_slope", "Destination_intercept", "Destination_slope"]
+          row_count: 100
+          description: "Wide-format clustering input from Step 0"
+
+      outputs:
+        standardized_features:
+          path: "data/step01_standardized_features.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str"}
+            - {name: "Source_intercept_z", type: "float"}
+            - {name: "Source_slope_z", type: "float"}
+            - {name: "Destination_intercept_z", type: "float"}
+            - {name: "Destination_slope_z", type: "float"}
+          row_count: 100
+          description: "Z-score standardized features (mean≈0, SD≈1)"
+
+      parameters:
+        X: "clustering_input[['Source_intercept', 'Source_slope', 'Destination_intercept', 'Destination_slope']]"
+
+      returns:
+        type: "np.ndarray"
+        variable_name: "standardized_array"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_standardization"
+        signature: "validate_standardization(df: DataFrame, column_names: List[str], tolerance: float) -> Dict[str, Any]"
+
+      inputs:
+        standardized_features:
+          path: "data/step01_standardized_features.csv"
+          description: "Output from StandardScaler"
+
+      parameters:
+        df: "standardized_features"
+        column_names: ["Source_intercept_z", "Source_slope_z", "Destination_intercept_z", "Destination_slope_z"]
+        tolerance: 0.01
+
+      criteria:
+        - name: "Mean approximately 0"
+          check: "abs(mean) < 0.01 for all z-score columns"
+          severity: "CRITICAL"
+        - name: "SD approximately 1"
+          check: "abs(SD - 1) < 0.01 for all z-score columns"
+          severity: "CRITICAL"
+        - name: "No NaN values"
+          check: "df.isna().sum() == 0"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 1 standardization failed validation - see logs/step01_standardize_features.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: K-Means Cluster Selection (BIC)
+  # --------------------------------------------------------------------------
+  - name: "step02_cluster_selection"
+    step_number: "02"
+    description: "K-means cluster selection using BIC for K=1 to K=6"
+
+    analysis_call:
+      module: "sklearn.cluster"
+      function: "KMeans"
+      signature: "KMeans(n_clusters: int, random_state: int).fit(X: np.ndarray) -> KMeans"
+
+      inputs:
+        standardized_features:
+          path: "data/step01_standardized_features.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "Source_intercept_z", "Source_slope_z", "Destination_intercept_z", "Destination_slope_z"]
+          row_count: 100
+          description: "Z-score standardized features from Step 1"
+
+      outputs:
+        cluster_selection:
+          path: "data/step02_cluster_selection.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "K", type: "int", description: "Number of clusters (1-6)"}
+            - {name: "inertia", type: "float", description: "Within-cluster sum of squares"}
+            - {name: "BIC", type: "float", description: "Bayesian Information Criterion"}
+            - {name: "optimal", type: "bool", description: "True for K with minimum BIC"}
+          row_count: 6
+          description: "BIC values for K=1 to K=6 with optimal K identified"
+
+      parameters:
+        n_clusters: [1, 2, 3, 4, 5, 6]
+        random_state: 42
+        X: "standardized_features[['Source_intercept_z', 'Source_slope_z', 'Destination_intercept_z', 'Destination_slope_z']]"
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "cluster_selection"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_numeric_range"
+        signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      inputs:
+        cluster_selection:
+          path: "data/step02_cluster_selection.csv"
+          description: "Output from BIC selection loop"
+
+      parameters:
+        data: "cluster_selection['BIC']"
+        min_val: -Inf
+        max_val: Inf
+        column_name: "BIC"
+
+      criteria:
+        - name: "All K values present"
+          check: "cluster_selection['K'].tolist() == [1,2,3,4,5,6]"
+          severity: "CRITICAL"
+        - name: "BIC finite"
+          check: "All BIC values finite (no NaN, no inf)"
+          severity: "CRITICAL"
+        - name: "Inertia decreases monotonically"
+          check: "inertia[K=i] > inertia[K=i+1] for all i"
+          severity: "MODERATE"
+        - name: "Exactly one optimal K"
+          check: "cluster_selection['optimal'].sum() == 1"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 2 cluster selection failed validation - see logs/step02_cluster_selection.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Final K-Means Clustering
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_final_kmeans"
+    step_number: "03"
+    description: "Fit final K-means clustering using optimal K from BIC selection"
+
+    analysis_call:
+      module: "sklearn.cluster"
+      function: "KMeans"
+      signature: "KMeans(n_clusters: int, random_state: int).fit(X: np.ndarray) -> KMeans"
+
+      inputs:
+        standardized_features:
+          path: "data/step01_standardized_features.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "Source_intercept_z", "Source_slope_z", "Destination_intercept_z", "Destination_slope_z"]
+          row_count: 100
+        cluster_selection:
+          path: "data/step02_cluster_selection.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["K", "inertia", "BIC", "optimal"]
+          row_count: 6
+          description: "BIC selection results to extract optimal K"
+
+      outputs:
+        cluster_assignments:
+          path: "data/step03_cluster_assignments.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "cluster", type: "int", description: "Cluster assignment (0 to K-1)"}
+          row_count: 100
+          description: "Final cluster assignments for N=100 participants"
+
+      parameters:
+        n_clusters: "optimal_K_from_step02"
+        random_state: 42
+        X: "standardized_features[['Source_intercept_z', 'Source_slope_z', 'Destination_intercept_z', 'Destination_slope_z']]"
+
+      returns:
+        type: "KMeans"
+        variable_name: "kmeans_model"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_cluster_assignment"
+        signature: "validate_cluster_assignment(cluster_labels: Union[np.ndarray, pd.Series], n_expected: int, min_cluster_size: int) -> Dict[str, Any]"
+
+      inputs:
+        cluster_assignments:
+          path: "data/step03_cluster_assignments.csv"
+          description: "Output from final KMeans fit"
+
+      parameters:
+        cluster_labels: "cluster_assignments['cluster']"
+        n_expected: 100
+        min_cluster_size: 10
+
+      criteria:
+        - name: "All participants assigned"
+          check: "len(cluster_labels) == 100"
+          severity: "CRITICAL"
+        - name: "Cluster IDs consecutive from 0"
+          check: "cluster IDs in {0, 1, ..., K-1}"
+          severity: "CRITICAL"
+        - name: "Each cluster >= 10 participants"
+          check: "All cluster sizes >= 10% of N=100"
+          severity: "CRITICAL"
+        - name: "No empty clusters"
+          check: "All K clusters represented"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 3 cluster assignment failed validation - see logs/step03_fit_final_kmeans.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Validate Clustering Quality
+  # --------------------------------------------------------------------------
+  - name: "step04_validate_clustering_quality"
+    step_number: "04"
+    description: "Compute clustering quality metrics (Silhouette, Davies-Bouldin, Jaccard bootstrap stability)"
+
+    analysis_call:
+      type: "composite"
+      tools:
+        - module: "sklearn.metrics"
+          function: "silhouette_score"
+          signature: "silhouette_score(X: np.ndarray, labels: np.ndarray) -> float"
+        - module: "sklearn.metrics"
+          function: "davies_bouldin_score"
+          signature: "davies_bouldin_score(X: np.ndarray, labels: np.ndarray) -> float"
+        - module: "custom"
+          function: "compute_jaccard_bootstrap"
+          signature: "compute_jaccard_bootstrap(X: np.ndarray, labels: np.ndarray, n_bootstrap: int) -> np.ndarray"
+
+      inputs:
+        standardized_features:
+          path: "data/step01_standardized_features.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "Source_intercept_z", "Source_slope_z", "Destination_intercept_z", "Destination_slope_z"]
+          row_count: 100
+        cluster_assignments:
+          path: "data/step03_cluster_assignments.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "cluster"]
+          row_count: 100
+
+      outputs:
+        validation_metrics:
+          path: "data/step04_validation.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "metric", type: "str", description: "Silhouette, Davies_Bouldin, or Jaccard"}
+            - {name: "value", type: "float", description: "Metric value"}
+            - {name: "threshold", type: "float", description: "Quality threshold"}
+            - {name: "pass", type: "bool", description: "True if value meets threshold"}
+          row_count: 3
+          description: "Clustering quality metrics with pass/fail evaluation"
+
+      parameters:
+        X: "standardized_features[['Source_intercept_z', 'Source_slope_z', 'Destination_intercept_z', 'Destination_slope_z']]"
+        labels: "cluster_assignments['cluster']"
+        n_bootstrap: 100
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "validation_metrics"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_bootstrap_stability"
+        signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float) -> Dict[str, Any]"
+
+      inputs:
+        validation_metrics:
+          path: "data/step04_validation.csv"
+          description: "Output from quality metric computation"
+
+      parameters:
+        jaccard_values: "validation_metrics[validation_metrics['metric']=='Jaccard']['value'].values"
+        min_jaccard_threshold: 0.70
+
+      criteria:
+        - name: "Silhouette in [-1, 1]"
+          check: "-1 <= Silhouette <= 1"
+          severity: "CRITICAL"
+        - name: "Davies-Bouldin >= 0"
+          check: "Davies_Bouldin >= 0"
+          severity: "CRITICAL"
+        - name: "Jaccard in [0, 1]"
+          check: "0 <= Jaccard <= 1"
+          severity: "CRITICAL"
+        - name: "Bootstrap stability"
+          check: "Jaccard > 0.70 for robust clusters"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "WARN"
+        message: "Step 4 clustering quality metrics computed, some thresholds not met - see logs/step04_validate_clustering_quality.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Characterize Clusters
+  # --------------------------------------------------------------------------
+  - name: "step05_characterize_clusters"
+    step_number: "05"
+    description: "Compute cluster summary statistics (mean, SD, min, max per feature) and assign phenotype labels"
+
+    analysis_call:
+      module: "pandas"
+      function: "groupby"
+      signature: "groupby(by: str).describe() -> DataFrame"
+
+      inputs:
+        clustering_input:
+          path: "data/step00_clustering_input.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "Source_intercept", "Source_slope", "Destination_intercept", "Destination_slope"]
+          row_count: 100
+          description: "Raw (unstandardized) features for interpretable statistics"
+        cluster_assignments:
+          path: "data/step03_cluster_assignments.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "cluster"]
+          row_count: 100
+
+      outputs:
+        cluster_characterization:
+          path: "data/step05_cluster_characterization.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "cluster", type: "int"}
+            - {name: "N", type: "int"}
+            - {name: "Source_intercept_mean", type: "float"}
+            - {name: "Source_intercept_SD", type: "float"}
+            - {name: "Source_intercept_min", type: "float"}
+            - {name: "Source_intercept_max", type: "float"}
+            - {name: "Source_slope_mean", type: "float"}
+            - {name: "Source_slope_SD", type: "float"}
+            - {name: "Source_slope_min", type: "float"}
+            - {name: "Source_slope_max", type: "float"}
+            - {name: "Destination_intercept_mean", type: "float"}
+            - {name: "Destination_intercept_SD", type: "float"}
+            - {name: "Destination_intercept_min", type: "float"}
+            - {name: "Destination_intercept_max", type: "float"}
+            - {name: "Destination_slope_mean", type: "float"}
+            - {name: "Destination_slope_SD", type: "float"}
+            - {name: "Destination_slope_min", type: "float"}
+            - {name: "Destination_slope_max", type: "float"}
+            - {name: "phenotype", type: "str"}
+          row_count: "K"
+          description: "Cluster summary statistics with interpretive phenotype labels"
+
+      parameters:
+        by: "cluster"
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "cluster_characterization"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_cluster_summary_stats"
+        signature: "validate_cluster_summary_stats(summary_df: DataFrame, min_col: str, mean_col: str, max_col: str, sd_col: str, n_col: str) -> Dict[str, Any]"
+
+      inputs:
+        cluster_characterization:
+          path: "data/step05_cluster_characterization.csv"
+          description: "Output from groupby.describe()"
+
+      parameters:
+        summary_df: "cluster_characterization"
+        min_col: "Source_intercept_min"
+        mean_col: "Source_intercept_mean"
+        max_col: "Source_intercept_max"
+        sd_col: "Source_intercept_SD"
+        n_col: "N"
+
+      criteria:
+        - name: "min <= mean <= max"
+          check: "For all features, min <= mean <= max"
+          severity: "CRITICAL"
+        - name: "SD >= 0"
+          check: "All SD values non-negative"
+          severity: "CRITICAL"
+        - name: "N > 0"
+          check: "All cluster sizes > 0"
+          severity: "CRITICAL"
+        - name: "Phenotype labels assigned"
+          check: "No empty phenotype strings"
+          severity: "MODERATE"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 5 cluster characterization failed validation - see logs/step05_characterize_clusters.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Cross-Tabulate with Ch5 5.5.7 Accuracy Clusters
+  # --------------------------------------------------------------------------
+  - name: "step06_crosstab_ch5"
+    step_number: "06"
+    description: "Cross-tabulate confidence clusters with Ch5 5.5.7 accuracy clusters + chi-square test with dual p-values (Decision D068)"
+
+    analysis_call:
+      module: "scipy.stats"
+      function: "chi2_contingency"
+      signature: "chi2_contingency(observed: np.ndarray) -> Tuple[float, float, int, np.ndarray]"
+
+      inputs:
+        confidence_clusters:
+          path: "data/step03_cluster_assignments.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "cluster"]
+          row_count: 100
+          description: "Confidence cluster assignments from this RQ"
+        accuracy_clusters:
+          path: "results/ch5/5.5.7/data/step03_cluster_assignments.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "cluster"]
+          row_count: 100
+          description: "Accuracy cluster assignments from Ch5 5.5.7"
+
+      outputs:
+        crosstab:
+          path: "data/step06_crosstab.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: "K_confidence rows x K_accuracy columns + margins"
+          description: "Contingency table (confidence clusters x accuracy clusters)"
+        chi_square_test:
+          path: "data/step06_chi_square.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "chi_square", type: "float", description: "Test statistic"}
+            - {name: "df", type: "int", description: "Degrees of freedom"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value"}
+            - {name: "significant_uncorrected", type: "bool", description: "p < 0.05"}
+            - {name: "significant_bonferroni", type: "bool", description: "p_bonferroni < 0.05"}
+          row_count: 1
+          description: "Chi-square test results with Decision D068 dual p-values"
+
+      parameters:
+        observed: "crosstab_contingency_table"
+
+      returns:
+        type: "Tuple[float, float, int, np.ndarray]"
+        unpacking: "chi_square, p_uncorrected, df, expected"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_hypothesis_test_dual_pvalues"
+        signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float) -> Dict[str, Any]"
+
+      inputs:
+        chi_square_test:
+          path: "data/step06_chi_square.csv"
+          description: "Output from chi2_contingency with Bonferroni correction added"
+
+      parameters:
+        interaction_df: "chi_square_test"
+        required_terms: ["chi_square", "df", "p_uncorrected", "p_bonferroni"]
+        alpha_bonferroni: 0.05
+
+      criteria:
+        - name: "All required columns present"
+          check: "chi_square, df, p_uncorrected, p_bonferroni columns exist"
+          severity: "CRITICAL"
+        - name: "Decision D068 compliance"
+          check: "BOTH uncorrected AND Bonferroni p-values reported"
+          severity: "CRITICAL"
+        - name: "All 100 participants matched"
+          check: "Crosstab row/column sums == cluster sizes"
+          severity: "CRITICAL"
+        - name: "Chi-square >= 0"
+          check: "chi_square >= 0"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 6 chi-square test failed validation - see logs/step06_crosstab_ch5.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Compare Quality Metrics to Ch5 RQs
+  # --------------------------------------------------------------------------
+  - name: "step07_compare_ch5"
+    step_number: "07"
+    description: "Compare clustering quality metrics across 6 RQs (5 Ch5 + this RQ) sorted by Silhouette descending"
+
+    analysis_call:
+      module: "pandas"
+      function: "concat"
+      signature: "concat(objs: List[DataFrame], axis: int) -> DataFrame"
+
+      inputs:
+        this_rq_validation:
+          path: "data/step04_validation.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["metric", "value", "threshold", "pass"]
+          row_count: 3
+          description: "This RQ's clustering quality metrics"
+        ch5_validations:
+          paths:
+            - "results/ch5/5.1.5/data/step04_validation.csv"
+            - "results/ch5/5.2.7/data/step04_validation.csv"
+            - "results/ch5/5.3.8/data/step04_validation.csv"
+            - "results/ch5/5.4.5/data/step04_validation.csv"
+            - "results/ch5/5.5.7/data/step04_validation.csv"
+          format: "CSV with UTF-8 encoding (same structure as this_rq_validation)"
+          description: "Ch5 clustering RQ quality metrics for comparison"
+
+      outputs:
+        ch5_comparison:
+          path: "data/step07_ch5_comparison.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "RQ_ID", type: "str", description: "e.g., 5.1.5, 6.8.4"}
+            - {name: "RQ_description", type: "str", description: "e.g., General Accuracy, Source-Dest Confidence"}
+            - {name: "Data_type", type: "str", description: "Accuracy or Confidence"}
+            - {name: "K", type: "int", description: "Optimal number of clusters"}
+            - {name: "Silhouette", type: "float", description: "Silhouette coefficient"}
+            - {name: "Davies_Bouldin", type: "float", description: "Davies-Bouldin index"}
+            - {name: "Jaccard", type: "float", description: "Jaccard stability"}
+          row_count: 6
+          description: "Clustering quality comparison across 6 RQs sorted by Silhouette descending"
+
+      parameters:
+        objs: "[this_rq_validation, ch5_5.1.5_validation, ch5_5.2.7_validation, ch5_5.3.8_validation, ch5_5.4.5_validation, ch5_5.5.7_validation]"
+        axis: 0
+
+      returns:
+        type: "pd.DataFrame"
+        variable_name: "ch5_comparison"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_dataframe_structure"
+        signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+      inputs:
+        ch5_comparison:
+          path: "data/step07_ch5_comparison.csv"
+          description: "Output from concatenation of 6 RQ quality metrics"
+
+      parameters:
+        df: "ch5_comparison"
+        expected_rows: 6
+        expected_columns: ["RQ_ID", "RQ_description", "Data_type", "K", "Silhouette", "Davies_Bouldin", "Jaccard"]
+        column_types: {"RQ_ID": "object", "K": "int64", "Silhouette": "float64", "Davies_Bouldin": "float64", "Jaccard": "float64"}
+
+      criteria:
+        - name: "All 6 RQs present"
+          check: "len(ch5_comparison) == 6"
+          severity: "CRITICAL"
+        - name: "Ch5 5.5.7 row present"
+          check: "'5.5.7' in ch5_comparison['RQ_ID'].values"
+          severity: "CRITICAL"
+        - name: "This RQ (6.8.4) row present"
+          check: "'6.8.4' in ch5_comparison['RQ_ID'].values"
+          severity: "CRITICAL"
+        - name: "No NaN in metrics"
+          check: "ch5_comparison[['Silhouette', 'Davies_Bouldin', 'Jaccard']].isna().sum().sum() == 0"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 7 Ch5 comparison failed validation - see logs/step07_compare_ch5.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 8: Prepare Cluster Visualization Data
+  # --------------------------------------------------------------------------
+  - name: "step08_prepare_cluster_scatter_data"
+    step_number: "08"
+    description: "PCA projection from 4D feature space to 2D for scatter plot visualization"
+
+    analysis_call:
+      module: "sklearn.decomposition"
+      function: "PCA"
+      signature: "PCA(n_components: int).fit_transform(X: np.ndarray) -> np.ndarray"
+
+      inputs:
+        standardized_features:
+          path: "data/step01_standardized_features.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "Source_intercept_z", "Source_slope_z", "Destination_intercept_z", "Destination_slope_z"]
+          row_count: 100
+          description: "Z-score standardized features from Step 1"
+        cluster_assignments:
+          path: "data/step03_cluster_assignments.csv"
+          format: "CSV with UTF-8 encoding"
+          columns: ["UID", "cluster"]
+          row_count: 100
+          description: "Cluster assignments from Step 3"
+
+      outputs:
+        cluster_scatter_data:
+          path: "data/step08_cluster_scatter_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant identifier"}
+            - {name: "PC1", type: "float", description: "First principal component"}
+            - {name: "PC2", type: "float", description: "Second principal component"}
+            - {name: "cluster", type: "int", description: "Cluster assignment"}
+          row_count: 100
+          description: "Plot source CSV for cluster scatter in 2D PCA space"
+
+      parameters:
+        n_components: 2
+        X: "standardized_features[['Source_intercept_z', 'Source_slope_z', 'Destination_intercept_z', 'Destination_slope_z']]"
+
+      returns:
+        type: "np.ndarray"
+        variable_name: "pca_projection"
+
+    validation:
+      tool:
+        module: "tools.validation"
+        function: "validate_dataframe_structure"
+        signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+      inputs:
+        cluster_scatter_data:
+          path: "data/step08_cluster_scatter_data.csv"
+          description: "Output from PCA projection merged with cluster assignments"
+
+      parameters:
+        df: "cluster_scatter_data"
+        expected_rows: 100
+        expected_columns: ["UID", "PC1", "PC2", "cluster"]
+        column_types: {"UID": "object", "PC1": "float64", "PC2": "float64", "cluster": "int64"}
+
+      criteria:
+        - name: "All 100 participants present"
+          check: "len(df) == 100"
+          severity: "CRITICAL"
+        - name: "PC1 and PC2 finite"
+          check: "No NaN or inf in PC1, PC2"
+          severity: "CRITICAL"
+        - name: "Cluster labels valid"
+          check: "cluster in {0, 1, ..., K-1}"
+          severity: "CRITICAL"
+
+      on_failure:
+        action: "QUIT"
+        message: "Step 8 PCA projection failed validation - see logs/step08_prepare_cluster_scatter_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

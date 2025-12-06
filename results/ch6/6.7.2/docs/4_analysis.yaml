@@ -1,0 +1,354 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06T14:30:00Z
+# RQ: ch6/6.7.2
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.7.2"
+  total_steps: 4
+  analysis_type: "Correlation analysis (confidence variability vs accuracy variability)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T14:30:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 1: Compute Within-Person Confidence Variability
+  # --------------------------------------------------------------------------
+  - name: "step01_compute_sd_confidence"
+    step_number: "01"
+    description: "Compute standard deviation of confidence ratings across items for each participant at each test session"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/cache/dfData.csv"
+        - "Filter paradigms: IFR, ICR, IRE (interactive VR only)"
+        - "Extract TC_* columns (confidence ratings)"
+        - "Group by UID + test"
+        - "Compute std() for confidence ratings per group"
+        - "Filter observations with >= 10 items"
+        - "Save to data/step01_sd_confidence.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test"]
+          description: "Master dataset with TC_* confidence columns"
+
+      output_files:
+        - path: "data/step01_sd_confidence.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "object", description: "Participant identifier"}
+            - {name: "test", type: "object", description: "Test session (T1, T2, T3, T4)"}
+            - {name: "SD_confidence", type: "float64", description: "Standard deviation of confidence ratings"}
+            - {name: "N_items", type: "int64", description: "Number of items used to compute SD"}
+          row_count: [380, 400]
+          description: "Within-person confidence variability"
+
+      parameters:
+        paradigms: ["IFR", "ICR", "IRE"]
+        min_items: 10
+        ddof: 1
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_sd_confidence.csv"
+          variable_name: "sd_confidence"
+          source: "Step 1 analysis output"
+
+      parameters:
+        df: "sd_confidence"
+        expected_rows: [380, 400]
+        expected_columns: ["UID", "test", "SD_confidence", "N_items"]
+        column_types:
+          UID: "object"
+          test: "object"
+          SD_confidence: "float64"
+          N_items: "int64"
+
+      criteria:
+        - "Row count in expected range [380, 400]"
+        - "All required columns present"
+        - "Column types match specification"
+        - "No NaN values in SD_confidence"
+        - "No duplicate UID x test combinations"
+        - "N_items >= 10 for all observations"
+        - "SD_confidence in [0, 0.5]"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step01_compute_sd_confidence.log"
+
+    log_file: "logs/step01_compute_sd_confidence.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute Within-Person Accuracy Variability
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_sd_accuracy"
+    step_number: "02"
+    description: "Compute standard deviation of accuracy responses across items for each participant at each test session"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/cache/dfData.csv"
+        - "Filter paradigms: IFR, ICR, IRE (interactive VR only)"
+        - "Extract TQ_* columns (accuracy responses)"
+        - "Group by UID + test"
+        - "Compute std() for accuracy responses per group"
+        - "Filter observations with >= 10 items"
+        - "Save to data/step02_sd_accuracy.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test"]
+          description: "Master dataset with TQ_* accuracy columns"
+
+      output_files:
+        - path: "data/step02_sd_accuracy.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "object", description: "Participant identifier"}
+            - {name: "test", type: "object", description: "Test session (T1, T2, T3, T4)"}
+            - {name: "SD_accuracy", type: "float64", description: "Standard deviation of accuracy responses"}
+            - {name: "N_items", type: "int64", description: "Number of items used to compute SD"}
+          row_count: [380, 400]
+          description: "Within-person accuracy variability"
+
+      parameters:
+        paradigms: ["IFR", "ICR", "IRE"]
+        min_items: 10
+        ddof: 1
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_sd_accuracy.csv"
+          variable_name: "sd_accuracy"
+          source: "Step 2 analysis output"
+
+      parameters:
+        df: "sd_accuracy"
+        expected_rows: [380, 400]
+        expected_columns: ["UID", "test", "SD_accuracy", "N_items"]
+        column_types:
+          UID: "object"
+          test: "object"
+          SD_accuracy: "float64"
+          N_items: "int64"
+
+      criteria:
+        - "Row count in expected range [380, 400]"
+        - "All required columns present"
+        - "Column types match specification"
+        - "No NaN values in SD_accuracy"
+        - "No duplicate UID x test combinations"
+        - "N_items >= 10 for all observations"
+        - "SD_accuracy in [0, 0.5]"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step02_compute_sd_accuracy.log"
+
+    log_file: "logs/step02_compute_sd_accuracy.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Correlate Confidence Variability vs Accuracy Variability
+  # --------------------------------------------------------------------------
+  - name: "step03_correlate_variability"
+    step_number: "03"
+    description: "Test correlation between confidence variability and accuracy variability using Pearson r with dual p-values per Decision D068"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load data/step01_sd_confidence.csv"
+        - "Load data/step02_sd_accuracy.csv"
+        - "Merge on UID + test (inner join)"
+        - "Compute Pearson correlation using scipy.stats.pearsonr"
+        - "Compute permutation-based p-value (10,000 iterations)"
+        - "Compute 95% CI using bootstrap (1,000 resamples)"
+        - "Classify effect size (strong/moderate/weak)"
+        - "Save to data/step03_correlation.csv"
+
+      input_files:
+        - path: "data/step01_sd_confidence.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test", "SD_confidence", "N_items"]
+          description: "Confidence variability from Step 1"
+        - path: "data/step02_sd_accuracy.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test", "SD_accuracy", "N_items"]
+          description: "Accuracy variability from Step 2"
+
+      output_files:
+        - path: "data/step03_correlation.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "r", type: "float64", description: "Pearson correlation coefficient"}
+            - {name: "p_parametric", type: "float64", description: "Parametric p-value"}
+            - {name: "p_permutation", type: "float64", description: "Permutation-based p-value"}
+            - {name: "CI_lower", type: "float64", description: "Lower bound of 95% CI"}
+            - {name: "CI_upper", type: "float64", description: "Upper bound of 95% CI"}
+            - {name: "N", type: "int64", description: "Number of observations"}
+            - {name: "effect_size_category", type: "object", description: "Effect size category"}
+          row_count: 1
+          description: "Correlation results with dual p-values"
+
+      parameters:
+        merge_on: ["UID", "test"]
+        merge_how: "inner"
+        n_permutations: 10000
+        n_bootstrap: 1000
+        ci_level: 0.95
+        effect_size_thresholds:
+          strong: 0.50
+          moderate: 0.30
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_correlation.csv"
+          variable_name: "correlation_results"
+          source: "Step 3 analysis output"
+
+      parameters:
+        correlation_df: "correlation_results"
+        required_cols: ["r", "p_parametric", "p_permutation", "CI_lower", "CI_upper"]
+        check_d068: true
+        alpha: 0.05
+
+      criteria:
+        - "DUAL p-values present: p_parametric AND p_permutation (Decision D068)"
+        - "r in [-1, 1]"
+        - "p_parametric in [0, 1]"
+        - "p_permutation in [0, 1]"
+        - "CI_lower <= r <= CI_upper"
+        - "N >= 300"
+        - "effect_size_category in {strong, moderate, weak}"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step03_correlate_variability.log"
+
+    log_file: "logs/step03_correlate_variability.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Prepare Scatterplot Data
+  # --------------------------------------------------------------------------
+  - name: "step04_prepare_scatterplot_data"
+    step_number: "04"
+    description: "Create plot source CSV for scatterplot showing relationship between confidence and accuracy variability"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load merged data from Step 3 (SD_confidence + SD_accuracy)"
+        - "Fit linear regression: SD_accuracy ~ SD_confidence"
+        - "Generate regression line coordinates (100 points)"
+        - "Save scatterplot data to data/step04_variability_scatterplot_data.csv"
+        - "Save regression line to data/step04_variability_regression_line.csv"
+
+      input_files:
+        - path: "data/step01_sd_confidence.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test", "SD_confidence"]
+          description: "Confidence variability"
+        - path: "data/step02_sd_accuracy.csv"
+          format: "CSV with UTF-8 encoding"
+          required_columns: ["UID", "test", "SD_accuracy"]
+          description: "Accuracy variability"
+
+      output_files:
+        - path: "data/step04_variability_scatterplot_data.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "object", description: "Participant identifier"}
+            - {name: "test", type: "object", description: "Test session"}
+            - {name: "SD_confidence", type: "float64", description: "X-axis values"}
+            - {name: "SD_accuracy", type: "float64", description: "Y-axis values"}
+          row_count: [380, 400]
+          description: "Observed points for scatterplot"
+        - path: "data/step04_variability_regression_line.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "SD_confidence", type: "float64", description: "X values for regression line"}
+            - {name: "SD_accuracy_predicted", type: "float64", description: "Y values for regression line"}
+          row_count: 100
+          description: "Regression line coordinates"
+
+      parameters:
+        merge_on: ["UID", "test"]
+        merge_how: "inner"
+        n_regression_points: 100
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_plot_data_completeness"
+      signature: "validate_plot_data_completeness(plot_data: DataFrame, required_domains: List[str], required_groups: List[str], domain_col: str = 'domain', group_col: str = 'group') -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_variability_scatterplot_data.csv"
+          variable_name: "scatterplot_data"
+          source: "Step 4 scatterplot data"
+        - path: "data/step04_variability_regression_line.csv"
+          variable_name: "regression_line"
+          source: "Step 4 regression line"
+
+      parameters:
+        plot_data: "scatterplot_data"
+        required_domains: []
+        required_groups: []
+        check_scatterplot:
+          expected_rows: [380, 400]
+          expected_columns: ["UID", "test", "SD_confidence", "SD_accuracy"]
+          no_duplicates: ["UID", "test"]
+          value_ranges:
+            SD_confidence: [0, 0.5]
+            SD_accuracy: [0, 0.5]
+        check_regression_line:
+          expected_rows: 100
+          expected_columns: ["SD_confidence", "SD_accuracy_predicted"]
+          sorted_ascending: "SD_confidence"
+          value_ranges:
+            SD_confidence: [0, 0.5]
+            SD_accuracy_predicted: [0, 0.5]
+
+      criteria:
+        - "Scatterplot data: 380-400 rows"
+        - "Regression line: 100 rows"
+        - "No NaN values in any column"
+        - "No duplicate UID x test combinations"
+        - "SD_confidence in [0, 0.5]"
+        - "SD_accuracy in [0, 0.5]"
+        - "Regression line x values sorted ascending"
+
+      on_failure:
+        action: "raise ValueError"
+        log_to: "logs/step04_prepare_scatterplot_data.log"
+
+    log_file: "logs/step04_prepare_scatterplot_data.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

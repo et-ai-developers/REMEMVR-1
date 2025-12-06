@@ -1,0 +1,391 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2025-12-06
+# RQ: ch6/6.5.3
+# Agent: rq_analysis v4.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+
+metadata:
+  rq_id: "ch6/6.5.3"
+  total_steps: 5
+  analysis_type: "Item-level CTT analysis (HCE dissociations, GLMM with crossed random effects)"
+  generated_by: "rq_analysis v4.1.0"
+  timestamp: "2025-12-06T00:00:00Z"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Item-Level Accuracy and Confidence Data
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_item_level"
+    step_number: "00"
+    description: "Extract item-level accuracy (TQ_*) and confidence (TC_*) data for congruence-tagged items from dfData.csv"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "Filter to interactive paradigms (IFR, ICR, IRE) and congruence-tagged items (i1CM, i2CM, i3CG, i4CG, i5IN, i6IN)"
+        - "Extract TQ_* (accuracy) and TC_* (confidence) column pairs"
+        - "Parse item tags to extract ItemID, Congruence level (Common/Congruent/Incongruent), Test session (T1/T2/T3/T4), Paradigm"
+        - "Create long-format dataset: one row per UID x ItemID x Test"
+        - "Columns: UID, ItemID, Test, Paradigm, Congruence, Accuracy, Confidence"
+        - "Save to data/step00_item_level.csv"
+
+      input_files:
+        - path: "data/cache/dfData.csv"
+          description: "Project-level cached data source"
+          required_columns: ["UID", "TQ_*", "TC_*"]
+
+      output_files:
+        - path: "data/step00_item_level.csv"
+          description: "Long-format item-level data with accuracy/confidence pairs"
+          columns:
+            - {name: "UID", type: "string", description: "Participant identifier"}
+            - {name: "ItemID", type: "string", description: "Full item tag identifier"}
+            - {name: "Test", type: "string", description: "Test session (T1/T2/T3/T4)"}
+            - {name: "Paradigm", type: "string", description: "VR paradigm (IFR/ICR/IRE)"}
+            - {name: "Congruence", type: "string", description: "Schema congruence level (Common/Congruent/Incongruent)"}
+            - {name: "Accuracy", type: "float", description: "Item accuracy (0, 0.25, 0.5, 1.0)"}
+            - {name: "Confidence", type: "float", description: "Response confidence (0, 0.25, 0.5, 0.75, 1.0)"}
+          expected_rows: [6000, 8000]
+
+      parameters:
+        paradigm_filter: ["IFR", "ICR", "IRE"]
+        congruence_tags: ["i1CM", "i2CM", "i3CG", "i4CG", "i5IN", "i6IN"]
+        domain_filter: "-N-"
+        accuracy_values: [0, 0.25, 0.5, 1.0]
+        confidence_values: [0, 0.25, 0.5, 0.75, 1.0]
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step00_item_level.csv"
+          variable_name: "item_level_df"
+          source: "analysis call output (stdlib extraction)"
+
+      parameters:
+        df: "item_level_df"
+        required_columns: ["UID", "ItemID", "Test", "Paradigm", "Congruence", "Accuracy", "Confidence"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "All 7 required columns present"
+        - "Expected rows: 6,000-8,000"
+        - "100 unique participants"
+        - "Congruence levels: Common, Congruent, Incongruent"
+        - "Accuracy values in {0, 0.25, 0.5, 1.0}"
+        - "Confidence values in {0, 0.25, 0.5, 0.75, 1.0}"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step00_extract_item_level.log"
+
+    log_file: "logs/step00_extract_item_level.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Identify High-Confidence Errors
+  # --------------------------------------------------------------------------
+  - name: "step01_identify_hce"
+    step_number: "01"
+    description: "Flag high-confidence errors (HCE_flag = 1 if Accuracy == 0 AND Confidence >= 0.75)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step00_item_level.csv')"
+        - "Create HCE_flag column: HCE_flag = 1 if (Accuracy == 0 AND Confidence >= 0.75) else 0"
+        - "Save to data/step01_hce_flags.csv"
+
+      input_files:
+        - path: "data/step00_item_level.csv"
+          description: "Item-level data from Step 0"
+          required_columns: ["UID", "ItemID", "Test", "Paradigm", "Congruence", "Accuracy", "Confidence"]
+
+      output_files:
+        - path: "data/step01_hce_flags.csv"
+          description: "Item-level data with HCE binary flag"
+          columns:
+            - {name: "UID", type: "string"}
+            - {name: "ItemID", type: "string"}
+            - {name: "Test", type: "string"}
+            - {name: "Paradigm", type: "string"}
+            - {name: "Congruence", type: "string"}
+            - {name: "Accuracy", type: "float"}
+            - {name: "Confidence", type: "float"}
+            - {name: "HCE_flag", type: "int", description: "Binary indicator (0 or 1)"}
+          expected_rows: [6000, 8000]
+
+      parameters:
+        high_confidence_threshold: 0.75
+        error_threshold: 0
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step01_hce_flags.csv"
+          variable_name: "hce_flags_df"
+          source: "analysis call output (stdlib binary flagging)"
+
+      parameters:
+        data: "hce_flags_df['HCE_flag']"
+        min_val: 0
+        max_val: 1
+        column_name: "HCE_flag"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "HCE_flag in {0, 1} (binary only)"
+        - "Logical consistency: If HCE_flag == 1, then Accuracy == 0 AND Confidence >= 0.75"
+        - "Expected HCE rate: 5-20% of total rows (340-1360 HCEs)"
+        - "No NaN in HCE_flag column"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step01_identify_hce.log"
+
+    log_file: "logs/step01_identify_hce.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Compute HCE Rates by Congruence and Test
+  # --------------------------------------------------------------------------
+  - name: "step02_compute_hce_rates"
+    step_number: "02"
+    description: "Aggregate HCE rates by Congruence x Test (3 x 4 = 12 cells)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step01_hce_flags.csv')"
+        - "Group by Congruence x Test"
+        - "Compute per cell: HCE_rate = mean(HCE_flag), N_responses = count(HCE_flag), N_hce = sum(HCE_flag)"
+        - "Save to data/step02_hce_rates.csv"
+
+      input_files:
+        - path: "data/step01_hce_flags.csv"
+          description: "Item-level data with HCE flags from Step 1"
+          required_columns: ["Congruence", "Test", "HCE_flag"]
+
+      output_files:
+        - path: "data/step02_hce_rates.csv"
+          description: "Aggregated HCE rates (one row per Congruence x Test cell)"
+          columns:
+            - {name: "Congruence", type: "string", description: "Common/Congruent/Incongruent"}
+            - {name: "Test", type: "string", description: "T1/T2/T3/T4"}
+            - {name: "HCE_rate", type: "float", description: "Proportion of HCEs in [0, 1]"}
+            - {name: "N_responses", type: "int", description: "Total responses in cell"}
+            - {name: "N_hce", type: "int", description: "Total HCEs in cell"}
+          expected_rows: 12
+
+      parameters:
+        groupby_columns: ["Congruence", "Test"]
+        aggregation:
+          HCE_rate: "mean(HCE_flag)"
+          N_responses: "count(HCE_flag)"
+          N_hce: "sum(HCE_flag)"
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step02_hce_rates.csv"
+          variable_name: "hce_rates_df"
+          source: "analysis call output (stdlib aggregation)"
+
+      parameters:
+        probability_df: "hce_rates_df"
+        prob_columns: ["HCE_rate"]
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "HCE_rate in [0, 1] for all cells"
+        - "All 12 cells present (complete 3 x 4 factorial design)"
+        - "All Congruence levels present: Common, Congruent, Incongruent"
+        - "All Test levels present: T1, T2, T3, T4"
+        - "Logical consistency: HCE_rate = N_hce / N_responses"
+        - "N_responses > 0 for all cells"
+        - "Expected N_responses per cell: ~400-800"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step02_compute_hce_rates.log"
+
+    log_file: "logs/step02_compute_hce_rates.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Mixed-Effects Model to Test Congruence x Time Effect on HCE
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_glmm"
+    step_number: "03"
+    description: "Fit GLMM (logistic regression) with Congruence * Time fixed effects and crossed random effects (UID, ItemID)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step01_hce_flags.csv')"
+        - "Convert Test to numeric time: T1=0, T2=1, T3=3, T4=6 (nominal days)"
+        - "Fit GLMM: HCE_flag ~ Congruence * Time + (Time | UID) + (1 | ItemID)"
+        - "Binomial family, logit link function"
+        - "Extract model summary and hypothesis tests (Congruence main effect, Time main effect, Congruence x Time interaction)"
+        - "Save model summary to data/step03_congruence_hce_model.txt"
+        - "Save hypothesis tests to data/step03_congruence_hce_test.csv"
+
+      input_files:
+        - path: "data/step01_hce_flags.csv"
+          description: "Item-level HCE flags from Step 1"
+          required_columns: ["HCE_flag", "Congruence", "Test", "UID", "ItemID"]
+
+      output_files:
+        - path: "data/step03_congruence_hce_model.txt"
+          description: "GLMM model summary (fixed effects, random effects, fit indices)"
+        - path: "data/step03_congruence_hce_test.csv"
+          description: "Hypothesis test results (F/Chi-square, df, p-values)"
+          columns:
+            - {name: "Effect", type: "string", description: "Congruence/Time/Congruence x Time"}
+            - {name: "F_or_ChiSq", type: "float", description: "Test statistic"}
+            - {name: "df1", type: "int", description: "Numerator df"}
+            - {name: "df2", type: "int", description: "Denominator df (may be NA for Wald tests)"}
+            - {name: "p_value", type: "float", description: "Uncorrected p-value per Decision D068"}
+          expected_rows: 3
+
+      parameters:
+        formula: "HCE_flag ~ Congruence * Time + (Time | UID) + (1 | ItemID)"
+        family: "binomial"
+        link: "logit"
+        time_mapping:
+          T1: 0
+          T2: 1
+          T3: 3
+          T4: 6
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step03_congruence_hce_model.txt"
+          variable_name: "glmm_model"
+          source: "analysis call output (GLMM fitted model object)"
+
+      parameters:
+        lmm_result: "glmm_model"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Model converged successfully (no convergence warnings)"
+        - "All fixed effects estimated (Congruence, Time, interaction - no NaN coefficients)"
+        - "All random effects estimated (UID intercept/slope, ItemID intercept - no NaN variances)"
+        - "Variance components > 0 (all random effects variances positive)"
+        - "p_value in [0, 1] for all hypothesis tests"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step03_fit_glmm.log"
+
+    log_file: "logs/step03_fit_glmm.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Post-Hoc Contrasts if Congruence Effect Significant
+  # --------------------------------------------------------------------------
+  - name: "step04_post_hoc_contrasts"
+    step_number: "04"
+    description: "Compute pairwise contrasts with dual p-values (uncorrected + Bonferroni) if Congruence main effect significant (p < 0.05)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/step03_congruence_hce_test.csv')"
+        - "Check if Congruence main effect p_value < 0.05"
+        - "If significant: Compute 3 pairwise contrasts (Incongruent vs Congruent, Incongruent vs Common, Congruent vs Common)"
+        - "For each contrast: Estimate, SE, z-value, p_uncorrected, p_bonferroni (p_bonf = min(p_uncorr * 3, 1.0))"
+        - "If NOT significant: Save empty CSV with note explaining no tests conducted"
+        - "Save to data/step04_post_hoc_contrasts.csv"
+
+      input_files:
+        - path: "data/step01_hce_flags.csv"
+          description: "Item-level data for re-fitting model with contrasts"
+          required_columns: ["HCE_flag", "Congruence", "Test", "UID", "ItemID"]
+        - path: "data/step03_congruence_hce_test.csv"
+          description: "Hypothesis tests to check Congruence main effect significance"
+          required_columns: ["Effect", "p_value"]
+
+      output_files:
+        - path: "data/step04_post_hoc_contrasts.csv"
+          description: "Pairwise contrasts with dual p-values (or empty if Congruence NULL)"
+          columns:
+            - {name: "Contrast", type: "string", description: "Incongruent vs Congruent, etc."}
+            - {name: "Estimate", type: "float", description: "Log-odds difference on logit scale"}
+            - {name: "SE", type: "float", description: "Standard error"}
+            - {name: "z_value", type: "float", description: "z-statistic"}
+            - {name: "p_uncorrected", type: "float", description: "Uncorrected p-value per Decision D068"}
+            - {name: "p_bonferroni", type: "float", description: "Bonferroni-corrected p-value per Decision D068"}
+          expected_rows: [0, 3]
+
+      parameters:
+        contrasts:
+          - "Incongruent vs Congruent"
+          - "Incongruent vs Common"
+          - "Congruent vs Common"
+        bonferroni_multiplier: 3
+        significance_threshold: 0.05
+
+    validation_call:
+      module: "tools.validation"
+      function: "validate_contrasts_d068"
+      signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict[str, Any]"
+
+      input_files:
+        - path: "data/step04_post_hoc_contrasts.csv"
+          variable_name: "contrasts_df"
+          source: "analysis call output (stdlib contrasts)"
+
+      parameters:
+        contrasts_df: "contrasts_df"
+
+      returns:
+        type: "Dict[str, Any]"
+        variable_name: "validation_result"
+
+      criteria:
+        - "Decision D068 compliance: BOTH p_uncorrected AND p_bonferroni columns present"
+        - "If Congruence significant: 3 contrasts present"
+        - "If Congruence NULL: contrasts.csv empty or contains note"
+        - "Logical consistency: p_bonferroni = min(p_uncorrected * 3, 1.0)"
+        - "All p-values in [0, 1]"
+        - "SE > 0 for all contrasts"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "logs/step04_post_hoc_contrasts.log"
+
+    log_file: "logs/step04_post_hoc_contrasts.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================
