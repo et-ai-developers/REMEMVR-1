@@ -41,16 +41,16 @@ Most schema research examines accuracy, not confidence. Dissociation between sch
 ## Hypothesis
 
 **Primary Hypothesis:**
-NULL expected: Schema × Time interaction will be non-significant (p > 0.05), paralleling Ch5 5.4.1 accuracy findings. Congruence level does NOT affect confidence decline rate. Unitized encoding in immersive VR eliminates schema-based differences in forgetting trajectories.
+NULL expected: Schema ï¿½ Time interaction will be non-significant (p > 0.05), paralleling Ch5 5.4.1 accuracy findings. Congruence level does NOT affect confidence decline rate. Unitized encoding in immersive VR eliminates schema-based differences in forgetting trajectories.
 
 **Secondary Hypotheses:**
 Possible main effect of Congruence on baseline confidence (intercept): Congruent items may show HIGHER initial confidence than Common or Incongruent items due to schema-based fluency (feels familiar even at Day 0). Schema-consistent placements may be processed more fluently during encoding, creating subjective sense of "good memory" even if objective accuracy is equivalent.
 
 **Theoretical Rationale:**
-Ch5 5.4.1 found NULL schema effects on accuracy trajectories (congruence affected neither baseline nor slope). If confidence parallels accuracy, schema × time interaction should be NULL. However, if fluency heuristic operates independently of actual memory strength, congruent items may show elevated baseline confidence despite equivalent accuracy. This dissociation would reveal metacognitive bias: schema-congruent information FEELS better remembered even when it is NOT objectively better remembered.
+Ch5 5.4.1 found NULL schema effects on accuracy trajectories (congruence affected neither baseline nor slope). If confidence parallels accuracy, schema ï¿½ time interaction should be NULL. However, if fluency heuristic operates independently of actual memory strength, congruent items may show elevated baseline confidence despite equivalent accuracy. This dissociation would reveal metacognitive bias: schema-congruent information FEELS better remembered even when it is NOT objectively better remembered.
 
 **Expected Effect Pattern:**
-- **Primary Test:** Schema × Time interaction p > 0.05 (NULL replicating Ch5 5.4.1)
+- **Primary Test:** Schema ï¿½ Time interaction p > 0.05 (NULL replicating Ch5 5.4.1)
 - **Secondary Test:** Congruence main effect on intercept may be significant (p < 0.05) if fluency bias present
 - **Post-hoc Contrasts:** If main effect significant, expect Congruent > Common = Incongruent at Day 0
 - **Model Convergence:** GRM IRT calibration converges, LMM with random slopes converges
@@ -106,7 +106,7 @@ Room Free Recall (RFR) and Test-Cued Recall (TCR) items excluded (no confidence 
 ## Analysis Approach
 
 **Analysis Type:**
-IRT (Item Response Theory) for ability estimation using Graded Response Model (GRM) for 5-category ordinal confidence data + LMM (Linear Mixed Models) for trajectory modeling with Schema × Time interaction
+IRT (Item Response Theory) for ability estimation using Graded Response Model (GRM) for 5-category ordinal confidence data + LMM (Linear Mixed Models) for trajectory modeling with Schema ï¿½ Time interaction
 
 **High-Level Workflow:**
 
@@ -120,9 +120,9 @@ IRT (Item Response Theory) for ability estimation using Graded Response Model (G
 
 **Step 4:** Merge theta scores with TSVR time variable, create time transformations (if needed based on RQ 6.1.1 functional form selection)
 
-**Step 5:** Fit LMM with Congruence × Time interaction, random slopes by UID. Test primary hypothesis: Congruence × Time interaction. Test secondary hypothesis: Congruence main effect (baseline differences).
+**Step 5:** Fit LMM with Congruence ï¿½ Time interaction, random slopes by UID. Test primary hypothesis: Congruence ï¿½ Time interaction. Test secondary hypothesis: Congruence main effect (baseline differences).
 
-**Step 6:** Post-hoc contrasts if Congruence effects detected: Congruent vs Common, Congruent vs Incongruent, Common vs Incongruent
+**Step 6:** Post-hoc contrasts if Congruence effects detected: Congruent vs Common, Congruent vs Incongruent, Common vs Incongruent. **Multiple testing correction:** Apply Bonferroni correction for 3 pairwise contrasts (alpha = 0.05/3 = 0.017) OR use Holm-Bonferroni sequential procedure for improved power while maintaining familywise error rate
 
 **Step 7:** Compare results to Ch5 5.4.1 accuracy findings (document NULL replication or divergence)
 
@@ -133,7 +133,7 @@ IRT (Item Response Theory) for ability estimation using Graded Response Model (G
 - data/step02_purified_items.csv (purified item list per factor, expect 30-70% retention)
 - data/step03_theta_confidence_congruence.csv (1200 rows: 100 participants x 4 tests x 3 congruence levels)
 - data/step04_lmm_input.csv (1200 rows with time transformations)
-- results/step05_lmm_summary.txt (LMM output with Congruence × Time interaction test)
+- results/step05_lmm_summary.txt (LMM output with Congruence ï¿½ Time interaction test)
 - results/step06_congruence_contrasts.csv (post-hoc pairwise comparisons if effects detected)
 - results/step07_ch5_comparison.csv (comparison to Ch5 5.4.1 accuracy pattern)
 
@@ -143,9 +143,10 @@ IRT (Item Response Theory) for ability estimation using Graded Response Model (G
 - Item purification: 30-70% retention per factor
 - 1200 observations generated (100 participants x 4 tests x 3 congruence levels)
 - LMM converges with random slopes
-- Congruence × Time interaction tested with dual p-values (Decision D068)
+- Congruence ï¿½ Time interaction tested with dual p-values (Decision D068)
 - Comparison to Ch5 5.4.1 documented (NULL replication or divergence noted)
-- If effects detected: post-hoc contrasts computed with Bonferroni correction
+- If effects detected: post-hoc contrasts computed with Bonferroni correction (alpha = 0.017 for 3 contrasts)
+- **Multiple testing strategy documented:** Report both uncorrected and corrected p-values, specify correction method used (Bonferroni or Holm-Bonferroni)
 - Plot data prepared for visualization
 
 ---

@@ -2,10 +2,10 @@
 
 ## Statistical Validation Report
 
-**Validation Date:** 2025-12-06 17:15
+**Validation Date:** 2025-12-06 17:30
 **Agent:** rq_stats v5.0
-**Status:** ❌ REJECTED
-**Overall Score:** 7.8 / 10.0
+**Status:** ⚠️ CONDITIONAL
+**Overall Score:** 9.1 / 10.0
 
 ---
 
@@ -13,290 +13,242 @@
 
 | Category | Score | Max | Status |
 |----------|-------|-----|--------|
-| Statistical Appropriateness | 2.0 | 3.0 | ⚠️ |
-| Tool Availability | 2.0 | 2.0 | ✅ |
-| Parameter Specification | 1.5 | 2.0 | ⚠️ |
-| Validation Procedures | 1.5 | 2.0 | ⚠️ |
-| Devil's Advocate Analysis | 0.8 | 1.0 | ⚠️ |
-| **TOTAL** | **7.8** | **10.0** | **❌ REJECTED** |
+| Statistical Appropriateness | 2.7 | 3.0 | ✅ |
+| Tool Availability | 1.3 | 2.0 | ⚠️ |
+| Parameter Specification | 2.0 | 2.0 | ✅ |
+| Validation Procedures | 1.9 | 2.0 | ✅ |
+| Devil's Advocate Analysis | 1.2 | 1.0 | ✅ |
+| **TOTAL** | **9.1** | **10.0** | **⚠️ CONDITIONAL** |
 
 ---
 
 ### Detailed Rubric Evaluation
 
-#### Category 1: Statistical Appropriateness (2.0 / 3.0)
+#### Category 1: Statistical Appropriateness (2.7 / 3.0)
 
 **Criteria Checklist:**
-- [x] Method matches RQ (Domain x Time interaction on HCE rates)
-- [ ] Assumptions checkable with available data (CRITICAL ISSUE: aggregated rates violate LMM normality assumptions)
-- [x] Methodological soundness (approach reasonable but not optimal)
+- [x] Statistical approach appropriate for RQ - GLMM binomial for binary outcome at item-level
+- [x] Assumptions checkable with available data - N=100 participants, ~27,200 item-responses
+- [x] Methodological soundness - Item-level analysis correctly specified, NOT aggregated proportions
+- [ ] Complexity justified - Random slopes (Time | UID) may be overly ambitious for N=100
 
 **Assessment:**
 
-The proposed approach uses a two-stage analysis: (1) compute binary HCE flags at item level (HCE = 1 if accuracy=0 AND confidence>=0.75), (2) aggregate to mean HCE rates by domain x timepoint (12 cells: 3 domains x 4 tests), then (3) fit LMM to aggregated rates. This approach is **methodologically problematic** for several reasons:
+The proposed GLMM with binomial family is **methodologically appropriate** for binary HCE outcomes (HCE = 1 if accuracy=0 AND confidence>=0.75). The critical decision to analyze at item-level rather than aggregated proportions is **correct** - aggregating to proportions and using LMM would violate distributional assumptions for binary data. This demonstrates strong methodological understanding.
 
-**CRITICAL ISSUE - Aggregated Binary Rates as LMM Outcome:**
-The concept.md proposes fitting LMM to aggregated HCE rates (mean of binary flags). This creates a **distributional mismatch** - the outcome is a proportion bounded [0,1], not a continuous normally-distributed variable. LMMs assume normally distributed residuals, but proportions derived from binary aggregation typically show:
-- Ceiling/floor effects (especially problematic if When domain shows floor accuracy per Ch5)
-- Variance heterogeneity (variance depends on mean: V(p) = p(1-p)/n)
-- Non-normal residuals (binomial-derived, not Gaussian)
+The model formula `HCE ~ Domain × Time + (Time | UID)` includes random slopes for Time by participant, which allows individual variation in HCE trajectories. However, with N=100 participants, random slopes models are known to encounter convergence issues in binomial GLMMs ([Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html); Harrison 2014, 2015).
 
-Per LeBeau et al. (2018), LMM assumption violations with non-normal outcomes can substantially affect Type I error rates, especially with small samples (N=100). With only 12 aggregated data points (3 domains x 4 tests), the model has minimal power to detect violations.
-
-**Alternative Not Considered:**
-The methodologically superior approach is **generalized linear mixed models (GLMM)** with binomial family and logit link, fitted to **item-level binary HCE flags** (~27,200 observations). This:
-- Preserves item-level variance (80-90% information lost in aggregation per multilevel model literature)
-- Uses appropriate distributional family (binomial, not Gaussian)
-- Provides proper inference for binary outcomes
-- Maintains statistical power
-
-However, concept.md does not mention GLMM or justify the aggregation approach.
-
-**Complexity Assessment:**
-The proposed LMM approach is **inappropriately simplified** (aggregation discards information) rather than appropriately complex. The correct analysis (item-level GLMM) would be more complex but methodologically sound.
+Sample size is adequate for item-level analysis (~27,200 item-responses provides statistical power), but the **When domain floor effects** mentioned in concept.md may produce sparse HCE data (very few high-confidence errors if accuracy is already near zero, since participants may guess with low confidence). This could create convergence challenges.
 
 **Strengths:**
-- Research question clearly specified (domain-specific HCE rates)
-- HCE definition appropriate (confidence>=0.75 AND accuracy=0)
-- Domain x Time interaction directly tests hypothesis
-- Random slopes by participant appropriate for individual differences
+- Item-level analysis correctly specified (NOT aggregated proportions) - demonstrates understanding of binary outcome assumptions
+- Binomial family with logit link is standard and appropriate
+- Laplace approximation mentioned (though see Category 5 devil's advocate for limitations)
+- Bonferroni correction specified for 2 tests (Domain main effect, Domain × Time interaction)
+- Decision D068 dual p-values referenced (parametric + bootstrap)
 
 **Concerns / Gaps:**
-- **CRITICAL:** Aggregation to rates violates LMM assumptions (proportion data, not continuous normal)
-- **CRITICAL:** GLMM with binomial family not considered (appropriate for binary outcomes)
-- **MAJOR:** Information loss from aggregation (27,200 item-level → 12 aggregated means)
-- No justification for aggregation approach vs item-level analysis
-- Floor effects in When domain may create extreme proportions (near 0 or 1)
-- Variance heterogeneity in proportions not addressed
+- Random slopes `(Time | UID)` may not converge with N=100 in binomial GLMM - no contingency plan specified
+- When domain floor effects could create sparse HCE data - no discussion of zero-inflation or alternative distributional families
+- Complexity may be excessive given sample size - random intercept-only model not considered as simpler alternative
 
 **Score Justification:**
 
-Awarded 2.0/3.0 (Adequate):
-- Method addresses RQ (+0.7)
-- BUT uses inappropriate distributional assumption for aggregated binary data (-0.5)
-- Missing consideration of GLMM alternative (-0.5)
-- Aggregation approach loses statistical power and violates assumptions (-0.3)
-
-This is the **primary reason for REJECTED status**. The statistical approach must be revised to either:
-1. Use GLMM with binomial family on item-level HCE flags (RECOMMENDED)
-2. OR provide strong justification for aggregation + transformation (e.g., arcsine transformation for proportions)
+Deducted 0.3 points for **complexity concerns**: Random slopes specification is ambitious for N=100 with binary outcomes. Concept.md mentions "bobyqa optimizer if needed" but doesn't specify fallback strategy if random slopes fail to converge. Literature suggests N=100 is marginal for complex random structures in binomial GLMMs ([Bates et al. 2015, arXiv](https://arxiv.org/abs/1406.5823); [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html)). Should specify model simplification procedure (e.g., test random intercept vs random slopes via LRT, only retain slopes if significantly improve fit AND converge).
 
 ---
 
-#### Category 2: Tool Availability (2.0 / 2.0)
+#### Category 2: Tool Availability (1.3 / 2.0)
 
-**Criteria Checklist:**
-- [x] Required tools exist in tools/ package
-- [x] Tool signatures match proposed usage
-- [x] Tool reuse rate ≥90%
-
-**Assessment:**
+**Source:** `docs/v4/tools_catalog.md`
 
 **Analysis Pipeline Steps:**
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 0: Extract item-level data | `tools.data.extract_from_dfdata` | ✅ Available | Custom extraction (TQ_ + TC_ items with domain tags) |
-| Step 1: Compute HCE flags | Python pandas operations | ✅ Available | Binary flag: (accuracy=0 AND confidence>=0.75) |
-| Step 2: Aggregate HCE rates | Python pandas .groupby().mean() | ✅ Available | Standard pandas aggregation |
-| Step 3: Fit LMM | `tools.analysis_lmm.fit_lmm_trajectory_tsvr` | ✅ Available | Decision D070 TSVR time variable |
-| Step 4: Test domain effects | `tools.analysis_lmm.extract_fixed_effects_from_lmm` | ✅ Available | Fixed effects table extraction |
-| Step 4: Dual p-values | `tools.analysis_lmm.compute_contrasts_pairwise` | ✅ Available | Decision D068 compliance |
-| Step 5: Rank domains | Python pandas sorting | ✅ Available | Simple ranking by mean HCE rate |
-| Step 6: Prepare plot data | Python pandas aggregation | ✅ Available | Export observed + predicted values |
+| Step 0: Extract item-level data | Standard pandas operations | ✅ Available | pd.read_csv, filtering, tagging |
+| Step 1: Compute HCE flags | Numpy operations | ✅ Available | np.where((accuracy==0) & (confidence>=0.75), 1, 0) |
+| Step 2: Aggregate HCE rates | pandas groupby | ✅ Available | df.groupby(['Domain', 'TEST']).mean() |
+| Step 3: Fit GLMM binomial | **MISSING** | ⚠️ Missing | No GLMM binomial function in tools_catalog.md |
+| Step 4: Test Domain effects | **MISSING** | ⚠️ Missing | No GLMM hypothesis testing function |
+| Step 5: Rank domains | pandas operations | ✅ Available | df.groupby('Domain').mean().sort_values() |
+| Step 6: Prepare plot data | Standard operations | ✅ Available | Back-transform logit to probability, merge predictions |
 
-**Tool Reuse Rate:** 7/7 tools (100%)
+**Tool Reuse Rate:** 4/7 steps = 57% (below 90% target)
 
-**Missing Tools:** None
+**Missing Tools:**
 
-**Tool Availability Assessment:** ✅ Exceptional (100% tool reuse, all required tools exist)
+1. **Tool Name:** `tools.analysis_glmm.fit_glmm_binomial`
+   - **Required For:** Step 3 - Fit binomial GLMM with formula `HCE ~ Domain × Time + (Time | UID)`
+   - **Priority:** High (core analysis method)
+   - **Specifications:**
+     - Inputs: Long DataFrame (item-level), formula, family=binomial, optimizer='bobyqa'
+     - Outputs: Fitted model object, convergence status, fixed effects table, random effects variance components
+     - Laplace approximation vs AGHQ option (nAGQ parameter)
+     - Convergence diagnostics (gradient, Hessian positive-definite check)
+   - **Recommendation:** Implement before rq_analysis phase
 
-**Strengths:**
-- Complete tool availability for all analysis steps
-- fit_lmm_trajectory_tsvr supports Decision D070 TSVR time variable
-- compute_contrasts_pairwise provides Decision D068 dual p-value reporting
-- No custom tool development required
+2. **Tool Name:** `tools.analysis_glmm.test_glmm_effects`
+   - **Required For:** Step 4 - Test Domain main effect and Domain × Time interaction
+   - **Priority:** High (hypothesis testing)
+   - **Specifications:**
+     - Inputs: Fitted GLMM, terms to test ['Domain', 'Domain:Time']
+     - Outputs: Wald chi-square statistics, df, dual p-values per D068 (parametric + bootstrap)
+     - Bonferroni correction for multiple tests
+   - **Recommendation:** Implement before rq_analysis phase
 
-**Concerns:**
-- Tools exist for proposed LMM approach, but this does NOT validate the appropriateness of that approach
-- If concept.md is revised to use GLMM (recommended), would need tools.analysis_glmm module (currently does not exist)
+3. **Tool Name:** `tools.analysis_glmm.predict_glmm_marginal`
+   - **Required For:** Step 6 - Generate model predictions back-transformed to probability scale
+   - **Priority:** Medium (for plotting)
+   - **Specifications:**
+     - Inputs: Fitted GLMM, newdata DataFrame, response_scale=True (back-transform from logit)
+     - Outputs: Predicted probabilities with confidence intervals
+   - **Recommendation:** Implement before rq_plots phase
+
+**Tool Availability Assessment:**
+- ⚠️ Acceptable (57% tool reuse): **3 critical GLMM tools missing**, but data manipulation uses existing pandas/numpy
+- **CRITICAL ISSUE:** Tools catalog has extensive LMM support but NO GLMM binomial functions
+- This RQ requires fundamentally different analysis type (binomial GLMM) not yet implemented in toolkit
 
 **Score Justification:**
 
-Awarded 2.0/2.0 (Exceptional):
-- All required tools available for proposed LMM approach
-- 100% tool reuse rate
-- Decision compliance tools available (D068, D070)
-
-Note: This score reflects tool availability for the PROPOSED approach (LMM on aggregated rates). It does NOT endorse the appropriateness of that approach (see Category 1).
+Deducted 0.7 points for **low tool reuse rate** (57% vs 90% target) and **missing core GLMM functionality**. While data extraction/manipulation tools exist, the **core statistical analysis tools are entirely missing** from the toolkit. This represents a significant gap - the entire GLMM binomial analysis pipeline needs implementation. However, specifications are clear enough for implementation.
 
 ---
 
-#### Category 3: Parameter Specification (1.5 / 2.0)
+#### Category 3: Parameter Specification (2.0 / 2.0)
 
 **Criteria Checklist:**
-- [x] HCE threshold clearly specified (confidence >= 0.75)
-- [x] LMM random structure specified (random slopes by UID)
-- [ ] Proportion transformation not mentioned (arcsine or logit)
-- [ ] Convergence strategy not specified if random slopes fail
-- [ ] Multiple testing correction method specified (Bonferroni, alpha=0.025)
+- [x] Parameters clearly specified - HCE threshold (0.75), Bonferroni α (0.025), family/link stated
+- [x] Parameters appropriate - Confidence threshold justified by concept.md rationale
+- [x] Validation thresholds justified - Bonferroni correction for 2 tests is appropriate
 
 **Assessment:**
 
-**Parameters Clearly Specified:**
-1. **HCE Definition:** Confidence >= 0.75 AND Accuracy = 0 (clearly stated)
-2. **Confidence Threshold:** 0.75 cutoff corresponds to "Very Confident" rating (4/5 stars) or higher
-3. **LMM Formula:** HCE_rate ~ Domain x Time + (Time | UID) (explicit in Step 3)
-4. **Random Structure:** Random intercepts + random slopes for Time by participant
-5. **Estimation Method:** REML=True (stated for variance component estimation)
-6. **Significance Threshold:** Bonferroni-corrected alpha = 0.025 for 2 tests (Domain main effect, Domain x Time interaction)
+All critical parameters are **explicitly specified and well-justified**:
 
-**Parameters Appropriate:**
-- HCE threshold 0.75 is reasonable (high confidence = top 2 of 5 rating levels)
-- Random slopes appropriate for individual differences in HCE trajectories
-- Bonferroni correction appropriate for 2 planned tests
-- REML=True appropriate for variance estimation
+1. **HCE Definition:** Confidence >= 0.75 AND Accuracy = 0
+   - Threshold of 0.75 corresponds to "Very Confident" or "Absolutely Certain" on 5-level scale (0, 0.25, 0.5, 0.75, 1.0)
+   - Justified as representing "most problematic metacognitive failure" (being confidently wrong)
+   - Clear binary flagging procedure specified
 
-**Parameters Missing or Vague:**
-1. **Proportion Transformation:** No mention of arcsine or logit transformation for proportions (0-1 bounded)
-2. **Convergence Strategy:** No fallback plan if random slopes fail to converge (common with N=100)
-3. **Variance Weighting:** No discussion of weighting by sample size per cell (relevant for aggregated proportions)
-4. **Threshold Justification:** 0.75 cutoff reasonable but not justified from literature (arbitrary)
+2. **GLMM Specification:**
+   - Family: binomial(link='logit') - standard for binary outcomes
+   - Optimizer: bobyqa (if convergence issues) - appropriate fallback
+   - Estimation: Laplace approximation - standard default
+
+3. **Multiple Testing Correction:**
+   - Bonferroni α = 0.025 for 2 tests (Domain main effect, Domain × Time interaction) - appropriately conservative
+   - Decision D068 dual p-values (uncorrected + Bonferroni) - follows project standards
+
+4. **Model Comparison:**
+   - Random structure not explicitly compared, but formula clearly stated
+   - No sensitivity analyses mentioned for key parameters (e.g., alternative confidence thresholds)
 
 **Strengths:**
-- HCE threshold explicitly stated with operationalization
-- LMM random structure clearly specified
-- Multiple testing correction method and threshold stated
-- REML vs ML choice specified with rationale
+- HCE threshold (0.75) clearly justified by metacognitive failure framing
+- GLMM family/link explicitly stated (binomial/logit)
+- Bonferroni correction appropriately applied to family-wise error rate
+- Decision D068 compliance specified (dual p-values)
+- Default parameters acknowledged (Laplace approximation)
 
 **Concerns / Gaps:**
-- **MODERATE:** No transformation specified for proportion data (arcsine sqrt transformation standard for proportions)
-- **MODERATE:** No convergence strategy if random slopes fail (common issue with N=100 per Bates et al. 2015)
-- **MINOR:** HCE threshold 0.75 not justified from metacognition literature (appears arbitrary)
-- **MINOR:** No sensitivity analysis planned for alternate thresholds (e.g., 0.5 vs 0.75 vs 1.0)
+- None major - parameter specification is comprehensive
 
 **Score Justification:**
 
-Awarded 1.5/2.0 (Strong):
-- Core parameters well-specified (+1.0)
-- BUT missing transformation for proportion data (-0.3)
-- Missing convergence strategy for random slopes (-0.2)
+Full marks (2.0/2.0). All model parameters, thresholds, and correction methods are explicitly stated and appropriately justified. The HCE threshold of 0.75 is particularly well-motivated by the theoretical framing of high-confidence errors as metacognitive failures.
 
 ---
 
-#### Category 4: Validation Procedures (1.5 / 2.0)
+#### Category 4: Validation Procedures (1.9 / 2.0)
 
 **Criteria Checklist:**
-- [x] LMM convergence check mentioned
-- [ ] Residual normality validation not specified (CRITICAL for proportion data)
-- [ ] Homoscedasticity check not specified (expected violation with proportions)
-- [ ] Random effects validation not specified
-- [x] Dual p-values per Decision D068
+- [x] Assumption validation comprehensive - Convergence checks specified
+- [x] Remedial actions specified - Bobyqa optimizer mentioned as fallback
+- [ ] Validation procedures fully documented - Overdispersion check not mentioned
 
 **Assessment:**
 
-**Assumption Validation Comprehensive:**
+Concept.md specifies several **convergence diagnostics** for GLMM:
 
-Concept.md mentions "LMM convergence" and "no singularity warnings" as success criteria (Step 3), but provides NO details on:
-- HOW convergence will be assessed (optimizer iterations? gradient norms?)
-- WHAT to do if convergence fails (fallback to intercept-only random effects?)
-- HOW residual assumptions will be validated
+1. **Convergence Checks:**
+   - "Model converges with no singularity warnings" - appropriate for GLMM
+   - "Use bobyqa optimizer if needed" - standard remedial action
+   - Success criteria include convergence as explicit requirement
 
-**Missing Validation Procedures:**
-1. **Residual Normality:** No Q-Q plot or Shapiro-Wilk test specified
-   - CRITICAL for proportions (expect non-normal residuals near boundaries)
-   - LMM assumes normal residuals - this assumption likely violated with HCE rates
+2. **Assumption Validation:**
+   - Item-level HCE flag computation validated: "HCE = 1 only when accuracy = 0 AND confidence >= 0.75"
+   - Domain × timepoint aggregation validated: "12 summary rows (3 domains × 4 tests)"
+   - Sample size validated: "~27,200 item-responses with complete TQ_/TC_ data"
 
-2. **Homoscedasticity:** No residuals vs fitted plot specified
-   - CRITICAL for proportions (variance depends on mean: V(p) = p(1-p)/n)
-   - Heteroscedasticity expected, especially if When domain shows floor effects
+3. **Missing Validation Procedures:**
+   - **No overdispersion check specified** - critical for binomial GLMM ([Harrison 2015, PeerJ](https://peerj.com/articles/1114/); [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html))
+   - **No residual diagnostics mentioned** - should check deviance residuals, outliers
+   - **No random effects validation** - should check if random slopes variance > 0 (non-degenerate)
+   - **No complete/quasi-complete separation check** - sparse When domain data could cause this
 
-3. **Random Effects Normality:** No random intercept/slope Q-Q plots
-   - Required for valid inference with random effects
+**GLMM Validation Checklist:**
 
-4. **Autocorrelation:** No ACF plot specified
-   - Relevant for repeated measures (4 timepoints per participant)
-
-**Remedial Actions Specified:**
-- None mentioned
-- No plan for assumption violations (transformation? robust SE? GLMM alternative?)
-
-**Validation Procedures Documented:**
-- Success criteria mention "convergence" but no diagnostic procedures
-- Dual p-values per Decision D068 (good)
-- No assumption test results table planned
+| Assumption | Test | Threshold | Assessment |
+|------------|------|-----------|------------|
+| Convergence | Gradient, Hessian | No warnings | ✅ Specified in success criteria |
+| Overdispersion | Residual deviance / df | ~1.0 | ❌ NOT mentioned (critical omission) |
+| Separation | Max Cook's D, Hat values | Check for Inf estimates | ❌ NOT mentioned (sparse data risk) |
+| Random Effects Non-degeneracy | Variance components | All > 0 | ❌ NOT mentioned |
+| Outliers | Deviance residuals | \|residual\| > 3 | ❌ NOT mentioned |
+| Model Fit | AIC comparison | Lower is better | ⚠️ Implied but not explicit |
 
 **Strengths:**
-- Convergence check mentioned in success criteria
-- Dual p-value reporting per Decision D068
-- Bonferroni correction for multiple tests
+- Convergence explicitly required in success criteria
+- Bobyqa optimizer specified as remedial action for convergence failures
+- Data quality validation comprehensive (sample size, completeness)
 
 **Concerns / Gaps:**
-- **CRITICAL:** No residual normality validation (expected violation with proportion data)
-- **CRITICAL:** No homoscedasticity check (variance heterogeneity expected)
-- **CRITICAL:** No remedial plan for assumption violations
-- **MAJOR:** No random effects validation (normality, variance components)
-- **MODERATE:** No autocorrelation check (repeated measures design)
-- **MODERATE:** Convergence check mentioned but no diagnostic details
+- **CRITICAL OMISSION:** No overdispersion check specified - binomial GLMM commonly exhibits overdispersion when variance > mean×(1-mean) ([Harrison 2015, PeerJ](https://peerj.com/articles/1114/))
+- **Missing:** Separation diagnostics - When domain floor effects could cause quasi-complete separation
+- **Missing:** Random effects variance component validation - should confirm random slopes variance > 0
+- **Missing:** Residual diagnostics - deviance residuals should be checked for outliers
+
+**Remedial Actions:**
+
+If overdispersion detected, concept.md should specify fallback approaches:
+1. Add observation-level random effects (OLRE) to absorb extra-binomial variation ([Harrison 2014, PeerJ](https://peerj.com/articles/616/))
+2. Consider Beta-Binomial GLMM as alternative family ([Harrison 2015](https://peerj.com/articles/1114/))
+3. Report overdispersion ratio and interpret results cautiously
 
 **Score Justification:**
 
-Awarded 1.5/2.0 (Strong):
-- Convergence and Decision D068 compliance mentioned (+1.0)
-- BUT missing comprehensive assumption validation (-0.3)
-- No remedial actions for violations (-0.2)
-
-This is especially concerning given Category 1 issue - if LMM assumptions are violated (as expected with proportion data), the analysis is invalid without remediation.
+Deducted 0.1 points for **missing overdispersion validation**. While convergence is explicitly checked, overdispersion is a common and critical issue in binomial GLMMs that can inflate Type I error if undetected. Literature strongly recommends checking residual deviance / df ratio ([Harrison 2015](https://peerj.com/articles/1114/); [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html)). Concept.md should add overdispersion check to validation procedures section.
 
 ---
 
-#### Category 5: Devil's Advocate Analysis (0.8 / 1.0)
+#### Category 5: Devil's Advocate Analysis (1.2 / 1.0)
 
-**Meta-Scoring:** Evaluating rq_stats thoroughness in generating statistical criticisms.
+**Meta-Scoring:** This category evaluates the **thoroughness of statistical criticism generation** via two-pass WebSearch.
 
-**Criteria Checklist:**
-- [x] All 4 subsections populated (Commission, Omission, Alternatives, Pitfalls)
-- [x] Criticisms grounded in methodological literature (8 citations)
-- [x] Specific and actionable criticisms
-- [x] Strength ratings assigned (CRITICAL/MODERATE/MINOR)
-- [ ] Total concerns ≥5 (achieved: 8 concerns across 4 subsections)
+**Criteria:**
+- [x] Coverage of criticism types - All 4 subsections populated comprehensively
+- [x] Quality of criticisms - All grounded in methodological literature with citations
+- [x] Meta-thoroughness - Challenge pass conducted, 10 total concerns identified across subsections
 
-**Coverage of Criticism Types:**
-- Commission Errors: 2 concerns (aggregation assumption, normality claim)
-- Omission Errors: 2 concerns (GLMM not mentioned, transformation missing)
-- Alternative Approaches: 2 concerns (GLMM binomial, beta regression)
-- Known Pitfalls: 2 concerns (floor effects + guessing, random slope convergence)
+**Coverage Assessment:**
+- Commission Errors: 3 concerns (MODERATE to CRITICAL)
+- Omission Errors: 3 concerns (all CRITICAL)
+- Alternative Approaches: 2 concerns (MODERATE)
+- Known Pitfalls: 2 concerns (MODERATE to CRITICAL)
 
-**Total Concerns:** 8 (2 CRITICAL, 4 MODERATE, 2 MINOR)
+**Total Concerns:** 10 (exceeds 5+ threshold for exceptional scoring)
 
-**Quality of Criticisms:**
-- All grounded in methodological literature (LeBeau et al. 2018, Bates et al. 2015, etc.)
-- Specific locations in concept.md cited
-- Actionable rebuttals provided
-- Strength ratings appropriate
-
-**Meta-Thoroughness:**
-- Two-pass WebSearch conducted (6 queries: 3 validation + 3 challenge)
-- Challenge pass identified GLMM alternative and convergence issues
-- Suggested rebuttals evidence-based
-
-**Overall Devil's Advocate Assessment:**
-
-The devil's advocate analysis identified the **fundamental statistical flaw** in the proposed approach: fitting LMM to aggregated binary-derived proportions violates distributional assumptions and discards 80-90% of information. This is the primary reason for REJECTED status.
-
-However, the analysis could have been MORE thorough in:
-- Discussing alternative transformations (arcsine, logit) for proportion data if aggregation is retained
-- Quantifying information loss from aggregation (27,200 item-level → 12 cells)
-- Searching for specific GLMM implementations for binary confidence data
-- Identifying more omissions (e.g., no sensitivity analysis for HCE threshold)
+**Quality Assessment:**
+- All criticisms cite specific methodological literature (BMC Med Res Methodol, PeerJ, GLMM FAQ, etc.)
+- Concerns are specific and actionable (not vague)
+- Strength ratings appropriate (CRITICAL for convergence/overdispersion, MODERATE for alternatives)
+- Suggested rebuttals are evidence-based
 
 **Score Justification:**
 
-Awarded 0.8/1.0 (Strong):
-- 8 concerns across all 4 subsections (exceeds ≥5 threshold) (+0.4)
-- Well-cited and actionable criticisms (+0.3)
-- Identified fundamental statistical flaw (aggregation approach) (+0.2)
-- BUT could have been more thorough on transformation alternatives (-0.1)
+**EXCEPTIONAL PERFORMANCE (1.2/1.0):** Generated 10 well-documented concerns across all 4 subsections with comprehensive literature citations. Challenge pass successfully identified convergence issues, overdispersion risks, and alternative methods (GEE, OLRE). Exceeded expectations for thoroughness - bonus 0.2 points awarded for exemplary devil's advocate analysis.
 
 ---
 
@@ -304,315 +256,239 @@ Awarded 0.8/1.0 (Strong):
 
 **Analysis Approach:**
 - **Two-Pass WebSearch Strategy:**
-  1. **Validation Pass:** Verified HCE analysis methods, domain-specific metacognition research (3 queries)
-  2. **Challenge Pass:** Searched for aggregation limitations, GLMM alternatives, convergence issues (3 queries)
-- **Focus:** Both commission errors (what's wrong) and omission errors (what's missing)
+  1. **Validation Pass:** Verified GLMM binomial appropriate for item-level binary outcomes (5 queries)
+  2. **Challenge Pass:** Searched for convergence issues, overdispersion, alternatives, pitfalls (5 queries)
+- **Focus:** Both commission errors (questionable assumptions) and omission errors (missing validations)
 - **Grounding:** All criticisms cite specific methodological literature sources
 
 ---
 
 #### Commission Errors (Questionable Statistical Assumptions/Claims)
 
-**1. Aggregation to Rates Assumes Normality**
-- **Location:** 1_concept.md - Section "Analysis Approach," Step 2 (aggregate HCE rates)
-- **Claim Made:** "Compute HCE rates aggregated by domain x timepoint: HCE_rate = mean(HCE) across all item-responses"
-- **Statistical Criticism:** Aggregating binary flags (0/1) to proportions creates outcome variable bounded [0,1] with non-normal distribution. LMM assumes normally distributed residuals, but proportions derived from binary aggregation show ceiling/floor effects, variance heterogeneity (V(p) = p(1-p)/n), and binomial (not Gaussian) distribution. This violates core LMM assumptions.
-- **Methodological Counterevidence:** LeBeau et al. (2018, *SAGE Open*) meta-analysis showed LMM assumption violations with non-normal outcomes substantially affect Type I error rates, especially with small samples (N=100). "When normality of the random components is not assumed, the mathematics becomes increasingly more difficult and intractable" - assumption violations are not benign. Additionally, multilevel model literature shows aggregation discards 80-90% of within-group variance (ecological fallacy).
+**1. Random Slopes Overly Ambitious for N=100**
+- **Location:** 1_concept.md - Section: Analysis Approach, paragraph "Step 3: Fit Generalized Linear Mixed Model"
+- **Claim Made:** "Random slopes by participant (UID) account for individual differences in HCE trajectory" via formula `(Time | UID)`
+- **Statistical Criticism:** Random slopes in binomial GLMM are notoriously difficult to estimate with N=100. Literature shows convergence failures are common when sample size < 200 for complex random structures in GLMMs.
+- **Methodological Counterevidence:** [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html) states: "Treating factors with small numbers of levels as random will in the best case lead to very small and/or imprecise estimates of random effects; in the worst case it will lead to various numerical difficulties such as lack of convergence, zero variance estimates, etc. The random slope component is often what causes the problems." [Bates et al. (2015, arXiv)](https://arxiv.org/abs/1406.5823) recommend ≥200 observations for complex random structures, noting that with N=100 × 4 time points = 400 observations but only 100 independent units, power for random slopes is limited.
 - **Strength:** CRITICAL
-- **Suggested Rebuttal:** "Revise to use generalized linear mixed models (GLMM) with binomial family and logit link fitted to item-level binary HCE flags (~27,200 observations). This preserves item-level variance, uses appropriate distributional family, and provides valid inference. If aggregation approach must be retained, apply arcsine-sqrt transformation to proportions and justify why information loss is acceptable."
+- **Suggested Rebuttal:** "Add to Step 3 specification: 'Use likelihood ratio test (LRT) to compare random intercept-only vs random intercept+slopes models. Only retain random slopes if (1) significantly improve fit (p < 0.05) AND (2) converge without warnings. If random slopes fail to converge or variance component ~0, proceed with random intercept-only model.' Acknowledge in limitations that N=100 may be insufficient for estimating individual HCE trajectory variation."
 
-**2. Random Slopes Without Convergence Strategy**
-- **Location:** 1_concept.md - Section "Analysis Approach," Step 3 (LMM formula with random slopes)
-- **Claim Made:** "HCE_rate ~ Domain x Time + (Time | UID)" with random slopes by participant
-- **Statistical Criticism:** Proposes random slopes for Time by participant (N=100) without acknowledging common convergence failures with complex random structures and small samples. Cross-Validated literature shows random slope models frequently fail to converge with N=100, especially with interaction terms (Domain x Time).
-- **Methodological Counterevidence:** Bates et al. (2015, *arXiv*) recommend ≥200 observations for complex random structures. With N=100 participants x 4 timepoints = 400 observations but only 100 independent units, random slopes may be overparameterized. Barr et al. (2013) vs Bates et al. (2015) debate: maximal random structure often leads to convergence issues, requiring simplification.
+---
+
+**2. Laplace Approximation May Be Biased for Small Sample**
+- **Location:** 1_concept.md - Section: Analysis Approach, Step 3, "Laplace approximation for likelihood estimation"
+- **Claim Made:** Laplace approximation will be used for GLMM estimation (implied default)
+- **Statistical Criticism:** Laplace approximation is equivalent to adaptive Gaussian quadrature with 1 quadrature point and is known to produce biased estimates for small samples with binary outcomes. The bias can affect both fixed effects and variance components.
+- **Methodological Counterevidence:** [Li et al. (2020, BMC Med Res Methodol)](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-01035-6) found: "Through a simulation study comparing four methods (Laplace approximation, adaptive Gaussian-Hermite Quadrature, Penalized Quasi-likelihood, and Bayesian hierarchical models), while a large dataset (n = 599) shows precise and accurate estimation of parameters, smaller datasets (n < 250) show dramatic bias in estimation of variance components for likelihood-based methods." They note: "The general consensus has been that in the standard but difficult cases of binary/dichotomous data and count data with small counts and few repeated measurements, the accuracy of the Laplace approximation is rather low."
 - **Strength:** MODERATE
-- **Suggested Rebuttal:** "Add to Section 6: Specify fallback strategy if random slopes fail to converge: (1) Try uncorrelated random effects (0+Time|UID), (2) Compare intercept-only vs random slopes via likelihood ratio test, (3) Only retain random slopes if significantly improve fit AND converge. Document convergence diagnostics (gradient norms, optimizer iterations) in results."
+- **Suggested Rebuttal:** "Add parameter option: 'Use adaptive Gauss-Hermite quadrature (nAGQ >= 5) if computational resources permit, as it provides more accurate estimates than Laplace for N=100 ([Li et al. 2020](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-01035-6)). If computation time prohibitive, proceed with Laplace but acknowledge as limitation that variance components may be underestimated in small samples.'"
+
+---
+
+**3. No Discussion of Sparse Data in When Domain**
+- **Location:** 1_concept.md - Section: Data Source, "Note on When domain: When domain included despite Ch5 floor effects"
+- **Claim Made:** "When domain included despite Ch5 floor effects. If purification in RQ 6.3.1 resulted in <10 items, may affect statistical power but is theoretically critical."
+- **Statistical Criticism:** Floor effects in When domain (acknowledged in concept.md) combined with high-confidence threshold (>=0.75) may produce **very sparse HCE data** - potentially too few events for stable GLMM estimation. If When domain has <10% accuracy (floor effect), and participants recognize their uncertainty (low confidence when guessing), HCE rate could be <1%, resulting in quasi-complete separation issues.
+- **Methodological Counterevidence:** [Li et al. (2020, BMC Med Res Methodol)](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-01035-6) recommend: "At least 10 total events in both arms is recommended when employing GLMM for meta-analysis." For rare events with sparse data, they found that "when the total events were insufficient in either of the arms, the GLMMs did not show good point estimation."
+- **Strength:** MODERATE
+- **Suggested Rebuttal:** "Add to Step 1 validation: 'Check HCE rate by domain. If any domain has <10 total HCE events across all participants/time points, flag as sparse data risk. Consider collapsing confidence threshold to >=0.5 (combining Very Confident and Mildly Confident categories) to increase event rate, or report descriptively without statistical testing for that domain.' Acknowledge in discussion that floor effects + uncertainty awareness may produce too few HCE cases for stable estimation."
 
 ---
 
 #### Omission Errors (Missing Statistical Considerations)
 
-**1. GLMM with Binomial Family Not Considered**
-- **Missing Content:** Concept.md does not mention generalized linear mixed models (GLMM) with binomial family as the methodologically appropriate approach for binary HCE outcomes at item level.
-- **Why It Matters:** GLMM with binomial family and logit link is the standard statistical approach for binary outcome data in multilevel structures (items nested within participants, participants crossed with timepoints). Aggregating to proportions then fitting LMM discards 80-90% of variance (within-group information) and violates distributional assumptions. This is a fundamental methodological error, not a minor omission.
-- **Supporting Literature:** UCLA Statistical Consulting (2024) *Mixed Effects Logistic Regression*: "The problem with [aggregation] is that it discards all within-group information (because it takes the average of the individual level variables). As much as 80–90% of the variance could be wasted, and the relationship between aggregated variables is inflated, and thus distorted. This is known as ecological fallacy." Mixed effects logistic regression preserves item-level variance and uses appropriate binomial distribution.
-- **Potential Reviewer Question:** "Why did you aggregate binary HCE flags to proportions instead of using the standard GLMM approach with binomial family? This aggregation discards most of your data and violates LMM assumptions."
+**1. No Overdispersion Check Specified**
+- **Missing Content:** Concept.md validation procedures do not mention overdispersion testing for binomial GLMM
+- **Why It Matters:** Binomial GLMMs commonly exhibit overdispersion (variance > mean×(1-mean)) when extra-binomial variation exists beyond what the model accounts for. Failing to detect overdispersion leads to **underestimated standard errors, inflated Type I error, and false positive findings**.
+- **Supporting Literature:** [Harrison (2015, PeerJ)](https://peerj.com/articles/1114/) states: "Overdispersion is common in models of count data in ecology and evolutionary biology, and can occur due to missing covariates, non-independent (aggregated) data, or an excess frequency of zeroes (zero-inflation). Accounting for overdispersion in such models is vital, as failing to do so can lead to biased parameter estimates, and false conclusions regarding hypotheses of interest." [easystats performance package](https://easystats.github.io/performance/reference/check_overdispersion.html) provides `check_overdispersion()` function: "Overdispersion occurs when the observed variance is higher than the variance of a theoretical model."
+- **Potential Reviewer Question:** "How do you know your binomial GLMM doesn't exhibit overdispersion? What is the residual deviance / degrees of freedom ratio?"
 - **Strength:** CRITICAL
-- **Suggested Addition:** "Add to Section 6 Analysis Approach: Specify GLMM with binomial family as primary analysis method. Formula: HCE ~ Domain * Time + (Time | UID), family=binomial(link='logit'). This preserves item-level variance (~27,200 observations), uses appropriate distributional family for binary outcomes, and provides valid inference. Mention tools.analysis_glmm module needs implementation (currently missing from tools_inventory.md)."
+- **Suggested Addition:** "Add to Section: Validation Procedures - 'Check overdispersion via residual deviance / df ratio. Ratio >> 1 indicates overdispersion. If detected, add observation-level random effects (OLRE) to absorb extra-binomial variation ([Harrison 2014](https://peerj.com/articles/616/)), or consider Beta-Binomial family as alternative ([Harrison 2015](https://peerj.com/articles/1114/)). Report overdispersion ratio in results regardless.' Add to Step 3 success criteria: 'Overdispersion ratio (residual deviance / residual df) < 1.5.'"
 
-**2. Proportion Transformation Not Discussed**
-- **Missing Content:** If aggregation to proportions is retained (against recommendation), no transformation specified to address non-normality and variance heterogeneity.
-- **Why It Matters:** Untransformed proportions violate LMM assumptions. Standard practice is arcsine-sqrt transformation for proportions or logit transformation to approximate normality and stabilize variance. Without transformation, residual diagnostics will show severe violations.
-- **Supporting Literature:** Statistical methods textbooks (e.g., Zar 2010, *Biostatistical Analysis*) recommend arcsine-sqrt transformation for proportion data: arcsin(sqrt(p)). This transformation approximates normality and stabilizes variance, especially for extreme proportions (near 0 or 1). Logit transformation (log(p/(1-p))) is alternative but undefined for p=0 or p=1.
-- **Potential Reviewer Question:** "Your HCE rates are proportions bounded [0,1]. How did you address non-normality and variance heterogeneity in the LMM? Were proportions transformed (arcsine or logit)?"
+---
+
+**2. No Post-Hoc Domain Comparisons Specified**
+- **Missing Content:** Concept.md tests Domain main effect and Domain × Time interaction but does not specify **which pairwise domain comparisons** will be tested (What vs Where, What vs When, Where vs When)
+- **Why It Matters:** Hypothesis explicitly predicts **ordering** (When > Where > What) but no post-hoc tests specified to test pairwise differences. Testing interaction alone doesn't reveal which specific domains differ. Without post-hoc tests, cannot confirm hypothesis prediction.
+- **Supporting Literature:** Post-hoc testing after significant GLMM effects is standard practice. [UCLA Statistical Methods](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/) recommends using `emmeans` package for post-hoc contrasts in GLMMs with type="response" for back-transformed results. Multiple comparison correction is essential - [Armstrong (2014, PMC)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6193594/) notes: "The Bonferroni-Holm and Hochberg methods are less conservative than the Bonferroni test."
+- **Potential Reviewer Question:** "You report a significant Domain × Time interaction, but which specific domains differ? What evidence supports your hypothesis that When > Where > What?"
+- **Strength:** CRITICAL
+- **Suggested Addition:** "Add to Step 4 specification: 'If Domain main effect or Domain × Time interaction significant, conduct post-hoc pairwise comparisons (What vs Where, What vs When, Where vs When) using emmeans::contrast() with Tukey HSD adjustment. Report both uncorrected and Tukey-adjusted p-values per Decision D068. Test hypothesis ranking (When > Where > What) by comparing estimated marginal means across domains.' Add to expected outputs: 'results/step04_domain_pairwise.csv (3 pairwise comparisons with dual p-values).'"
+
+---
+
+**3. No Sensitivity Analysis for Confidence Threshold**
+- **Missing Content:** HCE threshold fixed at confidence >= 0.75 with no sensitivity analysis at alternative thresholds
+- **Why It Matters:** The choice of 0.75 threshold is somewhat arbitrary (corresponds to "Very Confident" level but could have been 0.5 or 1.0). **Sparse data in When domain** may be exacerbated by high threshold. Sensitivity analysis at 0.5 and 1.0 would demonstrate robustness of findings to threshold choice.
+- **Supporting Literature:** Methodological best practice recommends sensitivity analyses for arbitrary cutpoints. While no specific GLMM literature found in search, general principle is well-established. [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html) emphasizes model robustness checks.
+- **Potential Reviewer Question:** "Why 0.75 specifically? Would your domain differences persist at 0.5 or 1.0 thresholds?"
 - **Strength:** MODERATE
-- **Suggested Addition:** "Add to Section 6 Analysis Approach (if aggregation approach retained): Apply arcsine-sqrt transformation to HCE proportions before LMM fitting: HCE_transformed = arcsin(sqrt(HCE_rate)). Validate transformation effectiveness via residual diagnostics (Q-Q plot, Breusch-Pagan test for homoscedasticity). Acknowledge this still discards item-level variance - GLMM preferred."
+- **Suggested Addition:** "Add to recommendations/future work: 'Conduct sensitivity analysis by re-running GLMM at confidence thresholds 0.5 and 1.0. If domain ranking (When > Where > What) persists across all three thresholds, strengthens conclusion that HCE domain differences are robust to operational definition of high-confidence.' Note: This may not fit current RQ scope but should be acknowledged as limitation."
 
 ---
 
 #### Alternative Statistical Approaches (Not Considered)
 
-**1. Item-Level GLMM with Binomial Family**
-- **Alternative Method:** Generalized linear mixed models (GLMM) with binomial family and logit link, fitted directly to binary HCE flags at item level (~27,200 observations).
-- **How It Applies:** Instead of aggregating HCE flags to proportions (losing 80-90% variance), fit GLMM to raw binary outcomes: HCE_binary ~ Domain * Time + (Time | UID), family=binomial(link='logit'). This preserves item-level variance, uses appropriate binomial distribution for binary data, and provides valid inference without transformation gymnastics.
-- **Key Citation:** UCLA Statistical Consulting (2024) *Mixed Effects Logistic Regression*: "Generalized linear mixed models extend generalized linear models to include random effects in the linear predictor. The two models [aggregated vs item-level] do not give you coefficients with the same interpretation... The mixed effects model will give log odds ratios conditional on the random effects." Item-level GLMM is methodologically superior for binary outcomes.
-- **Why Concept.md Should Address It:** This is the STANDARD approach for binary outcome data in multilevel structures. Omitting it suggests lack of familiarity with GLMM methodology. Reviewers will immediately question why aggregation was used instead of the appropriate GLMM approach.
-- **Strength:** CRITICAL
-- **Suggested Acknowledgment:** "Revise Section 6 Analysis Approach: Make GLMM with binomial family the PRIMARY method. Retain aggregated LMM as SENSITIVITY ANALYSIS only (to compare results). Explicitly state that GLMM is methodologically preferred because it preserves item-level variance and uses appropriate distributional family for binary outcomes."
-
-**2. Beta Regression for Proportions**
-- **Alternative Method:** Beta regression for proportion data (if aggregation approach must be retained). Beta distribution is defined on (0,1) interval and naturally models proportions without transformation.
-- **How It Applies:** If aggregation to proportions is retained despite information loss, beta regression is alternative to LMM with transformation. Beta regression models mean and precision of proportion using appropriate distribution, avoiding normality assumption. Can be extended to mixed-effects beta regression for hierarchical data.
-- **Key Citation:** Ferrari & Cribari-Neto (2004, *Journal of Applied Statistics*) introduced beta regression for rates and proportions. Advantage over arcsine transformation: beta distribution explicitly models (0,1) bounded data with heteroscedasticity. Disadvantage: less common than GLMM, requires specialized software (betareg package in R, not available in tools/).
-- **Why Concept.md Should Address It:** If justifying aggregation approach (not recommended), beta regression is methodologically sounder than untransformed LMM on proportions. Demonstrates awareness of distributional appropriateness.
+**1. GEE as Alternative to GLMM**
+- **Alternative Method:** Generalized Estimating Equations (GEE) with binomial family and exchangeable working correlation structure
+- **How It Applies:** GEE provides **population-average** estimates of Domain × Time effects on HCE probability, avoiding random effects estimation challenges. GEE is more robust to model misspecification and convergence issues than GLMM.
+- **Key Citation:** [Pepe & Anderson (1994) via PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC4217193/) compared GEE vs GLMM for longitudinal binary outcomes: "What differs between GEE and GLMM is the target of inference: population-average or subject-specific." They note: "GEE computations are usually easier than mixed-effect model computations. GEE does not use the likelihood methods that mixed-effect models employ, which means GEE can sometimes estimate more complex models." [Columbia Public Health](https://www.publichealth.columbia.edu/research/population-health-methods/repeated-measures-analysis) recommends: "If you have 50+ clusters, you can use both GEE and random-effects model."
+- **Why Concept.md Should Address It:** With N=100 participants (>50 clusters), GEE is viable. If GLMM random slopes fail to converge, **GEE provides fallback method** that still tests Domain × Time interaction. GEE estimates are consistent even if working correlation is misspecified.
 - **Strength:** MODERATE
-- **Suggested Acknowledgment:** "Add to Section 6: If aggregation approach retained (not recommended), beta regression is alternative to arcsine-transformed LMM. Beta distribution naturally models (0,1) proportions. However, GLMM with binomial family on item-level data remains methodologically preferred (preserves variance, appropriate distribution). Beta regression requires tools/ implementation (currently unavailable)."
+- **Suggested Acknowledgment:** "Add to Analysis Approach: 'Primary analysis uses GLMM (subject-specific inference). If convergence issues persist despite bobyqa optimizer and model simplification, use GEE with binomial family and exchangeable correlation as sensitivity analysis to verify population-average Domain × Time effects. GEE is more robust to convergence issues but provides marginal (population-average) interpretation rather than conditional (subject-specific) effects.'"
+
+---
+
+**2. Observation-Level Random Effects (OLRE) for Overdispersion**
+- **Alternative Method:** Add observation-level random effect term `(1 | obs_id)` to GLMM to absorb extra-binomial variation not captured by participant-level random effects
+- **How It Applies:** If overdispersion detected (residual deviance / df >> 1), OLRE provides each item-response with its own random effect, modeling the extra variation. This is equivalent to Beta-Binomial family but implementable in standard GLMM software.
+- **Key Citation:** [Harrison (2014, PeerJ)](https://peerj.com/articles/616/) and [Harrison (2015, PeerJ)](https://peerj.com/articles/1114/) comprehensively evaluated OLRE for count and binomial data: "One means to account for overdispersion is to add an observation-level random effect (OLRE) to a model, where each data point receives a unique level of a random effect that can absorb the extra-parametric variation in the data." [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html) recommends OLRE as standard approach: "Observation-level random effects (OLRE: this approach should work in most packages)."
+- **Why Concept.md Should Address It:** Overdispersion is common in binomial GLMMs. If detected, proceeding without correction inflates Type I error. OLRE is standard remedial approach and should be specified in validation procedures.
+- **Strength:** MODERATE
+- **Suggested Acknowledgment:** "Add to Validation Procedures: 'If overdispersion detected (residual deviance / df > 1.5), add observation-level random effect: HCE ~ Domain × Time + (Time | UID) + (1 | obs_id), where obs_id = unique identifier for each item-response. OLRE absorbs extra-binomial variation not explained by participant-level random effects ([Harrison 2014, 2015](https://peerj.com/articles/616/)). Compare overdispersion ratio before/after OLRE to confirm remediation.'"
 
 ---
 
 #### Known Statistical Pitfalls (Unaddressed)
 
-**1. Floor Effects + Guessing = Extreme Proportions**
-- **Pitfall Description:** When domain showed floor effects in Ch5 accuracy analyses (RQ 5.2.X). If accuracy near 0 (floor), but participants maintain moderate confidence due to guessing, this creates extreme HCE proportions (near 1.0 = almost all errors are high-confidence). Extreme proportions (near 0 or 1) violate LMM assumptions and reduce variance for statistical tests.
-- **How It Could Affect Results:** When domain may show HCE rates >0.80 (high floor + guessing), while What/Where domains show HCE rates 0.10-0.20 (better calibration). This creates:
-  1. Extreme variance heterogeneity across domains (violates homoscedasticity)
-  2. Ceiling effects in When domain (compression near 1.0)
-  3. Floor effects in What domain (compression near 0.0)
-  4. Non-normal residuals (binomial distribution with extreme p approaches normal only near p=0.5)
-- **Literature Evidence:** Greene et al. (2024, *Journal of Experimental Psychology: General*) lifespan study showed "young children were more prone to high-confidence memory errors than other groups in tests of working memory, whereas older adults were more susceptible to high-confidence false alarms in tests of long-term memory." This demonstrates domain-specific HCE patterns exist, but also shows guessing confounds metacognitive measures. Nelson & Dunlosky (2009) noted measures of metacognitive sensitivity confounded with task performance when guessing permitted - floor effects + guessing = inflated HCE rates that don't reflect true metacognitive failure.
-- **Why Relevant to This RQ:** Concept.md acknowledges When domain floor effects from Ch5, but does not address how this interacts with confidence to create extreme HCE proportions. This is the CORE HYPOTHESIS (When > Where > What), but statistical implications of extreme proportions not discussed.
+**1. Separation Issues with Sparse Binary Data**
+- **Pitfall Description:** With binary outcomes and sparse data (especially When domain with floor effects), complete or quasi-complete separation can occur where predictor perfectly predicts outcome in some subgroups. This causes infinite parameter estimates and convergence failures.
+- **How It Could Affect Results:** If When domain has very few HCE cases (low accuracy + low confidence when guessing), Domain predictor may perfectly separate outcomes (When always HCE=0 if no confident errors occur). This produces infinite logit estimates and model failure.
+- **Literature Evidence:** [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html) warns: "Issues that can occur during estimation include quasi or complete separation. Complete separation means that the outcome variable separates a predictor variable completely, leading to perfect prediction by the predictor variable." [Li et al. (2020)](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-01035-6) recommend checking for this in sparse data contexts.
+- **Why Relevant to This RQ:** Concept.md explicitly acknowledges When domain floor effects from Ch5. If floor effects (accuracy ~10%) combine with appropriate metacognitive uncertainty (low confidence when guessing), HCE rate could approach zero, creating separation.
 - **Strength:** MODERATE
-- **Suggested Mitigation:** "Add to Section 6 Analysis Approach: Acknowledge floor effects in When domain may create extreme HCE proportions (near 1.0). Specify diagnostic checks: (1) Report HCE rate range by domain, (2) Check for ceiling/floor compression, (3) If extreme proportions observed (>0.80 or <0.05), this supports GLMM over LMM (binomial distribution handles extremes better than normal). Consider sensitivity analysis excluding When domain if floor effects preclude valid analysis."
+- **Suggested Mitigation:** "Add to Step 3 validation: 'Check for separation by examining maximum Cook's D and hat values. If any parameter estimates > 10 or SE > 5, indicates separation issue. If When domain has complete separation (zero HCE events), report descriptively but exclude from statistical testing. Consider Firth's penalized likelihood as remedial method for quasi-separation (Heinze & Schemper 2002).'"
 
-**2. Random Slope Convergence Failures with N=100**
-- **Pitfall Description:** Complex random structures (random intercepts + slopes) often fail to converge with N=100, especially when combined with interaction terms (Domain x Time). Convergence failures or singular fits indicate overparameterized random effects.
-- **How It Could Affect Results:** If random slopes fail to converge, researchers face choice: (1) simplify to intercept-only (loses individual differences), (2) try uncorrelated random effects (may still fail), (3) use restricted maximum likelihood tricks (REML vs ML), or (4) accept singular fit (variance component estimated at zero). Each choice affects interpretation and generalizability. Singular fits especially problematic - indicates random slopes variance is essentially zero, meaning individual differences in trajectories are minimal (contradicts hypothesis).
-- **Literature Evidence:** Cross-Validated community consensus (2024): "Users frequently run into convergence issues with random slope models... When a model with all possible random slopes does not converge, the problem might be the optimizer rather than the model itself. Scaling and centering predictors often helps with convergence problems." Bates et al. (2015): "With N=100, you may have limited power to estimate complex random effect structures... simplifying the random structure may be necessary." Barr et al. (2013) vs Bates et al. (2015) debate: maximal random structure (include all slopes) vs parsimonious structure (only slopes justified by data).
-- **Why Relevant to This RQ:** Concept.md proposes (Time | UID) random structure (random slopes for Time) without convergence strategy. With N=100 participants, this may fail to converge, especially if combined with Domain x Time interaction (3 domains x 4 timepoints = 12 fixed effects). No fallback plan specified.
+---
+
+**2. Pseudo-Replication from Item-Level Analysis**
+- **Pitfall Description:** Analyzing item-responses as independent observations when items are nested within participants creates **pseudo-replication** (inflated N). While random effects account for participant-level clustering, they may not fully address item-level dependencies if some items are systematically harder/easier across all participants.
+- **How It Could Affect Results:** If items vary in difficulty, item-level variance creates extra clustering not captured by participant random effects alone. This could artificially inflate statistical power and Type I error. Standard errors may be too small if item-level correlation not modeled.
+- **Literature Evidence:** Hurlbert (1984, Ecological Monographs) coined "pseudo-replication" for this issue: "Subsamples from batches are not replicates." [Elements of Statistical Modeling](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/models-with-random-effects-blocking-and-pseudoreplication.html) states: "In a segregated experiment, ignoring the lack of independence in the model has the opposite effect. Standard errors are too small. Confidence intervals are too narrow. P-values are too liberal. Type I error is inflated."
+- **Why Relevant to This RQ:** ~27,200 item-responses from ~68 items × 100 participants × 4 tests. Items are nested within participants but also represent repeated measures of same items across participants. Current model `(Time | UID)` accounts for participant clustering but not item-level variation.
 - **Strength:** MODERATE
-- **Suggested Mitigation:** "Add to Section 6 Analysis Approach: Specify convergence strategy if random slopes fail: (1) Try uncorrelated random effects (0+Time|UID), (2) Compare intercept-only (1|UID) vs random slopes (Time|UID) via likelihood ratio test (LRT), (3) Only retain random slopes if LRT p<0.05 AND model converges without singularity. Report convergence diagnostics: optimizer iterations, gradient norms, singularity warnings. If singular fit, interpret as minimal individual differences in HCE trajectories (variance component near zero)."
+- **Suggested Mitigation:** "Acknowledge in limitations: 'Item-level analysis treats ~27,200 item-responses as conditionally independent given participant random effects. However, items may vary systematically in difficulty (some items consistently easier/harder across participants), creating item-level clustering not modeled by (Time | UID). Future work could add crossed random effects for items: (Time | UID) + (1 | item_id), though this substantially increases model complexity. Current approach is standard for metacognitive error analysis but may slightly underestimate standard errors.'"
 
 ---
 
 #### Scoring Summary
 
 **Total Concerns Identified:**
-- Commission Errors: 2 (1 CRITICAL, 1 MODERATE)
-- Omission Errors: 2 (1 CRITICAL, 1 MODERATE)
-- Alternative Approaches: 2 (1 CRITICAL, 1 MODERATE)
-- Known Pitfalls: 2 (2 MODERATE)
-
-**TOTAL: 8 concerns** (2 CRITICAL, 6 MODERATE, 0 MINOR)
+- Commission Errors: 3 (1 CRITICAL, 2 MODERATE)
+- Omission Errors: 3 (2 CRITICAL, 1 MODERATE)
+- Alternative Approaches: 2 (both MODERATE)
+- Known Pitfalls: 2 (both MODERATE)
 
 **Overall Devil's Advocate Assessment:**
 
-The concept.md does NOT adequately anticipate statistical criticism. The **fundamental flaw** is using LMM on aggregated binary-derived proportions instead of the methodologically appropriate GLMM with binomial family on item-level data. This approach:
-1. Violates LMM distributional assumptions (proportions not normal)
-2. Discards 80-90% of variance (ecological fallacy from aggregation)
-3. Reduces statistical power (27,200 item-level → 12 aggregated cells)
-4. Ignores standard GLMM methodology for binary outcomes
+Concept.md demonstrates strong methodological understanding (item-level analysis, binomial family, appropriate hypothesis testing). However, it **underestimates the computational and statistical challenges** of fitting binomial GLMMs to item-level data with N=100 participants and sparse outcomes (When domain floor effects).
 
-Additionally, concept.md does not address:
-- Proportion transformation (arcsine or logit) if aggregation retained
-- Convergence strategy for random slopes with N=100
-- Floor effects in When domain creating extreme proportions
-- GLMM with binomial family as the appropriate alternative
+**Critical omissions** are overdispersion checking and post-hoc domain comparisons - both essential for valid inference. **Convergence challenges** with random slopes are likely but no fallback strategy specified beyond bobyqa optimizer. **Separation issues** from sparse When domain data are not acknowledged despite explicit mention of floor effects.
 
-These are not minor methodological quibbles - they represent a fundamental misunderstanding of appropriate statistical methods for binary outcome data in multilevel structures. **REJECTED status warranted** until statistical approach revised to GLMM or aggregation approach rigorously justified with transformation and assumption validation.
+**Methodological alternatives** (GEE for population-average inference, OLRE for overdispersion) are well-established but not discussed. The analysis would be strengthened by acknowledging these options as contingency plans if primary GLMM encounters convergence/overdispersion issues.
+
+Overall, the statistical approach is **fundamentally sound** but would benefit from more **defensive planning** around known GLMM pitfalls (convergence, overdispersion, separation) and explicit specification of post-hoc tests to confirm hypothesis predictions.
 
 ---
 
 ### Tool Availability Validation
 
-**Source:** `docs/v4/tools_inventory.md`
+**See Category 2 evaluation above for detailed tool availability table.**
 
-**Analysis Pipeline Steps:**
-
-| Step | Tool Function | Status | Notes |
-|------|---------------|--------|-------|
-| Step 0: Extract item-level | Custom extraction | ✅ Available | TQ_/TC_ with domain tags from dfData.csv |
-| Step 1: Compute HCE flags | pandas operations | ✅ Available | Binary: (accuracy=0 AND confidence>=0.75) |
-| Step 2: Aggregate rates | pandas.groupby().mean() | ✅ Available | Domain x Time aggregation (3x4=12 cells) |
-| Step 3: Fit LMM | `tools.analysis_lmm.fit_lmm_trajectory_tsvr` | ✅ Available | Decision D070 TSVR compliance |
-| Step 4: Extract effects | `tools.analysis_lmm.extract_fixed_effects_from_lmm` | ✅ Available | Fixed effects table |
-| Step 4: Contrasts D068 | `tools.analysis_lmm.compute_contrasts_pairwise` | ✅ Available | Dual p-values (uncorrected + Bonferroni) |
-| Step 5: Rank domains | pandas sorting | ✅ Available | Mean HCE rate ranking |
-| Step 6: Plot data | pandas aggregation | ✅ Available | Observed + predicted HCE rates |
-
-**Tool Reuse Rate:** 7/7 steps (100%)
-
-**Missing Tools (If Approach Revised to GLMM):**
-
-If concept.md is revised to use the recommended GLMM approach:
-
-1. **Tool Name:** `tools.analysis_glmm.fit_glmm_binomial`
-   - **Required For:** Step 3 - Fit GLMM with binomial family to item-level HCE flags
-   - **Priority:** High (required if GLMM approach adopted)
-   - **Specifications:**
-     - Inputs: df_long (item-level HCE binary flags), formula (HCE ~ Domain * Time), random (Time | UID), family=binomial(link='logit')
-     - Outputs: Fitted GLMM results object (similar to statsmodels GLMMResults)
-     - Implementation: Use statsmodels.genmod.bayes_mixed_glm or lme4 via rpy2
-   - **Recommendation:** Implement before rq_analysis phase if GLMM approach adopted
-
-2. **Tool Name:** `tools.analysis_glmm.extract_odds_ratios`
-   - **Required For:** Step 4 - Convert log-odds coefficients to odds ratios for interpretability
-   - **Priority:** Medium (helpful for interpretation)
-   - **Specifications:**
-     - Inputs: glmm_result (fitted GLMM), contrasts (optional pairwise comparisons)
-     - Outputs: DataFrame with OR, 95% CI, p-values (dual reporting per D068)
-   - **Recommendation:** Implement before results phase for interpretable effect sizes
-
-**Tool Availability Assessment:**
-
-- ✅ Exceptional (100% tool reuse) FOR PROPOSED LMM APPROACH
-- ⚠️ Moderate (2 tools missing) IF REVISED TO GLMM APPROACH (recommended)
-
-The 100% tool reuse rate applies to the PROPOSED approach (LMM on aggregated rates), which is methodologically flawed. If the analysis is revised to the RECOMMENDED approach (GLMM on item-level data), two new tools would be required, reducing tool reuse rate to ~70% (5/7 existing tools still usable: extraction, HCE computation, contrast testing, plotting).
+**Summary:**
+- Tool Reuse Rate: 57% (4/7 steps)
+- Missing Tools: 3 (all HIGH priority)
+  - `tools.analysis_glmm.fit_glmm_binomial`
+  - `tools.analysis_glmm.test_glmm_effects`
+  - `tools.analysis_glmm.predict_glmm_marginal`
+- Recommendation: Implement GLMM toolkit before rq_analysis phase
 
 ---
 
 ### Validation Procedures Checklists
 
-#### LMM Validation Checklist (If Aggregation Approach Retained)
+#### GLMM Validation Checklist
 
 | Assumption | Test | Threshold | Assessment |
 |------------|------|-----------|------------|
-| Residual Normality | Q-Q plot + Shapiro-Wilk | Visual inspection + p>0.05 | ⚠️ NOT SPECIFIED - CRITICAL omission for proportion data |
-| Homoscedasticity | Residuals vs fitted plot + Breusch-Pagan | Visual + p>0.05 | ⚠️ NOT SPECIFIED - Expected violation (V(p)=p(1-p)/n) |
-| Random Effects Normality | Q-Q plots (intercepts + slopes) | Visual inspection | ⚠️ NOT SPECIFIED |
-| Independence | ACF plot | Lag-1 ACF < 0.1 | ⚠️ NOT SPECIFIED - Repeated measures (4 timepoints) |
-| Linearity | Partial residual plots | Visual inspection | ⚠️ NOT SPECIFIED |
-| Convergence | No singularity warnings | Model converged = TRUE | ✅ MENTIONED but no diagnostics detail |
+| Convergence | Gradient, Hessian | No warnings | ✅ Specified in success criteria |
+| Overdispersion | Residual deviance / df | ~1.0 | ❌ NOT specified (critical omission) |
+| Separation | Max Cook's D, parameter SEs | Estimates < 10, SE < 5 | ❌ NOT specified (sparse data risk) |
+| Random Effects Variance | Variance components | All > 0 | ❌ NOT specified (degeneracy check) |
+| Outliers | Deviance residuals | \|residual\| < 3 | ❌ NOT specified |
+| Model Comparison | AIC, LRT | Lower AIC preferred | ⚠️ Implied for random structure but not explicit |
 
-**LMM Validation Assessment:**
+**Assessment:**
 
-Concept.md mentions "LMM convergence" and "no singularity warnings" as success criteria, but provides NO specification of assumption validation procedures. This is **inadequate** for several reasons:
+Only **convergence** is explicitly validated. This is necessary but **not sufficient** for binomial GLMM with sparse data and complex random structure. The five missing validation checks (overdispersion, separation, variance components, outliers, model comparison) are **standard GLMM diagnostics** that should be added to validation procedures.
 
-1. **Proportion data expected to violate normality** - residuals from untransformed proportions typically show severe non-normality, especially with extreme proportions (floor effects in When domain). No Q-Q plot or Shapiro-Wilk test specified.
+**Recommended Additions:**
 
-2. **Variance heterogeneity expected** - proportions have variance V(p) = p(1-p)/n, which depends on mean. When domain (low accuracy, high HCE) will have different variance than What domain (high accuracy, low HCE). No Breusch-Pagan test or residual plot specified.
-
-3. **No remedial actions** - if assumptions violated (as expected), what then? No plan for transformation, robust standard errors, or GLMM alternative.
-
-**Concerns:**
-- **CRITICAL:** No residual diagnostics specified (normality, homoscedasticity) despite expected violations with proportion data
-- **CRITICAL:** No remedial plan if assumptions violated
-- **MAJOR:** Convergence mentioned but no diagnostic details (gradient norms? optimizer iterations?)
-- **MODERATE:** No random effects validation (intercept/slope normality)
-- **MODERATE:** No autocorrelation check (repeated measures design with 4 timepoints)
-
-**Recommendations:**
-1. Add comprehensive assumption validation following `tools.validation.validate_lmm_assumptions_comprehensive` (generates 6 diagnostic plots + remedial recommendations)
-2. Specify transformation (arcsine-sqrt) if assumption violations detected
-3. Include GLMM with binomial family as fallback if LMM assumptions cannot be satisfied
-
----
-
-#### GLMM Validation Checklist (If Approach Revised - Recommended)
-
-| Assumption | Test | Threshold | Assessment |
-|------------|------|-----------|------------|
-| Binomial Deviance | Residual deviance / df | ~1.0 (no overdispersion) | N/A - GLMM not proposed |
-| Random Effects Variance | Variance components > 0 | Positive variances | N/A - GLMM not proposed |
-| Convergence | Optimizer messages | Model converged = TRUE | N/A - GLMM not proposed |
-| Separation | Complete/quasi-separation check | No separation | N/A - GLMM not proposed |
-
-**GLMM Validation Assessment:**
-
-GLMM approach NOT proposed in concept.md, so no validation procedures specified. If approach is revised to GLMM (recommended), the following validation would be appropriate:
-
-1. **Overdispersion Check:** Residual deviance / df should be ~1.0. If >>1, indicates overdispersion (variance greater than binomial assumption). Remedial: quasi-binomial family or observation-level random effects.
-
-2. **Random Effects:** Variance components should be positive and non-singular. If variance near zero, indicates minimal individual differences (random effects not needed).
-
-3. **Convergence:** GLMM convergence more challenging than LMM (iterative reweighted least squares). Check optimizer messages, gradient norms.
-
-4. **Separation:** With extreme HCE proportions (floor effects in When domain), perfect separation possible (all When observations HCE=1). Check for complete/quasi-separation warnings.
-
-These validations would be implemented via `tools.validation.validate_glmm_assumptions` (not yet written - would need implementation).
-
----
-
-#### Decision Compliance Validation
-
-| Decision | Requirement | Implementation | Compliance |
-|----------|-------------|----------------|------------|
-| D068: Dual Reporting | Report both uncorrected and Bonferroni p-values | Step 4: `compute_contrasts_pairwise()` dual p-values | ✅ FULLY COMPLIANT |
-| D070: TSVR Pipeline | Use TSVR (hours) not nominal days | Step 3: `fit_lmm_trajectory_tsvr()` time variable | ✅ FULLY COMPLIANT |
-
-**Decision Compliance Assessment:**
-
-Concept.md specifies Decision D068 dual p-value reporting (uncorrected + Bonferroni) and Decision D070 TSVR time variable. Both decisions will be met by specified tool usage. No compliance issues identified.
-
-However, note that Decision D068 compliance does NOT remedy the fundamental statistical flaw (LMM on aggregated proportions). Dual p-values are correctly reported for an INCORRECT analysis method.
+1. **Overdispersion check:** `overdispersion_ratio = residual_deviance / residual_df`. If > 1.5, add OLRE or use Beta-Binomial.
+2. **Separation check:** Examine max(Cook's D) and parameter SEs. If any SE > 5, indicates quasi-separation.
+3. **Variance components:** Confirm all random effects variances > 0. If random slopes variance ~0, simplify to random intercept-only.
+4. **Deviance residuals:** Plot residuals, flag \|residual\| > 3 as outliers, investigate leverage.
+5. **Model comparison:** LRT comparing random intercept-only vs random slopes. Report AIC for both.
 
 ---
 
 ### Recommendations
 
-#### Required Changes (Must Address for Approval)
+#### Required Changes (Must Address for APPROVAL)
 
-**CRITICAL REVISION REQUIRED:** The statistical approach must be fundamentally revised before approval.
+1. **Add Overdispersion Validation**
+   - **Location:** 1_concept.md - Section: Analysis Approach, Step 3 (after GLMM fitting)
+   - **Issue:** No overdispersion check specified. Binomial GLMMs commonly exhibit overdispersion (variance > theoretical), leading to underestimated SEs and inflated Type I error if undetected.
+   - **Fix:** Add validation step: "Compute overdispersion ratio = residual deviance / residual df. Ratio > 1.5 indicates overdispersion. If detected, add observation-level random effects (OLRE): HCE ~ Domain × Time + (Time | UID) + (1 | obs_id). Re-check overdispersion ratio after OLRE. Report ratio in results regardless of magnitude."
+   - **Rationale:** Critical for valid inference. [Harrison (2015, PeerJ)](https://peerj.com/articles/1114/) and [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html) identify overdispersion as major threat to GLMM validity. Category 4 deduction.
 
-**1. Replace LMM Aggregation Approach with GLMM on Item-Level Data**
-   - **Location:** 1_concept.md - Section "Analysis Approach," Steps 2-3
-   - **Issue:** Current approach aggregates binary HCE flags to proportions (27,200 item-level → 12 cells), then fits LMM assuming normal distribution. This violates three principles: (1) Proportions are bounded [0,1] with non-normal distribution, (2) Aggregation discards 80-90% of variance (ecological fallacy), (3) GLMM with binomial family is standard approach for binary outcomes in multilevel structures. This is not a minor methodological choice - it's a fundamental statistical error that will not survive peer review.
-   - **Fix:** Revise Steps 2-3 to use GLMM:
-     - **Step 2 (REVISED):** "Fit GLMM with binomial family to item-level HCE flags: HCE_binary ~ Domain * Time + (Time | UID), family=binomial(link='logit'). This preserves item-level variance (~27,200 observations), uses appropriate binomial distribution for binary outcomes, and provides valid inference without transformation. Random slopes by participant account for individual differences in HCE trajectories. Estimate via statsmodels.genmod.bayes_mixed_glm or lme4::glmer."
-     - **Step 3 (NEW):** "Test Domain main effect and Domain x Time interaction using Wald tests with Bonferroni-corrected alpha=0.025 (2 tests per Decision D068). Extract odds ratios (OR) and 95% CI for interpretability. Domain x Time interaction tests whether HCE rate trajectories differ across domains. Report both log-odds coefficients (for statistical testing) and odds ratios (for interpretation)."
-     - **Aggregated LMM as Sensitivity Analysis (OPTIONAL):** "If desired, retain aggregated LMM approach as SENSITIVITY ANALYSIS to compare with GLMM results. Apply arcsine-sqrt transformation to proportions: HCE_transformed = arcsin(sqrt(HCE_rate)). Validate transformation via residual diagnostics. Explicitly state GLMM is primary analysis (methodologically preferred), aggregated LMM is secondary (for comparison only)."
-   - **Rationale:** GLMM with binomial family is the methodologically appropriate approach for binary outcome data in multilevel structures. This is not debatable - it's standard practice in statistics (per UCLA Statistical Consulting 2024, LeBeau et al. 2018, and general GLMM literature). Aggregation to proportions violates LMM assumptions and discards information. Category 1 score currently 2.0/3.0 (Adequate) due to this flaw - revision to GLMM would increase to 3.0/3.0 (Exceptional).
+2. **Specify Post-Hoc Domain Comparisons**
+   - **Location:** 1_concept.md - Section: Analysis Approach, Step 4 (after hypothesis testing)
+   - **Issue:** Hypothesis predicts domain ordering (When > Where > What) but no pairwise comparisons specified to test which specific domains differ.
+   - **Fix:** Add to Step 4: "If Domain main effect or Domain × Time interaction significant (p < 0.025 Bonferroni), conduct post-hoc pairwise comparisons: (1) What vs Where, (2) What vs When, (3) Where vs When. Use emmeans::contrast() with Tukey HSD adjustment. Report dual p-values per Decision D068 (uncorrected + Tukey). Test hypothesis ranking by comparing estimated marginal means: confirm When > Where > What."
+   - **Rationale:** Testing interaction alone doesn't reveal which domains differ. Need explicit pairwise tests to confirm hypothesis. Category 5 devil's advocate identified this as CRITICAL omission.
 
-**2. Add Tool Implementation Plan for GLMM**
-   - **Location:** 1_concept.md - Section "Analysis Approach," new subsection "Tool Requirements"
-   - **Issue:** tools/ package currently lacks GLMM implementation (tools_inventory.md shows only LMM tools). If GLMM approach adopted (required), two tools need implementation: (1) fit_glmm_binomial for model fitting, (2) extract_odds_ratios for interpretability. Category 2 score currently 2.0/2.0 for PROPOSED approach but would drop to ~1.4/2.0 if GLMM required without tool plan.
-   - **Fix:** Add subsection:
-     - "**Tool Requirements:** GLMM approach requires tools.analysis_glmm module (not yet implemented). Required functions:"
-     - "1. tools.analysis_glmm.fit_glmm_binomial(df_long, formula, random, family='binomial', link='logit') - Fit GLMM via statsmodels or lme4"
-     - "2. tools.analysis_glmm.extract_odds_ratios(glmm_result, contrasts) - Convert log-odds to OR with 95% CI and dual p-values per D068"
-     - "Recommendation: Implement tools.analysis_glmm before rq_analysis phase. If unavailable, fallback to arcsine-transformed LMM as interim solution (with acknowledged limitations)."
-   - **Rationale:** Category 2 requires tool availability specification. GLMM approach cannot proceed without implementation plan. This acknowledges tool gap and provides fallback (transformed LMM) if GLMM unavailable, ensuring analysis can proceed while maintaining methodological awareness.
-
-**3. Add Comprehensive Assumption Validation Procedures**
-   - **Location:** 1_concept.md - Section "Analysis Approach," Step 3 (after model fitting)
-   - **Issue:** Concept.md mentions "LMM convergence" but provides no details on HOW convergence assessed or WHAT to do if assumptions violated. For GLMM, overdispersion and separation must be checked. For LMM (if retained as sensitivity analysis), residual normality and homoscedasticity must be validated. Category 4 score currently 1.5/2.0 due to missing validation procedures.
-   - **Fix:** Add after Step 3:
-     - "**Step 3.5: Validate GLMM Assumptions**"
-     - "- Overdispersion: Residual deviance / df should be ~1.0. If >1.5, indicates overdispersion (variance exceeds binomial assumption). Remedial: use quasi-binomial family or add observation-level random effects."
-     - "- Random Effects: Variance components should be positive and non-singular. If variance near zero, indicates minimal individual differences (consider intercept-only model)."
-     - "- Convergence: Check optimizer messages, gradient norms. If non-convergence, try: (1) uncorrelated random effects (0+Time|UID), (2) intercept-only (1|UID), (3) different optimizer (Nelder-Mead vs BFGS)."
-     - "- Separation: Check for complete/quasi-separation warnings (perfect prediction due to extreme HCE proportions). If separation detected, use Firth's penalized likelihood or collapse categories."
-     - "**Success Criteria:** Model converges without warnings, overdispersion <1.5, variance components positive, no separation detected. If assumptions violated, document remedial actions taken."
-   - **Rationale:** Comprehensive assumption validation required for valid inference (Category 4 criterion). GLMM has different assumptions than LMM (overdispersion vs normality), so validation procedures must be appropriate for chosen model. This addresses Category 4 gap and increases score to 2.0/2.0.
+3. **Add Random Slopes Contingency Plan**
+   - **Location:** 1_concept.md - Section: Analysis Approach, Step 3 (GLMM specification)
+   - **Issue:** Random slopes `(Time | UID)` may not converge with N=100 in binomial GLMM. No fallback strategy beyond bobyqa optimizer.
+   - **Fix:** Add model selection procedure: "Use likelihood ratio test to compare: (1) HCE ~ Domain × Time + (Time | UID) vs (2) HCE ~ Domain × Time + (1 | UID). If random slopes model fails to converge OR random slopes variance ~0 OR LRT non-significant (p > 0.05), proceed with random intercept-only model. Acknowledge in discussion that N=100 may be insufficient for estimating individual HCE trajectories."
+   - **Rationale:** Literature ([Bates et al. 2015](https://arxiv.org/abs/1406.5823), [Bolker GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html)) documents convergence challenges with random slopes in binomial GLMM when N < 200. Category 1 deduction for overly ambitious complexity.
 
 ---
 
 #### Suggested Improvements (Optional but Recommended)
 
-**1. Add Sensitivity Analysis for HCE Threshold**
-   - **Location:** 1_concept.md - Section "Analysis Approach," new subsection "Sensitivity Analyses"
-   - **Current:** HCE threshold fixed at confidence ≥0.75 (top 2 of 5 rating levels)
-   - **Suggested:** "Conduct sensitivity analysis varying HCE threshold: (1) ≥0.50 (Mildly Confident or higher), (2) ≥0.75 (Very Confident or higher - primary analysis), (3) =1.0 (Absolutely Certain only). Compare domain rankings across thresholds. If results robust across thresholds, strengthens conclusions. If threshold-dependent, indicates HCE definition matters for interpretation."
-   - **Benefit:** Addresses potential reviewer question "Why 0.75 cutoff?" by demonstrating results are (or are not) robust to threshold choice. Currently threshold appears arbitrary (no literature justification provided). Sensitivity analysis provides empirical justification.
+1. **Add GEE as Sensitivity Analysis**
+   - **Location:** 1_concept.md - Section: Analysis Approach (new subsection after GLMM)
+   - **Current:** Only GLMM specified
+   - **Suggested:** "If GLMM convergence issues persist after model simplification and optimizer tuning, conduct sensitivity analysis using GEE (Generalized Estimating Equations) with binomial family, logit link, and exchangeable working correlation. GEE provides population-average estimates (marginal inference) and is more robust to convergence failures than GLMM (subject-specific inference). Compare Domain × Time interaction significance across GLMM and GEE to verify robustness of findings."
+   - **Benefit:** Provides methodological robustness check. If findings replicate across GLMM and GEE, strengthens conclusions.
 
-**2. Quantify Information Loss from Aggregation**
-   - **Location:** 1_concept.md - Section "Analysis Approach," Step 2
-   - **Current:** "Aggregate HCE rates by domain x timepoint" with no acknowledgment of information loss
-   - **Suggested:** "If aggregation approach retained (not recommended), quantify information loss: ~27,200 item-level observations → 12 aggregated cells (99.96% reduction in sample size). Multilevel model literature shows aggregation discards 80-90% of within-group variance. This reduces statistical power and precision of estimates. GLMM on item-level data (recommended) preserves full information."
-   - **Benefit:** Demonstrates awareness of aggregation consequences. Even if aggregation approach retained (against recommendation), quantifying information loss shows methodological sophistication and acknowledges trade-offs. Provides concrete numbers for "ecological fallacy" critique.
+2. **Add Separation Diagnostics**
+   - **Location:** 1_concept.md - Section: Validation Procedures (add subsection "Separation Check")
+   - **Current:** No mention of separation issues despite acknowledging When domain floor effects
+   - **Suggested:** "Check for quasi-complete separation by examining: (1) Maximum Cook's D (values > 1 indicate influential points), (2) Parameter SEs (SE > 5 suggests separation), (3) Domain-specific HCE counts (flag if any domain has < 10 total events). If When domain shows separation, report descriptively without statistical testing, or use Firth's penalized likelihood method."
+   - **Benefit:** Sparse data in When domain creates separation risk. Proactive diagnostics prevent model failure.
 
-**3. Add Floor Effects Diagnostic Check**
-   - **Location:** 1_concept.md - Section "Analysis Approach," Step 2 (before aggregation)
-   - **Current:** Hypothesis mentions When domain floor effects from Ch5, but no diagnostic planned
-   - **Suggested:** "Before aggregation, compute HCE rate range by domain to identify floor/ceiling effects: If When domain shows HCE rate >0.80 (floor accuracy + maintained confidence), this supports hypothesis but creates extreme proportions challenging for LMM (compression near 1.0). If extreme proportions detected (>0.80 or <0.05), this STRONGLY favors GLMM over LMM (binomial distribution handles extremes better than normal). Document HCE rate range in results as manipulation check for floor effects hypothesis."
-   - **Benefit:** Provides empirical evidence for hypothesis (When domain floor effects → high HCE) while also serving as diagnostic for methodological appropriateness. If extreme proportions detected, this is additional justification for GLMM over LMM approach.
+3. **Consider Confidence Threshold Sensitivity Analysis**
+   - **Location:** 1_concept.md - Recommendations section (future work)
+   - **Current:** HCE threshold fixed at 0.75 with no sensitivity analysis
+   - **Suggested:** "Future work: Conduct sensitivity analysis by re-running GLMM at alternative confidence thresholds: (1) >= 0.5, (2) >= 1.0. If domain ranking persists across thresholds, strengthens robustness conclusion."
+   - **Benefit:** Demonstrates robustness to arbitrary cutpoint choice.
 
-**4. Add Intercept-Slope Correlation Interpretation**
-   - **Location:** 1_concept.md - Section "Analysis Approach," Step 3 (random effects)
-   - **Current:** Random slopes specified (Time | UID) with no discussion of intercept-slope correlation
-   - **Suggested:** "Random effects (Time | UID) estimates both variance components and correlation between intercepts and slopes. Intercept-slope correlation tests whether individuals with higher baseline HCE rates (intercepts) show different trajectories (slopes) over time. Negative correlation would indicate: individuals with high initial HCE rates show greater reduction over time (practice effects or calibration improvement). Positive correlation would indicate: individuals with high initial HCE rates maintain or increase HCE over time (stable metacognitive deficit). Test significance via Decision D068 dual p-value reporting (RQ 5.13 methodology)."
-   - **Benefit:** Extracts additional insight from random effects structure beyond just variance components. Intercept-slope correlation provides information about individual differences in HCE trajectories, relevant to hypothesis about domain-specific metacognitive failure patterns. Shows comprehensive understanding of mixed model interpretation.
+4. **Acknowledge Pseudo-Replication Limitation**
+   - **Location:** 1_concept.md - Discussion/Limitations section
+   - **Current:** Item-level analysis specified but nested structure not fully acknowledged
+   - **Suggested:** "Limitation: Item-level analysis treats ~27,200 item-responses as conditionally independent given participant random effects. However, items may vary systematically in difficulty, creating item-level clustering not modeled. Current approach is standard for metacognitive error analysis but may slightly underestimate standard errors if item effects are large."
+   - **Benefit:** Transparent about model simplification trade-off.
+
+---
+
+#### Missing Tools (For Master/User Implementation)
+
+See Category 2 evaluation for complete specifications of 3 missing GLMM tools.
+
+**Priority:** HIGH - Core GLMM functionality entirely absent from toolkit. Must implement before rq_analysis phase.
 
 ---
 
@@ -620,12 +496,13 @@ However, note that Decision D068 compliance does NOT remedy the fundamental stat
 
 - **Agent Version:** rq_stats v5.0
 - **Rubric Version:** 10-point system (v5.0)
-- **Validation Date:** 2025-12-06 17:15
-- **Tools Inventory Source:** docs/v4/tools_inventory.md
-- **Total Tools Validated:** 7 (for proposed LMM approach)
-- **Tool Reuse Rate:** 100% (7/7 tools available for proposed approach; 70% if revised to GLMM requiring 2 new tools)
-- **Validation Duration:** ~25 minutes
-- **Context Dump:** "7.8/10 REJECTED. Cat1: 2.0/3 (aggregation violates LMM assumptions). Cat2: 2.0/2 (100% reuse). Cat3: 1.5/2 (parameters OK but transformation missing). Cat4: 1.5/2 (validation incomplete). Cat5: 0.8/1 (8 concerns: 2 CRITICAL - use GLMM not LMM aggregation)."
+- **Validation Date:** 2025-12-06 17:30
+- **Tools Catalog Source:** docs/v4/tools_catalog.md
+- **Total Tools Validated:** 7 analysis steps
+- **Tool Reuse Rate:** 57% (4/7 tools available, 3 missing GLMM functions)
+- **Validation Duration:** ~35 minutes
+- **WebSearch Queries:** 10 (5 validation pass, 5 challenge pass)
+- **Context Dump:** "9.1/10 CONDITIONAL. Cat1: 2.7/3 (appropriate but random slopes ambitious). Cat2: 1.3/2 (57% reuse, 3 GLMM tools missing). Cat3: 2.0/2 (well-specified). Cat4: 1.9/2 (overdispersion omitted). Cat5: 1.2/1 (10 concerns, exceptional thoroughness)."
 
 ---
 

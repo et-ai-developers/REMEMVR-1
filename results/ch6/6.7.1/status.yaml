@@ -2,26 +2,21 @@ rq_builder: success
 rq_concept: success
 rq_scholar: success
 rq_scholar_context: |
-  6.7.1 REJECTED 7.2/10: Strong theory (2.7/3) but CRITICAL gaps - no interpretation guidelines (0/2), no practice effects discussion. Must add Section 5 + Section 7 before proceeding.
+  9.0/10 CONDITIONAL. Strong theory (encoding strength vs metacognitive dissociation), exceptional interpretation guidelines.
+  CRITICAL fix needed: "Day 0 confidence at encoding" -> "retrieval confidence" (post-retrieval, not encoding-time).
+  14 concerns: 1 CRITICAL (terminology), 12 MODERATE (practice effects omission, VR metacognition, confounds), 1 MINOR.
+  10 literature queries (validation+challenge). 8 high-relevance papers (Koriat, Radvansky, Salthouse must cite).
+  Ready for rq_stats after terminology correction.
 rq_stats: success
-rq_stats_context: |
-  9.1/10 CONDITIONAL. Category 1: 2.7/3 (appropriate method, complexity justified). Category 2: 2.0/2 (100% tool reuse). Category 3: 1.9/2 (well-specified, missing test type). Category 4: 1.7/2 (missing assumption checks - CRITICAL gap). Category 5: 0.8/1 (8 concerns: 1 CRITICAL, 6 MODERATE, 1 MINOR).
-rq_planner: success
+rq_stats_context: "9.1/10 CONDITIONAL. Category 1: 2.8/3 (appropriate, minor gaps). Category 2: 2.0/2 (100% reuse). Category 3: 1.7/2 (parameters present, test specs missing). Category 4: 1.8/2 (validation good, normality test omitted). Category 5: 0.8/1 (11 concerns, 3 CRITICAL). Required fixes: Add regression, specify normality test + remedial action, clarify D068."
+rq_planner: pending
 rq_planner_context: |
   Analysis plan created: 5 steps planned (Steps 1-5: all DERIVED data loading and statistical tests).
   Tool requirements: Data loading (pandas), correlation analysis (scipy.stats), tertile analysis (groupby), dual p-values (Decision D068).
   Expected outputs: 6 data files (merged dataset, correlation results, tertile statistics, tertile test, plot source data). Validation required at every step.
   Cross-RQ dependencies: RQ 6.1.1 (Day 0 confidence), Ch5 5.1.4 (forgetting slopes).
-rq_tools: success
-rq_tools_context: |
-  8 analysis + 5 validation tools cataloged for correlation/tertile analysis.
-  Stdlib functions (pandas, scipy.stats) + custom validation tools verified.
-  Decision D068 dual p-value enforcement via validate_correlation_test_d068.
-rq_analysis: success
-rq_analysis_context: |
-  5 steps specified with validation (DERIVED data correlation and tertile analysis).
-  Cross-RQ dependencies: RQ 6.1.1 (Day 0 confidence), Ch5 5.1.4 (forgetting slopes).
-  Decision D068 dual p-value reporting enforced in Steps 4-5.
+rq_tools: pending
+rq_analysis: pending
 
 analysis_steps:
   step01_load_day0_confidence: pending

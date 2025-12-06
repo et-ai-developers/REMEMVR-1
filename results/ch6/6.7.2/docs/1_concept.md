@@ -98,10 +98,25 @@ Correlation analysis (Pearson r with dual p-values per Decision D068) examining 
 - Compute SD(accuracy) for each participant at each test session
 - Output: data/step02_sd_accuracy.csv (400 rows)
 
-**Step 2:** Correlate SD_confidence vs SD_accuracy
+**Step 2:** Correlate SD_confidence vs SD_accuracy using multilevel approach to handle non-independence
 - Merge SD_confidence and SD_accuracy by UID x test
-- Compute Pearson correlation across all 400 observations
-- Compute dual p-values: parametric (Pearson test) and permutation-based (10,000 resamples)
+- **CRITICAL:** 400 observations from 100 participants are NOT independent (4 repeated measures per person)
+
+**PRIMARY ANALYSIS: Person-level aggregation (N=100)**
+- Compute person-level means: avg_SD_confidence and avg_SD_accuracy (averaging across 4 timepoints per person)
+- Compute Pearson correlation on person-level means (N=100 independent observations)
+- This is the PRIMARY analysis due to interpretive clarity and statistical validity
+- Rationale: Avoids complex multilevel modeling, provides straightforward person-level association
+
+**SUPPLEMENTARY ANALYSIS: Multilevel model (N=400 observations)**
+- SD_accuracy ~ SD_confidence + (1 | UID) to account for within-person clustering
+- Extract fixed effect slope; standardize to obtain standardized β (analogous to r)
+- Compare multilevel result to person-level aggregation as robustness check
+- If results diverge substantially (r_person vs β_multilevel differ by >0.15), report both and discuss
+
+**Dual p-values:**
+- For person-level: Parametric Pearson test + bootstrap 95% CI (10000 resamples)
+- For multilevel: Wald p-value + parametric bootstrap p-value
 - Output: results/step03_correlation.csv
 
 **Step 3:** Test if variability predicts variability
@@ -119,9 +134,27 @@ Correlation analysis (Pearson r with dual p-values per Decision D068) examining 
 **Success Criteria:**
 - SD computed for all 400 person-timepoint observations
 - No missing values (all participants have sufficient items to compute SD)
-- Correlation tested with dual p-values (Decision D068 compliance)
+- **Non-independence addressed:** Person-level aggregation (N=100) as primary, multilevel (N=400) as supplementary
+- Correlation/association tested with dual p-values (parametric + bootstrap)
 - Direction of effect documented (positive/negative/null)
 - Effect size interpretation provided (strong/moderate/weak based on r thresholds)
+- **Analysis choice documented:** Primary = person-level aggregation (interpretive clarity), Supplementary = multilevel (preserves information)
+- **SD binary constraint sensitivity analysis completed** (see below)
+
+**SD of Binary Data Constraint - Sensitivity Analysis (REQUIRED)**
+
+**Issue:** SD of binary accuracy (0/1) is mathematically constrained by mean proportion: SD = sqrt[p*(1-p)]. This creates a potential artifact where participants with intermediate accuracy (~50%) automatically have higher SD than those at extremes (~0% or ~100%). The observed correlation between SD_confidence and SD_accuracy might partially reflect this mathematical constraint rather than true metacognitive sensitivity.
+
+**Required Sensitivity Analysis:**
+1. Compute mean_accuracy per person-timepoint alongside SD_accuracy
+2. Compute partial correlation: r(SD_confidence, SD_accuracy | mean_accuracy) controlling for mean accuracy
+3. Report BOTH unadjusted correlation AND partial correlation
+4. **Interpretation guide:**
+   - If unadjusted r significant but partial r is NOT significant: Mathematical constraint dominates; cannot conclude metacognitive sensitivity
+   - If BOTH unadjusted r AND partial r are significant: Variability relationship robust to mean accuracy confound; genuine metacognitive signal
+   - If neither significant: No evidence for variability relationship regardless of constraint
+
+**Output:** results/step03b_partial_correlation.csv (r_partial, p_partial, comparison to unadjusted)
 
 ---
 

@@ -13,7 +13,7 @@
 Are high-confidence errors domain-specific, showing different rates for What versus Where versus When memory domains?
 
 **Scope:**
-This RQ examines high-confidence errors (HCE: Confidence >= 0.75 AND Accuracy = 0) at the item level across three episodic memory domains (What/Where/When) over four test sessions (T1, T2, T3, T4; Days 0, 1, 3, 6). Sample: ~27,200 item-responses (approximately 68 items × 100 participants × 4 tests). Analysis tests Domain × Time interaction effects on HCE rate using item-level confidence (TC_*) and accuracy (TQ_*) data.
+This RQ examines high-confidence errors (HCE: Confidence >= 0.75 AND Accuracy = 0) at the item level across three episodic memory domains (What/Where/When) over four test sessions (T1, T2, T3, T4; Days 0, 1, 3, 6). Sample: ~27,200 item-responses (approximately 68 items ï¿½ 100 participants ï¿½ 4 tests). Analysis tests Domain ï¿½ Time interaction effects on HCE rate using item-level confidence (TC_*) and accuracy (TQ_*) data.
 
 **Theoretical Framing:**
 High-confidence errors represent the most problematic metacognitive failure - being confidently wrong. Domain-specific differences in HCE rates could reveal differential metacognitive access to What (object identity), Where (spatial location), and When (temporal order) memory systems. The When domain, which showed floor effects in Ch5 accuracy analyses, may produce the highest HCE rates due to low accuracy combined with guessing that feels confident.
@@ -54,7 +54,7 @@ What and Where domains may differ if object vs spatial memory have different met
 Based on dual-process theory, What memory can rely on familiarity which, while potentially misleading, provides consistent confidence signals. Where and When memory require recollection, which is more vulnerable to source monitoring errors. The When domain specifically showed floor effects in Ch5 accuracy analyses, suggesting fundamental encoding/retrieval difficulties. When combined with metacognitive processes that may not fully adjust confidence for this difficulty, the result is high-confidence errors. Source monitoring framework suggests that temporal attribution is particularly challenging, leading to confident but incorrect temporal judgments.
 
 **Expected Effect Pattern:**
-Significant Domain × Time interaction (p < 0.05 Bonferroni corrected for multiple comparisons). When domain expected to show HCE rates > 15% (combining floor accuracy with maintained confidence). What domain expected to show HCE rates < 10% (better calibrated). Where domain intermediate (~12%). Time effect may show increasing HCE rates across all domains as memories degrade but confidence fails to fully adjust.
+Significant Domain ï¿½ Time interaction (p < 0.05 Bonferroni corrected for multiple comparisons). When domain expected to show HCE rates > 15% (combining floor accuracy with maintained confidence). What domain expected to show HCE rates < 10% (better calibrated). Where domain intermediate (~12%). Time effect may show increasing HCE rates across all domains as memories degrade but confidence fails to fully adjust.
 
 ---
 
@@ -87,42 +87,60 @@ None - complete WWW domain coverage required for domain comparison hypothesis.
 ## Analysis Approach
 
 **Analysis Type:**
-Item-level descriptive analysis + Linear Mixed Models (LMM) for Domain × Time interaction effects on HCE rates
+Item-level Generalized Linear Mixed Models (GLMM) with binomial family for Domain Ã— Time interaction effects on HCE probability. **CRITICAL:** Analysis conducted at item-level (binary HCE outcome per item-response), NOT on aggregated proportions. Aggregating to means and using LMM violates distributional assumptions for binary outcomes
 
 **High-Level Workflow:**
 
-**Step 0:** Extract item-level data from dfData.csv, filtering to both TQ_* (accuracy, dichotomous 0/1) and TC_* (confidence, 5-level ordinal: 0, 0.25, 0.5, 0.75, 1.0) items. Tag items by domain: What (*-N-*), Where (*-L-*/*-U-*/*-D-*), When (*-O-*). Sample: ~27,200 item-responses (68 items × 100 participants × 4 tests).
+**Step 0:** Extract item-level data from dfData.csv, filtering to both TQ_* (accuracy, dichotomous 0/1) and TC_* (confidence, 5-level ordinal: 0, 0.25, 0.5, 0.75, 1.0) items. Tag items by domain: What (*-N-*), Where (*-L-*/*-U-*/*-D-*), When (*-O-*). Sample: ~27,200 item-responses (68 items ï¿½ 100 participants ï¿½ 4 tests).
 
 **Step 1:** Compute high-confidence error flags per item-response: HCE = 1 if (TQ_accuracy = 0 AND TC_confidence >= 0.75), else HCE = 0. Creates binary HCE flag for each of ~27,200 item-responses.
 
-**Step 2:** Compute HCE rates aggregated by domain × timepoint: For each combination of domain (What/Where/When) and test session (T1/T2/T3/T4), compute HCE_rate = mean(HCE) across all item-responses in that cell. Produces 12 rows (3 domains × 4 tests) summarizing mean HCE rates.
+**Step 2:** Compute HCE rates aggregated by domain ï¿½ timepoint: For each combination of domain (What/Where/When) and test session (T1/T2/T3/T4), compute HCE_rate = mean(HCE) across all item-responses in that cell. Produces 12 rows (3 domains ï¿½ 4 tests) summarizing mean HCE rates.
 
-**Step 3:** Fit Linear Mixed Model testing Domain × Time interaction: HCE_rate ~ Domain × Time + (Time | UID). Model tests whether HCE rate trajectories differ across domains. Random slopes by participant (UID) account for individual differences in HCE trajectory. REML=True for variance component estimation.
+**Step 3:** Fit Generalized Linear Mixed Model (GLMM) with binomial family testing Domain Ã— Time interaction: HCE ~ Domain Ã— Time + (Time | UID), family=binomial(link='logit'). Model tests whether HCE probability trajectories differ across domains at item-level. Random slopes by participant (UID) account for individual differences in HCE trajectory. **CRITICAL:** Use item-level binary HCE outcome (0/1), NOT aggregated proportions. Binary outcomes require GLMM with binomial family, not LMM on aggregated rates (which would violate homoscedasticity and normality assumptions). Laplace approximation for likelihood estimation.
 
-**Step 4:** Test Domain main effect and Domain × Time interaction using Bonferroni-corrected alpha = 0.025 (two tests). Extract fixed effect estimates, standard errors, t-statistics, and dual p-values (parametric + bootstrap per Decision D068). Report whether domain differences in HCE rates are statistically significant.
+**Step 3b: Overdispersion Validation (REQUIRED)**
+- Compute residual deviance / residual df ratio after model fit
+- If ratio > 1.5: overdispersion present, add observation-level random effect (OLRE) as remediation
+- Alternative: Use quasi-binomial family if OLRE causes convergence issues
+- Document: Overdispersion ratio, remediation applied (if any), model comparison (with vs without OLRE)
+
+**Step 3c: Random Slopes Contingency Plan (REQUIRED)**
+- With ~27,200 item-responses from 100 participants, random slopes may fail to converge
+- Strategy: (1) Attempt full model (Time | UID), (2) If singular fit or non-convergence, use LRT to compare: (Time | UID) vs (1 | UID), (3) If variance component â‰ˆ 0, proceed with intercept-only random effects
+- Use bobyqa optimizer with increased iterations (maxfun=100000) if convergence issues persist
+- Document: Convergence status, optimizer used, final random structure selection
+
+**Step 4:** Test Domain main effect and Domain Ã— Time interaction using Bonferroni-corrected alpha = 0.025 (two tests). Extract fixed effect estimates, standard errors, t-statistics, and dual p-values (parametric + bootstrap per Decision D068). Report whether domain differences in HCE rates are statistically significant.
 
 **Step 5:** Rank domains by mean HCE rate: Compute overall mean HCE rate per domain (averaged across all timepoints) and rank from highest to lowest. Compare to hypothesis prediction (When > Where > What). Report whether observed ranking matches theoretical prediction.
 
-**Step 6:** Create plot data for visualization: Export domain × time HCE rates for plotting. Include observed mean HCE rates per domain per timepoint, plus LMM model predictions with confidence intervals. Data structured for downstream plotting by rq_plots agent.
+**Step 5b: Post-hoc Domain Comparisons (REQUIRED)**
+- Conduct pairwise domain comparisons: What vs Where, What vs When, Where vs When
+- Use emmeans contrasts with Bonferroni correction (Î± = 0.05/3 = 0.017) or Tukey HSD
+- Report: Pairwise odds ratios on logit scale, back-transformed probability differences, 95% CIs, adjusted p-values
+- This confirms which specific domain pairs drive the main effect (if significant)
+
+**Step 6:** Create plot data for visualization: Export domain Ã— time HCE rates for plotting. Include observed mean HCE rates per domain per timepoint, plus GLMM model predictions (back-transformed from logit scale to probability scale) with confidence intervals. Data structured for downstream plotting by rq_plots agent.
 
 **Expected Outputs:**
 - data/step00_item_level.csv (~27,200 rows: item-level TQ_ accuracy + TC_ confidence with domain tags)
 - data/step01_hce_by_domain.csv (~27,200 rows: item-level with HCE flag added)
-- results/step02_hce_rates_summary.csv (12 rows: 3 domains × 4 tests with mean HCE rates)
-- results/step03_domain_hce_lmm.txt (LMM summary output with fixed effects, random effects, fit statistics)
-- results/step04_domain_effects.csv (Domain main effect and Domain × Time interaction statistics with dual p-values)
+- results/step02_hce_rates_summary.csv (12 rows: 3 domains ï¿½ 4 tests with mean HCE rates)
+- results/step03_domain_hce_glmm.txt (GLMM binomial summary output with fixed effects on logit scale, random effects, fit statistics)
+- results/step04_domain_effects.csv (Domain main effect and Domain ï¿½ Time interaction statistics with dual p-values)
 - results/step05_domain_ranking.csv (3 rows: domains ranked by mean HCE rate)
-- plots/step06_hce_by_domain.csv (plot data: observed + predicted HCE rates by domain × time)
+- plots/step06_hce_by_domain.csv (plot data: observed + predicted HCE rates by domain ï¿½ time)
 
 **Success Criteria:**
 - Item-level extraction successful: ~27,200 item-responses with complete TQ_/TC_ data
 - HCE flag computation correct: HCE = 1 only when accuracy = 0 AND confidence >= 0.75
-- Domain × timepoint aggregation correct: 12 summary rows (3 domains × 4 tests)
-- LMM convergence: Model converges with no singularity warnings
-- Domain effects tested: Both Domain main effect and Domain × Time interaction tested with Bonferroni-corrected alpha = 0.025
+- Domain ï¿½ timepoint aggregation correct: 12 summary rows (3 domains ï¿½ 4 tests)
+- GLMM convergence: Model converges with no singularity warnings (use bobyqa optimizer if needed)
+- Domain effects tested: Both Domain main effect and Domain ï¿½ Time interaction tested with Bonferroni-corrected alpha = 0.025
 - Dual p-values present per Decision D068
 - Domain ranking complete: Observed ranking compared to hypothesis prediction (When > Where > What)
-- Plot data complete: All 12 domain × time cells have observed and predicted HCE rates
+- Plot data complete: All 12 domain ï¿½ time cells have observed and predicted HCE rates
 
 ---
 

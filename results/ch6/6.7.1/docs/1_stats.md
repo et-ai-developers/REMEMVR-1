@@ -2,7 +2,7 @@
 
 ## Statistical Validation Report
 
-**Validation Date:** 2025-12-06 16:45
+**Validation Date:** 2025-12-06 18:00
 **Agent:** rq_stats v5.0
 **Status:** ⚠️ CONDITIONAL
 **Overall Score:** 9.1 / 10.0
@@ -13,184 +13,201 @@
 
 | Category | Score | Max | Status |
 |----------|-------|-----|--------|
-| Statistical Appropriateness | 2.7 | 3.0 | ✅ |
+| Statistical Appropriateness | 2.8 | 3.0 | ✅ |
 | Tool Availability | 2.0 | 2.0 | ✅ |
-| Parameter Specification | 1.9 | 2.0 | ✅ |
-| Validation Procedures | 1.7 | 2.0 | ⚠️ |
-| Devil's Advocate Analysis | 0.8 | 1.0 | ✅ |
+| Parameter Specification | 1.7 | 2.0 | ⚠️ |
+| Validation Procedures | 1.8 | 2.0 | ✅ |
+| Devil's Advocate Analysis | 0.8 | 1.0 | ⚠️ |
 | **TOTAL** | **9.1** | **10.0** | **⚠️ CONDITIONAL** |
 
 ---
 
 ### Detailed Rubric Evaluation
 
-#### Category 1: Statistical Appropriateness (2.7 / 3.0)
+#### Category 1: Statistical Appropriateness (2.8 / 3.0)
 
 **Criteria Checklist:**
-- [x] Statistical approach appropriate for RQ (correlation + tertile analysis matches predictive research question)
-- [x] Model structure matches data structure (N=100 person-level aggregates, no hierarchical nesting)
-- [x] Analysis complexity appropriate (simple correlation is parsimonious for this RQ)
-- [x] Assumptions checkable with N=100 sample
-- [ ] Alternative approaches considered and justified (not explicitly discussed)
+- [x] Method matches RQ (correlation for predictive relationship)
+- [x] Assumptions checkable with N=100 data
+- [x] Methodologically sound approach
+- [ ] Regression analysis explicitly planned (mentioned but not in workflow)
 
 **Assessment:**
-The proposed correlation analysis testing Day 0 confidence as predictor of forgetting slopes is methodologically sound for this RQ. Correlation coefficient with dual p-values (Decision D068) provides standard test of linear relationship. Tertile split analysis adds interpretability for effect visualization, though involves some statistical trade-offs (see Devil's Advocate section). N=100 provides adequate power for detecting moderate correlations (r≥0.30, power>0.80). Data structure is person-level (no hierarchical nesting), making simple correlation appropriate rather than multilevel model.
+
+The proposed correlation + tertile analysis approach is appropriate for testing whether Day 0 confidence predicts individual forgetting slopes. The person-level analysis (N=100) with two continuous variables is correctly specified. Sample size N=100 is adequate for detecting moderate correlations (r >= 0.30) with acceptable power and reasonable confidence interval precision. The approach aligns with current statistical best practices for predictive validity testing.
 
 **Strengths:**
-- Appropriate statistical approach for predictive RQ examining individual differences
-- Parsimonious method (simple correlation, not overcomplex)
-- Dual p-value reporting per Decision D068 controls Type I error
-- N=100 adequate for moderate-to-large correlations
-- Clear expected outputs specified
+- Correlation is appropriate method for examining predictive relationship between two continuous variables
+- Tertile analysis provides interpretable effect visualization (monotonic pattern test)
+- Dual p-value reporting (Decision D068) demonstrates methodological rigor
+- Outlier diagnostics (Cook's D) specified
+- Effect size benchmarks clearly stated (r >0.50 strong, 0.30-0.50 moderate, etc.)
+- Direction of effect interpretation comprehensive (positive, negative, null cases)
 
 **Concerns / Gaps:**
-- No discussion of alternative approaches (e.g., robust correlation methods, regression with confidence intervals)
-- Tertile split involves power loss relative to continuous predictor regression (see Devil's Advocate subsection 3)
-- No mention of correlation effect size interpretation benchmarks
-- Directional hypothesis stated but one-tailed vs two-tailed test not specified
+- Workflow shows correlation only, but Analysis Type section mentions "correlation and regression" - regression not explicitly planned in Steps 0-5
+- Tertile analysis statistical test not specified (ANOVA? Kruskal-Wallis? Linear contrast?)
+- Decision D068 applies to post-hoc pairwise tests (multiple comparisons), but concept applies it to correlation (no multiple comparisons issue here)
+- Directional hypothesis mentioned but correlation typically two-tailed by default (one-tailed test specification missing)
 
 **Score Justification:**
-Strong methodological foundation (2.7/3.0). Method is appropriate and parsimonious. Minor deduction (0.3) for lack of explicit consideration of alternatives and some missing methodological details (one-tailed vs two-tailed, effect size benchmarks). Complexity is appropriate (simplest method that answers RQ).
+
+Score 2.8/3.0 (Strong, approaching Exceptional). Method is appropriate and well-justified. Minor deduction for inconsistency between stated "correlation and regression" vs workflow showing correlation only, and for vague tertile test specification. Appropriateness is high, but small methodological gaps prevent perfect score.
 
 ---
 
 #### Category 2: Tool Availability (2.0 / 2.0)
 
-**Source:** `docs/v4/tools_inventory.md`
+**Source:** `docs/tools_inventory.md` (assumed standard Python statistical libraries)
 
 **Analysis Pipeline Steps:**
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 1: Load Day 0 Confidence | `pandas.read_csv` + filtering | ✅ Available | Standard library, filter to T1 |
-| Step 2: Load Forgetting Slopes | `pandas.read_csv` + merge | ✅ Available | Standard library |
-| Step 3: Compute Correlation | `scipy.stats.pearsonr` | ✅ Available | Stdlib, returns r and p-value |
-| Step 4: Dual P-values | `validate_correlation_test_d068` | ✅ Available | Decision D068 enforcement |
-| Step 5: Tertile Analysis | `pandas.qcut` + `groupby` | ✅ Available | Standard library |
-| Step 6: Plot Data | `pandas.DataFrame.to_csv` | ✅ Available | Standard library |
+| Step 1: Load Day0 Confidence | `pandas.read_csv` | ✅ Available | Standard data loading from RQ 6.1.1 |
+| Step 2: Load Forgetting Slopes | `pandas.read_csv` | ✅ Available | Standard data loading from Ch5 5.1.4 |
+| Step 3: Merge Datasets | `pandas.merge` | ✅ Available | Standard merge on UID |
+| Step 4: Compute Correlation | `scipy.stats.pearsonr` | ✅ Available | Standard Pearson correlation |
+| Step 5: Tertile Analysis | `pandas.qcut`, `groupby` | ✅ Available | Standard tertile split + grouping |
+| Step 6: Outlier Detection | `statsmodels` influence | ✅ Available | Cook's D computation |
+| Step 7: Prepare Plot Data | `pandas` operations | ✅ Available | Standard data manipulation |
 
-**Tool Reuse Rate:** 6/6 tools (100%)
+**Tool Reuse Rate:** 7/7 tools (100%)
 
-**Missing Tools:** None
+**Missing Tools:** None - all required tools available in standard Python statistical libraries
 
 **Tool Availability Assessment:**
-✅ Exceptional (100% tool reuse) - All required statistical functions available in standard library (pandas, scipy.stats) and project validation tools (validate_correlation_test_d068). No custom tool development required.
+
+100% tool reuse. All required analysis tools exist in standard Python libraries (pandas, scipy, statsmodels). No custom tool development needed. Analysis pipeline uses established, well-tested statistical functions.
 
 ---
 
-#### Category 3: Parameter Specification (1.9 / 2.0)
+#### Category 3: Parameter Specification (1.7 / 2.0)
 
 **Criteria Checklist:**
-- [x] Correlation method specified (Pearson's r)
-- [x] Dual p-value requirement specified (Decision D068)
-- [x] Tertile split method clear (3 equal-sized groups)
-- [x] Minimum tertile size mentioned (≥30 participants)
-- [ ] One-tailed vs two-tailed test not specified (directional hypothesis stated but test type unclear)
-- [ ] Effect size interpretation benchmarks not mentioned (small r=0.10, medium r=0.30, large r=0.50)
+- [x] Tertile split parameters specified (N=100 → 3 groups)
+- [x] Outlier threshold specified (Cook's D > 4/N)
+- [x] Effect size benchmarks specified (r >0.50 strong, etc.)
+- [x] Confidence level specified (95% CI)
+- [ ] Correlation test type not specified (one-tailed vs two-tailed)
+- [ ] Tertile test statistic not specified (ANOVA vs alternatives)
+- [ ] Dual p-value method unclear (Decision D068 context)
 
 **Assessment:**
-Most parameters clearly specified. Pearson's r correlation is standard for linear relationships. Decision D068 dual p-value reporting (both uncorrected and Bonferroni) explicitly mentioned as success criterion. Tertile analysis approach clear (3 groups, each ≥30 participants, compare mean forgetting slopes).
+
+Basic parameter specification is present. Tertile split criteria clearly stated (N=100 → ~33 per group, success criterion >= 30 participants). Outlier threshold uses standard Cook's D > 4/N formula. Effect size interpretation benchmarks are well-defined and appropriate. Confidence interval level (95%) is standard and stated.
 
 **Strengths:**
-- Correlation method explicitly stated (Pearson's r)
-- Dual p-value reporting per Decision D068
-- Tertile group size threshold specified (≥30 per tertile)
-- Expected outputs clearly enumerated
+- Tertile group size explicitly validated (>= 30 participants per tertile)
+- Cook's D threshold justified by standard formula (4/N)
+- Effect size benchmarks comprehensive and interpretable
+- Confidence interval interpretation guidelines provided
 
 **Concerns / Gaps:**
-- Directional hypothesis stated ("positive correlation expected") but one-tailed vs two-tailed test not specified
-- No effect size interpretation benchmarks mentioned (Cohen's conventions: small r=0.10, medium r=0.30, large r=0.50)
-- No alpha level explicitly stated (assume 0.05 but should be explicit)
+- Directional hypothesis mentioned, but correlation test specification missing (one-tailed vs two-tailed)
+- Tertile comparison test statistic not specified (ANOVA? Kruskal-Wallis? Jonckheere-Terpstra trend test?)
+- "Dual p-values" mentioned but unclear how this applies to single correlation (Decision D068 is for multiple comparisons, not applicable here)
+- No justification for tertile split specifically (why not quartiles, quintiles, or continuous predictor?)
 
 **Score Justification:**
-Strong parameter specification (1.9/2.0). Minor deduction (0.1) for missing specification of one-tailed vs two-tailed test despite directional hypothesis, and lack of effect size interpretation benchmarks.
+
+Score 1.7/2.0 (Strong). Parameters are generally well-specified with appropriate thresholds. Deductions for missing test type specifications (one-tailed correlation, tertile test statistic) and unclear application of Decision D068 to single correlation test.
 
 ---
 
-#### Category 4: Validation Procedures (1.7 / 2.0)
+#### Category 4: Validation Procedures (1.8 / 2.0)
 
 **Criteria Checklist:**
-- [x] Sample size adequacy mentioned (N=100)
-- [x] Data completeness criteria specified (no missing values in plot data)
-- [x] Tertile group size validation (each tertile ≥30)
-- [ ] Normality assumption for Pearson's r not mentioned
-- [ ] Outlier detection/handling not specified
-- [ ] Linearity assumption check not mentioned
-- [ ] Homoscedasticity assumption not discussed
-- [ ] Remedial actions if assumptions violated not specified
+- [x] Linearity check specified (scatterplot for curvilinear patterns)
+- [x] Homoscedasticity specified (residual variance check)
+- [x] Normality mentioned (Central Limit Theorem robustness)
+- [x] Outlier detection specified (Cook's D > 4/N)
+- [ ] Independence assumption not explicitly validated
+- [ ] Normality test not specified (only CLT invoked)
+- [ ] Remedial actions vague (mentions sensitivity analysis but not specifics)
 
 **Assessment:**
-Basic validation procedures present but incomplete. Success criteria include sample size verification (100 values extracted from both source RQs), tertile group size adequacy (≥30 per group), and data completeness (no missing values). However, standard correlation assumptions (bivariate normality, linearity, homoscedasticity) not explicitly addressed. No outlier detection plan mentioned despite correlation being sensitive to influential observations.
+
+Validation procedures cover major correlation assumptions. Linearity check via scatterplot is appropriate. Homoscedasticity check mentioned. Normality assumption addressed via Central Limit Theorem argument (N=100 provides robustness). Outlier diagnostics clearly specified with Cook's D threshold. Confidence interval interpretation guidelines comprehensive.
 
 **Strengths:**
-- Sample size adequacy mentioned (N=100)
-- Cross-RQ dependencies clearly specified (RQ 6.1.1 and Ch5 5.1.4)
-- Tertile group size threshold ensures adequate power per group
-- Data completeness verification included
+- Four key assumptions explicitly listed in Section 5.6
+- Scatterplot for linearity check (visual inspection + potential polynomial terms)
+- Cook's D outlier detection with standard threshold
+- Confidence interval interpretation clear (excludes/includes 0)
+- Effect size contextualized with Ch5 5.1.4 ICC_slope comparison
 
 **Concerns / Gaps:**
-- No plan for checking bivariate normality (Q-Q plots, Shapiro-Wilk test)
-- No outlier detection strategy (scatterplot inspection, Cook's distance, leverage diagnostics)
-- No linearity assumption check (scatterplot visual inspection)
-- No homoscedasticity validation
-- No remedial actions if assumptions violated (e.g., Spearman's rho if non-normality, robust correlation if outliers)
-- No sensitivity analysis planned
+- Independence assumption stated but not validated (100 participants assumed independent, but no check for family/duplicate enrollment)
+- Normality test not specified (CLT invoked but no Shapiro-Wilk, Q-Q plot, or distribution examination planned)
+- Remedial actions vague: "consider polynomial terms" for non-linearity, but no specification of what to do if assumptions violated
+- No plan for what to do if outliers detected (report sensitivity analysis with/without outliers?)
+- Missing data handling mentioned in concept ("What if 6.1.1 or 5.1.4 has <100 valid scores?") but not addressed in validation procedures
 
 **Score Justification:**
-Adequate but incomplete validation procedures (1.7/2.0). Deduction (0.3) for missing standard correlation assumption checks and lack of outlier handling plan. For CONDITIONAL approval, must add assumption validation procedures.
+
+Score 1.8/2.0 (Strong, approaching Exceptional). Validation procedures are present and appropriate for most assumptions. Minor deductions for missing normality test specification, vague remedial actions, and no explicit missing data handling plan.
 
 ---
 
 #### Category 5: Devil's Advocate Analysis (0.8 / 1.0)
 
-**Meta-Scoring:** Evaluating thoroughness of statistical criticisms generated via two-pass WebSearch
+**Meta-Scoring:** Evaluating thoroughness of statistical criticisms generation.
 
 **Coverage of Criticism Types:**
-- ✅ Commission Errors: 1 identified
-- ✅ Omission Errors: 3 identified
-- ✅ Alternative Approaches: 2 identified
-- ✅ Known Pitfalls: 2 identified
+- ✅ Commission Errors: 2 concerns identified (MODERATE)
+- ✅ Omission Errors: 4 concerns identified (2 CRITICAL, 2 MODERATE)
+- ✅ Alternative Approaches: 2 concerns identified (MODERATE)
+- ✅ Known Pitfalls: 3 concerns identified (1 CRITICAL, 2 MODERATE)
 
-**Quality of Criticisms:**
-- All criticisms grounded in methodological literature with citations
-- Specific and actionable concerns identified
-- Strength ratings appropriate (CRITICAL/MODERATE/MINOR)
-- Evidence-based rebuttals provided
+**Total Concerns:** 11 concerns across 4 subsections
+
+**Quality Assessment:**
+- All criticisms grounded in methodological literature (10 citations from WebSearch)
+- Criticisms specific and actionable
+- Strength ratings appropriate
+- Suggested rebuttals evidence-based
 
 **Meta-Thoroughness:**
 - Two-pass WebSearch conducted (validation + challenge)
-- 6 total queries executed
-- 8 concerns generated across all subsections
-- Literature support for all criticisms
+- Total 10 queries executed (5 validation, 5 challenge)
+- Literature citations: 10 sources across 2020-2024 + seminal works
+- Challenge pass successfully identified limitations, alternatives, and pitfalls
+
+**Gaps in Devil's Advocate Analysis:**
+- Could have explored more specific memory research criticisms (regression to mean in forgetting trajectories, practice effects)
+- Could have investigated Bayesian correlation alternatives more deeply
+- Could have examined cultural/demographic confounds in confidence-forgetting relationship
 
 **Score Justification:**
-Strong devil's advocate analysis (0.8/1.0). Comprehensive coverage of all 4 subsection types with 8 total concerns grounded in literature. Minor deduction (0.2) because CRITICAL-strength concerns limited to 1 (could identify more given small sample + tertile split issues).
+
+Score 0.8/1.0 (Strong). Generated 11 concerns across all 4 subsections with appropriate literature citations. All subsections populated with actionable criticisms. Minor deduction for not exploring memory-specific methodological issues (e.g., regression to mean in repeated measures forgetting data, which was attempted but search results didn't yield specific memory literature).
 
 ---
 
 ### Tool Availability Validation
 
-**Source:** `docs/v4/tools_inventory.md`
+**Source:** Standard Python statistical libraries (pandas, scipy, statsmodels)
 
 **Analysis Pipeline Steps:**
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 1: Load Day 0 Confidence | `pandas.read_csv` | ✅ Available | Filter theta_confidence to T1 |
-| Step 2: Load Forgetting Slopes | `pandas.read_csv` | ✅ Available | Load random_effects.csv from Ch5 5.1.4 |
-| Step 3: Merge Data | `pandas.merge` | ✅ Available | Standard library |
-| Step 4: Compute Correlation | `scipy.stats.pearsonr` | ✅ Available | Returns r and p-value |
-| Step 5: Dual P-value Validation | `tools.validation.validate_correlation_test_d068` | ✅ Available | Decision D068 enforcement |
-| Step 6: Tertile Split | `pandas.qcut` | ✅ Available | Standard library, creates equal-sized bins |
-| Step 7: Tertile Statistics | `pandas.groupby.agg` | ✅ Available | Mean forgetting slope per tertile |
-| Step 8: Plot Data | `pandas.DataFrame.to_csv` | ✅ Available | Export for visualization |
+| Step 1: Load Day0 Confidence | `pandas.read_csv` | ✅ Available | Filter T1 from step03_theta_confidence.csv |
+| Step 2: Load Forgetting Slopes | `pandas.read_csv` | ✅ Available | Extract random slopes from step04_random_effects.csv |
+| Step 3: Merge Datasets | `pandas.merge(on='UID')` | ✅ Available | Standard inner join |
+| Step 4: Compute Correlation | `scipy.stats.pearsonr` | ✅ Available | Returns r, p-value |
+| Step 5: Compute CI | `scipy.stats` + Fisher z | ✅ Available | Fisher transformation for CI |
+| Step 6: Tertile Split | `pandas.qcut(q=3)` | ✅ Available | Equal-frequency binning |
+| Step 7: Tertile Statistics | `pandas.groupby.agg` | ✅ Available | Mean, SD by tertile |
+| Step 8: Outlier Detection | `statsmodels.influence` | ✅ Available | Cook's distance |
+| Step 9: Prepare Plot Data | `pandas` operations | ✅ Available | Scatterplot source data |
 
-**Tool Reuse Rate:** 8/8 tools (100%)
+**Tool Reuse Rate:** 9/9 tools (100%)
 
 **Missing Tools:** None
 
-**Tool Availability Assessment:**
-✅ Exceptional - All required analysis tools available in standard library (pandas, scipy) and project validation tools. No custom implementation required. 100% tool reuse rate exceeds ≥90% target.
+**Tool Availability Assessment:** ✅ Exceptional - 100% tool reuse, all tools available in standard Python libraries.
 
 ---
 
@@ -200,26 +217,25 @@ Strong devil's advocate analysis (0.8/1.0). Comprehensive coverage of all 4 subs
 
 | Assumption | Test | Threshold | Assessment |
 |------------|------|-----------|------------|
-| Bivariate Normality | Q-Q plots for both variables | Visual inspection | ❌ NOT SPECIFIED in concept.md |
-| Linearity | Scatterplot visual inspection | Visual inspection | ❌ NOT SPECIFIED in concept.md |
-| Homoscedasticity | Scatterplot residual spread | Visual inspection | ❌ NOT SPECIFIED in concept.md |
-| Outliers/Influential Cases | Cook's distance, leverage | D > 4/n | ❌ NOT SPECIFIED in concept.md |
-| Sample Size Adequacy | Power analysis | N≥47 for r=0.4, 80% power | ✅ N=100 exceeds minimum |
+| Linearity | Scatterplot inspection | Visual + polynomial if non-linear | ✅ Appropriate (Section 5.6) |
+| Homoscedasticity | Residual variance plot | Constant variance visual | ✅ Appropriate (Section 5.6) |
+| Normality | CLT invoked | N=100 provides robustness | ⚠️ Questionable - No formal test specified |
+| Independence | Stated | 100 independent participants | ⚠️ Questionable - Not explicitly validated |
+| Outliers | Cook's D | D > 4/N (D > 0.04) | ✅ Appropriate (Section 5.6) |
 
 **Correlation Validation Assessment:**
-Sample size adequate (N=100 provides 80% power for r≥0.30). However, standard correlation assumptions (bivariate normality, linearity, homoscedasticity, outlier detection) not mentioned in concept.md. Without assumption validation, risk of violating Pearson's r requirements or missing influential observations that distort correlation estimate.
+
+Validation procedures cover major assumptions. Linearity and homoscedasticity checks appropriate via visual inspection. Normality assumption addressed via Central Limit Theorem (N=100), though formal normality test not specified. Outlier detection well-specified with Cook's D threshold.
 
 **Concerns:**
-- No bivariate normality check specified (Shapiro-Wilk test or Q-Q plots)
-- No scatterplot inspection for linearity/outliers mentioned
-- No plan for handling assumption violations (e.g., switch to Spearman's rho if non-normality, robust correlation if outliers)
+- Normality: CLT invoked but no Shapiro-Wilk or Q-Q plot specified (Bishara & Hittner 2012 showed Fisher z' CI can fail with kurtosis >= 2 even at N=100)
+- Independence: Assumed but not validated (no check for duplicate enrollment, family members)
+- Missing data: Concept mentions "What if <100 valid scores?" but no handling procedure specified
 
 **Recommendations:**
-Add to Section 6 (Analysis Approach):
-- Visual inspection: Scatterplot of Day0_confidence vs forgetting_slope to check linearity and identify outliers
-- Normality: Q-Q plots for both variables + Shapiro-Wilk test (p>0.05)
-- Outliers: Cook's distance > 4/n identifies influential cases
-- Remedial: If normality violated, report both Pearson's r and Spearman's rho; if outliers detected, conduct sensitivity analysis with/without outliers
+- Add Shapiro-Wilk test or Q-Q plot for normality check (if kurtosis >= 2 or |skewness| >= 1, consider Spearman or bootstrap CI)
+- Specify missing data procedure (complete case analysis? Imputation? Sensitivity analysis?)
+- Document independence verification (check for duplicate surnames, same address, etc.)
 
 ---
 
@@ -227,10 +243,15 @@ Add to Section 6 (Analysis Approach):
 
 | Decision | Requirement | Implementation | Compliance |
 |----------|-------------|----------------|------------|
-| D068: Dual Reporting | Report both uncorrected and Bonferroni p-values | Step 2 success criterion mentions dual p-values | ✅ FULLY COMPLIANT |
+| D068: Dual Reporting | Report uncorrected + Bonferroni p-values | Mentioned in Step 2 | ⚠️ UNCLEAR - D068 applies to multiple comparisons, not single correlation |
 
 **Decision Compliance Assessment:**
-Decision D068 explicitly mentioned in success criteria ("Correlation computed with dual p-values (Wald and LRT per Decision D068)"). Note: Correlation uses standard p-value, not Wald/LRT (those are for LMM), but dual reporting intent clear.
+
+Decision D068 (dual p-value reporting) is mentioned but appears misapplied. D068 specifies dual reporting for post-hoc pairwise tests (multiple comparisons) to control family-wise error rate. In this RQ, there is only ONE correlation test (Day0_confidence vs forgetting_slope), so Bonferroni correction is not applicable. Concept may be confusing D068 context with general transparency in p-value reporting.
+
+**Recommendation:**
+
+Clarify D068 application. Since this is a single correlation test (not multiple comparisons), Bonferroni correction is not needed. Report standard p-value from correlation test. If concept intends one-tailed test for directional hypothesis, specify this explicitly and report one-tailed p-value.
 
 ---
 
@@ -238,105 +259,141 @@ Decision D068 explicitly mentioned in success criteria ("Correlation computed wi
 
 **Analysis Approach:**
 - **Two-Pass WebSearch Strategy:**
-  1. **Validation Pass:** Verify correlation/tertile methods are appropriate (support)
-  2. **Challenge Pass:** Search for limitations, alternatives, pitfalls
-- **Focus:** Both commission errors (what's wrong) and omission errors (what's missing)
-- **Grounding:** All criticisms cite specific methodological literature sources
+  1. **Validation Pass (5 queries):** Verified correlation assumptions, sample size adequacy, tertile analysis validity, outlier detection, confidence interval interpretation
+  2. **Challenge Pass (5 queries):** Searched for correlation pitfalls, dichotomization criticisms, regression to mean artifacts, multiple testing issues, non-parametric alternatives
+- **Focus:** Both commission errors (questionable assumptions) and omission errors (missing considerations)
+- **Grounding:** All criticisms cite specific methodological literature sources from 2012-2024
 
 ---
 
 #### Commission Errors (Questionable Statistical Assumptions/Claims)
 
-**1. Tertile Split Justification Not Provided**
-- **Location:** 1_concept.md - Section "Analysis Approach", Step 4
-- **Claim Made:** "Tertile analysis - create High/Med/Low confidence tertiles, compare mean forgetting slopes across groups"
-- **Statistical Criticism:** Tertile split proposed without justification. Tertile splits involve arbitrary categorization of continuous predictor (confidence) which loses information and reduces statistical power. Concept.md does not explain why tertile analysis needed beyond correlation.
-- **Methodological Counterevidence:** [Categorisation of built environment characteristics: the trouble with tertiles](https://pmc.ncbi.nlm.nih.gov/articles/PMC4335683/) - "Arbitrary categorization leads to a loss of information and a lack of comparability between studies since the choice of cut-point is based on the sample distribution." [Continuous and Categorical Variables: The Trouble with Median Splits](https://www.theanalysisfactor.com/continuous-and-categorical-variables-the-trouble-with-median-splits/) - "Doing a median split reduces statistical power, primarily due to the reduction in the inherent variability of the predictor variable."
+**1. Decision D068 Misapplied to Single Correlation Test**
+- **Location:** 1_concept.md - Section 6: Analysis Approach, Step 2
+- **Claim Made:** "Compute correlation: Day0_confidence vs slope with dual p-values (Decision D068)"
+- **Statistical Criticism:** Decision D068 specifies dual reporting (uncorrected + Bonferroni-corrected p-values) for post-hoc pairwise tests with multiple comparisons. This RQ has only ONE correlation test, so Bonferroni correction for family-wise error rate is not applicable. Applying Bonferroni to single test would yield identical uncorrected/corrected p-values (redundant).
+- **Methodological Counterevidence:** Bonferroni correction is designed to control family-wise error rate when conducting multiple hypothesis tests simultaneously (Wikipedia 2024, StatisticsByJim 2024). With a single correlation test, no multiple comparisons issue exists, so correction is unnecessary and conceptually incorrect.
 - **Strength:** MODERATE
-- **Suggested Rebuttal:** "Add justification for tertile split: Tertile analysis included for interpretability and visualization purposes (comparing High/Med/Low confidence groups more intuitive for interpretation than correlation coefficient alone). Primary analysis is continuous correlation; tertile analysis is supplementary for effect communication. Acknowledge power loss but justify as trade-off for interpretability."
+- **Suggested Rebuttal:** "Clarify in Step 2: Report standard two-tailed p-value from correlation test. Decision D068 does not apply here (single test, not multiple comparisons). If testing directional hypothesis, specify one-tailed test explicitly."
+
+**2. Tertile Analysis Without Specifying Test Statistic**
+- **Location:** 1_concept.md - Section 6: Analysis Approach, Step 4
+- **Claim Made:** "Tertile analysis - create High/Med/Low confidence tertiles, compare mean forgetting slopes across groups"
+- **Statistical Criticism:** Tertile comparison method not specified. Unclear whether ANOVA, Kruskal-Wallis, or linear trend test (Jonckheere-Terpstra) will be used. Choice matters: ANOVA assumes normality and homoscedasticity; Kruskal-Wallis is non-parametric; trend test is most powerful for monotonic hypothesis.
+- **Methodological Counterevidence:** Statistical test choice affects power and interpretation. For testing monotonic pattern (High > Med > Low slopes), Jonckheere-Terpstra trend test is more powerful than ANOVA (Jonckheere 1954, Terpstra 1952). Without specification, analysis plan is incomplete.
+- **Strength:** MODERATE
+- **Suggested Rebuttal:** "Add to Step 4: Specify test statistic for tertile comparison. Recommend Jonckheere-Terpstra trend test (tests monotonic pattern directly, more powerful than ANOVA for ordered groups). Alternative: One-way ANOVA with linear contrast if normality assumptions met."
 
 ---
 
 #### Omission Errors (Missing Statistical Considerations)
 
-**1. No Assumption Checks for Pearson's r**
-- **Missing Content:** Concept.md proposes Pearson's r correlation but does not mention assumption validation (bivariate normality, linearity, homoscedasticity)
-- **Why It Matters:** Pearson's r assumes bivariate normality and linear relationship. If assumptions violated, coefficient may be biased or underpowered. With N=100, violations can substantially affect inference.
-- **Supporting Literature:** [Robust Correlation Analyses: False Positive and Power Validation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3541537/) - "The accuracy of r is known to decrease when data contain outliers and/or leverage observations, a circumstance common in behavioral and social sciences research." [An elaboration on sample size determination for correlations](https://pmc.ncbi.nlm.nih.gov/articles/PMC11148401/) - "Normality assumptions affect power estimates for correlation analysis."
-- **Potential Reviewer Question:** "How will you verify that Pearson's r assumptions are met? Did you check for bivariate normality or outliers?"
+**1. Regression Analysis Mentioned but Not Planned**
+- **Missing Content:** Analysis Type section states "Correlation and regression analysis" but workflow (Steps 0-5) only shows correlation. No regression model specified.
+- **Why It Matters:** Regression provides additional information beyond correlation: standardized regression coefficient (beta), variance explained (R²), prediction equation. If goal is "predictive relationship" (per RQ title), regression is more appropriate than correlation alone. Correlation answers "Are variables related?" but regression answers "Can I predict Y from X?"
+- **Supporting Literature:** Correlation and regression serve different purposes (Nimbli.ai 2024, TheKnowledgeAcademy 2024). Correlation is symmetric (treats variables equally), regression is asymmetric (predictor → outcome). For predictive validity testing, regression is preferred over correlation because it provides prediction equation and variance explained.
+- **Potential Reviewer Question:** "You claim this is a predictive analysis, but you only report correlation. Why not regression model with confidence intervals for slope and R²?"
 - **Strength:** CRITICAL
-- **Suggested Addition:** "Add to Section 6: Analysis Approach or create Section 7: Validation Procedures - specify assumption checks: (1) Scatterplot visual inspection for linearity and outliers, (2) Q-Q plots for bivariate normality, (3) Shapiro-Wilk test for normality of each variable (p>0.05). If normality violated, report both Pearson's r and Spearman's rho (non-parametric alternative). If outliers detected, conduct sensitivity analysis with/without influential cases."
+- **Suggested Addition:** "Add Step 2b: Fit simple linear regression (forgetting_slope ~ Day0_confidence). Report beta, R², 95% CI for slope, and prediction equation. This directly addresses 'predictive validity' claim in RQ title."
 
-**2. No Outlier Detection/Handling Plan**
-- **Missing Content:** No mention of outlier detection or sensitivity analysis for influential observations
-- **Why It Matters:** Correlation coefficients are highly sensitive to outliers. Single influential case can substantially inflate or deflate r estimate. With N=100, individual cases have non-trivial influence.
-- **Supporting Literature:** [Bootstrap Confidence Intervals for 11 Robust Correlations](https://meth.psychopen.eu/index.php/meth/article/view/8467) - "The accuracy of r is known to decrease when data contain outliers and/or leverage observations... The median-absolute-deviation correlation (r-MAD), median-based correlation (r-MED), and trimmed correlation (r-TRIM) consistently outperformed r when data contain outliers." [A Practical Illustration of Methods to Deal with Potential Outliers](https://online.ucpress.edu/collabra/article/4/1/30/112965/) - "Aguinis et al. (2013) recommend identifying model-fit and prediction outliers through various reasonable diagnostics as a screening tool for influential outliers."
-- **Potential Reviewer Question:** "Did you check for outliers that might distort the correlation estimate? What is your sensitivity analysis plan?"
+**2. Normality Test Not Specified Despite CLT Invocation**
+- **Missing Content:** Section 5.6 states "Central Limit Theorem provides robustness to mild non-normality for N=100" but no formal normality test planned (Shapiro-Wilk, Q-Q plot).
+- **Why It Matters:** Fisher z' confidence interval for correlation can fail even with N=100 if data has kurtosis >= 2 or |skewness| >= 1. Bishara & Hittner (2012) showed Fisher z' CI coverage as low as 68% (instead of 95%) with non-normal data. CLT invocation without verification is risky.
+- **Supporting Literature:** Bishara & Hittner (2012, *Behavior Research Methods*) demonstrated Fisher z' confidence intervals are NOT robust to non-normality even with large samples. They recommend Spearman or bootstrap CI if kurtosis >= 2, |skewness| >= 1, or significant normality test violations. Normality assumption must be checked, not assumed via CLT.
+- **Potential Reviewer Question:** "You invoke CLT but don't test normality. What if Day0_confidence or forgetting_slope distributions have high kurtosis? Fisher z' CI could be inaccurate."
+- **Strength:** CRITICAL
+- **Suggested Addition:** "Add to Section 7: Validation Procedures - specify Shapiro-Wilk test for Day0_confidence and forgetting_slope. If p < 0.05 OR kurtosis >= 2 OR |skewness| >= 1, report Spearman correlation with bootstrap 95% CI instead of Pearson with Fisher z' CI (per Bishara & Hittner 2012)."
+
+**3. Missing Data Handling Not Specified**
+- **Missing Content:** Concept asks "What if 6.1.1 or 5.1.4 has <100 valid scores?" but no missing data handling procedure specified in validation procedures.
+- **Why It Matters:** If either source RQ has missing theta scores or random slopes, N could be <100. Complete case analysis (listwise deletion) could reduce power. Imputation not appropriate for theta scores (latent variables). Sensitivity analysis needed.
+- **Supporting Literature:** Complete case analysis is simplest but can reduce power and introduce bias if data not missing completely at random (MCAR). For derived RQs, missing data from upstream RQs should be documented with sensitivity analysis comparing N=100 vs N<100 results (Pinheiro & Bates 2000).
+- **Potential Reviewer Question:** "If forgetting slope extraction fails for some participants (e.g., LMM convergence issues), how will you handle missing slopes? What if N=85 instead of N=100?"
 - **Strength:** MODERATE
-- **Suggested Addition:** "Add outlier diagnostics: (1) Scatterplot visual inspection, (2) Cook's distance > 4/n to identify influential cases, (3) Leverage statistics. If outliers detected, report correlation both with and without influential cases (sensitivity analysis). Consider robust correlation alternatives (e.g., percentage-bend correlation) if outliers substantially affect results."
+- **Suggested Addition:** "Add to Section 7: Validation Procedures - specify complete case analysis (only participants with valid Day0_confidence AND forgetting_slope). Report final N and document any participants excluded due to missing data. If N < 90, report sensitivity analysis comparing power for actual N vs planned N=100."
 
-**3. One-Tailed vs Two-Tailed Test Not Specified**
-- **Missing Content:** Hypothesis section states "positive correlation expected" (directional hypothesis) but analysis section does not specify one-tailed vs two-tailed significance test
-- **Why It Matters:** Directional hypothesis justifies one-tailed test (more power for detecting predicted positive correlation), but two-tailed test is more conservative. Choice affects p-value interpretation and should be pre-specified.
-- **Supporting Literature:** Standard statistical practice - directional hypotheses can justify one-tailed tests if theoretical rationale strong, but two-tailed tests are default for exploratory work
-- **Potential Reviewer Question:** "You predicted positive correlation - are you using one-tailed test? If so, what is rationale given potential for negative correlation (high confidence but poor consolidation)?"
-- **Strength:** MINOR
-- **Suggested Addition:** "Add to Analysis Approach or Hypothesis section: Specify two-tailed test despite directional hypothesis to remain conservative and allow detection of unexpected negative correlation (if high confidence reflects overconfidence rather than encoding quality). Report both p-value and confidence interval for full effect characterization."
+**4. Independence Assumption Not Validated**
+- **Missing Content:** Section 5.6 states "Independence (100 independent participants)" but no procedure to verify independence (e.g., check for family members, duplicate enrollment).
+- **Why It Matters:** Correlation assumes all observations are independent. If dataset contains family members (siblings, spouses) or duplicate enrollments, observations are not independent, violating correlation assumptions and inflating Type I error.
+- **Supporting Literature:** Common pitfall in correlation analysis: "should not be used if data include more than one observation on any individual" and "treatment of repeated measurements as independent when they are correlated" (Mukaka 2012, *Malawi Medical Journal*). Independence must be verified, not assumed.
+- **Potential Reviewer Question:** "Did you screen for family members or duplicate enrollments? If dataset contains related individuals, correlation assumptions are violated."
+- **Strength:** MODERATE
+- **Suggested Addition:** "Add to Section 2: Data Source - document independence verification procedure. Check for duplicate surnames + same address (possible family members) and duplicate demographic characteristics (possible duplicate enrollment). Report number of potential dependency cases identified and how handled."
 
 ---
 
 #### Alternative Statistical Approaches (Not Considered)
 
-**1. Regression with Confidence Intervals Not Considered**
-- **Alternative Method:** Simple linear regression (forgetting_slope ~ Day0_confidence) instead of correlation coefficient
-- **How It Applies:** Regression provides same r² as correlation but adds: (1) confidence intervals for slope estimate, (2) prediction intervals for individual predictions, (3) clearer causal framing (confidence predicting forgetting), (4) easier extension to multiple predictors if needed
-- **Key Citation:** Standard regression methodology - [Alternative Models for Small Samples](https://pmc.ncbi.nlm.nih.gov/articles/PMC5965574/) discusses regression as alternative to correlation for small samples
-- **Why Concept.md Should Address It:** Regression framework provides richer inference (confidence intervals, prediction intervals) and aligns better with RQ framing ("confidence predicting forgetting slopes")
+**1. Continuous Predictor vs Tertile Split (Dichotomization Criticism)**
+- **Alternative Method:** Keep Day0_confidence as continuous predictor in regression model instead of splitting into tertiles
+- **How It Applies:** Tertile split (trichotomization) loses statistical power compared to continuous analysis. Royston et al. (2006) showed dichotomizing continuous predictors reduces power equivalent to discarding 1/3 of data. Median split reduces r² to ~64% of original value. Tertile split similarly wasteful.
+- **Key Citation:** Royston, Altman & Sauerbrei (2006, *Statistics in Medicine*) argue "Dichotomizing continuous predictors in multiple regression: a bad idea" - causes information loss, reduces power, creates arbitrary categories. Applies to tertile splits as well. Recommendation: "keep continuous variables continuous."
+- **Why Concept.md Should Address It:** Tertile analysis aids interpretation (monotonic pattern visualization) but sacrifices statistical power. Reviewers may question why continuous predictor was discarded in favor of categorical analysis.
 - **Strength:** MODERATE
-- **Suggested Acknowledgment:** "Add brief note: Correlation analysis chosen for simplicity and direct effect size interpretation (r). Regression alternative (slope ~ confidence) provides equivalent test with additional confidence intervals. Correlation preferred for parsimony given single-predictor design."
+- **Suggested Acknowledgment:** "Add to Section 6: Justify tertile analysis as supplementary to continuous correlation/regression (aids interpretation of monotonic pattern). State primary analysis uses continuous Day0_confidence (preserves power), tertile analysis is secondary descriptive visualization. Acknowledge power loss from dichotomization per Royston et al. 2006."
 
-**2. Robust Correlation Methods Not Considered**
-- **Alternative Method:** Robust correlation alternatives (percentage-bend correlation, skipped correlation, Spearman's rho) if outliers or non-normality detected
-- **How It Applies:** If Pearson's r assumptions violated (non-normality, outliers), robust methods downweight influential cases while preserving linear relationship detection. Spearman's rho appropriate for monotonic non-linear relationships.
-- **Key Citation:** [Robust Correlation Analyses: False Positive and Power Validation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3541537/) - "Use a percentage-bend correlation when univariate outliers are identified, or use a skipped-correlation when bivariate outliers are identified."
-- **Why Concept.md Should Address It:** Pre-specifying alternative methods if assumptions violated prevents post-hoc rationalization
-- **Strength:** MINOR
-- **Suggested Acknowledgment:** "Add to Validation Procedures: If bivariate normality violated, report Spearman's rho alongside Pearson's r. If outliers detected (Cook's D > 4/n), report robust correlation (percentage-bend or skipped correlation) as sensitivity check."
+**2. Spearman Correlation or Bootstrap CI if Non-Normality Detected**
+- **Alternative Method:** Spearman rank correlation with bootstrap confidence intervals instead of Pearson correlation with Fisher z' CI
+- **How It Applies:** If Day0_confidence or forgetting_slope distributions show non-normality (kurtosis >= 2, |skewness| >= 1), Spearman correlation is more robust. Bootstrap CI provides accurate coverage without normality assumption.
+- **Key Citation:** Bishara & Hittner (2012, *Behavior Research Methods*) demonstrated Spearman and rank-based inverse normal (RIN) transformation methods are "universally robust to nonnormality" while Fisher z' CI can have actual coverage as low as 68% with non-normal data. Bootstrap percentile method also provides robust coverage.
+- **Why Concept.md Should Address It:** If normality tests reveal violations, Pearson correlation Fisher z' CI could be inaccurate. Concept should specify remedial action (Spearman + bootstrap) to avoid invalid inference.
+- **Strength:** MODERATE
+- **Suggested Acknowledgment:** "Add to Section 7: Validation Procedures - if normality violations detected (Shapiro-Wilk p < 0.05, kurtosis >= 2, or |skewness| >= 1), report Spearman correlation with 95% bootstrap CI (10,000 resamples, percentile method) instead of Pearson with Fisher z' CI. Per Bishara & Hittner 2012, Spearman + bootstrap robust to non-normality."
 
 ---
 
 #### Known Statistical Pitfalls (Unaddressed)
 
-**1. Tertile Split Power Loss**
-- **Pitfall Description:** Categorizing continuous predictors (tertile split) reduces statistical power by discarding within-group variance
-- **How It Could Affect Results:** Tertile analysis may fail to detect correlation that exists when using continuous predictor. Power loss approximately 20-30% relative to continuous regression.
-- **Literature Evidence:** [Continuous and Categorical Variables: The Trouble with Median Splits](https://www.theanalysisfactor.com/continuous-and-categorical-variables-the-trouble-with-median-splits/) - "As the slider moves towards the right (simulating a median split), the regression line fluctuates minimally but r-square and t steadily decrease due to systematic reduction in predictor variance." [Beyond the median split: Splitting into 3 parts](https://statmodeling.stat.columbia.edu/2015/11/24/beyond-the-median-split-splitting-a-predictor-into-3-parts/) - "Cutting in 3 or 4 doesn't avoid the problems but it's not quite as bad."
-- **Why Relevant to This RQ:** With N=100, power already limited for detecting small-to-moderate correlations. Tertile split further reduces power, risking false negative (failing to detect true relationship between confidence and forgetting).
+**1. Sample Size Adequacy for Detecting Small Effects**
+- **Pitfall Description:** N=100 provides adequate power for detecting moderate correlations (r >= 0.30) but may miss small effects (r = 0.10-0.29). Confidence intervals for small correlations will be wide.
+- **How It Could Affect Results:** If true correlation is r = 0.20 (weak but meaningful), N=100 provides only ~52% power to detect at alpha=0.05 (two-tailed). Null result could be Type II error (failing to detect weak relationship).
+- **Literature Evidence:** Schönbrodt & Perugini (2013, *Journal of Research in Personality*) showed correlations don't stabilize until N=250. For N=100, correlation estimates can vary substantially across samples (±0.20 fluctuation for true r=0.30). Sample size determination for correlation requires effect size assumptions (cfholbert.com 2024).
+- **Why Relevant to This RQ:** Hypothesis states "High Day 0 confidence may predict slower forgetting" but doesn't specify expected effect size. If true effect is small (r = 0.15), N=100 underpowered. Null result would be ambiguous (true null vs underpowered).
 - **Strength:** MODERATE
-- **Suggested Mitigation:** "Acknowledge in Analysis Approach: Tertile analysis involves power loss relative to continuous correlation (~20-30% reduction). Justification: Trade-off accepted for interpretability gains (High/Med/Low groups easier to communicate than r coefficient). Primary inference based on continuous correlation (Step 2), tertile analysis supplementary (Step 4)."
+- **Suggested Mitigation:** "Add to Section 3: Hypothesis - specify expected effect size (e.g., 'expect moderate correlation r >= 0.30 based on X literature'). Add to Section 8: Expected Outputs - report post-hoc power analysis for observed effect size. If r < 0.20 with p > 0.05, acknowledge possible Type II error due to small effect + N=100 limitation."
 
-**2. Restriction of Range if Participants Cluster**
-- **Pitfall Description:** If Day 0 confidence scores cluster in narrow range (e.g., most participants moderately confident), restricted range reduces correlation magnitude even if true relationship exists
-- **How It Could Affect Results:** Attenuated correlation coefficient (underestimate of true effect) if confidence scores lack variability. With N=100, individual differences may be limited, reducing power to detect relationships.
-- **Literature Evidence:** Standard psychometric principle - restricted range reduces correlation (Pearson & Filon, 1898). [Confidence and memory: assessing positive and negative correlations](https://pubmed.ncbi.nlm.nih.gov/23721250/) - "The correlation between confidence and accuracy has been questioned... with some finding a high correlation and others finding little to no correlation" (depends partly on range restriction).
-- **Why Relevant to This RQ:** If most participants use similar confidence ratings at Day 0 (e.g., predominantly "Very Confident" or narrow 1-2 point range), correlation will be attenuated regardless of true predictive relationship
-- **Strength:** MINOR
-- **Suggested Mitigation:** "Add to Results reporting plan: Report descriptive statistics for Day0_confidence (mean, SD, range, distribution histogram). If restricted range detected (SD < 1.0 on 0-5 scale), acknowledge as limitation and note potential for range restriction to attenuate correlation. Consider reporting correction for restriction of range if severe."
+**2. Correlation Does Not Imply Causation (Confound Omission)**
+- **Pitfall Description:** Even if Day0_confidence correlates with forgetting_slope, third variable confounds could drive relationship (e.g., general cognitive ability influences both initial confidence and memory consolidation).
+- **How It Could Affect Results:** Positive correlation could reflect general memory ability confound rather than confidence predicting forgetting. High cognitive ability participants may have both high Day0_confidence (accurate metacognition) AND slow forgetting (efficient consolidation), creating spurious correlation.
+- **Literature Evidence:** "Correlation does not imply causation" is fundamental statistical principle (Wikipedia 2024). Predictive validity claims require controlling for confounds. Without controlling for cognitive ability (RAVLT, BVMT), cannot rule out third variable explanation.
+- **Why Relevant to This RQ:** Concept states "predictive relationship" but no control variables planned. Correlation alone cannot establish that confidence CAUSES slower forgetting vs both being outcomes of cognitive ability.
+- **Strength:** MODERATE
+- **Suggested Mitigation:** "Add to Section 6: Analysis Approach - acknowledge correlation does not establish causation. Consider Step 6: Partial correlation controlling for general cognitive ability (RAVLT_Total or NART) to test if Day0_confidence predicts forgetting BEYOND general memory ability. Discuss confound limitation in interpretation."
+
+**3. Stability of Correlation Estimates with N=100**
+- **Pitfall Description:** Correlation estimates can be unstable with N=100. Schönbrodt & Perugini (2013) showed correlations stabilize around N=250. At N=100, confidence intervals are wider and point estimates less stable.
+- **How It Could Affect Results:** Observed correlation could fluctuate ±0.15 from true population value. Replication study with different N=100 sample could yield noticeably different r estimate. Confidence intervals will be wide, limiting precision of effect size estimate.
+- **Literature Evidence:** Schönbrodt & Perugini (2013, *Journal of Research in Personality*): "At what sample size do correlations stabilize? Results indicate sample size should approach 250 for stable estimates." At N=100, correlations have not fully stabilized (Knudson & Lindsey 2014, *Comprehensive Psychology*).
+- **Why Relevant to This RQ:** With N=100, correlation estimate precision limited. If r_observed = 0.25 with 95% CI [0.05, 0.43], effect size highly uncertain. Cannot conclude if relationship is weak or moderate.
+- **Strength:** CRITICAL
+- **Suggested Mitigation:** "Add to Section 5.3: Confidence Interval Interpretation - explicitly state N=100 limits precision of correlation estimate. Report 95% CI width and acknowledge per Schönbrodt & Perugini 2013, correlation estimates stabilize at N=250 (current N=100 provides less stable estimate). Interpret CI width as measure of uncertainty, not just significance testing."
 
 ---
 
 #### Scoring Summary
 
 **Total Concerns Identified:**
-- Commission Errors: 1 (0 CRITICAL, 1 MODERATE, 0 MINOR)
-- Omission Errors: 3 (1 CRITICAL, 1 MODERATE, 1 MINOR)
+- Commission Errors: 2 (0 CRITICAL, 2 MODERATE, 0 MINOR)
+- Omission Errors: 4 (2 CRITICAL, 2 MODERATE, 0 MINOR)
 - Alternative Approaches: 2 (0 CRITICAL, 2 MODERATE, 0 MINOR)
-- Known Pitfalls: 2 (0 CRITICAL, 2 MODERATE, 0 MINOR)
+- Known Pitfalls: 3 (1 CRITICAL, 2 MODERATE, 0 MINOR)
 
-**Overall:** 8 concerns (1 CRITICAL, 6 MODERATE, 1 MINOR)
+**Total:** 11 concerns (3 CRITICAL, 7 MODERATE, 0 MINOR)
 
 **Overall Devil's Advocate Assessment:**
-Concept.md provides sound basic approach (correlation + tertile analysis) but lacks methodological completeness. Most critical gap: no assumption validation plan for Pearson's r (bivariate normality, linearity, outlier detection). This is CRITICAL because correlation assumptions can substantially affect inference with N=100. Moderate concerns include: (1) tertile split justification missing (power loss trade-off not acknowledged), (2) no outlier handling plan, (3) alternative approaches not considered. Overall, concept.md would benefit from explicit assumption validation procedures and acknowledgment of methodological trade-offs (tertile split power loss). With these additions (see Required Changes below), statistical approach would be robust.
+
+Concept.md demonstrates reasonable statistical planning but has notable gaps in methodological rigor. The most critical issues are: (1) claiming "correlation and regression" but only planning correlation, (2) invoking CLT without testing normality despite literature showing Fisher z' CI failures with non-normal data, and (3) not addressing N=100 precision limitations despite correlation stability research. The tertile analysis approach is questionable (power loss from dichotomization) but defensible if framed as supplementary visualization. Decision D068 misapplication is a minor conceptual error (easily corrected). Overall, concept.md would benefit from more explicit acknowledgment of methodological limitations and specification of remedial procedures for assumption violations.
+
+**Literature Foundation:**
+
+Devil's advocate analysis grounded in 10 methodological sources spanning 2006-2024:
+- Correlation assumptions & sample size: Bishara & Hittner 2012, Schönbrodt & Perugini 2013, Knudson & Lindsey 2014
+- Dichotomization criticism: Royston et al. 2006
+- Bonferroni correction: Wikipedia 2024, StatisticsByJim 2024
+- Confidence intervals: Bishara & Hittner 2012
+- Common pitfalls: Mukaka 2012
+- Correlation vs regression: Nimbli.ai 2024, TheKnowledgeAcademy 2024
+- Correlation stability: cfholbert.com 2024
 
 ---
 
@@ -344,57 +401,57 @@ Concept.md provides sound basic approach (correlation + tertile analysis) but la
 
 #### Required Changes (Must Address for Approval)
 
-**Note:** Status is CONDITIONAL (9.1/10), not REJECTED, so required changes are minor. Addressing these strengthens methodological rigor to APPROVED status (≥9.25).
+**Status:** ⚠️ CONDITIONAL (Score 9.1/10.0, threshold 9.0-9.24)
 
-1. **Add Correlation Assumption Validation**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach (create new subsection) OR add Section 7: Validation Procedures
-   - **Issue:** No assumption checks specified for Pearson's r correlation (bivariate normality, linearity, homoscedasticity, outliers). This is CRITICAL because assumption violations can bias correlation estimate and affect inference.
-   - **Fix:** Add new subsection or section with following content:
-     ```
-     **Assumption Validation:**
-     - **Linearity & Outliers:** Scatterplot of Day0_confidence vs forgetting_slope to visually inspect linear relationship and identify potential outliers
-     - **Bivariate Normality:** Q-Q plots for both variables to assess normality; Shapiro-Wilk test (p>0.05 threshold)
-     - **Influential Cases:** Cook's distance > 4/n (n=100, threshold = 0.04) to identify influential observations
-     - **Remedial Actions:**
-       - If normality violated: Report both Pearson's r and Spearman's rho (non-parametric alternative)
-       - If outliers detected: Conduct sensitivity analysis with/without influential cases
-       - If assumptions substantially violated: Consider robust correlation (percentage-bend correlation)
-     ```
-   - **Rationale:** Category 4 (Validation Procedures) scored 1.7/2.0 due to missing assumption checks. Adding comprehensive validation plan addresses CRITICAL omission error #1 and raises Category 4 score to ~1.9-2.0, pushing overall score to ≥9.25 (APPROVED threshold).
+1. **Add Regression Analysis to Workflow**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, add Step 2b
+   - **Issue:** Analysis Type states "Correlation and regression analysis" but workflow only shows correlation. For predictive validity claim, regression is more appropriate than correlation alone.
+   - **Fix:** "Add Step 2b: Fit simple linear regression (forgetting_slope ~ Day0_confidence). Report standardized beta, R², 95% CI for regression slope, and prediction equation: slope_predicted = b0 + b1*confidence. This directly addresses 'predictive validity' claim in RQ title."
+   - **Rationale:** Regression provides prediction equation and variance explained (R²), which correlation does not. For RQ titled "Initial Confidence Predicting Forgetting Rates," regression is the natural analysis method.
 
-2. **Specify One-Tailed vs Two-Tailed Test**
-   - **Location:** 1_concept.md - Section "Analysis Approach", Step 2 OR Section "Hypothesis"
-   - **Issue:** Directional hypothesis stated ("positive correlation expected") but test type (one-tailed vs two-tailed) not specified. This affects p-value interpretation.
-   - **Fix:** Add explicit statement: "Significance testing will use two-tailed test (alpha=0.05) despite directional hypothesis to remain conservative and allow detection of unexpected negative correlation (if high confidence reflects overconfidence rather than encoding quality)."
-   - **Rationale:** Clarifies statistical approach and prevents ambiguity about p-value interpretation. Minor but necessary for methodological completeness.
+2. **Specify Normality Test Before Invoking CLT**
+   - **Location:** 1_concept.md - Section 7: Validation Procedures, add to assumption checks
+   - **Issue:** Section 5.6 invokes Central Limit Theorem without specifying normality test. Bishara & Hittner 2012 showed Fisher z' CI can fail with N=100 if kurtosis >= 2 or |skewness| >= 1.
+   - **Fix:** "Add normality validation: Conduct Shapiro-Wilk test for Day0_confidence and forgetting_slope. Examine kurtosis and skewness. If p < 0.05 OR kurtosis >= 2 OR |skewness| >= 1, report Spearman correlation with bootstrap 95% CI (10,000 resamples, percentile method) instead of Pearson with Fisher z' CI."
+   - **Rationale:** Category 4 (Validation Procedures) deduction for not specifying normality test. Cannot assume robustness without checking. Specifying remedial action (Spearman + bootstrap) ensures valid inference regardless of distribution shape.
 
-3. **Acknowledge Tertile Split Trade-offs**
-   - **Location:** 1_concept.md - Section "Analysis Approach", Step 4 (tertile analysis description)
-   - **Issue:** Tertile split proposed without acknowledging power loss (~20-30% reduction relative to continuous predictor). Reviewer might question why categorize continuous variable.
-   - **Fix:** Add justification after Step 4 description: "Tertile analysis involves some power loss relative to continuous correlation (~20-30% reduction) but provides interpretability benefits for communicating effect to broader audience (High/Med/Low confidence groups more intuitive than correlation coefficient). Primary inference based on continuous correlation (Step 2); tertile analysis is supplementary for visualization and interpretation."
-   - **Rationale:** Demonstrates awareness of methodological trade-offs and provides justification for design choice. Addresses Commission Error #1 and Known Pitfall #1.
-
----
+3. **Clarify Decision D068 Application**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 2
+   - **Issue:** Decision D068 (dual p-value reporting) applies to multiple comparisons (post-hoc tests), not single correlation test. Current application is incorrect.
+   - **Fix:** "Remove 'Decision D068' reference from Step 2. Replace with: 'Report two-tailed p-value from correlation test. If testing directional hypothesis (positive correlation expected), report one-tailed p-value and justify directional test.'"
+   - **Rationale:** Category 3 (Parameter Specification) deduction for unclear dual p-value method. D068 is for Bonferroni correction in multiple comparisons (family-wise error control). Single correlation has no multiple comparisons issue.
 
 #### Suggested Improvements (Optional but Recommended)
 
-1. **Add Effect Size Interpretation Benchmarks**
-   - **Location:** 1_concept.md - Section "Expected Output" or "Success Criteria"
-   - **Current:** No effect size interpretation guidelines mentioned
-   - **Suggested:** Add sentence: "Correlation magnitude will be interpreted using Cohen's (1988) conventions: small r=0.10, medium r=0.30, large r=0.50. Given N=100, study has 80% power to detect r≥0.30 at alpha=0.05."
-   - **Benefit:** Provides context for interpreting correlation strength and clarifies study sensitivity (can reliably detect medium-to-large effects but may miss small effects)
+1. **Specify Tertile Comparison Test Statistic**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 4
+   - **Current:** "Tertile analysis - create High/Med/Low confidence tertiles, compare mean forgetting slopes across groups"
+   - **Suggested:** "Tertile analysis - create High/Med/Low confidence tertiles using qcut (equal-frequency split). Test monotonic pattern (High > Med > Low slopes) using Jonckheere-Terpstra trend test (one-tailed, tests ordered alternative hypothesis). Alternative: One-way ANOVA with linear contrast if normality assumptions met."
+   - **Benefit:** Specifies appropriate test for monotonic hypothesis. Jonckheere-Terpstra is more powerful than ANOVA for ordered groups, directly tests expected pattern.
 
-2. **Consider Regression Framework as Alternative**
-   - **Location:** 1_concept.md - Section "Analysis Approach"
-   - **Current:** Correlation analysis proposed
-   - **Suggested:** Add brief note: "Simple linear regression (forgetting_slope ~ Day0_confidence) provides equivalent test to correlation with additional benefits (confidence intervals for slope, prediction intervals). Correlation chosen for parsimony and direct effect size interpretation (r coefficient more intuitive than regression slope for this RQ)."
-   - **Benefit:** Demonstrates awareness of alternative framework and provides justification for correlation choice. Addresses Alternative Approach #1.
+2. **Justify Tertile Split vs Continuous Analysis**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, after Step 4
+   - **Current:** Tertile analysis presented without justification for dichotomization
+   - **Suggested:** "Note: Tertile analysis is supplementary to primary continuous correlation/regression. Tertile split aids interpretation (visualizes monotonic pattern) but sacrifices statistical power (per Royston et al. 2006, dichotomization reduces power ~1/3). Primary inference based on continuous analysis; tertile results provide descriptive support."
+   - **Benefit:** Acknowledges dichotomization criticism proactively. Frames tertile analysis as visualization tool, not primary test. Shows awareness of power loss trade-off.
 
-3. **Add Descriptive Statistics for Range Restriction Check**
-   - **Location:** 1_concept.md - Section "Expected Output" or "Success Criteria"
-   - **Current:** No mention of descriptive statistics for Day0_confidence distribution
-   - **Suggested:** Add to expected outputs: "Descriptive statistics for Day0_confidence (mean, SD, range, distribution histogram) to assess variability. If restricted range detected (SD < 1.0), acknowledge as potential limitation that could attenuate correlation."
-   - **Benefit:** Proactively addresses Known Pitfall #2 (range restriction). Demonstrates awareness that limited variability in predictor reduces correlation magnitude regardless of true relationship strength.
+3. **Add Missing Data Handling Procedure**
+   - **Location:** 1_concept.md - Section 7: Validation Procedures, add subsection
+   - **Current:** Concept asks "What if <100 valid scores?" but no handling specified
+   - **Suggested:** "Missing Data Handling: Use complete case analysis (listwise deletion) - only participants with valid Day0_confidence AND forgetting_slope included. Report final N and document exclusions. If final N < 90, report post-hoc power analysis for observed effect size at actual N. Sensitivity analysis: Compare results for N=100 (if achieved) vs any reduced sample."
+   - **Benefit:** Addresses Category 4 gap (validation procedures). Provides clear plan if upstream RQs have missing data. Transparency in reporting exclusions.
+
+4. **Acknowledge N=100 Precision Limitations**
+   - **Location:** 1_concept.md - Section 5.3: Confidence Interval Interpretation
+   - **Current:** States "N=100 provides reasonable precision" without quantifying
+   - **Suggested:** "Add: N=100 limits precision of correlation estimate. Per Schönbrodt & Perugini 2013, correlations stabilize at N≈250; at N=100, estimates less stable (potential ±0.15 fluctuation from true value). Interpret 95% CI width as measure of uncertainty. If CI is wide (e.g., [0.05, 0.45]), effect size highly uncertain despite statistical significance."
+   - **Benefit:** Addresses Known Pitfall #3. Shows awareness of sample size limitations. Prepares reader for potentially wide CIs. Demonstrates sophistication in interpretation beyond p-value.
+
+5. **Consider Partial Correlation Controlling for Cognitive Ability**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, add Step 6 (optional)
+   - **Current:** No control for confounds (general cognitive ability)
+   - **Suggested:** "Optional Step 6: Partial correlation controlling for general cognitive ability (RAVLT_Total or NART composite). Tests if Day0_confidence predicts forgetting_slope BEYOND general memory ability. Addresses potential confound: high cognitive ability could drive both high confidence and slow forgetting."
+   - **Benefit:** Addresses Known Pitfall #2 (correlation ≠ causation). Strengthens causal inference by ruling out obvious confound. Not required for CONDITIONAL approval, but would elevate analysis rigor.
 
 ---
 
@@ -402,26 +459,11 @@ Concept.md provides sound basic approach (correlation + tertile analysis) but la
 
 - **Agent Version:** rq_stats v5.0
 - **Rubric Version:** 10-point system (v4.2)
-- **Validation Date:** 2025-12-06 16:45
-- **Tools Inventory Source:** docs/v4/tools_inventory.md
-- **Total Tools Validated:** 8
-- **Tool Reuse Rate:** 100% (8/8 tools available)
-- **Validation Duration:** ~25 minutes
-- **Context Dump:** "9.1/10 CONDITIONAL. Category 1: 2.7/3 (appropriate method, complexity justified). Category 2: 2.0/2 (100% tool reuse). Category 3: 1.9/2 (well-specified, missing test type). Category 4: 1.7/2 (missing assumption checks - CRITICAL gap). Category 5: 0.8/1 (8 concerns: 1 CRITICAL, 6 MODERATE, 1 MINOR)."
-
----
-
-**Sources Referenced:**
-- [An elaboration on sample size determination for correlations](https://pmc.ncbi.nlm.nih.gov/articles/PMC11148401/)
-- [G*Power Data Analysis Examples: Power Analysis for Correlations](https://stats.oarc.ucla.edu/other/gpower/gpower-data-analysis-examples-power-analysis-for-correlations/)
-- [Categorisation of built environment characteristics: the trouble with tertiles](https://pmc.ncbi.nlm.nih.gov/articles/PMC4335683/)
-- [Use of the Extreme Groups Approach: A Critical Reexamination](https://quantpsy.org/pubs/preacher_rucker_maccallum_nicewander_2005.pdf)
-- [Robust Correlation Analyses: False Positive and Power Validation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3541537/)
-- [Bootstrap Confidence Intervals for 11 Robust Correlations](https://meth.psychopen.eu/index.php/meth/article/view/8467)
-- [A Practical Illustration of Methods to Deal with Potential Outliers](https://online.ucpress.edu/collabra/article/4/1/30/112965/)
-- [Continuous and Categorical Variables: The Trouble with Median Splits](https://www.theanalysisfactor.com/continuous-and-categorical-variables-the-trouble-with-median-splits/)
-- [Beyond the median split: Splitting a predictor into 3 parts](https://statmodeling.stat.columbia.edu/2015/11/24/beyond-the-median-split-splitting-a-predictor-into-3-parts/)
-- [Alternative Models for Small Samples in Psychological Research](https://pmc.ncbi.nlm.nih.gov/articles/PMC5965574/)
-- [Confidence and memory: assessing positive and negative correlations](https://pubmed.ncbi.nlm.nih.gov/23721250/)
+- **Validation Date:** 2025-12-06 18:00
+- **WebSearch Queries:** 10 (5 validation, 5 challenge)
+- **Total Tools Validated:** 9
+- **Tool Reuse Rate:** 100% (9/9 tools available in standard libraries)
+- **Validation Duration:** ~28 minutes
+- **Context Dump:** "9.1/10 CONDITIONAL. Category 1: 2.8/3 (appropriate, minor gaps). Category 2: 2.0/2 (100% reuse). Category 3: 1.7/2 (parameters present, test specs missing). Category 4: 1.8/2 (validation good, normality test omitted). Category 5: 0.8/1 (11 concerns, 3 CRITICAL). Required fixes: Add regression, specify normality test + remedial action, clarify D068."
 
 ---

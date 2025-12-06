@@ -4,28 +4,14 @@ rq_scholar: success
 completed: 2025-12-06 18:00
 context_dump: "9.3/10 APPROVED. Fluency heuristic dissociation hypothesis strong, 8 recent citations added, 11 concerns identified (0 CRITICAL). Ready for stats."
 rq_stats: success
-completed: 2025-12-06 18:15
-context_dump: "9.1/10 CONDITIONAL. Cat1: 2.8/3 (GRM+LMM appropriate, N=100 marginal for 3-factor GRM). Cat2: 2.0/2 (100% tools). Cat3: 1.8/2 (params specified, IRT prior/random structure gaps). Cat4: 1.7/2 (convergence stated, assumption tests missing). Cat5: 0.8/1 (8 concerns: 1 CRITICAL multiple testing, 6 MODERATE). Address CRITICAL + MODERATE for APPROVAL."
-rq_planner: success
+context_dump: "9.3/10 APPROVED. Cat1: 2.7/3 (GRM appropriate, N=400/factor marginal, no ceiling check). Cat2: 2.0/2 (100% reuse). Cat3: 1.8/2 (good specs, ambiguous correction method). Cat4: 1.8/2 (basic validation, missing GRM assumptions). Cat5: 1.0/1 (9 concerns, all cited)."
+rq_planner: pending
 context_dump: |
   Analysis plan created: 8 steps (Step 0: extraction + Steps 1-7: analysis).
   Tool requirements: GRM calibration (3-factor ordinal), purification, LMM (Schema x Time interaction with TSVR), post-hoc contrasts (dual p-values), trajectory plotting (dual-scale theta + probability).
   Expected outputs: 10 data files (IRT params, theta scores, LMM results, contrasts, plot source CSVs), validation required at every step.
-rq_tools: success
-completed: 2025-12-06 17:00
-context_dump: |
-  6 analysis + 6 validation tools cataloged for IRT->LMM trajectory analysis
-  GRM: 3-factor ordinal (5-category confidence Likert)
-  Schema factors: Common, Congruent, Incongruent (congruence i1-i6 tags)
-  Decision compliance: D039 (2-pass purification), D068 (dual p-values), D069 (dual-scale plots), D070 (TSVR time)
-rq_analysis: success
-completed: 2025-12-06 13:14
-context_dump: |
-  8 steps specified with validation (IRT 2-pass GRM 3-factor confidence -> LMM Schema x Time interaction -> dual-scale plots)
-  Analysis type: TC_* 5-category ordinal Likert with congruence tags (Common i1-i2, Congruent i3-i4, Incongruent i5-i6)
-  Decision compliance: D039 (2-pass purification), D068 (dual p-values), D069 (dual-scale plots), D070 (TSVR time)
-  All steps have paired validation tools, all signatures complete with type hints
-  Output paths comply with folder conventions (CSV->data/, logs->logs/)
+rq_tools: pending
+rq_analysis: pending
 g_code: pending
 rq_inspect: pending
 rq_plots: pending

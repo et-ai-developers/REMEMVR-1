@@ -13,7 +13,7 @@
 Do source (-U-) and destination (-D-) locations show different confidence decline patterns over the 6-day retention interval?
 
 **Scope:**
-This RQ examines confidence decline trajectories for pick-up (source, -U-) versus put-down (destination, -D-) locations using IRT-derived ability estimates from TC_* confidence items. Analysis includes N=100 participants × 4 test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6) × 2 location types = 800 observations. Time variable uses TSVR (actual hours since encoding), not nominal days.
+This RQ examines confidence decline trajectories for pick-up (source, -U-) versus put-down (destination, -D-) locations using IRT-derived ability estimates from TC_* confidence items. Analysis includes N=100 participants ï¿½ 4 test sessions (T1, T2, T3, T4; nominal Days 0, 1, 3, 6) ï¿½ 2 location types = 800 observations. Time variable uses TSVR (actual hours since encoding), not nominal days.
 
 **Theoretical Framing:**
 This RQ tests whether the source-destination dissociation found for accuracy in Ch5 5.5.1 replicates in metacognitive judgments. If destination confidence declines faster than source confidence (paralleling accuracy), this validates that the dissociation reflects fundamental memory processing differences rather than measurement artifacts. Alternatively, if confidence shows no dissociation despite accuracy differences, this suggests metacognitive monitoring cannot distinguish between source and destination memory strength.
@@ -30,17 +30,29 @@ This RQ tests whether the source-destination dissociation found for accuracy in 
 To be added by rq_scholar
 
 **Theoretical Predictions:**
-Destination confidence should decline faster than source confidence, replicating the Ch5 5.5.1 accuracy pattern. If confidence tracks underlying memory strength, LocationType × Time interaction should be significant.
+Destination confidence should decline faster than source confidence, replicating the Ch5 5.5.1 accuracy pattern. If confidence tracks underlying memory strength, LocationType Ã— Time interaction should be significant.
+
+**Practice Effects Consideration:**
+Repeated testing across T1-T4 could introduce practice effects (improved performance due to test familiarity). However, this is a WITHIN-subjects design where BOTH source and destination are tested at each timepoint, so practice effects would affect both conditions equally. The critical test is the INTERACTION (differential trajectory between source/destination), which is robust to additive practice effects. If practice effects are non-uniform across location types (unlikely given matched item formats), this would appear as a main effect of Time that differs from Ch5 pattern. Recommend checking: (1) Overall trajectory shape matches Ch5 5.5.1, (2) Any unexpected improvements at later timepoints are flagged.
 
 **Literature Gaps:**
 To be identified by rq_scholar
+
+**Alternative Framework: Enactment Effect**
+
+Motor actions during object manipulation (both pick-up and put-down) may enhance encoding through the "enactment effect" (Engelkamp & Zimmer, 1989; Plancher et al., 2012). This framework predicts that destination locations (where objects are actively placed) could be BETTER encoded than source locations due to motor involvement, potentially contradicting the destination disadvantage hypothesis. However, in REMEMVR:
+1. Pick-up actions involve active object identification and initial encoding (attentional prioritization)
+2. Put-down actions are scripted task completion (potentially more automatic, less elaborative)
+3. The source advantage may persist despite enactment because initial object encounter captures more attention than task-directed placement
+
+This competing framework must be acknowledged; results should be interpreted considering both Source Monitoring Framework (predicts source advantage) and Enactment Effect (could predict destination advantage or null difference).
 
 ---
 
 ## Hypothesis
 
 **Primary Hypothesis:**
-Destination confidence will show faster decline than source confidence (significant LocationType × Time interaction), replicating Ch5 5.5.1 accuracy findings. This validates that the source-destination dissociation reflects fundamental memory processing differences visible in both accuracy and metacognition.
+Destination confidence will show faster decline than source confidence (significant LocationType ï¿½ Time interaction), replicating Ch5 5.5.1 accuracy findings. This validates that the source-destination dissociation reflects fundamental memory processing differences visible in both accuracy and metacognition.
 
 **Secondary Hypotheses:**
 None specified - straightforward replication hypothesis.
@@ -49,7 +61,7 @@ None specified - straightforward replication hypothesis.
 Ch5 5.5.1 found destination accuracy declined faster than source accuracy. If this reflects true differences in memory trace strength (not just measurement noise), confidence judgments should also detect these differences. Metacognitive monitoring should be sensitive to relative memory strength differences between source and destination.
 
 **Expected Effect Pattern:**
-Significant LocationType × Time interaction (p < 0.05 with dual p-values per Decision D068). Destination slope steeper (more negative) than source slope. Effect size comparable to Ch5 5.5.1 accuracy finding.
+Significant LocationType ï¿½ Time interaction (p < 0.05 with dual p-values per Decision D068). Destination slope steeper (more negative) than source slope. Effect size comparable to Ch5 5.5.1 accuracy finding.
 
 ---
 
@@ -91,15 +103,15 @@ IRT (Item Response Theory) using GRM for 5-category ordinal confidence data + LM
 **Step 2:** Item purification (Decision D039): exclude items with |b| > 3.0 OR a < 0.4
 **Step 3:** IRT Pass 2 re-calibration on purified items
 **Step 4:** Merge theta_confidence scores with TSVR time mapping, create time transformations
-**Step 5:** Fit LMM with LocationType × Time interaction and random slopes by UID
-**Step 6:** Extract LocationType × Time interaction term, compute contrasts (Source vs Destination slopes)
+**Step 5:** Fit LMM with LocationType ï¿½ Time interaction and random slopes by UID
+**Step 6:** Extract LocationType ï¿½ Time interaction term, compute contrasts (Source vs Destination slopes)
 **Step 7:** Compare results to Ch5 5.5.1 accuracy findings to test replication
 
 **Expected Outputs:**
 - data/step00_irt_input.csv (IRT input data)
 - data/step00_tsvr_mapping.csv (time mapping)
 - data/step02_purified_items.csv (purified item set)
-- data/step03_theta_confidence_location.csv (800 rows: 100 participants × 4 tests × 2 locations)
+- data/step03_theta_confidence_location.csv (800 rows: 100 participants ï¿½ 4 tests ï¿½ 2 locations)
 - results/step05_lmm_summary.txt (LMM model summary)
 - results/step06_location_contrasts.csv (Source vs Destination slope comparison)
 - results/step07_ch5_comparison.csv (comparison to Ch5 5.5.1 accuracy pattern)
@@ -109,7 +121,7 @@ IRT (Item Response Theory) using GRM for 5-category ordinal confidence data + LM
 - GRM calibration for 5-category ordinal data (NOT 2PL which is for binary data)
 - Item purification: 30-70% retention rate
 - LMM converges with 800 observations
-- LocationType × Time interaction tested with dual p-values (Decision D068)
+- LocationType ï¿½ Time interaction tested with dual p-values (Decision D068)
 - Ch5 5.5.1 comparison documented (does confidence dissociation replicate accuracy dissociation?)
 
 ---
@@ -149,5 +161,30 @@ Step 0 extracts from dfData.csv using tag pattern matching for TC_*-U-* and TC_*
 
 **Tests:**
 - [x] All 4 tests (T1, T2, T3, T4; nominal Days 0, 1, 3, 6)
+
+---
+
+## Limitations
+
+### VR Ecological Validity
+
+**Issue:** VR spatial memory may differ systematically from real-world spatial memory due to:
+1. **Vestibular/proprioceptive limitations:** Even with 1:1 movement mapping, vestibular and proprioceptive feedback in VR remains impoverished compared to real-world navigation (Commins et al., 2020)
+2. **Spatial updating mechanisms:** VR navigation may rely more heavily on visual path integration than real-world navigation, which benefits from multi-sensory integration (Lim et al., 2024)
+3. **Encoding depth differences:** Real-world spatial encoding may be inherently richer due to full embodiment
+
+**Mitigation:**
+- REMEMVR uses 1:1 physical movement (not teleportation or joystick), which provides partial ecological validity
+- Within-subjects design controls for individual differences in VR adaptation
+- Source-destination comparison is WITHIN the VR environment, so any VR-specific effects apply equally to both conditions
+
+**Interpretation Guidance:**
+- Results should be interpreted as applying to VR-based spatial memory
+- Generalization to real-world spatial memory requires explicit validation studies
+- Report this limitation prominently in discussion
+
+**Key Citations:**
+- Lim et al. (2024): VR vs real-world spatial memory differences
+- Commins et al. (2020): Physical movement limitations in VR spatial cognition
 
 ---
