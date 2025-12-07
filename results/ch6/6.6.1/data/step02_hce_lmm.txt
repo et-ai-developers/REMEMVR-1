@@ -1,0 +1,17 @@
+           Mixed Linear Model Regression Results
+===========================================================
+Model:               MixedLM  Dependent Variable:  Theta   
+No. Observations:    400      Method:              REML    
+No. Groups:          100      Scale:               0.0009  
+Min. group size:     4        Log-Likelihood:      728.5461
+Max. group size:     4        Converged:           Yes     
+Mean group size:     4.0                                   
+-----------------------------------------------------------
+                 Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------
+Intercept         0.050    0.004 11.549 0.000  0.041  0.058
+Days             -0.003    0.001 -4.267 0.000 -0.004 -0.002
+Group Var         0.001    0.011                           
+Group x Days Cov -0.000    0.001                           
+Days Var          0.000    0.000                           
+===========================================================

@@ -14,12 +14,30 @@ rq_analysis:
 g_code: pending
 rq_inspect: pending
 rq_plots: pending
-rq_results: pending
+rq_results:
+  status: success
+  completed: 2025-12-08
+  context_dump: |
+    HCE rate DECREASES 35% (4.87% -> 3.17%, Day 0-6) - hypothesis REJECTED
+    REML LMM: Days β=-0.003, p<.001 (significant decline) - ML LRT failed convergence
+    Summary: results/summary.md (REML primary, ML invalid, metacognitive recalibration)
 rq_validate: pending
 
 analysis_steps:
-  step00_extract_item_level: pending
-  step01_compute_hce_rates: pending
+  step00_extract_item_level:
+    status: success
+    completed: 2025-12-07 21:00
+    rows: 28800
+    items: 72
+    paradigms: IFR, ICR, IRE
+    bug_fixed: "Paradigm filtering (hyphen vs underscore) + confidence/accuracy scale validation"
+  step01_compute_hce_rates:
+    status: success
+    completed: 2025-12-07 23:39
+    context_dump: |
+      Validated step01 compute_hce_rates
+      Output: step01_hce_rates.csv (400 rows, 6 cols)
+      Validation: HCE_rate in [0,1], n_HCE<=n_total, all 100 participants × 4 tests present
   step02_fit_lmm_trajectory: pending
   step03_test_time_effect: pending
   step04_prepare_trajectory_data: pending

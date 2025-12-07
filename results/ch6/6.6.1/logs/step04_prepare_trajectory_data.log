@@ -1,0 +1,52 @@
+[START] Step 04: Prepare trajectory plot data
+[LOAD] Loading HCE rates from Step 1...
+[LOADED] step01_hce_rates.csv (400 rows, 6 cols)
+[INFO] Columns: ['UID', 'TEST', 'TSVR', 'HCE_rate', 'n_HCE', 'n_total']
+[INFO] Tests present: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[ANALYSIS] Aggregating HCE rates by timepoint...
+[INFO] Aggregated to 4 timepoints
+[INFO] Timepoints: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[INFO] Sample sizes per timepoint: [np.int64(100), np.int64(100), np.int64(100), np.int64(100)]
+[ANALYSIS] Computing 95% confidence intervals...
+[INFO] Confidence intervals computed
+[INFO]   1.0: mean=0.0487, CI=[0.0390, 0.0585], SE=0.0050
+[INFO]   2.0: mean=0.0487, CI=[0.0403, 0.0572], SE=0.0043
+[INFO]   3.0: mean=0.0379, CI=[0.0291, 0.0467], SE=0.0045
+[INFO]   4.0: mean=0.0317, CI=[0.0236, 0.0397], SE=0.0041
+[SAVE] Preparing plot-ready output...
+[INFO] Plot data prepared: 4 rows, 5 cols
+[SAVED] step04_hce_trajectory_data.csv (4 rows, 5 cols)
+[VALIDATION] Running validate_plot_data_completeness...
+[VALIDATION] Plot data incomplete: Missing groups: 1, 2, 3, 4
+[ERROR] Validation failed: Plot data incomplete: Missing groups: 1, 2, 3, 4
+[ERROR] Validation failed: Plot data incomplete: Missing groups: 1, 2, 3, 4
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.6.1/code/step04_prepare_trajectory_data.py", line 227, in <module>
+    raise ValueError(error_msg)
+ValueError: Validation failed: Plot data incomplete: Missing groups: 1, 2, 3, 4
+[START] Step 04: Prepare trajectory plot data
+[LOAD] Loading HCE rates from Step 1...
+[LOADED] step01_hce_rates.csv (400 rows, 6 cols)
+[INFO] Columns: ['UID', 'TEST', 'TSVR', 'HCE_rate', 'n_HCE', 'n_total']
+[INFO] Tests present: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[ANALYSIS] Aggregating HCE rates by timepoint...
+[INFO] Aggregated to 4 timepoints
+[INFO] Timepoints: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[INFO] Sample sizes per timepoint: [np.int64(100), np.int64(100), np.int64(100), np.int64(100)]
+[ANALYSIS] Computing 95% confidence intervals...
+[INFO] Confidence intervals computed
+[INFO]   1.0: mean=0.0487, CI=[0.0390, 0.0585], SE=0.0050
+[INFO]   2.0: mean=0.0487, CI=[0.0403, 0.0572], SE=0.0043
+[INFO]   3.0: mean=0.0379, CI=[0.0291, 0.0467], SE=0.0045
+[INFO]   4.0: mean=0.0317, CI=[0.0236, 0.0397], SE=0.0041
+[SAVE] Preparing plot-ready output...
+[INFO] Plot data prepared: 4 rows, 5 cols
+[SAVED] step04_hce_trajectory_data.csv (4 rows, 5 cols)
+[VALIDATION] Running validate_plot_data_completeness...
+[VALIDATION] Plot data complete: 0 domains, 4 groups.
+[VALIDATION] Running additional checks...
+[VALIDATION] All checks passed
+[VALIDATION] Plot data preparation complete: 4 timepoints created
+[VALIDATION] All tests represented: 1, 2, 3, 4
+[SUCCESS] Step 04 complete

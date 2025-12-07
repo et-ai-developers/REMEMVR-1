@@ -1,0 +1,49 @@
+================================================================================
+AIC MODEL COMPARISON SUMMARY - HCE RATE TIME TRANSFORMATION
+================================================================================
+
+Research Question: RQ 6.6.1
+Analysis: Which functional form best describes HCE rate trajectory?
+Method: AIC comparison with Akaike weights
+
+BEST MODEL SELECTION
+--------------------------------------------------------------------------------
+Best Model: Logarithmic
+Akaike Weight: 0.2717
+AIC: -1467.31
+Interpretation: No clear winner
+
+FULL MODEL COMPARISON TABLE
+--------------------------------------------------------------------------------
+        model          AIC          BIC     loglik  n_params  converged  delta_AIC  akaike_weight
+       Linear -1467.264571 -1443.315784 739.632285         5       True   0.049075       0.265071
+    Quadratic -1465.537723 -1437.597471 739.768861         6       True   1.775923       0.111785
+  Logarithmic -1467.313646 -1443.364859 739.656823         5       True   0.000000       0.271656
+   Linear+Log -1466.707721 -1438.767469 740.353860         6       True   0.605925       0.200653
+Quadratic+Log -1466.136945 -1434.205229 741.068473         7       True   1.176701       0.150835
+
+AKAIKE WEIGHT INTERPRETATION
+--------------------------------------------------------------------------------
+Akaike weight = probability that model is best given data and candidate set
+  > 0.90: Overwhelming evidence
+  > 0.70: Strong evidence
+  > 0.50: Moderate evidence
+  > 0.30: Weak evidence
+  < 0.30: No clear winner
+
+DELTA AIC INTERPRETATION (Burnham & Anderson 2002)
+--------------------------------------------------------------------------------
+delta_AIC = AIC_i - min(AIC)
+  0-2: Substantial support (models are competitive)
+  4-7: Considerably less support
+  >10: Essentially no support
+
+CONVERGENCE STATUS
+--------------------------------------------------------------------------------
+  Linear              : CONVERGED
+  Quadratic           : CONVERGED
+  Logarithmic         : CONVERGED
+  Linear+Log          : CONVERGED
+  Quadratic+Log       : CONVERGED
+
+================================================================================

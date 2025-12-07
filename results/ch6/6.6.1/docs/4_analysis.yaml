@@ -27,10 +27,17 @@ steps:
     description: "Extract item-level confidence-accuracy pairs from dfData.csv (interactive paradigms only: IFR, ICR, IRE)"
 
     analysis_call:
-      type: "catalogued"
-      module: "tools.data_extraction"
-      function: "extract_confidence_accuracy_data"
-      signature: "extract_confidence_accuracy_data(df: pd.DataFrame, paradigms: List[str], output_path: Path) -> pd.DataFrame"
+      type: "stdlib"
+      operations:
+        - "pd.read_csv('data/cache/dfData.csv')"
+        - "Filter to TC_* and TQ_* columns (confidence and accuracy items)"
+        - "Extract paradigm from column names (e.g., TC_IFR_xxx)"
+        - "Filter to interactive paradigms only: IFR, ICR, IRE (exclude RFR, TCR, RRE)"
+        - "Reshape to long format: one row per item-response"
+        - "Match confidence-accuracy pairs by item code (TC_XXX pairs with TQ_XXX)"
+        - "Merge UID, TEST, TSVR metadata"
+        - "Create columns: UID, TEST, TSVR, item_code, confidence, accuracy"
+        - "Save to data/step00_item_level.csv"
 
       input_files:
         - path: "data/cache/dfData.csv"
@@ -45,9 +52,10 @@ steps:
           description: "Item-level confidence-accuracy pairs (~27,200 rows)"
 
       parameters:
-        df: "df_data"
-        paradigms: ["IFR", "ICR", "IRE"]
-        output_path: "data/step00_item_level.csv"
+        paradigms_include: ["IFR", "ICR", "IRE"]
+        paradigms_exclude: ["RFR", "TCR", "RRE"]
+        confidence_prefix: "TC_"
+        accuracy_prefix: "TQ_"
 
       returns:
         type: "pd.DataFrame"

@@ -1,0 +1,38 @@
+[START] Step 03: Test Time Effect on HCE Rate
+[LOAD] Loading HCE rates from Step 01...
+[LOADED] step01_hce_rates.csv (400 rows, 6 cols)
+[DATA] 100 participants, 4 test sessions
+[ANALYSIS] Fitting Full LMM: HCE_rate ~ TSVR + (TSVR | UID)...
+[WARNING] Full model did not converge (continuing anyway)
+[FULL MODEL] Converged: False
+[FULL MODEL] Log-likelihood: 320.68
+[FULL MODEL] AIC: -629.35
+[EXTRACT] Extracting TSVR fixed effect from full model...
+[TSVR EFFECT] Coefficient: -0.000000
+[TSVR EFFECT] SE: 0.002000
+[TSVR EFFECT] p_wald: 0.958000
+[ANALYSIS] Fitting Reduced LMM: HCE_rate ~ 1 + (TSVR | UID)...
+[WARNING] Reduced model did not converge (continuing anyway)
+[REDUCED MODEL] Converged: False
+[REDUCED MODEL] Log-likelihood: 320.75
+[REDUCED MODEL] AIC: -631.50
+[LRT] Computing Likelihood Ratio Test for TSVR effect...
+[LRT] Chi-square statistic: -0.1453
+[LRT] Degrees of freedom: 1
+[LRT] p_lrt: 1.000000
+[FORMAT] Creating output DataFrame with dual p-values...
+[OUTPUT] Time effect results:
+  - effect: TSVR
+  - coefficient: -0.000000
+  - SE: 0.002000
+  - p_wald: 0.958000
+  - p_lrt: 1.000000
+  - significant: False
+[SAVED] step03_time_effect.csv (1 rows, 6 cols)
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION - PASS] Decision D068 compliant: All 1 required terms present with both p_uncorrected and p_bonferroni.
+[VALIDATION] Checking additional criteria...
+[VALIDATION - PASS] Both p-values in [0, 1] range
+[VALIDATION - PASS] SE > 0 (positive standard error)
+[VALIDATION - PASS] Coefficient in reasonable range [-0.01, 0.01]
+[SUCCESS] Step 03 complete

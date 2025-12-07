@@ -1,0 +1,32 @@
+[START] Step 00: Extract Item-Level Confidence-Accuracy Data
+[LOAD] Loading dfData.csv from data/cache/...
+[LOADED] dfData.csv (400 rows, 214 cols)
+[CHECK] Metadata columns present: ['UID', 'TEST', 'TSVR']
+[EXTRACT] Identifying confidence (TC_*) and accuracy (TQ_*) columns...
+[FOUND] 105 confidence columns (TC_*)
+[FOUND] 105 accuracy columns (TQ_*)
+[FILTER] 72 confidence columns after paradigm filter (IFR, ICR, IRE)
+[FILTER] 72 accuracy columns after paradigm filter (IFR, ICR, IRE)
+[PARADIGMS] Included: ['IFR', 'ICR', 'IRE']
+[PARADIGMS] Excluded: ['RFR', 'TCR', 'RRE']
+[RESHAPE] Converting to long format (one row per item-response)...
+[MELTED] Confidence data: 28800 rows
+[MELTED] Accuracy data: 28800 rows
+[MERGE] Matching confidence-accuracy pairs by item_code...
+[MERGED] 28800 item-response pairs created
+[STATS] Extracted 28800 item-responses from 100 participants
+[STATS] 4 test sessions, 72 unique items
+[STATS] Paradigms included: IFR, ICR, IRE
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch6/6.6.1/data/step00_item_level.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch6/6.6.1/data/step00_item_level.csv (28800 rows, 6 cols)
+[VALIDATION] Running validate_data_format...
+[VALIDATION] PASS - Column check: All required columns present (6 columns). DataFrame has 28800 rows.
+[VALIDATION] Checking value ranges and data quality...
+[VALIDATION] PASS - confidence values in {0.2, 0.4, 0.6, 0.8, 1.0}
+[VALIDATION] PASS - accuracy values in {0, 0.25, 0.5, 1.0}
+[VALIDATION] PASS - TSVR in reasonable range (min=1.00, max=246.24 hours)
+[VALIDATION] WARNING - Expected rows: 26000-28000, found: 28800
+[VALIDATION] This may be acceptable if some items have missing data
+[VALIDATION] Missing data: confidence=0.00%, accuracy=0.00%
+[VALIDATION] PASS - Missing data < 5% tolerance
+[SUCCESS] Step 00 complete

@@ -1,0 +1,103 @@
+================================================================================
+EXPANDED AIC MODEL COMPARISON - HCE RATE TIME TRANSFORMATION
+================================================================================
+
+Research Question: RQ 6.6.1
+Analysis: Which functional form BEST describes HCE rate trajectory?
+Method: Comprehensive AIC comparison with 13 candidate models
+Context: Step 02a showed Linear vs Log tied (ΔAIC=0.05, weights ~27% each)
+         Trajectory VERY FLAT: T1=4.87% -> T2=4.87% -> T3=3.79% -> T4=3.17%
+         Two-phase pattern: NO change Day 0-1, gradual decline Day 1-6
+
+BEST MODEL SELECTION
+--------------------------------------------------------------------------------
+Best Model: SquareRoot
+Akaike Weight: 0.1721
+AIC: -1467.92
+Interpretation: No clear winner
+
+TOP 5 MODELS (Ranked by AIC)
+--------------------------------------------------------------------------------
+         model          AIC          BIC     loglik  n_params  converged  delta_AIC  akaike_weight
+    SquareRoot -1467.917500 -1443.968713 739.958750         5       True   0.000000       0.172090
+     Power_0.7 -1467.778024 -1443.829237 739.889012         5       True   0.139476       0.160497
+Piecewise_Day1 -1467.365164 -1443.416376 739.682582         5       True   0.552337       0.130562
+   Logarithmic -1467.313646 -1443.364859 739.656823         5       True   0.603854       0.127242
+        Linear -1467.264571 -1443.315784 739.632285         5       True   0.652929       0.124158
+
+SPECIAL PATTERN FLAGS
+--------------------------------------------------------------------------------
+  - DIMINISHING_RETURNS: Power-law < 1.0 model (SquareRoot) wins - diminishing decline rate
+  - COMPETITIVE_MODELS: ΔAIC=0.14 < 2 (top models competitive)
+
+FULL MODEL COMPARISON TABLE (13 Models)
+--------------------------------------------------------------------------------
+           model          AIC          BIC     loglik  n_params  converged  delta_AIC  akaike_weight
+          Linear -1467.264571 -1443.315784 739.632285         5       True   0.652929       0.124158
+       Quadratic -1465.537723 -1437.597471 739.768861         6       True   2.379778       0.052359
+     Logarithmic -1467.313646 -1443.364859 739.656823         5       True   0.603854       0.127242
+      SquareRoot -1467.917500 -1443.968713 739.958750         5       True   0.000000       0.172090
+       Power_0.3 -1460.453603 -1436.504815 736.226801         5      False   7.463898       0.004121
+       Power_0.7 -1467.778024 -1443.829237 739.889012         5       True   0.139476       0.160497
+       Power_1.5 -1464.090340 -1440.141552 738.045170         5      False   3.827160       0.025392
+         Inverse -1462.668314 -1438.719526 737.334157         5       True   5.249186       0.012471
+           Cubic -1463.905265 -1431.973549 739.952633         7       True   4.012235       0.023148
+ExponentialDecay -1460.025208 -1436.076421 736.012604         5       True   7.892292       0.003326
+  Piecewise_Day1 -1467.365164 -1443.416376 739.682582         5       True   0.552337       0.130562
+      Linear+Log -1466.707721 -1438.767469 740.353860         6       True   1.209779       0.093984
+   Quadratic+Log -1466.136945 -1434.205229 741.068473         7       True   1.780555       0.070650
+
+AKAIKE WEIGHT INTERPRETATION
+--------------------------------------------------------------------------------
+Akaike weight = probability that model is best given data and candidate set
+  > 0.90: Overwhelming evidence
+  > 0.70: Strong evidence
+  > 0.50: Moderate evidence
+  > 0.30: Weak evidence
+  < 0.30: No clear winner
+
+DELTA AIC INTERPRETATION (Burnham & Anderson 2002)
+--------------------------------------------------------------------------------
+delta_AIC = AIC_i - min(AIC)
+  0-2: Substantial support (models are competitive)
+  4-7: Considerably less support
+  >10: Essentially no support
+
+MODEL TRANSFORMATIONS TESTED
+--------------------------------------------------------------------------------
+Basic:
+  - Linear: Days = TSVR / 24
+  - Quadratic: Days + Days^2
+  - Logarithmic: log(Days + 1)
+Power-law:
+  - Square Root: (Days + 1)^0.5 (power 0.5)
+  - Power 0.3: (Days + 1)^0.3 (shallow curvature)
+  - Power 0.7: (Days + 1)^0.7 (moderate curvature)
+  - Power 1.5: (Days + 1)^1.5 (accelerating)
+  - Inverse: 1/(Days + 1) (hyperbolic)
+  - Cubic: Days + Days^2 + Days^3 (power 3.0)
+Piecewise:
+  - Breakpoint Day 1: flat before Day 1, linear after
+Exponential:
+  - Exponential Decay: exp(-Days)
+Combinations:
+  - Linear + Log: Days + log(Days + 1)
+  - Quadratic + Log: Days + Days^2 + log(Days + 1)
+
+CONVERGENCE STATUS
+--------------------------------------------------------------------------------
+  Linear              : CONVERGED
+  Quadratic           : CONVERGED
+  Logarithmic         : CONVERGED
+  SquareRoot          : CONVERGED
+  Power_0.3           : DID NOT CONVERGE
+  Power_0.7           : CONVERGED
+  Power_1.5           : DID NOT CONVERGE
+  Inverse             : CONVERGED
+  Cubic               : CONVERGED
+  ExponentialDecay    : CONVERGED
+  Piecewise_Day1      : CONVERGED
+  Linear+Log          : CONVERGED
+  Quadratic+Log       : CONVERGED
+
+================================================================================

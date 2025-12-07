@@ -1,6 +1,6 @@
 # REMEMVR - Claude Code Reference Guide
 
-**Last Updated:** 2025-11-20
+**Last Updated:** 2025-12-08
 **Purpose:** Trait Memory - Defines WHO I am and HOW I operate (unchanging soul)
 **Current Work:** See state.md (loaded via /refresh)
 **Project Details:** See docs/ (loaded via context-finder or on-demand)
@@ -19,6 +19,7 @@
 8. **Topic names must be descriptive** - Format: `[topic][task][subtopic]` (e.g., `irt_calibration_model_selection_debugging`)
 9. **BEFORE responding to ANY user request:** Think questions → invoke context-finder agent → ask user ONLY remaining questions (MANDATORY - no exceptions)
 10. **NEVER answer user questions without context-finder first** - If you skip context-finding, you're violating core principles
+11. **🔴 LMM MODEL COMPLETENESS CHECK (MANDATORY)** - When working on ANY RQ involving LMM trajectory analysis, IMMEDIATELY check if extended model suite (17+ models including power law variants) has been tested. If only 5 basic models were tested, STOP and alert user (see LMM Model Completeness Protocol below)
 
 ---
 
@@ -122,6 +123,152 @@ I am a PhD thesis assistant for the REMEMVR project - a longitudinal episodic me
 - Interpreting ambiguous results
 - Modifying core analysis tools
 - Making architectural decisions
+
+---
+
+## 🔴 LMM MODEL COMPLETENESS PROTOCOL (CRITICAL)
+
+**DISCOVERY DATE:** 2025-12-08
+**SEVERITY:** HIGH - Affects thesis-level conclusions and theoretical interpretation
+
+### The Problem
+
+**RQ 5.1.1 Major Finding:** Original analysis tested only 5 basic models (Linear, Quadratic, Log, Lin+Log, Quad+Log) and selected **Logarithmic** as best (AIC=869.71).
+
+**Extended testing (17 models) revealed:**
+- **Power law models DOMINATE**: Top 5 positions all held by power law/fractional exponent models
+- **Best model: PowerLaw_Alpha05** (AIC=866.74, weight=15.2%)
+- **Original Log model: RANKED #10** (ΔAIC=2.97, weight=3.4%)
+- **Evidence ratio: 4.4:1** in favor of power law over logarithmic
+
+**Impact:**
+- Changes theoretical interpretation from "Ebbinghaus-style logarithmic forgetting" to "Wixted-style power-law forgetting"
+- Affects ALL downstream RQs that depend on functional form (random slope specifications, trajectory interpretations)
+- Original analysis CITED power law theory (Wixted & Ebbesen, 1991) but never tested it
+
+### Mandatory Check Protocol
+
+**WHEN:** Working on ANY RQ involving LMM trajectory modeling (forgetting curves, time effects, longitudinal analysis)
+
+**WHAT TO CHECK:**
+
+1. **Look for model comparison code** (e.g., `step05_fit_candidate_lmms.py`, `compare_lmm_models_by_aic`)
+2. **Count candidate models tested:**
+   - ✅ **17+ models** including power law variants → GOOD, proceed
+   - ⚠️ **5-7 models** (Linear, Quadratic, Log, combinations) → INCOMPLETE
+   - ❌ **1-3 models** or no comparison → CRITICAL GAP
+
+3. **Check if power law variants included:**
+   - `PowerLaw_Alpha05`: `y ~ (t+1)^(-0.5)`
+   - `PowerLaw_Alpha03`: `y ~ (t+1)^(-0.3)`
+   - `PowerLaw_Alpha07`: `y ~ (t+1)^(-0.7)`
+   - `PowerLaw_LogLog`: `y ~ log(log(t+1)+1)`
+   - `CubeRoot`: `y ~ t^(1/3)`
+   - `SquareRoot`: `y ~ sqrt(t)`
+
+**IF INCOMPLETE → STOP AND ALERT USER:**
+
+```
+🔴 LMM MODEL COMPLETENESS ALERT
+
+I've detected this RQ uses LMM trajectory modeling but only tested
+[X] basic models. Based on RQ 5.1.1 findings (2025-12-08), power law
+models significantly outperform logarithmic models (ΔAIC=2.97).
+
+Current RQ: [chX/X.Y.Z]
+Models tested: [list model names]
+Missing: Power law variants (α=0.3, 0.5, 0.7), fractional exponents
+
+RECOMMENDATION: Run extended model comparison (17+ models) before
+proceeding with analysis/interpretation.
+
+Should I:
+A) Run extended model comparison now (adds ~2 min)
+B) Proceed with existing models (note limitation)
+C) User will handle separately
+```
+
+### Extended Model Suite (17 Models)
+
+**Template for complete LMM model comparison:**
+
+```python
+models = {
+    # ORIGINAL 5 (for continuity)
+    'Linear': 'Ability ~ Days',
+    'Quadratic': 'Ability ~ Days + Days_sq',
+    'Log': 'Ability ~ log_Days',
+    'Lin+Log': 'Ability ~ Days + log_Days',
+    'Quad+Log': 'Ability ~ Days + Days_sq + log_Days',
+
+    # POWER LAW VARIANTS (CRITICAL)
+    'PowerLaw_Alpha05': 'Ability ~ Days_pow_neg05',  # (t+1)^(-0.5)
+    'PowerLaw_Alpha03': 'Ability ~ Days_pow_neg03',  # (t+1)^(-0.3)
+    'PowerLaw_Alpha07': 'Ability ~ Days_pow_neg07',  # (t+1)^(-0.7)
+    'PowerLaw_LogLog': 'Ability ~ log_log_Days',     # log(log(t+1)+1)
+    'PowerLaw_Combined': 'Ability ~ log_Days + log_log_Days',
+
+    # FRACTIONAL EXPONENTS
+    'SquareRoot': 'Ability ~ sqrt_Days',
+    'CubeRoot': 'Ability ~ cbrt_Days',
+    'SquareRoot+Log': 'Ability ~ sqrt_Days + log_Days',
+
+    # RECIPROCAL
+    'Reciprocal': 'Ability ~ recip_Days',        # 1/(t+1)
+    'Recip+Log': 'Ability ~ recip_Days + log_Days',
+
+    # EXPONENTIAL PROXY
+    'Exponential': 'Ability ~ neg_Days',         # -t (proxy for exp(-λt))
+    'Exp+Log': 'Ability ~ neg_Days + log_Days',
+}
+```
+
+**Required time transformations:**
+```python
+lmm_input['log_log_Days'] = np.log(lmm_input['log_Days'] + 1)
+lmm_input['sqrt_Days'] = np.sqrt(lmm_input['Days'])
+lmm_input['cbrt_Days'] = np.cbrt(lmm_input['Days'])
+lmm_input['recip_Days'] = 1.0 / (lmm_input['Days'] + 1)
+lmm_input['Days_pow_neg05'] = (lmm_input['Days'] + 1) ** (-0.5)
+lmm_input['Days_pow_neg03'] = (lmm_input['Days'] + 1) ** (-0.3)
+lmm_input['Days_pow_neg07'] = (lmm_input['Days'] + 1) ** (-0.7)
+lmm_input['neg_Days'] = -lmm_input['Days']
+```
+
+### Affected RQs (Known or Suspected)
+
+**Confirmed need extended comparison:**
+- **RQ 5.1.1** (ch5/5.1.1): ✅ DONE - Power law wins
+- **RQ 6.1.1** (ch6/6.1.1): ⚠️ LIKELY - Used same 5-model framework as 5.1.1
+
+**Potentially affected (check if they exist):**
+- Any Ch5 RQ with LMM trajectory analysis
+- Any Ch6 RQ with LMM trajectory analysis
+- Any Ch7 RQ with LMM trajectory analysis
+
+### Implementation Notes
+
+**Code location:** `results/ch5/5.1.1/code/step05b_fit_extended_candidate_lmms.py`
+
+**Execution time:** ~2 minutes (17 models, random intercept only)
+
+**When to run:**
+- BEFORE finalizing any RQ with LMM trajectory analysis
+- BEFORE writing Results/Discussion sections that interpret functional form
+- BEFORE propagating "best model" to downstream derivative RQs
+
+**When NOT needed:**
+- Non-trajectory LMMs (e.g., group comparisons without time effects)
+- IRT-only analyses (no LMM)
+- Descriptive statistics
+
+### Documentation Updates
+
+**TODO after extended comparison:**
+1. Update `docs/lmm_methodology.md` with extended model suite as standard
+2. Add power law interpretation guidelines to `docs/glossary.md`
+3. Create `docs/design_decisions.md` entry explaining why power law wasn't tested originally
+4. Update RQ workflow to include model completeness check in planning phase
 
 ---
 

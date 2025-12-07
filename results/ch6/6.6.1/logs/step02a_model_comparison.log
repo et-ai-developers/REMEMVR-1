@@ -1,0 +1,62 @@
+[START] Step 02a: AIC Model Comparison for HCE Rate Time Transformation
+[LOAD] Loading HCE rate data from step01...
+[LOADED] step01_hce_rates.csv (400 rows, 6 cols)
+[INFO] Data summary: 400 observations from 100 participants
+[TRANSFORM] Creating time transformations from TSVR...
+[DONE] Created transformations:
+  - Days: range [0.04, 10.26]
+  - Days_squared: range [0.00, 105.27]
+  - log_Days_plus1: range [0.041, 2.421]
+[ANALYSIS] Fitting 5 candidate LMM models with REML=False...
+
+[MODEL] Fitting Linear: Linear time trend
+  Formula: HCE_rate ~ Days
+  Random: ~Days
+  [PASS] Linear converged successfully
+  AIC: -1467.26, BIC: -1443.32, LogLik: 739.63
+
+[MODEL] Fitting Quadratic: Quadratic time trend (Days + Days^2)
+  Formula: HCE_rate ~ Days + Days_squared
+  Random: ~Days
+  [PASS] Quadratic converged successfully
+  AIC: -1465.54, BIC: -1437.60, LogLik: 739.77
+
+[MODEL] Fitting Logarithmic: Logarithmic time trend (log(Days+1))
+  Formula: HCE_rate ~ log_Days_plus1
+  Random: ~log_Days_plus1
+  [PASS] Logarithmic converged successfully
+  AIC: -1467.31, BIC: -1443.36, LogLik: 739.66
+
+[MODEL] Fitting Linear+Log: Linear + Logarithmic (Days + log(Days+1))
+  Formula: HCE_rate ~ Days + log_Days_plus1
+  Random: ~log_Days_plus1
+  [PASS] Linear+Log converged successfully
+  AIC: -1466.71, BIC: -1438.77, LogLik: 740.35
+
+[MODEL] Fitting Quadratic+Log: Quadratic + Logarithmic (Days + Days^2 + log(Days+1))
+  Formula: HCE_rate ~ Days + Days_squared + log_Days_plus1
+  Random: ~log_Days_plus1
+  [PASS] Quadratic+Log converged successfully
+  AIC: -1466.14, BIC: -1434.21, LogLik: 741.07
+
+[DONE] All models fitted
+
+[WEIGHTS] Computing Akaike weights...
+[CHECK] Akaike weights sum: 1.000000 (should be 1.0)
+
+[SELECTION] Identifying best model...
+[BEST] Logarithmic (weight=0.2717, AIC=-1467.31)
+[INTERPRET] No clear winner for Logarithmic model
+
+[SAVE] Saving model comparison results...
+[SAVED] step02a_model_comparison.csv (5 models)
+[SAVED] step02a_best_model_selection.txt
+
+[VALIDATION] Checking results...
+[PASS] All 5 models attempted
+[PASS] 5/5 models have finite AIC values
+[PASS] Akaike weights sum to 1.0
+[PASS] Best model identified: Logarithmic
+[PASS] All models fitted with REML=False (required for AIC comparison)
+
+[SUCCESS] Step 02a complete - all validations passed
