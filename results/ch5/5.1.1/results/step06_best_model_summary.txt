@@ -1,0 +1,23 @@
+================================================================================
+BEST MODEL SUMMARY - AIC Model Selection
+================================================================================
+
+Best Model: Log
+AIC: 873.71
+Akaike Weight: 0.4820
+Uncertainty: Moderate
+Interpretation: 30-60% probability - substantial uncertainty
+
+NOTE: Full model summary not available due to pickle unpickling issue.
+Model pickle file available at: data/lmm_Log.pkl
+
+================================================================================
+All Models Comparison:
+================================================================================
+
+model_name        AIC  delta_AIC  akaike_weight  cumulative_weight
+       Log 873.710488   0.000000   4.819531e-01           0.481953
+   Lin+Log 874.549192   0.838704   3.168710e-01           0.798824
+  Quad+Log 876.528487   2.817999   1.177834e-01           0.916608
+ Quadratic 877.219067   3.508579   8.339243e-02           1.000000
+    Linear 905.540198  31.829709   5.905698e-08           1.000000

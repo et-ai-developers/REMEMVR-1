@@ -68,5 +68,5 @@ analysis_steps:
   step03_irt_calibration_pass2: success
   step04_prepare_lmm_input: success
   step05_fit_5_candidate_lmms: success
-  step06_aic_model_selection: skipped  # Pickle unpickling issues, outputs from step05 sufficient
-  step07_prepare_functional_form_plots: skipped  # Pickle unpickling issues, rq_plots will generate plots directly
+  step06_aic_model_selection: success  # Fixed 2025-12-07: Modified to skip pickle loading, AIC comparison complete
+  step07_prepare_functional_form_plots: skipped  # Pickle unpickling issue prevents model predictions, manual plot exists

@@ -1,0 +1,287 @@
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[LOAD] Loading Step 00 outputs...
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] Q-matrix: 72 items, 4 columns
+[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+[RESHAPE] Converting wide format to long format...
+[INFO] Found 72 item columns
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[PREPARE] Creating factor groups from Q-matrix...
+[INFO] Factor IFR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[ERROR] Missing required columns: ['UID', 'test']
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 295, in <module>
+    prepare_irt_input_from_long(df_long, groups)
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 67, in prepare_irt_input_from_long
+    raise ValueError(f"Missing required columns: {missing_cols}")
+ValueError: Missing required columns: ['UID', 'test']
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[LOAD] Loading Step 00 outputs...
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] Q-matrix: 72 items, 4 columns
+[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+[RESHAPE] Converting wide format to long format...
+[INFO] Found 72 item columns
+[INFO] Parsed composite_ID into UID and test columns
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[PREPARE] Creating factor groups from Q-matrix...
+[INFO] Factor IFR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[PREPARED] Response matrix: torch.Size([400, 72])
+[PREPARED] Missing mask: 72.0 missing values
+[PREPARED] Q-matrix: torch.Size([400, 72])
+[PREPARED] 72 participants, 400 items
+[MODEL] Configuring 3-factor GRM model...
+[ERROR] Q_matrix shape torch.Size([400, 72]) doesn't match expected (400, 3)
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 319, in <module>
+    model = configure_irt_model(
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 150, in configure_irt_model
+    raise ValueError(
+ValueError: Q_matrix shape torch.Size([400, 72]) doesn't match expected (400, 3)
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/deepirtools/data.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[LOAD] Loading Step 00 outputs...
+[LOAD] Loading Step 00 outputs...
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] Q-matrix: 72 items, 4 columns
+[LOADED] Q-matrix: 72 items, 4 columns[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+
+[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+[RESHAPE] Converting wide format to long format...
+[RESHAPE] Converting wide format to long format...
+[INFO] Found 72 item columns
+[INFO] Found 72 item columns
+[INFO] Parsed composite_ID into UID and test columns
+[INFO] Parsed composite_ID into UID and test columns
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[PREPARE] Creating factor groups from Q-matrix...
+[PREPARE] Creating factor groups from Q-matrix...
+[INFO] Factor IFR: 24 items
+[INFO] Factor IFR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[PREPARED] Response matrix: torch.Size([400, 72])
+[PREPARED] Response matrix: torch.Size([400, 72])
+[PREPARED] Missing mask: 28800.0 missing values
+[PREPARED] Q-matrix: torch.Size([72, 3])
+[PREPARED] 400 participants, 72 items
+[MODEL] Configuring 3-factor GRM model...
+[PREPARED] Missing mask: 28800.0 missing values
+[ERROR] object of type 'int' has no len()
+[TRACEBACK] Full error details:
+[PREPARED] Q-matrix: torch.Size([72, 3])
+[PREPARED] 400 participants, 72 items
+[MODEL] Configuring 3-factor GRM model...
+[ERROR] object of type 'int' has no len()
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 320, in <module>
+    model = configure_irt_model(
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 154, in configure_irt_model
+    if len(n_cats) != n_items:
+       ^^^^^^^^^^^
+TypeError: object of type 'int' has no len()
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 320, in <module>
+    model = configure_irt_model(
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 154, in configure_irt_model
+    if len(n_cats) != n_items:
+       ^^^^^^^^^^^
+TypeError: object of type 'int' has no len()
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[LOAD] Loading Step 00 outputs...
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] Q-matrix: 72 items, 4 columns
+[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+[RESHAPE] Converting wide format to long format...
+[INFO] Found 72 item columns
+[INFO] Parsed composite_ID into UID and test columns
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[PREPARE] Creating factor groups from Q-matrix...
+[INFO] Factor IFR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[PREPARED] Response matrix: torch.Size([400, 72])
+[PREPARED] Missing mask: 28800.0 missing values
+[PREPARED] Q-matrix: torch.Size([72, 3])
+[PREPARED] 400 participants, 72 items
+[MODEL] Configuring 3-factor GRM model...
+[MODEL] Configured: 72 items, 3 factors, 5 categories
+[MODEL] Correlated factors: True
+[FIT] Fitting IRT model (MINIMUM settings for validation)...
+[FIT] mc_samples=1 (MINIMUM - expect ~35k epochs)
+[FIT] Expected runtime: ~2 minutes
+[FIT] Model fitting complete
+[WARNING] Model convergence status unclear
+[EXTRACT] Extracting item parameters...
+[ERROR] 'int' object is not iterable
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 373, in <module>
+    df_item_params = extract_parameters_from_irt(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/analysis_irt.py", line 364, in extract_parameters_from_irt
+    for j, k in enumerate(n_cats):
+                ^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not iterable
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[LOAD] Loading Step 00 outputs...
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] Q-matrix: 72 items, 4 columns
+[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+[RESHAPE] Converting wide format to long format...
+[INFO] Found 72 item columns
+[INFO] Parsed composite_ID into UID and test columns
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[PREPARE] Creating factor groups from Q-matrix...
+[INFO] Factor IFR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[PREPARED] Response matrix: torch.Size([400, 72])
+[PREPARED] Missing mask: 28800.0 missing values
+[PREPARED] Q-matrix: torch.Size([72, 3])
+[PREPARED] 400 participants, 72 items
+[MODEL] Configuring 3-factor GRM model...
+[MODEL] Configured: 72 items, 3 factors, 5 categories
+[MODEL] Correlated factors: True
+[FIT] Fitting IRT model (MINIMUM settings for validation)...
+[FIT] mc_samples=1 (MINIMUM - expect ~35k epochs)
+[FIT] Expected runtime: ~2 minutes
+[FIT] Model fitting complete
+[WARNING] Model convergence status unclear
+[EXTRACT] Extracting item parameters...
+[EXTRACTED] Item parameters: 72 rows
+[ERROR] "['factor', 'a', 'b1', 'b2', 'b3', 'b4'] not in index"
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 396, in <module>
+    df_item_params = df_item_params[['item_name', 'factor', 'a', 'b1', 'b2', 'b3', 'b4']]
+                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4119, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 6212, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 6264, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['factor', 'a', 'b1', 'b2', 'b3', 'b4'] not in index"
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* paradigm items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Factors: ['IFR', 'ICR', 'IRE']
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (MINIMUM - FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[CONFIG] Expected runtime: ~2 min fitting + ~5 min scoring = ~7 min total
+[LOAD] Loading Step 00 outputs...
+[LOADED] IRT input: 400 rows, 73 columns
+[LOADED] Q-matrix: 72 items, 4 columns
+[INFO] Q-matrix columns: ['item_name', 'factor1_IFR', 'factor2_ICR', 'factor3_IRE']
+[RESHAPE] Converting wide format to long format...
+[INFO] Found 72 item columns
+[INFO] Parsed composite_ID into UID and test columns
+[RESHAPE] Long format: 28800 observations (0 missing removed)
+[VALIDATE] Unique score values: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[PREPARE] Creating factor groups from Q-matrix...
+[INFO] Factor IFR: 24 items
+[INFO] Factor ICR: 24 items
+[INFO] Factor IRE: 24 items
+[PREPARE] Converting to IRT tensors...
+[PREPARED] Response matrix: torch.Size([400, 72])
+[PREPARED] Missing mask: 28800.0 missing values
+[PREPARED] Q-matrix: torch.Size([72, 3])
+[PREPARED] 400 participants, 72 items
+[MODEL] Configuring 3-factor GRM model...
+[MODEL] Configured: 72 items, 3 factors, 5 categories
+[MODEL] Correlated factors: True
+[FIT] Fitting IRT model (MINIMUM settings for validation)...
+[FIT] mc_samples=1 (MINIMUM - expect ~35k epochs)
+[FIT] Expected runtime: ~2 minutes
+[FIT] Model fitting complete
+[WARNING] Model convergence status unclear
+[EXTRACT] Extracting item parameters...
+[EXTRACTED] Item parameters: 72 rows
+[INFO] Parameter columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_IFR', 'Discrim_ICR', 'Discrim_IRE']
+[VALIDATE] Checking item parameters...
+[INFO] Overall Discrimination range: [1.835, 5.202]
+[INFO] Difficulty range: [0.040, 1.256]
+[PASS] No NaN parameters
+[ERROR] 'b1'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'b1'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step01_irt_calibration_pass1.py", line 401, in <module>
+    (df_item_params['b1'] < df_item_params['b2']) &
+     ~~~~~~~~~~~~~~^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'b1'

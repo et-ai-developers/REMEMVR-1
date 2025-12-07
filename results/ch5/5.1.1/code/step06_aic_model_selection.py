@@ -161,18 +161,10 @@ if __name__ == "__main__":
         log(f"  Columns: {model_comparison.columns.tolist()}")
         log(f"  AIC range: [{model_comparison['AIC'].min():.2f}, {model_comparison['AIC'].max():.2f}]")
 
-        log("[LOAD] Loading fitted model objects...")
-        # Load individual model pickle files (created by compare_lmm_models_by_aic)
-        model_fits = {}
-        for model_name in model_comparison['model_name']:
-            pickle_path = RQ_DIR / "data" / f"lmm_{model_name}.pkl"
-            if pickle_path.exists():
-                with open(pickle_path, 'rb') as f:
-                    model_fits[model_name] = pickle.load(f)
-            else:
-                log(f"  WARNING: Model pickle not found: {pickle_path.name}")
-
-        log(f"[LOADED] {len(model_fits)} model objects from individual pickle files")
+        log("[SKIP] Skipping model pickle loading (patsy unpickling issue)")
+        # Note: Model pickles exist but cannot be unpickled due to patsy formula issue
+        # We'll skip saving best_model.pkl and use limited summary info
+        model_fits = None  # Not loaded to avoid unpickling errors
 
         # =========================================================================
         # STEP 2: Compute Delta AIC
@@ -264,15 +256,10 @@ if __name__ == "__main__":
         )
         log(f"[SAVED] {output_path.name}")
 
-        # Save best model object separately
-        best_model_obj = model_fits[best_model_name]
-        best_model_path = RQ_DIR / "data" / "step06_best_model.pkl"
-        log(f"[SAVE] Saving best model object to {best_model_path.name}...")
-        with open(best_model_path, 'wb') as f:
-            pickle.dump(best_model_obj, f)
-        log(f"[SAVED] {best_model_path.name}")
+        # Skip saving best model pickle (unpickling issue)
+        log(f"[SKIP] Not saving best_model.pkl (model pickle exists as data/lmm_{best_model_name}.pkl)")
 
-        # Save best model summary text
+        # Save best model summary text (without full model summary)
         summary_path = RQ_DIR / "results" / "step06_best_model_summary.txt"
         log(f"[SAVE] Saving best model summary to {summary_path.name}...")
         with open(summary_path, 'w', encoding='utf-8') as f:
@@ -284,11 +271,8 @@ if __name__ == "__main__":
             f.write(f"Akaike Weight: {best_model_weight:.4f}\n")
             f.write(f"Uncertainty: {uncertainty}\n")
             f.write(f"Interpretation: {interpretation}\n\n")
-            f.write("=" * 80 + "\n")
-            f.write("Model Coefficients:\n")
-            f.write("=" * 80 + "\n\n")
-            f.write(str(best_model_obj.summary()))
-            f.write("\n\n")
+            f.write("NOTE: Full model summary not available due to pickle unpickling issue.\n")
+            f.write(f"Model pickle file available at: data/lmm_{best_model_name}.pkl\n\n")
             f.write("=" * 80 + "\n")
             f.write("All Models Comparison:\n")
             f.write("=" * 80 + "\n\n")

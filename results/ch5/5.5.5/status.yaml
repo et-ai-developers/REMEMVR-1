@@ -63,8 +63,12 @@ rq_inspect:
   context_dump: "All step outputs validated"
 
 rq_plots:
-  status: pending
-  context_dump: "Plot source CSVs created in step08, plot generation pending"
+  status: success
+  context_dump: |
+    Plots generated: 2 (correlation_comparison, aic_comparison)
+    Data sources: step08_correlation_comparison_data.csv, step08_aic_comparison_data.csv
+    Functions used: plot_comparison_bars (faceted by location_type)
+    No trajectory plots (Decision D069 not applicable per plan.md)
 
 rq_validate:
   status: success
@@ -72,5 +76,9 @@ rq_validate:
   context_dump: "PASS WITH NOTES. 29/30 checks passed. 1 moderate issue: missing Cohen's q effect size (optional). Paradox confirmed for destination, partial for source (ceiling effect). See results/validation.md"
 
 rq_results:
-  status: pending
-  context_dump: "Summary.md creation pending"
+  status: success
+  timestamp: "2025-12-07"
+  context_dump: |
+    Results validated for scientific plausibility
+    3 anomalies flagged: 1 convergence concern, 1 partial paradox, 1 low reliability
+    Summary documented in results/summary.md

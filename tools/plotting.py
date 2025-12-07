@@ -15,6 +15,7 @@ Functions:
     plot_trajectory() - Trajectory with fitted curves + observed errorhars
     plot_diagnostics() - 2x2 diagnostic grid for regression validation
     plot_histogram_by_group() - Grouped histograms
+    plot_comparison_bars() - Grouped bar plots with CI for comparisons
     convert_theta_to_probability() - IRT response function
     save_plot_with_data() - Save PNG + CSV simultaneously
 
@@ -840,6 +841,346 @@ def prepare_piecewise_plot_data(
 # =============================================================================
 # Piecewise Trajectory Plotting
 # =============================================================================
+
+def plot_comparison_bars(
+    df: pd.DataFrame,
+    x_col: str,
+    y_col: str,
+    group_col: Optional[str] = None,
+    facet_col: Optional[str] = None,
+    ci_lower_col: Optional[str] = None,
+    ci_upper_col: Optional[str] = None,
+    annotation_col: Optional[str] = None,
+    colors: Optional[Dict[str, str]] = None,
+    xlabel: Optional[str] = None,
+    ylabel: Optional[str] = None,
+    title: Optional[str] = None,
+    figsize: Tuple[int, int] = (10, 6),
+    orientation: str = 'vertical',
+    output_path: Optional[Path] = None,
+    bar_width: float = 0.35,
+    show_legend: bool = True
+) -> Tuple[plt.Figure, Any]:
+    """
+    Create grouped bar plot with confidence intervals for comparison visualizations.
+
+    Supports grouped bars (multiple bars per x-category), optional faceting,
+    confidence interval error bars, and custom annotations. Designed for
+    model comparison plots (e.g., IRT vs CTT) and correlation comparisons.
+
+    Args:
+        df: DataFrame with data to plot
+        x_col: Column name for x-axis categories
+        y_col: Column name for y-axis values
+        group_col: Optional column name for grouping (creates grouped bars)
+        facet_col: Optional column name for faceting (creates subplots)
+        ci_lower_col: Optional column name for CI lower bound
+        ci_upper_col: Optional column name for CI upper bound
+        annotation_col: Optional column name for annotations (e.g., significance stars)
+        colors: Optional dict mapping group names to colors
+        xlabel: X-axis label (default: x_col with underscores replaced)
+        ylabel: Y-axis label (default: y_col with underscores replaced)
+        title: Plot title
+        figsize: Figure size (width, height) in inches
+        orientation: Bar orientation - 'vertical' or 'horizontal'
+        output_path: Optional path to save plot
+        bar_width: Width of individual bars (default 0.35)
+        show_legend: Whether to show legend (default True)
+
+    Returns:
+        If facet_col is None:
+            Tuple of (fig, ax) where ax is single Axes
+        If facet_col is provided:
+            Tuple of (fig, axes) where axes is array of Axes
+
+    Raises:
+        ValueError: If DataFrame is empty
+        KeyError: If required column not in DataFrame
+
+    Example:
+        >>> # Simple bar plot
+        >>> df = pd.DataFrame({'model': ['A', 'B'], 'AIC': [100, 110]})
+        >>> fig, ax = plot_comparison_bars(df, 'model', 'AIC')
+
+        >>> # Grouped bars with CI
+        >>> df = pd.DataFrame({
+        ...     'location': ['source', 'source', 'dest', 'dest'],
+        ...     'version': ['full', 'purified'] * 2,
+        ...     'r': [0.93, 0.94, 0.80, 0.87],
+        ...     'CI_lower': [0.92, 0.93, 0.76, 0.85],
+        ...     'CI_upper': [0.95, 0.95, 0.83, 0.89]
+        ... })
+        >>> fig, ax = plot_comparison_bars(
+        ...     df, x_col='version', y_col='r', group_col='location',
+        ...     ci_lower_col='CI_lower', ci_upper_col='CI_upper'
+        ... )
+
+        >>> # Faceted plot
+        >>> fig, axes = plot_comparison_bars(
+        ...     df, x_col='model', y_col='AIC', facet_col='location'
+        ... )
+    """
+    # Input validation
+    if df.empty:
+        raise ValueError("DataFrame is empty")
+
+    if x_col not in df.columns:
+        raise KeyError(f"Column '{x_col}' not found in DataFrame")
+
+    if y_col not in df.columns:
+        raise KeyError(f"Column '{y_col}' not found in DataFrame")
+
+    # Set default labels
+    if xlabel is None:
+        xlabel = x_col.replace('_', ' ').title()
+    if ylabel is None:
+        ylabel = y_col.replace('_', ' ').title()
+
+    # Get default colors if not provided
+    if colors is None:
+        try:
+            config = load_config_from_file('plotting')
+            colors = config.get('colors', {})
+        except:
+            colors = {}
+
+    # Determine if we need faceting
+    if facet_col is not None:
+        facet_values = sorted(df[facet_col].unique())
+        n_facets = len(facet_values)
+
+        # Create subplots
+        fig, axes = plt.subplots(1, n_facets, figsize=(figsize[0] * n_facets / 2, figsize[1]),
+                                 squeeze=False)
+        axes = axes.flatten()
+
+        # Plot each facet
+        for i, facet_value in enumerate(facet_values):
+            df_facet = df[df[facet_col] == facet_value]
+            _plot_single_comparison_bars(
+                ax=axes[i],
+                df=df_facet,
+                x_col=x_col,
+                y_col=y_col,
+                group_col=group_col,
+                ci_lower_col=ci_lower_col,
+                ci_upper_col=ci_upper_col,
+                annotation_col=annotation_col,
+                colors=colors,
+                xlabel=xlabel,
+                ylabel=ylabel if i == 0 else None,  # Only first subplot gets ylabel
+                title=f"{facet_col.replace('_', ' ').title()}: {facet_value}",
+                orientation=orientation,
+                bar_width=bar_width,
+                show_legend=show_legend
+            )
+
+        plt.tight_layout()
+
+        if output_path:
+            output_path = Path(output_path)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            fig.savefig(output_path, dpi=300, bbox_inches='tight')
+
+        return fig, axes
+
+    else:
+        # Single plot (no faceting)
+        fig, ax = plt.subplots(figsize=figsize)
+
+        _plot_single_comparison_bars(
+            ax=ax,
+            df=df,
+            x_col=x_col,
+            y_col=y_col,
+            group_col=group_col,
+            ci_lower_col=ci_lower_col,
+            ci_upper_col=ci_upper_col,
+            annotation_col=annotation_col,
+            colors=colors,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            title=title,
+            orientation=orientation,
+            bar_width=bar_width,
+            show_legend=show_legend
+        )
+
+        plt.tight_layout()
+
+        if output_path:
+            output_path = Path(output_path)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            fig.savefig(output_path, dpi=300, bbox_inches='tight')
+
+        return fig, ax
+
+
+def _plot_single_comparison_bars(
+    ax: plt.Axes,
+    df: pd.DataFrame,
+    x_col: str,
+    y_col: str,
+    group_col: Optional[str] = None,
+    ci_lower_col: Optional[str] = None,
+    ci_upper_col: Optional[str] = None,
+    annotation_col: Optional[str] = None,
+    colors: Optional[Dict[str, str]] = None,
+    xlabel: Optional[str] = None,
+    ylabel: Optional[str] = None,
+    title: Optional[str] = None,
+    orientation: str = 'vertical',
+    bar_width: float = 0.35,
+    show_legend: bool = True
+) -> None:
+    """
+    Internal helper function to plot a single comparison bar chart.
+
+    This function handles the actual plotting logic for plot_comparison_bars().
+    Not intended to be called directly by users.
+    """
+    # Get unique x categories
+    x_categories = df[x_col].unique()
+    x_positions = np.arange(len(x_categories))
+
+    # Determine if we have grouping
+    if group_col is not None and group_col in df.columns:
+        groups = df[group_col].unique()
+        n_groups = len(groups)
+
+        # Calculate bar positions for grouped bars
+        offset = bar_width * (n_groups - 1) / 2
+        group_positions = {
+            group: x_positions + i * bar_width - offset
+            for i, group in enumerate(groups)
+        }
+
+        # Plot each group
+        for group in groups:
+            df_group = df[df[group_col] == group]
+
+            # Get y-values in order of x_categories
+            y_values = []
+            ci_lower_values = []
+            ci_upper_values = []
+
+            for x_cat in x_categories:
+                df_cat = df_group[df_group[x_col] == x_cat]
+                if len(df_cat) > 0:
+                    y_values.append(df_cat[y_col].values[0])
+
+                    if ci_lower_col and ci_upper_col:
+                        ci_lower_values.append(df_cat[ci_lower_col].values[0])
+                        ci_upper_values.append(df_cat[ci_upper_col].values[0])
+                else:
+                    y_values.append(0)
+                    if ci_lower_col and ci_upper_col:
+                        ci_lower_values.append(0)
+                        ci_upper_values.append(0)
+
+            # Get color
+            color = colors.get(group, None) if colors else None
+
+            # Plot bars
+            positions = group_positions[group]
+            if orientation == 'vertical':
+                bars = ax.bar(positions, y_values, bar_width, label=group, color=color, alpha=0.8)
+
+                # Add error bars if provided
+                if ci_lower_col and ci_upper_col and ci_lower_values and ci_upper_values:
+                    yerr_lower = [y_values[i] - ci_lower_values[i] for i in range(len(y_values))]
+                    yerr_upper = [ci_upper_values[i] - y_values[i] for i in range(len(y_values))]
+                    ax.errorbar(positions, y_values,
+                               yerr=[yerr_lower, yerr_upper],
+                               fmt='none', color='black', capsize=4, alpha=0.6)
+            else:  # horizontal
+                bars = ax.barh(positions, y_values, bar_width, label=group, color=color, alpha=0.8)
+
+                if ci_lower_col and ci_upper_col and ci_lower_values and ci_upper_values:
+                    xerr_lower = [y_values[i] - ci_lower_values[i] for i in range(len(y_values))]
+                    xerr_upper = [ci_upper_values[i] - y_values[i] for i in range(len(y_values))]
+                    ax.errorbar(y_values, positions,
+                               xerr=[xerr_lower, xerr_upper],
+                               fmt='none', color='black', capsize=4, alpha=0.6)
+
+            # Add annotations if provided
+            if annotation_col and annotation_col in df_group.columns:
+                for i, x_cat in enumerate(x_categories):
+                    df_cat = df_group[df_group[x_col] == x_cat]
+                    if len(df_cat) > 0 and pd.notna(df_cat[annotation_col].values[0]):
+                        annotation_text = str(df_cat[annotation_col].values[0])
+                        if orientation == 'vertical':
+                            ax.text(positions[i], y_values[i], annotation_text,
+                                   ha='center', va='bottom', fontsize=9)
+                        else:
+                            ax.text(y_values[i], positions[i], annotation_text,
+                                   ha='left', va='center', fontsize=9)
+
+    else:
+        # No grouping - simple bar plot
+        y_values = [df[df[x_col] == x_cat][y_col].values[0] for x_cat in x_categories]
+
+        if orientation == 'vertical':
+            bars = ax.bar(x_positions, y_values, bar_width * 2, alpha=0.8)
+
+            # Add error bars if provided
+            if ci_lower_col and ci_upper_col:
+                ci_lower_values = [df[df[x_col] == x_cat][ci_lower_col].values[0] for x_cat in x_categories]
+                ci_upper_values = [df[df[x_col] == x_cat][ci_upper_col].values[0] for x_cat in x_categories]
+                yerr_lower = [y_values[i] - ci_lower_values[i] for i in range(len(y_values))]
+                yerr_upper = [ci_upper_values[i] - y_values[i] for i in range(len(y_values))]
+                ax.errorbar(x_positions, y_values,
+                           yerr=[yerr_lower, yerr_upper],
+                           fmt='none', color='black', capsize=4, alpha=0.6)
+        else:  # horizontal
+            bars = ax.barh(x_positions, y_values, bar_width * 2, alpha=0.8)
+
+            if ci_lower_col and ci_upper_col:
+                ci_lower_values = [df[df[x_col] == x_cat][ci_lower_col].values[0] for x_cat in x_categories]
+                ci_upper_values = [df[df[x_col] == x_cat][ci_upper_col].values[0] for x_cat in x_categories]
+                xerr_lower = [y_values[i] - ci_lower_values[i] for i in range(len(y_values))]
+                xerr_upper = [ci_upper_values[i] - y_values[i] for i in range(len(y_values))]
+                ax.errorbar(y_values, x_positions,
+                           xerr=[xerr_lower, xerr_upper],
+                           fmt='none', color='black', capsize=4, alpha=0.6)
+
+        # Add annotations if provided
+        if annotation_col and annotation_col in df.columns:
+            for i, x_cat in enumerate(x_categories):
+                df_cat = df[df[x_col] == x_cat]
+                if len(df_cat) > 0 and pd.notna(df_cat[annotation_col].values[0]):
+                    annotation_text = str(df_cat[annotation_col].values[0])
+                    if orientation == 'vertical':
+                        ax.text(x_positions[i], y_values[i], annotation_text,
+                               ha='center', va='bottom', fontsize=9)
+                    else:
+                        ax.text(y_values[i], x_positions[i], annotation_text,
+                               ha='left', va='center', fontsize=9)
+
+    # Set labels and formatting
+    if orientation == 'vertical':
+        ax.set_xticks(x_positions)
+        ax.set_xticklabels(x_categories, rotation=0 if len(x_categories) <= 4 else 45, ha='right')
+        if xlabel:
+            ax.set_xlabel(xlabel, fontweight='bold')
+        if ylabel:
+            ax.set_ylabel(ylabel, fontweight='bold')
+    else:  # horizontal
+        ax.set_yticks(x_positions)
+        ax.set_yticklabels(x_categories)
+        if ylabel:
+            ax.set_xlabel(ylabel, fontweight='bold')
+        if xlabel:
+            ax.set_ylabel(xlabel, fontweight='bold')
+
+    if title:
+        ax.set_title(title, fontweight='bold', pad=15)
+
+    ax.grid(True, alpha=0.3, axis='y' if orientation == 'vertical' else 'x')
+
+    if show_legend and group_col is not None:
+        ax.legend(loc='best', framealpha=0.95)
+
 
 def plot_piecewise_trajectory(
     theta_data: pd.DataFrame,

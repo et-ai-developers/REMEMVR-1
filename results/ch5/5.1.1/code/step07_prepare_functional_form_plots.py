@@ -193,19 +193,33 @@ if __name__ == "__main__":
         log(f"[LOADED] {aic_path.name}")
         log(f"  Best model: {best_model_name}")
 
-        # Load all 5 model pickle files for predictions
-        log("[LOAD] Loading all 5 fitted models for predictions...")
-        model_fits = {}
-        for model_name in ['Linear', 'Quadratic', 'Logarithmic', 'LinLog', 'QuadLog']:
-            pickle_path = RQ_DIR / "data" / f"lmm_{model_name}.pkl"
-            if pickle_path.exists():
-                with open(pickle_path, 'rb') as f:
-                    model_fits[model_name] = pickle.load(f)
-                log(f"  Loaded {model_name}")
-            else:
-                log(f"  WARNING: {model_name} pickle not found")
+        # SKIP pickle loading due to patsy unpickling issues
+        # Instead, refit ONLY the best model for predictions
+        log("[SKIP] Skipping pickle loading (patsy unpickling issue)")
+        log("[REFIT] Refitting best model for predictions...")
 
-        log(f"[LOADED] {len(model_fits)} model objects")
+        import statsmodels.formula.api as smf
+
+        # Refit only the best model (Logarithmic)
+        log(f"  Refitting {best_model_name} model...")
+
+        if best_model_name == 'Logarithmic':
+            formula = "Theta ~ log_Days_plus1"
+        elif best_model_name == 'Linear':
+            formula = "Theta ~ Days"
+        elif best_model_name == 'Quadratic':
+            formula = "Theta ~ Days + Days_squared"
+        elif best_model_name == 'LinLog':
+            formula = "Theta ~ Days + log_Days_plus1"
+        elif best_model_name == 'QuadLog':
+            formula = "Theta ~ Days + Days_squared + log_Days_plus1"
+        else:
+            raise ValueError(f"Unknown best model: {best_model_name}")
+
+        best_model_fit = smf.mixedlm(formula, lmm_input, groups=lmm_input['UID']).fit()
+        model_fits = {best_model_name: best_model_fit}
+
+        log(f"[REFITTED] {best_model_name} model")
 
         # =========================================================================
         # STEP 2: Compute Observed Means per Test Session
