@@ -1,0 +1,72 @@
+[START] Step 00: Extract Confidence Item Data
+[LOAD] Loading dfData.csv...
+[LOADED] dfData.csv (400 rows, 214 cols)
+[CHECK] Required columns present: ['UID', 'TEST', 'TSVR']
+[FILTER] Filtering to TC_* confidence items with -U- or -D- tags...
+[FILTER] Found 18 source items (-U- tags)
+[FILTER] Found 18 destination items (-D- tags)
+[FILTER] Total confidence items: 36
+[FILTERED] 400 rows with 36 confidence items
+[TRANSFORM] Creating composite_ID...
+[CREATED] composite_ID for 400 unique participant-test combinations
+[VALIDATE] Checking confidence item value categories...
+[WARNING] Item TC_IFR-U-i1 has unexpected values: {np.float64(0.8), np.float64(0.6), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_IFR-U-i2 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IFR-U-i3 has unexpected values: {np.float64(0.6), np.float64(0.8), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_IFR-U-i4 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_IFR-U-i5 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_IFR-U-i6 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_ICR-U-i1 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_ICR-U-i2 has unexpected values: {np.float64(0.8), np.float64(0.6), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_ICR-U-i3 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_ICR-U-i4 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_ICR-U-i5 has unexpected values: {np.float64(0.6), np.float64(0.8), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_ICR-U-i6 has unexpected values: {np.float64(0.4), np.float64(0.8), np.float64(0.6), np.float64(0.2)}
+[WARNING] Item TC_IRE-U-i1 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-U-i2 has unexpected values: {np.float64(0.6), np.float64(0.4), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-U-i3 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-U-i4 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-U-i5 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-U-i6 has unexpected values: {np.float64(0.6), np.float64(0.4), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IFR-D-i1 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IFR-D-i2 has unexpected values: {np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8)}
+[WARNING] Item TC_IFR-D-i3 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IFR-D-i4 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IFR-D-i5 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_IFR-D-i6 has unexpected values: {np.float64(0.2), np.float64(0.6), np.float64(0.8), np.float64(0.4)}
+[WARNING] Item TC_ICR-D-i1 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_ICR-D-i2 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_ICR-D-i3 has unexpected values: {np.float64(0.8), np.float64(0.6), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_ICR-D-i4 has unexpected values: {np.float64(0.4), np.float64(0.8), np.float64(0.6), np.float64(0.2)}
+[WARNING] Item TC_ICR-D-i5 has unexpected values: {np.float64(0.6), np.float64(0.8), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_ICR-D-i6 has unexpected values: {np.float64(0.4), np.float64(0.8), np.float64(0.6), np.float64(0.2)}
+[WARNING] Item TC_IRE-D-i1 has unexpected values: {np.float64(0.6), np.float64(0.8), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_IRE-D-i2 has unexpected values: {np.float64(0.6), np.float64(0.4), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-D-i3 has unexpected values: {np.float64(0.8), np.float64(0.6), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_IRE-D-i4 has unexpected values: {np.float64(0.6), np.float64(0.4), np.float64(0.8), np.float64(0.2)}
+[WARNING] Item TC_IRE-D-i5 has unexpected values: {np.float64(0.6), np.float64(0.8), np.float64(0.2), np.float64(0.4)}
+[WARNING] Item TC_IRE-D-i6 has unexpected values: {np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(0.2)}
+[VALIDATED] Confidence items are 5-category ordinal (0, 0.25, 0.5, 0.75, 1.0)
+[RESHAPE] Creating wide-format IRT input...
+[RESHAPED] IRT input: 400 rows x 37 cols
+[SAVE] Saving IRT input to /home/etai/projects/REMEMVR/results/ch6/6.8.1/data/step00_irt_input.csv...
+[SAVED] step00_irt_input.csv (400 rows, 37 cols)
+[CREATE] Building Q-matrix for 2-factor structure...
+[CREATED] Q-matrix: 36 items, 2 dimensions (Source, Destination)
+[CREATED] Source dimension: 18 items
+[CREATED] Destination dimension: 18 items
+[VALIDATED] Q-matrix has simple structure (no items load on both dimensions)
+[SAVE] Saving Q-matrix to /home/etai/projects/REMEMVR/results/ch6/6.8.1/data/step00_q_matrix.csv...
+[SAVED] step00_q_matrix.csv (36 rows, 3 cols)
+[EXTRACT] Extracting TSVR time mapping...
+[EXTRACTED] TSVR mapping: 400 observations
+[VALIDATED] TSVR_hours range: [1.0, 246.2] hours
+[WARNING] TSVR_hours outside expected range [0, 168]: [1.0, 246.24]
+[SAVE] Saving TSVR mapping to /home/etai/projects/REMEMVR/results/ch6/6.8.1/data/step00_tsvr_mapping.csv...
+[SAVED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] PASS - 1 required columns present
+[SUCCESS] Step 00 complete
+[SUMMARY] Extracted 18 source items, 18 destination items
+[SUMMARY] Created Q-matrix: 2 dimensions (Source, Destination)
+[SUMMARY] TSVR mapping: 400 observations

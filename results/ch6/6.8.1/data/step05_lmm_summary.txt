@@ -1,0 +1,37 @@
+================================================================================
+Linear Mixed Model Summary
+RQ: ch6/6.3.1 - Confidence Domain x Time Interaction
+================================================================================
+
+                  Mixed Linear Model Regression Results
+==========================================================================
+Model:                   MixedLM       Dependent Variable:       theta    
+No. Observations:        800           Method:                   ML       
+No. Groups:              100           Scale:                    0.1210   
+Min. group size:         8             Log-Likelihood:           -437.8989
+Max. group size:         8             Converged:                Yes      
+Mean group size:         8.0                                              
+--------------------------------------------------------------------------
+                               Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+--------------------------------------------------------------------------
+Intercept                      -0.068    0.066  -1.045 0.296 -0.197  0.060
+C(location)[T.Source]           0.039    0.056   0.699 0.484 -0.070  0.148
+log_TSVR                       -0.138    0.011 -13.126 0.000 -0.159 -0.117
+C(location)[T.Source]:log_TSVR -0.009    0.015  -0.594 0.553 -0.038  0.020
+Group Var                       0.274    0.126                            
+==========================================================================
+
+
+================================================================================
+Model Specification
+================================================================================
+Formula: theta ~ C(location) * log_TSVR
+Random effects: ~1 (random intercept only)
+Groups: UID
+REML: False
+Converged: True
+AIC: 887.7978
+BIC: 915.9055
+Log-Likelihood: -437.8989
+N observations: 800
+N groups: 100

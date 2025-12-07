@@ -1,0 +1,49 @@
+[START] Step 07: Prepare Trajectory Plot Data
+[LOAD] Loading input data...
+[LOADED] step04_lmm_input.csv (800 rows, 7 cols)
+[LOADED] step03_pass2_item_params.csv (36 rows, 5 cols)
+[ANALYSIS] Aggregating theta scores by domain and test...
+[ERROR] 'test'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.8.1/code/step07_prepare_trajectory_plot_data.py", line 168, in <module>
+    grouped = df_long.groupby(['location', 'test']).agg({
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 9210, in groupby
+    return DataFrameGroupBy(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/groupby/groupby.py", line 1331, in __init__
+    grouper, exclusions, obj = get_grouper(
+                               ^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/groupby/grouper.py", line 1043, in get_grouper
+    raise KeyError(gpr)
+KeyError: 'test'
+[START] Step 07: Prepare Trajectory Plot Data
+[LOAD] Loading input data...
+[LOADED] step04_lmm_input.csv (800 rows, 7 cols)
+[LOADED] step03_pass2_item_params.csv (36 rows, 5 cols)
+[ANALYSIS] Aggregating theta scores by domain and test...
+[DONE] Aggregated to 8 rows (domains × tests)
+[INFO] Domains present: ['Destination', 'Source']
+[INFO] Tests per domain: {'Destination': 4, 'Source': 4}
+[SAVE] Saving theta-scale plot data...
+[SAVED] step07_trajectory_theta_data.csv (8 rows, 6 cols)
+[ANALYSIS] Computing mean discrimination per domain...
+[INFO] Mean discrimination for Source: 2.9337 (18 items)
+[INFO] Mean discrimination for Destination: 3.1419 (18 items)
+[ANALYSIS] Transforming theta to probability scale...
+[DONE] Probability transformation complete
+[SAVE] Saving probability-scale plot data...
+[SAVED] step07_trajectory_probability_data.csv (8 rows, 6 cols)
+[VALIDATION] Running validation checks...
+[VALIDATION] [PASS] Both datasets have 8 rows
+[VALIDATION] [PASS] Row count matches expected: 8 rows (2 domains × 4 timepoints)
+[VALIDATION] [PASS] No NaN values in theta_data
+[VALIDATION] [PASS] No NaN values in probability_data
+[VALIDATION] [PASS] All theta CI bounds valid (CI_lower < CI_upper)
+[VALIDATION] [PASS] All probability CI bounds valid (CI_lower < CI_upper)
+[VALIDATION] [PASS] All probability values valid (n=3 columns, 24 total values in [0, 1]).
+[VALIDATION] All validation checks passed
+[VALIDATION] Theta range: [-0.8350, -0.1632]
+[VALIDATION] Probability range: [0.0786, 0.3826]
+[SUCCESS] Step 07 complete

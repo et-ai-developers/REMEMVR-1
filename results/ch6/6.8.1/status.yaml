@@ -2,25 +2,30 @@ rq_builder: success
 rq_concept: success
 rq_scholar: success
 rq_stats: success
-rq_planner: pending
-rq_tools: pending
-rq_analysis: pending
+rq_planner: success
+rq_tools: success
+rq_analysis: success
+g_code: success
+rq_inspect: success
+rq_plots: pending
+rq_results: success
+rq_validate: pending
 
 context_dumps:
   rq_scholar: "9.1/10 CONDITIONAL. Theory strong, literature sparse. Required: VR ecological validity + enactment effect acknowledgment. Ready for stats after 2 changes."
   rq_stats: "9.4/10 APPROVED. Category 1: 3.0/3 (optimal). Category 2: 2.0/2 (87.5% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.8/2 (missing LMM diagnostics). Category 5: 0.6/1 (4 concerns, adequate but not comprehensive). Strong replication design paralleling Ch5 5.5.1."
+  rq_results: |
+    RQ 6.8.1: Source-Destination Confidence Trajectories
+    NULL hypothesis SUPPORTED: No source-destination dissociation in confidence (p=0.553)
+    Contrasts Ch5 5.5.1 accuracy finding (confidence-accuracy dissociation)
+    Summary documented in results/summary.md with critical limitations noted
 
 analysis_steps:
-  step00_extract_vr_data: pending
-  step01_irt_calibration_pass1: pending
-  step02_purify_items: pending
-  step03_irt_calibration_pass2: pending
-  step04_merge_theta_tsvr: pending
-  step05_fit_lmm: pending
-  step06_compute_post_hoc_contrasts: pending
-  step07_prepare_trajectory_plot_data: pending
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
-rq_validate: pending
+  step00_extract_vr_data: success
+  step01_irt_calibration_pass1: success
+  step02_purify_items: success
+  step03_irt_calibration_pass2: success
+  step04_merge_theta_tsvr: success
+  step05_fit_lmm: success
+  step06_compute_post_hoc_contrasts: success
+  step07_prepare_trajectory_plot_data: success

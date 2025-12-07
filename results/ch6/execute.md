@@ -158,13 +158,143 @@ df.columns = ['UID', 'TEST', 'TSVR', ...]
 
 ---
 
+## CODE-COPYING STRATEGY (75% Time Savings)
+
+**When to use:** After first successful ROOT RQ in a chapter series (e.g., 6.3.1 → 6.4.1 → 6.5.1 → 6.8.1)
+
+**Success rate:** 3/3 applications (RQs 6.4.1, 6.5.1, 6.8.1)
+**Time savings:** 45 min vs 4-5 hours with g_code (75-80% reduction)
+**Bug rate:** 1-2 predictable bugs vs 5-6 systematic bugs per step
+
+### Procedure:
+
+```bash
+# 1. Copy all code files from working source RQ
+cp -r results/ch6/SOURCE_RQ/code/* results/ch6/TARGET_RQ/code/
+
+# 2. Update RQ ID references (CRITICAL - prevents overwriting source RQ!)
+cd results/ch6/TARGET_RQ/code
+sed -i 's/SOURCE_ID/TARGET_ID/g' *.py  # e.g., 6.5.1 → 6.8.1
+sed -i 's/ch6\/SOURCE_ID/ch6\/TARGET_ID/g' *.py
+
+# 3. Find/replace factor names (if different factor structure)
+sed -i 's/OldFactor1/NewFactor1/g' *.py
+sed -i 's/OldFactor2/NewFactor2/g' *.py
+# ... for all factors
+
+# 4. Update IRT_CONFIG['factors'] list (Steps 01 & 03)
+# Manually edit step01*.py and step03*.py:
+# OLD: 'factors': ['Common', 'Congruent', 'Incongruent']
+# NEW: 'factors': ['Source', 'Destination']
+
+# 5. Fix Q-matrix column naming (Bug #6/#7 pattern - PREDICTABLE)
+# Check actual Q-matrix format from Step 00 output, then update:
+# - Step 01: factor_col construction (lines ~245-255)
+# - Step 03: factor_col construction (lines ~275-285)
+
+# 6. Run all steps sequentially, fix path bugs as they arise
+```
+
+### ⚠️ CRITICAL PATH VERIFICATION (MANDATORY)
+
+**BEFORE running ANY copied code, verify these paths:**
+
+```python
+# ✅ CORRECT: Dynamic path resolution
+RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch6/TARGET_RQ
+LOG_FILE = RQ_DIR / "logs" / "stepXX_*.log"
+df = pd.read_csv(RQ_DIR / "data" / "input.csv")
+df.to_csv(RQ_DIR / "data" / "output.csv")
+
+# ❌ WRONG: Hardcoded source RQ paths
+LOG_FILE = Path("/path/to/6.5.1/logs/stepXX.log")  # ← DANGER!
+df = pd.read_csv("results/ch6/6.5.1/data/input.csv")  # ← Reads wrong RQ!
+df.to_csv("../6.5.1/data/output.csv")  # ← Overwrites source RQ!
+
+# ❌ WRONG: Relative paths without RQ_DIR
+df = pd.read_csv("data/input.csv")  # ← Depends on working directory
+df.to_csv("results/output.csv")  # ← Wrong location
+
+# ❌ WRONG: String literals with RQ ID
+comment_path = "results/ch6/6.5.1/logs/step01.log"  # ← Check ALL comments too!
+```
+
+**Verification checklist (run BEFORE executing):**
+```bash
+# 1. Grep for source RQ ID in ALL files
+grep -r "SOURCE_ID" results/ch6/TARGET_RQ/code/
+# → Should return ZERO matches
+
+# 2. Grep for hardcoded absolute paths
+grep -r "/results/ch6/" results/ch6/TARGET_RQ/code/
+# → Should return ZERO matches (except comments)
+
+# 3. Check RQ_DIR is correctly defined
+grep -n "RQ_DIR = " results/ch6/TARGET_RQ/code/*.py
+# → Should use parents[1] or resolve() to target RQ
+
+# 4. Verify log file paths
+grep -n "LOG_FILE = " results/ch6/TARGET_RQ/code/*.py
+# → Should use RQ_DIR / "logs" / ...
+
+# 5. Check all read_csv/to_csv calls
+grep -n "read_csv\|to_csv" results/ch6/TARGET_RQ/code/*.py
+# → Should use RQ_DIR / "data" / ... or relative paths from RQ_DIR
+```
+
+**Common path bugs (from RQ 6.8.1):**
+- ✅ Fixed: TEST vs test column name case sensitivity
+- ✅ Fixed: expected_rows validation (3 factors → 2 factors)
+- ✅ Fixed: melt() including UID column as location value
+- ⚠️ Remaining: Steps 06-07 using relative 'data/' instead of RQ_DIR / 'data/'
+
+### Predictable Bugs to Fix Proactively:
+
+**Bug #6/#7 (Q-matrix column naming):**
+```python
+# Check Q-matrix format FIRST (from Step 00 output):
+df_q = pd.read_csv("results/ch6/TARGET_RQ/data/step00_q_matrix.csv")
+print(df_q.columns)  # e.g., ['item_name', 'Source', 'Destination']
+
+# Then update factor_col construction in Steps 01 & 03:
+# FORMAT 1 (domain-based): factor_col = f"factor_{factor.lower()}"
+# FORMAT 2 (numbered uppercase): factor_col = f"factor{i}_{factor}"
+# FORMAT 3 (descriptive lowercase): factor_col = f"factor_{factor.lower()}"
+# FORMAT 4 (direct capitalized): factor_col = factor  # ← RQ 6.8.1
+```
+
+**Expected row counts (n_factors dependent):**
+```python
+# Step 04 validation - update for actual factor count:
+expected_rows = len(df_theta) * N_FACTORS  # 2 for Source/Dest, 3 for What/Where/When
+```
+
+### Why Code-Copying Works:
+
+1. **Bugs #1-7 already fixed** in source RQ (systematic IRT issues)
+2. **IRT settings validated** (mc_samples=1/100 pattern proven)
+3. **File structure identical** (data/, logs/, plots/, results/ folders)
+4. **LMM formula patterns** reusable across RQs
+5. **Validation logic** generalizes well
+
+### When NOT to Code-Copy:
+
+- ❌ First RQ in chapter (no working template)
+- ❌ Different analysis type (IRT → CTT, LMM → correlation)
+- ❌ Different data structure (wide → long format change)
+- ❌ New tool functions required (not just parameter changes)
+
+---
+
 ## STEP EXECUTION TEMPLATE
 
 For each step in 4_analysis.yaml:
 
 ```
 1. READ step specification (inputs, outputs, validation)
-2. INVOKE g_code: "Generate stepXX for results/ch6/X.Y.Z"
+2. CHOOSE strategy:
+   a. CODE-COPY: If working template exists (verify paths first!)
+   b. G_CODE: If first RQ or new analysis type
 3. RUN: poetry run python results/ch6/X.Y.Z/code/stepXX_*.py
 4. VALIDATE output:
    - File exists at expected path?

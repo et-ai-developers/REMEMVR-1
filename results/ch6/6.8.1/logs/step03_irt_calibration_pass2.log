@@ -1,0 +1,96 @@
+[START] Step 03: IRT Calibration Pass 2 (2-factor GRM on purified items only)
+[CONFIG] Model: 2-factor GRM, 5 categories
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=1 (MINIMUM mode), iw_samples=1
+[NOTE] This is MINIMUM mode - for production, set mc_samples=100 for scoring
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOADED] step02_purified_items.csv (36 items retained)
+[INFO] Purified items count: 36
+[LOADED] step00_q_matrix.csv (36 items)
+[FILTER] Q-matrix filtered to 36 purified items
+[VALIDATION] All purified items have Q-matrix entries
+[FILTER] Filtering wide data to purified items...
+[FILTER] Wide data filtered: 400 rows x 37 cols (36 purified items)
+[VALIDATION] All 36 purified items found in wide data
+[TRANSFORM] Converting wide format to long format...
+[TRANSFORM] Long format created: 14400 observations (400 participants x 36 items)
+[TRANSFORM] Creating factor groups from Q-matrix...
+[INFO] Source: 18 items
+[INFO] Destination: 18 items
+[INFO] All 2 factors active for Pass 2: ['Source', 'Destination']
+[ANALYSIS] Preparing IRT tensors via prepare_irt_input_from_long...
+[DONE] Tensors prepared:
+  - response_matrix: torch.Size([400, 36]) (participants x items)
+  - missing_mask: torch.Size([400, 36])
+  - Q_matrix: torch.Size([36, 2]) (items x factors)
+  - composite_ids: 400 IDs
+  - item_list: 36 items
+[ANALYSIS] Configuring 2-factor GRM model via configure_irt_model...
+[DONE] Model configured: 36 items, 2 factors, 5 categories, correlated=True
+[ANALYSIS] Fitting GRM model via fit_irt_grm...
+[CRITICAL] Using mc_samples=1 during fit (avoids timeout per RQ 6.1.1)
+[START] Step 03: IRT Calibration Pass 2 (2-factor GRM on purified items only)
+[CONFIG] Model: 2-factor GRM, 5 categories
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (FAST mode), iw_samples=1
+[CONFIG] Scoring: mc_samples=1 (MINIMUM mode), iw_samples=1
+[NOTE] This is MINIMUM mode - for production, set mc_samples=100 for scoring
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOADED] step02_purified_items.csv (36 items retained)
+[INFO] Purified items count: 36
+[LOADED] step00_q_matrix.csv (36 items)
+[FILTER] Q-matrix filtered to 36 purified items
+[VALIDATION] All purified items have Q-matrix entries
+[FILTER] Filtering wide data to purified items...
+[FILTER] Wide data filtered: 400 rows x 37 cols (36 purified items)
+[VALIDATION] All 36 purified items found in wide data
+[TRANSFORM] Converting wide format to long format...
+[TRANSFORM] Long format created: 14400 observations (400 participants x 36 items)
+[TRANSFORM] Creating factor groups from Q-matrix...
+[INFO] Source: 18 items
+[INFO] Destination: 18 items
+[INFO] All 2 factors active for Pass 2: ['Source', 'Destination']
+[ANALYSIS] Preparing IRT tensors via prepare_irt_input_from_long...
+[DONE] Tensors prepared:
+  - response_matrix: torch.Size([400, 36]) (participants x items)
+  - missing_mask: torch.Size([400, 36])
+  - Q_matrix: torch.Size([36, 2]) (items x factors)
+  - composite_ids: 400 IDs
+  - item_list: 36 items
+[ANALYSIS] Configuring 2-factor GRM model via configure_irt_model...
+[DONE] Model configured: 36 items, 2 factors, 5 categories, correlated=True
+[ANALYSIS] Fitting GRM model via fit_irt_grm...
+[CRITICAL] Using mc_samples=1 during fit (avoids timeout per RQ 6.1.1)
+[DONE] Model fitting complete
+[ANALYSIS] Extracting theta scores via extract_theta_from_irt...
+[INFO] Using mc_samples=1 for scoring (MINIMUM mode)
+[DONE] Theta extraction complete: 400 participants x 2 factors
+[TRANSFORM] Reconstructing composite_ID from UID and test...
+[TRANSFORM] Wide format: 400 rows, 3 columns
+[ANALYSIS] Extracting item parameters via extract_parameters_from_irt...
+[DONE] Parameter extraction complete: 36 items
+[INFO] Parameter columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_Source', 'Discrim_Destination']
+[SAVE] Saving Pass 2 FINAL outputs...
+[SAVED] step03_pass2_item_params.csv (36 items, 5 cols)
+[SAVED] step03_pass2_theta.csv (400 rows, 3 cols)
+[VALIDATION] Running validation checks...
+[VALIDATION] Checking parameter bounds (purified thresholds)...
+[VALIDATION] Discrimination: min=1.965, max=4.176
+[VALIDATION] Difficulty (b): min=0.445, max=1.113
+[PASS] Parameter bounds reasonable
+[VALIDATION] Checking for NaN parameters...
+[PASS] No NaN parameters
+[VALIDATION] Checking theta estimates...
+[VALIDATION] Theta: min=-2.184, max=0.929
+[PASS] Theta estimates valid
+[VALIDATION] Checking output row counts...
+[PASS] Output row counts correct (items=36, theta=400)
+[VALIDATION] Checking purification retention rate...
+[INFO] Retention rate: 36/36 = 100.0%
+[WARNING] Retention rate outside typical range (20-80%) - check purification criteria
+[SUCCESS] Step 03 complete - All validations passed
+[SUMMARY] Pass 2 calibrated 36 purified items for 400 participants
+[SUMMARY] Active factors: ['Source', 'Destination']
+[NEXT] These FINAL theta estimates ready for downstream LMM analyses
+[NOTE] If mc_samples=1 used, re-run with mc_samples=100 for scoring for production quality
