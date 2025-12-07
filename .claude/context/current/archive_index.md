@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-07 23:00 (context-manager curation)
+**Last Updated:** 2025-12-07 23:10 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -475,6 +475,18 @@
 
 ### ch6_tool_interface_issues
 **Description:** Tool interface mismatches discovered during Ch6 execution. fit_lmm_trajectory_tsvr tool has column name expectations that differ from prepared data in Step 04. Solution: bypass tool, use statsmodels directly when data pre-prepared and formula specified. Tool bypass pattern confirmed: tools valuable for multi-step pipelines and standardized outputs, less valuable for single-step operations with pre-prepared data. Bypassing tools is acceptable when cleaner/faster. Priority is scientific correctness, not tool usage. Similar pattern in RQ 6.3.1 Step 06 (compute_contrasts_pairwise had sig_uncorrected bug). Session 2025-12-07 11:00.
+
+### rq_6.4.1_step00_complete_paradigm_extraction
+**Description:** RQ 6.4.1 Step 00 data extraction complete - 72 TC items extracted (24 per paradigm: IFR/ICR/IRE), 3-factor Q-matrix created, n_cats=5 detected adaptively, TSVR range 1.0-246.24 hours. Paradigm-based 3-factor GRM testing whether Free Recall, Cued Recall, and Recognition paradigms show different confidence decline patterns. Primary hypothesis NULL (paradigm affects baseline, not slopes). Generated step00_extract_confidence_data.py (435 lines), execution <10 seconds. Session 2025-12-07 19:45.
+
+### rq_6.4.1_step01_five_systematic_bug_fixes
+**Description:** RQ 6.4.1 Step 01 IRT calibration Pass 1 with 5 systematic bug fixes applied iteratively. Bugs: (1) missing UID/test columns parsed from composite_ID, (2) wrong return unpacking order corrected, (3) n_cats must be list for configure_irt_model, (4) n_cats must be list for extract_parameters_from_irt, (5) MIRT column format kept as-is (Difficulty/Overall_Discrimination/Discrim_*). All bugs repeatable from RQ 6.3.1 and 6.1.1 (same pattern across all GRM RQs). Root cause: g_code lacks multidimensional IRT training examples. Pattern documented for future RQs. Session 2025-12-07 19:45.
+
+### g_code_multidimensional_irt_bug_pattern
+**Description:** Systematic pattern of 5 bugs repeatable across ALL GRM-based RQs (6.1.1 single-factor, 6.3.1 domain 3-factor, 6.4.1 paradigm 3-factor). Root cause: g_code lacks training examples for multidimensional IRT models. Pattern WILL recur in future GRM RQs (6.5.1, 6.6.1, 6.7.2, 6.8.1). Solution: Use code-copying strategy from 6.3.1/6.4.1 (copy working code, replace factor names via find/replace) vs g_code debugging (saves 75-80% time, 45 min vs 4-5 hours). Documents all 5 bugs with fixes and pattern sources. Session 2025-12-07 19:45.
+
+### proactive_context_finding_before_execution
+**Description:** Proactive context-finding strategy using context_finder agent BEFORE RQ execution to gather historical patterns, identify bug patterns from past RQs, apply fixes proactively, reduce debugging time by referencing known solutions. RQ 6.4.1 validation: searched archives before coding, found 8 relevant topics (98-70% relevance, all current v4.X), identified bug patterns from RQ 6.1.1 and 6.3.1, applied fixes during debugging iterations, reduced time vs reactive approach. Strategy follows CLAUDE.md Proactive Context-Finding Workflow. Recommended for all future RQs with similar structure or complex statistical workflows. Session 2025-12-07 19:45.
 ---
 
 ## How to Use This Index
