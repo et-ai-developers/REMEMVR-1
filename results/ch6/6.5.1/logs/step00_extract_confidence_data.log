@@ -1,0 +1,52 @@
+[START] Step 00: Extract Confidence Data (Congruence-Based)
+[LOAD] Loading data/cache/dfData.csv...
+[LOADED] dfData.csv (400 rows, 214 cols)
+[CHECK] Required columns present: ['UID', 'TEST', 'TSVR']
+[FILTER] Filtering to interactive paradigm TC_* columns with i1-i6 tags...
+[FOUND] 105 total TC_* columns
+[FILTERED] 72 interactive TC_* columns with i1-i6 tags
+[PARADIGMS] IFR: 24 items
+[PARADIGMS] ICR: 24 items
+[PARADIGMS] IRE: 24 items
+[CONGRUENCE] Common (i1/i2): 24 items
+[CONGRUENCE] Congruent (i3/i4): 24 items
+[CONGRUENCE] Incongruent (i5/i6): 24 items
+[CREATE] Creating composite_ID from UID and TEST...
+[CREATED] composite_ID for 400 observations
+[EXAMPLE] First 3 composite_IDs: ['A010_T1', 'A010_T2', 'A010_T3']
+[CREATE] Creating IRT input wide-format DataFrame...
+[CREATED] IRT input: 400 rows x 73 cols
+[DETECT] Detecting actual unique TC_* values for n_cats determination...
+[DETECTED] Unique TC_* values found: [np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+[DETECTED] Number of categories (n_cats): 5
+[DETECTED] Number of thresholds for GRM: 4 (b1 to b4)
+
+================================================================================
+RECOMMENDATION FOR STEP 01 (IRT Calibration):
+  Set n_cats = 5 in configuration
+  This will create 4 thresholds: b1, b2, ..., b4
+  Item parameter CSV will have columns: item_name, dimension, a, b1, b2, ..., b4
+================================================================================
+
+[CREATE] Creating TSVR time mapping...
+[CREATED] TSVR mapping: 400 rows
+[TSVR RANGE] Min: 1.00 hours, Max: 246.24 hours
+[CREATE] Creating 3-factor Q-matrix BY CONGRUENCE...
+[CREATED] Q-matrix: 72 items
+[CONGRUENCE] Common: 24 items
+[CONGRUENCE] Congruent: 24 items
+[CONGRUENCE] Incongruent: 24 items
+[SAVE] Saving outputs...
+[SAVED] step00_irt_input.csv (400 rows, 73 cols)
+[SAVED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[SAVED] step00_q_matrix.csv (72 rows, 4 cols)
+[VALIDATION] Running inline validation checks...
+[PASS] All 3 output files exist
+[PASS] IRT input dimensions: 400 rows x 73 cols
+[WARN] TSVR_hours range: [1.00, 246.24] outside [0, 200] (some sessions >1 week)
+[PASS] Q-matrix has all 3 congruence levels (Common=24, Congruent=24, Incongruent=24)
+[PASS] Q-matrix has >=10 items per factor
+[PASS] Each item loads on exactly one factor
+[PASS] All items have <30% missing data
+[VALIDATION] All critical checks PASSED
+[SUCCESS] Step 00 complete
