@@ -1,0 +1,89 @@
+
+============================================================
+[START] Step 06: Compute Post-Hoc Contrasts (Decision D068)
+============================================================
+
+[LOAD] Loading Step 05 fixed effects coefficients...
+[LOADED] step05_lmm_coefficients.csv (6 rows)
+
+[CHECK] Checking Domain × Time interaction significance...
+[FOUND] 2 interaction terms:
+
+  - C(domain)[T.When]:log_TSVR: p=0.0202
+  - C(domain)[T.Where]:log_TSVR: p=0.9159
+
+[DECISION] Minimum interaction p-value: 0.0202
+[DECISION] Threshold: 0.05
+[DECISION] Result: SIGNIFICANT (p < 0.05)
+
+[COMPUTE] Domain × Time interaction IS significant
+          Post-hoc pairwise contrasts appropriate
+
+[LOAD] Loading LMM input data for model re-fitting...
+[LOADED] step04_lmm_input.csv (1200 rows)
+
+[FIT] Re-fitting LMM model...
+      Formula: theta ~ C(domain) * log_TSVR
+      Random effects: ~log_TSVR | UID
+      Method: powell (ML estimation)
+
+[FITTED] Model converged: True
+         AIC: 317.42
+         BIC: 368.32
+         Log-Likelihood: -148.71
+
+[ANALYSIS] Computing pairwise slope contrasts...
+           Implementing Decision D068: Dual p-value reporting
+           - Family-wise alpha: 0.05
+           - Number of comparisons: 3
+           - Bonferroni-corrected alpha: 0.0167
+
+[SAVED] step06_post_hoc_contrasts.csv (3 rows)
+
+============================================================
+POST-HOC CONTRASTS SUMMARY (Decision D068)
+============================================================
+
+Contrast: When vs What
+  Estimate: -0.0253
+  SE: 0.0093
+  z: -2.724
+  p (uncorrected): 0.0064
+  p (Bonferroni): 0.0193
+  Significance: *
+  Cohen's d: -0.116
+
+Contrast: Where vs What
+  Estimate: -0.0012
+  SE: 0.0093
+  z: -0.124
+  p (uncorrected): 0.9014
+  p (Bonferroni): 1.0000
+  Significance: ns
+  Cohen's d: -0.005
+
+Contrast: When vs Where
+  Estimate: -0.0242
+  SE: 0.0093
+  z: -2.601
+  p (uncorrected): 0.0093
+  p (Bonferroni): 0.0279
+  Significance: *
+  Cohen's d: -0.111
+
+[SAVED] step06_contrast_decision.txt
+
+============================================================
+[VALIDATION] Checking outputs...
+============================================================
+
+[PASS] Required files exist
+[PASS] Contrasts CSV has correct columns
+[PASS] Dual p-values in valid ranges (Decision D068)
+[PASS] Standard errors positive
+[PASS] No NaN values in contrasts
+
+============================================================
+[SUCCESS] Step 06 Complete
+============================================================
+

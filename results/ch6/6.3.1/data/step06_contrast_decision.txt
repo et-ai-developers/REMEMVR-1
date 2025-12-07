@@ -1,0 +1,29 @@
+RQ 6.3.1 Step 06: Post-Hoc Contrast Decision
+
+Domain × Time Interaction Test:
+  - Minimum interaction p-value: 0.0202
+  - Threshold: 0.05
+  - Result: SIGNIFICANT
+
+Decision: CONTRASTS COMPUTED
+
+Rationale:
+  Domain × Time interaction is significant (p < 0.05), indicating
+  that confidence decline trajectories differ across episodic memory
+  domains. Post-hoc pairwise contrasts are appropriate to identify
+  which specific domains differ.
+
+Number of Comparisons: 3
+  1. When vs What
+  2. Where vs What
+  3. When vs Where
+
+Multiple Comparison Correction (Decision D068):
+  - Method: Bonferroni
+  - Family-wise alpha: 0.05
+  - Per-comparison alpha: 0.0167 (0.05/3)
+  - Dual p-values reported: uncorrected AND Bonferroni-corrected
+
+Significant Contrasts (Bonferroni-corrected p < 0.05):
+  - When vs What: estimate=-0.0253, p=0.0193
+  - When vs Where: estimate=-0.0242, p=0.0279
