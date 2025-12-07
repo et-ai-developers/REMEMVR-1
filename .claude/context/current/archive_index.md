@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-07 19:45 (context-manager curation)
+**Last Updated:** 2025-12-07 23:00 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -466,6 +466,9 @@
 
 ### rq_6.3.1_partial_execution_when_domain_significant
 **Description:** RQ 6.3.1 Steps 00-05 execution history (domain-based 3-factor GRM). Extracted 72 TC items across 3 domains (What/Where/When). Fixed 3 critical issues: long format column mapping, return value unpacking, validation column names. All 72 items retained (100%). LMM revealed UNEXPECTED finding: When domain × Time interaction significant (p=0.020), Where domain NULL as expected. Primary hypothesis partially refuted. Added 3 critical fixes to execute.md: IRT background process management (no epoch polling), flush pattern for log functions, MINIMUM settings for validation (mc_samples=1). Session 2025-12-07 11:00. Superseded by complete execution in Session 2025-12-07 13:50.
+
+### rq_6.3.1_complete_execution_when_domain_steeper_decline
+**Description:** RQ 6.3.1 COMPLETE execution history - Steps 06-07 (post-hoc contrasts and trajectory plots). When domain shows significantly steeper confidence decline than both What (p=0.019) and Where (p=0.028) domains. NULL hypothesis PARTIALLY REFUTED. Scientific finding: confidence-accuracy dissociation for temporal memory (When domain confidence decays faster than accuracy suggests). Two technical patterns identified: (1) g_code aggregation bug - groups by continuous TSVR_hours instead of discrete test (fix: group by test, compute mean TSVR_hours), (2) tool bypass for LMM post-hoc - compute_contrasts_pairwise has internal bugs (fix: direct statsmodels implementation cleaner). Dual-scale trajectory data generated per Decision D069 (theta-scale and probability-scale with domain-specific discrimination parameters). All 8 steps complete. Session 2025-12-07 13:50.
 
 ### ch6_execute_md_updates
 **Description:** Runtime fixes and execution protocol updates for Chapter 6. Three critical patterns documented: (1) IRT background process management - don't poll epoch status repeatedly (blows up context), (2) Flush pattern for log functions - f.flush() + print(flush=True) for real-time visibility, (3) MINIMUM settings for code validation - mc_samples=1/iw_samples=1 for first runs (2-7 min validation), then production settings after validation. Two-phase execution strategy prevents wasting time on buggy code with 30-60 min production runs. Session 2025-12-07 11:00.
