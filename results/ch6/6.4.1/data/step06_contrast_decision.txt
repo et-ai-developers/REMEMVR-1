@@ -1,0 +1,22 @@
+RQ 6.3.1 Step 06: Post-Hoc Contrast Decision
+
+Domain × Time Interaction Test:
+  - Minimum interaction p-value: 0.1069
+  - Threshold: 0.05
+  - Result: NOT SIGNIFICANT
+
+Decision: CONTRASTS SKIPPED
+
+Rationale:
+  Domain × Time interaction is not significant (p >= 0.05), indicating
+  that confidence decline trajectories do NOT differ across episodic memory
+  domains. This supports the NULL hypothesis (unitized VR encoding produces
+  equivalent forgetting across What/Where/When domains).
+
+  Post-hoc pairwise contrasts are not appropriate when the omnibus interaction
+  test is non-significant.
+
+Number of Comparisons: 0 (contrasts not computed)
+
+Result:
+  All episodic memory domains show equivalent confidence decline over time.

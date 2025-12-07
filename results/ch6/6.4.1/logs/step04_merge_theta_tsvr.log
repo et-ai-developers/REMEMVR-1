@@ -1,0 +1,137 @@
+[START] Step 4: Merge Theta with TSVR Time Data
+[LOAD] Loading Pass 2 theta estimates (wide format)...
+[LOADED] step03_pass2_theta.csv (400 rows, 4 cols)
+[INFO] Theta columns: ['composite_ID', 'theta_IFR', 'theta_ICR', 'theta_IRE']
+[LOAD] Loading TSVR time mapping...
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] TSVR columns: ['composite_ID', 'UID', 'TSVR_hours', 'test']
+[MERGE] Merging theta with TSVR on composite_ID (left join)...
+[MERGED] Result: 400 rows, 7 cols
+[VALIDATION] 100% merge rate - all 400 theta observations matched with TSVR
+[RESHAPE] Melting wide theta format to long format...
+[RESHAPED] Result: 1200 rows (expected: 1200)
+[INFO] Paradigms: ['IFR', 'ICR', 'IRE']
+[PARSE] Extracting UID from composite_ID...
+[INFO] Extracted 100 unique UIDs
+[TRANSFORM] Adding time transformations for LMM...
+[INFO] log_TSVR range: [0.693, 5.510]
+[ERROR] "['domain'] not in index"
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step04_merge_theta_tsvr.py", line 206, in <module>
+    df_long = df_long[[
+              ^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4119, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 6212, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 6264, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['domain'] not in index"
+[START] Step 4: Merge Theta with TSVR Time Data
+[LOAD] Loading Pass 2 theta estimates (wide format)...
+[LOADED] step03_pass2_theta.csv (400 rows, 4 cols)
+[INFO] Theta columns: ['composite_ID', 'theta_IFR', 'theta_ICR', 'theta_IRE']
+[LOAD] Loading TSVR time mapping...
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] TSVR columns: ['composite_ID', 'UID', 'TSVR_hours', 'test']
+[MERGE] Merging theta with TSVR on composite_ID (left join)...
+[MERGED] Result: 400 rows, 7 cols
+[VALIDATION] 100% merge rate - all 400 theta observations matched with TSVR
+[RESHAPE] Melting wide theta format to long format...
+[RESHAPED] Result: 1200 rows (expected: 1200)
+[INFO] Paradigms: ['IFR', 'ICR', 'IRE']
+[PARSE] Extracting UID from composite_ID...
+[INFO] Extracted 100 unique UIDs
+[TRANSFORM] Adding time transformations for LMM...
+[INFO] log_TSVR range: [0.693, 5.510]
+[SAVE] Saving LMM-ready input to step04_lmm_input.csv...
+[SAVED] step04_lmm_input.csv (1200 rows, 7 cols)
+[VALIDATION] Running inline validation checks...
+[VALIDATION] [PASS] Row count: 1200 rows = 400 theta rows * 3 domains
+[VALIDATION] [WARN] TSVR_hours range: [1.0, 246.2] exceeds expected 0-168 but acceptable
+[VALIDATION] [PASS] log_TSVR range: [0.693, 5.510] (expected max ~5.13)
+[VALIDATION] [PASS] No missing TSVR_hours (0 NaN values)
+[VALIDATION] [PASS] UID parsing successful (100 unique UIDs, sample: ['A010', 'A011', 'A012', 'A013', 'A014'])
+[ERROR] 'domain'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'domain'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.4.1/code/step04_merge_theta_tsvr.py", line 271, in <module>
+    actual_domains = set(df_long['domain'].unique())
+                         ~~~~~~~^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'domain'
+[START] Step 4: Merge Theta with TSVR Time Data
+[LOAD] Loading Pass 2 theta estimates (wide format)...
+[LOADED] step03_pass2_theta.csv (400 rows, 4 cols)
+[INFO] Theta columns: ['composite_ID', 'theta_IFR', 'theta_ICR', 'theta_IRE']
+[LOAD] Loading TSVR time mapping...
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] TSVR columns: ['composite_ID', 'UID', 'TSVR_hours', 'test']
+[MERGE] Merging theta with TSVR on composite_ID (left join)...
+[MERGED] Result: 400 rows, 7 cols
+[VALIDATION] 100% merge rate - all 400 theta observations matched with TSVR
+[RESHAPE] Melting wide theta format to long format...
+[RESHAPED] Result: 1200 rows (expected: 1200)
+[INFO] Paradigms: ['IFR', 'ICR', 'IRE']
+[PARSE] Extracting UID from composite_ID...
+[INFO] Extracted 100 unique UIDs
+[TRANSFORM] Adding time transformations for LMM...
+[INFO] log_TSVR range: [0.693, 5.510]
+[SAVE] Saving LMM-ready input to step04_lmm_input.csv...
+[SAVED] step04_lmm_input.csv (1200 rows, 7 cols)
+[VALIDATION] Running inline validation checks...
+[VALIDATION] [PASS] Row count: 1200 rows = 400 theta rows * 3 domains
+[VALIDATION] [WARN] TSVR_hours range: [1.0, 246.2] exceeds expected 0-168 but acceptable
+[VALIDATION] [PASS] log_TSVR range: [0.693, 5.510] (expected max ~5.13)
+[VALIDATION] [PASS] No missing TSVR_hours (0 NaN values)
+[VALIDATION] [PASS] UID parsing successful (100 unique UIDs, sample: ['A010', 'A011', 'A012', 'A013', 'A014'])
+[VALIDATION] [FAIL] Domain mismatch - Expected: {'When', 'What', 'Where'}, Got: {'IRE', 'IFR', 'ICR'}
+[START] Step 4: Merge Theta with TSVR Time Data
+[LOAD] Loading Pass 2 theta estimates (wide format)...
+[LOADED] step03_pass2_theta.csv (400 rows, 4 cols)
+[INFO] Theta columns: ['composite_ID', 'theta_IFR', 'theta_ICR', 'theta_IRE']
+[LOAD] Loading TSVR time mapping...
+[LOADED] step00_tsvr_mapping.csv (400 rows, 4 cols)
+[INFO] TSVR columns: ['composite_ID', 'UID', 'TSVR_hours', 'test']
+[MERGE] Merging theta with TSVR on composite_ID (left join)...
+[MERGED] Result: 400 rows, 7 cols
+[VALIDATION] 100% merge rate - all 400 theta observations matched with TSVR
+[RESHAPE] Melting wide theta format to long format...
+[RESHAPED] Result: 1200 rows (expected: 1200)
+[INFO] Paradigms: ['IFR', 'ICR', 'IRE']
+[PARSE] Extracting UID from composite_ID...
+[INFO] Extracted 100 unique UIDs
+[TRANSFORM] Adding time transformations for LMM...
+[INFO] log_TSVR range: [0.693, 5.510]
+[SAVE] Saving LMM-ready input to step04_lmm_input.csv...
+[SAVED] step04_lmm_input.csv (1200 rows, 7 cols)
+[VALIDATION] Running inline validation checks...
+[VALIDATION] [PASS] Row count: 1200 rows = 400 theta rows * 3 domains
+[VALIDATION] [WARN] TSVR_hours range: [1.0, 246.2] exceeds expected 0-168 but acceptable
+[VALIDATION] [PASS] log_TSVR range: [0.693, 5.510] (expected max ~5.13)
+[VALIDATION] [PASS] No missing TSVR_hours (0 NaN values)
+[VALIDATION] [PASS] UID parsing successful (100 unique UIDs, sample: ['A010', 'A011', 'A012', 'A013', 'A014'])
+[VALIDATION] [PASS] Paradigms correct: ['ICR', 'IFR', 'IRE']
+[INFO] Summary statistics by domain:
+[INFO]   ICR: N=400, theta mean=-0.792, SD=0.568
+[INFO]   IFR: N=400, theta mean=-0.752, SD=0.570
+[INFO]   IRE: N=400, theta mean=-0.784, SD=0.569
+[SUCCESS] Step 4 complete - LMM input ready with TSVR time variable

@@ -1,5 +1,5 @@
 RQ	Exists	Inline	Plot_Types
-5.1.1	false	N/A	N/A
+5.1.1	true	false	Trajectory (theta + probability)
 5.1.2	true	true	Piecewise comparison (theta)
 5.1.3	true	true	Age tertile trajectory
 5.1.4	true	true	Cluster scatter
