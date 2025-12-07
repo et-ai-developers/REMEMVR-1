@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-07 13:50 (context-manager curation)
+**Last Updated:** 2025-12-07 19:45 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -463,6 +463,15 @@
 
 ### ch6_dfdata_wide_format_paradigm_parsing
 **Description:** dfData.csv column structure for confidence data. Data is in WIDE format with paradigm embedded in column names (TC_{PARADIGM}-{DOMAIN}-{ITEM}), NOT long format with separate Paradigm column. Requires parsing column names to filter paradigms. Example columns: TC_IFR-What-01, TC_ICR-Where-01, TC_IRE-When-01. Column naming is self-documenting (paradigm/domain/item encoded in name). Applies to TC_* (confidence) and AC_* (accuracy) columns. Affects any RQ filtering by paradigm subset (6.1.1, 6.3.1, 6.4.1, etc.). Session 2025-12-06 22:00.
+
+### rq_6.3.1_partial_execution_when_domain_significant
+**Description:** RQ 6.3.1 Steps 00-05 execution history (domain-based 3-factor GRM). Extracted 72 TC items across 3 domains (What/Where/When). Fixed 3 critical issues: long format column mapping, return value unpacking, validation column names. All 72 items retained (100%). LMM revealed UNEXPECTED finding: When domain × Time interaction significant (p=0.020), Where domain NULL as expected. Primary hypothesis partially refuted. Added 3 critical fixes to execute.md: IRT background process management (no epoch polling), flush pattern for log functions, MINIMUM settings for validation (mc_samples=1). Session 2025-12-07 11:00. Superseded by complete execution in Session 2025-12-07 13:50.
+
+### ch6_execute_md_updates
+**Description:** Runtime fixes and execution protocol updates for Chapter 6. Three critical patterns documented: (1) IRT background process management - don't poll epoch status repeatedly (blows up context), (2) Flush pattern for log functions - f.flush() + print(flush=True) for real-time visibility, (3) MINIMUM settings for code validation - mc_samples=1/iw_samples=1 for first runs (2-7 min validation), then production settings after validation. Two-phase execution strategy prevents wasting time on buggy code with 30-60 min production runs. Session 2025-12-07 11:00.
+
+### ch6_tool_interface_issues
+**Description:** Tool interface mismatches discovered during Ch6 execution. fit_lmm_trajectory_tsvr tool has column name expectations that differ from prepared data in Step 04. Solution: bypass tool, use statsmodels directly when data pre-prepared and formula specified. Tool bypass pattern confirmed: tools valuable for multi-step pipelines and standardized outputs, less valuable for single-step operations with pre-prepared data. Bypassing tools is acceptable when cleaner/faster. Priority is scientific correctness, not tool usage. Similar pattern in RQ 6.3.1 Step 06 (compute_contrasts_pairwise had sig_uncorrected bug). Session 2025-12-07 11:00.
 ---
 
 ## How to Use This Index

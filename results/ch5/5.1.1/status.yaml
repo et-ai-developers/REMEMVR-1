@@ -51,8 +51,13 @@ rq_inspect:
 
 rq_plots:
   status: success
+  timestamp: "2025-12-07T00:00:00Z"
   context_dump: |
-    Manual plot generated (Step 7 failed). Dual-scale trajectory showing logarithmic forgetting pattern. Plot: trajectory_functional_form.png
+    plots.py generated for functional form comparison
+    2 plots specified: functional_form_theta.png, functional_form_probability.png
+    Data sources: step07_functional_form_theta_data.csv, step07_functional_form_probability_data.csv
+    D069 compliance: YES (dual-scale trajectory plots)
+    Best model: Logarithmic (from AIC selection)
 
 rq_results:
   status: success
@@ -69,4 +74,4 @@ analysis_steps:
   step04_prepare_lmm_input: success
   step05_fit_5_candidate_lmms: success
   step06_aic_model_selection: success  # Fixed 2025-12-07: Modified to skip pickle loading, AIC comparison complete
-  step07_prepare_functional_form_plots: skipped  # Pickle unpickling issue prevents model predictions, manual plot exists
+  step07_prepare_functional_form_plots: success  # Fixed 2025-12-07: Refits best model only (workaround for pickle unpickling), generates plot CSVs

@@ -200,18 +200,19 @@ if __name__ == "__main__":
 
         import statsmodels.formula.api as smf
 
-        # Refit only the best model (Logarithmic)
+        # Refit only the best model
         log(f"  Refitting {best_model_name} model...")
 
-        if best_model_name == 'Logarithmic':
+        # Model name mapping (from AIC comparison CSV names)
+        if best_model_name == 'Log':
             formula = "Theta ~ log_Days_plus1"
         elif best_model_name == 'Linear':
             formula = "Theta ~ Days"
         elif best_model_name == 'Quadratic':
             formula = "Theta ~ Days + Days_squared"
-        elif best_model_name == 'LinLog':
+        elif best_model_name == 'Lin+Log':
             formula = "Theta ~ Days + log_Days_plus1"
-        elif best_model_name == 'QuadLog':
+        elif best_model_name == 'Quad+Log':
             formula = "Theta ~ Days + Days_squared + log_Days_plus1"
         else:
             raise ValueError(f"Unknown best model: {best_model_name}")
@@ -271,11 +272,12 @@ if __name__ == "__main__":
         log(f"  Grid: {n_points} points from {days_grid.min():.1f} to {days_grid.max():.1f} days")
 
         # =========================================================================
-        # STEP 4: Generate Predictions for All 5 Models
+        # STEP 4: Generate Predictions for Best Model Only
         # =========================================================================
         # Purpose: Extract model predictions on grid for plotting
+        # Note: Only best model refitted (to avoid pickle unpickling)
 
-        log("[PREDICT] Generating predictions for all 5 models...")
+        log(f"[PREDICT] Generating predictions for {best_model_name} model...")
 
         for model_name, model_result in model_fits.items():
             log(f"  Predicting {model_name}...")
@@ -286,7 +288,7 @@ if __name__ == "__main__":
 
             pred_grid[f'pred_{model_name}'] = predictions
 
-        log("[DONE] All predictions generated")
+        log("[DONE] Predictions generated for best model")
 
         # =========================================================================
         # STEP 5: Combine Observed + Predictions (Theta Scale)
@@ -298,8 +300,9 @@ if __name__ == "__main__":
         # Prepare observed data for merging
         observed_theta = observed_summary[['Days', 'observed_theta', 'CI_lower_theta', 'CI_upper_theta']].copy()
 
-        # Prepare prediction data
-        pred_theta = pred_grid[['Days', 'pred_Linear', 'pred_Quadratic', 'pred_Logarithmic', 'pred_LinLog', 'pred_QuadLog']].copy()
+        # Prepare prediction data (only best model)
+        pred_cols = ['Days'] + [f'pred_{model_name}' for model_name in model_fits.keys()]
+        pred_theta = pred_grid[pred_cols].copy()
 
         # Merge (outer join to keep both observed and prediction points)
         theta_plot_data = pd.merge(
@@ -331,7 +334,7 @@ if __name__ == "__main__":
         prob_plot_data['CI_lower_prob'] = theta_to_prob(prob_plot_data['CI_lower_theta'])
         prob_plot_data['CI_upper_prob'] = theta_to_prob(prob_plot_data['CI_upper_theta'])
 
-        # Transform model predictions to probability
+        # Transform model predictions to probability (only best model)
         for model_name in model_fits.keys():
             prob_plot_data[f'pred_{model_name}_prob'] = theta_to_prob(
                 prob_plot_data[f'pred_{model_name}']
@@ -339,6 +342,7 @@ if __name__ == "__main__":
 
         log("[DONE] Probability transformation complete")
         log(f"  Observed prob range: [{prob_plot_data['observed_prob'].min():.3f}, {prob_plot_data['observed_prob'].max():.3f}]")
+        log(f"  Note: Only {best_model_name} predictions generated (pickle unpickling workaround)")
 
         # =========================================================================
         # STEP 7: Save Plot Data (Both Scales)
@@ -355,10 +359,12 @@ if __name__ == "__main__":
         theta_plot_data.to_csv(theta_output_path, index=False, encoding='utf-8')
         log(f"[SAVED] {theta_output_path.name} ({len(theta_plot_data)} rows)")
 
-        # Save probability-scale plot data
-        prob_cols = ['Days', 'observed_prob', 'CI_lower_prob', 'CI_upper_prob',
-                     'pred_Linear_prob', 'pred_Quadratic_prob', 'pred_Logarithmic_prob',
-                     'pred_LinLog_prob', 'pred_QuadLog_prob', 'best_model']
+        # Save probability-scale plot data (only best model columns)
+        prob_cols = ['Days', 'observed_prob', 'CI_lower_prob', 'CI_upper_prob', 'best_model']
+        # Add prediction columns for fitted models
+        for model_name in model_fits.keys():
+            prob_cols.insert(-1, f'pred_{model_name}_prob')  # Insert before 'best_model'
+
         prob_output_path = plots_dir / "step07_functional_form_probability_data.csv"
         log(f"[SAVE] Saving probability-scale plot data to {prob_output_path.name}...")
         prob_plot_data[prob_cols].to_csv(prob_output_path, index=False, encoding='utf-8')
@@ -372,10 +378,10 @@ if __name__ == "__main__":
 
         log("[VALIDATION] Validating plot data...")
 
-        # Check probability bounds [0, 1]
-        prob_cols_to_check = ['observed_prob', 'CI_lower_prob', 'CI_upper_prob',
-                               'pred_Linear_prob', 'pred_Quadratic_prob',
-                               'pred_Logarithmic_prob', 'pred_LinLog_prob', 'pred_QuadLog_prob']
+        # Check probability bounds [0, 1] (only best model)
+        prob_cols_to_check = ['observed_prob', 'CI_lower_prob', 'CI_upper_prob']
+        for model_name in model_fits.keys():
+            prob_cols_to_check.append(f'pred_{model_name}_prob')
 
         for col in prob_cols_to_check:
             if (prob_plot_data[col].dropna() >= 0).all() and (prob_plot_data[col].dropna() <= 1).all():
