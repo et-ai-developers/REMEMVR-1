@@ -1,0 +1,39 @@
+================================================================================
+Linear Mixed Model Summary
+RQ: ch6/6.3.1 - Confidence Domain x Time Interaction
+================================================================================
+
+                      Mixed Linear Model Regression Results
+=================================================================================
+Model:                      MixedLM         Dependent Variable:         theta    
+No. Observations:           1200            Method:                     ML       
+No. Groups:                 100             Scale:                      0.0698   
+Min. group size:            12              Log-Likelihood:             -291.1057
+Max. group size:            12              Converged:                  Yes      
+Mean group size:            12.0                                                 
+---------------------------------------------------------------------------------
+                                      Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+---------------------------------------------------------------------------------
+Intercept                             -0.341    0.057  -6.016 0.000 -0.452 -0.230
+C(congruence)[T.Congruent]            -0.019    0.042  -0.439 0.660 -0.101  0.064
+C(congruence)[T.Incongruent]          -0.004    0.042  -0.100 0.921 -0.087  0.079
+log_TSVR                              -0.123    0.008 -15.431 0.000 -0.139 -0.108
+C(congruence)[T.Congruent]:log_TSVR   -0.005    0.011  -0.477 0.634 -0.027  0.017
+C(congruence)[T.Incongruent]:log_TSVR -0.011    0.011  -0.959 0.338 -0.033  0.011
+Group Var                              0.231    0.132                            
+=================================================================================
+
+
+================================================================================
+Model Specification
+================================================================================
+Formula: theta ~ C(congruence) * log_TSVR
+Random effects: ~1 (random intercept only)
+Groups: UID
+REML: False
+Converged: True
+AIC: 598.2115
+BIC: 638.9321
+Log-Likelihood: -291.1057
+N observations: 1200
+N groups: 100

@@ -136,7 +136,7 @@ def compute_slope_contrasts(model, domain_levels):
 
 def main():
     # Setup paths
-    rq_dir = Path("results/ch6/6.5.1")
+    rq_dir = Path(".")  # Run from RQ folder
     data_dir = rq_dir / "data"
     code_dir = rq_dir / "code"
     logs_dir = rq_dir / "logs"
