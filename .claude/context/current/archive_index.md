@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-07 11:00 (context-manager curation)
+**Last Updated:** 2025-12-07 13:50 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -452,6 +452,17 @@
 ### ch6_concept_fixes_execution_protocol
 **Description:** Fixed 5 CONDITIONAL/REJECTED RQ concepts to gold standard quality (2025-12-06 19:30). RQ 6.4.2 added reliability check and Lord's paradox mitigation. RQ 6.6.3 CRITICAL fix from LMM to GLMM binomial with overdispersion validation. RQ 6.7.1 terminology fix (retrieval confidence) with normality validation. RQ 6.7.2 added aggregation strategy and SD constraint sensitivity. RQ 6.8.1 added enactment effect and VR validity. Created ch6/execute.md execution protocol (~2k tokens) with Ch5 lessons learned (IRT mc_samples, LMM coefficient extraction, CSV not pickle), common mistakes, step execution template, validation workflow.
 
+### rq_6.1.1_complete_execution_logarithmic_best
+**Description:** Complete execution history of RQ 6.1.1 (Confidence Trajectory Functional Form), the first production ROOT RQ for Chapter 6. Documents all 8 steps, logarithmic model selection (AIC=338.60, weight=0.64), 72-item GRM with 100% retention, power-law forgetting trajectory, and 3 runtime fixes. Key finding: confidence declines logarithmically (steep initial decline slowing over time), supporting metacognitive monitoring tracks memory decay hypothesis. Files: 8 code scripts, 15 data outputs, 8 logs. Execution time: ~15 min. Session 2025-12-06 22:00.
+
+### ch6_grm_irt_pattern_mc_samples_1_100
+**Description:** GRM IRT calibration pattern using mc_samples=1 for fitting (fast convergence) and mc_samples=100 for scoring (accurate theta estimates). Pattern originated in Ch5 RQ 5.5.1, applied successfully to Ch6 RQs. Prevents 7000+ epoch hangs. Fitting phase uses mc_samples=1 for efficient gradient descent optimization (~35k epochs in ~2 min). Scoring phase uses mc_samples=100 for accurate numerical integration of theta. Applied to RQ 6.1.1 and all future Ch6 GRM calibrations. Session 2025-12-06 22:00.
+
+### ch6_lmm_statsmodels_cov_re_fix
+**Description:** Fix for statsmodels random effects covariance matrix extraction. In newer statsmodels versions, cov_re is a DataFrame (not ndarray), requiring .values.flatten() for safe extraction. Safe pattern: check hasattr(cov_re, 'values') and use .values.flatten() for DataFrame, .flatten() for ndarray. Affects ICC computation, model diagnostics, variance component reporting, and random effects interpretation. Applied in RQ 6.1.1 step05. Pattern needed for all LMM trajectory models in Ch6. Session 2025-12-06 22:00.
+
+### ch6_dfdata_wide_format_paradigm_parsing
+**Description:** dfData.csv column structure for confidence data. Data is in WIDE format with paradigm embedded in column names (TC_{PARADIGM}-{DOMAIN}-{ITEM}), NOT long format with separate Paradigm column. Requires parsing column names to filter paradigms. Example columns: TC_IFR-What-01, TC_ICR-Where-01, TC_IRE-When-01. Column naming is self-documenting (paradigm/domain/item encoded in name). Applies to TC_* (confidence) and AC_* (accuracy) columns. Affects any RQ filtering by paradigm subset (6.1.1, 6.3.1, 6.4.1, etc.). Session 2025-12-06 22:00.
 ---
 
 ## How to Use This Index

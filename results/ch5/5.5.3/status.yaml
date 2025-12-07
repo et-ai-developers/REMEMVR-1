@@ -84,13 +84,12 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: "2025-12-05"
+  timestamp: "2025-12-07"
   context_dump: |
-    validation.md created with PASS status
-    Primary finding: Age does NOT moderate source-destination forgetting
-    3-way interactions: p=0.16 (TSVR_hours), p=0.33 (log_TSVR), both Bonferroni-corrected
-    Power: 1.00 for detecting small effects (beta=0.01)
-    Thesis-ready: Supports VR ecological encoding hypothesis
+    Summary.md created with complete 5-section structure
+    Primary finding: Age does NOT moderate source-destination forgetting (p=.160, .329 Bonferroni)
+    Power: 1.00 for detecting small effects (null finding interpretable)
+    Thesis-ready: Extends Chapter 5 universal age-invariance pattern to location types
 
 analysis_steps:
   step00_load_dependency_data: success
