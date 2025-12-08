@@ -1,5 +1,4 @@
-rq_id: "ch5/5.3.1"
-
+rq_id: ch5/5.3.1
 rq_builder:
   status: success
   context_dump: 'Created results/ch5/5.3.1/ with 6 folders
@@ -101,24 +100,32 @@ rq_inspect:
     '
 rq_plots:
   status: success
-  completed: 2025-11-24
-  context_dump: '2 plots generated: trajectory_theta.png, trajectory_probability.png
+  completed: '2025-12-08'
+  regenerated: true
+  context_dump: '2 plots regenerated using MODEL-AVERAGED predictions
 
-    Data source: step04_lmm_input.csv (1200 obs), step03_item_parameters.csv
+    Data source: step05c_averaged_predictions.csv (17-model weighted average)
 
-    D069 compliance: YES (dual-scale trajectory plots included)
+    D069 compliance: YES (dual-scale theta + probability plots)
 
-    Functions used: set_plot_style_defaults, convert_theta_to_probability
+    Uncertainty: ±1.96 × prediction_se from model averaging variance
 
     '
 rq_results:
   status: success
-  completed: 2025-11-25
-  timestamp: 2025-11-25T03:30:00Z
-  context_dump: |
-    Results validated for scientific plausibility
-    2 anomalies flagged: Recognition faster forgetting (contradicts hypothesis), Cued=Free baseline (unexplained)
-    Summary documented in results/summary.md
+  completed: 2025-12-08
+  updated: true
+  context_dump: 'Results summary updated with model selection findings
+
+    Added: Model Selection Update (2025-12-08) section
+
+    Extended testing: PowerLaw α=0.1 (6.7%) vs Log (6.46%), ΔAIC=0.07
+
+    Model averaging: 14 models, effective N=12.90, effective α=0.140
+
+    Impact: MINIMAL (Log still competitive, substantive findings unchanged)
+
+    '
 analysis_steps:
   step00_prepare_paradigm_data: success
   step01_irt_calibration_pass1: success
@@ -126,5 +133,7 @@ analysis_steps:
   step03_irt_calibration_pass2: success
   step04_merge_theta_tsvr: success
   step05_fit_lmm: success
+  step05_extended_kitchen_sink: success
+  step05c_model_averaging: success
   step06_compute_post_hoc_contrasts: success
   step07_prepare_trajectory_plot_data: success

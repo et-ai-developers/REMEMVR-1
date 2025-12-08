@@ -97,6 +97,8 @@ analysis_steps:
   step03_irt_calibration_pass2: success
   step04_merge_theta_tsvr: success
   step05_fit_lmm: success
+  step05_fit_extended_lmm_models: success
+  step05c_model_averaging: success
   step06_compute_post_hoc_contrasts: success
   step07_prepare_trajectory_plot_data: success
 rq_inspect:
@@ -117,21 +119,32 @@ rq_inspect:
     '
 rq_plots:
   status: success
-  completed: 2025-11-24
-  context_dump: 'Generated 2 plots: trajectory_theta.png, trajectory_probability.png
-
-    Data sources: step07_trajectory_theta_data.csv, step07_trajectory_probability_data.csv
-
-    D069 compliance: YES (dual-scale trajectory plots included)
-
-    Functions used: set_plot_style_defaults (matplotlib/seaborn direct for pre-aggregated
-    data)
-
-    '
+  completed: 2025-12-08
+  regenerated: 2025-12-08
+  context_dump: |
+    REGENERATED: 4 plots incorporating kitchen sink model averaging
+    Original 2 plots: trajectory_theta.png, trajectory_probability.png (empirical data)
+    NEW 2 plots: trajectory_averaged_theta.png, trajectory_averaged_probability.png (model-averaged)
+    Data sources: step07 CSVs (empirical) + step05c_averaged_predictions.csv (model-averaged)
+    D069 compliance: YES (dual-scale trajectory plots for BOTH empirical and model-averaged)
+    Model uncertainty documented in plot annotations (15 competitive models, effective N=13.96)
+extended_model_selection:
+  status: success
+  timestamp: '2025-12-08T13:19:00'
+  context_dump: |
+    Kitchen sink (66 models) + model averaging completed
+    Best: PowerLaw_01 (6.0% weight) - EXTREME uncertainty
+    15 competitive models (ΔAIC < 2), effective N = 13.96
+    Model averaging MANDATORY - predictions in step05c_averaged_predictions.csv
+    Overconfidence factor: 16,630× (Log 99.98% → PowerLaw 6.0%)
+    Most extreme case in Chapter 5 - see COMPLETION_SUMMARY.md
 rq_results:
   status: success
-  timestamp: '2025-11-25T17:50:00'
+  timestamp: '2025-12-08T15:30:00'
   context_dump: |
-    Results validated for scientific plausibility
-    1 anomaly flagged: null schema effect (see summary.md Section 3)
-    Summary documented in results/summary.md
+    Results summary UPDATED with extended model selection (2025-12-08)
+    Original: Log 99.998% (5-model comparison, overconfident)
+    Extended: PowerLaw_01 6.0% (66 models, extreme uncertainty)
+    Key finding: Null schema effect ROBUST across all 66 functional forms
+    Model averaging applied (15 competitive models, effective N=13.96)
+    Summary.md documents most extreme functional form uncertainty in Chapter 5

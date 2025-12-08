@@ -1,0 +1,3 @@
+Best Model: PowerLaw_04
+AIC: 866.61
+Competitive models: 16

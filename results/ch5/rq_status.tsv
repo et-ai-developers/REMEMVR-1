@@ -1,9 +1,9 @@
 Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect	plots	results	validate
-5.1.1	General	Functional Form	Log model best (48% weight). Omnibus factor valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.1.2	General	Two-Phase Test	Depends on 5.1.1. Piecewise vs continuous. FIXED 2025-12-03.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.1.3	General	Age Effects	Depends on 5.1.1. Age tertile analysis.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.1.4	General	Variance Decomp	Depends on 5.1.1. ICC for slopes.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.1.5	General	Clustering	Depends on 5.1.4 random effects. K-means stdlib only.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
+5.1.1	General	Functional Form	EXTENDED 2025-12-08: PowerLaw α=0.5 wins (15% weight) vs Log basic (48%). ΔAIC=2.97. Model averaging applied. Plots regenerated.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
+5.1.2	General	Two-Phase Test	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 PowerLaw vs Log shift. Consider model-averaged predictions. Original: Log-based. FIXED 2025-12-03.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
+5.1.3	General	Age Effects	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 PowerLaw vs Log shift. Random slopes mismatch (~log_Days → ~Days_pow_neg05).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
+5.1.4	General	Variance Decomp	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 functional form change affects variance decomposition interpretation.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
+5.1.5	General	Clustering	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 random effects change (PowerLaw slopes) affects clustering input.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
 5.1.6	General	Item Difficulty	DEPRIORITIZED: Core hypothesis answered by 5.3.9 (item difficulty paradigm-invariant). Expected NULL.	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
 5.2.1	Domains	Trajectories	CRITICAL: When domain floor effect (6-9%). Use What/Where only downstream.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
 5.2.2	Domains	Consolidation	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)

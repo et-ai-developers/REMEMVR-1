@@ -1,0 +1,38 @@
+RQ_ID	Chapter	Type	Models_Tested	Best_Model_Basic5	Best_Model_Extended17	AIC_Weight_Basic	AIC_Weight_Extended	Random_Slope	Downstream_Dependencies	Notes
+5.1.1	5	General Omnibus	5 basic + 17 extended	Log	PowerLaw_Alpha05	0.482	0.152	~log_Days	5.1.2,5.1.3,5.1.4,5.1.5	Extended: Power law wins (ΔAIC=2.97 vs Log). When domain excluded downstream (73% floor effect).
+5.2.1	5	Domains (What/Where/When)	5 basic + 17 extended	Log	Log	0.917	0.401	~log_Days	5.2.2,5.2.3,5.2.4,5.2.5,5.2.6,5.2.7	When domain excluded from all derivatives (6-9% floor). SquareRoot competitive in extended.
+5.3.1	5	Paradigms (IFR/ICR/IRE)	5 basic + 17 extended	Log	SquareRoot	0.9998	0.286	~log_Days	5.3.2,5.3.3,5.3.4,5.3.5,5.3.6,5.3.7,5.3.8,5.3.9	Extended: SquareRoot edges Log (ΔAIC=0.68). Recognition faster forgetting (contradicts hypothesis).
+5.4.1	5	Schema Congruence	5 basic + 17 extended	Log	Recip+Log	0.9998	0.737	~log_TSVR	5.4.2,5.4.3,5.4.4,5.4.5,5.4.6,5.4.7	MAJOR: Recip+Log wins (ΔAIC=7.50 vs Log, evidence ratio 42:1). Two-process forgetting. NULL congruence effect.
+5.5.1	5	Source-Destination	5 basic only	Log	-	0.635	-	~log_Days	5.5.2,5.5.3,5.5.4*,5.5.5*,5.5.6*,5.5.7*	Extended models NOT tested. Destination marginal faster forgetting (p_bonf=0.050). *Incomplete RQs.
+6.1.1	6	Confidence Functional Form	5 planned	Logarithmic	-	0.639	-	~log_Days	6.1.2,6.1.3,6.1.4,6.1.5	Planning only. Model selected but extended NOT tested (should test 17 models).
+6.3.1	6	Domain Confidence	No AIC comparison	log_TSVR (assumed)	-	-	-	~1 (intercept only)	6.3.2,6.3.3,6.3.4	When domain significant interaction (p=0.020). What/Where parallel. No model selection performed.
+6.4.1	6	Paradigm Confidence	No AIC comparison	log_TSVR (assumed)	-	-	-	~1 (intercept only)	6.4.2,6.4.3,6.4.4	NULL finding (p=0.107). Parallel decline. No model selection performed.
+6.5.1	6	Schema Confidence	No AIC comparison	log_TSVR (assumed)	-	-	-	~1 (intercept only)	6.5.2,6.5.3	NULL finding (p=0.338). Parallel decline. No model selection performed. Dissociation: Ch5 accuracy NULL matches Ch6 confidence NULL.
+6.6.1	6	High-Confidence Errors	5 basic + 13 extended	Logarithmic (basic)	SquareRoot (extended)	0.272	0.172	~Days (attempted)	6.6.2,6.6.3	Extended 13 models (not 17). No clear winner (all ΔAIC<2). HCE rate DECREASES (contradicts hypothesis).
+6.8.1	6	Source-Dest Confidence	No AIC comparison	log_TSVR (assumed)	-	-	-	~1 (intercept only)	6.8.2,6.8.3,6.8.4	NULL finding (p=0.553). CRITICAL: Confidence-accuracy dissociation (Ch5 5.5.1 significant, Ch6 6.8.1 NULL).
+
+Notes:
+- "Basic 5" models: Linear, Quadratic, Log, Lin+Log, Quad+Log
+- "Extended 17" models: Basic 5 + PowerLaw (α=0.3/0.5/0.7), PowerLaw_LogLog, PowerLaw_Combined, CubeRoot, SquareRoot, SquareRoot+Log, Recip+Log, Reciprocal, Exponential, Exp+Log
+- "Extended 13" models (6.6.1 only): Basic 5 + SquareRoot, Power_0.7, Piecewise_Day1, and 5 others (not full 17-model suite)
+- Random slopes: Ch5 uses random slopes on time transformation, Ch6 mostly uses random intercepts only (boundary warnings)
+- AIC Weight: Akaike weight from model comparison (blank = no comparison performed)
+- Downstream dependencies: RQ IDs that depend on this ROOT RQ's model selection and theta scores
+- "*" indicates incomplete/concept-only RQs
+
+Key Findings:
+1. Extended models challenge Log dominance in 3/4 tested Ch5 RQs (5.1.1: PowerLaw wins, 5.3.1: SquareRoot competitive, 5.4.1: Recip+Log wins decisively)
+2. Ch6 ROOT RQs (6.3.1, 6.4.1, 6.5.1, 6.8.1) performed NO model selection - assumed log_TSVR from Ch5 precedent
+3. RQ 5.4.1 shows largest discrepancy: Basic 5 gave Log 99.998% confidence, Extended 17 gives Recip+Log 73.7% (5,882× overestimate)
+4. Confidence-accuracy dissociations: 6.8.1 NULL vs 5.5.1 significant (metacognitive monitoring insensitive to source/destination)
+5. Random slope specifications: Ch5 uses ~log_Days or ~log_TSVR, Ch6 uses ~1 (intercept only) due to boundary warnings
+
+Recommendations:
+- Test extended 17 models on: 5.5.1 (not done), 6.1.1 (planned but not executed), all Ch6 ROOT RQs (6.3.1, 6.4.1, 6.5.1, 6.8.1)
+- Update RQ 5.4.1 to use Recip+Log (ΔAIC=7.50 is substantial evidence against Log)
+- Consider updating 5.1.1 to use PowerLaw_Alpha05 (ΔAIC=2.97 vs Log)
+- Re-run Ch6 ROOT RQs with proper model selection rather than assuming log_TSVR
+
+File created: 2025-12-08
+Source: Context-finder agents + direct file inspection
+Coverage: 11 ROOT RQs (5 Ch5 + 6 Ch6), 39 Ch5 RQs total, 33 Ch6 RQs total

@@ -289,16 +289,15 @@ if __name__ == "__main__":
             log(f"[IRT] Model configured: {n_items} items, {n_factors} factor, {n_cats} categories")
 
             # Fit IRT model
-            log("[IRT] Fitting GRM model (this may take ~5 minutes)...")
-            log("[IRT] Settings: max_iter=50, mc_samples=10, iw_samples=10 (MINIMAL TEST)")
-            log("[IRT] Note: For production, use max_iter=200, mc_samples=100, iw_samples=100")
+            log("[IRT] Fitting GRM model (this may take ~30 minutes with MED settings)...")
+            log("[IRT] Settings: batch_size=2048, mc_samples=1, iw_samples=100 (MED - Ch5 validated)")
             model_fitted = fit_irt_grm(
                 model=model,
                 response_matrix=response_matrix,
                 missing_mask=missing_mask,
-                batch_size=400,
-                iw_samples=10,  # MINIMAL SETTING for testing
-                mc_samples=10   # MINIMAL SETTING for testing
+                batch_size=2048,     # MED: 2048 (was 400)
+                iw_samples=100,      # MED: 100 (was 10)
+                mc_samples=1         # MED: 1 = point estimates (FAST fitting)
             )
             log("[DONE] IRT model fitting complete")
 
@@ -310,9 +309,9 @@ if __name__ == "__main__":
                 missing_mask=missing_mask,
                 composite_ids=composite_ids,
                 factor_names=["All"],
-                scoring_batch_size=400,
-                mc_samples=10,  # MINIMAL SETTING
-                iw_samples=10,  # MINIMAL SETTING
+                scoring_batch_size=2048,  # MED: 2048 (was 400)
+                mc_samples=100,           # MED: 100 (was 10) - Monte Carlo integration
+                iw_samples=100,           # MED: 100 (was 10) - Importance weighting
                 invert_scale=False
             )
             # Rename columns to match expected output format

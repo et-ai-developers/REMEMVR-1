@@ -154,15 +154,15 @@ IRT_CONFIG = {
     'seed': 42,
     'n_cats': 5,  # 5-category ordinal (0, 0.25, 0.5, 0.75, 1.0)
 
-    # MEDIUM settings for production quality
+    # MEDIUM settings for production quality (Ch5 validated 2025-11-25)
     # mc_samples=1 for fitting (point estimates - fast), mc_samples=100 for scoring (ACCURATE)
     'max_iter': 200,         # Production: 200 iterations for convergence
-    'batch_size': 400,
+    'batch_size': 2048,      # MED: 2048 (was 400)
     'mc_samples': 1,         # CRITICAL: 1 = point estimates (FAST fitting)
-    'iw_samples': 1,         # CRITICAL: 1 = point estimates (FAST fitting)
+    'iw_samples': 100,       # MED: 100 (was 1) - importance weighting for ELBO
 
     # Scoring settings (used during theta extraction) - higher for accuracy
-    'scoring_batch_size': 400,
+    'scoring_batch_size': 2048,  # MED: 2048 (was 400)
     'scoring_mc_samples': 100,   # Monte Carlo for theta scores (ACCURATE)
     'scoring_iw_samples': 100,   # Importance weighting for theta scores
 

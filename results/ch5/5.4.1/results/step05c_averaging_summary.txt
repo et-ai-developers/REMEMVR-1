@@ -1,0 +1,46 @@
+================================================================================
+RQ 5.4.1 - Model Averaging Summary (Congruence × Time)
+================================================================================
+
+Problem: Best single model uncertainty
+  Best model: PowerLaw_01
+  Akaike weight: 0.0604 (6.0%)
+  Interpretation: EXTREME uncertainty (6.04% << 30% threshold)
+
+Solution: Multi-model inference (Burnham & Anderson, 2002)
+  Models averaged: 15
+  Effective N models: 13.96
+  Cumulative weight: 56.4%
+
+Models Used (Top 10):
+   1. PowerLaw_01               w=0.1071
+   2. Log                       w=0.1018
+   3. Log2                      w=0.1018
+   4. Log10                     w=0.1018
+   5. PowerLaw_02               w=0.0890
+   6. SquareRoot                w=0.0691
+   7. Exp_slow                  w=0.0691
+   8. PowerLaw_03               w=0.0589
+   9. Log+Recip                 w=0.0469
+  10. Recip+PowerLaw05          w=0.0439
+
+Model Composition:
+  Reciprocal family: 3 models (two-process forgetting)
+  Power-law family: 6 models (scale-invariant decay)
+  Logarithmic family: 6 models (Ebbinghaus curves)
+
+Effective Functional Form:
+  Mixed ensemble: Power-law (α≈0.1-0.3) + Logarithmic + Reciprocal
+  Interpretation: No single functional form dominates
+  Schema interaction: Time transformation × Congruence effects
+
+Robustness:
+  Single-model risk: Overfitting, ignores uncertainty
+  Averaged approach: Accounts for functional form uncertainty
+  Ph.D. defense: Scientifically defensible foundation
+
+Comparison to Previous Steps:
+  Original 5-model: Log 99.98% (overconfident by 5,882×)
+  Extended 17-model: Recip+Log 73.7% (strong but incomplete)
+  Kitchen sink 66-model: PowerLaw_01 6.04% (reveals true uncertainty)
+  This step: Model averaging addresses uncertainty

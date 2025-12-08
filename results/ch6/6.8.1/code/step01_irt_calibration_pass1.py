@@ -154,15 +154,15 @@ IRT_CONFIG = {
 # Model Fitting Settings (MINIMUM)
 MODEL_FIT_SETTINGS = {
     'batch_size': 2048,
-    'iw_samples': 1,   # MINIMUM
-    'mc_samples': 1    # MINIMUM
+    'iw_samples': 100,  # MED: 100 (was 1) - Ch5 validated 2025-11-25
+    'mc_samples': 1     # MED: 1 = point estimates (FAST - correct)
 }
 
-# Theta Scoring Settings (MINIMUM)
+# Theta Scoring Settings (MED - Ch5 validated)
 MODEL_SCORING_SETTINGS = {
     'scoring_batch_size': 2048,
-    'mc_samples': 1,   # MINIMUM
-    'iw_samples': 1    # MINIMUM
+    'mc_samples': 100,  # MED: 100 (was 1) - Monte Carlo integration
+    'iw_samples': 100   # MED: 100 (was 1) - Importance weighting
 }
 
 # =============================================================================

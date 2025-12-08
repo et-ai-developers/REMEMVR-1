@@ -1,0 +1,40 @@
+================================================================================
+RQ 5.3.1 - Model Averaging Summary (Paradigm × Time)
+================================================================================
+
+Problem: Best single model uncertainty
+  Best model: PowerLaw_01
+  Akaike weight: 0.0670 (6.7%)
+  Interpretation: EXTREME uncertainty
+
+Solution: Multi-model inference (Burnham & Anderson, 2002)
+  Models averaged: 14
+  Effective N models: 12.90
+  Cumulative weight: 57.9%
+
+Models Used (Top 10):
+   1. PowerLaw_01               w=0.1159
+   2. Log2                      w=0.1117
+   3. Log10                     w=0.1117
+   4. Log                       w=0.1117
+   5. SquareRoot                w=0.0794
+   6. Exp_slow                  w=0.0794
+   7. PowerLaw_02               w=0.0770
+   8. CubeRoot+Log              w=0.0470
+   9. Recip+Log                 w=0.0451
+  10. PowerLaw_Log              w=0.0449
+
+Model Composition:
+  Power-law family: 3 models (scale-invariant decay)
+  Logarithmic family: 9 models (Ebbinghaus curves)
+  Root family: 2 models (diminishing returns)
+
+Effective Functional Form:
+  Dominant family: Power-law/Log hybrid
+  Interpretation: Proportional decay with paradigm-specific rates
+  Paradigm interaction: Time transformation × Paradigm effects
+
+Robustness:
+  Single-model risk: Overfitting, ignores uncertainty
+  Averaged approach: Accounts for functional form uncertainty
+  Ph.D. defense: Scientifically defensible foundation

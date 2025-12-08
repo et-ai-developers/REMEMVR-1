@@ -126,8 +126,10 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: 2025-11-25T17:35:00Z
+  timestamp: 2025-12-08T12:05:00Z
   context_dump: |
-    Results validated for scientific plausibility (5 anomalies flagged)
-    Anomalies: IRT parameter drift (4 items), Where-What null (unexpected), When domain floor effect (8-12%), When item attrition (77%), LMM boundary warnings
-    Summary exists at results/summary.md (created 2025-11-22, validated 2025-11-25)
+    UPDATED: Extended model comparison (66 models) + model averaging
+    Original Log model REJECTED (rank #43, ΔAIC=+8.91, evidence ratio 89:1)
+    Best: Recip+Log (8.9% weight, extreme uncertainty), model averaging applied (10 models, 54.8% weight)
+    3 anomalies: Log model artifact (RESOLVED), model uncertainty (RESOLVED), When floor effect (UNRESOLVED)
+    Summary REGENERATED at results/summary.md (v2 updated 2025-12-08)

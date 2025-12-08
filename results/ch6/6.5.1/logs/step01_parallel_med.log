@@ -1,0 +1,31 @@
+/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/deepirtools/data.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+[START] Step 01: IRT Calibration Pass 1 (3-factor GRM on all TC_* items)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (FAST mode), iw_samples=100
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step00_q_matrix.csv (72 items)
+[INFO] Q-matrix specifies 72 items across 3 factors
+[VALIDATION] All 72 Q-matrix items found in data
+[TRANSFORM] Converting wide format to long format...
+[TRANSFORM] Long format created: 28800 observations (400 participants x 72 items)
+[TRANSFORM] Creating factor groups from Q-matrix...
+[INFO] Common: 24 items
+[INFO] Congruent: 24 items
+[INFO] Incongruent: 24 items
+[ANALYSIS] Preparing IRT tensors via prepare_irt_input_from_long...
+[DONE] Tensors prepared:
+  - response_matrix: torch.Size([400, 72]) (participants x items)
+  - missing_mask: torch.Size([400, 72])
+  - Q_matrix: torch.Size([72, 3]) (items x factors)
+  - composite_ids: 400 IDs
+  - item_list: 72 items
+[ANALYSIS] Configuring 3-factor GRM model via configure_irt_model...
+
+Initializing model parameters
+Initialization ended in  0.02  seconds
+[DONE] Model configured: 72 items, 3 factors, 5 categories, correlated=True
+[ANALYSIS] Fitting GRM model via fit_irt_grm...
+[CRITICAL] Using mc_samples=1 during fit (avoids timeout per RQ 6.1.1)

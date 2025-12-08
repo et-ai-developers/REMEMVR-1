@@ -82,3 +82,18 @@ rq_results:
     Results validated for scientific plausibility
     1 anomaly flagged: wrong direction (main effect null, contradicts hypothesis - see summary.md Section 3)
     Summary documented in results/summary.md
+
+extended_model_selection:
+  status: complete
+  timestamp: "2025-12-08T13:00:00Z"
+  context_dump: |
+    Extended 66-model kitchen sink comparison complete
+    Best model: Quadratic (AIC=1750.80, weight=6.7%) - EXTREME UNCERTAINTY
+    Log model: Rank #2-4 (AIC=1751.15, ΔAIC=0.34, weight=5.6% each variant)
+    Competitive models: 13 (ΔAIC<2, cumulative 54.3%, effective N=12.32)
+    Model averaging: MANDATORY (weight<30% threshold)
+    Hybrid approach: Log model tests (ΔAIC=0.34 from best) + averaged plots
+    Documentation: EXTENDED_MODEL_SELECTION_NOTE.md, COMPLETION_SUMMARY.md
+    Plots regenerated: trajectory_theta.png, trajectory_probability.png (2025-12-08)
+    Files: step05_fit_extended_lmm_models.py, step05c_model_averaging.py
+    Outputs: model_comparison.csv (65 models), step05c_averaged_predictions.csv (200 points)

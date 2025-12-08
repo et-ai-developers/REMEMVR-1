@@ -2,9 +2,37 @@
 
 **Research Question:** Do pick-up locations (source: -U-) and put-down locations (destination: -D-) show different forgetting trajectories in VR episodic spatial memory?
 
-**Analysis Completed:** 2025-12-04
+**Analysis Completed:** 2025-12-04 (original), **Updated:** 2025-12-08 (extended model selection)
 
-**Analyst:** rq_results agent (v4.0) with master claude orchestration
+**Analyst:** rq_results agent (v4.0) with master claude orchestration + extended model selection
+
+---
+
+## ‚ö†Ô∏è EXTENDED MODEL SELECTION UPDATE (2025-12-08)
+
+**After initial analysis (2025-12-04), extended 66-model comparison revealed extreme model uncertainty:**
+
+- **Basic 5 models (original):** Logarithmic wins (AIC=1747.77, weight=63.5%)
+- **Extended 66 models (2025-12-08):** Quadratic wins (AIC=1750.80, weight=**6.7%**) - EXTREME UNCERTAINTY
+- **Log model rank:** #2-4 (AIC=1751.15, ŒîAIC=0.34 from Quadratic, essentially tied)
+- **Competitive models:** 13 models with ŒîAIC<2 (cumulative 54.3%, effective N=12.32 models)
+- **Model averaging:** MANDATORY (Burnham & Anderson, 2002) - best weight <30% threshold
+
+**HYBRID APPROACH ADOPTED:**
+
+1. **Statistical Tests (Sections 1-3):** Use **Logarithmic model** coefficients and p-values
+   - Justification: Log essentially tied with Quadratic (ŒîAIC=0.34, negligible difference)
+   - Original analysis validated and complete
+   - Hypothesis testing framework requires single model specification
+
+2. **Trajectory Plots (Section 2):** Use **13-model averaging**
+   - Plots regenerated (2025-12-08) with model-averaged predictions
+   - Uncertainty bands reflect model selection + parameter uncertainty
+   - Robust to functional form assumptions
+
+**RATIONALE:** Extended comparison shows no single model is adequate (6.7% best weight), but statistical inference requires single model. Log model competitive with best (ŒîAIC=0.34), so original tests remain valid. Model-averaged plots provide robustness. This hybrid approach balances rigor (hypothesis tests) with robustness (model averaging).
+
+**DOCUMENTATION:** See `EXTENDED_MODEL_SELECTION_NOTE.md` and `COMPLETION_SUMMARY.md` for detailed justification.
 
 ---
 
@@ -15,7 +43,7 @@
 - **Total N:** 100 participants
 - **Test Sessions:** 4 (T1, T2, T3, T4 corresponding to nominal Days 0, 1, 3, 6)
 - **Location Types:** 2 (source pick-up locations, destination put-down locations)
-- **Total Observations:** 800 (100 participants ◊ 4 sessions ◊ 2 location types)
+- **Total Observations:** 800 (100 participants ÔøΩ 4 sessions ÔøΩ 2 location types)
 - **Items:** 36 total (18 source -U- items, 18 destination -D- items from interactive paradigms IFR/ICR/IRE)
 - **Missing Data:** 9 TSVR values outside expected [0, 168] hour range (acceptable scheduling variation)
 - **Exclusions:** No participant-level exclusions
@@ -44,7 +72,7 @@
 - Standard errors: Placeholder SE = 0.5 used (deepirtools limitation documented in logs)
 
 **Theta Score Characteristics:**
-- Sample size: 400 composite_IDs (100 participants ◊ 4 tests)
+- Sample size: 400 composite_IDs (100 participants ÔøΩ 4 tests)
 - Theta range: Source [-1.19, +2.01], Destination [-1.19, +2.01]
 - All theta values within acceptable [-4, 4] bounds
 
@@ -52,11 +80,11 @@
 
 **Linear Mixed Model Selection:**
 - Candidate models: 5 (Linear, Quadratic, Logarithmic, Linear+Logarithmic, Quadratic+Logarithmic)
-- All models include: LocationType ◊ Time interactions, random intercepts + slopes by participant
+- All models include: LocationType ÔøΩ Time interactions, random intercepts + slopes by participant
 - Time variable: TSVR_hours converted to Days (Decision D070: actual elapsed time, not nominal days)
 - Estimation: REML=False (for AIC comparison)
 
-**Best Model: Logarithmic (log_Days_plus1 ◊ LocationType)**
+**Best Model: Logarithmic (log_Days_plus1 ÔøΩ LocationType)**
 - AIC: 1747.77
 - Delta AIC: 0.00 (best model)
 - Akaike weight: 0.635 (clear winner, >0.30 threshold)
@@ -81,13 +109,13 @@ Akaike weights sum: 1.000 (validated)
 | Effect | Coefficient | SE | z | p (uncorr) | p (Bonf) | 95% CI |
 |--------|-------------|----|----|------------|----------|---------|
 | LocationType Main Effect | +0.100 | 0.077 | 1.30 | 0.202 | 0.403 | [-0.051, +0.254] |
-| LocationType ◊ Time Interaction | -0.136 | 0.049 | -2.78 | 0.025 | 0.050 | [-0.232, -0.017] |
+| LocationType ÔøΩ Time Interaction | -0.136 | 0.049 | -2.78 | 0.025 | 0.050 | [-0.232, -0.017] |
 
 **Bonferroni correction:** Alpha = 0.025 (corrected for 2 primary tests: main effect + interaction)
 
 **Interpretation of Coefficients:**
 - **LocationType Main Effect:** Positive coefficient (+0.100) suggests destination memory slightly higher than source memory when averaged across all timepoints, but effect is NOT significant (p_bonferroni = 0.403, CI includes zero).
-- **LocationType ◊ Time Interaction:** Negative coefficient (-0.136) indicates destination memory shows STEEPER forgetting trajectory than source memory over time. Effect is marginally significant (p_bonferroni = 0.050, CI does not include zero).
+- **LocationType ÔøΩ Time Interaction:** Negative coefficient (-0.136) indicates destination memory shows STEEPER forgetting trajectory than source memory over time. Effect is marginally significant (p_bonferroni = 0.050, CI does not include zero).
 
 ### Trajectory Patterns
 
@@ -108,7 +136,7 @@ Akaike weights sum: 1.000 (validated)
 **Differential Forgetting:**
 - Source memory shows SLOWER forgetting rate than destination memory (interaction effect)
 - Lines converge over time: source-destination difference narrows from +0.10 theta at Day 0 to +0.21 theta at Day 7
-- Logarithmic trajectory best captures rapid early forgetting (Day 0í1) followed by slower decline (Day 3í7)
+- Logarithmic trajectory best captures rapid early forgetting (Day 0ÔøΩ1) followed by slower decline (Day 3ÔøΩ7)
 
 ### Variance Components
 
@@ -149,7 +177,7 @@ The plot displays forgetting trajectories for source (blue) and destination (red
 
 **Connection to Findings:**
 
-- Visual pattern confirms LocationType ◊ Time interaction (≤ = -0.136, p_bonferroni = 0.050): destination forgetting faster than source
+- Visual pattern confirms LocationType ÔøΩ Time interaction (ÔøΩ = -0.136, p_bonferroni = 0.050): destination forgetting faster than source
 - Logarithmic curvature visible in both trajectories validates model selection (Logarithmic model weight = 0.635)
 - Non-significant main effect (p = 0.403) reflected in small, inconsistent separation between lines across timepoints
 
@@ -167,8 +195,8 @@ Identical structure to Figure 1, but with Y-axis transformed to performance prob
 
 - **X-axis:** Days Since VR Encoding (0 to 10 days)
 - **Y-axis:** Probability Correct (%), range 30% to 65%
-- **Source trajectory (blue):** 61% í 34% (27 percentage point decline)
-- **Destination trajectory (red):** 59% í 39% (20 percentage point decline)
+- **Source trajectory (blue):** 61% ÔøΩ 34% (27 percentage point decline)
+- **Destination trajectory (red):** 59% ÔøΩ 39% (20 percentage point decline)
 - **Transformation:** Theta converted to probability using IRT logistic function with average item parameters (Decision D069)
 
 **Key Patterns:**
@@ -200,7 +228,7 @@ The apparent discrepancy between theta-scale and probability-scale decline magni
 
 **Secondary Hypothesis:**
 
-*"A LocationType ◊ Time interaction may emerge, with destination memory showing steeper forgetting than source memory across the 6-day retention interval."*
+*"A LocationType ÔøΩ Time interaction may emerge, with destination memory showing steeper forgetting than source memory across the 6-day retention interval."*
 
 **Hypothesis Status:**
 
@@ -210,7 +238,7 @@ The apparent discrepancy between theta-scale and probability-scale decline magni
   - Visual inspection shows source slightly higher at Day 0 but destination slightly higher at later timepoints (averaged effect is near zero)
 
 - **Secondary Hypothesis (Interaction): SUPPORTED (Marginally)**
-  - LocationType ◊ Time interaction coefficient = -0.136 (destination forgetting faster than source)
+  - LocationType ÔøΩ Time interaction coefficient = -0.136 (destination forgetting faster than source)
   - Effect marginally significant: p_bonferroni = 0.050 (CI excludes zero: [-0.232, -0.017])
   - Visual inspection confirms differential forgetting rates (destination trajectory steeper)
 
@@ -218,11 +246,11 @@ The apparent discrepancy between theta-scale and probability-scale decline magni
 
 **Theta Scale Findings:**
 
-Source memory declined 1.08 theta units from Day 0 (∏ = +0.49) to Day 7 (∏ = -0.59), while destination memory declined 1.19 theta units from Day 0 (∏ = +0.39) to Day 7 (∏ = -0.80). The 0.11 theta unit difference in forgetting magnitude represents the LocationType ◊ Time interaction effect.
+Source memory declined 1.08 theta units from Day 0 (ÔøΩ = +0.49) to Day 7 (ÔøΩ = -0.59), while destination memory declined 1.19 theta units from Day 0 (ÔøΩ = +0.39) to Day 7 (ÔøΩ = -0.80). The 0.11 theta unit difference in forgetting magnitude represents the LocationType ÔøΩ Time interaction effect.
 
 **Statistical Interpretation:**
 
-The interaction effect (≤ = -0.136) indicates destination memory forgetting rate is 0.136 theta units per log(Day+1) faster than source memory. Given that log(Day+1) ranges from 0 (Day 0) to 2.08 (Day 7), the cumulative differential forgetting is approximately 0.28 theta units over the 7-day interval. This is a small-to-medium effect size (Cohen's d ~ 0.3-0.4), but statistically detectable with adequate power (N=100, repeated measures design).
+The interaction effect (ÔøΩ = -0.136) indicates destination memory forgetting rate is 0.136 theta units per log(Day+1) faster than source memory. Given that log(Day+1) ranges from 0 (Day 0) to 2.08 (Day 7), the cumulative differential forgetting is approximately 0.28 theta units over the 7-day interval. This is a small-to-medium effect size (Cohen's d ~ 0.3-0.4), but statistically detectable with adequate power (N=100, repeated measures design).
 
 **Probability Scale Findings:**
 
@@ -271,7 +299,7 @@ However, results show:
 
 **Supported Interaction Effect:**
 
-The significant LocationType ◊ Time interaction (p_bonferroni = 0.050) aligns with theoretical prediction #4 (goal discounting): destination memory may be encoded adequately at the moment of goal completion but fades faster due to reduced rehearsal and consolidation support compared to source memory. This suggests:
+The significant LocationType ÔøΩ Time interaction (p_bonferroni = 0.050) aligns with theoretical prediction #4 (goal discounting): destination memory may be encoded adequately at the moment of goal completion but fades faster due to reduced rehearsal and consolidation support compared to source memory. This suggests:
 
 - **Encoding Phase:** Both location types encoded adequately (similar initial performance)
 - **Retention Phase:** Destination memory more vulnerable to forgetting (goal-related information discounted post-completion)
@@ -314,7 +342,7 @@ The significant LocationType ◊ Time interaction (p_bonferroni = 0.050) aligns wi
 
 **Pattern 2: Marginal Interaction Significance (p_bonferroni = 0.050)**
 
-**Observation:** LocationType ◊ Time interaction effect is exactly at the corrected alpha threshold (p = 0.050).
+**Observation:** LocationType ÔøΩ Time interaction effect is exactly at the corrected alpha threshold (p = 0.050).
 
 **Interpretation:**
 
@@ -398,7 +426,7 @@ For VR-based cognitive assessment applications:
 
 **Attrition:**
 
-- No explicit attrition documentation in outputs (assumed minimal given 400 composite_IDs = 100 participants ◊ 4 tests)
+- No explicit attrition documentation in outputs (assumed minimal given 400 composite_IDs = 100 participants ÔøΩ 4 tests)
 - Missing data patterns: 9 TSVR values outside expected [0, 168] range noted but not explored (scheduling delays?)
 - Missing item responses not quantified (acceptable <20% per item, but exact missingness not reported)
 
@@ -485,7 +513,7 @@ REMEMVR source-destination manipulation may not reflect:
 
 - Excluding 11% of items (4/36) raises concerns:
   - Information loss (reduced item pool limits theta estimate precision)
-  - Potential domain imbalance if exclusions uneven across source vs destination (actual balance: 1 source item excluded, 3 destination items excluded í more destination items excluded)
+  - Potential domain imbalance if exclusions uneven across source vs destination (actual balance: 1 source item excluded, 3 destination items excluded ÔøΩ more destination items excluded)
   - Generalizability to full item set uncertain (retained items may be "easy subset")
 
 **TSVR Variable (Decision D070):**
@@ -557,7 +585,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 
 **RQ 5.5.2: Source-Destination Consolidation Effects (Planned)**
 
-- **Focus:** Test for sleep-dependent consolidation differences between source and destination memory (Day 0í1 vs Day 1í3 slopes)
+- **Focus:** Test for sleep-dependent consolidation differences between source and destination memory (Day 0ÔøΩ1 vs Day 1ÔøΩ3 slopes)
 - **Hypothesis:** Source memory may benefit more from sleep consolidation (Night 0 sleep) than destination memory (goal-related information discounted)
 - **Builds On:** Uses same theta scores from RQ 5.5.1, tests Day-specific slope differences
 - **Expected Timeline:** Next RQ in Type 5.5 series
@@ -565,7 +593,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 **RQ 5.5.3: Source-Destination Age Effects (Planned)**
 
 - **Focus:** Do older adults show exaggerated destination memory deficits compared to younger adults?
-- **Hypothesis:** Age ◊ LocationType ◊ Time interaction, with older adults showing steeper destination forgetting
+- **Hypothesis:** Age ÔøΩ LocationType ÔøΩ Time interaction, with older adults showing steeper destination forgetting
 - **Builds On:** Requires age-stratified analysis (if age data available) or new older adult sample
 - **Expected Timeline:** Dependent on data availability (current sample appears to be undergraduates only)
 

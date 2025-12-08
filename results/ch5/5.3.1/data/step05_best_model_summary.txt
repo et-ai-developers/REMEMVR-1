@@ -1,0 +1,24 @@
+RQ 5.3.1 - Kitchen Sink Model Selection Summary
+================================================================================
+
+Best Model: PowerLaw_01
+AIC: 2375.72
+Weight: 6.70%
+Uncertainty: High
+
+Top 10 Models:
+--------------------------------------------------------------------------------
+ 1. PowerLaw_01               AIC=2375.72  ΔAIC=  0.00  weight= 6.70%
+ 2. Log2                      AIC=2375.80  ΔAIC=  0.07  weight= 6.46%
+ 3. Log10                     AIC=2375.80  ΔAIC=  0.07  weight= 6.46%
+ 4. Log                       AIC=2375.80  ΔAIC=  0.07  weight= 6.46%
+ 5. SquareRoot                AIC=2376.48  ΔAIC=  0.76  weight= 4.59%
+ 6. Exp_slow                  AIC=2376.48  ΔAIC=  0.76  weight= 4.59%
+ 7. PowerLaw_02               AIC=2376.54  ΔAIC=  0.82  weight= 4.45%
+ 8. CubeRoot+Log              AIC=2377.53  ΔAIC=  1.80  weight= 2.72%
+ 9. Recip+Log                 AIC=2377.61  ΔAIC=  1.89  weight= 2.61%
+10. PowerLaw_Log              AIC=2377.62  ΔAIC=  1.90  weight= 2.60%
+
+⚠️  Model Uncertainty Detected
+   Best weight: 6.7% < 30% threshold
+   Action: Run model averaging (step05c_model_averaging.py)

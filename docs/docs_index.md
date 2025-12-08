@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-11-22 (Tools catalog created - lightweight tool discovery for rq_planner)
+**Last Updated:** 2025-12-08 (Kitchen sink model selection tool added to tools_catalog and tools_inventory)
 
 ---
 
@@ -226,11 +226,17 @@
 **Status:** Current (2025-11-22, v2.0 - 33 functions renamed)
 **Key Topics:** 8 formulaic patterns (convert_X_to_Y, load_X_from_Y, resolve_X_from_Y, set_X_Y, compute_X_Y, fit_X_Y, prepare_X_from_Y, compare_X_by_Y), source/target/method explicitness, self-documenting function names, pattern distribution (LOAD=8, EXTRACT=4, FIT=3, COMPUTE=2), quick reference guide, agent communication patterns (rq_planner uses pipelines, rq_analysis uses atomics)
 
-### tools_catalog.md
+### v4/tools_catalog.md
 **Purpose:** Lightweight tool discovery catalog for rq_planner (TIER 1: "What exists?") - 96% lighter than tools_inventory.md
 **Audience:** rq_planner agent (planning phase), main claude browsing available tools
-**Status:** Current (2025-11-22, created)
-**Key Topics:** 51 functions across 5 modules (analysis_irt, analysis_lmm, plotting, validation, config), one-line descriptions (name + purpose + basic I/O), organized by workflow (IRT calibration, LMM trajectory, plotting, validation), Decision cross-reference (D039/D068/D069/D070), stdlib exemption list (pandas/numpy/pathlib), missing tools (CTT), ~300 lines total
+**Status:** Current (2025-12-08, added kitchen sink model selection tool)
+**Key Topics:** 52 functions across 6 modules (analysis_irt, analysis_lmm, model_selection, plotting, validation, config), one-line descriptions (name + purpose + basic I/O), organized by workflow (IRT calibration, LMM trajectory, model selection, plotting, validation), Decision cross-reference (D039/D068/D069/D070), stdlib exemption list (pandas/numpy/pathlib), missing tools (CTT), ~300 lines total
+
+### v4/tools_inventory.md
+**Purpose:** Authoritative API reference for VALIDATED analysis tools (TIER 2: "How do I use it?") - Complete specifications with inputs/outputs/examples
+**Audience:** rq_tools, rq_analysis, g_code agents (implementation phase), main claude for precise API details
+**Status:** Current (2025-12-08, added kitchen sink model selection tool)
+**Key Topics:** 52 validated functions with complete specs (Status, Description, Inputs, Outputs, Model Suite [for model_selection], Interactions, Validation, Use Cases, Examples, Important Notes, References), module organization (tools.analysis_irt, tools.analysis_lmm, tools.model_selection, tools.plotting, tools.validation), Decision implementations (D039/D068/D069/D070), YELLOW/GREEN status only (RED/ORANGE excluded), self-contained API reference for agents
 
 ---
 

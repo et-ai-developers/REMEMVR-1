@@ -50,3 +50,28 @@
 [SUCCESS] Step 01 complete - All validations passed
 [SUMMARY] Pass 1 calibrated 36 items for 400 participants
 [NEXT] Run Step 02 to purify items using quality thresholds (a >= 0.4, |b| <= 3.0)
+[START] Step 01: IRT Calibration Pass 1 (2-factor GRM on all TC_* items)
+[CONFIG] Model: 2-factor GRM, 5 categories
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (FAST mode), iw_samples=100
+[CONFIG] Scoring: mc_samples=100 (ACCURATE mode), iw_samples=100
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 37 cols)
+[LOADED] step00_q_matrix.csv (36 items)
+[INFO] Q-matrix specifies 36 items across 3 factors
+[VALIDATION] All 36 Q-matrix items found in data
+[TRANSFORM] Converting wide format to long format...
+[TRANSFORM] Long format created: 14400 observations (400 participants x 36 items)
+[TRANSFORM] Creating factor groups from Q-matrix...
+[INFO] Source: 18 items
+[INFO] Destination: 18 items
+[ANALYSIS] Preparing IRT tensors via prepare_irt_input_from_long...
+[DONE] Tensors prepared:
+  - response_matrix: torch.Size([400, 36]) (participants x items)
+  - missing_mask: torch.Size([400, 36])
+  - Q_matrix: torch.Size([36, 2]) (items x factors)
+  - composite_ids: 400 IDs
+  - item_list: 36 items
+[ANALYSIS] Configuring 2-factor GRM model via configure_irt_model...
+[DONE] Model configured: 36 items, 2 factors, 5 categories, correlated=True
+[ANALYSIS] Fitting GRM model via fit_irt_grm...
+[CRITICAL] Using mc_samples=1 during fit (avoids timeout per RQ 6.1.1)

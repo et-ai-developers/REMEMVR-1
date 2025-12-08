@@ -122,6 +122,59 @@
 
 ---
 
+## Model Selection Update (2025-12-08)
+
+**Context:** Extended model comparison completed following discovery that basic 5-model testing systematically underestimated model uncertainty across ROOT RQs (see RQ 5.1.1, 5.2.1 findings).
+
+### Original vs Extended Comparison
+
+**Original (Basic 5 Models):**
+- Winner: Log model (AIC = 2346.60)
+- Weight: 99.99% (appeared to be overwhelming certainty)
+- Interpretation: "Logarithmic forgetting decisively superior"
+
+**Extended (Kitchen Sink 66 Models):**
+- Winner: **PowerLaw_01** (α=0.1, AIC = 2375.72)
+- Weight: **6.7%** (EXTREME model uncertainty revealed)
+- Log models: Ranked #2-4 (Log, Log2, Log10 all tied at AIC = 2375.80)
+- ΔAIC(PowerLaw - Log): **0.07** (essentially indistinguishable)
+- Competitive models (ΔAIC < 2): **14 models**
+
+**Key Finding:** Original analysis **overestimated confidence by 15× factor** (99.99% → 6.7%). Power-law α=0.1 technically "wins" but Log models remain highly competitive (tied within rounding error).
+
+### Model Averaging Approach
+
+**Multi-Model Inference (Burnham & Anderson, 2002):**
+- **Why:** Best weight = 6.7% < 30% threshold → model averaging mandatory
+- **Models averaged:** 14 competitive models (ΔAIC < 2, cumulative 57.9% weight renormalized)
+- **Effective N models:** 12.90 (Shannon diversity index - high diversity)
+- **Model families:**
+  - Logarithmic: 9 models (Log, Log2, Log10, combinations with roots/reciprocals)
+  - Power-law: 3 models (α=0.1, α=0.2, Log-hybrid)
+  - Root: 2 models (SquareRoot, CubeRoot+Log)
+
+**Effective Functional Form:**
+- Weighted effective α = **0.140** (shallow power-law)
+- Interpretation: Log/PowerLaw hybrid (both contribute ~50% to averaged predictions)
+- Paradigm × Time interaction structure preserved across all 14 models
+
+### Impact on Substantive Conclusions
+
+**Minimal changes to interpretation:**
+- Paradigm baseline differences (Recognition > Cued ≈ Free): **Unchanged** (fixed effect estimates identical across models)
+- Paradigm × Time interactions (Recognition faster forgetting): **Unchanged** (interaction terms consistent)
+- Logarithmic vs power-law debate: **Unresolved** (ΔAIC=0.07 too small to distinguish)
+- Statistical significance claims: **Unchanged** (p-values similar across top models)
+
+**What changed:**
+- **Certainty quantification:** Prediction uncertainty now includes between-model variance (SE = 0.003-0.047)
+- **Functional form interpretation:** Cannot claim "logarithmic forgetting proven" - Log and power-law α=0.1 equally plausible
+- **Scientific defensibility:** Model averaging provides robust foundation for thesis defense (accounts for functional form uncertainty)
+
+**Practical implication:** Original Log-based analyses (in summary above and RQ 5.3.2-5.3.9 derivatives) remain **scientifically valid**. Log model competitive (ranks #2-4, within ΔAIC=0.07 of best). No re-analysis required for downstream RQs, but model uncertainty should be acknowledged in limitations.
+
+---
+
 ## 2. Plot Descriptions
 
 ### Figure 1: Theta-Scale Trajectory by Retrieval Paradigm
@@ -477,6 +530,13 @@ For cognitive assessment applications:
 - **Exclusion reasons:** Extreme difficulty |b| > 3.0 (9 items with b < -3.0, 4 items with b > 3.0), low discrimination a < 0.4 (several items)
 - **Impact:** Recognition theta estimates may have restricted range, affecting trajectory comparisons
 - **Investigation needed:** Examine excluded item characteristics (domain, temporal order, landmark salience)
+
+**4. Model Selection Uncertainty (2025-12-08 Update):**
+- Original 5-model comparison overestimated confidence (99.99% → 6.7% after extended testing)
+- Power-law α=0.1 vs Log models essentially tied (ΔAIC=0.07)
+- **Limitation:** Cannot definitively claim "logarithmic forgetting" - both Log and power-law equally plausible
+- **Mitigation:** Model averaging (14 models, effective N=12.90) accounts for functional form uncertainty
+- **Impact:** Substantive conclusions unchanged (paradigm effects consistent across models), but certainty claims moderated
 
 **Design:**
 

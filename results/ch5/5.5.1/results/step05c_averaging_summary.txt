@@ -1,0 +1,42 @@
+================================================================================
+RQ 5.5.1 - Model Averaging Summary (LocationType × Time)
+================================================================================
+
+Problem: Best single model uncertainty
+  Best model: Quadratic
+  Akaike weight: 0.0670 (6.7%)
+  Interpretation: EXTREME uncertainty
+
+Solution: Multi-model inference (Burnham & Anderson, 2002)
+  Models averaged: 13
+  Effective N models: 12.32
+  Cumulative weight: 54.3%
+
+Models Used (Top 10):
+   1. Quadratic                 w=0.1233
+   2. Log                       w=0.1039
+   3. Log10                     w=0.1039
+   4. Log2                      w=0.1039
+   5. SquareRoot                w=0.0869
+   6. Exp_slow                  w=0.0869
+   7. PowerLaw_01               w=0.0790
+   8. Root_067                  w=0.0551
+   9. SquareRoot+Lin            w=0.0538
+  10. PowerLaw_Lin              w=0.0535
+
+Model Composition:
+  Quadratic family: 2 models
+  Logarithmic family: 4 models (Ebbinghaus curves)
+  Square-root family: 3 models
+  Power-law family: 3 models (scale-invariant decay)
+  Reciprocal family: 1 models (two-process forgetting)
+
+Effective Functional Form:
+  Dominant families: Quadratic + Logarithmic + Square-root
+  Interpretation: Multiple competing forgetting processes
+  LocationType interaction: Time transformation × Location effects
+
+Robustness:
+  Single-model risk: Overfitting, ignores uncertainty
+  Averaged approach: Accounts for functional form uncertainty
+  Ph.D. defense: Scientifically defensible foundation

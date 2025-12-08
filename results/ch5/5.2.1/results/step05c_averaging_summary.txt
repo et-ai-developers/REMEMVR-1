@@ -1,0 +1,40 @@
+================================================================================
+RQ 5.2.1 - Model Averaging Summary (Domain × Time)
+================================================================================
+
+Problem: Best single model uncertainty
+  Best model: Recip+Log
+  Akaike weight: 0.0890 (8.9%)
+  Interpretation: EXTREME uncertainty
+
+Solution: Multi-model inference (Burnham & Anderson, 2002)
+  Models averaged: 10
+  Effective N models: 9.45
+  Cumulative weight: 54.8%
+
+Models Used (Top 10):
+   1. Recip+Log                 w=0.1623
+   2. PowerLaw_Log              w=0.1482
+   3. CubeRoot+Log              w=0.1363
+   4. Tanh+Log                  w=0.1014
+   5. SquareRoot+Lin            w=0.0858
+   6. Lin+Log                   w=0.0855
+   7. Exp+Log                   w=0.0855
+   8. Recip+Lin                 w=0.0715
+   9. PowerLaw+Recip+Log        w=0.0621
+  10. PowerLaw_Lin              w=0.0615
+
+Model Composition:
+  Reciprocal family: 3 models (two-process forgetting)
+  Power-law family: 3 models (scale-invariant decay)
+  Logarithmic family: 5 models (Ebbinghaus curves)
+
+Effective Functional Form:
+  Dominant family: Reciprocal+Log (two-process)
+  Interpretation: Rapid initial consolidation + slow asymptotic decay
+  Domain interaction: Time transformation × Domain effects
+
+Robustness:
+  Single-model risk: Overfitting, ignores uncertainty
+  Averaged approach: Accounts for functional form uncertainty
+  Ph.D. defense: Scientifically defensible foundation

@@ -28,6 +28,7 @@
 | `configure_candidate_models` | Generate 5 candidate LMM formulas (Linear, Quadratic, Log, Lin+Log, Quad+Log) |
 | `fit_lmm_trajectory_tsvr` | D070: Fit LMM using TSVR (actual hours) as time variable |
 | `compare_lmm_models_by_aic` | Fit all 5 candidate models, compare by AIC, return best |
+| `compare_lmm_models_kitchen_sink` | **NEW (2025-12-08)**: Comprehensive model selection testing 70+ time transformations (polynomial, logarithmic, power-law, root, reciprocal, exponential, trigonometric, hyperbolic, hybrids). Supports 0/1/2-way interactions. Requires continuous TSVR. **NOTE:** `re_formula` parameter affects absolute AICs but preserves rankings; use `'~1'` for complex interactions, `'~log_TSVR'` or `'~TSVR'` for simple trajectories. Validated on RQ 5.1.1 (bit-exact match with existing results when using same re_formula). Returns AIC comparison, best model, Log model benchmark, top 10 models. |
 | `extract_fixed_effects_from_lmm` | Extract fixed effects table (coefficients, SE, z, p-values) |
 | `extract_random_effects_from_lmm` | Extract random effects variance components and ICC |
 | `compute_contrasts_pairwise` | D068: Post-hoc pairwise contrasts with dual p-values (uncorrected + Bonferroni) |
