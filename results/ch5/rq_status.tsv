@@ -1,39 +1,39 @@
-Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect	plots	results	validate
-5.1.1	General	Functional Form	EXTENDED 2025-12-08: PowerLaw α=0.5 wins (15% weight) vs Log basic (48%). ΔAIC=2.97. Model averaging applied. Plots regenerated.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.1.2	General	Two-Phase Test	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 PowerLaw vs Log shift. Consider model-averaged predictions. Original: Log-based. FIXED 2025-12-03.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.1.3	General	Age Effects	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 PowerLaw vs Log shift. Random slopes mismatch (~log_Days → ~Days_pow_neg05).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.1.4	General	Variance Decomp	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 functional form change affects variance decomposition interpretation.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.1.5	General	Clustering	⚠️ RERUN RECOMMENDED (MODERATE): 5.1.1 random effects change (PowerLaw slopes) affects clustering input.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.1.6	General	Item Difficulty	DEPRIORITIZED: Core hypothesis answered by 5.3.9 (item difficulty paradigm-invariant). Expected NULL.	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
-5.2.1	Domains	Trajectories	CRITICAL: When domain floor effect (6-9%). Use What/Where only downstream.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.2.2	Domains	Consolidation	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.2.3	Domains	Age Effects	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.2.4	Domains	IRT-CTT	USE WHAT/WHERE ONLY. Exclude When (floor effect).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.2.5	Domains	Purified CTT	COMPLETE 2025-12-03. What/Where only. Purification improves CTT-IRT correlation Δr=0.015-0.027 p<0.001. IRT superior AIC=1655 vs CTT=1780-1812.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
-5.2.6	Domains	Variance Decomp	COMPLETE 2025-12-03. What/Where only. ICC_int=0.51/0.57, ICC_slope_simple=0.008/0.011 (low - design limitation). Where Fan Effect r=-0.316 p<0.003.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
-5.2.7	Domains	Clustering	COMPLETE 2025-12-03. What/Where only. K=5 clusters (BIC). Silhouette=0.34 (POOR), Jaccard=0.88 (STABLE). 5 profiles: Average/Slow, Average/Improving, Low/Improving, High/Stable, Fast Decline.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.2.8	Domains	Item Difficulty	DEPRIORITIZED: Core hypothesis answered by 5.3.9 (item difficulty paradigm-invariant). Expected NULL.	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
-5.3.1	Paradigms	Trajectories	Recognition faster forgetting (contradicts hypothesis). Investigate item quality.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/4M)
-5.3.2	Paradigms	Gradient Test	Unique to Paradigms. Linear trend contrast.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.3.3	Paradigms	Consolidation	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.3.4	Paradigms	Age Effects	All 3 paradigms valid.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.3.5	Paradigms	IRT-CTT	COMPLETE 2025-12-04. r=0.84-0.88 all >0.70. κ=0.667 substantial. 83.3% agreement. Validates 5.3.1 not measurement artifact.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2L)
-5.3.6	Paradigms	Purified CTT	COMPLETE 2025-12-04. Paradox confirmed (3rd replication): All 3 paradigms significant Δr=+0.023-0.098 but AIC WORSE. IFR largest effect.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.3.7	Paradigms	Variance Decomp	COMPLETE 2025-12-04. ICC_slope≈0 all paradigms (design limitation). ICC_intercept=0.44-0.52 substantial. Replicates 5.2.6/5.4.6.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.3.8	Paradigms	Clustering	COMPLETE 2025-12-04. K=3 by BIC. Weak quality: silhouette=0.367, Jaccard=0.714 marginal. No paradigm-selective profiles (null finding).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.3.9	Paradigms	Item Difficulty	COMPLETE 2025-12-04. 3-way interaction NOT significant (p_bonf>0.0033). Item difficulty paradigm-invariant. 18k observations.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.4.1	Congruence	Trajectories	NULL schema effects (valid finding). All 3 levels usable.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/2M)
-5.4.2	Congruence	Consolidation	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
-5.4.3	Congruence	Age Effects	NULL effects expected (per 5.4.1).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1M)
-5.4.4	Congruence	IRT-CTT	COMPLETE 2025-12-04. r=0.87-0.91 all >0.70. κ=0.667 substantial. 83.3% agreement. Validates 5.4.1 null schema findings robust to measurement.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/1L)
-5.4.5	Congruence	Purified CTT	COMPLETE 2025-12-04. Purified CTT higher r (0.88-0.91) but WORSE AIC for Common/Congruent (paradox). Incongruent 54% retention lowest.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
-5.4.6	Congruence	Variance Decomp	COMPLETE 2025-12-04. ICC_slope=0.000 ALL levels (forgetting NOT trait-like). ICC_intercept: Congruent=0.365 highest, Common=0.277, Incongruent=0.267. Replicates RQ 5.2.6 domains finding.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
-5.4.7	Congruence	Clustering	COMPLETE 2025-12-04. K=6 by BIC but WEAK quality: silhouette=0.254, Jaccard=0.592. Slopes~0 (per 5.4.6). Null finding: no schema-selective memory profiles.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS (0C/0H/3M)
-5.4.8	Congruence	Item Difficulty	DEPRIORITIZED: Core hypothesis answered by 5.3.9 (item difficulty paradigm-invariant). Expected NULL.	TRUE	TRUE	TRUE	TRUE	FAIL	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.1	Source-Dest	Trajectories	COMPLETE 2025-12-05. Main effect NULL (p=0.61). Source=Destination memory. IRT bug fixed (factor-specific conversion).	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
-5.5.2	Source-Dest	Consolidation	COMPLETE 2025-12-05. 3-way interaction NULL (p=0.61, f2=0.0005). Similar consolidation patterns.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
-5.5.3	Source-Dest	Age Effects	COMPLETE 2025-12-05. 3-way Age x Location x Time NULL (p=0.16, 0.33). Power=1.00. Age-invariant.	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PASS
-5.5.4	Source-Dest	IRT-CTT	Validates 5.5.1 findings not measurement artifact. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.5	Source-Dest	Purified CTT	Tests purification-trajectory paradox. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.6	Source-Dest	Variance Decomp	ICC by location type. Expected ICC_slope≈0. Depends on 5.5.1.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
-5.5.7	Source-Dest	Clustering	K-means on -U-/-D- random effects. Expected weak quality. Depends on 5.5.6.	TRUE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE	FALSE
+RQ	Type	Status	Model_Basic	Model_Extended	ΔAIC	Weight_Ext	Rerun_Priority	Key_Finding	Date_Complete	Issues
+5.1.1	General/ROOT	COMPLETE+EXTENDED	Log (48%)	PowerLaw α=0.5 (15%)	2.97	15.2%	PLOTS DONE	Wixted power-law > Ebbinghaus log. Model averaging applied.	2025-12-08	-
+5.1.2	General/Two-Phase	COMPLETE	Log	-	-	-	⚠️ MODERATE	Piecewise vs continuous. FIXED 2025-12-03.	2025-12-03	Rerun: PowerLaw shift affects interpretation
+5.1.3	General/Age	COMPLETE	Log	-	-	-	⚠️ MODERATE	Age tertile analysis. No age effects.	2025-12-03	Rerun: Random slope mismatch (~log_Days → ~Days_pow_neg05)
+5.1.4	General/Variance	COMPLETE	Log	-	-	-	⚠️ MODERATE	ICC_slope ≈ 0 (design limitation).	2025-12-03	Rerun: Functional form affects variance decomposition
+5.1.5	General/Clustering	COMPLETE	Log	-	-	-	⚠️ MODERATE	K=2 clusters. Random effects input.	2025-12-03	Rerun: PowerLaw slopes change clustering input
+5.1.6	General/ItemDiff	DEPRIORITIZED	-	-	-	-	-	Answered by 5.3.9 (paradigm-invariant).	-	Expected NULL
+5.2.1	Domains/ROOT	COMPLETE+EXTENDED	Log (92%)	Recip+Log (8.9%)	8.91	8.9%	⚠️ LOW-MOD	When floor effect (6-9%). Use What/Where only.	2025-12-08	Two-process forgetting, but weak weight
+5.2.2	Domains/Consolidation	COMPLETE	Log	-	-	-	✅ OK	What/Where only. When excluded.	2025-12-03	Floor effect constraint
+5.2.3	Domains/Age	COMPLETE	Log	-	-	-	✅ OK	What/Where only. When excluded.	2025-12-03	Floor effect constraint
+5.2.4	Domains/IRT-CTT	COMPLETE	Log	-	-	-	✅ OK	What/Where only. Convergence validated.	2025-12-03	Floor effect constraint
+5.2.5	Domains/PurifiedCTT	COMPLETE	Log	-	-	-	✅ OK	What/Where. Δr=+0.015-0.027 p<0.001. IRT superior AIC.	2025-12-03	Floor effect constraint
+5.2.6	Domains/Variance	COMPLETE	Log	-	-	-	✅ OK	What/Where. ICC_int=0.51/0.57, ICC_slope=0.008/0.011. Where Fan r=-0.316.	2025-12-03	Floor effect constraint
+5.2.7	Domains/Clustering	COMPLETE	Log	-	-	-	✅ OK	What/Where. K=5. Silhouette=0.34 (POOR), Jaccard=0.88 (STABLE).	2025-12-03	Floor effect constraint
+5.2.8	Domains/ItemDiff	DEPRIORITIZED	-	-	-	-	-	Answered by 5.3.9 (paradigm-invariant).	-	Expected NULL
+5.3.1	Paradigms/ROOT	COMPLETE+EXTENDED	Log (99.98%)	PowerLaw α=0.1 (6.7%)	0.07	6.7%	✅ NO RERUN	Log/PowerLaw tied. Recognition faster forgetting (unexpected).	2025-12-08	Log remains valid (ΔAIC=0.07 negligible)
+5.3.2	Paradigms/Gradient	COMPLETE	Log	-	-	-	✅ OK	Linear trend IFR<ICR<IRE. Unique to paradigms.	2025-12-04	-
+5.3.3	Paradigms/Consolidation	COMPLETE	Log	-	-	-	✅ OK	All 3 paradigms valid. No differential consolidation.	2025-12-04	-
+5.3.4	Paradigms/Age	COMPLETE	Log	-	-	-	✅ OK	All 3 paradigms. No age effects.	2025-12-04	-
+5.3.5	Paradigms/IRT-CTT	COMPLETE	Log	-	-	-	✅ OK	r=0.84-0.88, κ=0.667. Validates 5.3.1 not artifact.	2025-12-04	-
+5.3.6	Paradigms/PurifiedCTT	COMPLETE	Log	-	-	-	✅ OK	Paradox (3rd): Δr=+0.023-0.098 but AIC WORSE. IFR largest.	2025-12-04	-
+5.3.7	Paradigms/Variance	COMPLETE	Log	-	-	-	✅ OK	ICC_slope≈0 (design limit). ICC_int=0.44-0.52. Replicates 5.2.6/5.4.6.	2025-12-04	-
+5.3.8	Paradigms/Clustering	COMPLETE	Log	-	-	-	✅ OK	K=3. Weak: silhouette=0.367, Jaccard=0.714. No selective profiles.	2025-12-04	-
+5.3.9	Paradigms/ItemDiff	COMPLETE	Log	-	-	-	✅ OK	3-way NULL (p_bonf>0.0033). Paradigm-invariant. 18k obs.	2025-12-04	Answers 5.1.6, 5.2.8, 5.4.8
+5.4.1	Congruence/ROOT	COMPLETE+EXTENDED	Log (99.98%)	Recip+Log (74%)	7.50	73.7%	🔴 HIGH	NULL schema effects. Two-process forgetting discovered.	2025-12-08	MUST RERUN derivatives with Recip+Log
+5.4.2	Congruence/Consolidation	COMPLETE	Log	-	-	-	🔴 HIGH	NULL (per 5.4.1).	2025-12-04	Rerun: Recip+Log model, ~recip_TSVR slopes
+5.4.3	Congruence/Age	COMPLETE	Log	-	-	-	🔴 HIGH	NULL (per 5.4.1).	2025-12-04	Rerun: Recip+Log model, ~recip_TSVR slopes
+5.4.4	Congruence/IRT-CTT	COMPLETE	Log	-	-	-	🔴 HIGH	r=0.87-0.91, κ=0.667. Validates 5.4.1 null robust.	2025-12-04	Rerun: Two-process interpretation
+5.4.5	Congruence/PurifiedCTT	COMPLETE	Log	-	-	-	🔴 HIGH	r=0.88-0.91 but WORSE AIC (paradox). Incongruent 54% retention.	2025-12-04	Rerun: Two-process interpretation
+5.4.6	Congruence/Variance	COMPLETE	Log	-	-	-	🔴 HIGH	ICC_slope=0.000 ALL. ICC_int: Congruent=0.365, Common=0.277, Incongruent=0.267.	2025-12-04	Rerun: Recip_TSVR random effects
+5.4.7	Congruence/Clustering	COMPLETE	Log	-	-	-	🔴 HIGH	K=6. WEAK: silhouette=0.254, Jaccard=0.592. Slopes~0. No selective profiles.	2025-12-04	Rerun: Recip_TSVR random effects
+5.4.8	Congruence/ItemDiff	DEPRIORITIZED	-	-	-	-	-	Answered by 5.3.9 (paradigm-invariant).	-	Expected NULL
+5.5.1	Source-Dest/ROOT	COMPLETE+EXTENDED	Log (64%)	Quadratic (6.7%)	0.34	6.7%	HYBRID DONE	NULL main effect. Extreme uncertainty (13 models). Hybrid approach.	2025-12-08	Log/Quad tied. Statistical tests: Log. Plots: 13-model avg
+5.5.2	Source-Dest/Consolidation	COMPLETE	Log	-	-	-	✅ VERIFY	3-way NULL (p=0.61, f2=0.0005). Similar patterns.	2025-12-05	Check if Log-only assumption critical
+5.5.3	Source-Dest/Age	COMPLETE	Log	-	-	-	✅ VERIFY	3-way Age×Location×Time NULL (p=0.16, 0.33). Power=1.00.	2025-12-05	Check if Log-only assumption critical
+5.5.4	Source-Dest/IRT-CTT	CONCEPT ONLY	-	-	-	-	USE AVERAGED	Validates 5.5.1 not artifact. Depends on 5.5.1.	-	Use model-averaged predictions when built
+5.5.5	Source-Dest/PurifiedCTT	CONCEPT ONLY	-	-	-	-	USE AVERAGED	Purification-trajectory paradox. Depends on 5.5.1.	-	Use model-averaged predictions when built
+5.5.6	Source-Dest/Variance	CONCEPT ONLY	-	-	-	-	USE AVERAGED	ICC by location. Expected ICC_slope≈0. Depends on 5.5.1.	-	Use model-averaged predictions when built
+5.5.7	Source-Dest/Clustering	CONCEPT ONLY	-	-	-	-	USE AVERAGED	K-means on -U-/-D- random effects. Depends on 5.5.6.	-	Use model-averaged predictions when built
