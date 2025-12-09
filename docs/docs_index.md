@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-12-08 (Kitchen sink model selection tool added to tools_catalog and tools_inventory)
+**Last Updated:** 2025-12-09 (Model-averaged variance decomposition tool added to tools_catalog and tools_inventory)
 
 ---
 

@@ -1,0 +1,27 @@
+models_used:
+- PowerLaw_01
+- Log
+- Log10
+- Log2
+- PowerLaw_02
+- SquareRoot
+effective_n_models: 5.94275409639065
+delta_aic_threshold: 2.0
+weights:
+  PowerLaw_01: 0.1866041767842791
+  Log: 0.178903881045301
+  Log10: 0.178903881045301
+  Log2: 0.178903881045301
+  PowerLaw_02: 0.1550014978911134
+  SquareRoot: 0.1216826821887043
+congruence_levels:
+- common
+- congruent
+- incongruent
+n_participants: 100
+n_observations: 1200
+methodology: Burnham & Anderson (2002) multi-model inference
+rationale: "RQ 5.4.1 best model weight 6.0% << 30% threshold \u2192 averaging MANDATORY"
+convergence_rate: 1.0
+best_model: PowerLaw_01
+best_model_weight: 0.06073192428757261

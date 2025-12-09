@@ -38,3 +38,42 @@
     Congruent: I=0.6064, S=0.000394
     Incongruent: I=-0.0006, S=0.000894
 [SUCCESS] Step 05 complete
+[START] Step 05: Characterize Clusters
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step00_random_effects_from_rq546.csv
+[BACKTRANSFORM] Converting z-scores to original scale
+  Means: [ 3.16413562e-17 -9.45077350e-17  8.68957684e-15 -6.40390518e-16
+ -3.33066907e-14 -3.52010088e-15]
+  SDs: [0.30246402 0.08433076 0.16540498 0.06721428 0.30780179 0.05515872]
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_centers_original_scale.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_centers_original_scale.csv
+[STATS] Computing cluster-specific summary statistics
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_summary_stats.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step05_cluster_summary_stats.csv
+[CLUSTERS]
+  Cluster 0: N=14, label=Medium
+    Common: I=0.1174, S=0.068188
+    Congruent: I=0.0032, S=0.001138
+    Incongruent: I=0.0319, S=0.008574
+  Cluster 1: N=19, label=Medium
+    Common: I=-0.0421, S=-0.042650
+    Congruent: I=0.0153, S=0.006137
+    Incongruent: I=-0.0760, S=-0.022825
+  Cluster 2: N=15, label=High
+    Common: I=0.3539, S=0.124603
+    Congruent: I=0.1953, S=0.079456
+    Incongruent: I=0.3738, S=0.075234
+  Cluster 3: N=16, label=Low
+    Common: I=-0.3237, S=-0.054693
+    Congruent: I=-0.1751, S=-0.071173
+    Incongruent: I=-0.2895, S=-0.046426
+  Cluster 4: N=11, label=Low
+    Common: I=-0.4504, S=-0.103446
+    Congruent: I=-0.2968, S=-0.120465
+    Incongruent: I=-0.5114, S=-0.088324
+  Cluster 5: N=25, label=High
+    Common: I=0.1593, S=-0.000013
+    Congruent: I=0.1120, S=0.045580
+    Incongruent: I=0.2259, S=0.035980
+[SUCCESS] Step 05 complete

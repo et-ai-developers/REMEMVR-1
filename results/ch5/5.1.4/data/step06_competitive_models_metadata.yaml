@@ -1,0 +1,15 @@
+competitive_models:
+- PowerLaw_04
+- PowerLaw_05
+- PowerLaw_03
+- LogLog
+- Root_033
+- CubeRoot
+- PowerLaw_06
+- FourthRoot
+- PowerLaw_02
+- PowerLaw_07
+delta_aic_threshold: 2.0
+generated_timestamp: '2025-12-09T16:51:45.335653'
+n_competitive_models: 10
+n_models_tested: 65

@@ -73,8 +73,10 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: "2025-12-03T00:00:00Z"
+  timestamp: "2025-12-09T00:00:00Z"
   context_dump: |
-    Results validated for scientific plausibility
-    3 anomalies flagged: K=6 boundary selection, WEAK clustering quality (silhouette=0.254, Jaccard=0.592), zero slope variance
-    Summary documented in results/summary.md (meaningful NULL finding: no schema-selective profiles)
+    Results validated for scientific plausibility (MODEL-AVERAGED UPDATE)
+    K=6 clusters REPLICATED across Log-only (Dec 3) and Model-averaged (Dec 9) analyses
+    WEAK clustering quality ROBUST: silhouette=0.236, Jaccard=0.587 (similar to Log-only 0.254, 0.592)
+    Summary documented in results/summary_model_averaged.md (comparison to Log-only included)
+    CRITICAL FINDING: Adding meaningful slope variance (Model-averaged) did NOT improve clustering quality - NULL finding confirmed

@@ -53,7 +53,7 @@ rq_analysis:
 
 analysis_steps:
   step01_load_dependency_data: success
-  step02_fit_stratified_lmms: success
+  step02_fit_stratified_lmms: success (MODEL-AVERAGED - 6 competitive models)
   step03_compute_icc: success
   step04_extract_random_effects: success
   step05_test_correlations_plot_diagnostics: success
@@ -69,16 +69,19 @@ rq_inspect:
 
 rq_plots:
   status: success
+  timestamp: 2025-12-09T14:27:00Z
   context_dump: |
-    7 plots copied from data/ to plots/ (publication-quality, generated during analysis steps)
-    Plots: 3 histograms, 3 Q-Q plots (random slopes by congruence), 1 ICC comparison barplot
-    No plot source CSVs needed (diagnostic-only RQ, not trajectory RQ)
+    8 plots generated from MODEL-AVERAGED data (6 competitive models)
+    Plots: 3 histograms + 3 Q-Q plots (random slopes) + 1 ICC barplot + 1 model weights barplot
+    KEY: Model averaging reveals NON-ZERO slope variance (ICC_slope=0.036-0.148)
+    CONTEXT: Log-only underestimated slope variance by 85-95% (showed spike at zero)
 
 rq_results:
   status: success
-  timestamp: 2025-12-03T23:00:00Z
+  timestamp: 2025-12-09T14:35:00Z
   context_dump: |
-    Results validated for scientific plausibility
-    3 anomalies flagged: 2 implausible correlations (r=1.000 artifacts), 1 model convergence issue (Congruent singular fit)
-    Key finding: ICC_slope ≈ 0.000 ALL congruence levels (forgetting NOT trait-like, replicates RQ 5.2.6 domains finding)
-    Summary documented in results/summary.md
+    Results validated for model-averaged scientific plausibility (6 competitive models)
+    KEY FINDING: Forgetting rate PARTIALLY trait-like (ICC_slope=0.036-0.148), NOT purely situation-dependent
+    Hypothesis: PARTIALLY REJECTED (ICC < 0.40 but non-negligible). Common>Congruent>Incongruent (OPPOSITE to prediction)
+    METHODOLOGICAL: Log-only underestimated slope variance 85-95%. Model averaging MANDATORY when best model weight < 30%
+    Summary: results/summary.md (SUPERSEDES Log-only analysis 2025-12-03)

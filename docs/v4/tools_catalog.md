@@ -39,6 +39,7 @@
 | `test_intercept_slope_correlation_d068` | D068: Pearson correlation between random intercepts/slopes with dual p-values (uncorrected + Bonferroni) |
 | `extract_segment_slopes_from_lmm` | Extract Early/Late slopes + ratio from piecewise LMM with delta method SE propagation (RQ 5.8 two-phase test) |
 | `extract_marginal_age_slopes_by_domain` | Extract domain-specific marginal age effects from 3-way Age×Domain×Time interaction LMM with delta method SEs (RQ 5.10) |
+| `compute_model_averaged_variance_decomposition` | **NEW (2025-12-09)**: Model-averaged variance decomposition for stratified LMMs when functional form uncertainty is high. Integrates with `compare_lmm_models_kitchen_sink` to identify competitive models (ΔAIC < 2), fits stratified LMMs for each level (e.g., Common/Congruent/Incongruent) × model, then Akaike-averages variance components (var_int, var_slope, cov, var_resid), ICCs (intercept, slope_simple, slope_conditional), and random effects (participant-specific intercepts/slopes). Returns both model-specific AND averaged results (transparency). Handles convergence failures gracefully. Use when best model has <30% Akaike weight (Burnham & Anderson, 2002 threshold). **Reusable:** RQ 5.4.6 (congruence), RQ 5.2.6 (domain), RQ 5.3.7 (paradigm), any variance decomposition with model uncertainty. Parametric design: `delta_aic_threshold=2.0`, `min_models=3`, `max_models=10`. |
 
 ---
 

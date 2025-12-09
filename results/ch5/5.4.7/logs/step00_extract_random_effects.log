@@ -34,3 +34,17 @@ TypeError: 'type' object is not iterable
 [VALIDATION] Validating output structure
 [VALIDATION PASS] DataFrame structure valid: 100 rows, 7 columns (required: 7).
 [SUCCESS] Step 00 complete
+[START] Step 00: Extract and Reshape Random Effects
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.6/data/step02_averaged_random_effects.csv
+[LOADED] 300 rows, 4 columns
+[INFO] Columns: ['UID', 'congruence', 'intercept_avg', 'slope_avg']
+[INFO] Unique UIDs: 100, Unique congruence levels: 3
+[RESHAPE] Pivoting from long to wide format
+[INFO] Actual columns after pivot: ['UID', 'Common_Intercept', 'Congruent_Intercept', 'Incongruent_Intercept', 'Common_Slope', 'Congruent_Slope', 'Incongruent_Slope']
+[RESHAPED] 100 rows, 7 columns
+[INFO] Final columns: ['UID', 'Common_Intercept', 'Common_Slope', 'Congruent_Intercept', 'Congruent_Slope', 'Incongruent_Intercept', 'Incongruent_Slope']
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step00_random_effects_from_rq546.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step00_random_effects_from_rq546.csv
+[VALIDATION] Validating output structure
+[VALIDATION PASS] DataFrame structure valid: 100 rows, 7 columns (required: 7).
+[SUCCESS] Step 00 complete

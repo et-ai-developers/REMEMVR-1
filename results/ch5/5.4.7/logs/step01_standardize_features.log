@@ -17,3 +17,21 @@
 [VALIDATION] Validating standardization
 [VALIDATION PASS] All 6 columns properly standardized (mean ≈ 0, SD ≈ 1 within tolerance=0.1).
 [SUCCESS] Step 01 complete
+[START] Step 01: Standardize Features
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step00_random_effects_from_rq546.csv
+[LOADED] 100 rows, 7 columns
+[INFO] Standardizing 6 features
+[STANDARDIZE] Applying StandardScaler (mean=0, SD=1)
+[INFO] Before standardization:
+  Mean: [ 3.16413562e-17 -9.45077350e-17  8.68957684e-15 -6.40390518e-16
+ -3.33066907e-14 -3.52010088e-15]
+  SD: [0.3009479  0.08390804 0.16457588 0.06687737 0.30625892 0.05488224]
+[INFO] After standardization:
+  Mean: [-8.88178420e-18 -5.55111512e-18 -1.33226763e-17 -3.21964677e-17
+  2.22044605e-17  6.66133815e-18]
+  SD: [1. 1. 1. 1. 1. 1.]
+[SAVE] Writing to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[VALIDATION] Validating standardization
+[VALIDATION PASS] All 6 columns properly standardized (mean ≈ 0, SD ≈ 1 within tolerance=0.1).
+[SUCCESS] Step 01 complete

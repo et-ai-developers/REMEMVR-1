@@ -70,3 +70,24 @@ ValueError: Validation failed: Clusters below minimum size (10): [5]
 [VALIDATION] Validating cluster assignments
 [VALIDATION PASS] Valid cluster assignment: 6 clusters, sizes {3: 22, 0: 22, 4: 18, 1: 17, 2: 15, 5: 6}
 [SUCCESS] Step 03 complete - 6 clusters assigned
+[START] Step 03: Fit Final K-means Model
+[LOAD] Reading optimal K from /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step02_optimal_k.txt
+[INFO] Optimal K = 6
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step01_standardized_features.csv
+[LOADED] 100 rows, 7 columns
+[INFO] Fitting K-means with K=6, n_init=50, random_state=42
+[FITTED] Inertia = 122.4338
+[INFO] Cluster sizes:
+  Cluster 0: 14 participants (14.0%)
+  Cluster 1: 19 participants (19.0%)
+  Cluster 2: 15 participants (15.0%)
+  Cluster 3: 16 participants (16.0%)
+  Cluster 4: 11 participants (11.0%)
+  Cluster 5: 25 participants (25.0%)
+[SAVE] Writing cluster assignments to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_assignments.csv
+[SAVE] Writing cluster centers to /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.7/data/step03_cluster_centers.csv
+[VALIDATION] Validating cluster assignments
+[VALIDATION PASS] Valid cluster assignment: 6 clusters, sizes {5: 25, 1: 19, 3: 16, 2: 15, 0: 14, 4: 11}
+[SUCCESS] Step 03 complete - 6 clusters assigned
