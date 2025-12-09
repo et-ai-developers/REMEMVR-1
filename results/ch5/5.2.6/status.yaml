@@ -60,6 +60,7 @@ analysis_steps:
   step05_test_intercept_slope_correlations: success
   step06_compare_domain_icc: success
   step07_prepare_domain_icc_barplot_data: success
+  step08_model_averaged_variance: success
 
 rq_inspect:
   status: success
@@ -80,10 +81,10 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: "2025-12-03T20:00:00Z"
+  timestamp: "2025-12-09T18:00:00Z"
   context_dump: |
-    Results validated for scientific plausibility
-    0 anomalies flagged (plausibility acceptable)
-    Summary documented in results/summary.md
-    Key finding: Both domains ICC_slope_conditional > 0.50 (Substantial)
-    Fan Effect confirmed in Where (r=-0.316, p_bonf=0.003), absent in What
+    Model-averaged results validated for scientific plausibility
+    1 anomaly flagged: Plot-data mismatch (plot shows Log-only, not model-averaged ICCs)
+    Summary documented in results/summary_model_averaged_final.md
+    KEY FINDING: ICC_slope 16-23% (15-29× higher than Log-only 1-2%)
+    Forgetting rate IS trait-like (moderate between-person variance, not measurement noise)

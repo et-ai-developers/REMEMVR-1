@@ -1,22 +1,22 @@
 RQ 5.2.7 Step 02: Optimal K Selection
 ==================================================
 
-Optimal K = 5
+Optimal K = 4
 
-Justification: Clear BIC minimum
-  K=5 has minimum BIC = 90.09
-  Next best K has ΔBIC = 3.38
+Justification: Parsimony rule applied
+  K values with ΔBIC < 2: [np.int64(4), np.int64(5)]
+  Selected K=4 as most parsimonious model
 
 BIC Comparison Table:
 ---------------------------------------------
    K      Inertia          BIC       ΔBIC
 ---------------------------------------------
- 1.0       396.00       156.05      65.95
- 2.0       255.44       130.62      40.53
- 3.0       152.33        97.35       7.25
- 4.0       121.88        93.47       3.38
- 5.0        98.01        90.09       0.00 <-- optimal
- 6.0        84.58        93.78       3.69
+ 1.0       396.00       156.05      64.19
+ 2.0       236.68       123.00      31.14
+ 3.0       149.02        95.15       3.29
+ 4.0       119.93        91.86       0.00 <-- optimal
+ 5.0        99.76        91.86       0.00
+ 6.0        84.89        94.14       2.29
 ---------------------------------------------
 
 Model Selection Parameters:

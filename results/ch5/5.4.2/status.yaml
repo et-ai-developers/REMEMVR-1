@@ -131,7 +131,23 @@ analysis_steps:
   step00_extract_theta_from_rq5: success
   step01_prepare_piecewise_input: success
   step02_fit_piecewise_lmm: success
+  step02b_fit_extended_lmm_models: success
+  step02c_model_averaging: success
   step03_extract_slopes: success
   step04_test_hypothesis: success
   step05_validate_assumptions: success
   step06_prepare_piecewise_plot_data: success
+
+extended_model_selection:
+  status: success
+  timestamp: '2025-12-09T19:09:00'
+  context_dump: |
+    Kitchen sink (66 models) + model averaging completed
+    Best: PowerLaw_01 (6.04% weight) - EXTREME uncertainty
+    15 competitive models (ΔAIC < 2), effective N = 13.96
+    Model averaging MANDATORY - predictions in step02c_averaged_predictions.csv
+    Effective α = 0.181 (power-law dominance)
+    NOTE: Random intercepts only (re='~1'), piecewise still better with random slopes
+    Original piecewise (random slopes): AIC = 2581.55
+    Extended PowerLaw_01 (random intercepts): AIC = 2593.41
+    Comparison not apples-to-apples (different random effects specifications)

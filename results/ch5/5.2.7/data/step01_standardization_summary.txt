@@ -5,24 +5,24 @@ Raw Variable Statistics (Before Standardization)
 --------------------------------------------------
 
 Total_Intercept_What:
-  Mean: 0.000000
-  SD:   0.496222
-  Range: [-1.531162, 1.130175]
+  Mean: -0.000000
+  SD:   0.521806
+  Range: [-1.512465, 1.185510]
 
 Total_Intercept_Where:
   Mean: -0.000000
-  SD:   0.567881
-  Range: [-1.621405, 1.315481]
+  SD:   0.546144
+  Range: [-1.459283, 1.239270]
 
 Total_Slope_What:
-  Mean: -0.000000
-  SD:   0.015596
-  Range: [-0.038147, 0.037364]
+  Mean: 0.000000
+  SD:   0.037795
+  Range: [-0.095615, 0.085745]
 
 Total_Slope_Where:
   Mean: -0.000000
-  SD:   0.020234
-  Range: [-0.044221, 0.043317]
+  SD:   0.041469
+  Range: [-0.086215, 0.091246]
 
 
 Z-Scored Variable Statistics (After Standardization)
@@ -31,27 +31,27 @@ Z-Scored Variable Statistics (After Standardization)
 Total_Intercept_What_z:
   Mean: 0.000000
   SD:   1.000000
-  Range: [-3.085642, 2.277562]
+  Range: [-2.898521, 2.271938]
 
 Total_Intercept_Where_z:
   Mean: -0.000000
   SD:   1.000000
-  Range: [-2.855186, 2.316474]
+  Range: [-2.671973, 2.269125]
 
 Total_Slope_What_z:
   Mean: -0.000000
   SD:   1.000000
-  Range: [-2.446010, 2.395810]
+  Range: [-2.529814, 2.268672]
 
 Total_Slope_Where_z:
-  Mean: 0.000000
+  Mean: -0.000000
   SD:   1.000000
-  Range: [-2.185462, 2.140764]
+  Range: [-2.079018, 2.200340]
 
 
 Outliers (|z| > 3)
 --------------------------------------------------
-  A065: Total_Intercept_What_z = -3.0856
+  None detected
 
 
 Validation Status: PASS

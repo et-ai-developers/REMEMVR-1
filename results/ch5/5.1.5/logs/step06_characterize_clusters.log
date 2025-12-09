@@ -26,3 +26,35 @@
 [VALIDATION] Sum of N = 100 (expected 100): PASS
 [VALIDATION] PASS - All 2 cluster summaries mathematically consistent
 [SUCCESS] Step 06 complete
+[START] Step 06: Characterize Clusters
+[LOAD] Loading raw-scale random effects from Step 0...
+[LOADED] random_effects (100 rows)
+[INFO] Columns: ['UID', 'Total_Intercept', 'Total_Slope']
+[LOAD] Loading cluster assignments from Step 3...
+[LOADED] cluster_assignments (100 rows)
+[MERGE] Merging random effects with cluster assignments on UID...
+[MERGED] 100 participants with cluster + raw intercept/slope
+[ANALYSIS] Computing cluster summary statistics...
+[CLUSTER 0] N=25
+  Intercept: mean=-0.7752, SD=0.2530, range=[-1.5333, -0.3665]
+  Slope: mean=-0.0139, SD=0.0385, range=[-0.0753, 0.0470]
+[CLUSTER 1] N=44
+  Intercept: mean=0.3728, SD=0.3362, range=[-0.1237, 1.2647]
+  Slope: mean=-0.0300, SD=0.0305, range=[-0.1062, 0.0265]
+[CLUSTER 2] N=31
+  Intercept: mean=0.0960, SD=0.3175, range=[-0.4705, 0.7389]
+  Slope: mean=0.0538, SD=0.0303, range=[0.0170, 0.1156]
+[ANALYSIS] Assigning interpretive labels based on profile patterns...
+[INFO] Overall intercept median: 0.0679
+[INFO] Overall slope median: -0.0034
+[LABEL] Cluster 0.0: Low baseline, slower change
+[LABEL] Cluster 1.0: High baseline, slower change
+[LABEL] Cluster 2.0: High baseline, faster change
+[SAVE] Saving cluster characterization...
+[SAVED] step06_cluster_characterization.csv (3 rows)
+[SAVE] Saving cluster labels...
+[SAVED] step06_cluster_labels.txt
+[VALIDATION] Running validate_cluster_summary_stats...
+[VALIDATION] Sum of N = 100 (expected 100): PASS
+[VALIDATION] PASS - All 3 cluster summaries mathematically consistent
+[SUCCESS] Step 06 complete

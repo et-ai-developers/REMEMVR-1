@@ -1,0 +1,26 @@
+RQ 5.4.2 - Model Averaging Summary
+================================================================================
+
+Models used: 15
+Effective N models: 13.96
+ΔAIC threshold: 2.0
+
+Model Weights (Normalized):
+--------------------------------------------------------------------------------
+  PowerLaw_01                    0.1071
+  Log                            0.1018
+  Log2                           0.1018
+  Log10                          0.1018
+  PowerLaw_02                    0.0890
+  SquareRoot                     0.0691
+  Exp_slow                       0.0691
+  PowerLaw_03                    0.0589
+  Log+Recip                      0.0469
+  Recip+PowerLaw05               0.0439
+  Recip+PowerLaw                 0.0439
+  Log+LogLog                     0.0433
+  Log+PowerLaw05                 0.0431
+  Lin+Log                        0.0401
+  Exp+Log                        0.0401
+
+Prediction Variance Range: [0.0000, 0.0019]

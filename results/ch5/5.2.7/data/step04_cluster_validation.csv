@@ -1,6 +1,6 @@
 metric,value,interpretation
-silhouette_score,0.34028191255748164,Poor
-davies_bouldin_index,0.9813636891418998,Good
-jaccard_mean,0.8846993670886074,Stable
-jaccard_ci_lower,0.7953322784810127,95% CI lower bound
-jaccard_ci_upper,0.9908386075949367,95% CI upper bound
+silhouette_score,0.35239771271560905,Poor
+davies_bouldin_index,0.9516643941054154,Good
+jaccard_mean,0.8713227848101268,Stable
+jaccard_ci_lower,0.7556329113924051,95% CI lower bound
+jaccard_ci_upper,1.0,95% CI upper bound

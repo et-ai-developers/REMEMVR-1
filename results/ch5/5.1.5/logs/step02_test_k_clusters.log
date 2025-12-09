@@ -45,3 +45,66 @@
 [VALIDATION] Checking all 6 K values tested...
 [VALIDATION] All 6 K values tested: PASS
 [SUCCESS] Step 02 complete
+[START] Step 02: Test K Clusters
+[LOAD] Loading standardized features from Step 1...
+[LOADED] step01_standardized_features.csv (100 rows, 3 cols)
+[INFO] Feature matrix shape: (100, 2) (N=100 participants, D=2 features)
+[ANALYSIS] Testing K-means for K=1 to K=10 (EXTENDED range)...
+[KMEANS] Fitting K=1 clusters (n_init=50)...
+[RESULT] K=1: inertia=200.0000, BIC=73.9199
+[KMEANS] Fitting K=2 clusters (n_init=50)...
+[RESULT] K=2: inertia=129.4186, BIC=34.9986
+[KMEANS] Fitting K=3 clusters (n_init=50)...
+[RESULT] K=3: inertia=73.9630, BIC=-16.3450
+[KMEANS] Fitting K=4 clusters (n_init=50)...
+[RESULT] K=4: inertia=57.0267, BIC=-37.7444
+[KMEANS] Fitting K=5 clusters (n_init=50)...
+[RESULT] K=5: inertia=43.3073, BIC=-60.6591
+[KMEANS] Fitting K=6 clusters (n_init=50)...
+[RESULT] K=6: inertia=35.4132, BIC=-76.1776
+[KMEANS] Fitting K=7 clusters (n_init=50)...
+[RESULT] K=7: inertia=30.4287, BIC=-86.7423
+[KMEANS] Fitting K=8 clusters (n_init=50)...
+[RESULT] K=8: inertia=26.9923, BIC=-94.1203
+[KMEANS] Fitting K=9 clusters (n_init=50)...
+[RESULT] K=9: inertia=23.6227, BIC=-102.8497
+[KMEANS] Fitting K=10 clusters (n_init=50)...
+[RESULT] K=10: inertia=21.2013, BIC=-109.0589
+[DONE] K-means testing complete for 10 K values
+[SELECTION] Selecting optimal K via BIC minimum...
+[BIC] BIC minimum at K=10 (BIC = -109.0589)
+[WARNING] BIC minimum at boundary K=10 - using elbow method instead
+[ELBOW] Second derivative analysis:
+  K=2: second_deriv=15.1257
+  K=3: second_deriv=38.5193 <-- ELBOW
+  K=4: second_deriv=3.2169
+  K=5: second_deriv=5.8254
+  K=6: second_deriv=2.9096
+  K=7: second_deriv=1.5482
+  K=8: second_deriv=0.0667
+  K=9: second_deriv=0.9483
+[OPTIMAL] K_optimal = 3 (via elbow method due to BIC boundary)
+[BIC COMPARISON]
+  K=1: BIC=73.9199
+  K=2: BIC=34.9986
+  K=3: BIC=-16.3450 <-- OPTIMAL
+  K=4: BIC=-37.7444
+  K=5: BIC=-60.6591
+  K=6: BIC=-76.1776
+  K=7: BIC=-86.7423
+  K=8: BIC=-94.1203
+  K=9: BIC=-102.8497
+  K=10: BIC=-109.0589
+[SAVE] Saving cluster selection results to step02_cluster_selection.csv...
+[SAVED] step02_cluster_selection.csv (10 rows, 3 cols)
+[SAVE] Saving optimal K to step02_optimal_k.txt...
+[SAVED] step02_optimal_k.txt (K_optimal = 3)
+[VALIDATION] Running validate_numeric_range on inertia values...
+[VALIDATION] Inertia range validation: inertia: All values within range [0.0, inf] (n=10).
+[VALIDATION] Checking inertia monotonicity...
+[VALIDATION] Inertia monotonically decreasing: PASS
+[VALIDATION] Checking BIC finite values...
+[VALIDATION] BIC finite values: PASS
+[VALIDATION] Checking all 10 K values tested...
+[VALIDATION] All 10 K values tested: PASS
+[SUCCESS] Step 02 complete

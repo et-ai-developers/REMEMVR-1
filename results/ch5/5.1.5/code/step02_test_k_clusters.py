@@ -7,11 +7,15 @@ Step ID: 02
 Step Name: test_k_clusters
 RQ: results/ch5/5.1.5
 Generated: 2025-12-02
+UPDATED: 2025-12-09 (EXTENDED TO K=1-10)
 
 PURPOSE:
-Test K-means clustering for K=1 to K=6 clusters, compute BIC for each model,
-and select optimal K via BIC minimization. Uses scipy.cluster.vq.kmeans2 for
-clustering implementation. BIC formula: N * log(inertia/N) + K * log(N).
+Test K-means clustering for K=1 to K=10 clusters (EXTENDED from K=1-6), compute BIC
+for each model, and select optimal K via BIC minimization. Uses scipy.cluster.vq.kmeans2
+for clustering implementation. BIC formula: N * log(inertia/N) + K * log(N).
+
+CRITICAL UPDATE (2025-12-09): Extended K range from K=1-6 to K=1-10 for more thorough
+exploration of cluster space. This follows GOLD standard protocol for cluster model selection.
 
 EXPECTED INPUTS:
   - data/step01_standardized_features.csv
@@ -22,8 +26,8 @@ EXPECTED INPUTS:
 EXPECTED OUTPUTS:
   - data/step02_cluster_selection.csv
     Columns: ['K', 'inertia', 'BIC']
-    Format: K-means results for K=1 to K=6
-    Expected rows: 6 (one per K value)
+    Format: K-means results for K=1 to K=10
+    Expected rows: 10 (one per K value)
 
   - data/step02_optimal_k.txt
     Format: Single integer (optimal K selected by BIC minimum)
@@ -32,20 +36,21 @@ VALIDATION CRITERIA:
   - Inertia values >= 0 (positive)
   - Inertia monotonically decreasing with K
   - BIC values finite (not NaN, not inf)
-  - All 6 K values tested (1, 2, 3, 4, 5, 6)
+  - All 10 K values tested (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 g_code REASONING:
-- Approach: Exhaustive K-means testing over K=1 to K=6 with BIC model selection
+- Approach: Exhaustive K-means testing over K=1 to K=10 with BIC model selection
 - Why this approach: BIC balances model fit (inertia) against complexity (K) to
-  prevent overfitting while penalizing excessive cluster counts
+  prevent overfitting while penalizing excessive cluster counts. Extended range
+  (K=1-10) provides more thorough exploration per GOLD standard.
 - Data flow: Standardized features → K-means loop → Inertia + BIC computation
   → Optimal K selection → Save results
-- Expected performance: ~10-30 seconds for 6 K-means fits with n_init=50
+- Expected performance: ~15-45 seconds for 10 K-means fits with n_init=50
 
 IMPLEMENTATION NOTES:
 - Analysis tool: scipy.cluster.vq.kmeans2 (stdlib K-means implementation)
 - Validation tool: tools.validation.validate_numeric_range
-- Parameters: K range [1-6], random_state=42, n_init=50, BIC formula per spec
+- Parameters: K range [1-10], random_state=42, n_init=50, BIC formula per spec
 - BIC interpretation: Lower BIC = better model (optimal K at minimum BIC)
 - Inertia: Within-cluster sum of squared distances (WCSS)
 """
@@ -235,15 +240,15 @@ if __name__ == "__main__":
             raise ValueError("NaN values found in feature matrix - cannot perform K-means")
 
         # =========================================================================
-        # STEP 2: Run K-means for K=1 to K=6 and Compute BIC
+        # STEP 2: Run K-means for K=1 to K=10 and Compute BIC
         # =========================================================================
         # Tool: scipy.cluster.vq.kmeans2
         # What it does: Fit K-means clustering for each K value, compute inertia (WCSS)
-        # Expected output: Table with K, inertia, BIC for K=1 to K=6
+        # Expected output: Table with K, inertia, BIC for K=1 to K=10
 
-        log("[ANALYSIS] Testing K-means for K=1 to K=6...")
+        log("[ANALYSIS] Testing K-means for K=1 to K=10 (EXTENDED range)...")
 
-        k_range = [1, 2, 3, 4, 5, 6]
+        k_range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         random_state = 42
         n_init = 50
 
@@ -278,7 +283,7 @@ if __name__ == "__main__":
         # =========================================================================
         # BIC interpretation: Lower BIC = better model
         # Optimal K: argmin(BIC) - K with lowest BIC value
-        # FALLBACK: If BIC minimum is at boundary (K=6), use elbow method instead
+        # FALLBACK: If BIC minimum is at boundary (K=10), use elbow method instead
         # Elbow method: Find K where second derivative of inertia is maximized
 
         log("[SELECTION] Selecting optimal K via BIC minimum...")
@@ -384,12 +389,12 @@ if __name__ == "__main__":
         else:
             log("[VALIDATION] BIC finite values: PASS")
 
-        log("[VALIDATION] Checking all 6 K values tested...")
-        if len(df_results) != 6:
-            raise ValueError(f"Expected 6 K values tested, found {len(df_results)}")
-        if not all(df_results['K'].values == np.array([1, 2, 3, 4, 5, 6])):
+        log("[VALIDATION] Checking all 10 K values tested...")
+        if len(df_results) != 10:
+            raise ValueError(f"Expected 10 K values tested, found {len(df_results)}")
+        if not all(df_results['K'].values == np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])):
             raise ValueError(f"K values not as expected. Found: {df_results['K'].values}")
-        log("[VALIDATION] All 6 K values tested: PASS")
+        log("[VALIDATION] All 10 K values tested: PASS")
 
         log("[SUCCESS] Step 02 complete")
         sys.exit(0)

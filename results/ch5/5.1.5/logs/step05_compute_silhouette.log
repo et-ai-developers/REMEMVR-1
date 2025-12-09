@@ -20,3 +20,25 @@
 [VALIDATION] PASS: Silhouette coefficient in valid range [-1, 1]
 [VALIDATION] Message: silhouette: All values within range [-1.0, 1.0] (n=1).
 [SUCCESS] Step 05 complete - Silhouette coefficient computed and validated
+[START] Step 05: Compute Silhouette Coefficient
+[LOAD] Loading standardized features from Step 1...
+[LOADED] step01_standardized_features.csv (100 rows, 3 cols)
+[INFO] Columns: ['UID', 'Intercept_z', 'Slope_z']
+[LOAD] Loading cluster assignments from Step 3...
+[LOADED] step03_cluster_assignments.csv (100 rows, 2 cols)
+[INFO] Columns: ['UID', 'cluster']
+[PREPARE] Merging features with cluster assignments on UID...
+[MERGED] 100 participants with features + cluster assignments
+[PREPARED] Feature matrix X: shape (100, 2) (100 participants x 2 features)
+[PREPARED] Cluster labels: 100 participants, 3 unique clusters
+[INFO] Cluster sizes: {0: 25, 1: 44, 2: 31}
+[ANALYSIS] Computing silhouette coefficient using Euclidean metric...
+[COMPUTED] Silhouette coefficient: 0.4084
+[INTERPRETATION] Weak cluster structure
+[DETAIL] Clusters have poor separation, may be artificial (0.25 <= silhouette < 0.50)
+[SAVE] Saving silhouette score and interpretation to step05_silhouette_score.txt...
+[SAVED] step05_silhouette_score.txt
+[VALIDATION] Running validate_numeric_range on silhouette coefficient...
+[VALIDATION] PASS: Silhouette coefficient in valid range [-1, 1]
+[VALIDATION] Message: silhouette: All values within range [-1.0, 1.0] (n=1).
+[SUCCESS] Step 05 complete - Silhouette coefficient computed and validated

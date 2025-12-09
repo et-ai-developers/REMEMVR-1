@@ -7,18 +7,24 @@ Step ID: 00
 Step Name: load_random_effects
 RQ: results/ch5/5.1.5
 Generated: 2025-12-02
+UPDATED: 2025-12-09 (MODEL-AVERAGED UPGRADE)
 
 PURPOSE:
-Load individual random effects (Total_Intercept, Total_Slope) from RQ 5.1.4
-best-fitting LMM. This is a dependency load step - RQ 5.1.5 performs K-means
-clustering on DERIVED data from RQ 5.1.4 (random intercepts and slopes).
+Load MODEL-AVERAGED random effects (intercept_avg, slope_avg) from RQ 5.1.4 Step 06.
+This is a dependency load step - RQ 5.1.5 performs K-means clustering on DERIVED
+data from RQ 5.1.4 (model-averaged random intercepts and slopes across 10 competitive
+power law models).
+
+CRITICAL UPDATE (2025-12-09): Now uses model-averaged random effects (step06) instead of
+Log-only random effects (step04). Model averaging reveals meaningful slope variance
+(ICC_slope 21.6%) that was invisible in single-model analysis (ICC_slope 0.05%).
 
 EXPECTED INPUTS:
-  - results/ch5/5.1.4/data/step04_random_effects.csv
-    Columns: ['UID', 'random_intercept', 'random_slope', 'total_intercept', 'total_slope']
-    Format: CSV with 100 participant rows + 1 header
+  - results/ch5/5.1.4/data/step06_averaged_random_effects.csv
+    Columns: ['UID', 'intercept_avg', 'slope_avg']
+    Format: CSV with 100 participant rows + 1 header (model-averaged across 10 competitive models)
     Expected rows: ~100
-    Source: RQ 5.1.4 Step 4 (extract random effects from best-fitting LMM)
+    Source: RQ 5.1.4 Step 06 (model-averaged variance decomposition)
 
 EXPECTED OUTPUTS:
   - data/step00_random_effects_from_rq514.csv
@@ -72,8 +78,8 @@ from tools.validation import validate_dataframe_structure
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch5/5.1.5 (derived from script location)
 LOG_FILE = RQ_DIR / "logs" / "step00_load_random_effects.log"
 
-# Cross-RQ dependency path (RQ 5.1.4 Step 4 output)
-SOURCE_FILE = PROJECT_ROOT / "results/ch5/5.1.4/data/step04_random_effects.csv"
+# Cross-RQ dependency path (RQ 5.1.4 Step 6 output - MODEL-AVERAGED)
+SOURCE_FILE = PROJECT_ROOT / "results/ch5/5.1.4/data/step06_averaged_random_effects.csv"
 
 # Local output path
 OUTPUT_FILE = RQ_DIR / "data/step00_random_effects_from_rq514.csv"
@@ -129,13 +135,13 @@ if __name__ == "__main__":
 
         if not SOURCE_FILE.exists():
             error_msg = (
-                "EXPECTATIONS ERROR: RQ 5.1.4 Step 4 must complete before RQ 5.1.5\n"
+                "EXPECTATIONS ERROR: RQ 5.1.4 Step 06 must complete before RQ 5.1.5\n"
                 f"\n"
                 f"Missing file: {SOURCE_FILE}\n"
                 f"\n"
-                f"Action: Run RQ 5.1.4 through Step 4 (extract random effects) before running RQ 5.1.5\n"
+                f"Action: Run RQ 5.1.4 through Step 06 (model-averaged variance decomposition) before running RQ 5.1.5\n"
                 f"\n"
-                f"Dependency chain: RQ 5.1.1 (Steps 1-6) -> RQ 5.1.4 (Steps 1-4) -> RQ 5.1.5"
+                f"Dependency chain: RQ 5.1.1 (Steps 1-6) -> RQ 5.1.4 (Steps 1-6) -> RQ 5.1.5"
             )
             log(f"[ERROR] {error_msg}")
             sys.exit(1)
@@ -146,10 +152,10 @@ if __name__ == "__main__":
         # STEP 2: Load Source CSV from RQ 5.1.4
         # =========================================================================
         # Expected: 100 rows + 1 header = 101 lines
-        # Columns: UID, random_intercept, random_slope, total_intercept, total_slope
-        # We need: UID, total_intercept, total_slope (sum of fixed + random effects)
+        # Columns: UID, intercept_avg, slope_avg (MODEL-AVERAGED across 10 competitive models)
+        # We need: UID, intercept_avg, slope_avg
 
-        log("[LOAD] Loading random effects from RQ 5.1.4 Step 4...")
+        log("[LOAD] Loading MODEL-AVERAGED random effects from RQ 5.1.4 Step 06...")
 
         try:
             df_source = pd.read_csv(SOURCE_FILE, encoding='utf-8')
@@ -159,7 +165,7 @@ if __name__ == "__main__":
             raise
 
         # Check expected columns exist in source file
-        expected_source_cols = ['UID', 'total_intercept', 'total_slope']
+        expected_source_cols = ['UID', 'intercept_avg', 'slope_avg']
         missing_cols = [col for col in expected_source_cols if col not in df_source.columns]
 
         if missing_cols:
@@ -177,17 +183,17 @@ if __name__ == "__main__":
         # =========================================================================
         # STEP 3: Extract Required Columns and Standardize Names
         # =========================================================================
-        # Extract: UID, total_intercept, total_slope
+        # Extract: UID, intercept_avg, slope_avg
         # Rename to: UID, Total_Intercept, Total_Slope (standardized capitalization)
 
         log("[TRANSFORM] Extracting and standardizing column names...")
 
-        df_output = df_source[['UID', 'total_intercept', 'total_slope']].copy()
+        df_output = df_source[['UID', 'intercept_avg', 'slope_avg']].copy()
 
         # Standardize column names (capitalize for consistency across RQs)
         df_output.rename(columns={
-            'total_intercept': 'Total_Intercept',
-            'total_slope': 'Total_Slope'
+            'intercept_avg': 'Total_Intercept',
+            'slope_avg': 'Total_Slope'
         }, inplace=True)
 
         log(f"[TRANSFORMED] Standardized columns: {list(df_output.columns)}")

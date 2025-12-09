@@ -60,25 +60,28 @@ rq_inspect:
     PASS - All 4 validation layers
     Layer 1 (Existence): 13 data files + 7 log files present
     Layer 2 (Structure): All formats, columns, dtypes correct
-    Layer 3 (Substance): K=5 selected, silhouette=0.34, Jaccard=0.88
+    Layer 3 (Substance): K=4 selected (parsimony), silhouette=0.352, Jaccard=0.871
     Layer 4 (Logs): All SUCCESS, no errors
     Quality: POOR (silhouette<0.40) but STABLE (Jaccard>0.75)
-    Caveats: Interpret clusters cautiously
+    Caveats: Interpret clusters cautiously, model-averaged input
 
 rq_plots:
   status: success
   context_dump: |
     Plot generated: cluster_scatter_matrix.png (4x4 scatter matrix, 937 KB)
-    Source: step06_scatter_plot_matrix_data.csv (105 rows: 100 participants + 5 centroids)
-    Visualization: 5 clusters with domain-specific patterns (What/Where intercepts and slopes)
+    Source: step06_scatter_plot_matrix_data.csv (105 rows: 100 participants + 4 centroids)
+    Visualization: 4 clusters with domain-specific patterns (What/Where intercepts and slopes)
     Custom code: Scatter matrix function (not in tools/plotting.py)
 
 rq_results:
   status: success
+  timestamp: "2025-12-09T00:00:00Z"
   context_dump: |
-    Results validated for scientific plausibility
-    3 anomalies flagged: 1 poor cluster quality, 1 improving memory, 1 What-Where correlation (see summary.md)
-    Summary documented in results/summary.md
+    Results validated for scientific plausibility (MODEL-AVERAGED RERUN)
+    K=4 selected (changed from K=5), silhouette=0.352 (improved), Jaccard=0.871 (stable)
+    Input: RQ 5.2.6 Step 08 model-averaged random effects (PowerLaw dominance, Log #10)
+    Impact: More parsimonious clustering (K=4 vs K=5), marginally improved quality
+    Summary documented in results/summary.md with model averaging comparison
 
 analysis_steps:
   step00_load_random_effects: success

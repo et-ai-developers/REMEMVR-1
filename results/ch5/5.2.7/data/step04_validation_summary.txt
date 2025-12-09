@@ -5,14 +5,14 @@ Overall cluster quality: POOR
 
 Validation Metrics:
 -------------------------------------------------------
-  Silhouette score:     0.3403 (Poor)
+  Silhouette score:     0.3524 (Poor)
     Threshold: Good ≥ 0.5, Acceptable ≥ 0.4
 
-  Davies-Bouldin index: 0.9814 (Good)
+  Davies-Bouldin index: 0.9517 (Good)
     Threshold: Good < 1.0, Acceptable < 1.5
 
-  Bootstrap Jaccard:    0.8847 (Stable)
-    95% CI: [0.7953, 0.9908]
+  Bootstrap Jaccard:    0.8713 (Stable)
+    95% CI: [0.7556, 1.0000]
     Threshold: Stable > 0.75, Moderate > 0.6
 
 -------------------------------------------------------

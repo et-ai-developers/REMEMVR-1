@@ -1,0 +1,28 @@
+RQ 5.4.2 - Kitchen Sink Model Selection Summary
+================================================================================
+
+CONTEXT:
+  Original piecewise analysis: AIC = 2581.55
+  Sensitivity test (Lin+Log):  AIC = 2490.91 (ΔAIC = -91)
+  This step: Comprehensive kitchen sink comparison
+
+Best Model: PowerLaw_01
+AIC: 2593.41
+Weight: 6.04%
+
+Top 10 Models:
+--------------------------------------------------------------------------------
+ 1. PowerLaw_01               AIC=2593.41  ΔAIC=  0.00  weight= 6.04%
+ 2. Log                       AIC=2593.51  ΔAIC=  0.10  weight= 5.74%
+ 3. Log2                      AIC=2593.51  ΔAIC=  0.10  weight= 5.74%
+ 4. Log10                     AIC=2593.51  ΔAIC=  0.10  weight= 5.74%
+ 5. PowerLaw_02               AIC=2593.78  ΔAIC=  0.37  weight= 5.02%
+ 6. SquareRoot                AIC=2594.29  ΔAIC=  0.88  weight= 3.90%
+ 7. Exp_slow                  AIC=2594.29  ΔAIC=  0.88  weight= 3.90%
+ 8. PowerLaw_03               AIC=2594.60  ΔAIC=  1.19  weight= 3.33%
+ 9. Log+Recip                 AIC=2595.06  ΔAIC=  1.65  weight= 2.65%
+10. Recip+PowerLaw05          AIC=2595.19  ΔAIC=  1.78  weight= 2.48%
+
+⚠️  Model Uncertainty Detected
+   Best weight: 6.0% < 30% threshold
+   Action: Run model averaging (step02c_model_averaging.py)

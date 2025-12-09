@@ -1,15 +1,15 @@
 Bootstrap Stability Validation (B=100 iterations)
 ============================================================
 
-K_final: 2
+K_final: 3
 N participants: 100
 
 Summary Statistics:
-  Mean Jaccard: 0.9289
-  95% CI: [0.7853, 1.0000]
+  Mean Jaccard: 0.2929
+  95% CI: [0.0000, 0.9755]
 
-Stability Classification: Stable
-Recommendation: Proceed with confidence
+Stability Classification: Unstable
+Recommendation: Consider reducing K
 
 Threshold Reference:
   Jaccard >= 0.75: Stable (proceed with confidence)
