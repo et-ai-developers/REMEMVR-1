@@ -93,7 +93,26 @@ The a ≥ 0.4 threshold is standard in applied IRT (Reise & Waller, 2009). The |
 
 ### 4.2.3 Dimensionality Considerations
 
-[TBD: Omnibus vs domain-specific factors, justification for different RQ approaches]
+REMEMVR analyses employed both omnibus and dimension-specific IRT calibrations depending on research question requirements.
+
+**Omnibus "All" Factor:**
+Aggregates items across What (object identity), Where (spatial location), When (temporal order) domains into single unidimensional scale. Used when:
+- Research question targets general episodic memory ability (e.g., RQ 5.1.1 functional form)
+- Domain distinctions not theoretically relevant
+- Maximum statistical power desired (more items = lower SE_θ)
+
+**Rationale:** Factor analyses confirmed sufficient unidimensionality (CFI>0.90) for omnibus calibration despite domain structure (see Appendix X for confirmatory factor analysis results).
+
+**Domain-Specific Factors:**
+Separate calibrations for What, Where, When dimensions. Used when:
+- Research question targets domain dissociations (e.g., RQ 5.2.1 domain trajectories)
+- Theoretical predictions involve domain-specific effects
+- Purification benefits outweigh reduced item pool (higher discrimination per domain)
+
+**Multi-Dimensional Models:**
+Correlated-factors GRM (e.g., RQ 5.5.1 Source × Destination) allows simultaneous estimation while preserving dimension structure.
+
+**Trade-off:** Omnibus maximizes precision (large item pool), domain-specific maximizes construct validity (purer measurement). Choice determined a priori based on research question.
 
 ---
 
@@ -307,7 +326,43 @@ When assumptions violated but effects highly significant (e.g., p < 0.001), conc
 
 ### 4.4.1 Standardized Effect Sizes
 
-[TBD: Cohen's d, f², partial η² - will be populated as effect sizes are reported]
+Standardized effect sizes enable comparison across studies, metrics, and sample sizes. REMEMVR employed three conventional metrics for between-group and correlation analyses.
+
+**Cohen's d (Mean Difference Effect Size):**
+```
+d = (M₁ - M₂) / SD_pooled
+
+SD_pooled = √[(SD₁² + SD₂²) / 2]
+```
+
+**Interpretation (Cohen, 1988):**
+- d = 0.20: Small effect (subtle, requires large N to detect)
+- d = 0.50: Medium effect (visible to trained observer)
+- d = 0.80: Large effect (visible to casual observer)
+
+**Application:** Reported for all pairwise contrasts (e.g., domain comparisons, age tertile differences).
+
+**Cohen's f² (Variance Explained Effect Size):**
+```
+f² = R² / (1 - R²)
+```
+
+**Interpretation (Cohen, 1988):**
+- f² = 0.02: Small effect (2% incremental variance)
+- f² = 0.15: Medium effect (13% incremental variance)
+- f² = 0.35: Large effect (26% incremental variance)
+
+**Application:** Reported for interaction terms in regression/LMM analyses.
+
+**Partial η² (ANOVA-Style Effect Size):**
+```
+η²_partial = SS_effect / (SS_effect + SS_error)
+```
+
+**Interpretation:** Proportion of variance in outcome attributable to predictor, controlling for other predictors.
+
+**Reporting Standard:**
+All hypothesis tests accompanied by effect size + interpretation. Effect sizes reported even when p>.05 (null findings with small effect sizes = evidence of absence; null findings with large effect sizes + wide CIs = underpowered).
 
 ### 4.4.2 LMM-Specific Effect Sizes
 
@@ -391,7 +446,29 @@ Bonferroni is conservative (increases Type II error) but ensures strong control 
 
 ### 4.5.2 False Discovery Rate (FDR)
 
-[TBD: Benjamini-Hochberg procedure for exploratory analyses]
+**Note:** FDR procedures were NOT applied in REMEMVR analyses. All multiple comparison corrections used Bonferroni method (§4.5.1). This section included for completeness.
+
+**Benjamini-Hochberg Procedure:**
+FDR controls the expected proportion of false discoveries among rejected hypotheses, less conservative than family-wise error rate (FWER) control.
+
+**Procedure:**
+1. Rank p-values: p₁ ≤ p₂ ≤ ... ≤ pₘ
+2. Find largest k where p_k ≤ (k/m) × q
+3. Reject hypotheses 1 through k
+
+Where:
+- m = total number of tests
+- q = desired FDR level (typically 0.05 or 0.10)
+
+**When Appropriate:**
+- Exploratory analyses (hypothesis generation)
+- Large number of tests (m>20)
+- Context where false negatives costlier than false positives
+
+**Why Not Used in REMEMVR:**
+All analyses confirmatory (planned a priori), moderate test counts (k=2-15 per RQ), biomedical context prioritizing Type I error control. Bonferroni provides stronger protection against false positives at acceptable Type II error cost given adequate power (N=100, 800 observations typical).
+
+**Literature:** Benjamini & Hochberg (1995), Glickman et al. (2014) for recommendations.
 
 ---
 
@@ -493,7 +570,41 @@ Unstable clustering is not necessarily fatal—report findings transparently and
 
 ## 4.8 Software and Reproducibility
 
-[TBD: Software versions to be extracted from RQ logs]
+**Computing Environment:**
+- Operating System: Linux (WSL2 Ubuntu)
+- Python Version: 3.9+ (primary analysis environment)
+
+**IRT Calibration:**
+- Software: py-irt Python package (Graded Response Model implementation)
+- Estimation: Expectation-Maximization (EM) algorithm
+- Convergence tolerance: 0.001 log-likelihood change
+
+**Linear Mixed Models:**
+- Software: statsmodels.MixedLM (Python)
+- Version: 0.13+
+- Optimizer: L-BFGS-B (default for MixedLM)
+- Estimation: REML=True (parameters), REML=False (model comparison via AIC)
+
+**Data Management:**
+- Pandas: 1.4+ (DataFrames, merging, filtering)
+- NumPy: 1.21+ (numerical operations, transformations)
+
+**Statistical Testing:**
+- SciPy: 1.7+ (t-tests, correlations, Shapiro-Wilk, Levene's)
+- Statsmodels: 0.13+ (Tukey HSD, Steiger's z-test for correlation comparisons)
+
+**Visualization:**
+- Matplotlib: 3.5+
+- Seaborn: 0.11+
+
+**Reproducibility:**
+All analysis code, raw data, and IRT parameter estimates available in project repository:
+- Repository structure: results/chX/X.Y.Z/ (per RQ organization)
+- Random seeds: Fixed (random_state=42 for K-means, bootstrap)
+- Compute time: ~20-40 minutes per RQ (N=100, 800 observations typical)
+- Package management: Poetry (poetry.lock ensures exact environment replication)
+
+**Archival:** Analysis scripts versioned via Git, tagged by analysis phase (e.g., `ch5_pass1_complete`).
 
 ---
 

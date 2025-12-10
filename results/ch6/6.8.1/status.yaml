@@ -7,13 +7,18 @@ rq_tools: success
 rq_analysis: success
 g_code: success
 rq_inspect: success
-rq_plots: pending
+rq_plots: success
 rq_results: success
 rq_validate: pending
 
 context_dumps:
   rq_scholar: "9.1/10 CONDITIONAL. Theory strong, literature sparse. Required: VR ecological validity + enactment effect acknowledgment. Ready for stats after 2 changes."
   rq_stats: "9.4/10 APPROVED. Category 1: 3.0/3 (optimal). Category 2: 2.0/2 (87.5% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.8/2 (missing LMM diagnostics). Category 5: 0.6/1 (4 concerns, adequate but not comprehensive). Strong replication design paralleling Ch5 5.5.1."
+  rq_plots: |
+    Plots: 2 (trajectory_theta, trajectory_probability)
+    Sources: step07_trajectory_theta_data.csv, step07_trajectory_probability_data.csv
+    D069: YES (dual-scale theta + probability)
+    Functions: plot_trajectory (used for both scales with value transformation)
   rq_results: |
     RQ 6.8.1: Source-Destination Confidence Trajectories
     NULL hypothesis SUPPORTED: No source-destination dissociation in confidence (p=0.553)

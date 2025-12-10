@@ -22,17 +22,61 @@ context_dump: |
   When domain conditional (2-factor if <10 items post-purification, else 3-factor). Decisions D039/D068/D069/D070 embedded.
 g_code: pending
 rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+rq_plots: success
+context_dump: |
+  Plots generated: 2 (trajectory_theta, trajectory_probability)
+  Data sources: step07_trajectory_theta_data.csv, step07_trajectory_probability_data.csv
+  D069 compliance: YES (dual-scale trajectory plots)
+  Functions used: plot_trajectory (theta + probability scales)
+rq_results: success
+timestamp: 2025-12-10T18:15:00Z
+context_dump: |
+  Results validated for scientific plausibility
+  2 anomalies flagged: 1 probability transformation (GRM vs 2PL mismatch), 1 extreme floor effects (probabilities <25%)
+  Summary documented in results/summary.md
 rq_validate: pending
 
 analysis_steps:
-  step00_extract_confidence_data: pending
-  step01_irt_calibration_pass1: pending
-  step02_purify_items: pending
-  step03_irt_calibration_pass2: pending
-  step04_merge_theta_tsvr: pending
-  step05_fit_lmm: pending
-  step06_compute_post_hoc_contrasts: pending
-  step07_prepare_trajectory_plot_data: pending
-  step08_document_ch5_comparison: pending
+  step00_extract_confidence_data:
+    status: success
+    context_dump: |
+      Extracted 102 TC_* confidence items (What: 18, Where: 36, When: 48).
+      3-factor Q-matrix created. TSVR mapping: 400 composite_IDs.
+  step01_irt_calibration_pass1:
+    status: success
+    context_dump: |
+      GRM Pass 1: 102 items calibrated, model converged.
+      Theta range [-1.78, 1.06]. All items have parameters.
+  step02_purify_items:
+    status: success
+    context_dump: |
+      Purification (D039): 72/102 items retained (70.6%).
+      What: 18 items, Where: 36 items, When: 18 items (all >=10, 3-factor OK).
+  step03_irt_calibration_pass2:
+    status: success
+    context_dump: |
+      GRM Pass 2: 72 purified items, model converged.
+      Final theta estimates: 400 composite_IDs x 3 domains = 1200 rows.
+  step04_merge_theta_tsvr:
+    status: success
+    context_dump: |
+      Merged theta with TSVR (D070). 100% merge rate.
+      LMM input ready: 1200 rows x 7 cols (log_TSVR added).
+  step05_fit_lmm:
+    status: success
+    context_dump: |
+      LMM fitted: Domain x Time interaction tested.
+      17 candidate models compared, best model selected (kitchen sink).
+  step06_compute_post_hoc_contrasts:
+    status: success
+    context_dump: |
+      Post-hoc contrasts computed with dual p-values (D068).
+  step07_prepare_trajectory_plot_data:
+    status: success
+    context_dump: |
+      Dual-scale plot data created (D069): theta + probability scales.
+      12 rows (3 domains x 4 timepoints), all validation passed.
+  step08_document_ch5_comparison:
+    status: deferred
+    context_dump: |
+      Ch5 comparison documentation deferred - will be included in results summary by rq_results agent.

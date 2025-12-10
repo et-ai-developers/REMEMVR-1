@@ -338,6 +338,58 @@ Run in sequence. Don't skip. Each catches different issues.
 
 ---
 
+## LESSONS LEARNED LOG (Terse Format - Updated Session-by-Session)
+
+**Purpose:** Capture critical insights discovered during Ch6 execution for cross-RQ learning. Add new lessons in terse format immediately after discovery. Format: `[Date] [RQ] [Lesson]`
+
+### Validation Workflow Lessons
+
+**[2025-12-10] [6.3.1, 6.4.1, 6.5.1, 6.8.1] Validation Agent Sequence:**
+- plots.py requires PYTHONPATH set: `PYTHONPATH=/path/to/project poetry run python plots/plots.py`
+- Import error if run from plots/ directory (tools module not found)
+- rq_results agents BLOCK until PNG files exist (visual inspection required)
+- Execute plots.py BEFORE launching rq_results agents
+- All 4 agents (inspect → plots → results → validate) can run in parallel across RQs
+- status.yaml must reflect actual execution state (agents quit if mismatch)
+
+**[2025-12-10] [6.3.1] Step 08 Documentation Steps:**
+- Some RQs have step08 (Ch5 comparison documentation) in plan but no code generated
+- If step08 exists in 4_analysis.yaml but not executed: mark as "deferred" in status.yaml
+- rq_results agents will document comparison qualitatively in summary.md
+- Formal statistical comparison can be completed post-validation if needed
+
+**[2025-12-10] [6.4.1, 6.5.1] Status.yaml Staleness:**
+- Code-copying strategy updates code files but NOT status.yaml
+- Agents read status.yaml to determine workflow state
+- ALWAYS update status.yaml after manual execution (code-copying, bug fixes)
+- Pattern: g_code=success, rq_inspect=success, all analysis_steps=success before launching plots/results
+
+**[2025-12-10] [All 4 RQs] 100% Item Retention Pattern:**
+- All Ch6 confidence RQs showed 100% item retention after purification (unusual vs typical 30-70%)
+- GRM 5-category ordinal data may have inherently better psychometric properties than binary accuracy
+- Discrimination: 1.98-6.14 (well above a≥0.4 threshold)
+- Difficulty: 0.05-1.18 (well within |b|≤3.0 threshold)
+- Documented as "unusual pattern" in validation.md, not blocking for thesis
+- May indicate purification thresholds need tightening for ordinal IRT (sensitivity analysis recommended)
+
+### Common Validation Issues
+
+**[2025-12-10] GRM-2PL Probability Transformation Mismatch:**
+- plots.py may use 2PL approximation instead of GRM category averaging
+- Can cause probability reversals (higher probability despite lower theta)
+- Observed in RQ 6.3.1: When domain higher probability (20%) vs lower theta (-0.39)
+- Theta scale remains valid regardless; probability scale interpretability reduced
+- Document limitation in thesis methods if observed
+
+**[2025-12-10] Day 6 Floor Effects in Confidence Data:**
+- Confidence trajectories converge to 2-3% probability by Hour 151 (Day 6)
+- Near measurement floor for 5-category Likert scale
+- Limits Decision D069 dual-scale interpretability (designed for accuracy, questionable for confidence)
+- May reflect genuine confidence collapse, response bias, or scale compression
+- Document in limitations, recommend raw distribution analysis
+
+---
+
 ## QUICK REFERENCE
 
 | Analysis Type | Model | Key Validation |

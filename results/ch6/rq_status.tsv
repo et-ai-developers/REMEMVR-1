@@ -1,6 +1,6 @@
 Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect	plots	results	validate
-6.1.1	Confidence	Model Selection	ROOT - GRM 5-category. Log model comparison.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.1.2	Confidence	Two-Phase Pattern	Depends 6.1.1. Piecewise test.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.1.1	Confidence	Model Selection	ROOT - GRM 5-category. Kitchen sink (70+ models). MED settings. BULLETPROOF.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+6.1.2	Confidence	Two-Phase Pattern	Depends 6.1.1. Piecewise test. INCONCLUSIVE (1/3 tests).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	PENDING	PENDING
 6.1.3	Confidence	Age Effects	Depends 6.1.1. Age × Time interaction.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.1.4	Confidence	ICC Decomposition	CRITICAL. Depends 6.1.1. ICC_slope detection test.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.1.5	Confidence	Trajectory Clustering	Depends 6.1.4. K-means on random effects.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
@@ -9,15 +9,15 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.2.3	Calibration	Resolution Over Time	ROOT - Item-level gamma. MISSING TOOLS.	True	True	True	True	FAIL	FAIL	False	False	False	False	False
 6.2.4	Calibration	By Accuracy Level	Depends 6.2.1 + 6.2.3. Dunning-Kruger test.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.2.5	Calibration	Age Effects	Depends 6.2.1. Age × calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.3.1	Domain Confidence	Trajectories	ROOT - What/Where/When GRM. Domain × Time.	True	True	True	True	TRUE	TRUE	True	False	False	False	False
+6.3.1	Domain Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (H1: Ch5 comparison deferred).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.3.2	Domain Confidence	Calibration	Depends 6.3.1 + Ch5 5.2.1. Domain calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.3.3	Domain Confidence	Age × Domain	Depends 6.3.1. 3-way interaction.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.3.4	Domain Confidence	ICC by Domain	Depends 6.3.1. ICC per domain.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.4.1	Paradigm Confidence	Trajectories	ROOT - IFR/ICR/IRE GRM. Paradigm × Time.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.4.1	Paradigm Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (M5: 100% retention).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.4.2	Paradigm Confidence	Calibration	Depends 6.4.1 + Ch5 5.3.1. Paradigm calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.4.3	Paradigm Confidence	Age × Paradigm	Depends 6.4.1. 3-way interaction.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.4.4	Paradigm Confidence	ICC by Paradigm	Depends 6.4.1. ICC per paradigm.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.5.1	Schema Confidence	Trajectories	ROOT - Common/Congruent/Incongruent GRM. Schema × Time.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.5.1	Schema Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS (2 moderate: retention, floor).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.5.2	Schema Confidence	Calibration	Depends 6.5.1 + Ch5 5.4.1. Schema calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.5.3	Schema Confidence	High-Confidence Errors	ROOT - Item-level HCE by schema.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.6.1	HCE	Over Time	ROOT - Item-level HCE trajectory.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
@@ -26,7 +26,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.7.1	Predictive	Day 0 Confidence	Depends 6.1.1 + Ch5 5.1.4. Confidence predicts forgetting.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.7.2	Predictive	Confidence Variability	ROOT - Item-level SD. Variability correlation.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.7.3	Predictive	Calibration Predicts	Depends 6.2.1 + Ch5 5.1.1. Calibration → stability.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.8.1	Source-Dest Confidence	Trajectories	ROOT - Source/Dest GRM. Location × Time.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.8.1	Source-Dest Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (3 moderate).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.8.2	Source-Dest Confidence	Calibration	Depends 6.8.1 + Ch5 5.5.1. Location calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.8.3	Source-Dest Confidence	ICC	CRITICAL. Depends 6.8.1. Opposite correlation replication.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.8.4	Source-Dest Confidence	Clustering	Depends 6.8.3. K-means on location random effects.	True	True	True	True	TRUE	TRUE	False	False	False	False	False

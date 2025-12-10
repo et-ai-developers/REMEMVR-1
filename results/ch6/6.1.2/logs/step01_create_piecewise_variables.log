@@ -1,0 +1,28 @@
+[START] Step 01: Create Piecewise Time Variables
+[LOAD] Loading input data from step00_lmm_input.csv...
+[LOADED] step00_lmm_input.csv (400 rows, 6 cols)
+[INFO] TSVR_hours range: [1.0, 246.2]
+[CREATE] Creating piecewise segments with breakpoint at 48.0h...
+[DONE] Piecewise variables created
+[INFO] Segment distribution:
+  Early: 196 rows (49.0%)
+  Late: 204 rows (51.0%)
+[INFO] Time_Early range: [0.0, 47.7]
+[INFO] Time_Late range: [0.0, 198.2]
+[CHECK] Verifying mutual exclusivity of time variables...
+[PASS] No rows with both Time_Early and Time_Late > 0
+[PASS] No rows with both Time_Early and Time_Late == 0
+[PASS] Mutual exclusivity verified (exactly one time variable > 0 per row)
+[SAVE] Saving piecewise data to step01_piecewise_input.csv...
+[SAVED] step01_piecewise_input.csv (400 rows, 9 cols)
+[VALIDATION] Running validate_dataframe_structure...
+[ERROR] 'type' object is not iterable
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/6.1.2/code/step01_create_piecewise_variables.py", line 189, in <module>
+    validation_result = validate_dataframe_structure(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in validate_dataframe_structure
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'type' object is not iterable
