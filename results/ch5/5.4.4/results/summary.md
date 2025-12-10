@@ -2,7 +2,9 @@
 
 **Research Question:** Do IRT theta scores and CTT mean scores yield the same conclusions about congruence-specific forgetting trajectories?
 
-**Analysis Completed:** 2025-12-03
+**Analysis Completed:** 2025-12-03 (Original Log model)
+
+**Updated:** 2025-12-09 (Recip+Log two-process forgetting model per RQ 5.4.1 ROOT cascade)
 
 **Analyst:** rq_results agent (v4.0) with master claude orchestration
 
@@ -37,36 +39,38 @@
 
 ### Cohen's Kappa Agreement on Fixed Effects
 
-**Agreement Metrics:**
+**Agreement Metrics (UPDATED 2025-12-09 with Recip+Log Model):**
 
-| Metric                | Value  | Threshold | Result   | Interpretation           |
-|-----------------------|--------|-----------|----------|--------------------------|
-| Cohen's Kappa         | 0.667  | > 0.60    | **PASS** | Substantial agreement    |
-| Percent Agreement     | 83.3%  | >= 80%    | **PASS** | 5/6 terms agree          |
-| Discordant Terms      | 1      | -         | INFO     | 1 term disagrees on sig. |
+| Metric                | Value  | Threshold | Result   | Interpretation              |
+|-----------------------|--------|-----------|----------|-----------------------------|
+| Cohen's Kappa         | 1.000  | > 0.60    | **PASS** | Almost perfect agreement    |
+| Percent Agreement     | 100.0% | >= 80%    | **PASS** | 9/9 terms agree             |
+| Discordant Terms      | 0      | -         | INFO     | Perfect agreement on sig.   |
 
-**Fixed Effect Comparison (6 Terms Compared):**
-- Agreement on significance/non-significance: 5/6 terms (83.3%)
-- Kappa interpretation (Landis & Koch, 1977): 0.61-0.80 = Substantial agreement
+**Fixed Effect Comparison (9 Terms Compared with Recip+Log Model):**
+- Agreement on significance/non-significance: 9/9 terms (100%)
+- Kappa interpretation (Landis & Koch, 1977): 0.81-1.00 = Almost perfect agreement
+- **Two-process forgetting model includes both recip_TSVR and log_TSVR terms + interactions**
 - **Convergence Criterion 2: PASS** (kappa > 0.60)
 - **Convergence Criterion 3: PASS** (agreement >= 80%)
 
 ### Model Fit Comparison
 
-**AIC/BIC Comparison:**
+**AIC/BIC Comparison (UPDATED 2025-12-09 with Recip+Log Model):**
 
 | Metric | IRT Model | CTT Model | Delta      | Interpretation                |
 |--------|-----------|-----------|------------|-------------------------------|
-| AIC    | 2559.06   | -1069.30  | **-3628**  | Strong evidence for CTT       |
-| BIC    | 2609.96   | -1018.40  | **-3628**  | Strong evidence for CTT       |
+| AIC    | 2529.98   | -1077.45  | **-3607**  | Strong evidence for CTT       |
+| BIC    | 2596.15   | -1011.28  | **-3607**  | Strong evidence for CTT       |
 
-**Convergence Status:**
-- Both models converged successfully with random slopes (log_TSVR | UID)
+**Convergence Status (Recip+Log Two-Process Forgetting):**
+- Both models converged successfully with random slopes (recip_TSVR | UID)
 - Identical model structure (full random effects retained)
-- Random effects specification: ~log_TSVR (participant-specific slopes)
+- Random effects specification: ~recip_TSVR (rapid component per RQ 5.4.1 ROOT)
+- Formula: `DV ~ C(congruence) * (recip_TSVR + log_TSVR)` for both IRT and CTT
 
 **Interpretation:**
-- Delta-AIC = -3628 (massive difference, far exceeds delta < 4 "comparable fit" threshold)
+- Delta-AIC = -3607 (updated with Recip+Log, massive difference remains)
 - CTT model shows vastly superior fit to data
 - Unexpected finding (plan predicted comparable fit)
 - Possible explanation: CTT's bounded [0,1] scale better matches LMM normal-distribution assumption than unbounded IRT theta
@@ -86,7 +90,7 @@
 -  All r > 0.70 (hypothesis met)
 -  Cohen's kappa > 0.60 (hypothesis met)
 -  Agreement >= 80% (hypothesis met)
--   Delta-AIC < 4 (hypothesis NOT met, but convergence still validated)
+- ï¿½ Delta-AIC < 4 (hypothesis NOT met, but convergence still validated)
 
 ---
 
@@ -146,9 +150,9 @@ Displays forgetting trajectories using IRT theta scores across 4 test sessions (
 
 **Trajectory Patterns (Theta Scale):**
 
-- **Common:** Starts ¸ H 0.4 (Day 0), declines to ¸ H -0.3 (Day 6) ’ 0.7 SD decline
-- **Congruent:** Starts ¸ H 0.5 (Day 0), declines to ¸ H -0.2 (Day 6) ’ 0.7 SD decline
-- **Incongruent:** Starts ¸ H 0.2 (Day 0), declines to ¸ H -0.5 (Day 6) ’ 0.7 SD decline
+- **Common:** Starts ï¿½ H 0.4 (Day 0), declines to ï¿½ H -0.3 (Day 6) ï¿½ 0.7 SD decline
+- **Congruent:** Starts ï¿½ H 0.5 (Day 0), declines to ï¿½ H -0.2 (Day 6) ï¿½ 0.7 SD decline
+- **Incongruent:** Starts ï¿½ H 0.2 (Day 0), declines to ï¿½ H -0.5 (Day 6) ï¿½ 0.7 SD decline
 
 **Key Patterns:**
 
@@ -182,9 +186,9 @@ Same trajectory analysis as Figure 2, but using CTT proportion correct instead o
 
 **Trajectory Patterns (Proportion Scale):**
 
-- **Common:** Starts 67% ’ declines to 55% (12 percentage point decline)
-- **Congruent:** Starts 74% ’ declines to 58% (16 percentage point decline)
-- **Incongruent:** Starts 65% ’ declines to 50% (15 percentage point decline)
+- **Common:** Starts 67% ï¿½ declines to 55% (12 percentage point decline)
+- **Congruent:** Starts 74% ï¿½ declines to 58% (16 percentage point decline)
+- **Incongruent:** Starts 65% ï¿½ declines to 50% (15 percentage point decline)
 
 **Key Patterns:**
 
@@ -277,9 +281,9 @@ IRT and CTT demonstrate strong methodological convergence for schema congruence 
 **Theta Scale Findings:**
 
 All three congruence levels showed approximately 0.7 SD decline from Day 0 to Day 6:
-- Common: ¸ = 0.4 ’ -0.3 (0.7 SD decline)
-- Congruent: ¸ = 0.5 ’ -0.2 (0.7 SD decline)
-- Incongruent: ¸ = 0.2 ’ -0.5 (0.7 SD decline)
+- Common: ï¿½ = 0.4 ï¿½ -0.3 (0.7 SD decline)
+- Congruent: ï¿½ = 0.5 ï¿½ -0.2 (0.7 SD decline)
+- Incongruent: ï¿½ = 0.2 ï¿½ -0.5 (0.7 SD decline)
 
 **Statistical Interpretation:**
 
@@ -288,9 +292,9 @@ A 0.7 SD decline over 6 days represents a medium effect size (Cohen's d). Parall
 **Proportion Scale Findings:**
 
 Translating to CTT performance probabilities:
-- Common: 67% ’ 55% (12 percentage point decline)
-- Congruent: 74% ’ 58% (16 percentage point decline)
-- Incongruent: 65% ’ 50% (15 percentage point decline)
+- Common: 67% ï¿½ 55% (12 percentage point decline)
+- Congruent: 74% ï¿½ 58% (16 percentage point decline)
+- Incongruent: 65% ï¿½ 50% (15 percentage point decline)
 
 **Practical Interpretation:**
 
@@ -437,7 +441,7 @@ For cognitive assessment applications:
 
 - **Interpretable Metrics:** CTT proportion correct (e.g., "Patient retained 67% at Day 0, declined to 55% at Day 6") is more accessible than IRT theta (e.g., "theta = 0.4 declined to -0.3"). Clinicians without psychometric training can interpret CTT directly.
 
-- **Robust Cutoffs:** If clinical cutoffs established using IRT (e.g., ¸ < -1 = impairment), CTT equivalent can be derived via regression (r = 0.87-0.91 supports accurate translation). This enables cross-method comparison of diagnostic thresholds.
+- **Robust Cutoffs:** If clinical cutoffs established using IRT (e.g., ï¿½ < -1 = impairment), CTT equivalent can be derived via regression (r = 0.87-0.91 supports accurate translation). This enables cross-method comparison of diagnostic thresholds.
 
 **Future Research Directions:**
 
@@ -455,7 +459,7 @@ For cognitive assessment applications:
 
 **Sample Size and Power:**
 
-- N = 100 participants provides adequate power (>0.80) for detecting strong correlations (r > 0.70) and medium LMM effects (² > 0.3), but underpowered for small effects (d < 0.2, power ~0.35).
+- N = 100 participants provides adequate power (>0.80) for detecting strong correlations (r > 0.70) and medium LMM effects (ï¿½ > 0.3), but underpowered for small effects (d < 0.2, power ~0.35).
 - Subgroup analyses (e.g., fast vs slow forgetters) constrained by limited N per group.
 - Cohen's kappa analysis based on only 6 fixed effect termslarger effect sets would provide more stable kappa estimates.
 
@@ -498,7 +502,7 @@ For cognitive assessment applications:
 
 2. **No Session Covariate (Critical Concern per rq_scholar):**
    - LMMs modeled time as continuous (log_TSVR), but did not include session number covariate (1/2/3/4) to explicitly separate practice from forgetting.
-   - If practice effects non-linear (e.g., strongest Day 0’1, weakening later), log_TSVR may not fully capture temporal dynamics.
+   - If practice effects non-linear (e.g., strongest Day 0ï¿½1, weakening later), log_TSVR may not fully capture temporal dynamics.
 
 3. **Fixed Test Order:**
    - All participants experienced same test order (Day 0, 1, 3, 6). Cannot rule out order effects (e.g., Day 0 novelty, Day 6 fatigue) confounded with forgetting.
@@ -653,11 +657,11 @@ Practice effects from 4-session design are ACKNOWLEDGED but NOT corrected. Both 
 - Extract item parameters (a, b) from RQ 5.4.1 Step 2 purified items
 - For EACH item, compute IRT-predicted probability vs CTT observed proportion (across 400 observations)
 - Correlate IRT-predicted vs CTT-observed per item
-- Regress item-level correlation on discrimination parameter (a): corr ~ a + µ
+- Regress item-level correlation on discrimination parameter (a): corr ~ a + ï¿½
 
 **Expected Insight:** If high-discrimination items show r > 0.95 and low-discrimination show r < 0.80, this supports "discrimination drives convergence" hypothesis (aligns with Finding #2: Incongruent r = 0.91). Informs optimal item selection for dual-method assessments.
 
-**Timeline:** ~3-4 hours (requires item-level data restructuring, 50-90 items × 400 obs = 20,000-36,000 predictions)
+**Timeline:** ~3-4 hours (requires item-level data restructuring, 50-90 items ï¿½ 400 obs = 20,000-36,000 predictions)
 
 ---
 
@@ -762,7 +766,7 @@ Practice effects from 4-session design are ACKNOWLEDGED but NOT corrected. Both 
 
 **Next Steps:**
 - Analyze item-level convergence (Follow-Up #4 above)
-- Test hypothesis: corr(IRT, CTT) ~ discrimination_a + difficulty_b + µ
+- Test hypothesis: corr(IRT, CTT) ~ discrimination_a + difficulty_b + ï¿½
 - If discrimination is significant predictor, this has test design implications: Include challenging items to maximize IRT-CTT agreement.
 
 **Expected Insight:** May reveal that "good IRT items" (high discrimination) are also "good CTT items" (clear ability differentiation), unifying classical and modern test theory via shared construct of "item quality."
@@ -776,7 +780,7 @@ Practice effects from 4-session design are ACKNOWLEDGED but NOT corrected. Both 
 **Question:** LMMs used log(TSVR) as time variable (linear forgetting on log-scale). But Ebbinghaus (1885) proposed exponential decay. Does time scale affect IRT-CTT convergence?
 
 **Next Steps:**
-- Fit alternative LMMs: theta ~ TSVR (linear), theta ~ TSVR² (quadratic), theta ~ exp(-TSVR) (exponential)
+- Fit alternative LMMs: theta ~ TSVR (linear), theta ~ TSVRï¿½ (quadratic), theta ~ exp(-TSVR) (exponential)
 - Compare AIC across time scales
 - Test IRT-CTT convergence for each scale: Do correlations change if using exponential vs log-linear?
 

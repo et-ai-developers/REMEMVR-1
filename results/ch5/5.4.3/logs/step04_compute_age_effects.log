@@ -13,23 +13,23 @@
 
 [STEP 3] Compute Marginal Age Effects by Congruence
 ----------------------------------------------------------------------
-[COMPUTED] Age effect for Common: -0.006310
-[COMPUTED] Age effect for Congruent: -0.000116
-[COMPUTED] Age effect for Incongruent: -0.006262
+[COMPUTED] Age effect for Common: -0.006217
+[COMPUTED] Age effect for Congruent: -0.001400
+[COMPUTED] Age effect for Incongruent: -0.006418
 
 [STEP 4] Estimate Standard Errors
 ----------------------------------------------------------------------
 [INFO] SE estimation method: simplified delta method approximation
-[INFO] SE for Common: 0.007122
-[INFO] SE for Congruent: 0.010521
-[INFO] SE for Incongruent: 0.010521
+[INFO] SE for Common: 0.017662
+[INFO] SE for Congruent: 0.030181
+[INFO] SE for Incongruent: 0.030181
 
 [INFO] Age Effects by Congruence (at Day 3):
 Congruence         Age Slope         SE                    95% CI
 -----------------------------------------------------------------
-Common             -0.006310   0.007122         [-0.0203, 0.0076]
-Congruent          -0.000116   0.010521         [-0.0207, 0.0205]
-Incongruent        -0.006262   0.010521         [-0.0269, 0.0144]
+Common             -0.006217   0.017662         [-0.0408, 0.0284]
+Congruent          -0.001400   0.030181         [-0.0606, 0.0578]
+Incongruent        -0.006418   0.030181         [-0.0656, 0.0527]
 
 [STEP 5] Compute Tukey HSD Post-Hoc Contrasts
 ----------------------------------------------------------------------
@@ -37,9 +37,9 @@ Incongruent        -0.006262   0.010521         [-0.0269, 0.0144]
 
 Contrast                    Estimate         SE        z    p_uncor    p_tukey   Sig
 ------------------------------------------------------------------------------------------
-Congruent - Common          0.006194   0.012705     0.49     0.6259     1.0000      
-Incongruent - Common        0.000048   0.012705     0.00     0.9970     1.0000      
-Incongruent - Congruent    -0.006146   0.014879    -0.41     0.6796     1.0000      
+Congruent - Common          0.004817   0.034969     0.14     0.8904     1.0000      
+Incongruent - Common       -0.000201   0.034969    -0.01     0.9954     1.0000      
+Incongruent - Congruent    -0.005018   0.042682    -0.12     0.9064     1.0000      
 
 [SUMMARY] Significant contrasts: 0 / 3
 [FINDING] No significant differences in age effects across congruence levels

@@ -1,32 +1,35 @@
 IRT LMM Summary for RQ 5.4.4
 ============================================================
-Formula: theta ~ C(congruence) * log_TSVR
+Formula: theta ~ C(congruence) * (recip_TSVR + log_TSVR)
 Groups: UID
 N observations: 1200
 N groups: 100
 Converged: True
-AIC: 2559.06
-BIC: 2609.96
+AIC: 2529.98
+BIC: 2596.15
 ============================================================
 
-                     Mixed Linear Model Regression Results
-================================================================================
-Model:                    MixedLM         Dependent Variable:         theta     
-No. Observations:         1200            Method:                     ML        
-No. Groups:               100             Scale:                      0.3773    
-Min. group size:          12              Log-Likelihood:             -1269.5312
-Max. group size:          12              Converged:                  Yes       
-Mean group size:          12.0                                                  
---------------------------------------------------------------------------------
-                                      Coef.  Std.Err.   z    P>|z| [0.025 0.975]
---------------------------------------------------------------------------------
-Intercept                              0.632    0.096  6.584 0.000  0.444  0.820
-C(congruence)[T.congruent]            -0.032    0.098 -0.327 0.744 -0.225  0.160
-C(congruence)[T.incongruent]           0.051    0.098  0.516 0.606 -0.142  0.243
-log_TSVR                              -0.189    0.023 -8.198 0.000 -0.235 -0.144
-C(congruence)[T.congruent]:log_TSVR    0.016    0.026  0.597 0.551 -0.036  0.067
-C(congruence)[T.incongruent]:log_TSVR -0.011    0.026 -0.419 0.675 -0.062  0.040
-UID Var                                0.438    0.145                           
-UID x log_TSVR Cov                    -0.065    0.029                           
-log_TSVR Var                           0.019    0.007                           
-================================================================================
+                      Mixed Linear Model Regression Results
+==================================================================================
+Model:                      MixedLM         Dependent Variable:         theta     
+No. Observations:           1200            Method:                     ML        
+No. Groups:                 100             Scale:                      0.3617    
+Min. group size:            12              Log-Likelihood:             -1251.9897
+Max. group size:            12              Converged:                  Yes       
+Mean group size:            12.0                                                  
+----------------------------------------------------------------------------------
+                                        Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------------------
+Intercept                                1.287    0.260  4.960 0.000  0.779  1.796
+C(congruence)[T.congruent]               0.067    0.360  0.186 0.852 -0.638  0.772
+C(congruence)[T.incongruent]            -0.086    0.360 -0.239 0.811 -0.791  0.619
+recip_TSVR                              -1.210    0.469 -2.579 0.010 -2.129 -0.290
+C(congruence)[T.congruent]:recip_TSVR   -0.183    0.641 -0.286 0.775 -1.439  1.073
+C(congruence)[T.incongruent]:recip_TSVR  0.253    0.641  0.394 0.693 -1.003  1.509
+log_TSVR                                -0.335    0.057 -5.836 0.000 -0.447 -0.222
+C(congruence)[T.congruent]:log_TSVR     -0.006    0.081 -0.078 0.938 -0.165  0.152
+C(congruence)[T.incongruent]:log_TSVR    0.019    0.081  0.238 0.812 -0.139  0.178
+UID Var                                  0.232    0.068                           
+UID x recip_TSVR Cov                    -0.152    0.133                           
+recip_TSVR Var                           1.366    0.507                           
+==================================================================================

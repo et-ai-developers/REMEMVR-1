@@ -1,0 +1,29 @@
+================================================================================
+PRACTICE EFFECTS DECOMPOSITION SUMMARY - RQ 5.1.2
+================================================================================
+
+RESEARCH QUESTION:
+  Does T1→T2 trajectory reflect practice gains or genuine forgetting?
+
+METHODOLOGY:
+  Dual-phase model: theta ~ Time_within_phase * Phase + (1 | UID)
+  Phase 1 (Practice): T1→T2 (first retest)
+  Phase 2 (Forgetting): T2→T4 (subsequent tests)
+
+--------------------------------------------------------------------------------
+RESULTS:
+--------------------------------------------------------------------------------
+Practice phase slope (T1→T2):   β = -0.003325 ± 0.001031, p = 0.001258
+Forgetting phase slope (T2→T4): β = -0.018965 ± 0.003094
+Slope difference:                Δβ = 0.015640, p = 0.000002
+
+CONCLUSION: Significant practice effect detected (p < 0.0033)
+  Practice PARTIALLY masks forgetting: T1→T2 decline less steep than T2→T4
+
+--------------------------------------------------------------------------------
+IMPLICATIONS FOR RQ 5.1.3 (AGE EFFECTS):
+--------------------------------------------------------------------------------
+  CRITICAL: Age × Time analysis must account for practice effects
+  Younger adults may benefit MORE from practice (processing speed advantage)
+  This could create artifact of 'older adults better forgetting rate'
+  Recommendation: Test Age × Phase interaction before interpreting Age × Time

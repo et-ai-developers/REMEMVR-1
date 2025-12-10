@@ -33,8 +33,11 @@
 [STEP 6] Create Time Transformations
 ----------------------------------------------------------------------
 [INFO] TSVR_hours range: [1.00, 246.24]
+[CREATED] recip_TSVR = 1 / (TSVR_hours + 1)
+[INFO] recip_TSVR range: [0.0040, 0.5000]
 [CREATED] log_TSVR = log(TSVR_hours + 1)
 [INFO] log_TSVR range: [0.69, 5.51]
+[INFO] Two-process forgetting model: Recip+Log per RQ 5.4.1 ROOT
 
 [STEP 7] Final Validation
 ----------------------------------------------------------------------
@@ -45,7 +48,7 @@
 [STEP 8] Save Output
 ----------------------------------------------------------------------
 [SAVED] /home/etai/projects/REMEMVR/results/ch5/5.4.3/data/step01_lmm_input.csv
-  1200 rows, 10 columns
+  1200 rows, 11 columns
 
 [SUMMARY]
 ----------------------------------------------------------------------
@@ -55,18 +58,21 @@ Input files:
   Age data: 100 rows
 
 Output file:
-  LMM input: 1200 rows x 10 columns
+  LMM input: 1200 rows x 11 columns
 
 Transformations applied:
   - Reshaped wide -> long format
   - Grand-mean centered Age (Age_c)
-  - Created log(TSVR_hours + 1)
+  - Created recip_TSVR = 1 / (TSVR_hours + 1)
+  - Created log_TSVR = log(TSVR_hours + 1)
+  - Two-process forgetting model: Recip+Log per RQ 5.4.1 ROOT
 
 Value ranges:
   theta: [-2.15, 2.34]
   Age: [20, 70]
   Age_c: [-24.57, 25.43]
   TSVR_hours: [1.00, 246.24]
+  recip_TSVR: [0.0040, 0.5000]
   log_TSVR: [0.69, 5.51]
 
-[SUCCESS] Step 01 complete - LMM input prepared
+[SUCCESS] Step 01 complete - LMM input prepared with Recip+Log transformations

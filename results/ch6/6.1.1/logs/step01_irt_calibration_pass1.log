@@ -58,3 +58,29 @@
 [IRT] Model configured: GRM with 72 items, 1 factor(s), 5 categories
 [IRT] Fitting GRM model (max_iter=200, mc_samples=1, iw_samples=100)...
 [IRT] WARNING: Using MINIMAL settings for testing. Re-run with max_iter=200, mc_samples=100, iw_samples=100 for production.
+[IRT] Model fitting complete
+[IRT] Extracting item parameters (discrimination + thresholds)...
+[IRT] Transforming item parameters to GRM format (a, b1-b4)...
+[IRT] Item parameters extracted: 72 items
+[IRT] Discrimination (a) range: [1.742, 5.350]
+[IRT] Threshold b1 range: [-1.438, 0.868]
+[IRT] Threshold b4 range: [0.247, 0.758]
+[IRT] Extracting theta scores (ability estimates)...
+[IRT] Computing standard errors from posterior variance...
+[IRT] Theta scores extracted: 400 observations
+[IRT] Theta range: [-2.241, 0.491]
+[IRT] SE range: [0.033, 0.033]
+[SAVE] Saving item parameters...
+[SAVED] /home/etai/projects/REMEMVR/results/ch6/6.1.1/data/step01_pass1_item_params.csv (72 rows, 7 cols)
+[SAVE] Saving theta scores...
+[SAVED] /home/etai/projects/REMEMVR/results/ch6/6.1.1/data/step01_pass1_theta.csv (400 rows, 3 cols)
+[VALIDATION] Running convergence validation...
+[VALIDATION] WARNING - Model did not converge
+[VALIDATION] Checking parameter bounds...
+[VALIDATION] PASS - All discriminations in [0.01, 10.0]
+[VALIDATION] WARNING - 72 items have misordered thresholds
+[VALIDATION] PASS - All theta scores in [-4, 4]
+[VALIDATION] WARNING - 400 SE values outside [0.1, 1.5]
+[VALIDATION] PASS - No NaN in item parameters
+[VALIDATION] PASS - No NaN in theta scores
+[SUCCESS] Step 01 complete

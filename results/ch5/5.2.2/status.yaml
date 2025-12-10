@@ -113,21 +113,20 @@ rq_inspect:
     '
 rq_plots:
   status: success
-  context_dump: 'Plots generated: 2 (piecewise_trajectory_theta, piecewise_trajectory_probability)
-
-    Data sources: step05_piecewise_theta_data.csv, step05_piecewise_probability_data.csv
-
+  timestamp: 2025-12-09T17:00:00Z
+  context_dump: |
+    Plots regenerated: 2 (piecewise_trajectory_theta, piecewise_trajectory_probability)
+    Data sources: step05_piecewise_theta_data.csv (8 rows, 2 domains), step05_piecewise_probability_data.csv (8 rows, 2 domains)
     D069 compliance: YES (dual-scale trajectory plots included)
-
+    UPDATED 2025-12-09: Plots now current with 2-domain analysis (What/Where only, When excluded)
     Functions used: set_plot_style_defaults, plot_trajectory
-
-    '
 rq_results:
   status: success
-  timestamp: 2025-12-02
+  timestamp: 2025-12-09T17:00:00Z
   context_dump: |
-    Results validated for scientific plausibility (summary.md regenerated for When exclusion)
+    Results validated for scientific plausibility (summary.md current for When exclusion)
     Analysis re-run Dec 2 with When excluded (800 obs, 2 domains only) per RQ 5.2.1 floor effect
     Null consolidation hypothesis: All contrasts p>0.68, effect sizes negligible (|d|<0.06)
-    CRITICAL: Plots outdated (show 3 domains), MUST regenerate before publication (Step 16 re-run required)
+    PLOTS CURRENT (regenerated 2025-12-09): Show 2 domains (What/Where), When excluded
     Model boundary warning documented (random slope variance near zero, not fatal but noted)
+    GOLD STATUS: Plots current, analysis complete, summary publication-ready

@@ -86,15 +86,15 @@ def main():
     log("[STEP 2] Identify 3-Way Interaction Terms")
     log("-" * 70)
 
-    # The 4 three-way interaction terms we need:
+    # The 4 three-way interaction terms we need (UPDATED for Recip+Log):
     required_terms = [
-        'Age_c:Congruent:TSVR_hours',
+        'Age_c:Congruent:recip_TSVR',
         'Age_c:Congruent:log_TSVR',
-        'Age_c:Incongruent:TSVR_hours',
+        'Age_c:Incongruent:recip_TSVR',
         'Age_c:Incongruent:log_TSVR'
     ]
 
-    log(f"[INFO] Required 3-way interaction terms:")
+    log(f"[INFO] Required 3-way interaction terms (Recip+Log two-process):")
     for term in required_terms:
         log(f"  - {term}")
     log("")

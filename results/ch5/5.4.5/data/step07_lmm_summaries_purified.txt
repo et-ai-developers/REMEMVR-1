@@ -1,59 +1,62 @@
 
 ================================================================================
-COMMON - Purified CTT
+COMMON - Purified CTT (RE: ~1)
 ================================================================================
                Mixed Linear Model Regression Results
 ===================================================================
 Model:            MixedLM Dependent Variable: z_ctt_purified_common
 No. Observations: 400     Method:             ML                   
-No. Groups:       100     Scale:              0.6829               
-Min. group size:  4       Log-Likelihood:     -533.6171            
+No. Groups:       100     Scale:              0.6755               
+Min. group size:  4       Log-Likelihood:     -532.0757            
 Max. group size:  4       Converged:          Yes                  
 Mean group size:  4.0                                              
 ---------------------------------------------------------------------
                  Coef.    Std.Err.     z      P>|z|   [0.025   0.975]
 ---------------------------------------------------------------------
-const             0.332      0.078    4.239   0.000    0.178    0.485
-TSVR_hours       -0.005      0.001   -7.174   0.000   -0.006   -0.004
-Group Var         0.227      0.079                                   
+const             1.458      0.352    4.137   0.000    0.767    2.149
+recip_TSVR       -1.622      0.622   -2.609   0.009   -2.841   -0.403
+log_TSVR         -0.367      0.078   -4.674   0.000   -0.521   -0.213
+Group Var         0.230      0.079                                   
 ===================================================================
 
 
 ================================================================================
-CONGRUENT - Purified CTT
+CONGRUENT - Purified CTT (RE: ~1)
 ================================================================================
                 Mixed Linear Model Regression Results
 ======================================================================
 Model:            MixedLM Dependent Variable: z_ctt_purified_congruent
 No. Observations: 400     Method:             ML                      
-No. Groups:       100     Scale:              0.7525                  
-Min. group size:  4       Log-Likelihood:     -537.3192               
+No. Groups:       100     Scale:              0.7465                  
+Min. group size:  4       Log-Likelihood:     -536.0298               
 Max. group size:  4       Converged:          Yes                     
 Mean group size:  4.0                                                 
 -------------------------------------------------------------------------
                 Coef.     Std.Err.      z       P>|z|    [0.025    0.975]
 -------------------------------------------------------------------------
-const            0.377       0.075     5.057    0.000     0.231     0.523
-TSVR_hours      -0.006       0.001    -7.775    0.000    -0.007    -0.004
-Group Var        0.132       0.060                                       
+const            1.489       0.368     4.041    0.000     0.767     2.211
+recip_TSVR      -1.514       0.653    -2.320    0.020    -2.794    -0.235
+log_TSVR        -0.380       0.082    -4.616    0.000    -0.542    -0.219
+Group Var        0.133       0.060                                       
 ======================================================================
 
 
 ================================================================================
-INCONGRUENT - Purified CTT
+INCONGRUENT - Purified CTT (RE: ~1)
 ================================================================================
                  Mixed Linear Model Regression Results
 ========================================================================
 Model:            MixedLM Dependent Variable: z_ctt_purified_incongruent
 No. Observations: 400     Method:             ML                        
-No. Groups:       100     Scale:              0.6554                    
-Min. group size:  4       Log-Likelihood:     -528.9650                 
+No. Groups:       100     Scale:              0.6320                    
+Min. group size:  4       Log-Likelihood:     -523.6679                 
 Max. group size:  4       Converged:          Yes                       
 Mean group size:  4.0                                                   
 ---------------------------------------------------------------------------
                   Coef.     Std.Err.      z       P>|z|    [0.025    0.975]
 ---------------------------------------------------------------------------
-const              0.345       0.078     4.404    0.000     0.192     0.499
-TSVR_hours        -0.005       0.001    -7.627    0.000    -0.007    -0.004
-Group Var          0.246       0.083                                       
+const              1.064       0.342     3.114    0.002     0.394     1.733
+recip_TSVR        -0.720       0.602    -1.196    0.232    -1.899     0.459
+log_TSVR          -0.287       0.076    -3.776    0.000    -0.436    -0.138
+Group Var          0.253       0.085                                       
 ========================================================================

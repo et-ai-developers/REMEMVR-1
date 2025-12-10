@@ -25,3 +25,30 @@
 [PASS] Complete factorial design verified for both plots
 
 [SUCCESS] Step 08 complete
+[START] Step 08: Prepare Plot Data for Visualization
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step05_correlation_analysis.csv
+[LOADED] 3 rows
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step07_lmm_model_comparison.csv
+[LOADED] 3 rows
+
+[PLOT 1] Preparing correlation comparison data
+[CREATED] 6 rows (3 dimensions x 2 CTT types)
+[VALIDATION] Dimensions: ['Common', 'Congruent', 'Incongruent']
+[VALIDATION] CTT types: ['Full', 'Purified']
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step08_correlation_comparison_data.csv
+[SAVED] 6 rows
+
+[PLOT 2] Preparing AIC comparison data
+[CREATED] 6 rows (3 dimensions x 2 CTT types)
+[VALIDATION] Dimensions: ['Common', 'Congruent', 'Incongruent']
+[VALIDATION] CTT types: ['Full', 'Purified']
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step08_aic_comparison_data.csv
+[SAVED] 6 rows
+
+[VALIDATION] Checking for NaN values
+[PASS] No NaN values in either plot dataset
+
+[VALIDATION] Checking complete factorial design
+[PASS] Complete factorial design verified for both plots
+
+[SUCCESS] Step 08 complete

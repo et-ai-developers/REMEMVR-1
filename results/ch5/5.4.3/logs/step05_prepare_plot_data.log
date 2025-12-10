@@ -3,7 +3,7 @@
 [STEP 1] Load Data
 ----------------------------------------------------------------------
 [LOADED] LMM input: 1200 rows
-[INFO] Columns: ['UID', 'composite_ID', 'test', 'congruence', 'theta', 'se_theta', 'Age', 'Age_c', 'TSVR_hours', 'log_TSVR']
+[INFO] Columns: ['UID', 'composite_ID', 'test', 'congruence', 'theta', 'se_theta', 'Age', 'Age_c', 'TSVR_hours', 'recip_TSVR', 'log_TSVR']
 
 [STEP 2] Create Age Tertiles
 ----------------------------------------------------------------------

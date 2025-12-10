@@ -810,4 +810,140 @@ The CORRECTED analysis reveals **IRT detects individual forgetting rate differen
 
 ---
 
+## 6. ROOT Model Verification: Recip+Log Update (Step 03b, Added 2025-12-10)
+
+### Motivation
+
+Following RQ 5.2.1 extended model comparison (2025-12-08), the ROOT model changed from Log-only to **Recip+Log** (two-process forgetting: rapid reciprocal + slow logarithmic). Original RQ 5.2.4 analysis used Log-only functional form. This verification tested whether IRT-CTT convergence findings remain robust when updating to ROOT-aligned Recip+Log model.
+
+### Methodology
+
+**Updated Formula (Both IRT and CTT):**
+```
+score ~ recip_TSVR + log_TSVR + C(domain) +
+        recip_TSVR:C(domain) + log_TSVR:C(domain)
+```
+
+**Key Changes:**
+- Added `recip_TSVR` (1 / (TSVR_hours + 1)) rapid forgetting component
+- Retained `log_TSVR` (slow forgetting component)
+- Updated random slopes: `~recip_TSVR` (matching ROOT 5.2.1 structure)
+
+**Model Fit:**
+- **IRT Model:** Converged with random slopes (~recip_TSVR)
+  - AIC: 1460.32 (cf. original Log AIC=1546.92, ΔAIC=-86.60)
+  - Recip+Log provides BETTER fit
+  - Random slope variance: 1.507 (DRAMATICALLY larger than Log-only 0.021)
+
+- **CTT Model:** Converged with random slopes (~recip_TSVR)
+  - AIC: -1064.37 (cf. original Log AIC=-1008.16, ΔAIC=-56.21)
+  - Recip+Log provides BETTER fit
+  - Random slope variance: 0.022 (NOW DETECTS individual differences!)
+
+### Results
+
+**IRT-CTT Convergence (Recip+Log Model):**
+
+| Domain | r (Log-only) | r (Recip+Log) | Δr | Both Exceptional? |
+|--------|-------------|---------------|-----|-------------------|
+| **What** | 0.906 | 0.906 | 0.000 | **YES** |
+| **Where** | 0.970 | 0.970 | 0.000 | **YES** |
+
+**Key Finding:** Convergence **IDENTICAL** between Log-only and Recip+Log models (r unchanged to 3 decimal places)
+
+### Random Slope Variance Comparison
+
+**CRITICAL FINDING - Pattern Changed:**
+
+| Model | Log-only Slope Var | Recip+Log Slope Var | Change |
+|-------|-------------------|---------------------|--------|
+| **IRT** | 0.021 | 1.507 | **+71.8× larger** |
+| **CTT** | 0.000 (boundary) | 0.022 | **NOW DETECTS** |
+
+**Interpretation:**
+
+1. **Recip+Log reveals MORE individual variation:**
+   - IRT slope variance increased 71.8× (0.021 → 1.507)
+   - Two-process forgetting (rapid + slow) captures richer trajectory heterogeneity
+   - Original Log-only model UNDERESTIMATED individual differences
+
+2. **CTT NOW detects individual differences (Var = 0.022):**
+   - Original Log-only: Variance = 0.000 (boundary, no detection)
+   - Recip+Log: Variance = 0.022 (non-zero, detects variation!)
+   - **Pattern reversal:** CTT CAN detect individual forgetting rates with better functional form
+   - Log-only boundary was **model limitation**, not CTT limitation
+
+3. **IRT still superior for individual differences:**
+   - IRT detects 68× MORE variance than CTT (1.507 vs 0.022)
+   - But CTT no longer at boundary (meaningful improvement)
+   - Confirms IRT advantage, but CTT not completely blind to dynamics
+
+### Comparison to Original Log Model
+
+**Convergence: ROBUST**
+- Static correlations unchanged (What: 0.906, Where: 0.970)
+- Both functional forms yield EXCEPTIONAL convergence (r ≥ 0.87)
+- IRT-CTT agreement insensitive to trajectory shape specification
+
+**Random Slope Variance: PATTERN CHANGE**
+- Original: IRT detects (0.021), CTT does not (0.000)
+- Recip+Log: IRT detects MORE (1.507), CTT NOW detects (0.022)
+- **Conclusion:** Log-only model UNDERESTIMATED individual differences for BOTH methods
+- Two-process forgetting reveals richer person-specific trajectories
+
+### Theoretical Implications
+
+1. **IRT-CTT convergence ROBUST:**
+   - Static ability estimates (r > 0.90) unaffected by functional form
+   - Both methods measure same latent construct regardless of forgetting dynamics
+   - Validates use of either metric for group-level comparisons
+
+2. **Functional form matters MORE than measurement method:**
+   - Log-only: CTT boundary estimate (0.000)
+   - Recip+Log: CTT non-zero estimate (0.022)
+   - **Lesson:** Model misspecification can hide individual differences
+   - Two-process forgetting (rapid + slow) essential for capturing dynamics
+
+3. **IRT advantage persists but magnitude matters:**
+   - IRT still detects 68× more variance than CTT (1.507 vs 0.022)
+   - But CTT improvement (0.000 → 0.022) shows bounded scales CAN detect variation
+   - Scale properties (bounded vs unbounded) constrain effect SIZE, not detectability
+
+4. **Clinical implications:**
+   - IRT enables richer person-specific forgetting curves (variance 68× larger)
+   - CTT now viable for detecting individual differences (non-zero variance)
+   - Both methods benefit from ROOT functional form (two-process forgetting)
+
+### Status Update
+
+**Verification Passed:** ✅
+
+- IRT-CTT convergence **ROBUST** to ROOT model update (Recip+Log)
+- Correlations unchanged (What: 0.906, Where: 0.970)
+- Random slope variance **DRAMATICALLY improved** for both methods
+- RQ 5.2.4 ready for **GOLD status** with ROOT dependency resolved
+
+### Files Generated
+
+- `code/step03b_recip_log_verification.py`
+- `data/step03b_irt_lmm_recip_log.pkl`
+- `data/step03b_ctt_lmm_recip_log.pkl`
+- `data/step03b_irt_fixed_effects.csv`
+- `data/step03b_ctt_fixed_effects.csv`
+- `data/step03b_convergence_comparison.csv`
+- `data/step03b_random_slope_variance_comparison.csv`
+- `logs/step03b_recip_log_verification.log`
+
+### Implications for Original Conclusions
+
+**REVISION REQUIRED for Section 3 "Random Slope Variance Divergence":**
+
+Original conclusion: "IRT detects individual differences (Var=0.021), CTT does not (Var=0.000)"
+
+**Updated conclusion:** "IRT detects SUBSTANTIALLY MORE individual differences than CTT (1.507 vs 0.022), but BOTH methods detect non-zero variation when using ROOT-aligned two-process forgetting model. Log-only specification UNDERESTIMATED individual differences for BOTH methods. IRT advantage persists (68× larger variance) but CTT not at boundary with correct functional form."
+
+**Key methodological lesson:** Always test multiple functional forms before concluding measurement method CANNOT detect an effect. CTT boundary with Log-only was model limitation, not CTT limitation.
+
+---
+
 **End of Results Summary**

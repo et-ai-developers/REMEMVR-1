@@ -68,16 +68,18 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: 2025-12-02T22:30:00Z
+  timestamp: 2025-12-09T14:13:00Z
   context_dump: |
-    Results validated for scientific plausibility
-    NULL RESULT ACCEPTED: 0 anomalies flagged (plausibility checks passed)
-    Summary documented in results/summary.md (5 sections: Findings, Plots, Interpretation, Limitations, Next Steps)
+    Results validated for scientific plausibility (Recip+Log two-process model)
+    NULL RESULT ROBUST: All 4 three-way interactions p_bonferroni > 0.025 (range: 0.249-1.000)
+    Summary updated in results/summary.md (5 sections, updated for Recip+Log functional form)
+    Two-process findings: Rapid (recip_TSVR β=-1.21) + Slow (log_TSVR β=-0.34) forgetting, age-invariant
+    0 anomalies flagged (plausibility checks passed, visual-statistical coherence excellent)
 
 analysis_steps:
   step00_load_dependencies: success
-  step01_prepare_lmm_input: success
-  step02_fit_lmm: success
-  step03_extract_interactions: success
+  step01_prepare_lmm_input: success (updated 2025-12-09 for Recip+Log)
+  step02_fit_lmm: success (updated 2025-12-09 for Recip+Log)
+  step03_extract_interactions: success (updated 2025-12-09 for recip_TSVR terms)
   step04_compute_age_effects: success
   step05_prepare_plot_data: success

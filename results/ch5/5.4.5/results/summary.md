@@ -2,7 +2,8 @@
 
 **Research Question:** If we compute CTT scores using only IRT-retained items (post-purification), do conclusions differ from full-item CTT for congruence?
 
-**Analysis Completed:** 2025-12-03
+**Analysis Completed:** 2025-12-03 (Original Log model)
+**Updated:** 2025-12-09 (Recip+Log two-process forgetting per RQ 5.4.1 ROOT cascade)
 
 **Analyst:** rq_results agent (v4.0) with master claude orchestration
 
@@ -59,21 +60,37 @@ Steiger's z-test for dependent correlations (Bonferroni alpha = 0.0167 for 3 com
 
 ### LMM Model Fit Comparison (Step 7 - Secondary Hypothesis)
 
-Parallel LMMs fit with identical formula (z-standardized_score ~ TSVR_hours + (1|UID)) to compare trajectory modeling:
+**UPDATED 2025-12-09:** Parallel LMMs fit with Recip+Log two-process forgetting model:
+- **Formula:** z-standardized_score ~ recip_TSVR + log_TSVR + (1|UID)
+- **Per RQ 5.4.1 ROOT cascade:** Rapid 1/(t+1) + slow log(t+1) components
+- **Random effects:** Attempted ~recip_TSVR, all fell back to ~1 (random intercepts only)
+
+**Recip+Log Results (2025-12-09):**
 
 | Dimension | AIC IRT | AIC Full | AIC Purified | Delta AIC | Full BETTER? |
 |-----------|---------|----------|--------------|-----------|--------------|
-| Common | 1047.6 | 1058.0 | 1075.2 | +17.2 | Yes |
-| Congruent | 1081.0 | 1047.4 | 1082.6 | +35.2 | Yes |
-| Incongruent | 1040.5 | 1068.0 | 1066.0 | -2.0 | Marginal (Purified slightly better) |
+| Common | 1040.4 | 1055.2 | 1074.2 | +19.0 | Yes |
+| Congruent | 1080.0 | 1043.9 | 1082.1 | +38.2 | Yes |
+| Incongruent | 1029.9 | 1057.0 | 1057.3 | +0.4 | No (essentially TIED) |
 
-**Secondary Hypothesis Status:** NOT SUPPORTED
-- Contrary to prediction, Purified CTT showed WORSE model fit than Full CTT for 2 of 3 dimensions
-- Common: Delta AIC = +17.2 (Full CTT 17 points better)
-- Congruent: Delta AIC = +35.2 (Full CTT 35 points better)
-- Incongruent: Delta AIC = -2.0 (Purified CTT 2 points better, marginal by Burnham & Anderson threshold)
+**Comparison with Original Log Model (2025-12-03):**
 
-**Key Finding:** All 9 models converged successfully (100% convergence rate)
+| Dimension | Log ΔAIC | Recip+Log ΔAIC | Change |
+|-----------|----------|----------------|--------|
+| Common | +17.2 | +19.0 | +1.8 (paradox STRENGTHENED) |
+| Congruent | +35.2 | +38.2 | +3.0 (paradox STRENGTHENED) |
+| Incongruent | -2.0 | +0.4 | +2.4 (paradox REVERSED, now TIED) |
+
+**Secondary Hypothesis Status:** NOT SUPPORTED (ROBUST across functional forms)
+- With Recip+Log, Purified CTT showed WORSE or TIED model fit for all 3 dimensions
+- Common: Delta AIC = +19.0 (Full CTT 19 points better, +1.8 vs Log)
+- Congruent: Delta AIC = +38.2 (Full CTT 38 points better, +3.0 vs Log)
+- Incongruent: Delta AIC = +0.4 (essentially TIED, switched from Purified-better to TIED)
+
+**Key Finding:** Purification-trajectory paradox **ROBUST to functional form choice**. Updating from Log to Recip+Log:
+- Strengthened paradox for Common (+1.8) and Congruent (+3.0)
+- Reversed marginal Purified advantage for Incongruent (now TIED)
+- All 9 models converged successfully (100% convergence rate)
 
 ### Paradoxical Pattern Identified
 
@@ -472,7 +489,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 **4. Examine LMM Singular Matrix Error**
 - **Why:** Random slopes model failed (log line 9-23), forced simplification to random intercepts only, limiting trajectory modeling
 - **How:**
-  - Diagnose root cause: Check variance components in failed model (likely participant slope variance near zero or correlations near �1)
+  - Diagnose root cause: Check variance components in failed model (likely participant slope variance near zero or correlations near �1)
   - Test alternative covariance structures: Compound symmetry, AR(1), unstructured
   - Investigate whether Full vs Purified CTT differ in trajectory variance (relevant to singular matrix)
 - **Expected Insight:** Understand why random slopes failed, potentially enable more sophisticated trajectory models, refine interpretation of AIC comparisons

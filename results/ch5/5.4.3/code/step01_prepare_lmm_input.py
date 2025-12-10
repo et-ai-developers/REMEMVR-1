@@ -215,10 +215,16 @@ def main():
     # Linear time: TSVR_hours (already present)
     log(f"[INFO] TSVR_hours range: [{lmm_input['TSVR_hours'].min():.2f}, {lmm_input['TSVR_hours'].max():.2f}]")
 
-    # Logarithmic time: log(TSVR_hours + 1)
+    # Reciprocal time: 1/(TSVR_hours + 1) - Two-process forgetting (rapid component)
+    lmm_input['recip_TSVR'] = 1.0 / (lmm_input['TSVR_hours'] + 1)
+    log(f"[CREATED] recip_TSVR = 1 / (TSVR_hours + 1)")
+    log(f"[INFO] recip_TSVR range: [{lmm_input['recip_TSVR'].min():.4f}, {lmm_input['recip_TSVR'].max():.4f}]")
+
+    # Logarithmic time: log(TSVR_hours + 1) - Two-process forgetting (slow component)
     lmm_input['log_TSVR'] = np.log(lmm_input['TSVR_hours'] + 1)
     log(f"[CREATED] log_TSVR = log(TSVR_hours + 1)")
     log(f"[INFO] log_TSVR range: [{lmm_input['log_TSVR'].min():.2f}, {lmm_input['log_TSVR'].max():.2f}]")
+    log(f"[INFO] Two-process forgetting model: Recip+Log per RQ 5.4.1 ROOT")
     log("")
 
     # -------------------------------------------------------------------------
@@ -227,8 +233,8 @@ def main():
     log("[STEP 7] Final Validation")
     log("-" * 70)
 
-    # Reorder columns
-    final_columns = ['UID', 'composite_ID', 'test', 'congruence', 'theta', 'se_theta', 'Age', 'Age_c', 'TSVR_hours', 'log_TSVR']
+    # Reorder columns (add recip_TSVR)
+    final_columns = ['UID', 'composite_ID', 'test', 'congruence', 'theta', 'se_theta', 'Age', 'Age_c', 'TSVR_hours', 'recip_TSVR', 'log_TSVR']
     lmm_input = lmm_input[final_columns]
 
     # Check for NaN values
@@ -279,21 +285,24 @@ def main():
     log(f"  Age data: 100 rows")
     log("")
     log(f"Output file:")
-    log(f"  LMM input: 1200 rows x 10 columns")
+    log(f"  LMM input: 1200 rows x 11 columns")
     log("")
     log(f"Transformations applied:")
     log(f"  - Reshaped wide -> long format")
     log(f"  - Grand-mean centered Age (Age_c)")
-    log(f"  - Created log(TSVR_hours + 1)")
+    log(f"  - Created recip_TSVR = 1 / (TSVR_hours + 1)")
+    log(f"  - Created log_TSVR = log(TSVR_hours + 1)")
+    log(f"  - Two-process forgetting model: Recip+Log per RQ 5.4.1 ROOT")
     log("")
     log(f"Value ranges:")
     log(f"  theta: [{lmm_input['theta'].min():.2f}, {lmm_input['theta'].max():.2f}]")
     log(f"  Age: [{lmm_input['Age'].min():.0f}, {lmm_input['Age'].max():.0f}]")
     log(f"  Age_c: [{lmm_input['Age_c'].min():.2f}, {lmm_input['Age_c'].max():.2f}]")
     log(f"  TSVR_hours: [{lmm_input['TSVR_hours'].min():.2f}, {lmm_input['TSVR_hours'].max():.2f}]")
+    log(f"  recip_TSVR: [{lmm_input['recip_TSVR'].min():.4f}, {lmm_input['recip_TSVR'].max():.4f}]")
     log(f"  log_TSVR: [{lmm_input['log_TSVR'].min():.2f}, {lmm_input['log_TSVR'].max():.2f}]")
     log("")
-    log("[SUCCESS] Step 01 complete - LMM input prepared")
+    log("[SUCCESS] Step 01 complete - LMM input prepared with Recip+Log transformations")
 
     return True
 

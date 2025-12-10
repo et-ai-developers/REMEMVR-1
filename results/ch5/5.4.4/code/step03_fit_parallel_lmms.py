@@ -3,8 +3,12 @@ Step 03: Fit Parallel LMMs (IRT vs CTT)
 RQ 5.4.4: IRT-CTT Convergence for Schema Congruence-Specific Forgetting
 
 Purpose: Fit parallel Linear Mixed Models using identical formula for IRT theta
-         vs CTT mean scores. Both models use Log transformation (congruence * log_TSVR)
-         with random slopes on log_TSVR per RQ 5.4.1 model selection.
+         vs CTT mean scores. Both models use Recip+Log two-process forgetting model
+         (congruence * (recip_TSVR + log_TSVR)) with random slopes on recip_TSVR
+         per RQ 5.4.1 ROOT model specification.
+
+UPDATED 2025-12-09: Changed from Log-only to Recip+Log two-process forgetting
+                    per RQ 5.4.1 ROOT cascade. Random slopes on recip_TSVR (rapid component).
 """
 
 import pandas as pd
@@ -69,8 +73,9 @@ def prepare_lmm_input(merged_df, tsvr_df, dv_col, output_name):
     else:
         long_df['congruence'] = long_df['congruence_var'].str.replace('CTT_', '')
 
-    # Add log_TSVR transformation
-    long_df['log_TSVR'] = np.log1p(long_df['TSVR_hours'])
+    # Add time transformations for two-process forgetting model
+    long_df['recip_TSVR'] = 1.0 / (long_df['TSVR_hours'] + 1)  # Rapid component: 1/(t+1)
+    long_df['log_TSVR'] = np.log1p(long_df['TSVR_hours'])      # Slow component: log(t+1)
 
     # Drop temp column
     long_df = long_df.drop(columns=['congruence_var'])
@@ -159,9 +164,10 @@ def main():
     ctt_input = prepare_lmm_input(merged_df, tsvr_df, 'CTT', 'CTT')
     logger.info(f"CTT input: {len(ctt_input)} rows, columns: {list(ctt_input.columns)}")
 
-    # 5. Define model formula (Log model per RQ 5.4.1)
-    formula = "theta ~ C(congruence) * log_TSVR"
-    re_formula = "~log_TSVR"
+    # 5. Define model formula (Recip+Log two-process model per RQ 5.4.1 ROOT)
+    # Two-process forgetting: rapid 1/(t+1) + slow log(t+1)
+    formula = "theta ~ C(congruence) * (recip_TSVR + log_TSVR)"
+    re_formula = "~recip_TSVR"  # Random slopes on rapid component
 
     convergence_logs = []
 
@@ -174,9 +180,9 @@ def main():
         )
     convergence_logs.extend(irt_conv_log)
 
-    # 7. Fit CTT model (with same formula structure)
+    # 7. Fit CTT model (with same Recip+Log formula structure)
     logger.info("Fitting CTT LMM...")
-    ctt_formula = "CTT_mean ~ C(congruence) * log_TSVR"
+    ctt_formula = "CTT_mean ~ C(congruence) * (recip_TSVR + log_TSVR)"
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

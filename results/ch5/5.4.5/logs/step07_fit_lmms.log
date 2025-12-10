@@ -98,3 +98,112 @@ numpy.linalg.LinAlgError: Singular matrix
 [SAVED] purified model summaries
 
 [SUCCESS] Step 07 complete
+[START] Step 07: Fit Parallel LMMs and Compare AIC
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step06_standardized_scores.csv
+[LOADED] 400 rows
+[CREATED] UID column (e.g., A010)
+[TRANSFORM] Creating recip_TSVR and log_TSVR transformations
+[CREATED] recip_TSVR (rapid): 1/(t+1), range [0.004, 0.500]
+[CREATED] log_TSVR (slow): log(t+1), range [0.693, 5.510]
+[ANALYSIS] Fitting 9 LMMs (3 dimensions x 3 score types)
+[NOTE] Formula: score ~ recip_TSVR + log_TSVR + (recip_TSVR | UID)
+[NOTE] Recip+Log two-process forgetting per RQ 5.4.1 ROOT cascade
+[NOTE] Will attempt ~recip_TSVR random slopes, fallback to ~1 if singular
+
+[DIMENSION] Common
+  [MODEL] IRT (z_theta_common)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1040.42
+    Converged: True
+    Log-likelihood: -515.21
+  [MODEL] Full (z_ctt_full_common)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1055.16
+    Converged: True
+    Log-likelihood: -522.58
+  [MODEL] Purified (z_ctt_purified_common)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1074.15
+    Converged: True
+    Log-likelihood: -532.08
+  [SUMMARY] AIC comparison:
+    IRT:      1040.42
+    Full:     1055.16
+    Purified: 1074.15
+    Delta (Purified - Full): +18.99
+    Improvement (|delta| > 2): Yes
+
+[DIMENSION] Congruent
+  [MODEL] IRT (z_theta_congruent)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1080.05
+    Converged: True
+    Log-likelihood: -535.02
+  [MODEL] Full (z_ctt_full_congruent)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1043.91
+    Converged: True
+    Log-likelihood: -516.95
+  [MODEL] Purified (z_ctt_purified_congruent)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1082.06
+    Converged: True
+    Log-likelihood: -536.03
+  [SUMMARY] AIC comparison:
+    IRT:      1080.05
+    Full:     1043.91
+    Purified: 1082.06
+    Delta (Purified - Full): +38.15
+    Improvement (|delta| > 2): Yes
+
+[DIMENSION] Incongruent
+  [MODEL] IRT (z_theta_incongruent)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1029.90
+    Converged: True
+    Log-likelihood: -509.95
+  [MODEL] Full (z_ctt_full_incongruent)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1056.98
+    Converged: True
+    Log-likelihood: -523.49
+  [MODEL] Purified (z_ctt_purified_incongruent)
+    [ATTEMPT 1] Fitting with ~recip_TSVR random slopes...
+    [FALLBACK] Random slopes failed ('MixedLMResults' object has no attribute 'warnings...), trying ~1
+    [SUCCESS] Random intercepts model converged
+    AIC = 1057.34
+    Converged: True
+    Log-likelihood: -523.67
+  [SUMMARY] AIC comparison:
+    IRT:      1029.90
+    Full:     1056.98
+    Purified: 1057.34
+    Delta (Purified - Full): +0.35
+    Improvement (|delta| > 2): No
+
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step07_lmm_model_comparison.csv
+[SAVED] 3 rows, 7 columns
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step07_lmm_summaries_theta.txt
+[SAVED] theta model summaries
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step07_lmm_summaries_full.txt
+[SAVED] full model summaries
+[SAVE] Writing /home/etai/projects/REMEMVR/results/ch5/5.4.5/data/step07_lmm_summaries_purified.txt
+[SAVED] purified model summaries
+
+[SUCCESS] Step 07 complete

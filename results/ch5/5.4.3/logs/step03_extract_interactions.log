@@ -4,14 +4,14 @@
 ----------------------------------------------------------------------
 [LOADED] Fixed effects: 18 rows
 [INFO] Columns: ['term', 'coef', 'se', 'z', 'p']
-[INFO] Terms: ['Intercept', 'TSVR_hours', 'log_TSVR', 'Age_c', 'Congruent', 'Incongruent', 'Age_c:TSVR_hours', 'Age_c:log_TSVR', 'Congruent:TSVR_hours', 'Congruent:log_TSVR', 'Incongruent:TSVR_hours', 'Incongruent:log_TSVR', 'Age_c:Congruent', 'Age_c:Incongruent', 'Age_c:Congruent:TSVR_hours', 'Age_c:Congruent:log_TSVR', 'Age_c:Incongruent:TSVR_hours', 'Age_c:Incongruent:log_TSVR']
+[INFO] Terms: ['Intercept', 'recip_TSVR', 'log_TSVR', 'Age_c', 'Congruent', 'Incongruent', 'Age_c:recip_TSVR', 'Age_c:log_TSVR', 'Congruent:recip_TSVR', 'Congruent:log_TSVR', 'Incongruent:recip_TSVR', 'Incongruent:log_TSVR', 'Age_c:Congruent', 'Age_c:Incongruent', 'Age_c:Congruent:recip_TSVR', 'Age_c:Congruent:log_TSVR', 'Age_c:Incongruent:recip_TSVR', 'Age_c:Incongruent:log_TSVR']
 
 [STEP 2] Identify 3-Way Interaction Terms
 ----------------------------------------------------------------------
-[INFO] Required 3-way interaction terms:
-  - Age_c:Congruent:TSVR_hours
+[INFO] Required 3-way interaction terms (Recip+Log two-process):
+  - Age_c:Congruent:recip_TSVR
   - Age_c:Congruent:log_TSVR
-  - Age_c:Incongruent:TSVR_hours
+  - Age_c:Incongruent:recip_TSVR
   - Age_c:Incongruent:log_TSVR
 
 [EXTRACTED] Found 4 matching terms
@@ -37,10 +37,10 @@
 
 Term                                           Coef       SE        z    p_uncor     p_bonf   Sig
 -----------------------------------------------------------------------------------------------
-Age_c:Congruent:TSVR_hours                  -0.0001   0.0001    -1.42     0.1550     0.3099      
-Age_c:Congruent:log_TSVR                     0.0050   0.0036     1.40     0.1617     0.3234      
-Age_c:Incongruent:TSVR_hours                 0.0000   0.0001     0.06     0.9550     1.0000      
-Age_c:Incongruent:log_TSVR                   0.0007   0.0036     0.18     0.8561     1.0000      
+Age_c:Congruent:recip_TSVR                  -0.0671   0.0437    -1.54     0.1243     0.2486      
+Age_c:Congruent:log_TSVR                    -0.0074   0.0055    -1.34     0.1788     0.3575      
+Age_c:Incongruent:recip_TSVR                 0.0223   0.0437     0.51     0.6091     1.0000      
+Age_c:Incongruent:log_TSVR                   0.0035   0.0055     0.63     0.5259     1.0000      
 
 [SUMMARY] Significant 3-way interactions: 0 / 4
 [FINDING] NULL RESULT: No significant Age x Congruence x Time interactions

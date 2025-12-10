@@ -1,59 +1,62 @@
 
 ================================================================================
-COMMON - IRT Theta
+COMMON - IRT Theta (RE: ~1)
 ================================================================================
            Mixed Linear Model Regression Results
 ============================================================
 Model:            MixedLM Dependent Variable: z_theta_common
 No. Observations: 400     Method:             ML            
-No. Groups:       100     Scale:              0.6177        
-Min. group size:  4       Log-Likelihood:     -519.8102     
+No. Groups:       100     Scale:              0.5992        
+Min. group size:  4       Log-Likelihood:     -515.2106     
 Max. group size:  4       Converged:          Yes           
 Mean group size:  4.0                                       
 -------------------------------------------------------------
               Coef.   Std.Err.    z     P>|z|  [0.025  0.975]
 -------------------------------------------------------------
-const          0.402     0.078   5.187  0.000   0.250   0.554
-TSVR_hours    -0.006     0.001  -9.147  0.000  -0.008  -0.005
-Group Var      0.254     0.085                               
+const          1.511     0.333   4.538  0.000   0.858   2.163
+recip_TSVR    -1.415     0.586  -2.414  0.016  -2.563  -0.266
+log_TSVR      -0.391     0.074  -5.288  0.000  -0.536  -0.246
+Group Var      0.258     0.086                               
 ============================================================
 
 
 ================================================================================
-CONGRUENT - IRT Theta
+CONGRUENT - IRT Theta (RE: ~1)
 ================================================================================
              Mixed Linear Model Regression Results
 ===============================================================
 Model:            MixedLM Dependent Variable: z_theta_congruent
 No. Observations: 400     Method:             ML               
-No. Groups:       100     Scale:              0.7396           
-Min. group size:  4       Log-Likelihood:     -536.4934        
+No. Groups:       100     Scale:              0.7330           
+Min. group size:  4       Log-Likelihood:     -535.0234        
 Max. group size:  4       Converged:          Yes              
 Mean group size:  4.0                                          
 -----------------------------------------------------------------
              Coef.    Std.Err.     z      P>|z|   [0.025   0.975]
 -----------------------------------------------------------------
-const         0.375      0.075    4.996   0.000    0.228    0.522
-TSVR_hours   -0.006      0.001   -7.798   0.000   -0.007   -0.004
-Group Var     0.147      0.063                                   
+const         1.499      0.365    4.103   0.000    0.783    2.215
+recip_TSVR   -1.540      0.647   -2.380   0.017   -2.808   -0.272
+log_TSVR     -0.382      0.082   -4.683   0.000   -0.543   -0.222
+Group Var     0.148      0.063                                   
 ===============================================================
 
 
 ================================================================================
-INCONGRUENT - IRT Theta
+INCONGRUENT - IRT Theta (RE: ~1)
 ================================================================================
               Mixed Linear Model Regression Results
 =================================================================
 Model:            MixedLM Dependent Variable: z_theta_incongruent
 No. Observations: 400     Method:             ML                 
-No. Groups:       100     Scale:              0.6026             
-Min. group size:  4       Log-Likelihood:     -516.2417          
+No. Groups:       100     Scale:              0.5775             
+Min. group size:  4       Log-Likelihood:     -509.9487          
 Max. group size:  4       Converged:          Yes                
 Mean group size:  4.0                                            
 -------------------------------------------------------------------
                Coef.    Std.Err.     z      P>|z|   [0.025   0.975]
 -------------------------------------------------------------------
-const           0.415      0.077    5.365   0.000    0.263    0.566
-TSVR_hours     -0.006      0.001   -9.551   0.000   -0.008   -0.005
-Group Var       0.259      0.086                                   
+const           1.376      0.327    4.207   0.000    0.735    2.017
+recip_TSVR     -1.084      0.575   -1.885   0.059   -2.211    0.043
+log_TSVR       -0.365      0.073   -5.021   0.000   -0.507   -0.222
+Group Var       0.266      0.088                                   
 =================================================================

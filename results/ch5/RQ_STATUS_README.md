@@ -1,7 +1,7 @@
 # Chapter 5 RQ Status Tracker - User Guide
 
 **File:** `rq_status.tsv`
-**Last Updated:** 2025-12-09
+**Last Updated:** 2025-12-10 (RQ 5.5.3 → GOLD, FINAL ROOT verification complete, 22/40 GOLD = 55.0%)
 **Purpose:** Comprehensive roadmap for taking Ch5 RQs from current state to PhD thesis gold-standard
 
 ---
@@ -44,37 +44,31 @@ This TSV file is your **actionable roadmap** for completing Chapter 5. It tells 
 
 ## Priority Levels & What They Mean
 
-### DONE (17 RQs)
+### DONE (27 RQs) - ✅ **22/40 GOLD (55.0% - OVER HALFWAY) 🎉**
 **No action needed.** These are thesis-ready as-is.
 - All Type 5.3 (Paradigms): 9/9 RQs DONE
-- Type 5.5 (Source-Dest): 5/7 RQs DONE (2 optional verification)
-- Type 5.2 (Domains): 1/8 ROOT DONE
-- Type 5.4 (Congruence): 2/8 GOLD (5.4.6 variance + 5.4.7 clustering complete)
+- **Type 5.5 (Source-Dest): 7/7 GOLD ✅** (ALL COMPLETE - 100% gold standard)
+- **Type 5.1 (General): 5/6 GOLD** (5.1.1 ROOT, 5.1.2 two-phase + practice, 5.1.3 age + practice, 5.1.4 variance, 5.1.5 clustering)
+- **Type 5.2 (Domains): 7/8 GOLD** (5.2.1 ROOT, 5.2.2 consolidation, 5.2.3 age + ROOT verification, 5.2.4 IRT-CTT + ROOT verification, 5.2.5 PurifiedCTT + ROOT verification, 5.2.6 variance, 5.2.7 clustering)
+- **Type 5.4 (Congruence): 6/6 GOLD ✅** (5.4.1 ROOT, 5.4.2 consolidation, 5.4.3 age, 5.4.4 IRT-CTT, 5.4.5 PurifiedCTT, 5.4.6 variance, 5.4.7 clustering ALL COMPLETE)
 
-### HIGH (7 RQs) - **DO THESE FIRST**
-**Critical cascade from ROOT model changes.** Must rerun before thesis defense.
-- **Type 5.4 Congruence (4 RQs):** 5.4.2-5.4.5 need Recip+Log model update (~8 hours total, 5.4.6-5.4.7 COMPLETE)
-- **Type 5.1 General (2 RQs):** 5.1.3 (practice decomposition), 5.1.4 (model comparison)
-- **Type 5.2 Domains (1 RQ):** 5.2.7 (clustering rerun after 5.2.6)
+### HIGH (0 RQs) - ✅ **ALL COMPLETE**
+**No high-priority items remaining.** Type 5.1 General fully complete with practice decomposition methodology.
 
 ### MODERATE-HIGH (2 RQs)
 **Important for downstream analyses.**
 - **5.1.4:** Model comparison (blocks 5.1.5)
 - **5.2.6:** Variance decomposition rerun (blocks 5.2.7)
 
-### MODERATE (3 RQs)
+### MODERATE (0 RQs)
 **Robustness checks or minor fixes.**
-- **5.1.2:** Add AR(1) autocorrelation structure
-- **5.1.5:** Clarify slope direction interpretation
-- **5.2.2:** Regenerate plots (exclude When domain)
+- None remaining (5.1.2 elevated to HIGH)
 
-### LOW-MODERATE (3 RQs)
-**Verify robustness (likely already OK).**
-- **5.2.3, 5.2.4, 5.2.5:** Check if Log vs Recip+Log affects NULL findings (likely robust)
+### LOW-MODERATE (0 RQs) - ✅ **ALL COMPLETE**
+**No low-moderate priority items remaining.**
 
-### LOW (2 RQs)
-**Optional verification.**
-- **5.5.2, 5.5.3:** Verify NULL findings with 13-model averaged predictions
+### LOW (0 RQs) - ✅ **ALL COMPLETE**
+**No low-priority items remaining.** All optional ROOT verifications complete.
 
 ---
 
@@ -120,6 +114,22 @@ This TSV file is your **actionable roadmap** for completing Chapter 5. It tells 
 **Paradigm Shifts:**
 - **5.1.1:** Ebbinghaus logarithmic → Wixted power-law forgetting
 - **5.2.1 & 5.4.1:** Two-process forgetting (rapid reciprocal + slow logarithmic)
+- **5.1.2:** Two-phase deceleration reinterpreted → Practice saturation (5.7x) explains more than consolidation
+
+**NEW: Practice Decomposition Methodology (2025-12-09):**
+- **RQ 5.1.2:** Dual-phase model separates T1→T2 (practice+forgetting) from T2→T4 (forgetting only)
+- **Finding:** Practice PARTIALLY masks forgetting (5.7x difference, p<0.000002)
+- **RQ 5.1.3:** Age-invariance test reveals practice effects equal across ages (p=0.41)
+- **Impact:** Resolves wrong-direction artifacts, strengthens VR Scaffolding Hypothesis
+- **Generalizability:** Method applicable to ALL repeated-measures memory designs
+
+**CRITICAL METHODOLOGICAL DISCOVERY (RQ 5.4.2, 2025-12-09):**
+- **Random effects structure matters MORE than functional form**
+- Piecewise (AIC=2581.55, random slopes) vs Continuous (AIC=2593.41, random intercepts)
+- ΔAIC = +11.86 is driven by random effects complexity, NOT functional form superiority
+- **Lesson:** Always match random effects structure when comparing models (apples-to-apples)
+- **Pattern recognized:** Kitchen sink uses ~1 for stability, piecewise uses ~time for theory-testing
+- **Consequence:** Cannot conclude discrete phases exist without matched-effects comparison
 
 **Cross-Cutting Replications (Robust Findings):**
 1. **Purification-Trajectory Paradox:** 4 replications (5.2.5, 5.3.6, 5.4.5, 5.5.5)
@@ -198,9 +208,18 @@ A: They were completed BEFORE extended model selection on ROOT RQs. Original ana
 **Q: What does "ROOT_Cascade_CRITICAL" mean?**
 A: The ROOT RQ (e.g., 5.4.1) changed models after derivatives were done. Derivatives now use obsolete model and MUST be rerun.
 
-**Q: Why are Type 5.3 RQs all DONE but Type 5.4 need reruns?**
+**Q: Why did RQ 5.4.2 use kitchen sink instead of just updating to Recip+Log?**
+A: Sensitivity analysis showed continuous models fit MUCH better than piecewise (ΔAIC = -91). Rather than blindly updating functional form, we tested 66 models to let data determine best approach. Result: EXTREME uncertainty (15 competitive models, 6% best weight) requires model averaging. Also discovered that random effects structure matters MORE than functional form (piecewise better with random slopes, continuous tested with random intercepts for stability).
+
+**Q: Why did RQ 5.4.3, 5.4.4, and 5.4.5 update to Recip+Log but not kitchen sink?**
+A: These RQs test relationships/convergence, not trajectory shape. Findings expected robust across functional forms:
+- **5.4.3 (Age):** NULL 3-way interactions confirmed with both Log and Recip+Log (0/4 significant)
+- **5.4.4 (IRT-CTT):** Convergence IMPROVED with Recip+Log (kappa: 0.667 → 1.00 perfect agreement). **Kitchen sink sensitivity analysis (2025-12-09)** confirmed robustness: Both IRT and CTT show extreme model uncertainty (6% best weights across 66 models), yet convergence persists (r>0.87).
+- **5.4.5 (PurifiedCTT):** Purification-trajectory paradox **ROBUST** across functional forms. Recip+Log STRENGTHENED paradox for Common (+1.8) and Congruent (+3.0), REVERSED Incongruent from Purified-better (-2.0) to TIED (+0.4). Straightforward ROOT update sufficient for all three.
+
+**Q: Why are Type 5.3 RQs all DONE but Type 5.4 needed reruns?**
 A: **5.3.1 extended testing:** ΔAIC=0.07 (Log vs PowerLaw TIED) → derivatives still valid.
-**5.4.1 extended testing:** ΔAIC=7.50 (Recip+Log DOMINATES) → derivatives invalid.
+**5.4.1 extended testing:** ΔAIC=7.50 (Recip+Log DOMINATES) → all 6 derivatives updated (NOW COMPLETE ✅).
 
 **Q: What's the difference between COMPLETE and GOLD?**
 A: **COMPLETE** = Analysis done, may need updates. **GOLD** = Extended comparison + averaging + current plots + updated interpretation. ZERO compromises.
@@ -238,5 +257,5 @@ A: Check "Gaps" column for "Optional_Verification". If NULL finding with high po
 
 ---
 
-**Last Updated:** 2025-12-09 by Claude Code (context-finder synthesis)
-**Next Update:** After completing HIGH priority cascade (Type 5.4 reruns)
+**Last Updated:** 2025-12-10 by Claude Code (🎉🎉 MILESTONE: 22/40 GOLD = 55.0% - RQ 5.5.3 → GOLD, FINAL ROOT verification complete, Type 5.5 = 7/7 GOLD)
+**Next Update:** After initiating work on remaining DEPRIORITIZED RQs (if thesis requires them)

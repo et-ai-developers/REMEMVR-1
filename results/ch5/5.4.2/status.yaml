@@ -122,11 +122,13 @@ rq_inspect:
     '
 rq_results:
   status: success
-  timestamp: '2025-11-25T18:45:00'
+  timestamp: '2025-12-09T19:45:00'
   context_dump: |
-    Results validated for scientific plausibility (summary.md already exists)
-    4 anomalies flagged: 1 unexpected null (primary hypothesis p=0.938), 1 assumption violation (heteroscedasticity), 1 model specification (Lin+Log fits better), 1 incomplete sensitivity
-    Summary documented in results/summary.md - sleep consolidation hypothesis NOT supported
+    Extended model selection update (2025-12-09): Kitchen sink (66 models) reveals EXTREME functional form uncertainty
+    Best model: PowerLaw_01 (6.04% weight) - 15 competitive models (ΔAIC<2), effective N=13.96
+    NULL consolidation finding ROBUST across all 66 models (schema congruence does NOT moderate forgetting)
+    Model averaging MANDATORY (no single model >10% support) - predictions in step02c_averaged_predictions.csv
+    Effective power-law α=0.181 (if applicable), piecewise vs continuous comparison confounded by random effects mismatch
 analysis_steps:
   step00_extract_theta_from_rq5: success
   step01_prepare_piecewise_input: success

@@ -184,7 +184,7 @@ When context_finder returns ANALYSIS section for an RQ:
 - LMM: 5 candidate models compared via AIC (see §4.3.2 for model comparison procedures)
 
 **Results:**
-Logarithmic model best fit (AIC=873.71, weight=0.48), Lin+Log competitive (ΔAIC=0.84, weight=0.32). Memory declined 1.18 SD over 6 days (θ: 0.67→-0.51), with rapid early forgetting (Day 0-1: 0.55 SD) then asymptotic leveling (Day 3-6: 0.25 SD). Supports Ebbinghaus forgetting curve.
+[Narrative paragraph(s) integrating statistics naturally]
 
 [Continue with interpretation, cross-references to related RQs, theoretical implications]
 
@@ -435,13 +435,13 @@ When approaching 140k tokens:
 ## Success Criteria
 
 **Deliverables:**
-- [x] chapter_4_analysis.md: Polished methods chapter (consolidated, no redundancy)
-- [x] chapter_5_empirical.md: Polished results chapter (narrative, thematic organization)
-- [x] All 35 RQs documented with complete statistics
-- [x] Cross-references from Ch5 to Ch4 functional
-- [x] Figures embedded with publication-quality captions
-- [x] Null results reported with equal detail as significant results
-- [x] Writing quality: PhD thesis standard (formal, precise, cohesive)
+- [ ] chapter_4_analysis.md: Polished methods chapter (consolidated, no redundancy)
+- [ ] chapter_5_empirical.md: Polished results chapter (narrative, thematic organization)
+- [ ] All 35 RQs documented with complete statistics
+- [ ] Cross-references from Ch5 to Ch4 functional
+- [ ] Figures embedded with publication-quality captions
+- [ ] Null results reported with equal detail as significant results
+- [ ] Writing quality: PhD thesis standard (formal, precise, cohesive)
 
 **Verification:**
 - User can read Ch4 and understand ALL methods used in thesis

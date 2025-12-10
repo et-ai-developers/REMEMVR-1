@@ -1,10 +1,10 @@
 Model Fit Comparison - RQ 5.4.4
 ============================================================
 
-IRT Model: AIC = 2559.06, BIC = 2609.96
-CTT Model: AIC = -1069.30, BIC = -1018.40
+IRT Model: AIC = 2529.98, BIC = 2596.15
+CTT Model: AIC = -1077.45, BIC = -1011.28
 
-Delta AIC (IRT - CTT): 3628.36
+Delta AIC (IRT - CTT): 3607.43
 
 IMPORTANT CAVEAT:
 AIC and BIC are NOT directly comparable across models with different

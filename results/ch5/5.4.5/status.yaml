@@ -72,12 +72,14 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: 2025-12-03T22:00:00Z
+  timestamp: 2025-12-09T15:30:00Z
   context_dump: |
-    Results validated for scientific plausibility
-    3 anomalies flagged: 1 purification-trajectory paradox, 1 normality violation, 1 differential retention
-    Summary documented in results/summary.md
-    Key finding: Purified CTT converges better (r) BUT fits worse (AIC) for Common/Congruent
+    Results validated for scientific plausibility (UPDATED for Recip+Log two-process model)
+    3 anomalies flagged: 1 purification-trajectory paradox (ROBUST across functional forms), 1 normality violation, 1 differential retention
+    Summary documented in results/summary.md (Recip+Log comparison added)
+    Key finding: Purified CTT converges better (r) BUT fits worse (AIC) for Common/Congruent - paradox STRENGTHENS with Recip+Log
+    Two-process model: Rapid (recip_TSVR) + Slow (log_TSVR), all fell back to ~1 (random intercepts only)
+    Incongruent dimension switched from Purified-better (-2.0) to TIED (+0.4)
 
 analysis_steps:
   step00_verify_dependencies: success
@@ -87,5 +89,5 @@ analysis_steps:
   step04_reliability_assessment: success
   step05_correlation_analysis: success
   step06_standardize_scores: success
-  step07_fit_lmms: success
-  step08_prepare_plot_data: success
+  step07_fit_lmms: success (updated 2025-12-09 for Recip+Log)
+  step08_prepare_plot_data: success (regenerated 2025-12-09 for Recip+Log)

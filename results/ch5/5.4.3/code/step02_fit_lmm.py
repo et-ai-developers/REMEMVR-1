@@ -6,9 +6,9 @@ RQ 5.4.3 - Step 02: Fit LMM with 3-Way Age x Congruence x Time Interaction
 
 PURPOSE:
     Fit Linear Mixed Model with 3-way Age x Congruence x Time interaction.
-    Random intercepts and slopes for log_TSVR by participant.
-    CRITICAL: RQ 5.4.1 established Log model as best fit (AIC weight=100%)
-    Random slope must be on log_TSVR, NOT linear TSVR_hours.
+    Random intercepts and slopes for recip_TSVR by participant.
+    UPDATED: RQ 5.4.1 ROOT established Recip+Log as two-process forgetting model
+    (rapid 1/(t+1) + slow log(t+1)). Random slope on recip_TSVR per ROOT spec.
 
 INPUTS:
     - data/step01_lmm_input.csv (1200 rows, long format)
@@ -16,16 +16,16 @@ INPUTS:
 OUTPUTS:
     - data/step02_lmm_model.pkl (pickled model object)
     - data/step02_lmm_model_summary.txt (model summary text)
-    - data/step02_fixed_effects.csv (18 fixed effects terms)
+    - data/step02_fixed_effects.csv (24 fixed effects terms, including recip_TSVR)
 
 MODEL FORMULA:
-    theta ~ TSVR_hours + log_TSVR + Age_c + C(congruence, Treatment('Common')) +
-            Age_c:TSVR_hours + Age_c:log_TSVR +
-            C(congruence):TSVR_hours + C(congruence):log_TSVR +
+    theta ~ recip_TSVR + log_TSVR + Age_c + C(congruence, Treatment('Common')) +
+            Age_c:recip_TSVR + Age_c:log_TSVR +
+            C(congruence):recip_TSVR + C(congruence):log_TSVR +
             Age_c:C(congruence) +
-            Age_c:C(congruence):TSVR_hours + Age_c:C(congruence):log_TSVR
+            Age_c:C(congruence):recip_TSVR + Age_c:C(congruence):log_TSVR
 
-    Random: ~log_TSVR | UID (random intercepts and slopes per RQ 5.4.1)
+    Random: ~recip_TSVR | UID (random intercepts and slopes per RQ 5.4.1 ROOT)
 
 ===============================================================================
 """
@@ -115,28 +115,29 @@ def main():
     # Formula: Full 3-way interaction model
     # Using explicit dummy variables for clarity
     formula = """
-    theta ~ 1 + TSVR_hours + log_TSVR + Age_c +
+    theta ~ 1 + recip_TSVR + log_TSVR + Age_c +
             Congruent + Incongruent +
-            Age_c:TSVR_hours + Age_c:log_TSVR +
-            Congruent:TSVR_hours + Congruent:log_TSVR +
-            Incongruent:TSVR_hours + Incongruent:log_TSVR +
+            Age_c:recip_TSVR + Age_c:log_TSVR +
+            Congruent:recip_TSVR + Congruent:log_TSVR +
+            Incongruent:recip_TSVR + Incongruent:log_TSVR +
             Age_c:Congruent + Age_c:Incongruent +
-            Age_c:Congruent:TSVR_hours + Age_c:Congruent:log_TSVR +
-            Age_c:Incongruent:TSVR_hours + Age_c:Incongruent:log_TSVR
+            Age_c:Congruent:recip_TSVR + Age_c:Congruent:log_TSVR +
+            Age_c:Incongruent:recip_TSVR + Age_c:Incongruent:log_TSVR
     """.strip().replace('\n', ' ')
 
-    log(f"[INFO] Model formula (fixed effects):")
-    log(f"  theta ~ 1 + TSVR_hours + log_TSVR + Age_c + Congruent + Incongruent")
-    log(f"        + Age_c:TSVR_hours + Age_c:log_TSVR")
-    log(f"        + Congruent:TSVR_hours + Congruent:log_TSVR")
-    log(f"        + Incongruent:TSVR_hours + Incongruent:log_TSVR")
+    log(f"[INFO] Model formula (fixed effects - Recip+Log two-process):")
+    log(f"  theta ~ 1 + recip_TSVR + log_TSVR + Age_c + Congruent + Incongruent")
+    log(f"        + Age_c:recip_TSVR + Age_c:log_TSVR")
+    log(f"        + Congruent:recip_TSVR + Congruent:log_TSVR")
+    log(f"        + Incongruent:recip_TSVR + Incongruent:log_TSVR")
     log(f"        + Age_c:Congruent + Age_c:Incongruent")
-    log(f"        + Age_c:Congruent:TSVR_hours + Age_c:Congruent:log_TSVR")
-    log(f"        + Age_c:Incongruent:TSVR_hours + Age_c:Incongruent:log_TSVR")
+    log(f"        + Age_c:Congruent:recip_TSVR + Age_c:Congruent:log_TSVR")
+    log(f"        + Age_c:Incongruent:recip_TSVR + Age_c:Incongruent:log_TSVR")
     log("")
-    # CRITICAL: RQ 5.4.1 established Log model as best fit (AIC weight=100%)
-    # Random slope must be on log_TSVR, NOT linear TSVR_hours
-    log(f"[INFO] Random effects: ~log_TSVR | UID (per RQ 5.4.1 best model)")
+    # UPDATED: RQ 5.4.1 ROOT established Recip+Log as two-process forgetting model
+    # Random slope on recip_TSVR (rapid component)
+    log(f"[INFO] Random effects: ~recip_TSVR | UID (per RQ 5.4.1 ROOT Recip+Log model)")
+    log(f"[INFO] Two-process forgetting: rapid 1/(t+1) + slow log(t+1)")
     log("")
 
     log("[INFO] Fitting model (this may take a moment)...")
@@ -147,11 +148,11 @@ def main():
             formula=formula,
             data=lmm_input,
             groups=lmm_input['UID'],
-            re_formula='~log_TSVR'  # CORRECTED: log_TSVR not TSVR_hours (per 5.4.1)
+            re_formula='~recip_TSVR'  # UPDATED: recip_TSVR for two-process forgetting (per 5.4.1 ROOT)
         )
         result = model.fit(method='lbfgs', maxiter=500)
-        random_structure = "random intercepts + slopes for log_TSVR (per 5.4.1)"
-        log(f"[SUCCESS] Model fitted with random slopes on log_TSVR")
+        random_structure = "random intercepts + slopes for recip_TSVR (per 5.4.1 ROOT)"
+        log(f"[SUCCESS] Model fitted with random slopes on recip_TSVR (two-process forgetting)")
 
     except Exception as e:
         log(f"[WARNING] Random slopes failed: {e}")

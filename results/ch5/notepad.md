@@ -13,70 +13,69 @@
 ## Progress Tracker
 
 ### Chapter 4 (Analysis)
-- [x] File created with structure (chapter_4_analysis.md)
-- [x] §4.2.2 Item purification (fully written)
-- [x] §4.3.2 Model comparison (fully written)
-- [x] §4.4.1 Effect sizes (fully written)
-- [x] §4.5.1 Bonferroni correction (fully written)
-- [x] §4.6 Missing data (fully written)
-- [TBD] §4.1 Overview (write after all RQs processed)
-- [TBD] §4.2.1 GRM specification
-- [TBD] §4.2.3 Dimensionality
-- [TBD] §4.3.1 LMM specification
-- [TBD] §4.3.3 Assumptions
-- [TBD] §4.4.2 LMM effect sizes
-- [TBD] §4.5.2 FDR
-- [TBD] §4.7 Software versions (extract from RQ logs)
+- [x] §4.2.1 GRM specification written (RQ 5.1.1)
+- [x] §4.2.2 Item purification protocol written (RQ 5.1.1)
+- [x] §4.3.1 LMM specification + piecewise LMM written (RQ 5.1.1, 5.1.2)
+- [x] §4.3.2 Model comparison procedures written (RQ 5.1.1)
+- [x] §4.3.3 Assumption checking written (RQ 5.1.2)
+- [x] §4.5.1 Bonferroni correction written (RQ 5.1.2)
+- [ ] §4.2.3 Dimensionality (pending)
+- [ ] §4.4 Effect sizes (pending)
+- [ ] §4.5.2 FDR (pending)
+- [ ] §4.6 Missing data (pending)
+- [ ] §4.7 Software (pending - extract from logs)
 
 ### Chapter 5 (Empirical Results)
-- [x] File created with structure (chapter_5_empirical.md)
-- [x] §5.1.1 COMPLETE (functional form, verified 2025-12-08)
-- [x] §5.1.2 COMPLETE (two-phase forgetting, 2025-12-08)
-- [x] §5.1.3 COMPLETE (age effects null, 2025-12-08)
-- [x] §5.1.4 COMPLETE (ICC slope 0.05%, 2025-12-08)
-- [x] §5.1.5 COMPLETE (K=2 clusters, 2025-12-08)
-**Completed RQs:** 5.1.1-5.1.5, 5.2.1-5.2.7 ✓
-**In Progress:** None
-**Next:** 5.3.1 (9 RQs in 5.3, 5.1.6-5.1.7 not executed)
-**Remaining:** 5.3.X-5.5.X (~20 RQs estimated)
+- [x] 5.1.1-5 COMPLETE (§5.1 done)
+- [x] 5.2.1 domain trajectories, When floor
+- [x] 5.2.2 domain consolidation NULL (3-way p=0.671, d<0.06)
+- [x] 5.2.3 domain age NULL (both 3-way p>0.4, robust across Recip+Log ΔAIC=-83)
+- [x] 5.2.4 IRT-CTT convergence (r>0.90, but 68× sensitivity difference, func form matters)
+- [x] 5.2.5 CTT purif paradox (static ↑ r, dynamic FAILS convergence Recip+Log, When 81% loss)
+- [x] 5.2.6 Domain ICC (What 51.8%, Where 53.1%, Fan Effect r=-0.316, r_intercept=0.961)
+- [x] 5.2.7 K=4 clusters (47% improvers, C2 domain dissociation, stable-fuzzy Jaccard=0.871/Silh=0.352)
+- [x] 5.3.1 Paradigm trajectories (Recog FASTEST forget paradox, β=-0.127 p=.013, floor 32-37%)
+- **Next:** 5.3.2-5.3.9 (8 RQs: §5.3 Paradigms)
+- **Progress:** 13/35 RQs (37%), §5.2 DONE, §5.3 intro+5.3.1 done
+- **Token:** 119k/200k (60%), ~4-5 RQs remain this session, STOP ~140k
 
 ---
 
 ## Analysis Method Catalog
 
-### GRM (Graded Response Model)
-**RQs using:** 5.1.1, [add as discovered]
-**Key specs:** 2-pass purification, a≥0.4, |b|≤3.0
-**Chapter 4 location:** §4.X.X (TBD)
+**GRM Calibration:**
+- 2-pass purif (a≥0.4,|b|≤3): 5.1.1-3
+- Omnibus "All": 5.1.1-3
 
-### LMM (Linear Mixed Model)
-**RQs using:** 5.1.1, [add as discovered]
-**Key specs:** Random intercepts by UID, REML=False for AIC comparison
-**Chapter 4 location:** §4.X.X (TBD)
+**LMM Specs:**
+- Random intercepts: 5.1.1-3
+- Random slopes (time): 5.1.3
+- Model comparison AIC: 5.1.1-3
+- Model avg (w<0.30): 5.1.1, 5.1.3
+- Piecewise (seg×time): 5.1.2
+- Bonf correction: 5.1.2-3
+- Assumption checks: 5.1.2
 
 ---
 
 ## Cross-RQ Patterns
 
-### Pattern: Temporal items low discrimination
-**RQs:** 5.1.1 (73% excluded items = When domain)
-**Implication:** When domain harder to measure in VR
-**Action:** Note in domain-specific RQs (5.2.X)
+[Will be populated as patterns emerge during analysis]
 
 ---
 
 ## Blockers / Questions
 
-[None yet]
+[None yet - fresh start]
 
 ---
 
 ## Session Log (Last 5 Only)
 
-**Session 2025-12-08:**
-- Redesigned workflow: 2 parallel chapters (Ch4 analysis, Ch5 empirical)
-- Created notepad.md
-- Rewriting write.md for stateless execution
+**Session 2025-12-10:**
+- CLEARED all chapter documents to start writing process from scratch
+- Rerun analyses complete for most Ch5 RQs
+- Ready to begin systematic RQ processing
 
 ---
 

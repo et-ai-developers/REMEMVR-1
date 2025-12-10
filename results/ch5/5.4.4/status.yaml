@@ -79,8 +79,22 @@ rq_plots:
 
 rq_results:
   status: success
-  timestamp: 2025-12-03T20:15:00
+  timestamp: 2025-12-09T20:38:00Z
   context_dump: |
-    Results validated for scientific plausibility
-    1 anomaly flagged: CTT fit dominance (delta-AIC=-3628, see summary.md Section 3)
-    Summary documented in results/summary.md
+    Results validated for scientific plausibility (Recip+Log two-process model)
+    EXCEPTIONAL CONVERGENCE: r=0.87-0.91 (all >0.70), kappa=1.00 (PERFECT agreement, upgraded from 0.667)
+    Summary updated in results/summary.md (Recip+Log two-process forgetting interpretation)
+    Two-process model: Rapid (recip_TSVR) + Slow (log_TSVR), ~recip_TSVR random slopes
+    1 anomaly flagged: CTT fit dominance (delta-AIC=-3607, persists with Recip+Log)
+    Convergence ROBUST across functional forms (Log → Recip+Log maintained all findings)
+
+analysis_steps:
+  step00_load_dependencies: success
+  step01_compute_ctt_scores: success
+  step02_compute_correlations: success
+  step03_fit_parallel_lmms: success (updated 2025-12-09 for Recip+Log)
+  step05_compare_fixed_effects: success (updated 2025-12-09 for Recip+Log, kappa=1.00)
+  step06_compare_model_fit: success (updated 2025-12-09 for Recip+Log)
+  step07_prepare_scatterplot_data: success
+  step08_prepare_trajectory_data: success
+
