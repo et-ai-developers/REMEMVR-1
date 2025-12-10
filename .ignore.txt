@@ -1,1 +1,1 @@
-Read these 5 files: 1. results/ch5/write.md (instructions) 2. results/ch5/notepad.md (progress) 3. thesis/methods.md (context) 4. results/ch5/chapter_empirical.md 5. results/ch5/chapter_analysis.md Then continue processing RQs per write.md workflow.
+Read these 5 files: 1. results/ch5/write.md (instructions) 2. results/ch5/notepad.md (progress) 3. thesis/methods.md (context) 4. results/ch5/chapter_5_empirical.md 5. results/ch5/chapter_4_analysis.md Then continue processing RQs per write.md workflow.
