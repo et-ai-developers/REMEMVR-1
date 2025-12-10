@@ -47,9 +47,11 @@
 - [x] 5.4.2 Cong×Consolidation NULL (3-way p=.938, Early 2.6-3.2× faster, no schema modulation)
 - [x] 5.4.3 Age×Cong NULL (4 three-way p_bonf>.025, rapid/slow processes age-invariant)
 - [x] 5.4.4 IRT-CTT PERFECT convergence (κ=1.000, r=0.87-0.91, ΔAIC=-3607 scale artifact)
-- **Next:** RQs 5.4.5-5.4.7, §5.5 Sleep RQs (remaining 10 RQs)
-- **Progress:** 25/35 RQs (71%), **§5.1-5.3 DONE**, §5.4 started (4/7), §5.5 pending
-- **Token:** 105k/200k (52%), user OK with high tokens, CONTINUE until ~180k or session end
+- [x] 5.4.5 Purif paradox (Δr=+0.096-0.108 Cong/Incong, ΔAIC=+19-38 Full better, cross-sect≠longit)
+- [x] 5.4.6 Schema ICC REVERSED (Common 14.8% > Cong 7.8% > Incong 3.6%, schema compresses traits)
+- **Next:** RQ 5.4.7, §5.5 Sleep RQs (remaining 8 RQs)
+- **Progress:** 27/35 RQs (77%), **§5.1-5.3 DONE**, §5.4 started (6/7), §5.5 pending
+- **Token:** 128k/200k (64%), user OK with high tokens, CONTINUE until ~180k or session end
 
 ---
 
