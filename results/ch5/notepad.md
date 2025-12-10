@@ -35,9 +35,10 @@
 - [x] 5.2.6 Domain ICC (What 51.8%, Where 53.1%, Fan Effect r=-0.316, r_intercept=0.961)
 - [x] 5.2.7 K=4 clusters (47% improvers, C2 domain dissociation, stable-fuzzy Jaccard=0.871/Silh=0.352)
 - [x] 5.3.1 Paradigm trajectories (Recog FASTEST forget paradox, β=-0.127 p=.013, floor 32-37%)
-- **Next:** 5.3.2-5.3.9 (8 RQs: §5.3 Paradigms)
-- **Progress:** 13/35 RQs (37%), §5.2 DONE, §5.3 intro+5.3.1 done
-- **Token:** 119k/200k (60%), ~4-5 RQs remain this session, STOP ~140k
+- [x] 5.3.2 Linear trend REVERSED (Free slowest, Recog fastest, β=-0.127 p=.013 unc / p=.200 Bonf)
+- **Next:** 5.3.3-5.3.9 (7 RQs: §5.3 Paradigms)
+- **Progress:** 14/35 RQs (40%), §5.2 DONE, §5.3 intro+5.3.1-2 done
+- **Token:** 73k/200k (37%), ~10-12 RQs remain this session, STOP ~140k
 
 ---
 
