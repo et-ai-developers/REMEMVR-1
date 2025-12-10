@@ -37,9 +37,9 @@ NO ITEMS EXCLUDED (all items passed thresholds)
 RETAINED ITEMS SUMMARY
 ----------------------------------------------------------------------
   - Count: 72 items
-  - Discrimination (a) range: [1.817, 5.579]
-  - b_mean range: [0.075, 1.260]
-  - |b_mean| range: [0.000, 1.260]
+  - Discrimination (a) range: [1.742, 5.350]
+  - b_mean range: [0.091, 1.338]
+  - |b_mean| range: [0.000, 1.338]
 
 ======================================================================
 END OF REPORT

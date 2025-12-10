@@ -21,17 +21,6 @@
 
 [SAVED] step06_post_hoc_contrasts.csv (0 rows - empty as expected)
 
-[SAVED] step06_contrast_decision.txt
 
-============================================================
-[VALIDATION] Checking outputs...
-============================================================
-
-[PASS] Required files exist
-[PASS] Contrasts CSV has correct columns
-[PASS] Empty contrasts file (expected for non-significant interaction)
-
-============================================================
-[SUCCESS] Step 06 Complete
-============================================================
+[ERROR] [Errno 32] Broken pipe
 

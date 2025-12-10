@@ -36,9 +36,20 @@
 - [x] 5.2.7 K=4 clusters (47% improvers, C2 domain dissociation, stable-fuzzy Jaccard=0.871/Silh=0.352)
 - [x] 5.3.1 Paradigm trajectories (Recog FASTEST forget paradox, β=-0.127 p=.013, floor 32-37%)
 - [x] 5.3.2 Linear trend REVERSED (Free slowest, Recog fastest, β=-0.127 p=.013 unc / p=.200 Bonf)
-- **Next:** 5.3.3-5.3.9 (7 RQs: §5.3 Paradigms)
-- **Progress:** 14/35 RQs (40%), §5.2 DONE, §5.3 intro+5.3.1-2 done
-- **Token:** 73k/200k (37%), ~10-12 RQs remain this session, STOP ~140k
+- [x] 5.3.3 Consolidation window NULL paradigm effect (Early 3-4× faster, but NO paradigm diffs p>.59)
+- [x] 5.3.4 Age×Paradigm NULL (parallel trajectories, all 3-way p>.71, age=-0.012 marginal p=.116)
+- [x] 5.3.5 IRT-CTT convergence STRONG (r=0.84-0.88, kappa=0.667, 83.3% agree, robust)
+- [x] 5.3.6 Purif paradox REPLICATED (r↑ Δ+0.098 Free, AIC↓ ΔAIC=-33.4, cross-sect≠longit)
+- [x] 5.3.7 ICC slopes NOT trait-like (ICC_simple=0.00-0.02, ICC_cond=0.41-0.46, baseline drives outcomes)
+- [x] 5.3.8 Paradigm clustering K=3 WEAK (Silh=0.367, Jacc=0.714, NO selective profiles, baseline-driven)
+- [x] 5.3.9 Paradigm×Difficulty NULL (3-way p_bonf=1.00, parallel traj easy/hard all paradigms)
+- [x] 5.4.1 Schema congruence NULL (Cong×Time p>.44, 16,630× overconfidence, H'=13.96 highest diversity)
+- [x] 5.4.2 Cong×Consolidation NULL (3-way p=.938, Early 2.6-3.2× faster, no schema modulation)
+- [x] 5.4.3 Age×Cong NULL (4 three-way p_bonf>.025, rapid/slow processes age-invariant)
+- [x] 5.4.4 IRT-CTT PERFECT convergence (κ=1.000, r=0.87-0.91, ΔAIC=-3607 scale artifact)
+- **Next:** RQs 5.4.5-5.4.7, §5.5 Sleep RQs (remaining 10 RQs)
+- **Progress:** 25/35 RQs (71%), **§5.1-5.3 DONE**, §5.4 started (4/7), §5.5 pending
+- **Token:** 105k/200k (52%), user OK with high tokens, CONTINUE until ~180k or session end
 
 ---
 

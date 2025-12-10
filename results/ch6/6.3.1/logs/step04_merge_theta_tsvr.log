@@ -51,3 +51,34 @@
 [INFO]   When: N=400, theta mean=-0.761, SD=0.553
 [INFO]   Where: N=400, theta mean=-0.786, SD=0.546
 [SUCCESS] Step 4 complete - LMM input ready with TSVR time variable
+[START] Step 4: Merge Theta with TSVR Time Data
+[LOAD] Loading Pass 2 theta estimates (wide format)...
+[LOADED] step03_pass2_theta.csv (400 rows, 4 cols)
+[INFO] Theta columns: ['composite_ID', 'theta_What', 'theta_Where', 'theta_When']
+[LOAD] Loading TSVR time mapping...
+[LOADED] step00_tsvr_mapping.csv (400 rows, 3 cols)
+[INFO] TSVR columns: ['composite_ID', 'TSVR_hours', 'test']
+[MERGE] Merging theta with TSVR on composite_ID (left join)...
+[MERGED] Result: 400 rows, 6 cols
+[VALIDATION] 100% merge rate - all 400 theta observations matched with TSVR
+[RESHAPE] Melting wide theta format to long format...
+[RESHAPED] Result: 1200 rows (expected: 1200)
+[INFO] Domains: ['What', 'Where', 'When']
+[PARSE] Extracting UID from composite_ID...
+[INFO] Extracted 100 unique UIDs
+[TRANSFORM] Adding time transformations for LMM...
+[INFO] log_TSVR range: [0.693, 5.510]
+[SAVE] Saving LMM-ready input to step04_lmm_input.csv...
+[SAVED] step04_lmm_input.csv (1200 rows, 7 cols)
+[VALIDATION] Running inline validation checks...
+[VALIDATION] [PASS] Row count: 1200 rows = 400 theta rows * 3 domains
+[VALIDATION] [WARN] TSVR_hours range: [1.0, 246.2] exceeds expected 0-168 but acceptable
+[VALIDATION] [PASS] log_TSVR range: [0.693, 5.510] (expected max ~5.13)
+[VALIDATION] [PASS] No missing TSVR_hours (0 NaN values)
+[VALIDATION] [PASS] UID parsing successful (100 unique UIDs, sample: ['A010', 'A011', 'A012', 'A013', 'A014'])
+[VALIDATION] [PASS] Domains correct: ['What', 'When', 'Where']
+[INFO] Summary statistics by domain:
+[INFO]   What: N=400, theta mean=-0.753, SD=0.547
+[INFO]   When: N=400, theta mean=-0.761, SD=0.553
+[INFO]   Where: N=400, theta mean=-0.786, SD=0.546
+[SUCCESS] Step 4 complete - LMM input ready with TSVR time variable

@@ -1,0 +1,31 @@
+================================================================================
+BEST MODEL SUMMARY - Kitchen Sink Model Selection
+================================================================================
+
+Best Model: Linear
+AIC: 298.37
+Akaike Weight: 0.5000 (50.0%)
+Uncertainty: Moderate
+Interpretation: 30-60% probability - substantial uncertainty
+
+Log Model (Benchmark):
+  Rank: #45
+  AIC: 729.69
+  ΔAIC: 431.32
+  Weight: 0.0000 (0.0%)
+
+================================================================================
+Top 10 Models:
+================================================================================
+
+         model_name        AIC  delta_AIC  akaike_weight  cumulative_weight
+             Linear 298.370583   0.000000   5.000000e-01                0.5
+  Exponential_proxy 298.370583   0.000000   5.000000e-01                1.0
+Quad+Log+SquareRoot 717.686372 419.315789   4.422861e-92                1.0
+ PowerLaw+Recip+Log 719.257529 420.886946   2.016188e-92                1.0
+           Ultimate 719.740272 421.369689   1.583816e-92                1.0
+            Sin+Log 720.025515 421.654932   1.373299e-92                1.0
+SquareRoot+PowerLaw 720.571238 422.200655   1.045352e-92                1.0
+         FourthRoot 721.939667 423.569084   5.273660e-93                1.0
+           Root_033 722.395423 424.024840   4.199000e-93                1.0
+           CubeRoot 722.397639 424.027056   4.194350e-93                1.0

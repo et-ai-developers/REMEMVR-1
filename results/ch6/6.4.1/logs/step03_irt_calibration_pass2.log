@@ -76,3 +76,36 @@ IRT model fitting complete.
 [SUMMARY] Active factors: ['IFR', 'ICR', 'IRE']
 [NEXT] These FINAL theta estimates ready for downstream LMM analyses
 [NOTE] If mc_samples=1 used, re-run with mc_samples=100 for scoring for production quality
+[START] Step 03: IRT Calibration Pass 2 (3-factor GRM on purified items only)
+[CONFIG] Model: 3-factor GRM, 5 categories
+[CONFIG] Fitting: batch_size=2048, mc_samples=1 (FAST mode), iw_samples=100
+[CONFIG] Scoring: mc_samples=100 (MINIMUM mode), iw_samples=100
+[NOTE] This is MINIMUM mode - for production, set mc_samples=100 for scoring
+[LOAD] Loading input data...
+[LOADED] step00_irt_input.csv (400 rows, 73 cols)
+[LOADED] step02_purified_items.csv (72 items retained)
+[INFO] Purified items count: 72
+[LOADED] step00_q_matrix.csv (72 items)
+[FILTER] Q-matrix filtered to 72 purified items
+[VALIDATION] All purified items have Q-matrix entries
+[FILTER] Filtering wide data to purified items...
+[FILTER] Wide data filtered: 400 rows x 73 cols (72 purified items)
+[VALIDATION] All 72 purified items found in wide data
+[TRANSFORM] Converting wide format to long format...
+[TRANSFORM] Long format created: 28800 observations (400 participants x 72 items)
+[TRANSFORM] Creating factor groups from Q-matrix...
+[INFO] IFR: 24 items
+[INFO] ICR: 24 items
+[INFO] IRE: 24 items
+[INFO] All 3 factors active for Pass 2: ['IFR', 'ICR', 'IRE']
+[ANALYSIS] Preparing IRT tensors via prepare_irt_input_from_long...
+[DONE] Tensors prepared:
+  - response_matrix: torch.Size([400, 72]) (participants x items)
+  - missing_mask: torch.Size([400, 72])
+  - Q_matrix: torch.Size([72, 3]) (items x factors)
+  - composite_ids: 400 IDs
+  - item_list: 72 items
+[ANALYSIS] Configuring 3-factor GRM model via configure_irt_model...
+[DONE] Model configured: 72 items, 3 factors, 5 categories, correlated=True
+[ANALYSIS] Fitting GRM model via fit_irt_grm...
+[CRITICAL] Using mc_samples=1 during fit (avoids timeout per RQ 6.1.1)
