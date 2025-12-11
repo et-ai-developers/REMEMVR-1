@@ -487,6 +487,12 @@
 
 ### proactive_context_finding_before_execution
 **Description:** Proactive context-finding strategy using context_finder agent BEFORE RQ execution to gather historical patterns, identify bug patterns from past RQs, apply fixes proactively, reduce debugging time by referencing known solutions. RQ 6.4.1 validation: searched archives before coding, found 8 relevant topics (98-70% relevance, all current v4.X), identified bug patterns from RQ 6.1.1 and 6.3.1, applied fixes during debugging iterations, reduced time vs reactive approach. Strategy follows CLAUDE.md Proactive Context-Finding Workflow. Recommended for all future RQs with similar structure or complex statistical workflows. Session 2025-12-07 19:45.
+
+### ch6_validation_workflow_complete_four_root_rqs_thesis_ready
+**Description:** Complete record of validation workflow execution for RQs 6.3.1, 6.4.1, 6.5.1, 6.8.1 (16 agents, 100% success). Resolved 4 critical workflow issues: status.yaml staleness (code-copying bypasses status updates), plots.py import error (PYTHONPATH required), rq_results PNG blocking (execute plots.py first), step08 deferred documentation. Scientific findings: confidence-accuracy divergence (When domain p=0.020, Source/Dest NULL vs accuracy significant), convergence (Paradigm NULL, Schema NULL). Common patterns: 100% item retention (GRM ordinal better psychometrics), Day 6 floor effects (2-3% probability), GRM-2PL transformation mismatch (theta valid, probability misleading). All lessons documented in execute.md. Session 2025-12-10 17:00.
+
+### rq_6.1.2_random_slopes_corrected_thesis_methodology_fixed
+**Description:** RQ 6.1.2 random slopes correction from random intercept only to proper `(1 + TSVR_hours | UID)` specification. Original implementation dropped random slopes due to tool bugs. Created `simple_steps_02_to_06_CORRECTED.py` with correct `re_formula` specifications (Quadratic: ~TSVR_hours, Piecewise: ~Time_Early + Time_Late). Verified 3 variance components (intercept, covariance, slope). Scientific conclusion unchanged (INCONCLUSIVE 1/3 tests for two-phase pattern), but methodology now PhD-correct. Novel finding: confidence plateaus after Day 3 vs accuracy continues declining (confidence-accuracy temporal dissociation). Lesson: verify model summary shows multiple variance components, boundary warnings acceptable if convergence successful. Session 2025-12-11 00:30.
 ---
 
 ## How to Use This Index
