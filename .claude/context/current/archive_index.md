@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-11 21:25 (context-manager curation)
+**Last Updated:** 2025-12-11 22:15 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -551,3 +551,8 @@
 
 ### ch6_progress_12_of_31_thesis_ready_39_percent
 **Description:** Chapter 6 progress snapshot after RQ 6.2.3 completion (2025-12-11 20:50). 12/31 RQs thesis-ready (39%): Type 6.1 Confidence complete (5/5), Type 6.2 Calibration (3/5), plus 4 other ROOT RQs (6.3.1, 6.4.1, 6.5.1, 6.8.1). 2 remaining ROOT RQs (6.6.1, 6.7.2). RQ 6.2.4 now unlocked (depends on 6.2.1 + 6.2.3). Major findings: age-invariant pattern (6.1.3), 824× variance ratio (6.1.4), confidence-accuracy phenotypes (6.1.5), calibration trilogy complete (6.2.1-6.2.3). Infrastructure: 30/31 specification agents successful (97%, one bypassed). Full validation workflow operational. NOTE: Superseded by later progress (13/31 at 21:00, 14/31 at 21:25).
+### rq_6.2.4_complete_dunning_kruger_not_sig_thesis_ready
+**Description:** RQ 6.2.4 Calibration by Accuracy Level complete execution (2025-12-11 21:00). Dunning-Kruger effect NOT supported (low performers overconfident trend mean=+0.14 but p_bonf=0.797). METACOGNITIVE DISSOCIATION FOUND: Resolution (gamma) performance-DEPENDENT (ρ=0.46***), Calibration (bias) performance-INDEPENDENT (ρ=-0.10, p=0.63). Tertile comparison: gamma significant (H=21.16, p<0.001), calibration not (H=1.74, p=0.418). Supports Fleming & Lau (2014) two-dimensional metacognition model. Type 2 sensitivity ≠ Type 2 bias. Clinical implication: Memory improvement won't fix calibration bias (requires confidence regulation training). Completes 4/5 Calibration series. Full validation passed (0 critical/high). Total 13/31 Ch6 RQs thesis-ready (42%).
+
+### rq_6.2.5_complete_age_invariant_thesis_ready
+**Description:** RQ 6.2.5 Calibration Age Effects complete execution (2025-12-11 21:25). STRONGEST NULL FINDING IN THESIS: Age × Time interaction p=0.735 (essentially zero effect β=0.00002). Extends universal age-invariant pattern from memory accuracy (Ch5 4 RQs) to metacognitive calibration (Ch6). Pattern consistency: 5/5 RQs show NULL age × time interaction (5.1.3 p=0.323, 5.2.3 p=0.412, 5.3.4 p=0.567, 5.4.3 p=0.389, 6.2.5 p=0.735). VR ecological encoding creates parallel aging effects for both memory and metacognition systems. Age tertiles show identical calibration trajectories. Clinical implication: No age-specific calibration norms needed. COMPLETES Type 6.2 Calibration Series (5/5 RQs thesis-ready). Total 14/31 Ch6 RQs complete (45%).
