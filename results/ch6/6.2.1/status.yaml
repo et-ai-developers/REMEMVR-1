@@ -5,25 +5,31 @@ rq_stats: success
 rq_planner: success
 rq_tools: success
 rq_analysis: success
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
-rq_validate: pending
+g_code: success
+rq_inspect: success
+rq_plots: success
+rq_results: success
+rq_validate: success
 
 # Context Dumps
 rq_tools_context: "4 analysis + 4 validation tools cataloged for calibration trajectory analysis"
 rq_analysis_context: "7 steps specified with validation (theta merge → calibration metrics → LMM trajectory)"
+g_code_context: "Steps 00a-07 executed successfully. Time effect SIGNIFICANT (p_LRT=0.004). Calibration worsens over time."
+rq_inspect_context: "Validated all 10 steps. All 4 layers PASS. Minor: se_accuracy=NaN (not used). Time effect p<0.004."
+rq_results_context: |
+  Results validated for scientific plausibility
+  Plausibility acceptable (0 anomalies flagged)
+  Summary documented in results/summary.md
 
 # Analysis Steps
 analysis_steps:
-  step00a_load_accuracy_theta: pending
-  step00b_load_confidence_theta: pending
-  step00c_load_tsvr_mapping: pending
-  step01_merge_theta: pending
-  step02_compute_calibration: pending
-  step03_compute_brier: pending
-  step04_compute_ece: pending
-  step05_fit_lmm: pending
-  step06_test_time_effect: pending
-  step07_prepare_trajectory_plot: pending
+  step00a_load_accuracy_theta: success
+  step00b_load_confidence_theta: success
+  step00c_load_tsvr_mapping: success
+  step01_merge_theta: success
+  step02_compute_calibration: success
+  step03_compute_brier: success
+  step04_compute_ece: success
+  step05_fit_lmm: success
+  step06_test_time_effect: success
+  step07_prepare_trajectory_plot: success
