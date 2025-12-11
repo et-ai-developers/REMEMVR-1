@@ -5,21 +5,35 @@ rq_stats: success
 rq_planner: success
 rq_tools: success
 rq_analysis: success
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
-rq_validate: pending
+g_code: success
+rq_inspect: success
+rq_plots: success
+rq_results: success
+rq_validate: success
 
 # Context Dumps
 rq_tools_context: "0 analysis + 4 validation tools cataloged for calibration by accuracy analysis"
 rq_analysis_context: "6 steps (stdlib only - pandas+scipy), 4 validation tools, cross-RQ derived data analysis"
+rq_results_context: |
+  Results validated for scientific plausibility
+  3 key findings: (1) Dunning-Kruger NOT significant (p=0.797), (2) Gamma-accuracy correlation STRONG (ρ=0.46, p<0.001), (3) Calibration independent of accuracy (p=0.633)
+  Summary documented in results/summary.md
 
 # Analysis Steps
 analysis_steps:
-  step00_merge_metrics: pending
-  step01_create_tertiles: pending
-  step02_tertile_comparison: pending
-  step03_dunning_kruger_test: pending
-  step04_correlation: pending
-  step05_prepare_plot_data: pending
+  step00_merge_metrics: success
+  step01_create_tertiles: success
+  step02_tertile_comparison: success
+  step03_dunning_kruger_test: success
+  step04_correlation: success
+  step05_prepare_plot_data: success
+
+# Execution Summary (2025-12-11)
+execution_context: |
+  Manual execution from 4_analysis.yaml specification (bypassed g_code agent).
+  All 6 steps completed successfully.
+  Key findings:
+  - Dunning-Kruger: Low performers overconfident (mean=+0.142) but NOT SIGNIFICANT (p_bonf=0.797)
+  - Gamma correlation: SIGNIFICANT (rho=0.46, p<0.001) - higher accuracy -> better discrimination
+  - Calibration correlation: NOT SIGNIFICANT (rho=-0.10, p=0.63) - calibration independent of accuracy
+  2 plots generated: calibration_by_accuracy.png, dunning_kruger_boxplot.png

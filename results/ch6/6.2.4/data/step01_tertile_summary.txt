@@ -1,0 +1,12 @@
+RQ 6.2.4 - Accuracy Tertile Summary
+========================================
+
+Tertile Boundaries:
+  Low:  [-2.2386, 0.3440]
+  Med:  [0.3440, 1.0569]
+  High: [1.0569, 2.7278]
+
+N per Tertile:
+  Low: N=33, Mean accuracy=-0.3146
+  Med: N=33, Mean accuracy=0.6948
+  High: N=34, Mean accuracy=1.5740
