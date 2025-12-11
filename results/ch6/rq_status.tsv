@@ -8,7 +8,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.2.2	Calibration	Over-Underconfidence	Depends 6.2.1. +10% overconfident (41%→51%), trend p=0.230 NON-SIG. Complements 6.2.1. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.2.3	Calibration	Resolution Over Time	ROOT. Gamma DECLINES (p=0.011, 9.1%). All exceed 0.50 threshold. THESIS-READY.	True	True	True	True	BYPASS	BYPASS	TRUE	TRUE	TRUE	TRUE	TRUE
 6.2.4	Calibration	By Accuracy Level	Dunning-Kruger NOT SIG (p=0.797). Gamma-accuracy STRONG (ρ=0.46***). Calibration independent. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.2.5	Calibration	Age Effects	Depends 6.2.1. Age × calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.2.5	Calibration	Age Effects	Age × Time NULL (p=0.735). 5/5 RQs NULL (100% Ch5 replication). STRONGEST null. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.3.1	Domain Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (H1: Ch5 comparison deferred).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.3.2	Domain Confidence	Calibration	Depends 6.3.1 + Ch5 5.2.1. Domain calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.3.3	Domain Confidence	Age × Domain	Depends 6.3.1. 3-way interaction.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
