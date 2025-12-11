@@ -1,0 +1,34 @@
+================================================================================
+RQ 6.4.4 - Step 01: LMM Summary for Recognition (IRE)
+================================================================================
+
+Timestamp: 2025-12-12T09:29:57.229438
+N observations: 400
+N groups: 100
+Formula: theta ~ log_TSVR + (log_TSVR | UID)
+Method: ML (REML=False)
+
+Model Summary:
+             Mixed Linear Model Regression Results
+================================================================
+Model:               MixedLM    Dependent Variable:    theta    
+No. Observations:    400        Method:                ML       
+No. Groups:          100        Scale:                 0.0554   
+Min. group size:     4          Log-Likelihood:        -143.4103
+Max. group size:     4          Converged:             Yes      
+Mean group size:     4.0                                        
+----------------------------------------------------------------
+                     Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+----------------------------------------------------------------
+Intercept            -0.311    0.050  -6.281 0.000 -0.408 -0.214
+log_TSVR             -0.141    0.009 -16.514 0.000 -0.158 -0.124
+Group Var             0.174    0.181                            
+Group x log_TSVR Cov  0.001    0.020                            
+log_TSVR Var          0.002    0.005                            
+================================================================
+
+
+Random Effects Covariance:
+             Group  log_TSVR
+Group     0.174218  0.001443
+log_TSVR  0.001443  0.002202

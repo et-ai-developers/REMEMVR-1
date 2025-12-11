@@ -1,0 +1,22 @@
+================================================================================
+RQ 6.4.4 - Step 05: Ch5 Comparison Summary
+================================================================================
+
+Timestamp: 2025-12-12T09:29:57.247288
+
+Comparison: Confidence (5-level ordinal) vs Accuracy (dichotomous)
+
+Per-Paradigm ICC_slope Comparison:
+  IFR: conf=0.045607, acc=0.022051, diff=+0.023556
+  ICR: conf=0.054589, acc=0.000089, diff=+0.054500
+  IRE: conf=0.038225, acc=0.013827, diff=+0.024399
+
+Average ICC_slope Difference: +0.034152
+
+Overall Pattern: Confidence and accuracy show SIMILAR slope variance patterns
+
+Theoretical Interpretation:
+  Both confidence and accuracy show minimal slope variance.
+  This strengthens the conclusion that forgetting trajectories
+  are fundamentally state-like (universal decline pattern)
+  regardless of measurement precision.

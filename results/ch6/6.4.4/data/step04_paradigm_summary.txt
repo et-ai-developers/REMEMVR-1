@@ -1,0 +1,18 @@
+================================================================================
+RQ 6.4.4 - Step 04: Paradigm ICC Comparison Summary
+================================================================================
+
+Timestamp: 2025-12-12T09:29:57.242015
+
+ICC_slope Ranking (highest to lowest):
+  1. ICR (Cued Recall): 0.054589
+  2. IFR (Free Recall): 0.045607
+  3. IRE (Recognition): 0.038225
+
+Pattern: ICR shows highest ICC_slope (0.054589): Unexpected pattern
+
+Hypothesis Test: REFUTED - ICR has highest ICC_slope, not Free Recall
+
+Interpretation:
+  Some paradigm-specific slope variance detected.
+  Individual differences in confidence decline may vary by paradigm.

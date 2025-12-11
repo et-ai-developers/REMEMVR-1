@@ -1,0 +1,34 @@
+================================================================================
+RQ 6.4.4 - Step 01: LMM Summary for Free Recall (IFR)
+================================================================================
+
+Timestamp: 2025-12-12T09:29:56.529269
+N observations: 400
+N groups: 100
+Formula: theta ~ log_TSVR + (log_TSVR | UID)
+Method: ML (REML=False)
+
+Model Summary:
+             Mixed Linear Model Regression Results
+================================================================
+Model:               MixedLM    Dependent Variable:    theta    
+No. Observations:    400        Method:                ML       
+No. Groups:          100        Scale:                 0.0683   
+Min. group size:     4          Log-Likelihood:        -179.3896
+Max. group size:     4          Converged:             Yes      
+Mean group size:     4.0                                        
+----------------------------------------------------------------
+                     Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+----------------------------------------------------------------
+Intercept            -0.362    0.052  -6.926 0.000 -0.465 -0.260
+log_TSVR             -0.116    0.010 -11.893 0.000 -0.135 -0.097
+Group Var             0.186    0.181                            
+Group x log_TSVR Cov -0.002    0.023                            
+log_TSVR Var          0.003    0.006                            
+================================================================
+
+
+Random Effects Covariance:
+             Group  log_TSVR
+Group     0.185691 -0.001754
+log_TSVR -0.001754  0.003264

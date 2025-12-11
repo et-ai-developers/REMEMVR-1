@@ -1,0 +1,4 @@
+paradigm,ICC_intercept,ICC_slope_simple,ICC_slope_conditional,interpretation_intercept,interpretation_slope
+IFR,0.6653747617120526,0.045607100868411826,0.2969295439229637,Substantial,Negligible
+ICR,0.7713483868437202,0.05458933409271206,0.32312538278547626,Substantial,Small
+IRE,0.6593916054854053,0.0382254850694062,0.21405590738756738,Substantial,Negligible
