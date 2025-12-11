@@ -7,8 +7,8 @@ rq_tools: success
 rq_analysis: success
 g_code: pending
 rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+rq_plots: success
+rq_results: success
 rq_validate: pending
 
 context_dump:
@@ -23,6 +23,13 @@ context_dump:
     Cross-RQ dependencies documented: RQ 6.4.1 theta scores required, RQ 5.3.4 comparison optional
   rq_analysis: |
     5 steps specified with validation (LMM Age x Paradigm x Time interaction → effect sizes → Ch5/Ch6 comparison)
+  rq_plots: |
+    3 plots generated: age tertile trajectories by paradigm, effect sizes, interaction significance
+    All plots show NULL 3-way interaction (parallel trajectories across age groups within each paradigm)
+  rq_results: |
+    Results validated for scientific plausibility
+    Plausibility acceptable (0 anomalies flagged)
+    Summary documented in results/summary.md
 
 analysis_steps:
   step00_prepare_lmm_input: pending

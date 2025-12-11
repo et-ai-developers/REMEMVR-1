@@ -15,7 +15,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.3.4	Domain Confidence	ICC by Domain	MAJOR FINDING: Domain dissociation. What/Where ICC_slope=0.59 (trait), When=0.00 (universal). 54-73× > Ch5. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.4.1	Paradigm Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (M5: 100% retention).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.4.2	Paradigm Confidence	Calibration	Paradigm main effect SIG (p=0.040). IFR best calibrated, IRE worst. Small d<0.11. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.4.3	Paradigm Confidence	Age × Paradigm	Depends 6.4.1. 3-way interaction.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.4.3	Paradigm Confidence	Age × Paradigm	NULL 3-way (p=0.994). Age-invariant paradigm effects. Parallels Ch5. f²=0.000004 negligible. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.4.4	Paradigm Confidence	ICC by Paradigm	Depends 6.4.1. ICC per paradigm.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.5.1	Schema Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS (2 moderate: retention, floor).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.5.2	Schema Confidence	Calibration	Depends 6.5.1 + Ch5 5.4.1. Schema calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False

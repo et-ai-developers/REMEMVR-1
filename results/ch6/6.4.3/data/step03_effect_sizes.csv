@@ -1,0 +1,4 @@
+term,f_squared,interpretation
+Age_c,0.037260890282984765,small
+Age_c:log_TSVR,2.8079266328255567e-06,negligible
+Age_c:log_TSVR:Paradigm,4.25658260606155e-06,negligible

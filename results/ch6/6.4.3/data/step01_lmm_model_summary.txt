@@ -1,0 +1,27 @@
+                    Mixed Linear Model Regression Results
+=============================================================================
+Model:                 MixedLM      Dependent Variable:      theta_confidence
+No. Observations:      1200         Method:                  REML            
+No. Groups:            100          Scale:                   0.0442          
+Min. group size:       12           Log-Likelihood:          -171.0570       
+Max. group size:       12           Converged:               Yes             
+Mean group size:       12.0                                                  
+-----------------------------------------------------------------------------
+                                  Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------------
+Intercept                         -0.362    0.053  -6.819 0.000 -0.466 -0.258
+C(Paradigm)[T.ICR]                -0.015    0.034  -0.435 0.663 -0.081  0.051
+C(Paradigm)[T.IRE]                 0.051    0.034   1.525 0.127 -0.015  0.117
+log_TSVR                          -0.116    0.010 -11.334 0.000 -0.136 -0.096
+log_TSVR:C(Paradigm)[T.ICR]       -0.008    0.009  -0.861 0.389 -0.025  0.010
+log_TSVR:C(Paradigm)[T.IRE]       -0.025    0.009  -2.778 0.005 -0.043 -0.007
+Age_c                             -0.008    0.004  -2.067 0.039 -0.015 -0.000
+C(Paradigm)[T.ICR]:Age_c          -0.001    0.002  -0.272 0.785 -0.005  0.004
+C(Paradigm)[T.IRE]:Age_c          -0.000    0.002  -0.156 0.876 -0.005  0.004
+log_TSVR:Age_c                    -0.000    0.001  -0.056 0.955 -0.001  0.001
+log_TSVR:C(Paradigm)[T.ICR]:Age_c -0.000    0.001  -0.002 0.998 -0.001  0.001
+log_TSVR:C(Paradigm)[T.IRE]:Age_c -0.000    0.001  -0.111 0.911 -0.001  0.001
+Group Var                          0.226    0.174                            
+Group x log_TSVR Cov              -0.013    0.023                            
+log_TSVR Var                       0.006    0.006                            
+=============================================================================
