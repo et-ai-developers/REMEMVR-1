@@ -1,0 +1,4 @@
+icc_type,value,interpretation
+ICC_intercept,0.5066590031536012,substantial
+ICC_slope_simple,0.41203906013923747,substantial
+ICC_slope_conditional,9.251771248909388e-11,negligible

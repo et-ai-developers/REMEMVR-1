@@ -1,0 +1,2 @@
+correlation_r,CI_lower,CI_upper,N,p_uncorrected,p_bonferroni,interpretation
+0.9407708519817317,0.9130741303345693,0.959828026477699,100,7.873187492592235e-48,7.873187492592235e-48,large positive correlation (significant); Higher baseline confidence associated with slower decline

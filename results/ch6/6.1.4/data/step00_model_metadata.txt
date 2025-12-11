@@ -1,0 +1,34 @@
+================================================================================
+RQ 6.1.4 - Step 00: Model Metadata
+================================================================================
+
+Timestamp: 2025-12-11T17:37:26.514175
+Source: RQ 6.1.1 best CONVERGED model (Recip_sq)
+Data: results/ch6/6.1.1/data/step04_lmm_input.csv
+
+Model Specification:
+  Formula: theta_All ~ Recip_sq
+  Recip_sq = 1/(TSVR_hours+1)^2
+  Random effects: (1 + Recip_sq | UID)
+  Method: ML (REML=False)
+
+Fit Statistics:
+  Converged: True
+  AIC: 303.9172
+  BIC: 327.8660
+  Log-likelihood: -145.9586
+  N observations: 400
+  N groups: 100
+
+Fixed Effects:
+                       Coef. Std.Err.        z  P>|z|  [0.025  0.975]
+Intercept             -0.717    0.033  -21.780  0.000  -0.781  -0.652
+Recip_sq               1.337    0.133   10.079  0.000   1.077   1.597
+Group Var              0.082    0.067                                
+Group x Recip_sq Cov   0.027    0.160                                
+Recip_sq Var           0.056    1.081                                
+
+Random Effects Covariance:
+             Group  Recip_sq
+Group     0.081705  0.027417
+Recip_sq  0.027417  0.055744

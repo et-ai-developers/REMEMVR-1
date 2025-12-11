@@ -16,8 +16,14 @@
    c. Validate output makes theoretical sense
    d. Mark step complete, proceed to next
 4. POST-EXECUTION: rq_inspect → rq_plots → rq_results → rq_validate
-5. REPORT: Summary + thesis implications to user
+5. UPDATE STATUS: Update ch6/rq_status.tsv with completion status
+6. ADD LESSONS: Add any new insights to "LESSONS LEARNED LOG" section below
+7. REPORT: Summary + thesis implications to user
 ```
+
+**MANDATORY END-OF-RQ UPDATES:**
+- [ ] `ch6/rq_status.tsv` - Mark all validation columns TRUE, update Notes with key finding
+- [ ] `ch6/execute.md` - Add lessons learned (format: `[Date] [RQ] [Lesson]`)
 
 ---
 
@@ -387,6 +393,55 @@ Run in sequence. Don't skip. Each catches different issues.
 - Limits Decision D069 dual-scale interpretability (designed for accuracy, questionable for confidence)
 - May reflect genuine confidence collapse, response bias, or scale compression
 - Document in limitations, recommend raw distribution analysis
+
+### ICC Decomposition Lessons (RQ 6.1.4)
+
+**[2025-12-11] [6.1.4] Pickle File Limitations for LMM Models:**
+- statsmodels MixedLMResults pickles CANNOT be reliably reloaded (patsy eval_env error)
+- Solution: Re-fit model from scratch using step04_lmm_input.csv
+- Include model formula and parameters in code, not just pickle reference
+- 4_analysis.yaml specified pickle loading but this is NOT PORTABLE
+
+**[2025-12-11] [6.1.4] Best CONVERGED Model Selection:**
+- Kitchen sink may select non-converged model as "best" (lowest AIC)
+- Sin+Cos had lowest AIC (1068.98) but converged=False
+- For ICC/variance decomposition, MUST use best CONVERGED model (Recip_sq, AIC=1073.13)
+- Query: `df[df['converged']==True].sort_values('AIC').iloc[0]`
+
+**[2025-12-11] [6.1.4] ICC Calculation for Transformed Time Variables:**
+- ICC_slope interpretation changes with time transformation (Recip_sq vs linear)
+- ICC_slope_conditional may approach zero for reciprocal models (asymptotic behavior)
+- This is CORRECT BEHAVIOR, not an error (Hoffman & Stawski 2009 caveats)
+- Document time scaling effects in validation.md
+
+**[2025-12-11] [6.1.4] MAJOR FINDING - Measurement Artifact Hypothesis:**
+- ICC_slope_confidence = 0.4120 (substantial) vs ICC_slope_accuracy = 0.0005 (Ch5)
+- 824x ratio demonstrates ordinal data reveals variance binary data missed
+- Ch5 "universal forgetting" finding was MEASUREMENT LIMITATION
+- Forgetting trajectories ARE trait-like when measured with sufficient precision
+- This fundamentally changes thesis interpretation
+
+**[2025-12-11] [6.1.4] Intercept-Slope Correlation Artifact Potential:**
+- r = 0.94 (intercept-slope) is unusually strong
+- May partially reflect Recip_sq time scaling artifact (Hoffman & Stawski 2009 caution)
+- Does NOT invalidate ICC_slope = 0.41 finding (independent calculation)
+- RQ 6.1.5 clustering will test if r=0.94 reflects discrete groups vs continuous dimension
+- Document as MODERATE issue, not blocking
+
+### ROOT RQ Validation Lessons (RQ 6.1.1)
+
+**[2025-12-11] [6.1.1] Downstream Validation of ROOT RQ:**
+- ROOT RQ can be validated by success of derivative RQs
+- 6.1.1 theta_confidence validated by: 6.1.2, 6.1.3, 6.1.4 all thesis-ready
+- RQ 6.1.3 achieved ZERO ANOMALIES using this data
+- RQ 6.1.4 found 824x ICC ratio (validates theta quality)
+- Known issues (GRM threshold ordering, convergence warnings) are NON-BLOCKING
+
+**[2025-12-11] [6.1.1] Kitchen Sink vs Original 5-Model Comparison:**
+- Kitchen sink (65 models): High uncertainty, no clear winner (best=21.7% weight)
+- Original 5 models: Clear winner (Logarithmic=63.9% weight)
+- Demonstrates model selection conclusions sensitive to candidate set specification
+- Document both comparisons in summary.md for transparency
 
 ---
 

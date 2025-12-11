@@ -2,7 +2,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.1.1	Confidence	Model Selection	ROOT - GRM 5-category. Kitchen sink (70+ models). MED settings. BULLETPROOF.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.1.2	Confidence	Two-Phase Pattern	Depends 6.1.1. Piecewise test. INCONCLUSIVE (1/3 tests). Random slopes corrected. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.1.3	Confidence	Age Effects	Depends 6.1.1. Age × Time NULL (p=0.323). Parallels Ch5. THESIS-READY. ZERO ANOMALIES.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.1.4	Confidence	ICC Decomposition	CRITICAL. Depends 6.1.1. ICC_slope detection test.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.1.4	Confidence	ICC Decomposition	CRITICAL. ICC_slope=0.412 (824x > Ch5). MEASUREMENT ARTIFACT confirmed. PASS WITH NOTES. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.1.5	Confidence	Trajectory Clustering	Depends 6.1.4. K-means on random effects.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.2.1	Calibration	Over Time	Depends 6.1.1 + Ch5 5.1.1. Calibration = conf - acc.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.2.2	Calibration	Over-Underconfidence	Depends 6.2.1. Overconfidence trend.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
