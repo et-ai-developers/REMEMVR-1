@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-12 00:30 (context-manager curation - Session 23:15 archived)
+**Last Updated:** 2025-12-12 10:30 (context-manager curation - Session 23:40 archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -481,6 +481,9 @@
 
 ### rq_6.4.1_step01_five_systematic_bug_fixes
 **Description:** RQ 6.4.1 Step 01 IRT calibration Pass 1 with 5 systematic bug fixes applied iteratively. Bugs: (1) missing UID/test columns parsed from composite_ID, (2) wrong return unpacking order corrected, (3) n_cats must be list for configure_irt_model, (4) n_cats must be list for extract_parameters_from_irt, (5) MIRT column format kept as-is (Difficulty/Overall_Discrimination/Discrim_*). All bugs repeatable from RQ 6.3.1 and 6.1.1 (same pattern across all GRM RQs). Root cause: g_code lacks multidimensional IRT training examples. Pattern documented for future RQs. Session 2025-12-07 19:45.
+
+### rq_6.4.2_complete_paradigm_effect_sig_thesis_ready
+**Description:** RQ 6.4.2 complete execution history (paradigm-specific calibration quality) - SIGNIFICANT PARADIGM MAIN EFFECT (χ²=7.83, p=0.040 Bonferroni) but NO interaction with time (p=0.871). Free Recall best calibrated (|cal|=0.700), Recognition worst (|cal|=0.749), consistent with fluency-familiarity heuristic but weak magnitude (d < 0.11). All paradigms show parallel trajectories from underconfidence (T1) to slight overconfidence (T4). Post-hoc contrasts NS after Bonferroni. Pattern: retrieval support slightly inflates confidence relative to accuracy, but effect is modest. Compares to RQ 6.3.2 domain calibration (crossover interaction χ²=59.60 vs paradigm main effect only). 5-step analysis pipeline adapted from RQ 6.3.2 template (75% time savings). Validation 100% PASS (2 agents sequential). Total 18/31 Ch6 RQs thesis-ready (58%). Session 2025-12-11 23:40.
 
 ### g_code_multidimensional_irt_bug_pattern
 **Description:** Systematic pattern of 5 bugs repeatable across ALL GRM-based RQs (6.1.1 single-factor, 6.3.1 domain 3-factor, 6.4.1 paradigm 3-factor). Root cause: g_code lacks training examples for multidimensional IRT models. Pattern WILL recur in future GRM RQs (6.5.1, 6.6.1, 6.7.2, 6.8.1). Solution: Use code-copying strategy from 6.3.1/6.4.1 (copy working code, replace factor names via find/replace) vs g_code debugging (saves 75-80% time, 45 min vs 4-5 hours). Documents all 5 bugs with fixes and pattern sources. Session 2025-12-07 19:45.
