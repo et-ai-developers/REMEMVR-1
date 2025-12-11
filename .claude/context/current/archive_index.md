@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-11 23:15 (context-manager curation - Session 22:45 archived)
+**Last Updated:** 2025-12-12 00:30 (context-manager curation - Session 23:15 archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -582,3 +582,6 @@
 
 ### ch6_progress_17_of_31_thesis_ready_55_percent
 **Description:** Chapter 6 milestone after RQ 6.3.4 completion (2025-12-11 22:45). PASSED 50% THRESHOLD: 17/31 RQs thesis-ready (55%). Complete series: Confidence (6.1.X, 5/5), Calibration (6.2.X, 5/5), Domain Confidence (6.3.X, 4/4). Partial series: Paradigm (1/5), Schema (1/4), Source-Dest (1/4). Remaining ROOT RQs: 6.6.1 (HCE), 6.7.2 (Variability). Major discoveries: universal age-invariance (6/6 RQs NULL), measurement artifact (54-824× ratios), domain dissociation (What/Where ICC=0.59 vs When ICC≈0), calibration worsening, crossover dynamics. Theoretical implications: VR age-fair (ages 20-70), cue-based metacognition supported, 5-level confidence essential, metacognition has performance-dependent (resolution) and performance-independent (calibration) components. Execution efficiency: 1 RQ per 30-min session. Estimated 7 hours (14 RQs) to chapter completion. Quality: 0 critical issues across all 17 RQs.
+
+### grm_probability_transformation_bug_fix_critical
+**Description:** GRM Probability Transformation Bug Fix - CRITICAL CORRECTION to Ch6 trajectory plots (2025-12-11 23:15). User identified RQ 6.4.1 probability plot wrong (values 2-20% hugging floor). Root cause: Ch6 uses GRM (ordinal confidence) with systematically negative theta (mean ≈ -0.78), Step 07 scripts used b=0.0 for 2PL transformation causing misleadingly low probabilities. Solution: Changed to b=sample_mean_theta (EAP normalization) per standard practice. Fixed 4 RQs (6.3.1, 6.4.1, 6.5.1, 6.8.1), corrected probability ranges from 2-20% to 25-80%. All plots regenerated. Lesson documented in execute.md: NEVER assume b=0 without checking theta distribution. Pattern recognition: SECOND instance of b=0 problem (first: Ch5 5.5.1 multi-dimensional IRT). General rule established: Check theta distribution before probability transformation, use factor-specific b or sample mean theta as appropriate. Bug severity: HIGH (visual misrepresentation), files modified: 5 (4 step07 scripts + execute.md), plots regenerated: 8.
