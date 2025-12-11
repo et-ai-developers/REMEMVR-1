@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-07 23:10 (context-manager curation)
+**Last Updated:** 2025-12-11 21:25 (context-manager curation)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -539,3 +539,15 @@
 
 ### ch6_progress_11_of_31_thesis_ready_35_percent
 **Description:** Chapter 6 progress snapshot after RQ 6.2.2 completion (2025-12-11 20:15). 11/31 RQs thesis-ready: Type 6.1 complete (5/5), Type 6.2 (2/5 at this snapshot), plus 4 other ROOT RQs. 2 remaining ROOT RQs (6.6.1, 6.7.2). ~15 derivative RQs ready to execute. Velocity: 25 min/RQ average, projected 8.3 hours to complete Ch6. Quality metrics: 100% validation success, major findings (824× variance, calibration worsens, clustering integration), zero anomalies (RQ 6.1.3). Infrastructure: 30/31 specification agents successful (97%), rq_status.tsv tracking, execute.md lessons. NOTE: Superseded by later progress (12/31 at 20:50, 13/31 at 21:00).
+
+### rq_6.2.3_complete_resolution_declines_thesis_ready
+**Description:** RQ 6.2.3 complete execution with specification bypass workflow (2025-12-11 20:50). MAJOR THESIS FINDING: Metacognitive resolution (Goodman-Kruskal gamma) declines significantly over time (p=0.011, 9.1% decrease from 0.729 to 0.662). Bypassed failed rq_tools agent and executed directly from 2_plan.md (7-step pipeline). All timepoints exceed γ > 0.50 threshold (acceptable discrimination maintained). Completes CALIBRATION TRILOGY with RQs 6.2.1 and 6.2.2. Full validation workflow passed (rq_inspect manual, rq_plots, rq_results, rq_validate) with 2 moderate issues documented. Total 12/31 Ch6 RQs thesis-ready (39%). Unlocks RQ 6.2.4 (Dunning-Kruger test).
+
+### rq_6.2.3_specification_bypass_pattern
+**Description:** Specification bypass workflow for RQ 6.2.3 (2025-12-11 20:50). Alternative execution pattern when specification agents fail but complete plan document exists. Bypassed rq_tools: failed status and directly created steps_00_to_06.py from 2_plan.md. Updated status.yaml with rq_tools: bypassed, rq_analysis: bypassed. Validation agents ran normally and achieved thesis-quality results. Lesson: When specification agents fail but plan exists, direct manual execution is viable. Documents bypass methodology for future reference.
+
+### ch6_calibration_trilogy_complete
+**Description:** CALIBRATION TRILOGY completion milestone (2025-12-11 20:50). All three metacognitive calibration dimensions show deterioration pattern: (1) RQ 6.2.1 - Calibration magnitude worsens (p=0.004, underconfidence→overconfidence shift), (2) RQ 6.2.2 - Overconfidence proportion increases (+10%, p=0.230 trend only), (3) RQ 6.2.3 - Resolution discrimination declines (p=0.011, 9.1% decrease). Supports dual-process hypothesis: both absolute (calibration) and relative (resolution) metacognition deteriorate as memory fades. Signal-to-noise ratio decreases over time making it harder to distinguish remembered from forgotten items. Integration demonstrates unified metacognitive deterioration framework.
+
+### ch6_progress_12_of_31_thesis_ready_39_percent
+**Description:** Chapter 6 progress snapshot after RQ 6.2.3 completion (2025-12-11 20:50). 12/31 RQs thesis-ready (39%): Type 6.1 Confidence complete (5/5), Type 6.2 Calibration (3/5), plus 4 other ROOT RQs (6.3.1, 6.4.1, 6.5.1, 6.8.1). 2 remaining ROOT RQs (6.6.1, 6.7.2). RQ 6.2.4 now unlocked (depends on 6.2.1 + 6.2.3). Major findings: age-invariant pattern (6.1.3), 824× variance ratio (6.1.4), confidence-accuracy phenotypes (6.1.5), calibration trilogy complete (6.2.1-6.2.3). Infrastructure: 30/31 specification agents successful (97%, one bypassed). Full validation workflow operational. NOTE: Superseded by later progress (13/31 at 21:00, 14/31 at 21:25).
