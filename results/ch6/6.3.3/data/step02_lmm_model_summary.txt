@@ -1,0 +1,27 @@
+                     Mixed Linear Model Regression Results
+===============================================================================
+Model:                   MixedLM      Dependent Variable:      theta_confidence
+No. Observations:        1200         Method:                  REML            
+No. Groups:              100          Scale:                   0.0711          
+Min. group size:         12           Log-Likelihood:          -435.5227       
+Max. group size:         12           Converged:               Yes             
+Mean group size:         12.0                                                  
+-------------------------------------------------------------------------------
+                                    Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+-------------------------------------------------------------------------------
+Intercept                           -0.580    0.047 -12.208 0.000 -0.673 -0.487
+C(Domain)[T.When]                    0.101    0.028   3.567 0.000  0.045  0.156
+C(Domain)[T.Where]                   0.009    0.028   0.317 0.751 -0.046  0.064
+TSVR_hours                          -0.003    0.000 -10.183 0.000 -0.004 -0.003
+TSVR_hours:C(Domain)[T.When]        -0.000    0.000  -0.821 0.411 -0.001  0.000
+TSVR_hours:C(Domain)[T.Where]       -0.000    0.000  -0.039 0.969 -0.001  0.001
+Age_c                               -0.008    0.003  -2.325 0.020 -0.014 -0.001
+Age_c:C(Domain)[T.When]              0.000    0.002   0.099 0.921 -0.004  0.004
+Age_c:C(Domain)[T.Where]            -0.001    0.002  -0.273 0.785 -0.004  0.003
+TSVR_hours:Age_c                    -0.000    0.000  -0.687 0.492 -0.000  0.000
+TSVR_hours:Age_c:C(Domain)[T.When]   0.000    0.000   0.613 0.540 -0.000  0.000
+TSVR_hours:Age_c:C(Domain)[T.Where]  0.000    0.000   1.116 0.264 -0.000  0.000
+Group Var                            0.185    0.112                            
+Group x TSVR_hours Cov               0.000    0.000                            
+TSVR_hours Var                       0.000    0.000                            
+===============================================================================

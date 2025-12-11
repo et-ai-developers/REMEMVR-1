@@ -24,12 +24,17 @@ rq_analysis: success
     Step 3: Extract interaction with dual p-values (tools.analysis_lmm.compute_contrasts_pairwise).
     D068 dual p-values embedded. D070 TSVR time variable embedded.
 analysis_steps:
-  step00_load_theta_with_age: pending
-  step01_center_age_reshape_long: pending
-  step02_fit_lmm_age_domain_interaction: pending
-  step03_extract_interaction_dual_pvalues: pending
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+  step00_load_theta_with_age: success
+  step01_center_age_reshape_long: success
+  step02_fit_lmm_age_domain_interaction: success
+  step03_extract_interaction_dual_pvalues: success
+g_code: success
+rq_inspect: success
+rq_plots: success
+rq_results: success
+  timestamp: 2025-12-11
+  context_dump: |
+    Results validated for scientific plausibility
+    Plausibility acceptable (0 anomalies flagged)
+    Summary documented in results/summary.md
 rq_validate: pending
