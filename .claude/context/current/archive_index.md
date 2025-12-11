@@ -515,3 +515,15 @@
 - Timestamps are IN the archive files themselves (each entry timestamped)
 - New topics added automatically when context-manager archives content
 - Each topic file max 50k tokens (context-manager enforces)
+
+### rq_6.1.3_complete_age_effects_null_thesis_ready_zero_anomalies
+**Description:** RQ 6.1.3 complete execution with ZERO anomalies (2025-12-11 16:45). Age × Time interaction NULL (p=0.323), age-invariant confidence decline. Parallels 4 Ch5 accuracy RQs. Effect size negligible (-0.045 theta). Full validation workflow (4 agents) passed. LMM methodology log transformation, derivative RQ execution pattern established.
+
+### rq_6.1.4_icc_decomposition_major_finding_824x_ratio
+**Description:** RQ 6.1.4 ICC Decomposition major thesis finding (2025-12-11 18:30). 824× more slope variance with ordinal confidence vs dichotomous accuracy. Measurement artifact hypothesis confirmed - Ch5 "universal forgetting" was measurement limitation. ICC_slope 0.4120 vs 0.0005. Intercept-slope correlation r=0.9408. Pickle patsy eval_env limitation. RQ 6.1.1 validation completed. execute.md updated with 8 lessons + mandatory updates checklist.
+
+### rq_6.1.5_trajectory_clustering_integration_confirmed
+**Description:** RQ 6.1.5 trajectory clustering integration hypothesis confirmed (2025-12-11 19:15). Chi-square χ²=34.34, p<0.000001, Cramer's V=0.41. Confidence-accuracy phenotypes ASSOCIATED. Three phenotypes: Resilient (42%), Resilient-Increasing (41%, positive slope anomaly), Vulnerable (17%). K=3 forced for cross-RQ comparability. BIC monotonic decrease. CRITICAL lesson: validation agents must run SEQUENTIALLY (rq_validate requires summary.md from rq_results). execute.md major update with 7 lessons including sequential validation requirement.
+
+### rq_6.2.1_calibration_worsens_thesis_ready
+**Description:** RQ 6.2.1 Calibration Over Time ROOT RQ complete (2025-12-11 19:45). Calibration worsens significantly (p_LRT=0.004). Trajectory shifts underconfidence (-0.116) to overconfidence (+0.111). Zero-crossing Days 1-3. Dual-process hypothesis supported. Three calibration metrics converge (theta difference, Brier, ECE). Source file column discrepancies (Ch5 vs Ch6 naming). Z-standardization exact. Unlocks derivative RQs 6.2.2, 6.2.4, 6.2.5, 6.7.3.
