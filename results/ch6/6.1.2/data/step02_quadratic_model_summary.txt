@@ -1,16 +1,18 @@
-            Mixed Linear Model Regression Results
-==============================================================
-Model:            MixedLM Dependent Variable: theta_confidence
-No. Observations: 400     Method:             ML              
-No. Groups:       100     Scale:              0.0749          
-Min. group size:  4       Log-Likelihood:     -135.4393       
-Max. group size:  4       Converged:          Yes             
-Mean group size:  4.0                                         
----------------------------------------------------------------
-               Coef.   Std.Err.     z     P>|z|  [0.025  0.975]
----------------------------------------------------------------
-Intercept      -0.412     0.038  -10.746  0.000  -0.487  -0.337
-TSVR_hours     -0.006     0.001   -7.032  0.000  -0.007  -0.004
-TSVR_sq         0.000     0.000    4.027  0.000   0.000   0.000
-Group Var       0.086     0.063                                
-==============================================================
+              Mixed Linear Model Regression Results
+=================================================================
+Model:             MixedLM  Dependent Variable:  theta_confidence
+No. Observations:  400      Method:              ML              
+No. Groups:        100      Scale:               0.0525          
+Min. group size:   4        Log-Likelihood:      -121.1532       
+Max. group size:   4        Converged:           Yes             
+Mean group size:   4.0                                           
+-----------------------------------------------------------------
+                       Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------
+Intercept              -0.406    0.043 -9.408 0.000 -0.491 -0.322
+TSVR_hours             -0.006    0.001 -7.943 0.000 -0.008 -0.005
+TSVR_sq                 0.000    0.000  4.951 0.000  0.000  0.000
+Group Var               0.142    0.131                           
+Group x TSVR_hours Cov -0.001    0.001                           
+TSVR_hours Var          0.000    0.000                           
+=================================================================
