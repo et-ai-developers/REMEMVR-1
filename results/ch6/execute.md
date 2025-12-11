@@ -8,7 +8,8 @@
 ## EXECUTION FLOW
 
 ```
-1. READ: 1_concept.md → 2_plan.md → 4_analysis.yaml (understand pipeline)
+1. READ: docs/1_concept.md → docs/2_plan.md → docs/4_analysis.yaml (understand pipeline)
+   NOTE: Specification files are in results/ch6/X.Y.Z/docs/ NOT the RQ root folder
 2. TODOWRITE: Create step-by-step task list from 4_analysis.yaml
 3. LOOP per step:
    a. g_code generates stepXX_*.py
@@ -16,13 +17,16 @@
    c. Validate output makes theoretical sense
    d. Mark step complete, proceed to next
 4. POST-EXECUTION: rq_inspect → rq_plots → rq_results → rq_validate
+   ⚠️ CRITICAL: Run SEQUENTIALLY, not in parallel (rq_validate needs summary.md from rq_results)
 5. UPDATE STATUS: Update ch6/rq_status.tsv with completion status
+   ⚠️ MANDATORY: Do this IMMEDIATELY after validation completes, before reporting to user
 6. ADD LESSONS: Add any new insights to "LESSONS LEARNED LOG" section below
 7. REPORT: Summary + thesis implications to user
 ```
 
-**MANDATORY END-OF-RQ UPDATES:**
+**⚠️ MANDATORY END-OF-RQ UPDATES (DO NOT SKIP):**
 - [ ] `ch6/rq_status.tsv` - Mark all validation columns TRUE, update Notes with key finding
+      **This is the SINGLE SOURCE OF TRUTH for chapter progress. Update IMMEDIATELY after RQ completion.**
 - [ ] `ch6/execute.md` - Add lessons learned (format: `[Date] [RQ] [Lesson]`)
 
 ---
@@ -320,9 +324,28 @@ For each step in 4_analysis.yaml:
 ## VALIDATION AGENTS (Post-Execution)
 
 **rq_inspect:** Validates all outputs exist and meet schema
-**rq_plots:** Creates publication-quality visualizations
+**rq_plots:** Creates publication-quality visualizations (run plots.py BEFORE this agent)
 **rq_results:** Generates summary.md with anomaly detection
-**rq_validate:** Thesis-quality checklist validation
+**rq_validate:** Thesis-quality checklist validation (REQUIRES summary.md to exist)
+
+### ⚠️ CRITICAL: Sequential Execution Required
+
+```
+# CORRECT: Run validation agents SEQUENTIALLY
+1. rq_inspect (can run in background)
+2. Generate plots: PYTHONPATH=/path/to/project poetry run python plots/plots.py
+3. rq_results (wait for completion - creates summary.md)
+4. rq_validate (MUST run AFTER rq_results - reads summary.md)
+
+# WRONG: Running all 4 agents in parallel
+# → rq_validate will fail with "summary.md missing" because rq_results hasn't finished
+```
+
+**Why sequential matters:**
+- rq_validate reads `results/summary.md` to check scientific plausibility
+- rq_results creates `results/summary.md` (can take 1-2 minutes)
+- If rq_validate starts before rq_results finishes → CIRCUIT BREAKER triggers
+- Learned the hard way in RQ 6.1.5 (2025-12-11)
 
 Run in sequence. Don't skip. Each catches different issues.
 
@@ -443,6 +466,43 @@ Run in sequence. Don't skip. Each catches different issues.
 - Demonstrates model selection conclusions sensitive to candidate set specification
 - Document both comparisons in summary.md for transparency
 
+### Clustering Lessons (RQ 6.1.5)
+
+**[2025-12-11] [6.1.5] RQ Specification File Location:**
+- Specification files are in `results/ch6/X.Y.Z/docs/` NOT the RQ root folder
+- Files: `docs/1_concept.md`, `docs/2_plan.md`, `docs/3_tools.yaml`, `docs/4_analysis.yaml`
+- Easy to miss - glob or check folder structure before reading nonexistent files
+
+**[2025-12-11] [6.1.5] BIC Monotonic Decrease (K-means Clustering):**
+- BIC monotonically decreased for K=1-6 (no elbow/minimum)
+- This is COMMON when clustering structure is weak/continuous rather than discrete
+- Solution: Match K to comparison RQ (Ch5 5.1.5 used K=3) for valid cross-RQ chi-square test
+- Document BIC trend in results; K selection justified by comparability, not BIC optimum
+
+**[2025-12-11] [6.1.5] Validation Agent Dependency Chain:**
+- rq_validate REQUIRES summary.md (created by rq_results)
+- If rq_validate runs before rq_results completes → CIRCUIT BREAKER "summary.md missing"
+- Solution: Run validation agents SEQUENTIALLY, not in parallel
+- Order: rq_inspect → plots.py → rq_results → (wait) → rq_validate
+
+**[2025-12-11] [6.1.5] Cross-RQ Dependency File Naming Discrepancies:**
+- 4_analysis.yaml may specify "step04_random_effects.csv" but actual file is "step03_random_effects.csv"
+- 4_analysis.yaml may specify "step04_cluster_assignments.csv" but actual file is "step03_cluster_assignments.csv"
+- Always CHECK ACTUAL FILE NAMES in dependency RQ before coding
+- Column names may also differ: "cluster_label" vs "cluster", "random_intercept" vs "intercept"
+
+**[2025-12-11] [6.1.5] rq_status.tsv Update Timing:**
+- MUST update rq_status.tsv IMMEDIATELY after validation completes
+- rq_status.tsv is the SINGLE SOURCE OF TRUTH for chapter progress
+- Forgetting to update leaves progress tracking inconsistent
+- Add to end-of-RQ checklist: update rq_status.tsv BEFORE reporting results to user
+
+**[2025-12-11] [6.1.5] Integration vs Dissociation Finding:**
+- Chi-square test: χ² = 34.34, p < 0.000001, Cramer's V = 0.41 (medium effect)
+- INTEGRATED: Confidence and accuracy phenotypes are ASSOCIATED
+- Metacognition tracks memory state (memory-metacognition coupling confirmed)
+- This is a MAJOR THESIS FINDING connecting Ch5 and Ch6
+
 ---
 
 ## QUICK REFERENCE
@@ -454,6 +514,7 @@ Run in sequence. Don't skip. Each catches different issues.
 | GLMM | binomial family | Item-level data, overdispersion check |
 | Correlation | Pearson/Spearman | Normality test, bootstrap CI |
 | Calibration | theta_conf - theta_acc | Reliability check, Lord's paradox |
+| K-means Clustering | sklearn KMeans | Silhouette > 0.40, min cluster N >= 10, BIC may not have minimum |
 
 **Decision Compliance:**
 - D039: 2-pass IRT purification

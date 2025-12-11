@@ -1,0 +1,5 @@
+statistic,value,interpretation
+chi_square,34.343781186031386,integrated
+df,4.0,integrated
+p_value,6.334944071150003e-07,integrated
+cramers_v,0.4143897995006114,integrated

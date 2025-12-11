@@ -1,0 +1,14 @@
+CONFIDENCE-ACCURACY PHENOTYPE ASSOCIATION TEST
+==================================================
+
+Chi-square test of independence:
+  Chi-square statistic: 34.3438
+  Degrees of freedom: 4
+  p-value: 0.000001
+  Effect size (Cramer's V): 0.4144
+
+RESULT: INTEGRATED
+
+Confidence and accuracy phenotypes show significant association (p < 0.05).
+This supports the INTEGRATION hypothesis: metacognitive monitoring tracks memory state.
+Participants with resilient memory trajectories tend to also show resilient confidence trajectories.

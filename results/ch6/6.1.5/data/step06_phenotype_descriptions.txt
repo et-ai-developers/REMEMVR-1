@@ -1,0 +1,24 @@
+CONFIDENCE PHENOTYPE DESCRIPTIONS
+==================================================
+
+Cluster 0: Resilient
+  N = 42 participants
+  Mean baseline confidence (intercept): -0.0560
+  Mean decline rate (slope): -0.0162
+  SD intercept: 0.0980
+  SD slope: 0.0413
+
+Cluster 1: Resilient
+  N = 41 participants
+  Mean baseline confidence (intercept): 0.2285
+  Mean decline rate (slope): 0.0853
+  SD intercept: 0.1210
+  SD slope: 0.0443
+
+Cluster 2: Vulnerable
+  N = 17 participants
+  Mean baseline confidence (intercept): -0.4128
+  Mean decline rate (slope): -0.1657
+  SD intercept: 0.1704
+  SD slope: 0.0821
+
