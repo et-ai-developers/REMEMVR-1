@@ -1,0 +1,21 @@
+                                Mixed Linear Model Regression Results
+=====================================================================================================
+Model:                            MixedLM               Dependent Variable:               calibration
+No. Observations:                 1200                  Method:                           ML         
+No. Groups:                       100                   Scale:                            0.4631     
+Min. group size:                  12                    Log-Likelihood:                   -1414.2901 
+Max. group size:                  12                    Converged:                        Yes        
+Mean group size:                  12.0                                                               
+-----------------------------------------------------------------------------------------------------
+                                                           Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------------------------------------
+Intercept                                                  -0.094    0.106 -0.887 0.375 -0.302  0.114
+C(congruence, Treatment('Common'))[T.Congruent]             0.152    0.109  1.398 0.162 -0.061  0.366
+C(congruence, Treatment('Common'))[T.Incongruent]           0.027    0.109  0.248 0.804 -0.186  0.240
+log_TSVR                                                    0.028    0.026  1.078 0.281 -0.023  0.078
+C(congruence, Treatment('Common'))[T.Congruent]:log_TSVR   -0.045    0.029 -1.558 0.119 -0.102  0.012
+C(congruence, Treatment('Common'))[T.Incongruent]:log_TSVR -0.008    0.029 -0.277 0.782 -0.065  0.049
+Group Var                                                   0.534    0.159                           
+Group x log_TSVR Cov                                       -0.053    0.029                           
+log_TSVR Var                                                0.024    0.008                           
+=====================================================================================================

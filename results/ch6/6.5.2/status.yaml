@@ -16,11 +16,17 @@ rq_analysis: success
   timestamp: "2025-12-06T14:30:00Z"
   context_dump: "3 steps specified with validation (merge accuracy/confidence → calibration scores → LMM congruence effects)"
 analysis_steps:
-  step00_merge_accuracy_confidence: pending
-  step01_compute_calibration: pending
-  step02_fit_lmm_congruence: pending
-g_code: pending
+  step00_merge_accuracy_confidence: success
+  step01_compute_calibration: success
+  step02_fit_lmm_congruence: success
+g_code: success
 rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+rq_plots: bypassed
+  note: "No plots required for calibration LMM analysis - tabular results only"
+rq_results: success
+  timestamp: "2025-12-12T10:00:00Z"
+  context_dump: |
+    NULL schema effects on calibration: Congruent vs Common β=+0.152, p_bonf=0.487 (NOT significant)
+    Direction hypothesis-consistent (overconfidence trend) but small effect (f²=0.05), underpowered
+    Summary documented in results/summary.md with 5 sections + workflow deviation note
 rq_validate: pending

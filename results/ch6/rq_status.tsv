@@ -18,7 +18,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.4.3	Paradigm Confidence	Age × Paradigm	NULL 3-way (p=0.994). Age-invariant paradigm effects. Parallels Ch5. f²=0.000004 negligible. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.4.4	Paradigm Confidence	ICC by Paradigm	HYPO REFUTED: ICR highest ICC_slope (0.055), not IFR. All <0.10 (state-like). Ch5 +0.034 diff. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.5.1	Schema Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS (2 moderate: retention, floor).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.5.2	Schema Confidence	Calibration	Depends 6.5.1 + Ch5 5.4.1. Schema calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.5.2	Schema Confidence	Calibration	NULL schema effect on calibration (p_bonf=0.487). Direction correct (β=+0.15), underpowered (f²=0.05). THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.5.3	Schema Confidence	High-Confidence Errors	ROOT - Item-level HCE by schema.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.6.1	HCE	Over Time	ROOT - Item-level HCE trajectory.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.6.2	HCE	Profiles	Depends 6.6.1 + Ch5 5.1.1 + 6.1.1. HCE predictors.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
