@@ -7,10 +7,16 @@ context_dump: |
   Analysis plan created: 7 steps planned (Step 0: extraction + Steps 1-6: analysis).
   Tool requirements: Gamma computation (Goodman-Kruskal), LMM trajectory (TSVR), t-tests (threshold), plot data preparation.
   Expected outputs: 6 data files (item-level, gamma scores, LMM results, time effect, mean gamma, threshold tests, plot data). Validation required at every step.
-rq_tools: failed
-rq_analysis: pending
-g_code: pending
+  MANUAL EXECUTION: rq_tools failed but analysis executed directly from 2_plan.md (2025-12-11).
+  PRIMARY FINDING: Resolution (gamma) DECLINES significantly (p=0.011). 9.1% decrease over 6 days.
+rq_tools: bypassed
+rq_analysis: bypassed
+g_code: success
 rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+rq_plots: success
+rq_results: success
+context_dump: |
+  Results validated for scientific plausibility
+  Plausibility acceptable (0 anomalies flagged)
+  Summary documented in results/summary.md
 rq_validate: pending

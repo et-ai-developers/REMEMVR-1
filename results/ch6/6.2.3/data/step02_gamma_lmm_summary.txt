@@ -1,0 +1,17 @@
+             Mixed Linear Model Regression Results
+================================================================
+Model:                MixedLM    Dependent Variable:    gamma   
+No. Observations:     400        Method:                REML    
+No. Groups:           100        Scale:                 0.0216  
+Min. group size:      4          Log-Likelihood:        151.5583
+Max. group size:      4          Converged:             No      
+Mean group size:      4.0                                       
+----------------------------------------------------------------
+                      Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------
+Intercept              0.715    0.012 60.612 0.000  0.692  0.738
+TSVR_days             -0.008    0.003 -2.531 0.011 -0.015 -0.002
+Group Var              0.002    0.022                           
+Group x TSVR_days Cov  0.000    0.005                           
+TSVR_days Var          0.000    0.002                           
+================================================================
