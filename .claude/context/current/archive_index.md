@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-12 10:30 (context-manager curation - Session 23:40 archived)
+**Last Updated:** 2025-12-12 11:15 (context-manager curation - Session 00:15 archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -588,3 +588,6 @@
 
 ### grm_probability_transformation_bug_fix_critical
 **Description:** GRM Probability Transformation Bug Fix - CRITICAL CORRECTION to Ch6 trajectory plots (2025-12-11 23:15). User identified RQ 6.4.1 probability plot wrong (values 2-20% hugging floor). Root cause: Ch6 uses GRM (ordinal confidence) with systematically negative theta (mean ≈ -0.78), Step 07 scripts used b=0.0 for 2PL transformation causing misleadingly low probabilities. Solution: Changed to b=sample_mean_theta (EAP normalization) per standard practice. Fixed 4 RQs (6.3.1, 6.4.1, 6.5.1, 6.8.1), corrected probability ranges from 2-20% to 25-80%. All plots regenerated. Lesson documented in execute.md: NEVER assume b=0 without checking theta distribution. Pattern recognition: SECOND instance of b=0 problem (first: Ch5 5.5.1 multi-dimensional IRT). General rule established: Check theta distribution before probability transformation, use factor-specific b or sample mean theta as appropriate. Bug severity: HIGH (visual misrepresentation), files modified: 5 (4 step07 scripts + execute.md), plots regenerated: 8.
+
+### rq_6.4.3_complete_null_3way_age_invariant_thesis_ready
+**Description:** RQ 6.4.3 Age × Paradigm × Time interaction complete execution (2025-12-12 00:15). DEFINITIVE NULL FINDING: 3-way interaction NOT SIGNIFICANT (χ²(2)=0.01, p_uncorr=0.994, p_bonf=1.000, f²=0.000004 negligible - 4,700× smaller than "small" threshold). Age does NOT moderate paradigm-specific confidence decline. Age main effect marginal (β=-0.0076, p=0.039) but NOT significant after Bonferroni (p=0.116). Age×Time and Age×Paradigm×Time interactions essentially ZERO (coefficients ~10⁻⁵, all p>0.9). Extends universal age-invariant pattern to SEVENTH REPLICATION (7/7 RQs NULL: Ch5 5.1.3, 5.2.3, 5.3.4, 5.4.3; Ch6 6.1.3, 6.2.5, 6.4.3). Theoretical significance: VR ecological encoding creates age-invariant memory traces for BOTH accuracy AND confidence across ALL paradigm types (Free Recall, Cued Recall, Recognition). No age-related dissociation between "knowing" and "knowing that you know". Clinical implication: VR-based assessment produces equivalent results across adult lifespan (ages 20-70), no age-specific norms needed. Ch5 5.3.4 comparison pending (file not found, moderate validation note). Paradigm series 3/5 complete (6.4.1 trajectories, 6.4.2 calibration, 6.4.3 age). Total 19/31 Ch6 RQs thesis-ready (61%).
