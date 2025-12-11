@@ -1,0 +1,3 @@
+term,statistic,df,p_uncorrected,p_bonferroni,interpretation
+Domain_main,60.23966863012538,2,8.304468224196171e-14,1.6608936448392342e-13,significant
+Domain_x_Time_interaction,59.602144410600886,2,1.141309269314661e-13,2.282618538629322e-13,significant

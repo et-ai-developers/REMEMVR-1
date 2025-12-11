@@ -1,0 +1,30 @@
+======================================================================
+RQ 6.3.2: LMM Model Summary
+======================================================================
+
+Formula: calibration ~ C(Domain) * TSVR_centered
+Groups: UID
+Random Effects: Intercept + Slope
+Estimation: ML (REML=False)
+
+Fixed Effects:
+----------------------------------------------------------------------
+                            term  estimate       SE         z      p_value
+                       Intercept  0.010626 0.075393  0.140937 8.879194e-01
+              C(Domain)[T.Where] -0.038529 0.056689 -0.679655 4.967232e-01
+               C(Domain)[T.When]  0.003509 0.056689  0.061896 9.506459e-01
+                   TSVR_centered  0.001707 0.000793  2.152747 3.133857e-02
+C(Domain)[T.Where]:TSVR_centered  0.000489 0.000973  0.502812 6.150963e-01
+ C(Domain)[T.When]:TSVR_centered -0.006344 0.000973 -6.521938 6.940493e-11
+
+Hypothesis Tests (LRT with dual p-values, Decision D068):
+----------------------------------------------------------------------
+                     term  statistic  df  p_uncorrected  p_bonferroni interpretation
+              Domain_main  60.239669   2   8.304468e-14  1.660894e-13    significant
+Domain_x_Time_interaction  59.602144   2   1.141309e-13  2.282619e-13    significant
+
+Model Fit:
+----------------------------------------------------------------------
+Log-likelihood: -1574.88
+AIC: 3169.76
+BIC: 3220.66
