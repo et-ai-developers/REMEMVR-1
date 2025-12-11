@@ -30,18 +30,6 @@
 
 ## Session History
 
-### Session (2025-12-10 14:45)
-
-[Previous session content preserved - see earlier in file]
-
-### Session (2025-12-10 15:10)
-
-[Previous session content preserved - see earlier in file]
-
-### Session (2025-12-10 16:30)
-
-[Previous session content preserved - see earlier in file]
-
 ### Session (2025-12-10 17:00)
 
 **Archived to:** `ch6_validation_workflow_complete_four_root_rqs_thesis_ready.md`
