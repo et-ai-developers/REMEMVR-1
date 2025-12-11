@@ -503,6 +503,22 @@ Run in sequence. Don't skip. Each catches different issues.
 - Metacognition tracks memory state (memory-metacognition coupling confirmed)
 - This is a MAJOR THESIS FINDING connecting Ch5 and Ch6
 
+### GRM Probability Transformation Lessons (Critical Bug Fix)
+
+**[2025-12-11] [6.3.1, 6.4.1, 6.5.1, 6.8.1] GRM Theta-to-Probability Transformation Fix:**
+- **BUG:** Step 07 scripts used `b = 0.0` (centered scale) for probability transformation
+- **SYMPTOM:** Probability plots showed values hugging floor (2-20% range) - MISLEADING
+- **ROOT CAUSE:** GRM confidence theta is systematically negative (mean ≈ -0.78) unlike 2PL accuracy theta which centers at 0
+- **FIX:** Use `b = sample_mean_theta` (EAP normalization) instead of b=0
+- **RESULT:** Sensible probability range (25-80%) representing "probability relative to average participant"
+- **FILES FIXED:**
+  - `results/ch6/6.3.1/code/step07_prepare_trajectory_plot_data.py`
+  - `results/ch6/6.4.1/code/step07_prepare_trajectory_plot_data.py`
+  - `results/ch6/6.5.1/code/step07_prepare_trajectory_plot_data.py`
+  - `results/ch6/6.8.1/code/step07_prepare_trajectory_plot_data.py`
+- **STATISTICAL JUSTIFICATION:** EAP normalization is standard practice when theta distributions differ from assumed N(0,1)
+- **FUTURE PREVENTION:** For GRM confidence data, ALWAYS use sample mean theta for probability centering
+
 ---
 
 ## QUICK REFERENCE

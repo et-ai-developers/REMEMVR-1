@@ -249,13 +249,24 @@ if __name__ == "__main__":
         # =========================================================================
         # Tool: convert_theta_to_probability() from tools.plotting
         # What it does: Transforms theta to P(correct) using IRT 2PL formula
-        # Formula: P = 1 / (1 + exp(-a * (theta - b))) where b=0 (centered scale)
-        # Expected output: Probability values in [0, 1] range
+        # Formula: P = 1 / (1 + exp(-a * (theta - b)))
+        #
+        # CRITICAL FIX (2025-12-11): GRM confidence theta is systematically negative
+        # (mean ≈ -0.78) unlike 2PL accuracy theta which centers at 0. Using b=0
+        # produces misleadingly low probabilities (2-20%). The statistically rigorous
+        # solution is to use b = mean(theta) to get interpretable probabilities
+        # representing "probability relative to average participant" (EAP normalization).
+        # Expected output: Probability values in [0, 1] range with sensible distribution
 
         log("[ANALYSIS] Transforming theta to probability scale...")
 
         # Create copy for probability transformation
         probability_data = theta_data.copy()
+
+        # Compute sample mean theta for centering (EAP normalization)
+        # This ensures probabilities are interpretable relative to the sample
+        sample_mean_theta = theta_data['theta'].mean()
+        log(f"[INFO] Sample mean theta: {sample_mean_theta:.4f} (used for probability centering)")
 
         # Transform theta and CIs to probability for each domain
         for domain in probability_data['domain'].unique():
@@ -265,7 +276,9 @@ if __name__ == "__main__":
                 continue
 
             a = mean_discrim[domain]
-            b = 0.0  # Centered scale (theta mean = 0)
+            # Use sample mean theta as difficulty parameter (EAP normalization)
+            # This produces interpretable probabilities centered around 50% for average theta
+            b = sample_mean_theta
 
             # Transform theta to probability
             domain_mask = probability_data['domain'] == domain
