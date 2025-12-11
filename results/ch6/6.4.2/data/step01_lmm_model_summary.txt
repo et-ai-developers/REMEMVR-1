@@ -1,0 +1,30 @@
+======================================================================
+RQ 6.4.2: LMM Model Summary
+======================================================================
+
+Formula: calibration ~ C(Paradigm) * TSVR_centered
+Groups: UID
+Random Effects: Intercept + Slope
+Estimation: ML (REML=False)
+
+Fixed Effects:
+----------------------------------------------------------------------
+                            term  estimate       SE         z  p_value
+                       Intercept  0.019504 0.076066  0.256407 0.797637
+              C(Paradigm)[T.ICR] -0.083729 0.039609 -2.113891 0.034525
+              C(Paradigm)[T.IRE]  0.018670 0.039609  0.471346 0.637393
+                   TSVR_centered  0.000949 0.000666  1.425646 0.153971
+C(Paradigm)[T.ICR]:TSVR_centered  0.000018 0.000680  0.025805 0.979413
+C(Paradigm)[T.IRE]:TSVR_centered  0.000317 0.000680  0.467128 0.640409
+
+Hypothesis Tests (LRT with dual p-values, Decision D068):
+----------------------------------------------------------------------
+                       term  statistic  df  p_uncorrected  p_bonferroni  interpretation
+              Paradigm_main   7.827709   2       0.019963      0.039927     significant
+Paradigm_x_Time_interaction   0.275722   2       0.871220      1.000000 not significant
+
+Model Fit:
+----------------------------------------------------------------------
+Log-likelihood: -1220.90
+AIC: 2461.80
+BIC: 2512.70
