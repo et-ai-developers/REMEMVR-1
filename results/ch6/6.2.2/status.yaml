@@ -9,16 +9,28 @@ rq_tools: success
 rq_analysis: success
   timestamp: "2025-12-06T00:00:00Z"
   context_dump: "6 steps specified with validation (classification + trend test + dual-axis trajectory)"
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
-rq_validate: pending
+g_code: success
+rq_inspect: success
+rq_plots: success
+rq_results: success
+  timestamp: "2025-12-11T00:00:00Z"
+  context_dump: |
+    Overconfidence trajectory analysis complete (RQ 6.2.2)
+    Proportion overconfident: 41% (Day 0) -> 51% (Day 6), +10%, trend p=0.230 (NON-SIG)
+    Mean calibration: -0.116 -> +0.111, shift +0.227 z-units (underconfident to overconfident)
+    NUANCED FINDING: Mean shifts significantly (6.2.1 p=0.004) but proportion trend not significant
+    Summary documented in results/summary.md (9 sections, publication-ready)
+rq_validate: success
+  timestamp: "2025-12-11T20:00:00Z"
+  context_dump: |
+    PASS WITH NOTES (0 critical, 0 high, 3 moderate issues)
+    All 6 validation layers passed. Proportion +10%, trend p=0.230 NON-SIG
+    Complements RQ 6.2.1 (magnitude vs direction). Thesis-ready with documented follow-ups
 
 analysis_steps:
-  step00_load_calibration_data: pending
-  step01_classify_observations: pending
-  step02_compute_proportions: pending
-  step03_trend_test: pending
-  step04_compute_mean_calibration: pending
-  step05_prepare_plot_data: pending
+  step00_load_calibration_data: success
+  step01_classify_observations: success
+  step02_compute_proportions: success
+  step03_trend_test: success
+  step04_compute_mean_calibration: success
+  step05_prepare_plot_data: success

@@ -5,7 +5,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.1.4	Confidence	ICC Decomposition	CRITICAL. ICC_slope=0.412 (824x > Ch5). MEASUREMENT ARTIFACT confirmed. PASS WITH NOTES. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.1.5	Confidence	Trajectory Clustering	K=3 matched Ch5. INTEGRATED (p<0.000001, V=0.41). PASS WITH NOTES. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.2.1	Calibration	Over Time	ROOT. Time effect SIGNIFICANT (p_LRT=0.004). Calibration WORSENS over time. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.2.2	Calibration	Over-Underconfidence	Depends 6.2.1. Overconfidence trend.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.2.2	Calibration	Over-Underconfidence	Depends 6.2.1. +10% overconfident (41%→51%), trend p=0.230 NON-SIG. Complements 6.2.1. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.2.3	Calibration	Resolution Over Time	ROOT - Item-level gamma. MISSING TOOLS.	True	True	True	True	FAIL	FAIL	False	False	False	False	False
 6.2.4	Calibration	By Accuracy Level	Depends 6.2.1 + 6.2.3. Dunning-Kruger test.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.2.5	Calibration	Age Effects	Depends 6.2.1. Age × calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
