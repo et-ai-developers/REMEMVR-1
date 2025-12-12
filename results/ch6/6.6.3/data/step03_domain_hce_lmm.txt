@@ -1,0 +1,19 @@
+                               Mixed Linear Model Regression Results
+====================================================================================================
+Model:                           MixedLM                Dependent Variable:                HCE_rate 
+No. Observations:                1200                   Method:                            REML     
+No. Groups:                      100                    Scale:                             0.0046   
+Min. group size:                 12                     Log-Likelihood:                    1390.2959
+Max. group size:                 12                     Converged:                         Yes      
+Mean group size:                 12.0                                                               
+----------------------------------------------------------------------------------------------------
+                                                          Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+----------------------------------------------------------------------------------------------------
+Intercept                                                  0.060    0.007  8.093 0.000  0.046  0.075
+C(domain, Treatment(reference='What'))[T.When]             0.035    0.007  4.880 0.000  0.021  0.050
+C(domain, Treatment(reference='What'))[T.Where]            0.050    0.007  6.858 0.000  0.036  0.064
+Days_mean                                                 -0.001    0.001 -0.394 0.694 -0.003  0.002
+C(domain, Treatment(reference='What'))[T.When]:Days_mean  -0.008    0.002 -3.830 0.000 -0.012 -0.004
+C(domain, Treatment(reference='What'))[T.Where]:Days_mean -0.006    0.002 -2.830 0.005 -0.010 -0.002
+Group Var                                                  0.003    0.007                           
+====================================================================================================
