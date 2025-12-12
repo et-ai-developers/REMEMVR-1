@@ -1,0 +1,2 @@
+test,F_statistic,p_value,eta_squared,df_between,df_within
+One-way ANOVA,27.8991077967577,2.683443223297314e-10,0.36517583256308167,2,97

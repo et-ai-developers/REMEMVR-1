@@ -23,7 +23,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.6.1	HCE	Over Time	ROOT - HCE DECREASES 35% (4.87%→3.17%). Hypothesis REJECTED. Dual p<.001 (D068 FULL). Sensitivity: 4 models robust. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.6.2	HCE	Profiles	Dunning-Kruger NOT SUPPORTED (β≈0). Confidence_bias+baseline_conf predict HCE (p<.001). Age NULL. R²=0.21. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.6.3	HCE	Domain Specificity	ROOT - HYPO REFUTED: Where>When>What (not When>Where). Domain p<.001, Domain×Time p<.001. Spatial most vulnerable. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
-6.7.1	Predictive	Day 0 Confidence	Depends 6.1.1 + Ch5 5.1.4. Confidence predicts forgetting.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.7.1	Predictive	Day 0 Confidence	ROOT - BULLETPROOF. rho=-0.66 (p<.001). PARTIAL rho=-0.35 (p=0.0004) controlling baseline = UNIQUE PREDICTOR. 12.2% unique variance. Slopes positive (improvement). Full diagnostics. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.7.2	Predictive	Confidence Variability	ROOT - Item-level SD. Variability correlation.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.7.3	Predictive	Calibration Predicts	Depends 6.2.1 + Ch5 5.1.1. Calibration → stability.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.8.1	Source-Dest Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (3 moderate).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE

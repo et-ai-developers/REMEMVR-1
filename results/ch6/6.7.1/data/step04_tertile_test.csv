@@ -1,0 +1,2 @@
+comparison,high_mean,low_mean,difference,t_statistic,cohens_d,p_uncorrected,p_bonferroni,interpretation
+High vs Low,0.0738295076674149,0.08027042172259533,-0.006440914055180422,-7.504486680893244,-1.8201053677272792,2.039847140011571e-10,2.039847140011571e-10,High confidence -> faster forgetting (more negative slope)
