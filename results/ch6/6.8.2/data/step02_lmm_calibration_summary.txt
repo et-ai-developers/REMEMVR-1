@@ -1,0 +1,17 @@
+                 Mixed Linear Model Regression Results
+=======================================================================
+Model:                  MixedLM     Dependent Variable:     calibration
+No. Observations:       800         Method:                 REML       
+No. Groups:             100         Scale:                  0.5550     
+Min. group size:        8           Log-Likelihood:         -989.2960  
+Max. group size:        8           Converged:              Yes        
+Mean group size:        8.0                                            
+-----------------------------------------------------------------------
+                             Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------
+Intercept                     0.078    0.100  0.778 0.436 -0.118  0.274
+LocationType_Source          -0.138    0.119 -1.156 0.248 -0.371  0.096
+log_TSVR                     -0.023    0.023 -1.029 0.304 -0.067  0.021
+LocationType_Source:log_TSVR  0.041    0.032  1.288 0.198 -0.021  0.103
+Group Var                     0.288    0.073                           
+=======================================================================

@@ -9,7 +9,7 @@ g_code: success
 rq_inspect: success
 rq_plots: success
 rq_results: success
-rq_validate: pending
+rq_validate: success
 
 context_dumps:
   rq_scholar: "9.1/10 CONDITIONAL. Theory strong, literature sparse. Required: VR ecological validity + enactment effect acknowledgment. Ready for stats after 2 changes."

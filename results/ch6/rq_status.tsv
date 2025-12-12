@@ -27,6 +27,6 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.7.2	Predictive	Confidence Variability	ROOT - SUPPRESSION EFFECT. r=-0.01 (null) BUT partial r=0.21 (p=.034) controlling mean_acc. Metacognition tracks variability WITHIN ability bands. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.7.3	Predictive	Calibration Predicts	NULL FINDING. r=0.02, p=0.847. Calibration INDEPENDENT of trajectory stability. Metacognition ≠ consolidation. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.8.1	Source-Dest Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (3 moderate).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.8.2	Source-Dest Confidence	Calibration	Depends 6.8.1 + Ch5 5.5.1. Location calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.8.3	Source-Dest Confidence	ICC	CRITICAL. Depends 6.8.1. Opposite correlation replication.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
-6.8.4	Source-Dest Confidence	Clustering	Depends 6.8.3. K-means on location random effects.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.8.2	Source-Dest Confidence	Calibration	DERIVATIVE - COMPLETE. NULL: Equal calibration (p=0.248). PASS WITH NOTES.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+6.8.3	Source-Dest Confidence	ICC	DERIVATIVE - COMPLETE. NULL: Pattern NOT replicated (both r<0). PASS.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
+6.8.4	Source-Dest Confidence	Clustering	DERIVATIVE - COMPLETE. NULL: Silhouette=0.33<0.40. PASS WITH NOTES.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE

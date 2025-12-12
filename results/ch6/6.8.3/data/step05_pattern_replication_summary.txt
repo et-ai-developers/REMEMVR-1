@@ -1,0 +1,14 @@
+Ch5 5.5.6 vs RQ 6.8.3 Pattern Comparison
+==================================================
+
+Accuracy (Ch5 5.5.6):
+  Source:      r = +0.9890
+  Destination: r = -0.9033
+  Opposite signs: True
+
+Confidence (Ch6 6.8.3):
+  Source:      r = -0.2407
+  Destination: r = -0.4019
+  Opposite signs: False
+
+Pattern Replication: False
