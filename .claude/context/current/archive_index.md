@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-12 16:15 (context-manager curation - Sessions 13:30, 14:30 archived)
+**Last Updated:** 2025-12-12 17:15 (context-manager curation - Session 15:30 archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -621,3 +621,6 @@
 
 ### ch6_progress_24_of_31_thesis_ready_77_percent
 **Description:** Chapter 6 Progress Milestone - 24/31 RQs THESIS-READY (77%) achieved after completing RQ 6.6.2 (2025-12-12 14:30). Series completion: Confidence (6.1.X, 5/5), Calibration (6.2.X, 5/5), Domain Confidence (6.3.X, 4/4), Paradigm Confidence (6.4.X, 4/4), Schema Confidence (6.5.X, 3/3), HCE (6.6.X, 2/3), Source-Dest (6.8.X, 1/1). Remaining ROOT RQs: 2 (6.6.3 HCE Domain, 6.7.2 Confidence Variability). Progress trajectory: 55% → 68% → 74% → 77% over 4 sessions. Major discoveries: Dunning-Kruger DOUBLE NULL (6.2.4 + 6.6.2), HCE driven by metacognition not memory, Schema QUADRUPLE NULL (accuracy/confidence/calibration/HCE), Domain dissociation (What/Where ICC=0.59 vs When ICC≈0), universal age-invariance (7/7 RQs NULL). Methodological achievements: D068 compliance (dual p-values), D069 (dual-scale plots), D070 (TSVR time variable), sensitivity analysis (6.6.1: 4-model robustness). Quality: 100% validation pass rate, 0 critical issues. Estimated 3-4 hours to 100% completion.
+
+### rq_6.6.3_complete_hypo_refuted_where_highest_hce_thesis_ready
+**Description:** RQ 6.6.3 HCE Domain Specificity complete execution (2025-12-12 15:30). MAJOR FINDING: Hypothesis REFUTED - WHERE domain most vulnerable to HCEs (9.32%), not WHEN as predicted. Actual ranking: Where (9.32%) > When (7.34%) > What (5.88%). Domain main effect p<.001, Domain × Time interaction p<.001 (both D068 compliant). Spatial memory shows "false spatial familiarity" - locations feel known when incorrect. Temporal memory shows FASTEST HCE decline (9.88% → 4.58%), better calibration than expected despite accuracy floor effects. Object recognition best calibrated (5.88%, stable). All domains show DECREASING HCE over time (adaptive metacognition). 7-step LMM pipeline on 42,000 item-level responses. Moderate issue: GLMM specified but LMM implemented (conservative, effects still highly significant). HCE series complete (3/3: temporal pattern 6.6.1, predictors 6.6.2, domain specificity 6.6.3). Total 25/31 Ch6 RQs thesis-ready (81%).
