@@ -2,21 +2,27 @@ rq_builder: success
 rq_concept: success
 rq_scholar: success
 rq_stats: success
-rq_planner: pending
+rq_planner: success
 rq_planner_context: |
   Analysis plan created: 4 steps (Steps 1-2: SD computation, Step 3: correlation, Step 4: plot data).
   Tool requirements: pandas aggregation (groupby + std), Pearson correlation, permutation test (D068), scatterplot data preparation.
   Expected outputs: 5 CSV files (2 SD files, 1 correlation file, 2 plot data files). Validation required at every step.
-rq_tools: pending
-rq_analysis: pending
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+rq_tools: success
+rq_analysis: success
+g_code: success
+rq_inspect: success
+rq_plots: success
+rq_results: success
+rq_results_context: |
+  Results validated for scientific plausibility
+  1 suppression effect flagged: partial r (0.21) > zero-order r (-0.01), expected due to binary SD constraint
+  Hypothesis PARTIALLY SUPPORTED: null zero-order but significant partial correlation
+  Summary documented in results/summary.md
 rq_validate: pending
 
 analysis_steps:
-  step01_compute_sd_confidence: pending
-  step02_compute_sd_accuracy: pending
-  step03_correlate_variability: pending
-  step04_prepare_scatterplot_data: pending
+  step01_compute_sd_confidence: success
+  step02_compute_sd_accuracy: success
+  step03_correlate_variability: success
+  step04_prepare_scatterplot_data: success
+  step05_suppression_analysis: success
