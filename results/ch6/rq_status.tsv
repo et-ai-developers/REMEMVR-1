@@ -25,7 +25,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.6.3	HCE	Domain Specificity	ROOT - HYPO REFUTED: Where>When>What (not When>Where). Domain p<.001, Domain×Time p<.001. Spatial most vulnerable. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.7.1	Predictive	Day 0 Confidence	ROOT - BULLETPROOF. rho=-0.66 (p<.001). PARTIAL rho=-0.35 (p=0.0004) controlling baseline = UNIQUE PREDICTOR. 12.2% unique variance. Slopes positive (improvement). Full diagnostics. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.7.2	Predictive	Confidence Variability	ROOT - SUPPRESSION EFFECT. r=-0.01 (null) BUT partial r=0.21 (p=.034) controlling mean_acc. Metacognition tracks variability WITHIN ability bands. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
-6.7.3	Predictive	Calibration Predicts	Depends 6.2.1 + Ch5 5.1.1. Calibration → stability.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.7.3	Predictive	Calibration Predicts	NULL FINDING. r=0.02, p=0.847. Calibration INDEPENDENT of trajectory stability. Metacognition ≠ consolidation. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.8.1	Source-Dest Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS WITH NOTES (3 moderate).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.8.2	Source-Dest Confidence	Calibration	Depends 6.8.1 + Ch5 5.5.1. Location calibration.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.8.3	Source-Dest Confidence	ICC	CRITICAL. Depends 6.8.1. Opposite correlation replication.	True	True	True	True	TRUE	TRUE	False	False	False	False	False

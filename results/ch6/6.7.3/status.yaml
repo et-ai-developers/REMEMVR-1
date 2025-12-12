@@ -8,7 +8,7 @@ rq_analysis: success
 g_code: pending
 rq_inspect: pending
 rq_plots: pending
-rq_results: pending
+rq_results: success
 rq_validate: pending
 
 # Context dumps
@@ -21,6 +21,12 @@ rq_tools_context: |
 
 rq_analysis_context: |
   4 steps specified with validation (correlation: calibration → trajectory stability)
+
+rq_results_context: |
+  NULL RESULT - Calibration does NOT predict trajectory stability
+  r = 0.020, p = 0.847 (two-tailed), effect size negligible
+  Hypothesis NOT SUPPORTED - metacognition & consolidation independent
+  Summary documented in results/summary.md
 
 # Analysis steps
 analysis_steps:
