@@ -20,7 +20,7 @@ Number	Type	Subtype	Notes	concept	scholar	stats	plan	tools	analysis	code	inspect
 6.5.1	Schema Confidence	Trajectories	ROOT - COMPLETE. Kitchen sink. MED. PASS (2 moderate: retention, floor).	True	True	True	True	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE
 6.5.2	Schema Confidence	Calibration	NULL schema effect on calibration (p_bonf=0.487). Direction correct (β=+0.15), underpowered (f²=0.05). THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.5.3	Schema Confidence	High-Confidence Errors	NULL HCE schema effect (p_bonf=0.130). Incong 5.6% vs Common 4.1% (trend only). Quadruple NULL. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
-6.6.1	HCE	Over Time	ROOT - Item-level HCE trajectory.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
+6.6.1	HCE	Over Time	ROOT - HCE DECREASES 35% (4.87%→3.17%). Hypothesis REJECTED. Dual p<.001 (D068 FULL). Sensitivity: 4 models robust. THESIS-READY.	True	True	True	True	TRUE	TRUE	TRUE	TRUE	N/A	TRUE	TRUE
 6.6.2	HCE	Profiles	Depends 6.6.1 + Ch5 5.1.1 + 6.1.1. HCE predictors.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.6.3	HCE	Domain Specificity	ROOT - Item-level HCE by domain.	True	True	True	True	TRUE	TRUE	False	False	False	False	False
 6.7.1	Predictive	Day 0 Confidence	Depends 6.1.1 + Ch5 5.1.4. Confidence predicts forgetting.	True	True	True	True	TRUE	TRUE	False	False	False	False	False

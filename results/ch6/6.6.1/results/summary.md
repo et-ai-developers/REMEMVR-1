@@ -59,7 +59,7 @@
 
 **Fixed Effects Estimates:**
 
-| Effect    | ²        | SE      | z      | p       | 95% CI          | Interpretation                          |
+| Effect    | ï¿½        | SE      | z      | p       | 95% CI          | Interpretation                          |
 |-----------|----------|---------|--------|---------|-----------------|------------------------------------------|
 | Intercept | 0.050    | 0.004   | 11.549 | <.001   | [0.041, 0.058]  | Baseline HCE rate at Day 0: 5.0%        |
 | Days      | -0.003   | 0.001   | -4.267 | <.001   | [-0.004, -0.002]| HCE rate DECREASES 0.3% per day         |
@@ -69,34 +69,48 @@
 - Group x Days Covariance: -0.000 (negligible covariance between intercept and slope)
 - Days (Slope) Variance: 0.000 (minimal between-participant variability in forgetting rate)
 
-**Interpretation:** Significant negative time effect (² = -0.003, p < .001) indicates HCE rate DECREASES over the 6-day retention interval, contrary to hypothesis predicting increase.
+**Interpretation:** Significant negative time effect (ï¿½ = -0.003, p < .001) indicates HCE rate DECREASES over the 6-day retention interval, contrary to hypothesis predicting increase.
 
 ### Hypothesis Test: Time Effect on HCE Rate (Step 03 - Dual P-Values per D068)
 
-**Note:** Step 03 attempted to fit models with ML (Maximum Likelihood) for Likelihood Ratio Test comparison, but encountered convergence failure.
+**Note:** Step 03 was corrected (2025-12-12) to use Days (TSVR/24) consistently with Step 02. Original version incorrectly used raw TSVR hours, causing convergence failure.
 
-**Full Model (ML Estimation):**
-- Formula: HCE_rate ~ TSVR + (TSVR | UID)
-- Converged: **No** (convergence failure documented in logs)
-- TSVR coefficient: -0.000 (rounded to zero due to non-convergence)
-- SE: 0.002
-- p_wald: 0.958 (not interpretable due to convergence failure)
+**Full Model (REML Estimation - Primary):**
+- Formula: HCE_rate ~ Days + (Days | UID)
+- Converged: **Yes**
+- Days coefficient: -0.003 (HCE rate decreases 0.3% per day)
+- SE: 0.0007
+- p_wald (REML): 0.000021 (p < .001)
 
-**Reduced Model (ML Estimation):**
-- Formula: HCE_rate ~ 1 + (TSVR | UID) (no fixed TSVR effect)
-- Converged: **No** (convergence failure)
+**Full Model (ML Estimation - for LRT):**
+- Formula: HCE_rate ~ Days + (Days | UID)
+- Converged: **Yes**
+- Log-likelihood: 739.63
+
+**Reduced Model (ML Estimation - for LRT):**
+- Formula: HCE_rate ~ 1 + (Days | UID) (no fixed Days effect)
+- Converged: **Yes**
+- Log-likelihood: 731.19
 
 **Likelihood Ratio Test:**
-- Chi-square statistic: -0.145 (**negative value - mathematically impossible**, confirms convergence failure)
+- Chi-square statistic: 16.88 (valid positive value)
 - Degrees of freedom: 1
-- p_lrt: 1.000 (not interpretable)
+- p_lrt: 0.000040 (p < .001)
 
-**Dual P-Values (Decision D068 Compliance - Attempted):**
-- p_wald (uncorrected): 0.958 (invalid due to non-convergence)
-- p_lrt (Bonferroni equivalent): 1.000 (invalid due to non-convergence)
-- Significant: False (but result invalid)
+**Dual P-Values (Decision D068 Compliance - FULL):**
+- p_wald (REML): 0.000021 (p < .001) âœ“
+- p_lrt (ML LRT): 0.000040 (p < .001) âœ“
+- Significant: **True** (both p-values < 0.05)
 
-**Critical Note:** Step 03 ML-based hypothesis test **failed to converge** and produced invalid results (zero coefficient, negative chi-square). **The REML results from Step 02 should be considered the primary finding** (² = -0.003, p < .001, significant decline).
+**Sensitivity Analysis (Step 05):**
+- Model A (Full, random slopes): Î²=-0.003, p<.001 âœ“
+- Model B (Intercepts only): Î²=-0.003, p<.001 âœ“
+- Model C (Quadratic): DaysÂ² NOT significant (p=0.608)
+- Model D (Exclude late): Î²=-0.003, p<.001 âœ“
+- Random slopes LRT: p=0.074 (not significant - intercepts-only model adequate)
+- **Robustness:** Primary finding confirmed across 4 model specifications
+
+**Conclusion:** Both REML Wald test and ML-based Likelihood Ratio Test converge and show highly significant time effect (p < .001). HCE rate decreases significantly over time, contrary to hypothesis predicting increase. Linear model is optimal (quadratic term not significant).
 
 ### Trajectory Data for Visualization (Step 04)
 
@@ -164,7 +178,7 @@ The plot will display HCE rate trajectory across 4 test sessions with the follow
 
 **Connection to Statistical Findings:**
 
-The visual trajectory will corroborate the REML LMM finding (Step 02: ² = -0.003, p < .001):
+The visual trajectory will corroborate the REML LMM finding (Step 02: ï¿½ = -0.003, p < .001):
 - Negative slope visible in line plot (downward trajectory)
 - Statistical significance supported by non-overlapping confidence bands
 - Magnitude: 35% relative reduction from baseline (4.87% -> 3.17%) visually evident as substantial drop
@@ -185,15 +199,15 @@ The visual trajectory will corroborate the REML LMM finding (Step 02: ² = -0.003
 
 The statistical findings **contradict** the hypothesis:
 - **Predicted:** HCE rate INCREASES over time (positive Time effect)
-- **Observed:** HCE rate DECREASES over time (negative Time effect: ² = -0.003, p < .001)
+- **Observed:** HCE rate DECREASES over time (negative Time effect: ï¿½ = -0.003, p < .001)
 - **Direction:** Opposite to prediction (decline, not increase)
 
 **Evidence for Rejection:**
-1. REML LMM (Step 02): Significant negative Days effect (² = -0.003, p < .001, 95% CI [-0.004, -0.002])
+1. REML LMM (Step 02): Significant negative Days effect (ï¿½ = -0.003, p < .001, 95% CI [-0.004, -0.002])
 2. Trajectory data (Step 04): 35% relative reduction from Day 0 (4.87%) to Day 6 (3.17%)
 3. Confidence intervals non-overlapping between T1/T2 and T4 (statistically meaningful decline)
 
-**Note on Step 03 ML Results:** While Step 03 attempted dual p-value reporting (Decision D068), the ML-based LRT failed to converge (coefficient = 0.000, p = 0.958, negative chi-square). These results are **invalid** and should not be interpreted. The REML results from Step 02 are the authoritative finding.
+**Note on Step 03 Results:** Step 03 was corrected (2025-12-12) and now produces valid dual p-values per Decision D068. Both REML (p_wald=0.000021) and ML-based LRT (p_lrt=0.000040) show highly significant time effect (p < .001), confirming HCE rate decreases over time.
 
 ### Theoretical Contextualization
 
@@ -209,7 +223,7 @@ The finding that HCE rate **decreases** (not increases) over time suggests **met
 **2. Forgetting of Lure Details (Source Monitoring):**
 - High-confidence errors often reflect **false memories** where lure items are mistaken for targets with high certainty
 - Over time, **both true memories AND lure details fade**, reducing the vividness of false memories
-- **Mechanism:** When lure details become less accessible, participants are less likely to endorse them with high confidence (vaguer memories ’ lower confidence)
+- **Mechanism:** When lure details become less accessible, participants are less likely to endorse them with high confidence (vaguer memories ï¿½ lower confidence)
 
 **3. Conservative Response Bias at Longer Delays:**
 - Participants may adopt **more conservative response strategies** at longer retention intervals
@@ -335,7 +349,7 @@ The finding that HCE rate **decreases** (not increases) over time suggests **met
 **Measurement:**
 
 1. **Confidence Scale (5-Level Likert):**
-   - Confidence ratings use 5 levels (0, 0.25, 0.5, 0.75, 1.0), requiring HCE threshold at 0.75 (high confidence)
+   - Confidence ratings use 5 levels (0.2, 0.4, 0.6, 0.8, 1.0), requiring HCE threshold at 0.75 (high confidence, captures 0.8 and 1.0)
    - **Arbitrary threshold:** Why 0.75 and not 0.5? Sensitivity to threshold choice unknown (no threshold analysis conducted)
    - **Coarse granularity:** Only 2 high-confidence levels (0.75 and 1.0), may miss nuanced confidence changes
    - **Recommendation:** Future studies could use continuous confidence scales (0-100 slider) for finer-grained HCE detection
@@ -377,7 +391,7 @@ The finding that HCE rate **decreases** (not increases) over time suggests **met
    - ML-based Likelihood Ratio Test **failed to converge** (coefficient = 0.000, negative chi-square statistic)
    - **Impact:** Cannot report valid LRT p-value for Time effect (Decision D068 dual p-value reporting incomplete)
    - **Root cause:** Small random effect variances (near zero) in HCE data cause ML estimation instability
-   - **Resolution:** REML results from Step 02 should be considered **primary and authoritative** (² = -0.003, p < .001), ML results discarded
+   - **Resolution:** REML results from Step 02 should be considered **primary and authoritative** (ï¿½ = -0.003, p < .001), ML results discarded
 
 2. **REML Boundary Warning:**
    - Step 02 REML estimation produced convergence warning: "MLE may be on boundary of parameter space"
@@ -435,9 +449,9 @@ Findings may not generalize to:
 **2. Decision D068 (Dual P-Value Reporting) - Partially Compliant:**
 
 - **Goal:** Report both uncorrected (Wald) and Bonferroni-corrected (LRT) p-values for hypothesis tests
-- **Status:** Step 03 attempted dual p-values but **ML convergence failed**, producing invalid p_wald (0.958) and p_lrt (1.000)
-- **Compliance:** File `step03_time_effect.csv` **exists** with both columns (D068 format compliant), but **values invalid** (non-convergence)
-- **Recommendation:** Update Decision D068 to allow **REML-only reporting** when ML fails to converge (avoid forcing invalid LRT)
+- **Status:** Step 03 corrected (2025-12-12) - now produces valid dual p-values: p_wald=0.000021, p_lrt=0.000040
+- **Compliance:** File `step03_time_effect.csv` **exists** with valid dual p-values (D068 FULLY compliant)
+- **Note:** Original convergence failure was due to inconsistent time variable (TSVR hours vs Days). Fixed by using Days consistently.
 
 **3. Decision D070 (TSVR as Time Variable) - Successfully Applied:**
 
@@ -488,7 +502,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 **2. Fit Reduced LMM (Random Intercepts Only) for Sensitivity Check:**
 - **Why:** REML convergence warning ("MLE may be on boundary") suggests random slopes may be unnecessary (variance = 0.000)
 - **How:** Refit model with formula `HCE_rate ~ Days + (1 | UID)` (random intercepts only, no random slopes), compare Days coefficient to full model
-- **Expected Insight:** Verify Days coefficient stability (should remain ² H -0.003, p < .001 if robust)
+- **Expected Insight:** Verify Days coefficient stability (should remain ï¿½ H -0.003, p < .001 if robust)
 - **Timeline:** Immediate (re-run Step 02 with modified formula, ~5 minutes)
 
 **3. Test Quadratic Time Effect (Non-Linear Trajectory):**
@@ -506,7 +520,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 
 **5. Confidence Scale Response Pattern Analysis:**
 - **Why:** Transparency requirement (solution.md section 1.4) to document % participants using full scale vs extremes
-- **How:** For each participant, compute histogram of confidence ratings (0, 0.25, 0.5, 0.75, 1.0), classify as "full-range user" (uses all 5 levels) vs "extreme user" (uses only 0/1 or 0/0.25/0.75/1.0)
+- **How:** For each participant, compute histogram of confidence ratings (0.2, 0.4, 0.6, 0.8, 1.0), classify as "full-range user" (uses all 5 levels) vs "extreme user" (uses only extreme values)
 - **Expected Insight:** Assess whether HCE threshold (>= 0.75) is meaningful or artifacts of scale usage patterns
 - **Timeline:** ~20 minutes (read `step00_item_level.csv`, aggregate by UID, create response pattern summary)
 
@@ -533,7 +547,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 ### Methodological Extensions (Future Data Collection or Re-Analysis)
 
 **1. Continuous Confidence Scale (0-100 Slider):**
-- **Current Limitation:** 5-level Likert scale (0, 0.25, 0.5, 0.75, 1.0) coarse, requires arbitrary HCE threshold (>= 0.75)
+- **Current Limitation:** 5-level Likert scale (0.2, 0.4, 0.6, 0.8, 1.0) coarse, requires arbitrary HCE threshold (>= 0.75, captures 0.8 and 1.0)
 - **Extension:** Collect confidence ratings on 0-100 slider (or VAS scale) to enable finer-grained HCE detection
 - **Expected Insight:** More sensitive detection of metacognitive recalibration (gradual confidence decline, not just threshold crossing)
 - **Feasibility:** Requires new data collection (~6 months for N = 100 replication with slider scale)
@@ -633,4 +647,4 @@ Methodological extensions (continuous confidence scales, GLMM item analysis, cli
 
 **Date:** 2025-12-08
 
-**Note:** This summary was generated despite status.yaml showing steps 02-04 as "pending." All expected output files exist with valid data (step02_hce_lmm.txt, step03_time_effect.csv, step04_hce_trajectory_data.csv), indicating analysis completion with status.yaml update lag. The REML LMM results (Step 02: ² = -0.003, p < .001) should be considered the authoritative finding, as the ML-based LRT (Step 03) failed to converge.
+**Note:** This summary was generated despite status.yaml showing steps 02-04 as "pending." All expected output files exist with valid data (step02_hce_lmm.txt, step03_time_effect.csv, step04_hce_trajectory_data.csv), indicating analysis completion with status.yaml update lag. The REML LMM results (Step 02: ï¿½ = -0.003, p < .001) should be considered the authoritative finding, as the ML-based LRT (Step 03) failed to converge.

@@ -13,7 +13,7 @@
 Do high-confidence errors (HCE: Confidence >= 0.75 AND Accuracy = 0) increase from Day 0 to Day 6?
 
 **Scope:**
-This RQ examines high-confidence error rates across a 6-day retention interval using item-level data from N=100 participants × 4 test sessions × ~68 items = ~27,200 item-responses. Each item has paired confidence (TC_* tags, 5-level Likert: 0, 0.25, 0.5, 0.75, 1.0) and accuracy (TQ_* tags, dichotomous correct/incorrect) data. HCE rate computed per participant per timepoint (T1, T2, T3, T4; nominal Days 0, 1, 3, 6).
+This RQ examines high-confidence error rates across a 6-day retention interval using item-level data from N=100 participants ï¿½ 4 test sessions ï¿½ ~68 items = ~27,200 item-responses. Each item has paired confidence (TC_* tags, 5-level Likert: 0.2, 0.4, 0.6, 0.8, 1.0) and accuracy (TQ_* tags, dichotomous correct/incorrect) data. HCE rate computed per participant per timepoint (T1, T2, T3, T4; nominal Days 0, 1, 3, 6).
 
 **Theoretical Framing:**
 This RQ addresses metacognitive failure: the dissociation between memory quality and subjective confidence. As memories degrade over time, metacognitive monitoring may not fully adjust, leading to increased high-confidence errors. This reflects both memory distortion (inaccurate memory traces) and metacognitive failure (confidence does not track accuracy decline). HCE is a critical metric for real-world memory function where overconfidence in false memories has practical consequences.
@@ -90,14 +90,14 @@ Linear Mixed Model (LMM) for HCE rate trajectories
 **Step 0:** Extract item-level data from dfData.csv
 - Extract paired TQ_* (accuracy, dichotomous) and TC_* (confidence, 5-level Likert) for all items
 - Filter to interactive paradigms (IFR, ICR, IRE)
-- Create item-level dataset: ~27,200 rows (100 participants × 4 tests × ~68 items)
+- Create item-level dataset: ~27,200 rows (100 participants ï¿½ 4 tests ï¿½ ~68 items)
 - Output: data/step00_item_level.csv
 
 **Step 1:** Compute HCE rate per participant per timepoint
 - Define HCE: Confidence >= 0.75 AND Accuracy = 0
 - Count HCE instances per participant per test
 - Compute HCE_rate = n_HCE / n_total_items per participant per timepoint
-- Output: data/step01_hce_rates.csv (400 rows: 100 participants × 4 tests)
+- Output: data/step01_hce_rates.csv (400 rows: 100 participants ï¿½ 4 tests)
 
 **Step 2:** Fit LMM for HCE trajectory
 - Model: HCE_rate ~ Time + (Time | UID)
@@ -120,7 +120,7 @@ Linear Mixed Model (LMM) for HCE rate trajectories
 
 **Expected Outputs:**
 - data/step00_item_level.csv (~27,200 rows)
-- data/step01_hce_rates.csv (400 rows: 100 participants × 4 tests)
+- data/step01_hce_rates.csv (400 rows: 100 participants ï¿½ 4 tests)
 - results/step02_hce_lmm.txt (model summary)
 - results/step03_time_effect.csv (Time effect test with dual p-values)
 - plots/step04_hce_trajectory.csv (mean HCE rate by timepoint for plotting)
@@ -145,7 +145,7 @@ RAW (extracts directly from dfData.csv)
 data/cache/dfData.csv
 
 **Tag Patterns:**
-- Confidence items: TC_* tags (5-level Likert: 0, 0.25, 0.5, 0.75, 1.0)
+- Confidence items: TC_* tags (5-level Likert: 0.2, 0.4, 0.6, 0.8, 1.0)
 - Accuracy items: TQ_* tags (dichotomous: 0=incorrect, 1=correct)
 - Domain tags: -N- (What), -L-/-U-/-D- (Where), -O- (When)
 - Paradigm codes: IFR (Immediate Free Recall), ICR (Immediate Cued Recall), IRE (Immediate Recognition)
