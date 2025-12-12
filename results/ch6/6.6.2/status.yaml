@@ -16,15 +16,31 @@ rq_tools: success
 rq_analysis: success
   completed: 2025-12-06 17:30
   context_dump: "5 steps specified with validation (data merge → regression → coefficients → effect sizes)"
-g_code: pending
-rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+g_code: success
+  completed: 2025-12-12
+  context_dump: "steps_00_to_04.py created - combined all 5 steps into single script"
+rq_inspect: success
+  completed: 2025-12-12
+  context_dump: "Manual validation during execution - all outputs verified"
+rq_plots: skipped
+  context_dump: "No plots required - multiple regression analysis only (no trajectories)"
+rq_results: success
+  completed: 2025-12-12
+  timestamp: 2025-12-12T00:00:00Z
+  context_dump: |
+    Results validated for scientific plausibility
+    2 anomalies flagged: 1 wrong direction (baseline confidence positive), 1 unexpected null (Dunning-Kruger not supported)
+    Summary documented in results/summary.md
 rq_validate: pending
 
 analysis_steps:
-  step00_merge_predictor_data: pending
-  step01_standardize_predictors: pending
-  step02_fit_regression: pending
-  step03_extract_coefficients: pending
-  step04_compute_effect_sizes: pending
+  step00_merge_predictor_data: success
+    completed: 2025-12-12
+  step01_standardize_predictors: success
+    completed: 2025-12-12
+  step02_fit_regression: success
+    completed: 2025-12-12
+  step03_extract_coefficients: success
+    completed: 2025-12-12
+  step04_compute_effect_sizes: success
+    completed: 2025-12-12

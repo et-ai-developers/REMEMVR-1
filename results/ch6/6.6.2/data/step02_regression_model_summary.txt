@@ -1,0 +1,36 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:          HCE_rate_mean   R-squared:                       0.206
+Model:                            OLS   Adj. R-squared:                  0.181
+Method:                 Least Squares   F-statistic:                     8.291
+Date:                Fri, 12 Dec 2025   Prob (F-statistic):           5.84e-05
+Time:                        12:26:21   Log-Likelihood:                 203.79
+No. Observations:                 100   AIC:                            -399.6
+Df Residuals:                      96   BIC:                            -389.2
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+=========================================================================================
+                            coef    std err          t      P>|t|      [0.025      0.975]
+-----------------------------------------------------------------------------------------
+Intercept                 0.0418      0.003     12.981      0.000       0.035       0.048
+z_baseline_accuracy      -0.0009      0.002     -0.441      0.660      -0.005       0.003
+z_baseline_confidence     0.0085      0.002      4.004      0.000       0.004       0.013
+z_Age                     0.0021      0.003      0.631      0.529      -0.004       0.009
+z_confidence_bias         0.0102      0.002      4.502      0.000       0.006       0.015
+==============================================================================
+Omnibus:                       53.685   Durbin-Watson:                   2.230
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              191.289
+Skew:                           1.842   Prob(JB):                     2.90e-42
+Kurtosis:                       8.687   Cond. No.                     7.04e+15
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The smallest eigenvalue is 3.32e-30. This might indicate that there are
+strong multicollinearity problems or that the design matrix is singular.
+
+============================================================
+Residual Diagnostics
+Mean: -0.000000
+SD: 0.031687
+Shapiro-Wilk W: 0.8678, p=0.0000
