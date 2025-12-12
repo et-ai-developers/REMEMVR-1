@@ -1,0 +1,31 @@
+======================================================================
+RQ 6.5.3: GLMM for HCE by Schema Congruence
+======================================================================
+
+Formula: HCE_flag ~ C(Congruence, Treatment('Common')) * Time
+Random effects: (Time | UID)
+Reference level: Common
+Observations: 7200
+Groups (UID): 100
+
+FIXED EFFECTS:
+----------------------------------------------------------------------
+Effect                                                 β         SE          z          p
+----------------------------------------------------------------------
+Intercept                                         0.0431     0.0073      5.938     0.0000
+C(Congruence, Treatment('Common'))[T.Congruent]     0.0035     0.0091      0.382     0.7023
+C(Congruence, Treatment('Common'))[T.Incongruent]     0.0185     0.0091      2.019     0.0434
+Time                                             -0.0008     0.0019     -0.393     0.6941
+C(Congruence, Treatment('Common'))[T.Congruent]:Time     0.0029     0.0027      1.090     0.2758
+C(Congruence, Treatment('Common'))[T.Incongruent]:Time    -0.0015     0.0027     -0.574     0.5657
+----------------------------------------------------------------------
+
+RANDOM EFFECTS:
+----------------------------------------------------------------------
+          Group      Time
+Group  0.001102  0.000070
+Time   0.000070  0.000005
+
+Log-likelihood: 802.08
+AIC: nan
+BIC: nan

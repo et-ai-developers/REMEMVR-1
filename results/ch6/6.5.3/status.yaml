@@ -16,19 +16,24 @@ context_dump: |
   Decision D068 enforcement via validate_contrasts_d068 for dual p-value reporting in post-hoc contrasts.
 rq_analysis: success
 context_dump: |
-  5 steps specified with validation (Item-level CTT → GLMM with crossed random effects → post-hoc contrasts).
+  5 steps specified with validation (Item-level CTT -> GLMM with crossed random effects -> post-hoc contrasts).
   All steps use stdlib operations (pandas/statsmodels) with validation tools from 3_tools.yaml.
   Decision D068 enforced via validate_contrasts_d068 (dual p-value reporting).
   Folder conventions validated: ALL data outputs to data/, logs to logs/, results empty until rq_results.
-g_code: pending
+g_code: success
 rq_inspect: pending
-rq_plots: pending
-rq_results: pending
+rq_plots: bypassed
+rq_results: success
+context_dump: |
+  Results validated: NULL HYPOTHESIS (schema congruence does NOT affect HCE rate)
+  0 anomalies flagged (plausibility acceptable)
+  Summary documented in results/summary.md
+  Completes "quadruple NULL" pattern (Ch5 accuracy, Ch6 confidence, calibration, HCE all NULL)
 rq_validate: pending
 
 analysis_steps:
-  step00_extract_item_level: pending
-  step01_identify_hce: pending
-  step02_compute_hce_rates: pending
-  step03_fit_glmm: pending
-  step04_post_hoc_contrasts: pending
+  step00_extract_item_level: success
+  step01_identify_hce: success
+  step02_compute_hce_rates: success
+  step03_fit_glmm: success
+  step04_post_hoc_contrasts: success
