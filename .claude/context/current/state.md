@@ -1002,3 +1002,124 @@ Comprehensive anomaly and limitations audit completed for all 31 Chapter 6 RQs. 
 **Next Actions:** Ready for Chapter 7 execution or thesis writing. Consider completing 4 high-priority actions (~10 hours) before thesis defense.
 
 ---
+
+### Session (2025-12-13 10:30)
+
+**Task:** Ch5 vs Ch6 Cross-Chapter Integration Analysis - COMPLETE - accuracy_vs_confidence.md Created
+
+**Context:** User requested comprehensive cross-chapter comparison using parallel context-finder agents to understand implications of Ch5 (accuracy) and Ch6 (confidence) for episodic memory theory. Created PhD-student-focused synthesis document.
+
+**Major Accomplishment: Created results/ch6/accuracy_vs_confidence.md (~4,500 words)**
+
+### 1. Parallel Context-Finder Agents (6 Agents)
+
+Launched 6 parallel agents searching archives/:
+1. Ch5 ROOT RQ findings (5.1.1, 5.2.1, 5.3.1, 5.4.1, 5.5.1)
+2. Ch6 ROOT RQ findings (all 9 ROOT RQs)
+3. Accuracy-confidence dissociations
+4. Age effects comparisons
+5. Individual differences findings
+6. Calibration and metacognition findings
+
+All 6 agents completed successfully with comprehensive findings.
+
+### 2. CRITICAL CORRECTION Made During Session
+
+**User caught error:** Original document stated Ch6 6.1.1 used "5 models" and logarithmic won.
+
+**Actual finding (from RQ 6.1.1 kitchen sink):**
+- 65 models tested (full kitchen sink comparison)
+- Logarithmic ranks #38 with only 0.95% weight
+- PowerLaw_10 ranks #3 (2.7% weight)
+- Best converged model: Recip_sq (reciprocal squared)
+- EXTREME model uncertainty (best = 21.7%, didn't converge)
+
+**Correction applied:** Updated accuracy_vs_confidence.md to reflect true findings - confidence functional form shows EXTREME UNCERTAINTY, not clear logarithmic winner.
+
+### 3. Key Cross-Chapter Findings Documented
+
+**Five Major Discoveries:**
+
+1. **Power-Law Paradigm Shift (Ch5):** Accuracy follows Wixted power-law (α=0.41), NOT Ebbinghaus logarithmic
+
+2. **824× Measurement Artifact (Ch5 vs Ch6):** Binary accuracy ICC_slope = 0.0005, ordinal confidence ICC_slope = 0.41. Ch5's "universal forgetting" was MEASUREMENT LIMITATION.
+
+3. **Age-Invariance (Both Chapters):** 7/7 RQs show NULL age × time interactions. VR scaffolding creates age-fair encoding (ages 20-70).
+
+4. **Memory-Metacognition Dissociation:**
+   - Accuracy detects source-destination granularity (confidence doesn't)
+   - Confidence detects temporal vulnerability (accuracy doesn't)
+   - Complementary information, not redundant
+
+5. **Calibration Trilogy (Ch6):** All three metacognitive dimensions worsen, but HCEs DECREASE 35% (adaptive metacognition).
+
+### 4. Document Structure (accuracy_vs_confidence.md)
+
+9 Parts covering:
+- Part 1: Trajectory Story (decay functional forms)
+- Part 2: Calibration Story (overconfidence development)
+- Part 3: Individual Differences (824× measurement artifact)
+- Part 4: Dissociation Matrix (where accuracy vs confidence diverge)
+- Part 5: Age-Invariance Story (VR scaffolding)
+- Part 6: Dunning-Kruger (Double NULL)
+- Part 7: Predictive Story (confidence unique predictive value)
+- Part 8: Synthesis (theoretical framework)
+- Part 9: Outstanding Questions (for Ch8 Discussion)
+
+### 5. Key Theoretical Framework
+
+```
+EPISODIC MEMORY SYSTEM
+├── MEMORY (Ch5)
+│   ├── Decay: Power-law (α=0.41)
+│   ├── Individual diffs: 0.05% (measurement limit)
+│   ├── Detects: Spatial context granularity
+│   └── Source-dest: Dissociation
+└── METACOGNITION (Ch6)
+    ├── Decay: UNCERTAIN (extreme model uncertainty)
+    ├── Individual diffs: 41% (true trait variance)
+    ├── Detects: Temporal vulnerability
+    └── Source-dest: NULL
+
+SHARED: Age-invariant, paradigm-independent, schema-resistant
+```
+
+### 6. Files Created/Modified
+
+**Created:**
+- results/ch6/accuracy_vs_confidence.md (~4,500 words, thesis-quality)
+
+**Modified:**
+- results/ch6/accuracy_vs_confidence.md (corrected Ch6 6.1.1 model comparison section)
+
+### 7. Session Metrics
+
+**Session Duration:** ~45 minutes
+**Tokens Used:** ~60k
+**Agent Invocations:** 6 parallel context-finder + 1 /save context-finder
+**Code Strategy:** Parallel agent search, comprehensive synthesis
+**Success Rate:** 100%
+
+### 8. Active Topics (For context-manager)
+
+- ch5_vs_ch6_cross_chapter_integration_document (Session 2025-12-13 10:30: accuracy_vs_confidence.md_created, 9_parts_4500_words, phd_synthesis_format)
+
+- ch6_6.1.1_kitchen_sink_extreme_uncertainty (Session 2025-12-13 10:30: 65_models_tested, log_ranks_38_with_0.95_weight, power_law_10_ranks_3, recip_sq_best_converged, model_averaging_required)
+
+- correction_log_not_best_for_confidence (Session 2025-12-13 10:30: original_5_model_comparison_misleading, kitchen_sink_reveals_extreme_uncertainty, functional_form_ambiguous)
+
+**Relevant Archived Topics:**
+- rq_6.1.4_icc_decomposition_major_finding_824x_ratio (2025-12-11 18:30) - measurement artifact
+- ch6_hce_driven_by_metacognition_not_memory (2025-12-12 14:30) - dissociation
+- ch6_paradigm_vs_domain_icc_dissociation (2025-12-12 09:30) - content vs method
+- rq_6.1.1_complete_execution_logarithmic_best (2025-12-06 22:00) - original 5-model finding
+
+**End of Session (2025-12-13 10:30)**
+
+**Status:** ✅ **Ch5 vs Ch6 Cross-Chapter Integration Complete - accuracy_vs_confidence.md Created**
+
+Created comprehensive cross-chapter synthesis document (results/ch6/accuracy_vs_confidence.md, ~4,500 words) comparing Ch5 (accuracy) and Ch6 (confidence) findings. Document structured for PhD student understanding with 9 parts covering trajectory forms, calibration, individual differences, dissociation patterns, age-invariance, Dunning-Kruger, predictive value, theoretical synthesis, and outstanding questions. Critical correction made: Ch6 6.1.1 confidence functional form shows EXTREME model uncertainty (65 models, best=21.7%, log ranks #38), NOT clear logarithmic winner as originally archived. Five major thesis contributions documented with defense-ready concluding statement.
+
+**Next Actions:** Document complete. Ready for Chapter 7 or thesis writing.
+
+---
