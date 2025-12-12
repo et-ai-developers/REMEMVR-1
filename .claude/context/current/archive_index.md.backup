@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-12 16:15 (context-manager curation - Sessions 13:30, 14:30 archived)
+**Last Updated:** 2025-12-12 14:45 (context-manager curation - Session 11:00 archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -606,9 +606,6 @@
 
 ### rq_6.5.2_complete_null_schema_calibration_thesis_ready
 **Description:** RQ 6.5.2 Schema Confidence Calibration complete execution (2025-12-12 11:00). NULL schema effect on calibration (p_bonf=0.487). Congruent items showed trend toward overconfidence (β=+0.152 vs Common) but NOT statistically significant. Direction hypothesis-consistent but magnitude insufficient (f²=0.05 small). Completes "triple null" pattern for schema congruence: accuracy NULL (Ch5 5.4.1), confidence NULL (6.5.1), calibration NULL (6.5.2). VR episodic memory resistant to schema-based metacognitive illusions. 3-step calibration pipeline (merge accuracy+confidence theta, z-standardize, LMM). Critical data issue resolved (composite_ID format mismatch, 100% merge success). Model R²=0.583 (high variance from random effects, not fixed effects). Total 21/31 Ch6 RQs thesis-ready (68%).
-
-### rq_6.6.1_perfected_all_issues_resolved_thesis_ready_100_percent
-**Description:** RQ 6.6.1 HCE Over Time comprehensive fixes and validation (2025-12-12 13:30). MAJOR FIXES: (1) ML convergence failure RESOLVED (inconsistent time scales: Step02 used Days, Step03 used TSVR hours, fixed to use Days consistently), (2) Confidence scale documentation corrected (actual: 0.2/0.4/0.6/0.8/1.0, not 0/0.25/0.5/0.75/1.0), (3) Sensitivity analysis added (4 model specs confirm robustness). PRIMARY FINDING UNCHANGED: HCE rate DECREASES 35% from Day 0 (4.87%) to Day 6 (3.17%). D068 FULL COMPLIANCE: p_wald=0.000021, p_lrt=0.000040 (both <.001). Sensitivity: random slopes NOT necessary (LRT p=0.074), quadratic NOT significant (p=0.608), robust to outliers (Δβ<0.01). Theoretical: metacognitive monitoring IMPROVES over retention interval, confidence adjusts appropriately to memory quality decline, NO metacognitive failure in VR episodic memory. Total 23/31 Ch6 RQs thesis-ready (74%).
 
 ### rq_6.6.2_complete_dunning_kruger_not_supported_thesis_ready
 **Description:** RQ 6.6.2 Individual Difference Predictors of HCE complete execution (2025-12-12 14:30). MAJOR FINDING: Dunning-Kruger effect NOT SUPPORTED in VR episodic memory. Baseline accuracy (memory ability) has essentially ZERO relationship with HCE rates (β=-0.001, p=1.000). Instead, OVERCONFIDENCE is the driver - both confidence_bias (+0.010) and baseline_confidence (+0.009) significantly predict HCE rates (p<.001). This represents a DOUBLE NULL for Dunning-Kruger (also null in RQ 6.2.4). Age NULL confirmed (another age-invariant finding). R²=0.206 indicates meaningful individual differences in HCE tendency explained by metacognitive factors. 5-step OLS regression pipeline. Baseline confidence showed OPPOSITE direction (high confidence → MORE HCEs, not fewer). Total 24/31 Ch6 RQs thesis-ready (77%).
