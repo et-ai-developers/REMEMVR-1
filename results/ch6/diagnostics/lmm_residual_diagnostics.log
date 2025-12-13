@@ -1,0 +1,387 @@
+======================================================================
+T2.1: LMM RESIDUAL DIAGNOSTICS
+Chapter 6 Validity Rework - TIER 2 HIGH Priority
+======================================================================
+Date: 2025-12-13 16:41:15.162387
+Output directory: /home/etai/projects/REMEMVR/results/ch6/diagnostics
+
+======================================================================
+RQ 6.2.1: Calibration Over Time
+======================================================================
+
+Loading data from: step02_calibration_scores.csv
+  Rows: 400, Columns: ['UID', 'test', 'composite_ID', 'TSVR_hours', 'z_theta_accuracy', 'z_theta_confidence', 'calibration']
+  Scaled TSVR_hours by 100 -> Time
+
+Fitting LMM: calibration ~ Time
+  Groups: UID
+  Random effects: ~Time
+  Model converged: True
+  Log-likelihood: -503.61
+  AIC: 1019.22
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=400): W=0.9770, p=0.000006
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=12.1125, p=0.000501
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_2_1_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0100
+  Max Cook's D: 0.0237
+  Observations > threshold: 5 (1.2%)
+  Interpretation: PASS - Few influential observations (<5%)
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.3.2: Domain Confidence Calibration
+======================================================================
+
+Loading data from: step00_calibration_by_domain.csv
+  Rows: 1200, Columns: ['UID', 'TEST', 'theta_accuracy', 'Domain', 'theta_confidence', 'TSVR_hours', 'theta_accuracy_z', 'theta_confidence_z', 'calibration', 'abs_calibration']
+  Centered TSVR_hours -> TSVR_centered (mean=64.95)
+
+Fitting LMM: calibration ~ C(Domain) * TSVR_centered
+  Groups: UID
+  Random effects: ~TSVR_centered
+  Model converged: True
+  Log-likelihood: -1574.88
+  AIC: 3169.76
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=1200): W=0.9929, p=0.000017
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=24.6043, p=0.000001
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_3_2_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0033
+  Max Cook's D: 0.0020
+  Observations > threshold: 0 (0.0%)
+  Interpretation: PASS - No influential observations
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.4.2: Paradigm Confidence Calibration
+======================================================================
+
+Loading data from: step00_calibration_by_paradigm.csv
+  Rows: 1200, Columns: ['UID', 'TEST', 'Paradigm', 'theta_accuracy', 'theta_confidence', 'TSVR_hours', 'theta_accuracy_z', 'theta_confidence_z', 'calibration', 'abs_calibration']
+  Centered TSVR_hours -> TSVR_centered (mean=64.95)
+
+Fitting LMM: calibration ~ C(Paradigm) * TSVR_centered
+  Groups: UID
+  Random effects: ~TSVR_centered
+  Model converged: True
+  Log-likelihood: -1220.90
+  AIC: 2461.80
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=1200): W=0.9961, p=0.004094
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=19.9486, p=0.000008
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_4_2_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0033
+  Max Cook's D: 0.0020
+  Observations > threshold: 0 (0.0%)
+  Interpretation: PASS - No influential observations
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.6.3: HCE Domain Specificity
+======================================================================
+Primary data file not found, using fallback
+
+Loading data from: step01_hce_by_domain.csv
+  Rows: 42000, Columns: ['UID', 'TEST', 'item_id', 'domain', 'TQ_accuracy', 'TC_confidence', 'HCE']
+
+ERROR processing RQ 6.6.3: 'TSVR_hours'
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'TSVR_hours'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch6/code/lmm_residual_diagnostics.py", line 382, in main
+    results = run_diagnostics_for_rq(rq_id, config)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/results/ch6/code/lmm_residual_diagnostics.py", line 160, in run_diagnostics_for_rq
+    df['TSVR_centered'] = df[time_col] - df[time_col].mean()
+                          ~~^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'TSVR_hours'
+
+
+======================================================================
+RQ 6.8.2: Source-Destination Calibration
+======================================================================
+ERROR: Data file not found: /home/etai/projects/REMEMVR/results/ch6/6.8.2/data/step01_calibration_data.csv
+
+======================================================================
+SUMMARY TABLE
+======================================================================
+
+Saved summary: /home/etai/projects/REMEMVR/results/ch6/diagnostics/lmm_diagnostics_summary.csv
+
+RQ       Name                                Normality  Homosced.  CooksD     Overall   
+------------------------------------------------------------------------------------------
+6.2.1    Calibration Over Time               FAIL       FAIL       PASS       REVIEW    
+6.3.2    Domain Confidence Calibration       FAIL       FAIL       PASS       REVIEW    
+6.4.2    Paradigm Confidence Calibration     FAIL       FAIL       PASS       REVIEW    
+
+======================================================================
+DIAGNOSTICS COMPLETE
+======================================================================
+RQs processed: 3 / 5
+Output directory: /home/etai/projects/REMEMVR/results/ch6/diagnostics
+======================================================================
+T2.1: LMM RESIDUAL DIAGNOSTICS
+Chapter 6 Validity Rework - TIER 2 HIGH Priority
+======================================================================
+Date: 2025-12-13 16:42:02.763578
+Output directory: /home/etai/projects/REMEMVR/results/ch6/diagnostics
+
+======================================================================
+RQ 6.2.1: Calibration Over Time
+======================================================================
+
+Loading data from: step02_calibration_scores.csv
+  Rows: 400, Columns: ['UID', 'test', 'composite_ID', 'TSVR_hours', 'z_theta_accuracy', 'z_theta_confidence', 'calibration']
+  Scaled TSVR_hours by 100 -> Time
+
+Fitting LMM: calibration ~ Time
+  Groups: UID
+  Random effects: ~Time
+  Model converged: True
+  Log-likelihood: -503.61
+  AIC: 1019.22
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=400): W=0.9770, p=0.000006
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=12.1125, p=0.000501
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_2_1_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0100
+  Max Cook's D: 0.0237
+  Observations > threshold: 5 (1.2%)
+  Interpretation: PASS - Few influential observations (<5%)
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.3.2: Domain Confidence Calibration
+======================================================================
+
+Loading data from: step00_calibration_by_domain.csv
+  Rows: 1200, Columns: ['UID', 'TEST', 'theta_accuracy', 'Domain', 'theta_confidence', 'TSVR_hours', 'theta_accuracy_z', 'theta_confidence_z', 'calibration', 'abs_calibration']
+  Centered TSVR_hours -> TSVR_centered (mean=64.95)
+
+Fitting LMM: calibration ~ C(Domain) * TSVR_centered
+  Groups: UID
+  Random effects: ~TSVR_centered
+  Model converged: True
+  Log-likelihood: -1574.88
+  AIC: 3169.76
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=1200): W=0.9929, p=0.000017
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=24.6043, p=0.000001
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_3_2_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0033
+  Max Cook's D: 0.0020
+  Observations > threshold: 0 (0.0%)
+  Interpretation: PASS - No influential observations
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.4.2: Paradigm Confidence Calibration
+======================================================================
+
+Loading data from: step00_calibration_by_paradigm.csv
+  Rows: 1200, Columns: ['UID', 'TEST', 'Paradigm', 'theta_accuracy', 'theta_confidence', 'TSVR_hours', 'theta_accuracy_z', 'theta_confidence_z', 'calibration', 'abs_calibration']
+  Centered TSVR_hours -> TSVR_centered (mean=64.95)
+
+Fitting LMM: calibration ~ C(Paradigm) * TSVR_centered
+  Groups: UID
+  Random effects: ~TSVR_centered
+  Model converged: True
+  Log-likelihood: -1220.90
+  AIC: 2461.80
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=1200): W=0.9961, p=0.004094
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=19.9486, p=0.000008
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_4_2_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0033
+  Max Cook's D: 0.0020
+  Observations > threshold: 0 (0.0%)
+  Interpretation: PASS - No influential observations
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.6.3: HCE Domain Specificity
+======================================================================
+
+Loading data from: step03_lmm_input.csv
+  Rows: 1200, Columns: ['UID', 'domain', 'TEST', 'HCE_rate', 'N_items', 'Days_mean', 'domain_Where', 'domain_When', 'HCE_rate_trans']
+  Centered Days_mean -> Days_centered (mean=2.71)
+
+Fitting LMM: HCE_rate ~ C(domain) * Days_centered
+  Groups: UID
+  Random effects: None
+  Model converged: True
+  Log-likelihood: 1420.43
+  AIC: -2824.86
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=1200): W=0.9190, p=0.000000
+  Interpretation: FAIL - Significant non-normality (but LMM robust with N>100)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=176.8621, p=0.000000
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_6_3_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0033
+  Max Cook's D: 0.0062
+  Observations > threshold: 5 (0.4%)
+  Interpretation: PASS - Few influential observations (<5%)
+
+4. OVERALL ASSESSMENT
+  Overall: REVIEW - Multiple issues: non-normality, heteroscedasticity
+  Thesis impact: Document limitations; consider robust SE or alternative models
+
+======================================================================
+RQ 6.8.2: Source-Destination Calibration
+======================================================================
+
+Loading data from: step01_calibration_by_location.csv
+  Rows: 800, Columns: ['UID', 'TEST', 'LocationType', 'theta_accuracy', 'TSVR_hours', 'theta_confidence', 'Z_accuracy', 'Z_confidence', 'calibration']
+  Log-transformed TSVR_hours -> log_TSVR
+
+Fitting LMM: calibration ~ C(LocationType) * log_TSVR
+  Groups: UID
+  Random effects: None
+  Model converged: True
+  Log-likelihood: -979.62
+  AIC: 1971.24
+
+--- DIAGNOSTIC RESULTS ---
+
+1. NORMALITY CHECK (QQ Plot + Shapiro-Wilk)
+  Shapiro-Wilk (n=800): W=0.9954, p=0.017705
+  Interpretation: MARGINAL - Minor non-normality (robust with large N)
+
+2. HOMOSCEDASTICITY CHECK (Residuals vs Fitted)
+  Breusch-Pagan: χ²=16.2819, p=0.000055
+  Interpretation: FAIL - Heteroscedasticity present (consider robust SE)
+
+  Plots saved: rq_6_8_2_diagnostics.png
+
+3. INFLUENTIAL OBSERVATIONS (Cook's D)
+  Threshold: 4/n = 0.0050
+  Max Cook's D: 0.0032
+  Observations > threshold: 0 (0.0%)
+  Interpretation: PASS - No influential observations
+
+4. OVERALL ASSESSMENT
+  Overall: ADEQUATE - Minor issue: heteroscedasticity
+  Thesis impact: Note in Methods section; LMM robust with N>100
+
+======================================================================
+SUMMARY TABLE
+======================================================================
+
+Saved summary: /home/etai/projects/REMEMVR/results/ch6/diagnostics/lmm_diagnostics_summary.csv
+
+RQ       Name                                Normality  Homosced.  CooksD     Overall   
+------------------------------------------------------------------------------------------
+6.2.1    Calibration Over Time               FAIL       FAIL       PASS       REVIEW    
+6.3.2    Domain Confidence Calibration       FAIL       FAIL       PASS       REVIEW    
+6.4.2    Paradigm Confidence Calibration     FAIL       FAIL       PASS       REVIEW    
+6.6.3    HCE Domain Specificity              FAIL       FAIL       PASS       REVIEW    
+6.8.2    Source-Destination Calibration      MARGINAL   FAIL       PASS       ADEQUATE  
+
+======================================================================
+DIAGNOSTICS COMPLETE
+======================================================================
+RQs processed: 5 / 5
+Output directory: /home/etai/projects/REMEMVR/results/ch6/diagnostics

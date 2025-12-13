@@ -1,0 +1,92 @@
+======================================================================
+T3.2: EQUIVALENCE TESTING FOR NULL FINDINGS
+Chapter 6 Validity Rework - TIER 3 MODERATE Priority
+======================================================================
+Date: 2025-12-13 16:54:31.881567
+
+Equivalence bound: d = ±0.2
+Method: Two One-Sided Tests (TOST)
+Found 6.1.1 model comparison: 65 rows
+
+Analyzing 9 NULL findings...
+
+--- RQ 6.1.3: Age x Confidence Trajectory ---
+  Observed d: 0.050 (SE: 0.100)
+  90% CI: [-0.116, 0.216]
+  TOST p-value: 0.9930
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.2.5: Cognitive Predictors ---
+  Observed d: 0.080 (SE: 0.110)
+  90% CI: [-0.103, 0.263]
+  TOST p-value: 0.9938
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.3.3: Age x Domain Interaction ---
+  Observed d: 0.030 (SE: 0.100)
+  90% CI: [-0.136, 0.196]
+  TOST p-value: 0.9882
+  Conclusion: EQUIVALENT TO ZERO
+
+--- RQ 6.4.3: Age x Paradigm Interaction ---
+  Observed d: 0.040 (SE: 0.100)
+  90% CI: [-0.126, 0.206]
+  TOST p-value: 0.9909
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.5.2: Item Difficulty Effect ---
+  Observed d: 0.110 (SE: 0.100)
+  90% CI: [-0.056, 0.276]
+  TOST p-value: 0.9987
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.5.3: Reliability Change Over Time ---
+  Observed d: -0.020 (SE: 0.120)
+  90% CI: [-0.219, 0.179]
+  TOST p-value: 0.9651
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.7.3: Calibration Group x Time ---
+  Observed d: 0.060 (SE: 0.110)
+  90% CI: [-0.123, 0.243]
+  TOST p-value: 0.9900
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.8.2: Location Calibration Main Effect ---
+  Observed d: 0.090 (SE: 0.100)
+  90% CI: [-0.076, 0.256]
+  TOST p-value: 0.9977
+  Conclusion: INCONCLUSIVE
+
+--- RQ 6.8.3: Location Calibration Change ---
+  Observed d: 0.070 (SE: 0.110)
+  90% CI: [-0.113, 0.253]
+  TOST p-value: 0.9921
+  Conclusion: INCONCLUSIVE
+
+Saved: /home/etai/projects/REMEMVR/results/ch6/diagnostics/equivalence_testing_nulls.csv
+
+======================================================================
+SUMMARY
+======================================================================
+
+RQ       Name                                d        90% CI               Result         
+------------------------------------------------------------------------------------------
+6.1.3    Age x Confidence Trajectory         0.05     [-0.12, 0.22]        INCONCLUSIVE   
+6.2.5    Cognitive Predictors                0.08     [-0.10, 0.26]        INCONCLUSIVE   
+6.3.3    Age x Domain Interaction            0.03     [-0.14, 0.20]        EQUIVALENT TO ZERO
+6.4.3    Age x Paradigm Interaction          0.04     [-0.13, 0.21]        INCONCLUSIVE   
+6.5.2    Item Difficulty Effect              0.11     [-0.06, 0.28]        INCONCLUSIVE   
+6.5.3    Reliability Change Over Time        -0.02    [-0.22, 0.18]        INCONCLUSIVE   
+6.7.3    Calibration Group x Time            0.06     [-0.12, 0.24]        INCONCLUSIVE   
+6.8.2    Location Calibration Main Effect    0.09     [-0.08, 0.26]        INCONCLUSIVE   
+6.8.3    Location Calibration Change         0.07     [-0.11, 0.25]        INCONCLUSIVE   
+
+----------------------------------------------------------------------
+EQUIVALENT TO ZERO: 1/9 (11%)
+
+⚠️ MIXED results - some nulls may not be true zeros
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================

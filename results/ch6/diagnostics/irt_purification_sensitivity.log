@@ -1,0 +1,119 @@
+======================================================================
+T3.1: IRT PURIFICATION SENSITIVITY ANALYSIS
+Chapter 6 Validity Rework - TIER 3 MODERATE Priority
+======================================================================
+Date: 2025-12-13 16:53:08.917301
+
+Original thresholds: a≥0.4, |b|≤4.0
+Strict thresholds: a≥0.6, |b|≤2.5
+
+======================================================================
+RQ 6.1.1: Overall Confidence IRT Purification Sensitivity
+======================================================================
+Loaded item parameters: 72 items
+Columns: ['item_name', 'dimension', 'a', 'b1', 'b2', 'b3', 'b4']
+
+Discrimination (a) statistics:
+  Mean: 3.451
+  Min: 1.742
+  Max: 5.350
+
+Purification results:
+  Original (a≥0.4): 72/72 retained (100.0%)
+  Strict (a≥0.6): 66/72 retained (91.7%)
+
+Theta file: 400 rows
+
+Items excluded by stricter threshold:
+  Unknown: a=2.024
+  Unknown: a=2.315
+  Unknown: a=2.235
+  Unknown: a=2.800
+  Unknown: a=1.742
+  Unknown: a=2.488
+
+======================================================================
+RQ 6.4.1: Paradigm-Stratified Confidence IRT Purification Sensitivity
+======================================================================
+Loaded item parameters: 72 items
+Columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_IFR', 'Discrim_ICR', 'Discrim_IRE']
+
+--- Paradigm: IFR ---
+  Items: 24
+  Discrimination range: [2.107, 5.187]
+  Original (a≥0.4): 24/24 retained
+  Strict (a≥0.6): 24/24 retained
+
+--- Paradigm: ICR ---
+  Items: 24
+  Discrimination range: [1.974, 5.303]
+  Original (a≥0.4): 24/24 retained
+  Strict (a≥0.6): 24/24 retained
+
+--- Paradigm: IRE ---
+  Items: 24
+  Discrimination range: [1.859, 4.370]
+  Original (a≥0.4): 24/24 retained
+  Strict (a≥0.6): 24/24 retained
+
+======================================================================
+RQ 6.5.1: Item Difficulty Confidence IRT Purification Sensitivity
+======================================================================
+Loaded item parameters: 72 items
+Columns: ['item_name', 'Difficulty', 'Overall_Discrimination', 'Discrim_Common', 'Discrim_Congruent', 'Discrim_Incongruent']
+
+--- Difficulty: Hard ---
+  Items: 36
+  Discrimination range: [1.964, 4.739]
+  Original (a≥0.4): 36/36 retained
+  Strict (a≥0.6): 36/36 retained
+
+--- Difficulty: Easy ---
+  Items: 36
+  Discrimination range: [2.274, 6.352]
+  Original (a≥0.4): 36/36 retained
+  Strict (a≥0.6): 36/36 retained
+
+Saved: /home/etai/projects/REMEMVR/results/ch6/diagnostics/irt_purification_sensitivity.csv
+
+======================================================================
+SUMMARY
+======================================================================
+
+6.1.1 (nan):
+  Items: 72
+  Retained (strict): 66 (91.7%)
+  Excluded: 6
+
+6.4.1 (IFR):
+  Items: 24
+  Retained (strict): 24 (100.0%)
+  Excluded: 0
+
+6.4.1 (ICR):
+  Items: 24
+  Retained (strict): 24 (100.0%)
+  Excluded: 0
+
+6.4.1 (IRE):
+  Items: 24
+  Retained (strict): 24 (100.0%)
+  Excluded: 0
+
+6.5.1 (nan):
+  Items: 36
+  Retained (strict): 36 (100.0%)
+  Excluded: 0
+
+6.5.1 (nan):
+  Items: 36
+  Retained (strict): 36 (100.0%)
+  Excluded: 0
+
+----------------------------------------------------------------------
+Average retention with strict thresholds: 98.6%
+✓ ROBUST: >90% retained even with stricter thresholds
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================

@@ -1,0 +1,67 @@
+======================================================================
+T2.5: LMM CONVERGENCE SENSITIVITY ANALYSIS
+Chapter 6 Validity Rework - TIER 2 HIGH Priority
+======================================================================
+Date: 2025-12-13 16:49:32.024812
+
+======================================================================
+RQ 6.3.4: Domain-Specific ICC Convergence Sensitivity
+======================================================================
+Loaded data: 400 rows, 100 participants
+
+--- Domain: What ---
+  N observations: 400
+  M1 (int+slope): converged=False, ICC_slope=0.5895
+  M2 (int-only):  converged=True, ICC_slope=0.0000 (forced 0)
+  M3 (Powell opt): converged=True, ICC_slope=0.0001
+
+--- Domain: Where ---
+  N observations: 400
+  M1 (int+slope): converged=False, ICC_slope=0.5896
+  M2 (int-only):  converged=True, ICC_slope=0.0000 (forced 0)
+  M3 (Powell opt): converged=True, ICC_slope=0.0000
+
+--- Domain: When ---
+  N observations: 400
+  M1 (int+slope): converged=True, ICC_slope=0.0000
+  M2 (int-only):  converged=True, ICC_slope=0.0000 (forced 0)
+  M3 (Powell opt): converged=True, ICC_slope=0.0000
+
+======================================================================
+RQ 6.8.1: Source-Destination ICC Convergence Sensitivity
+======================================================================
+Loaded data: 800 rows
+
+--- Location: Source ---
+  N observations: 400
+  M1 (int+slope): converged=True, ICC_slope=0.0590
+  M2 (int-only):  converged=True, ICC_slope=0.0000
+  M3 (Powell):    converged=True, ICC_slope=0.0590
+
+--- Location: Destination ---
+  N observations: 400
+  M1 (int+slope): converged=True, ICC_slope=0.0004
+  M2 (int-only):  converged=True, ICC_slope=0.0000
+  M3 (Powell):    converged=True, ICC_slope=0.0273
+
+Saved: /home/etai/projects/REMEMVR/results/ch6/diagnostics/lmm_convergence_sensitivity.csv
+
+======================================================================
+SUMMARY
+======================================================================
+
+RQ       Domain          M1_ICC     M3_ICC     Diff       Stability 
+-----------------------------------------------------------------
+6.3.4    What            0.5895     0.0001     0.5895     UNSTABLE  
+6.3.4    Where           0.5896     0.0000     0.5896     UNSTABLE  
+6.3.4    When            0.0000     0.0000     0.0000     STABLE    
+6.8.1    Source          0.0590     0.0590     0.0001     STABLE    
+6.8.1    Destination     0.0004     0.0273     0.0269     STABLE    
+
+----------------------------------------------------------------------
+Stable domains: 3/5
+⚠️ Some instability - Document in Methods
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================

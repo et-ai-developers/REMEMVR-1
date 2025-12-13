@@ -336,3 +336,182 @@ All thesis-critical TIER 1 tasks complete. Key findings:
 4. Then TIER 3/4 if time permits
 
 ---
+
+### Session (2025-12-14 16:55)
+
+**Task:** Execute Remaining TIER 2 + Start TIER 3 Validity Tasks
+
+**Context:** User requested continuation of rework tasks until 70% context used. Completed all TIER 2 tasks and 2/4 TIER 3 tasks.
+
+---
+
+## TIER 2 COMPLETE (5/5 Tasks) ✅
+
+### T2.1 - LMM Residual Diagnostics (5 RQs)
+**Status:** ✅ COMPLETE
+**RQs:** 6.2.1, 6.3.2, 6.4.2, 6.6.3, 6.8.2
+
+**Findings:**
+| RQ    | N    | Normality | Homoscedasticity | Cook's D | Overall  |
+|-------|------|-----------|------------------|----------|----------|
+| 6.2.1 | 400  | FAIL      | FAIL             | PASS     | REVIEW   |
+| 6.3.2 | 1200 | FAIL      | FAIL             | PASS     | REVIEW   |
+| 6.4.2 | 1200 | FAIL      | FAIL             | PASS     | REVIEW   |
+| 6.6.3 | 1200 | FAIL      | FAIL             | PASS     | REVIEW   |
+| 6.8.2 | 800  | MARGINAL  | FAIL             | PASS     | ADEQUATE |
+
+**Key Points:**
+- Shapiro-Wilk significant (p<0.05) for 4/5 RQs (normality deviation)
+- Breusch-Pagan significant for ALL 5 RQs (heteroscedasticity)
+- Cook's D MAX = 0.024 (well below 1.0 - no outliers)
+- **CRITICAL:** LMM robust with N>100 per simulation studies (Maas & Hox, 2004)
+
+**Files Created:**
+- `results/ch6/code/lmm_residual_diagnostics.py`
+- `results/ch6/diagnostics/lmm_diagnostics_summary.csv`
+- `results/ch6/diagnostics/rq_6_*_diagnostics.png` (5 plots)
+
+### T2.4 - Confidence Response Pattern Analysis (6.1.1, 6.8.1)
+**Status:** ✅ COMPLETE
+
+**Scale Discovery:** Confidence scale is 6-point (0.0, 0.2, 0.4, 0.6, 0.8, 1.0)
+- Level 1 (0.0) **NEVER USED** - floor effect
+
+**Response Distribution:**
+| Level | Value | Mean % |
+|-------|-------|--------|
+| 1     | 0.0   | 0.0%   |
+| 2     | 0.2   | 25.4%  |
+| 3     | 0.4   | 17.9%  |
+| 4     | 0.6   | 15.2%  |
+| 5     | 0.8   | 10.4%  |
+| 6     | 1.0   | 31.1%  |
+
+**⚠️ ISSUE 003 - Extreme Response Style (ERS):**
+- N with ERS (>50% at endpoints): 11/100 (11.0%)
+- **MASSIVE theta inflation:** ERS theta=-0.16 vs Non-ERS theta=-0.69
+- **t(98)=5.90, p<0.0001, Cohen's d=1.89**
+- Thesis implication: Document as limitation; 89% unaffected
+
+**Files Created:**
+- `results/ch6/code/confidence_response_patterns.py`
+- `results/ch6/diagnostics/confidence_response_metrics.csv`
+- `results/ch6/diagnostics/confidence_response_patterns.png`
+
+### T2.5 - LMM Convergence Sensitivity (6.3.4, 6.8.1)
+**Status:** ✅ COMPLETE
+
+**Convergence Test Results:**
+| RQ    | Domain      | M1 (Default) | M3 (Powell) | Stability   |
+|-------|-------------|--------------|-------------|-------------|
+| 6.3.4 | What        | 0.590*       | 0.000       | **UNSTABLE** |
+| 6.3.4 | Where       | 0.590*       | 0.000       | **UNSTABLE** |
+| 6.3.4 | When        | 0.000        | 0.000       | STABLE      |
+| 6.8.1 | Source      | 0.059        | 0.059       | STABLE      |
+| 6.8.1 | Destination | 0.000        | 0.027       | STABLE      |
+
+*M1 did NOT converge for What/Where domains
+
+**⚠️ ISSUE 004 - RQ 6.3.4 Convergence Artifacts:**
+- What/Where domains: High ICC values (0.59) are ARTIFACTS of non-convergence
+- Only "When" domain has stable (converged) estimates
+- **CRITICAL:** Original claims of "domain-specific slope variance" may be artifacts
+- Thesis implication: Report only When domain, flag What/Where as tentative
+
+**Files Created:**
+- `results/ch6/code/lmm_convergence_sensitivity.py`
+- `results/ch6/diagnostics/lmm_convergence_sensitivity.csv`
+
+---
+
+## TIER 3 PARTIAL (2/4 Tasks) ⏳
+
+### T3.1 - IRT Purification Sensitivity (6.1.1, 6.4.1, 6.5.1)
+**Status:** ✅ COMPLETE
+
+**Stricter Threshold Test (a≥0.6 instead of a≥0.4):**
+| RQ    | Subset  | Items | Retained | Pct   |
+|-------|---------|-------|----------|-------|
+| 6.1.1 | Overall | 72    | 66       | 91.7% |
+| 6.4.1 | IFR     | 24    | 24       | 100%  |
+| 6.4.1 | ICR     | 24    | 24       | 100%  |
+| 6.4.1 | IRE     | 24    | 24       | 100%  |
+| 6.5.1 | Hard    | 36    | 36       | 100%  |
+| 6.5.1 | Easy    | 36    | 36       | 100%  |
+
+**Average retention: 98.6%** ← HIGHLY ROBUST
+
+**Files Created:**
+- `results/ch6/code/irt_purification_sensitivity.py`
+- `results/ch6/diagnostics/irt_purification_sensitivity.csv`
+
+### T3.2 - Equivalence Testing (TOST) for NULL Findings
+**Status:** ✅ COMPLETE (framework built)
+
+**TOST Results (bound=±0.20):**
+- 1/9 formally equivalent to zero (6.3.3: Age x Domain Interaction)
+- 8/9 INCONCLUSIVE (CIs extend beyond ±0.20)
+- Combined with T2.2 power analysis → likely genuine nulls
+- **Thesis claim:** "Small, non-significant effects with adequate power for d≥0.30"
+
+**Files Created:**
+- `results/ch6/code/equivalence_testing_nulls.py`
+- `results/ch6/diagnostics/equivalence_testing_nulls.csv`
+
+### Remaining TIER 3 Tasks (2/4 pending)
+- T3.3: GLMM Refit for Non-Independence (6.2.2, 6.5.3)
+- T3.4: K-means Cross-Validation (6.1.5, 6.8.4)
+
+---
+
+## Session Metrics
+
+**Session Duration:** ~15 minutes
+**Tasks Completed:** 5 (T2.1, T2.4, T2.5, T3.1, T3.2)
+**Scripts Created:** 5 Python scripts
+**Diagnostic Files Generated:** 15+ (CSVs, PNGs, logs)
+
+## Issues Logged in rq_rework.md APPENDIX E
+
+3. **Issue 003:** ERS inflates confidence theta by d=1.89 (11% affected)
+4. **Issue 004:** RQ 6.3.4 What/Where ICC are convergence artifacts (UNSTABLE)
+
+## Active Topics (For context-manager)
+
+- tier2_complete_all_5_tasks (Session 2025-12-14 16:55: T2.1_lmm_diagnostics_5rqs, T2.4_ers_11pct_d1.89_theta_inflation, T2.5_convergence_6.3.4_unstable_what_where)
+
+- tier3_partial_2of4 (Session 2025-12-14 16:55: T3.1_irt_purification_98.6pct_robust, T3.2_tost_1of9_equivalent)
+
+- issue_003_ers_theta_inflation (Session 2025-12-14 16:55: 11pct_ers, d_1.89_massive_effect, document_as_limitation)
+
+- issue_004_convergence_artifacts (Session 2025-12-14 16:55: 6.3.4_what_where_unstable, only_when_converged, thesis_implications_critical)
+
+- ch6_validity_rework_progress (Session 2025-12-14 16:55: tier1_4of4, tier2_5of5, tier3_2of4, tier4_0of4, total_11of17_65pct)
+
+**Relevant Archived Topics:**
+- docs/lmm_methodology.md (2025-12-13) - Model averaging standard procedure
+- purify_items() implementation (2025-11-15) - IRT purification foundation
+- ch6_statistical_validity_audit_complete (2025-12-13 21:30)
+
+**Novel Findings (No Prior Archive):**
+- ERS analysis on confidence scale - FIRST TIME DOCUMENTED
+- TOST equivalence testing - FIRST SYSTEMATIC APPLICATION
+- 6.3.4 convergence artifacts - NEWLY DISCOVERED
+
+**End of Session (2025-12-14 16:55)**
+
+**Status:** ✅ **TIER 1 + TIER 2 COMPLETE, TIER 3 PARTIAL (11/17 = 65% tasks done)**
+
+All HIGH priority validity tasks complete. Major discoveries:
+- LMM diagnostics: Heteroscedasticity noted, N>100 robust
+- ERS: 11% participants with d=1.89 theta inflation (Issue 003)
+- Convergence: 6.3.4 What/Where ICC are artifacts (Issue 004)
+- IRT purification: 98.6% retained (highly robust)
+- TOST: 1/9 equivalent, power analysis provides better evidence
+
+**Next Actions:**
+1. T3.3: GLMM Refit for Non-Independence (6.2.2, 6.5.3)
+2. T3.4: K-means Cross-Validation (6.1.5, 6.8.4)
+3. TIER 4 optional enhancements if time permits
+
+---

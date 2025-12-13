@@ -1,0 +1,198 @@
+======================================================================
+T2.4: CONFIDENCE RESPONSE PATTERN ANALYSIS
+Chapter 6 Validity Rework - TIER 2 HIGH Priority
+======================================================================
+Date: 2025-12-13 16:44:04.918643
+
+======================================================================
+STEP 1: Extract Raw Confidence Ratings
+======================================================================
+Loaded dfData.csv: 400 rows (100 UIDs × 4 tests)
+Found 105 TC_* (confidence) columns
+Created long-format data: 42000 rows
+Unique confidence values: [np.float64(0.0), np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+Scale appears to be 0-1 (normalized). Converting to 1-5 for analysis.
+Converted scale values: [np.int64(1), np.int64(2), np.int64(3), np.int64(4), np.int64(5)]
+
+======================================================================
+STEP 2: Compute Per-Participant Response Metrics
+======================================================================
+
+Per-Participant Metrics Summary (N=100):
+  Mean responses per participant: 420.0
+  Mean confidence: 3.47 (SD=0.42)
+  Mean SD of responses: 1.08 (SD=0.20)
+
+Response Distribution (mean % per level):
+  Level 1: 0.0%
+  Level 2: 25.4%
+  Level 3: 33.0%
+  Level 4: 10.4%
+  Level 5: 31.1%
+
+Endpoint Usage:
+  Mean % at endpoints: 31.1%
+  Min % at endpoints: 0.0%
+  Max % at endpoints: 73.3%
+
+======================================================================
+STEP 3: Identify Extreme Responders
+======================================================================
+
+Extreme Response Style (>50% at endpoints):
+  N with ERS: 11 / 100 (11.0%)
+
+Restricted Range (SD < 0.8):
+  N with restricted range: 10 / 100 (10.0%)
+
+ERS participants (UIDs): ['A015', 'A017', 'A034', 'A039', 'A043', 'A054', 'A060', 'A061', 'A085', 'A087']...
+
+--------------------------------------------------
+⚠️ MODERATE: 10-20% ERS participants. Note in Methods.
+
+======================================================================
+STEP 4: Test ERS vs Non-ERS Theta Differences
+======================================================================
+Loaded theta estimates: 400 rows
+Merged data: 100 participants
+
+Theta by ERS status:
+  ERS (n=11): mean=-0.160, SD=0.148
+  Non-ERS (n=89): mean=-0.691, SD=0.293
+
+Independent samples t-test:
+  t = 5.903, p = 0.0000
+  Cohen's d = 1.887
+  ⚠️ Significant difference - ERS may bias theta estimates
+
+======================================================================
+STEP 5: Create Visualizations
+======================================================================
+Saved: confidence_response_patterns.png
+
+======================================================================
+OUTPUTS
+======================================================================
+Saved: confidence_response_metrics.csv
+
+======================================================================
+SUMMARY
+======================================================================
+Participants analyzed: 100
+Total confidence responses: 42000
+Mean responses per participant: 420.0
+
+Extreme Response Style (>50% endpoints):
+  N: 11 (11.0%)
+  Interpretation: MODERATE
+
+Restricted Range (SD < 0.8):
+  N: 10 (10.0%)
+
+ERS-Theta Relationship:
+  t = 5.903, p = 0.0000
+  Cohen's d = 1.887
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================
+======================================================================
+T2.4: CONFIDENCE RESPONSE PATTERN ANALYSIS
+Chapter 6 Validity Rework - TIER 2 HIGH Priority
+======================================================================
+Date: 2025-12-13 16:45:51.315536
+
+======================================================================
+STEP 1: Extract Raw Confidence Ratings
+======================================================================
+Loaded dfData.csv: 400 rows (100 UIDs × 4 tests)
+Found 105 TC_* (confidence) columns
+Created long-format data: 42000 rows
+Unique confidence values: [np.float64(0.0), np.float64(0.2), np.float64(0.4), np.float64(0.6), np.float64(0.8), np.float64(1.0)]
+Scale is 0.0-1.0 in 0.2 increments (6-point scale).
+Mapping: {0.0->1, 0.2->2, 0.4->3, 0.6->4, 0.8->5, 1.0->6}
+Converted scale values: [np.int64(1), np.int64(2), np.int64(3), np.int64(4), np.int64(5), np.int64(6)]
+
+======================================================================
+STEP 2: Compute Per-Participant Response Metrics
+======================================================================
+
+Per-Participant Metrics Summary (N=100):
+  Mean responses per participant: 420.0
+  Mean confidence: 4.04 (SD=0.59)
+  Mean SD of responses: 1.46 (SD=0.26)
+
+Response Distribution (mean % per level):
+  Level 1: 0.0%
+  Level 2: 25.4%
+  Level 3: 17.9%
+  Level 4: 15.2%
+  Level 5: 10.4%
+  Level 6: 31.1%
+
+Endpoint Usage:
+  Mean % at endpoints: 31.1%
+  Min % at endpoints: 0.0%
+  Max % at endpoints: 73.3%
+
+======================================================================
+STEP 3: Identify Extreme Responders
+======================================================================
+
+Extreme Response Style (>50% at endpoints):
+  N with ERS: 11 / 100 (11.0%)
+
+Restricted Range (SD < 0.8):
+  N with restricted range: 7 / 100 (7.0%)
+
+ERS participants (UIDs): ['A015', 'A017', 'A034', 'A039', 'A043', 'A054', 'A060', 'A061', 'A085', 'A087']...
+
+--------------------------------------------------
+⚠️ MODERATE: 10-20% ERS participants. Note in Methods.
+
+======================================================================
+STEP 4: Test ERS vs Non-ERS Theta Differences
+======================================================================
+Loaded theta estimates: 400 rows
+Merged data: 100 participants
+
+Theta by ERS status:
+  ERS (n=11): mean=-0.160, SD=0.148
+  Non-ERS (n=89): mean=-0.691, SD=0.293
+
+Independent samples t-test:
+  t = 5.903, p = 0.0000
+  Cohen's d = 1.887
+  ⚠️ Significant difference - ERS may bias theta estimates
+
+======================================================================
+STEP 5: Create Visualizations
+======================================================================
+Saved: confidence_response_patterns.png
+
+======================================================================
+OUTPUTS
+======================================================================
+Saved: confidence_response_metrics.csv
+
+======================================================================
+SUMMARY
+======================================================================
+Participants analyzed: 100
+Total confidence responses: 42000
+Mean responses per participant: 420.0
+
+Extreme Response Style (>50% endpoints):
+  N: 11 (11.0%)
+  Interpretation: MODERATE
+
+Restricted Range (SD < 0.8):
+  N: 7 (7.0%)
+
+ERS-Theta Relationship:
+  t = 5.903, p = 0.0000
+  Cohen's d = 1.887
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================

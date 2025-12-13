@@ -1,0 +1,7 @@
+RQ,Name,N_items_total,N_retained_original,N_retained_strict,Pct_retained_strict,N_excluded,Interpretation,Paradigm,Difficulty
+6.1.1,Overall confidence,72,72,66,91.66666666666667,6,ROBUST,,
+6.4.1,,24,24,24,100.0,0,,IFR,
+6.4.1,,24,24,24,100.0,0,,ICR,
+6.4.1,,24,24,24,100.0,0,,IRE,
+6.5.1,,36,36,36,100.0,0,,,Hard
+6.5.1,,36,36,36,100.0,0,,,Easy
