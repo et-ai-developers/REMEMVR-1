@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-12-13 (lmm_methodology.md updated with model averaging procedure)
+**Last Updated:** 2025-12-14 (ch6_limitations.md created, stale entries marked)
 
 ---
 
@@ -49,7 +49,7 @@
 ### irt_methodology.md
 **Purpose:** IRT deep dive, model specifications, parameter interpretation, downstream usage for LMM
 **Audience:** Analysis-executor agent, main claude when building IRT tools, statistics-expert agent
-**Status:** Current
+**Status:** STALE - File does not exist (listed but never created)
 **Key Topics:** Graded Response Model (GRM), multidimensional IRT, deepirtools IWAVE implementation, theta estimation, composite_ID stacking, downstream usage in LMM pipeline (theta scores + TSVR)
 
 ### lmm_methodology.md
@@ -83,8 +83,14 @@
 ### design_decisions.md
 **Purpose:** Documents key design decisions and their rationales (composite_ID stacking, dichotomous scoring, agent architecture)
 **Audience:** Main claude when questioning why specific design choices were made
-**Status:** Current
+**Status:** STALE - File does not exist (listed but never created)
 **Key Topics:** Why composite_ID stacking, why dichotomous scoring, why agent-based architecture
+
+### ch6_limitations.md
+**Purpose:** Consolidated documentation of statistical limitations discovered during Ch6 validity rework
+**Audience:** Main claude when writing thesis Discussion, reviewers asking about limitations
+**Status:** Current (2025-12-14, created from validity audit)
+**Key Topics:** ICC attenuation (824→221×), difference score reliability (0.66), ERS theta inflation (d=1.89), domain ICC convergence artifacts (6.3.4), GEE vs LPM for HCE, heteroscedasticity robustness, methods section template
 
 ### thesis_chapters.md
 **Purpose:** Overview of thesis chapters 5, 6, 7 with RQ counts and focus areas

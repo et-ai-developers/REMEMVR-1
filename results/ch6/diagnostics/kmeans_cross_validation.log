@@ -1,0 +1,102 @@
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] T3.4: K-Means Cross-Validation for Clustering Stability
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] Start time: 2025-12-13 18:42:48.034457
+[2025-12-13 18:42:48] Project root: /home/etai/projects/REMEMVR
+[2025-12-13 18:42:48] Configuration: N_SPLITS=10, TRAIN_FRAC=0.7, K=3
+[2025-12-13 18:42:48] 
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] RQ 6.1.5: Confidence Trajectory Phenotypes - Cross-Validation
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] Loading: /home/etai/projects/REMEMVR/results/ch6/6.1.5/data/step02_standardized_features.csv
+[2025-12-13 18:42:48]   Loaded 100 participants
+[2025-12-13 18:42:48]   Features: intercept_z, slope_z
+[2025-12-13 18:42:48]   K = 3
+[2025-12-13 18:42:48]   Original full-sample silhouette: 0.4587
+[2025-12-13 18:42:48] 
+  Running 10-fold cross-validation (70/30 split)...
+[2025-12-13 18:42:48] 
+  CROSS-VALIDATION RESULTS:
+[2025-12-13 18:42:48]   Metric                              Value
+[2025-12-13 18:42:48]   ------------------------- ---------------
+[2025-12-13 18:42:48]   Train silhouette mean              0.4834
+[2025-12-13 18:42:48]   Train silhouette SD                0.0195
+[2025-12-13 18:42:48]   Test silhouette mean               0.3895
+[2025-12-13 18:42:48]   Test silhouette SD                 0.0427
+[2025-12-13 18:42:48]   Gap (train - test)                 0.0939
+[2025-12-13 18:42:48]   Gap SD                             0.0470
+[2025-12-13 18:42:48]   Valid splits                           10
+[2025-12-13 18:42:48] 
+  SUCCESS CRITERIA:
+[2025-12-13 18:42:48]   Stability (gap < 0.10)               PASS
+[2025-12-13 18:42:48]   Test adequate (≥0.25)                PASS
+[2025-12-13 18:42:48] 
+  OVERALL: ROBUST
+[2025-12-13 18:42:48] 
+======================================================================
+[2025-12-13 18:42:48] RQ 6.8.4: Location-Type Confidence Phenotypes - Cross-Validation
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] Loading: /home/etai/projects/REMEMVR/results/ch6/6.8.4/data/step01_standardized_features.csv
+[2025-12-13 18:42:48]   Loaded 100 participants
+[2025-12-13 18:42:48]   Features: ['Source_intercept_z', 'Source_slope_z', 'Destination_intercept_z', 'Destination_slope_z']
+[2025-12-13 18:42:48]   Feature matrix shape: (100, 4)
+[2025-12-13 18:42:48]   K = 3
+[2025-12-13 18:42:48]   Original full-sample silhouette: 0.3302
+[2025-12-13 18:42:48] 
+  Running 10-fold cross-validation (70/30 split)...
+[2025-12-13 18:42:48] 
+  CROSS-VALIDATION RESULTS:
+[2025-12-13 18:42:48]   Metric                              Value
+[2025-12-13 18:42:48]   ------------------------- ---------------
+[2025-12-13 18:42:48]   Train silhouette mean              0.3839
+[2025-12-13 18:42:48]   Train silhouette SD                0.0101
+[2025-12-13 18:42:48]   Test silhouette mean               0.3637
+[2025-12-13 18:42:48]   Test silhouette SD                 0.0364
+[2025-12-13 18:42:48]   Gap (train - test)                 0.0202
+[2025-12-13 18:42:48]   Gap SD                             0.0378
+[2025-12-13 18:42:48]   Valid splits                           10
+[2025-12-13 18:42:48] 
+  SUCCESS CRITERIA:
+[2025-12-13 18:42:48]   Stability (gap < 0.10)               PASS
+[2025-12-13 18:42:48]   Test adequate (≥0.25)                PASS
+[2025-12-13 18:42:48] 
+  OVERALL: ROBUST
+[2025-12-13 18:42:48] 
+Saved: /home/etai/projects/REMEMVR/results/ch6/diagnostics/kmeans_cross_validation.csv
+[2025-12-13 18:42:48] 
+======================================================================
+[2025-12-13 18:42:48] FINAL SUMMARY
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] 
+1. RQ 6.1.5 (Confidence Trajectory Phenotypes):
+[2025-12-13 18:42:48]    Original silhouette: 0.4587
+[2025-12-13 18:42:48]    CV train silhouette: 0.4834 ± 0.0195
+[2025-12-13 18:42:48]    CV test silhouette: 0.3895 ± 0.0427
+[2025-12-13 18:42:48]    Gap (train-test): 0.0939
+[2025-12-13 18:42:48]    Stability: PASS
+[2025-12-13 18:42:48]    Test adequate: PASS
+[2025-12-13 18:42:48]    OVERALL: ROBUST
+[2025-12-13 18:42:48] 
+2. RQ 6.8.4 (Location-Type Confidence Phenotypes):
+[2025-12-13 18:42:48]    Original silhouette: 0.3302
+[2025-12-13 18:42:48]    CV train silhouette: 0.3839 ± 0.0101
+[2025-12-13 18:42:48]    CV test silhouette: 0.3637 ± 0.0364
+[2025-12-13 18:42:48]    Gap (train-test): 0.0202
+[2025-12-13 18:42:48]    Stability: PASS
+[2025-12-13 18:42:48]    Test adequate: PASS
+[2025-12-13 18:42:48]    OVERALL: ROBUST
+[2025-12-13 18:42:48] 
+3. OVERALL:
+[2025-12-13 18:42:48]    Robust clusters: 2/2
+[2025-12-13 18:42:48]    ASSESSMENT: Both clustering solutions are STABLE
+[2025-12-13 18:42:48]    Findings generalize beyond training sample
+[2025-12-13 18:42:48] 
+4. THESIS RECOMMENDATION:
+[2025-12-13 18:42:48]    Document CV results in Methods section.
+[2025-12-13 18:42:48]    Report test silhouette alongside full-sample metrics.
+[2025-12-13 18:42:48]    Acknowledge that N=100 limits cluster generalizability.
+[2025-12-13 18:42:48] 
+======================================================================
+[2025-12-13 18:42:48] T3.4 COMPLETE
+[2025-12-13 18:42:48] ======================================================================
+[2025-12-13 18:42:48] End time: 2025-12-13 18:42:48.134657

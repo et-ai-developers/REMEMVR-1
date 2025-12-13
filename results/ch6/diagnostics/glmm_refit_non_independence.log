@@ -1,0 +1,120 @@
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] T3.3: GLMM Refit for Non-Independence Issues
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] Start time: 2025-12-13 18:41:07.417349
+[2025-12-13 18:41:07] Project root: /home/etai/projects/REMEMVR
+[2025-12-13 18:41:07] 
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] RQ 6.2.2: Overconfidence Trajectory - GEE Refit
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] Loading: /home/etai/projects/REMEMVR/results/ch6/6.2.2/data/step01_calibration_classified.csv
+[2025-12-13 18:41:07]   Loaded 400 rows, 100 participants
+[2025-12-13 18:41:07] 
+Data summary:
+[2025-12-13 18:41:07]   Overconfident: 187 (46.8%)
+[2025-12-13 18:41:07]   Time points: [np.int64(0), np.int64(1), np.int64(3), np.int64(6)]
+[2025-12-13 18:41:07] 
+--- ORIGINAL: Standard Logistic Regression ---
+[2025-12-13 18:41:07]   Time effect: β = 0.0526, SE = 0.0438
+[2025-12-13 18:41:07]   z = 1.201, p = 0.2296
+[2025-12-13 18:41:07]   OR = 1.0540
+[2025-12-13 18:41:07]   Conclusion: NON-SIGNIFICANT
+[2025-12-13 18:41:07] 
+--- GEE: Exchangeable Correlation Structure ---
+[2025-12-13 18:41:07]   GEE converged successfully
+[2025-12-13 18:41:07]   Time effect: β = 0.0526, SE = 0.0405
+[2025-12-13 18:41:07]   z = 1.300, p = 0.1937
+[2025-12-13 18:41:07]   OR = 1.0540 [0.9736, 1.1410]
+[2025-12-13 18:41:07]   Estimated correlation: The correlation between two observations in the same cluster is 0.174
+[2025-12-13 18:41:07]   Conclusion: NON-SIGNIFICANT
+[2025-12-13 18:41:07] 
+--- COMPARISON: Original vs GEE ---
+[2025-12-13 18:41:07]   Metric                      Original             GEE          Change
+[2025-12-13 18:41:07]   -------------------- --------------- --------------- ---------------
+[2025-12-13 18:41:07]   β (log-odds/day)              0.0526          0.0526         -0.0000
+[2025-12-13 18:41:07]   SE                            0.0438          0.0405         -0.0033
+[2025-12-13 18:41:07]   p-value                       0.2296          0.1937         -0.0359
+[2025-12-13 18:41:07]   OR                            1.0540          1.0540         -0.0000
+[2025-12-13 18:41:07] 
+  Conclusion changed: False
+[2025-12-13 18:41:07]   Both methods agree: NON-SIGNIFICANT
+[2025-12-13 18:41:07] 
+======================================================================
+[2025-12-13 18:41:07] RQ 6.5.3: High-Confidence Errors by Congruence - GEE Refit
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] Loading: /home/etai/projects/REMEMVR/results/ch6/6.5.3/data/step01_hce_flags.csv
+[2025-12-13 18:41:07]   Loaded 7200 rows, 100 participants
+[2025-12-13 18:41:07] 
+Data summary:
+[2025-12-13 18:41:07]   HCE: 358 (5.0%)
+[2025-12-13 18:41:07]   By Congruence:
+[2025-12-13 18:41:07]     Common: 99/2400 (4.1%)
+[2025-12-13 18:41:07]     Congruent: 125/2400 (5.2%)
+[2025-12-13 18:41:07]     Incongruent: 134/2400 (5.6%)
+[2025-12-13 18:41:07] 
+--- ORIGINAL: Linear Probability Model (MixedLM) ---
+[2025-12-13 18:41:07]   Incongruent vs Common: β = 0.0185, SE = 0.0091
+[2025-12-13 18:41:07]   z = 2.019, p = 0.0434
+[2025-12-13 18:41:07]   Note: LPM - coefficients are probability changes, not log-odds
+[2025-12-13 18:41:07]   Conclusion: SIGNIFICANT
+[2025-12-13 18:41:07] 
+--- GEE: Logistic with Exchangeable Correlation ---
+[2025-12-13 18:41:07]   GEE converged successfully
+[2025-12-13 18:41:07]   Incongruent vs Common: β = 0.3781, SE = 0.1981
+[2025-12-13 18:41:07]   z = 1.908, p = 0.0563
+[2025-12-13 18:41:07]   OR = 1.4594 [0.9898, 2.1518]
+[2025-12-13 18:41:07]   Estimated correlation: The correlation between two observations in the same cluster is 0.030
+[2025-12-13 18:41:07]   Conclusion: NON-SIGNIFICANT
+[2025-12-13 18:41:07] 
+  Full GEE Model Fixed Effects:
+[2025-12-13 18:41:07]   Effect                                                           β         SE          z          p
+[2025-12-13 18:41:07]   ------------------------------------------------------- ---------- ---------- ---------- ----------
+[2025-12-13 18:41:07]   Intercept                                                  -3.0986     0.1751    -17.695    0.0000*
+[2025-12-13 18:41:07]   C(Congruence, Treatment('Common'))[T.Congruent]             0.0845     0.2196      0.385    0.7005
+[2025-12-13 18:41:07]   C(Congruence, Treatment('Common'))[T.Incongruent]           0.3781     0.1981      1.908    0.0563
+[2025-12-13 18:41:07]   Time                                                       -0.0193     0.0483     -0.399    0.6902
+[2025-12-13 18:41:07]   C(Congruence, Treatment('Common'))[T.Congruent]:Time        0.0626     0.0649      0.964    0.3351
+[2025-12-13 18:41:07]   C(Congruence, Treatment('Common'))[T.Incongruent]:Time     -0.0255     0.0541     -0.471    0.6377
+[2025-12-13 18:41:07] 
+--- COMPARISON: Original LPM vs GEE ---
+[2025-12-13 18:41:07]   Note: LPM β is probability change; GEE β is log-odds change
+[2025-12-13 18:41:07]   Direct comparison of p-values and conclusions only
+[2025-12-13 18:41:07] 
+[2025-12-13 18:41:07]   Metric                           LPM             GEE
+[2025-12-13 18:41:07]   -------------------- --------------- ---------------
+[2025-12-13 18:41:07]   p-value                       0.0434          0.0563
+[2025-12-13 18:41:07] 
+  Conclusion changed: True
+[2025-12-13 18:41:07]   IMPORTANT: Original was SIGNIFICANT, GEE is NON-SIGNIFICANT
+[2025-12-13 18:41:07] 
+Saved: /home/etai/projects/REMEMVR/results/ch6/diagnostics/glmm_refit_non_independence.csv
+[2025-12-13 18:41:07] 
+======================================================================
+[2025-12-13 18:41:07] FINAL SUMMARY
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] 
+1. RQ 6.2.2 (Overconfidence Trajectory):
+[2025-12-13 18:41:07]    Original (Logistic): p = 0.2296 (NON-SIGNIFICANT)
+[2025-12-13 18:41:07]    GEE (Exchangeable): p = 0.1937 (NON-SIGNIFICANT)
+[2025-12-13 18:41:07]    SE change: -7.6%
+[2025-12-13 18:41:07]    Conclusion changed: False
+[2025-12-13 18:41:07] 
+2. RQ 6.5.3 (HCE by Congruence):
+[2025-12-13 18:41:07]    Original (LPM): p = 0.0434 (SIGNIFICANT)
+[2025-12-13 18:41:07]    GEE (Logistic): p = 0.0563 (NON-SIGNIFICANT)
+[2025-12-13 18:41:07]    Conclusion changed: True
+[2025-12-13 18:41:07] 
+3. OVERALL:
+[2025-12-13 18:41:07]    Conclusions changed: 1/2
+[2025-12-13 18:41:07]    ASSESSMENT: Some findings CHANGED with proper clustering
+[2025-12-13 18:41:07]    Recommend reporting GEE results in thesis
+[2025-12-13 18:41:07] 
+4. THESIS RECOMMENDATION:
+[2025-12-13 18:41:07]    Document in Methods: 'For binary outcomes with repeated measures,
+[2025-12-13 18:41:07]    GEE with exchangeable correlation was used to account for within-
+[2025-12-13 18:41:07]    participant clustering (Zeger & Liang, 1986).'
+[2025-12-13 18:41:07] 
+======================================================================
+[2025-12-13 18:41:07] T3.3 COMPLETE
+[2025-12-13 18:41:07] ======================================================================
+[2025-12-13 18:41:07] End time: 2025-12-13 18:41:07.490389
