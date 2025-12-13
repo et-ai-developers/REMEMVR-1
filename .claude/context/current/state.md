@@ -1,23 +1,23 @@
 # Current State
 
-**Last Updated:** 2025-12-13 21:30 (curated by context-manager)
+**Last Updated:** 2025-12-14 16:20 (pre-curation)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2025-12-13 21:30
-**Token Count:** ~4,200 tokens (~21% utilization)
+**Last /save:** 2025-12-14 16:20
+**Token Count:** ~8,500 tokens (~42% utilization)
 
 ---
 
 ## What We're Doing
 
-**Current Task:** CHAPTER 6 STATISTICAL VALIDITY REWORK - 18 TASKS IDENTIFIED
+**Current Task:** CHAPTER 6 STATISTICAL VALIDITY REWORK - TIER 1 COMPLETE, TIER 2 IN PROGRESS
 
-**Context:** Comprehensive audit identified 18 statistical validity improvement tasks to strengthen thesis defensibility. Model averaging complete (Phase 1). Now entering Phase 2: validity enhancements including ICC validation, bootstrap robustness, Lord's paradox checks, power analysis, and LMM diagnostics.
+**Context:** Comprehensive audit identified 18 statistical validity improvement tasks. TIER 1 CRITICAL tasks all complete. Now working through TIER 2.
 
 **Chapter 6 Status:**
 - **Model Averaging:** ✅ COMPLETE (5/5 ROOT RQs + Ch5 5.1.1 + 6.7.3)
-- **Validity Rework:** ⏳ 0/18 tasks complete
-  - TIER 1 CRITICAL: 0/4 (824× ICC, bootstrap 6.7.2, Lord's paradox, difference score reliability)
-  - TIER 2 HIGH: 0/5 (diagnostics, power analysis, bootstrap 6.8.3, response patterns, convergence)
+- **Validity Rework:** ⏳ 6/18 tasks complete
+  - TIER 1 CRITICAL: ✅ 4/4 COMPLETE (824× ICC→221×, bootstrap 6.7.2 robust, Lord's paradox N/A, reliability marginal)
+  - TIER 2 HIGH: ⏳ 2/5 (power analysis ✅, bootstrap 6.8.3 ✅ | diagnostics, response patterns, convergence pending)
   - TIER 3 MODERATE: 0/4 (IRT sensitivity, equivalence testing, GLMM refit, clustering CV)
   - TIER 4 LOW: 0/5 (optional enhancements)
 
@@ -229,136 +229,175 @@ Completed all remaining rework items: (1) Updated 4 ROOT RQ summary.md files wit
 
 **Task:** Ch6 Statistical Validity Audit & Comprehensive Rework Plan Creation
 
-**Context:** User requested comprehensive search for ANY improvements that could strengthen Ch6 statistical validity and make findings more representative of real human episodic memory/metacognition performance. Four context_finder agents deployed in parallel to search Ch6 results, docs, archives, and episodic memory validity standards.
+**Status:** ✅ COMPLETE - Created 18-task rework plan in rq_rework.md (~740 lines)
 
-**Major Accomplishment: Complete Statistical Validity Improvement Plan Created**
+**Key Accomplishment:** Comprehensive audit identified 18 statistical validity improvement tasks across 4 priority tiers. rq_rework.md restructured as authoritative operational document.
 
-### 1. Parallel Context Search (4 Agents)
+**TIER 1 CRITICAL Tasks Identified (4 tasks):**
+- T1.1: 824× ICC MA validation (thesis centerpiece at risk)
+- T1.2: Bootstrap robustness for 6.7.2 (p=0.034 marginal)
+- T1.3: Lord's paradox check for 6.4.2
+- T1.4: Difference score reliability for 6.4.2
 
-Deployed context_finder agents to search:
-1. Ch6 RQ folders for methodology gaps
-2. Docs/archives for methodology standards
-3. Episodic memory validity standards and metacognition best practices
-4. Ch6 RQ status and documented gaps
+**Archived Topics:**
+- ch6_statistical_validity_audit_complete
+- ch6_critical_validity_issues
+- ch6_validity_rework_plan_structure
 
-### 2. Critical Validity Issues Identified
+---
 
-**TIER 1 - CRITICAL (Must Do Before Defense):**
-| Task | RQ | Issue | Impact |
-|------|-----|-------|--------|
-| T1.1 | 6.1.4 | 824× ICC uses single model (21.7% weight) | Thesis centerpiece at risk |
-| T1.2 | 6.7.2 | Partial r p=0.034 marginal | Metacognitive sensitivity claim needs bootstrap |
-| T1.3 | 6.4.2 | Lord's paradox not checked | Paradigm calibration may be artifact |
-| T1.4 | 6.4.2 | Difference score reliability unknown | Small effects (d=0.09) may be noise |
+### Session (2025-12-14 16:20)
 
-**TIER 2 - HIGH PRIORITY:**
-- LMM residual diagnostics (QQ plots, heteroscedasticity) - 5 RQs
-- Post-hoc power analysis for NULL findings - 8 RQs
-- Bootstrap CI for correlation reversal (6.8.3)
-- Confidence response pattern analysis (extreme response bias)
-- LMM convergence sensitivity (boundary warnings in 6.3.4, 6.8.1)
+**Task:** Execute TIER 1 CRITICAL Validity Tasks + Start TIER 2
 
-**TIER 3 - MODERATE:**
-- IRT purification sensitivity (100% retention unusual)
-- Equivalence testing for NULL findings (TOST)
-- GLMM refit for non-independence (6.2.2, 6.5.3)
-- Cross-validation for clustering (6.1.5, 6.8.4)
+**Context:** User requested execution of rework tasks from rq_rework.md in logical order until 70% context used.
 
-**TIER 4 - LOW:**
-- Alternative time transformations
-- Derivative RQs re-run with MA outputs
-- Documentation creation (irt_methodology.md, design_decisions.md)
+**Major Accomplishments:**
 
-### 3. rq_rework.md Complete Restructure
+## TIER 1 COMPLETE (4/4 Tasks) ✅
 
-**File Modified:** `results/ch6/rq_rework.md` (~740 lines)
+### T1.1 - 824× ICC Model-Averaged Validation
+**Status:** ✅ COMPLETE
+**Finding:** ICC ratio REDUCED from 824× to **221×** with model averaging
+- Original ICC_slope = 0.412 (single Recip_sq model, 21.7% weight)
+- MA ICC_slope = 0.111 (48 models, Eff_N=31.1)
+- Reduction: 73%
+- **Still ROBUST** (>100× threshold, >0.10 ICC)
+- **Thesis claim revised:** Report ~220× with model uncertainty caveat
 
-**New Structure:**
-- **HOW TO USE THIS DOCUMENT** - Explicit instructions for Claude's use
-- **Session Start/End Protocol** - Step-by-step workflow
-- **User Notification Protocol** - When to ask user (deviations, surprises, decisions)
-- **CURRENT STATUS DASHBOARD** - Quick reference for what's done/pending
-- **TIER 1-4 Tasks** - Self-contained with inputs, outputs, success criteria, code templates
-- **APPENDIX A** - Known limitations to document in thesis
-- **APPENDIX B** - Completed model averaging reference
-- **APPENDIX C** - Session completion log
-- **APPENDIX D** - Quick reference file locations
-- **APPENDIX E** - Issues log (for documenting surprises)
-- **APPENDIX F** - Decision log (for methodological choices)
-- **REVISION HISTORY** - Document changes tracked
+**Issue 001 Logged:** 824× finding attenuated but survives
 
-**Key Design Principles:**
-- Self-contained tasks (no guessing required)
-- Real-time status updates (not batched at session end)
-- User notification mandatory for any deviations/surprises/decisions
-- Document is single source of truth (must stay current)
-- Issues/decisions logged for thesis documentation
+**Files Created:**
+- `results/ch6/6.1.4/code/step06b_icc_ma_validation.py`
+- `results/ch6/6.1.4/data/step06b_icc_ma_validation.csv`
+- Updated `results/ch6/6.1.4/results/summary.md` with MA validation section
 
-### 4. Key Findings from Context Search
+### T1.2 - Bootstrap Robustness for Partial Correlation (6.7.2)
+**Status:** ✅ COMPLETE
+**Finding:** **SUBSTANTIALLY ROBUST** (3/4 criteria passed)
+- Bootstrap 95% CI: [0.02, 0.41] - excludes 0 ✓
+- LOO: All 100 iterations positive ✓
+- Permutation p = 0.031 (confirms parametric p = 0.033) ✓
+- Outlier sensitivity: ⚠️ 7 outliers detected, removal changes r from 0.21 to 0.15 (p=0.15)
+- **Caveat:** Finding is outlier-sensitive
 
-**What's At Risk:**
-- 824× ICC ratio (6.1.4) - thesis centerpiece, needs MA validation
-- Metacognitive sensitivity (6.7.2) - p=0.034 marginal, needs bootstrap
-- Paradigm calibration (6.4.2) - Lord's paradox not addressed
-- Domain dissociation (6.3.4) - convergence boundary warnings
+**Files Created:**
+- `results/ch6/6.7.2/code/step06_robustness_analysis.py`
+- `results/ch6/6.7.2/data/step06_*.csv`
+- `results/ch6/6.7.2/results/robustness_analysis.md`
 
-**What's Already Robust:**
-- All NULL interaction findings (robust across model specifications)
-- Model averaging complete for 5 ROOT RQs (6.1.1, 6.3.1, 6.4.1, 6.5.1, 6.8.1)
-- Ch5 5.1.1 MA residuals created, 6.7.3 fixed
+### T1.3 - Lord's Paradox Sensitivity Check (6.4.2)
+**Status:** ✅ COMPLETE
+**Finding:** **ROBUST - Lord's paradox NOT a concern**
+- Key finding: Accuracy does NOT differ by paradigm (F=0.12, p=0.89)
+- Therefore, Lord's paradox cannot apply (no baseline differences)
+- ANCOVA paradigm effect: p = 0.275 (n.s.)
+- All 3 methods agree on non-significance
 
-**Known Limitations to Document:**
-1. Model averaging limited to ROOT RQs (derivatives use single-best)
-2. GRM-2PL transformation mismatch (theta valid, probability visual only)
-3. Non-independence in some logistic regressions
-4. Day 6 floor effects (2-3% probability)
-5. 100% item retention (unusual vs typical 40-60%)
-6. Desktop VR ecological limitations
-7. Transfer/generalization to real-world unknown
+**Files Created:**
+- `results/ch6/6.4.2/code/step05_lords_paradox_sensitivity.py`
+- `results/ch6/6.4.2/data/step05_lords_paradox_check.csv`
+- `results/ch6/6.4.2/results/sensitivity_analysis.md`
 
-### 5. Files Modified
+### T1.4 - Difference Score Reliability Check (6.4.2)
+**Status:** ✅ COMPLETE
+**Finding:** **MARGINAL RELIABILITY** (r_diff = 0.66 < 0.70 threshold)
+- Components: r_xx=0.87 (confidence), r_yy=0.83 (accuracy), r_xy=0.56
+- High r_xy (0.56) reduces difference score reliability
+- Sensitivity: Only 2/5 scenarios meet 0.70 threshold
+- **Thesis implication:** Effect sizes (d=0.09-0.11) may be attenuated; document as limitation
 
-**Major Changes:**
-- `results/ch6/rq_rework.md` - Complete restructure with tiered validity tasks
+**Issue 002 Logged:** Difference score reliability marginal
 
-**Structure:**
-- ~740 lines (was ~444 lines)
-- Added 18 specific tasks with code templates
-- Added 6 appendices
-- Added session/issues/decision logging infrastructure
+**Files Created:**
+- `results/ch6/6.4.2/code/step06_difference_score_reliability.py`
+- `results/ch6/6.4.2/data/step06_reliability_*.csv`
 
-### 6. Session Metrics
+---
 
-**Session Duration:** ~30 minutes
-**Context Searches:** 4 parallel agents
-**Documentation Updated:** 1 major file (rq_rework.md)
-**Tasks Identified:** 18 (4 CRITICAL, 5 HIGH, 4 MODERATE, 5 LOW)
-**Estimated Total Rework Time:** 2-3 weeks comprehensive, 2 days for TIER 1 only
+## TIER 2 PARTIAL (3/5 Tasks) ⏳
 
-### 7. Active Topics (For context-manager)
+### T2.2 - Post-Hoc Power Analysis for NULL Findings
+**Status:** ✅ COMPLETE
+**Finding:** **ALL 8 NULL findings ADEQUATELY POWERED**
+- RQs tested: 6.1.3, 6.2.5, 6.3.3, 6.4.3, 6.5.2, 6.5.3, 6.7.3, 6.8.2
+- Power for d=0.30: 84-97% across all RQs
+- Power for d=0.20: 51-72% (slightly below 80%)
+- Classification: All "ADEQUATELY POWERED NULL"
+- **Thesis implication:** Can claim genuine null effects (no medium/large effects d>0.30)
 
-- ch6_statistical_validity_audit_complete (Session 2025-12-13 21:30: four_parallel_context_searches, 18_improvement_tasks_identified, tiered_priority_T1_T4, rq_rework.md_restructured_740_lines)
+**Files Created:**
+- `results/ch6/power_analysis_null_findings.py`
+- `results/ch6/power_analysis_null_findings.csv`
 
-- ch6_critical_validity_issues (Session 2025-12-13 21:30: T1.1_824x_icc_ma_validation, T1.2_bootstrap_robustness_6.7.2, T1.3_lords_paradox_6.4.2, T1.4_difference_score_reliability)
+### T2.3 - Bootstrap CI for Correlation Reversal (6.8.3)
+**Status:** ✅ COMPLETE
+**Finding:** Source vs Destination **SIGNIFICANTLY DIFFERENT**
+- Source confidence: r = -0.13
+- Destination confidence: r = -0.39
+- Bootstrap 95% CI: [0.12, 0.39] - excludes 0
+- Cohen's q = 0.28 (small effect)
 
-- ch6_validity_rework_plan_structure (Session 2025-12-13 21:30: self_contained_tasks, user_notification_protocol, issues_decision_logs, appendices_A_through_F, session_tracking)
+**MAJOR FINDING - Accuracy vs Confidence Dissociation:**
+- Source: Accuracy r=+0.99 → Confidence r=-0.13 (Cohen's q=**2.78 MASSIVE**)
+- Destination: Accuracy r=-0.90 → Confidence r=-0.39 (Cohen's q=1.06 LARGE)
+- Metacognitive monitoring shows fundamentally different pattern than memory accuracy
 
-- episodic_memory_validity_standards (Session 2025-12-13 21:30: ecological_validity_vr_desktop, calibration_metrics_used, icc_thresholds, longitudinal_best_practices, known_limitations_documented)
+**Files Created:**
+- `results/ch6/6.8.3/code/step06_bootstrap_correlation_comparison.py`
+- `results/ch6/6.8.3/data/step06_correlation_comparison.csv`
+
+### Remaining TIER 2 Tasks (2/5 pending)
+- T2.1: LMM residual diagnostics (5 RQs) - NOT STARTED
+- T2.4: Confidence response pattern analysis - NOT STARTED
+- T2.5: LMM convergence sensitivity - NOT STARTED
+
+---
+
+## Session Metrics
+
+**Session Duration:** ~25 minutes
+**Tasks Completed:** 6 (T1.1, T1.2, T1.3, T1.4, T2.2, T2.3)
+**Scripts Created:** 6 Python scripts
+**CSVs Generated:** 10+
+**Documentation Updated:** rq_rework.md, multiple summary.md files
+
+## Issues Logged in rq_rework.md APPENDIX E
+
+1. **Issue 001:** 824× ICC ratio reduced to 221× with MA (still robust, thesis claim revised)
+2. **Issue 002:** Difference score reliability marginal (0.66) - document as thesis limitation
+
+## Active Topics (For context-manager)
+
+- tier1_validity_tasks_complete (Session 2025-12-14 16:20: T1.1_icc_ma_221x, T1.2_bootstrap_3of4_robust, T1.3_lords_paradox_not_concern, T1.4_reliability_marginal_0.66)
+
+- tier2_power_analysis_complete (Session 2025-12-14 16:20: all_8_null_findings_adequately_powered, can_claim_genuine_null_effects)
+
+- tier2_correlation_dissociation (Session 2025-12-14 16:20: source_dest_significant_difference, accuracy_confidence_massive_q_2.78, metacognitive_pattern_different_from_accuracy)
+
+- rq_rework_progress (Session 2025-12-14 16:20: tier1_4of4_complete, tier2_3of5_complete, remaining_T2.1_T2.4_T2.5)
 
 **Relevant Archived Topics:**
-- ch6_824x_icc_model_averaged_validation (2025-12-13 14:30) - MA foundation for T1.1
-- power_analysis_simulation_method (2025-12-05 14:00) - methodology for T2.2
-- ch6_extreme_model_uncertainty_validated (2025-12-13 14:30) - context for model selection issues
+- ch6_824x_icc_model_averaged_validation (2025-12-13 14:30)
+- ch6_statistical_validity_audit_complete (2025-12-13 21:30)
+- burnham_anderson_2002_implementation (2025-12-13 14:30)
 
-**End of Session (2025-12-13 21:30)**
+**End of Session (2025-12-14 16:20)**
 
-**Status:** ✅ **Ch6 Statistical Validity Rework Plan Complete**
+**Status:** ✅ **TIER 1 COMPLETE + TIER 2 PARTIAL (6/9 validity tasks done)**
 
-Comprehensive audit completed identifying 18 statistical validity improvement tasks across 4 priority tiers. rq_rework.md completely restructured (~740 lines) as authoritative operational document for Claude to execute rework tasks across multiple sessions. Includes self-contained task specifications, user notification protocols, issues/decision logging, and session tracking infrastructure.
+All thesis-critical TIER 1 tasks complete. Key findings:
+- 824× ICC → 221× (still robust)
+- Bootstrap robustness 3/4 criteria (outlier-sensitive)
+- Lord's paradox not a concern
+- Difference score reliability marginal (limitation)
+- All 8 NULL findings adequately powered
+- Source-Dest correlation dissociation massive (q=2.78)
 
 **Next Actions:**
-1. Begin TIER 1 tasks (T1.1 most impactful - 824× ICC MA validation, 30 min)
-2. Work through TIER 1-4 systematically over coming sessions
-3. Update rq_rework.md in real-time as tasks complete
+1. T2.1: LMM residual diagnostics (5 RQs)
+2. T2.4: Confidence response pattern analysis
+3. T2.5: LMM convergence sensitivity
+4. Then TIER 3/4 if time permits
 
 ---

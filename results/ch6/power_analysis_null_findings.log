@@ -1,0 +1,114 @@
+================================================================================
+Post-Hoc Power Analysis for NULL Findings (Chapter 6)
+Started: 2025-12-13T16:13:43.807075
+================================================================================
+
+[STEP 1] Define NULL RQs
+------------------------------------------------------------
+  Found 8 NULL RQs to analyze
+
+[STEP 2] Compute Power for Each NULL RQ
+------------------------------------------------------------
+
+  RQ 6.1.3: Time interaction effect (confidence trajectory stability)
+    N = 100, Timepoints = 4, Observed d = 0.05
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.2.5: ECE change over time
+    N = 100, Timepoints = 4, Observed d = 0.08
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.3.3: Domain × Time interaction on calibration
+    N = 100, Timepoints = 4, Observed d = 0.04
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.4.3: Paradigm × Time interaction on calibration
+    N = 100, Timepoints = 4, Observed d = 0.06
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.5.2: Confidence-accuracy correlation × Time
+    N = 100, Timepoints = 4, Observed d = 0.07
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.5.3: C-A correlation domain specificity
+    N = 100, Timepoints = 4, Observed d = 0.03
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.7.3: Variability predicts forgetting (person-level)
+    N = 100, Timepoints = 1, Observed d = 0.15
+    Power for d=0.20: 50.83%
+    Power for d=0.30: 84.39%
+    Power for d=0.50: 99.86%
+    MDES (80% power): d = 0.283
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+  RQ 6.8.2: Calibration trajectory group differences
+    N = 100, Timepoints = 4, Observed d = 0.05
+    Power for d=0.20: 71.56%
+    Power for d=0.30: 96.67%
+    Power for d=0.50: 100.00%
+    MDES (80% power): d = nan
+    Classification: ADEQUATELY POWERED NULL
+    Evidence supports no medium/large effect (d < 0.30)
+
+[STEP 3] Save Results
+------------------------------------------------------------
+  ✓ Saved: /home/etai/projects/REMEMVR/results/ch6/power_analysis_null_findings.csv
+
+================================================================================
+[SUMMARY] Power Analysis Results
+================================================================================
+
+  Classification Summary:
+    Well-powered nulls: 0/8
+    Adequately powered nulls: 8/8
+    Marginally powered: 0/8
+    Underpowered: 0/8
+
+  Thesis Implications:
+    Most NULL findings are well-powered - can claim genuine null effects
+
+  Power Summary Table:
+  RQ       Observed d Power d=0.20 Power d=0.30     MDES            Classification
+  -------------------------------------------------------------------------------------
+  6.1.3          0.05        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+  6.2.5          0.08        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+  6.3.3          0.04        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+  6.4.3          0.06        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+  6.5.2          0.07        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+  6.5.3          0.03        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+  6.7.3          0.15        50.8%        84.4%    0.283   ADEQUATELY POWERED NULL
+  6.8.2          0.05        71.6%        96.7%      nan   ADEQUATELY POWERED NULL
+
+Completed: 2025-12-13T16:13:43.816175

@@ -78,7 +78,7 @@ The Chapter 5 finding of near-zero slope variance (ICC_slope H 0.0005) was a **m
 ### Sample Characteristics
 
 - Total N: 100 participants
-- Observations: 400 total (100 participants � 4 test sessions)
+- Observations: 400 total (100 participants � 4 test sessions)
 - Missing data: None (all participants successfully estimated)
 - Random effects extraction: 100/100 participants (complete)
 - TSVR range: 1.0 to 246.24 hours (Day 0 to Day 6)
@@ -121,8 +121,8 @@ The Chapter 5 finding of near-zero slope variance (ICC_slope H 0.0005) was a **m
 "CRITICAL HYPOTHESIS: ICC_slope for confidence will exceed 0.10 (detectable with 5-level ordinal data) while Chapter 5 accuracy ICC_slope H 0.0005 (dichotomous data limitation)."
 
 **Two competing predictions:**
-1. **Measurement Artifact Hypothesis:** ICC_slope_confidence > 0.10 while ICC_slope_accuracy H 0 � suggests dichotomous data lacked precision
-2. **Universal Forgetting Hypothesis:** ICC_slope_confidence H 0, replicating Chapter 5 � confirms universal forgetting pattern regardless of precision
+1. **Measurement Artifact Hypothesis:** ICC_slope_confidence > 0.10 while ICC_slope_accuracy H 0 � suggests dichotomous data lacked precision
+2. **Universal Forgetting Hypothesis:** ICC_slope_confidence H 0, replicating Chapter 5 � confirms universal forgetting pattern regardless of precision
 
 **Hypothesis Status:** **MEASUREMENT ARTIFACT HYPOTHESIS STRONGLY SUPPORTED**
 
@@ -138,13 +138,13 @@ The findings unambiguously support Prediction 1:
 This RQ addresses a fundamental question in individual differences research: Are forgetting rates person-specific traits (stable individual differences) or universal states (everyone forgets at the same rate, only baseline differs)?
 
 **Chapter 5 Conclusion (Dichotomous Accuracy Data):**
-- ICC_intercept = 0.36 (substantial baseline variance) � TRAIT-LIKE
-- ICC_slope = 0.0005 (near-zero slope variance) � STATE-LIKE
+- ICC_intercept = 0.36 (substantial baseline variance) � TRAIT-LIKE
+- ICC_slope = 0.0005 (near-zero slope variance) � STATE-LIKE
 - **Interpretation:** "People differ in how much they know initially, but everyone forgets at the same rate"
 
 **Chapter 6 Revision (Ordinal Confidence Data):**
-- ICC_intercept = 0.51 (substantial baseline variance) � TRAIT-LIKE (confirmed)
-- ICC_slope = 0.41 (substantial slope variance) � **TRAIT-LIKE** (NEW FINDING)
+- ICC_intercept = 0.51 (substantial baseline variance) � TRAIT-LIKE (confirmed)
+- ICC_slope = 0.41 (substantial slope variance) � **TRAIT-LIKE** (NEW FINDING)
 - **Revised Interpretation:** "People differ in BOTH baseline confidence AND forgetting rate. Memory decline trajectories are individualized, not universal."
 
 **Theoretical Impact:**
@@ -215,13 +215,13 @@ RQ 6.1.5 (Clustering Analysis) will examine whether r = 0.94 reflects two distin
 
 ---
 
-**Pattern 3: Chapter 5 vs Chapter 6 ICC_intercept Increase (0.36 � 0.51)**
+**Pattern 3: Chapter 5 vs Chapter 6 ICC_intercept Increase (0.36 � 0.51)**
 
 Baseline variance ICC increased from 0.36 (accuracy) to 0.51 (confidence), a 41% relative increase.
 
 **Explanation:**
 
-This is expected from measurement precision theory: ordinal confidence data captures baseline ability variance more reliably than dichotomous accuracy. Participants at similar ability levels (e.g., � = 0.5 vs � = 0.6) may both answer correctly (accuracy = 1), collapsing individual differences. But confidence ratings (e.g., 0.75 vs 1.0) preserve this variance.
+This is expected from measurement precision theory: ordinal confidence data captures baseline ability variance more reliably than dichotomous accuracy. Participants at similar ability levels (e.g., � = 0.5 vs � = 0.6) may both answer correctly (accuracy = 1), collapsing individual differences. But confidence ratings (e.g., 0.75 vs 1.0) preserve this variance.
 
 **Implication:** Both baseline AND slope variance are underestimated by dichotomous data. The 824x slope variance ratio is more dramatic, but baseline variance also benefits from ordinal measurement (41% increase).
 
@@ -364,7 +364,7 @@ This is expected from measurement precision theory: ordinal confidence data capt
 
 **TSVR Variable (Decision D070):**
 - TSVR (hours since encoding) treats time continuously, assuming linear relationship between calendar time and psychological forgetting time
-- Does not account for sleep consolidation (Day 0 � Day 1 includes overnight sleep, which may alter slope variance)
+- Does not account for sleep consolidation (Day 0 � Day 1 includes overnight sleep, which may alter slope variance)
 - Recip_sq transformation (1/(TSVR+1)^2) compresses time nonlinearly, creating scaling issues for ICC_conditional
 
 **GRM Theta Extraction:**
@@ -513,6 +513,58 @@ Methodological extensions (7-point scales, IRT model comparisons, independent re
 
 ---
 
+## 6. Model Averaging Validation (Added 2025-12-14)
+
+### Context
+
+The original 824× ICC ratio was computed from a single "best" model (Recip_sq, 21.7% Akaike weight), ignoring 78% of model evidence. Following Burnham & Anderson (2002) model averaging methodology, this validation uses random effects averaged across 48 competitive models (ΔAIC < 7, Effective N = 31.1) to test robustness.
+
+### Key Finding: ICC Ratio Attenuated but Still Substantial
+
+| Metric | Original (Recip_sq) | Model-Averaged | Change |
+|--------|---------------------|----------------|--------|
+| ICC_intercept | 0.507 | 0.555 | +9.6% |
+| ICC_slope | 0.412 | 0.111 | **-73.2%** |
+| Ratio vs Ch5 accuracy | 824× | **221×** | -73.2% |
+
+### Interpretation
+
+**SUBSTANTIALLY ROBUST:** The measurement artifact hypothesis remains strongly supported. Model-averaged ICC_slope = 0.111 still exceeds the 0.10 detectability threshold, confirming that ordinal confidence data reveals substantial slope variance that dichotomous accuracy data cannot detect.
+
+**Key Revisions to Original Claims:**
+
+1. **Ratio Revision:** The ordinal vs binary precision advantage should be reported as **~220×** (not 824×). The 824× figure was inflated by single-model selection.
+
+2. **ICC_slope Interpretation:** With MA, ICC_slope drops from "substantial" (0.41) to "moderate" (0.11). Individual differences in forgetting rate are still DETECTABLE with ordinal data but are SMALLER than originally estimated.
+
+3. **Effect Size Attenuation:** The 73% reduction indicates substantial model uncertainty. The Recip_sq model overestimated slope variance relative to the model-averaged consensus.
+
+**Why the Difference?**
+
+Model averaging incorporates variance ACROSS models in addition to variance WITHIN models. When 48 competitive models disagree about trajectory shape (linear vs log vs reciprocal vs power law), averaging their random effects reduces the apparent individual differences in slopes. This is methodologically correct—it reflects genuine uncertainty about the true functional form.
+
+### Robustness Assessment
+
+- ✅ ICC_slope_MA > 0.10 (detectable threshold) → Finding SURVIVES
+- ✅ Ratio_MA > 100× → Ordinal advantage SUBSTANTIAL
+- ⚠️ ICC_slope_MA < 0.30 (substantial threshold) → Magnitude REDUCED
+- ⚠️ Change > 20% → Original estimate INFLATED
+
+### Thesis Implications
+
+1. **Chapter 6 Discussion:** Report 220× ratio with caveat about model uncertainty
+2. **Measurement Artifact Claim:** Still supported—221× is a massive precision advantage
+3. **Trait-like Forgetting:** Still supported—ICC_slope = 0.11 detects individual differences
+4. **Quantitative Caution:** Original 824× was specific to Recip_sq functional form
+
+### Files Created
+
+- `data/step06b_icc_ma_validation.csv` - Full comparison table
+- `logs/step06b_icc_ma_validation.log` - Execution log
+
+---
+
 **Summary generated by:** rq_results agent (v4.0)
+**Model Averaging Validation added by:** Claude Code (T1.1 rework)
 **Pipeline version:** v4.X (13-agent atomic architecture)
-**Date:** 2025-12-11
+**Date:** 2025-12-11 (original), 2025-12-14 (MA validation)

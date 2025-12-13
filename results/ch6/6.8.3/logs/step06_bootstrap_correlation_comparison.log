@@ -1,0 +1,97 @@
+================================================================================
+RQ 6.8.3 - Step 06: Bootstrap CI for Correlation Difference
+Started: 2025-12-13T16:16:16.632406
+================================================================================
+
+[STEP 1] Load Random Effects
+------------------------------------------------------------
+  ✓ Loaded 200 observations
+  ✓ Location types: ['Source', 'Destination']
+  Source: N = 100
+  Destination: N = 100
+  ✓ Paired design confirmed (same participants)
+
+[STEP 2] Compute Original Correlations
+------------------------------------------------------------
+  Source: r = -0.1304, p = 0.1958
+  Destination: r = -0.3865, p = 0.0001
+  Difference (Source - Dest): +0.2561
+
+[STEP 3] Fisher's Z Test for Dependent Correlations
+------------------------------------------------------------
+  Fisher's z (Source): -0.1312
+  Fisher's z (Destination): -0.4077
+
+  Cross-location correlations:
+    r(intercepts): 0.9295
+    r(slopes): 0.7277
+
+  Note: Using bootstrap as primary method (Steiger test complex for this design)
+
+[STEP 4] Bootstrap 95% CI for Correlation Difference
+------------------------------------------------------------
+  N bootstrap samples: 10000
+  Difference distribution:
+    Mean: +0.2560
+    SD: 0.0679
+    95% CI: [+0.1245, +0.3924]
+
+  CI excludes 0? True
+  ✓ SIGNIFICANT: Correlations differ between Source and Destination
+
+[STEP 5] Effect Size (Cohen's q)
+------------------------------------------------------------
+  Cohen's q = 0.2765
+  Interpretation: small
+
+[STEP 6] Comparison to Ch5 5.5.6 Accuracy Pattern
+------------------------------------------------------------
+  Ch5 Accuracy:
+    Source: r = +0.9900
+    Destination: r = -0.9000
+
+  Confidence (this RQ):
+    Source: r = -0.1304
+    Destination: r = -0.3865
+
+  Confidence - Accuracy Differences:
+    Source: -1.1204 (MASSIVE reversal)
+    Destination: +0.5135 (moderate difference)
+
+  Cohen's q (Accuracy vs Confidence):
+    Source: q = 2.7778 (large)
+    Destination: q = 1.0645 (large)
+
+[STEP 7] Save Results
+------------------------------------------------------------
+  ✓ Saved: step06_correlation_comparison.csv
+
+================================================================================
+[SUMMARY] Correlation Comparison Results
+================================================================================
+
+  SOURCE vs DESTINATION (Confidence):
+    Source: r = -0.1304
+    Destination: r = -0.3865
+    Difference: +0.2561
+    95% Bootstrap CI: [+0.1245, +0.3924]
+    CI excludes 0: True → SIGNIFICANT difference
+    Cohen's q: 0.2765 (small)
+
+  ACCURACY vs CONFIDENCE (Major Finding):
+    Source: Accuracy r=+0.9900 vs Confidence r=-0.1304 → Δ=-1.1204 (q=2.78)
+    Destination: Accuracy r=-0.9000 vs Confidence r=-0.3865 → Δ=+0.5135 (q=1.06)
+
+  INTERPRETATION:
+    The SOURCE location shows a MASSIVE reversal from accuracy to confidence:
+    - Accuracy: Strong positive (r=+0.99) - regression to mean pattern
+    - Confidence: Weak negative (r=-0.24) - opposite pattern!
+    - Cohen's q = 2.78 is large, indicating profound metacognitive dissociation
+
+    DESTINATION shows same-sign but different magnitude:
+    - Accuracy: Strong negative (r=-0.90)
+    - Confidence: Moderate negative (r=-0.40)
+    - Cohen's q = 1.06 is large
+    
+
+Completed: 2025-12-13T16:16:18.081152

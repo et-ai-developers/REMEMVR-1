@@ -1,0 +1,9 @@
+rq,description,n_subjects,n_timepoints,test_type,observed_d,power_d020,power_d030,power_d050,mdes_80pct,classification,interpretation
+6.1.3,Time interaction effect (confidence trajectory stability),100,4,lmm,0.05,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.2.5,ECE change over time,100,4,lmm,0.08,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.3.3,Domain × Time interaction on calibration,100,4,lmm,0.04,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.4.3,Paradigm × Time interaction on calibration,100,4,lmm,0.06,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.5.2,Confidence-accuracy correlation × Time,100,4,lmm,0.07,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.5.3,C-A correlation domain specificity,100,4,lmm,0.03,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.7.3,Variability predicts forgetting (person-level),100,1,ttest,0.15,0.5082648066516795,0.8439471027559773,0.9986097259860682,0.2829126327735806,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)
+6.8.2,Calibration trajectory group differences,100,4,lmm,0.05,0.7156166067891214,0.9667300578912553,0.9999936319685956,,ADEQUATELY POWERED NULL,Evidence supports no medium/large effect (d < 0.30)

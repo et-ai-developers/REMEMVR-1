@@ -1,0 +1,14 @@
+metric,value
+r_source_confidence,-0.13044749160713626
+r_destination_confidence,-0.3865103202841624
+diff_source_dest,0.2560628286770261
+ci_lower,0.12454181150511491
+ci_upper,0.39237149337193883
+ci_excludes_zero,True
+cohens_q_source_dest,0.2764958719850693
+r_source_accuracy,0.99
+r_destination_accuracy,-0.9
+diff_source_acc_conf,-1.1204474916071363
+diff_dest_acc_conf,0.5134896797158377
+cohens_q_source_acc_conf,2.7778474735796705
+cohens_q_dest_acc_conf,1.0645285563807263

@@ -1,0 +1,128 @@
+================================================================================
+RQ 6.1.4 - Step 06b: Model-Averaged ICC Validation
+Started: 2025-12-13T15:58:19.507171
+================================================================================
+
+[STEP 1] Load Original Single-Model Results
+------------------------------------------------------------
+  Original ICC_intercept: 0.5067
+  Original ICC_slope: 0.4120
+  Original model: Recip_sq (21.7% Akaike weight)
+  Original var_intercept: 0.081705
+  Original var_slope: 0.055744
+  Original var_residual: 0.079544
+
+[STEP 2] Load Model-Averaged Random Effects from 6.1.1
+------------------------------------------------------------
+  ✓ Loaded 100 participants
+  ✓ Columns: ['UID', 'ma_intercept', 'ma_slope']
+
+  MA Intercept Stats:
+    Mean: -0.018067
+    SD: 0.315218
+    Range: [-0.8132, 0.7175]
+
+  MA Slope Stats:
+    Mean: -0.012575
+    SD: 0.099434
+    Range: [-0.2953, 0.2214]
+
+[STEP 3] Compute Model-Averaged Variance Components
+------------------------------------------------------------
+  var(ma_intercept): 0.099362
+  var(ma_slope): 0.009887
+
+  MA Metadata:
+    n_competitive_models: 48
+    n_models_fitted: 48
+    n_models_with_slopes: 48
+    delta_aic_threshold: 7.0
+    effective_n_models: 31.11699399776719
+    total_original_weight: 0.974781050388058
+    top_model: Sin+Cos
+    top_model_renorm_weight: 0.2227603651208372
+    top_model_original_weight: 0.217142582697317
+    prediction_mean: -0.6044900379311055
+    prediction_std: 0.1566990585122456
+    max_model_variance: 0.0991285284475196
+    mean_model_variance: 0.008971788452845
+    intercept_sd: 0.3136379569791201
+    slope_sd: 0.0989352808543094
+
+  Using original var_residual: 0.079544
+  (Residual variance is approximately invariant across model specifications)
+
+[STEP 4] Compute Model-Averaged ICC Estimates
+------------------------------------------------------------
+
+  ICC Formulas (Hoffman & Stawski 2009 simplified):
+  ICC = var(random_effect) / (var(random_effect) + var_residual)
+
+  Model-Averaged ICC Estimates:
+    ICC_intercept_MA: 0.5554
+    ICC_slope_MA: 0.1106
+
+[STEP 5] Compare Original vs Model-Averaged ICCs
+------------------------------------------------------------
+
+  ICC_intercept Comparison:
+    Original (Recip_sq): 0.5067
+    Model-Averaged: 0.5554
+    Delta: +0.0487 (+9.6%)
+
+  ICC_slope Comparison:
+    Original (Recip_sq): 0.4120
+    Model-Averaged: 0.1106
+    Delta: -0.3015 (-73.2%)
+
+[STEP 6] Recompute Confidence vs Accuracy ICC Ratio with MA
+------------------------------------------------------------
+
+  ICC_slope_accuracy (Ch5 dichotomous): 0.0005
+
+  Original Ratio (Recip_sq / Ch5):
+    0.4120 / 0.0005 = 824.1×
+
+  MA Ratio (MA / Ch5):
+    0.1106 / 0.0005 = 221.1×
+
+  Ratio Change: -603.0× (-73.2%)
+
+[STEP 7] Assess Robustness of 824× Finding
+------------------------------------------------------------
+
+  Robustness Assessment: SUBSTANTIALLY ROBUST
+
+  Interpretation:
+  The ICC ratio finding is substantially robust though reduced. MA ratio = 221.1× (vs original 824×). Still demonstrates large ordinal vs dichotomous precision advantage. Measurement artifact hypothesis supported, effect size somewhat attenuated.
+
+  Additional Checks:
+    ICC_slope_MA > 0.10 (detectable)? True (value = 0.1106)
+    ICC_slope_MA > 0.30 (substantial)? False (value = 0.1106)
+    ICC_slope_MA within 20% of original? False (change = -73.2%)
+
+[STEP 8] Save Validation Results
+------------------------------------------------------------
+  ✓ Saved: /home/etai/projects/REMEMVR/results/ch6/6.1.4/data/step06b_icc_ma_validation.csv
+
+================================================================================
+[SUMMARY] Model-Averaged ICC Validation Complete
+================================================================================
+
+  ORIGINAL (Single Model: Recip_sq, 21.7% weight):
+    ICC_intercept: 0.5067
+    ICC_slope: 0.4120
+    Ratio vs Ch5: 824.1×
+
+  MODEL-AVERAGED (48 models, Eff_N=31.1):
+    ICC_intercept: 0.5554 (+9.6% change)
+    ICC_slope: 0.1106 (-73.2% change)
+    Ratio vs Ch5: 221.1× (-73.2% change)
+
+  ROBUSTNESS: SUBSTANTIALLY ROBUST
+
+  INTERPRETATION:
+    The ICC ratio finding is substantially robust though reduced. MA ratio = 221.1× (vs original 824×). Still demonstrates large ordinal vs dichotomous precision advantage. Measurement artifact hypothesis supported, effect size somewhat attenuated.
+    
+
+Completed: 2025-12-13T15:58:19.515374
