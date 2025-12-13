@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2025-12-14 16:20 (pre-curation)
+**Last Updated:** 2025-12-14 16:20 (post-curation)
 **Last /clear:** 2025-11-27 20:50
 **Last /save:** 2025-12-14 16:20
-**Token Count:** ~8,500 tokens (~42% utilization)
+**Token Count:** ~4,200 tokens (~21% utilization)
 
 ---
 
@@ -36,71 +36,6 @@
 ---
 
 ## Session History
-
-### Session (2025-12-13 13:45)
-
-**Task:** Kitchen Sink & Model Averaging Audit + Rework Plan - COMPLETE
-
-**Key Accomplishment:** Comprehensive audit of all Ch6 RQs revealed systematic gap: 5 kitchen sink ROOT RQs (6.1.1, 6.3.1, 6.4.1, 6.5.1, 6.8.1) computed Akaike weights but selected single "best" model, ignoring 78-96% of model evidence. Created `rq_rework.md` with phased implementation plan.
-
-**Critical Findings:**
-- 6.8.1: Best model = 4.2% weight (EXTREME uncertainty - 20 models with ΔAIC < 2)
-- 6.1.1: Best model = 21.7% weight (high uncertainty - affects 824× ICC finding)
-- 6.3.1, 6.4.1, 6.5.1: Best models = 50-65% weight (moderate uncertainty)
-
-**Status:** ✅ COMPLETE - Audit done, plan approved, implemented in Sessions 14:30 and 20:50
-
-**Archived Topics:**
-- ch6_kitchen_sink_audit_complete_model_averaging_gap
-- ch6_rq_rework_plan_created
-- ch6_model_averaging_methodology_burnham_anderson
-- ch6_critical_rework_priorities
-- ch6_824x_icc_ratio_at_risk
-
----
-
-### Session (2025-12-13 14:30)
-
-**Task:** Chapter 6 Model Averaging Implementation - COMPLETE (5/5 ROOT RQs)
-
-**Accomplishment:** Implemented Burnham & Anderson (2002) model averaging for all 5 kitchen sink ROOT RQs in Chapter 6.
-
-**Key Findings:**
-- 6.8.1 and 6.1.1: EXTREME uncertainty (Effective N = 43.4 and 31.1) - model averaging mandatory
-- 6.3.1, 6.4.1, 6.5.1: Low uncertainty (Effective N = 1.8-2.4) - model averaging for consistency
-- 824× ICC ratio (RQ 6.1.4) now has model-averaged validation foundation
-
-**Implementation Summary:**
-- Infrastructure: Enhanced `tools/model_averaging.py` (779 lines, 5 new functions)
-- RQ 6.8.1: 51 competitive models, Eff_N=43.4, NULL interaction ROBUST
-- RQ 6.1.1: 48 competitive models, Eff_N=31.1, random slopes from all models
-- RQ 6.3.1: 4 competitive models, Eff_N=2.4, Ultimate dominates
-- RQ 6.4.1: 2 competitive models, Eff_N=2.0, Linear/Exponential tied
-- RQ 6.5.1: 2 competitive models, Eff_N=1.8, Quad+Log+SquareRoot dominates
-
-**Documentation:**
-- `rq_rework.md`: Added implementation status section
-- `rq_status.tsv`: Updated all 5 ROOT RQs with MA metadata
-- `6.8.1/results/summary.md`: Added MA methodology section
-
-**Deferred:** RQ 6.7.3 (needs Ch5 MA first), derivative RQs (MA outputs available for sensitivity analysis)
-
-**Archived Topics:**
-- ch6_model_averaging_implementation_complete_5_root_rqs
-- ch6_extreme_model_uncertainty_validated
-- ch6_model_averaging_outputs_per_rq
-- ch6_824x_icc_model_averaged_validation
-- burnham_anderson_2002_implementation
-
-**Relevant Archived Topics:**
-- ch6_kitchen_sink_audit_complete_model_averaging_gap (2025-12-13 13:45)
-- ch6_rq_rework_plan_created (2025-12-13 13:45)
-- rq_6.1.4_icc_decomposition_major_finding_824x_ratio (2025-12-11 18:30)
-- ch6_6.1.1_kitchen_sink_extreme_uncertainty (2025-12-13 10:30)
-
-**Status:** ✅ COMPLETE - All 5 ROOT RQs model-averaged, ready for Ch7 or validity rework
-
----
 
 ### Session (2025-12-13 20:50)
 
