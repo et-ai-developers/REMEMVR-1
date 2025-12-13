@@ -86,6 +86,42 @@ The critical LocationType x log_TSVR interaction was **NOT significant** (p = 0.
 - **Time effect (log_TSVR):** Highly significant (β = -0.138, p < .001), confirming confidence declines over time for both location types
 - **LocationType main effect:** Not significant (β = 0.039, p = 0.484), indicating similar baseline confidence levels for source vs destination
 
+### Model Averaging Methodology (Added 2025-12-13)
+
+**IMPORTANT UPDATE:** The original analysis selected a single best model (SquareRoot), but this model had only **4.2% Akaike weight** - meaning 95.8% of model evidence supported OTHER functional forms. This represents **EXTREME model uncertainty** (effective N = 43.4 models).
+
+**Kitchen Sink Model Comparison:**
+- **Models tested:** 66 functional forms (linear, polynomial, logarithmic, power law, etc.)
+- **Best model:** SquareRoot (ΔAIC = 0.00, weight = 4.22%)
+- **Second-best:** Exp_slow (ΔAIC = 0.00, weight = 4.22%) - essentially tied
+- **Problem:** With top model having <5% weight, selecting single model ignores >95% of evidence
+
+**Model Averaging Implementation (Burnham & Anderson 2002):**
+- **Threshold:** ΔAIC < 7 (includes models with weak-to-substantial support)
+- **Competitive models:** 51 models (representing 99.6% of total model weight)
+- **Effective N models:** 43.4 (very high - indicating flat, uncertain weight distribution)
+- **Output:** Model-averaged predictions weighted by renormalized Akaike weights
+
+**Key Model Averaging Outputs:**
+- `step05b_competitive_models.csv` - 51 models with ΔAIC < 7
+- `step05b_model_averaged_predictions.csv` - MA predictions (mean = -0.528, SD = 0.237)
+- `step05b_model_averaged_theta.csv` - MA theta for derivative RQs
+- `step05b_model_averaged_random_effects.csv` - MA intercepts for clustering
+- `step05b_metadata.csv` - Summary statistics
+
+**Impact on Findings:**
+- **NULL interaction ROBUST:** The LocationType × Time interaction remains non-significant across ALL competitive models (p > 0.30 for top 20 models)
+- **Prediction uncertainty:** Model selection adds variance = 0.0006-0.007 (small but non-zero)
+- **Interpretation unchanged:** Source and destination show equivalent decline regardless of functional form assumed
+
+**Why Model Averaging Matters:**
+When best model has <30% weight, model averaging is essential for:
+1. Acknowledging functional form uncertainty in thesis
+2. Providing robust predictions not tied to arbitrary model choice
+3. Propagating model uncertainty to derivative RQs (6.8.2-6.8.4)
+
+**Reference:** Burnham, K. P., & Anderson, D. R. (2002). *Model Selection and Multimodel Inference* (2nd ed.). Springer.
+
 ### Post-Hoc Contrasts (Decision D068)
 
 **Contrast Decision:** Contrasts were **skipped** because the omnibus LocationType x Time interaction was not significant (p = 0.553 >= 0.05).

@@ -1,0 +1,2 @@
+n_competitive_models,n_models_fitted,n_models_with_slopes,delta_aic_threshold,effective_n_models,total_original_weight,top_model,top_model_renorm_weight,top_model_original_weight,prediction_mean,prediction_std,max_model_variance,mean_model_variance,intercept_sd,slope_sd
+48,48,48,7.0,31.11699399776719,0.974781050388058,Sin+Cos,0.22276036512083722,0.217142582697317,-0.6044900379311055,0.1566990585122456,0.0991285284475196,0.008971788452845067,0.3136379569791201,0.0989352808543094

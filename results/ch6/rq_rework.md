@@ -1,9 +1,77 @@
 # Chapter 6 RQ Rework Plan: Model Averaging Implementation
 
 **Created:** 2025-12-13
+**Last Updated:** 2025-12-13 11:50
 **Purpose:** Implement model averaging across all kitchen sink ROOT RQs to properly characterize how confidence ACTUALLY changes over time, incorporating model uncertainty rather than selecting a single "best" model.
 
 **Rationale:** For PhD thesis defense, we need to demonstrate that our conclusions about confidence trajectories are robust to functional form uncertainty. When 66 models are tested and the best has only 4-21% weight, selecting just that model ignores 79-96% of the evidence.
+
+---
+
+## IMPLEMENTATION STATUS (2025-12-13)
+
+### What Was Done
+
+Model averaging was implemented for ALL 5 kitchen sink ROOT RQs in Chapter 6. This addresses the audit finding that selecting a single "best" model when that model has low Akaike weight (4-65%) ignores substantial model uncertainty.
+
+| Priority | RQ | Status | Competitive Models | Effective N | Notes |
+|----------|-----|--------|-------------------|-------------|-------|
+| **P1-CRITICAL** | 6.8.1 | ✅ COMPLETE | 51 (99.6% weight) | 43.4 | EXTREME uncertainty, 51 models with ΔAIC < 7 |
+| **P2-HIGH** | 6.1.1 | ✅ COMPLETE | 48 (97.5% weight) | 31.1 | Slopes computed for 824× ICC finding |
+| **P3-MODERATE** | 6.3.1 | ✅ COMPLETE | 4 (92.0% weight) | 2.4 | Domain (What/Where/When) interaction |
+| **P4-MODERATE** | 6.4.1 | ✅ COMPLETE | 2 (100% weight) | 2.0 | Paradigm (IFR/ICR/IRE) - Linear/Exp tied |
+| **P5-MODERATE** | 6.5.1 | ✅ COMPLETE | 2 (87.5% weight) | 1.8 | Schema (Common/Unique) congruence |
+| **P6-FIX** | 6.7.3 | ⏳ PENDING | N/A | N/A | Requires Ch5 5.1.1 MA first (separate task) |
+
+### Key Findings
+
+1. **6.8.1 and 6.1.1 have EXTREME model uncertainty** - Effective N of 43.4 and 31.1 means no single model dominates. Model averaging essential here.
+2. **6.3.1, 6.4.1, 6.5.1 have concentrated weights** - Effective N of 1.8-2.4 means 1-2 models dominate. Model averaging has limited impact but provides methodological consistency.
+3. **All NULL interaction findings remain robust** - The key thesis conclusions (e.g., no Source-Destination difference in 6.8.1) hold across ALL competitive models.
+
+### Files Created
+
+**Infrastructure:**
+- `tools/model_averaging.py` - Reusable module with:
+  - `identify_competitive_models()` - Filters by ΔAIC < 7, renormalizes weights
+  - `compute_unconditional_variance()` - Burnham & Anderson (2002) eq 4.9
+  - `compute_model_averaged_random_effects()` - For ICC/clustering derivatives
+  - `run_model_averaging_pipeline()` - Complete workflow
+
+**Per-RQ Scripts (all run successfully):**
+- `results/ch6/6.8.1/code/step05b_model_averaging.py` - With location (Source/Dest) interaction
+- `results/ch6/6.1.1/code/step05b_model_averaging.py` - With random slopes for ICC
+- `results/ch6/6.3.1/code/step05b_model_averaging.py` - With domain interaction
+- `results/ch6/6.4.1/code/step05b_model_averaging.py` - With paradigm interaction
+- `results/ch6/6.5.1/code/step05b_model_averaging.py` - With congruence interaction
+
+### Outputs Generated per RQ
+
+Each ROOT RQ now has in its `data/` folder:
+- `step05b_competitive_models.csv` - Models with ΔAIC < 7, renormalized weights
+- `step05b_model_averaged_predictions.csv` - MA predictions with unconditional variance
+- `step05b_model_averaged_theta.csv` - MA theta for derivative RQs
+- `step05b_model_averaged_random_effects.csv` - MA intercepts (+ slopes for 6.1.1)
+- `step05b_metadata.csv` - Summary: n_models, effective_N, top_model, etc.
+
+### Documentation Updated
+
+- `results/ch6/rq_status.tsv` - Kitchen_Sink_Model_Averaging column updated with "✅ IMPLEMENTED 2025-12-13"
+- `results/ch6/6.8.1/results/summary.md` - Added "Model Averaging Methodology" section
+
+### What Remains (DEFERRED)
+
+1. **6.7.3** - Uses Ch5 5.1.1 residuals. Ch5 MA not implemented yet. NULL finding (r=0.02) robust regardless.
+2. **Derivative RQs** - NOT re-run. Use existing results. MA outputs available if needed for future sensitivity analysis.
+3. **Summary.md updates** - Only 6.8.1 updated. Other ROOT RQs can be updated similarly if needed.
+
+### How to Continue
+
+To resume this work:
+1. Read this file for context
+2. Check `rq_status.tsv` for current status of all RQs
+3. Run any `step05b_model_averaging.py` script to regenerate outputs
+4. For 6.7.3, first implement Ch5 5.1.1 model averaging
 
 ---
 

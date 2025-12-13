@@ -1,0 +1,99 @@
+================================================================================
+[START] Step 05b: Model Averaging for RQ 6.1.1
+================================================================================
+
+[LOAD] Loading input data...
+  ✓ LMM input: 400 rows
+  ✓ Model comparison: 65 models
+  ✓ Best model: Sin+Cos (weight=21.7%)
+======================================================================
+MODEL AVERAGING FOR CONFIDENCE TRAJECTORIES
+======================================================================
+
+[STEP 1] Identifying competitive models (ΔAIC < 7.0)...
+  ✓ 48 competitive models identified
+  ✓ Total original weight: 97.5%
+
+[STEP 2] Creating time transformations...
+  ✓ 34 time transformations created
+
+[STEP 3] Fitting 48 models...
+  [ 1/48] Sin+Cos                   w=0.2228 (with slope) ✓
+  [ 2/48] Tanh+Log                  w=0.0482 (with slope) ✓
+  [ 3/48] PowerLaw_10               w=0.0280 (with slope) ✓
+  [ 4/48] Reciprocal                w=0.0280 (with slope) ✓
+  [ 5/48] Recip_sq                  w=0.0280 (with slope) ✓
+  [ 6/48] PowerLaw_09               w=0.0268 (with slope) ✓
+  [ 7/48] FourthRoot                w=0.0262 (with slope) ✓
+  [ 8/48] Root_033                  w=0.0254 (with slope) ✓
+  [ 9/48] CubeRoot                  w=0.0254 (with slope) ✓
+  [10/48] PowerLaw_08               w=0.0252 (with slope) ✓
+  [11/48] PowerLaw_07               w=0.0235 (with slope) ✓
+  [12/48] Cubic                     w=0.0235 (with slope) ✓
+  [13/48] LogLog                    w=0.0228 (with slope) ✓
+  [14/48] SquareRoot+Recip          w=0.0218 (with slope) ✓
+  [15/48] Exp_slow                  w=0.0217 (with slope) ✓
+  [16/48] SquareRoot                w=0.0217 (with slope) ✓
+  [17/48] PowerLaw_06               w=0.0216 (with slope) ✓
+  [18/48] PowerLaw_05               w=0.0196 (with slope) ✓
+  [19/48] Root_067                  w=0.0178 (with slope) ✓
+  [20/48] PowerLaw_04               w=0.0175 (with slope) ✓
+  [21/48] PowerLaw+Recip+Log        w=0.0157 (with slope) ✓
+  [22/48] PowerLaw_03               w=0.0155 (with slope) ✓
+  [23/48] Log+PowerLaw05            w=0.0135 (with slope) ✓
+  [24/48] PowerLaw_Log              w=0.0135 (with slope) ✓
+  [25/48] Quartic                   w=0.0135 (with slope) ✓
+  [26/48] PowerLaw_02               w=0.0134 (with slope) ✓
+  [27/48] Recip+Log                 w=0.0121 (with slope) ✓
+  [28/48] Log+Recip                 w=0.0121 (with slope) ✓
+  [29/48] Log+LogLog                w=0.0118 (with slope) ✓
+  [30/48] Recip+PowerLaw            w=0.0117 (with slope) ✓
+  [31/48] Recip+PowerLaw05          w=0.0117 (with slope) ✓
+  [32/48] PowerLaw_01               w=0.0115 (with slope) ✓
+  [33/48] Lin+Quad+Log              w=0.0108 (with slope) ✓
+  [34/48] Quad+Log                  w=0.0108 (with slope) ✓
+  [35/48] Exp+Recip                 w=0.0103 (with slope) ✓
+  [36/48] Recip+Lin                 w=0.0103 (with slope) ✓
+  [37/48] Root_Multi                w=0.0098 (with slope) ✓
+  [38/48] Log                       w=0.0098 (with slope) ✓
+  [39/48] Log10                     w=0.0098 (with slope) ✓
+  [40/48] Log2                      w=0.0098 (with slope) ✓
+  [41/48] CubeRoot+Log              w=0.0095 (with slope) ✓
+  [42/48] SquareRoot+Log            w=0.0093 (with slope) ✓
+  [43/48] Log+SquareRoot            w=0.0093 (with slope) ✓
+  [44/48] Quad+Log+SquareRoot       w=0.0089 (with slope) ✓
+  [45/48] SquareRoot+PowerLaw       w=0.0079 (with slope) ✓
+  [46/48] SquareRoot+Lin            w=0.0078 (with slope) ✓
+  [47/48] PowerLaw_Lin              w=0.0072 (with slope) ✓
+  [48/48] Exp+PowerLaw              w=0.0072 (with slope) ✓
+
+[STEP 4] Computing model-averaged predictions...
+  ✓ Predictions: mean=-0.6045, SD=0.1567
+  ✓ Uncond. variance: mean=0.008972, max=0.099129
+
+[STEP 5] Computing model-averaged random effects...
+  ✓ Slopes from 48 models (weight sum = 100.00%)
+  ✓ Random intercepts: mean=-0.0181, SD=0.3136
+  ✓ Random slopes: mean=-0.012575, SD=0.098935
+  ✓ Effective N models: 31.12
+
+[STEP 6] Preparing output files...
+
+[SAVE] Saving output files...
+  ✓ step05b_competitive_models.csv (48 models)
+  ✓ step05b_model_averaged_predictions.csv (400 rows)
+  ✓ step05b_model_averaged_theta.csv (400 rows)
+  ✓ step05b_model_averaged_random_effects.csv (100 UIDs)
+      (includes slopes from 48 models)
+  ✓ step05b_metadata.csv
+
+================================================================================
+[SUCCESS] Model Averaging Complete
+================================================================================
+  Models in competitive set: 48
+  Effective N models: 31.12
+  Top 3 models by renormalized weight:
+    1. Sin+Cos: 0.223
+    2. Tanh+Log: 0.048
+    3. PowerLaw_10: 0.028
+================================================================================
