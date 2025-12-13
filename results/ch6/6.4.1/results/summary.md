@@ -13,7 +13,7 @@
 ### Sample Characteristics
 
 - **Total N:** 100 participants
-- **Observations:** 1200 total (100 participants × 4 test sessions × 3 paradigms)
+- **Observations:** 1200 total (100 participants ï¿½ 4 test sessions ï¿½ 3 paradigms)
 - **Test Sessions:** T1 (Day 0, encoding), T2 (~Day 1), T3 (~Day 3), T4 (~Day 6)
 - **Time Variable:** TSVR (actual hours since VR encoding: 1.0, 28.8, 78.7, 151.4 hours)
 - **Missing Data:** Not explicitly documented in logs (typical for IRT calibration with partial data)
@@ -57,7 +57,7 @@
 **Linear Mixed Model:**
 - Outcome: Theta scores (latent confidence ability)
 - Time variable: log_TSVR (log-transformed hours since encoding, Decision D070)
-- Fixed effects: Paradigm + log_TSVR + Paradigm × log_TSVR interaction
+- Fixed effects: Paradigm + log_TSVR + Paradigm ï¿½ log_TSVR interaction
 - Random effects: Participant intercepts only (1 | UID)
 - Model fit: AIC = 470.30, BIC = 511.02
 - Convergence: Successful
@@ -66,36 +66,72 @@
 - **Best model: Linear** (AIC = 298.37, Akaike weight = 50%)
 - Tied model: Exponential_proxy (AIC = 298.37, weight = 50%)
 - Interpretation: Moderate uncertainty (50% weight each) - both linear and exponential time transformations fit equivalently
-- Log model (benchmark): Ranked #45 (AIC = 729.69, ”AIC = 431.32) - much worse fit
+- Log model (benchmark): Ranked #45 (AIC = 729.69, Î”AIC = 431.32) - much worse fit
 - Total models tested: 65 (kitchen sink suite including power law, polynomial, fractional exponent variants)
+
+### Model Averaging Methodology (Added 2025-12-13)
+
+**IMPORTANT UPDATE:** The original analysis had two models tied for best (Linear and Exponential_proxy, each 50% weight). Model averaging was implemented to properly synthesize across both.
+
+**Kitchen Sink Model Comparison:**
+- **Models tested:** 66 functional forms
+- **Best models:** Linear and Exponential_proxy (TIED at 50% each)
+- **Uncertainty level:** LOW (perfect tie between 2 models, 100% weight in competitive set)
+
+**Model Averaging Implementation (Burnham & Anderson 2002):**
+- **Threshold:** Î”AIC < 7 (includes models with weak-to-substantial support)
+- **Competitive models:** 2 models (representing 100% of total model weight)
+- **Effective N models:** 2.0 (exactly 2 models with equal weight)
+- **Factor variable:** paradigm (IFR/ICR/IRE)
+- **Output:** Model-averaged predictions weighted by renormalized Akaike weights (50% each)
+
+**Key Model Averaging Outputs:**
+- `step05b_competitive_models.csv` - 2 models with Î”AIC < 7
+- `step05b_model_averaged_predictions.csv` - MA predictions (mean = -0.776, SD = 0.206)
+- `step05b_model_averaged_theta.csv` - MA theta for derivative RQs
+- `step05b_model_averaged_random_effects.csv` - MA intercepts for clustering
+- `step05b_metadata.csv` - Summary statistics (effective_n=2.0)
+
+**Impact on Findings:**
+- **Paradigm Ã— Time interaction ROBUST:** NULL finding holds across both competitive models
+- **Model-averaged trajectory:** Simple average of Linear and Exponential_proxy predictions
+- **Limited MA impact:** With only 2 equally-weighted models, MA essentially averages two similar trajectories
+
+**Why Model Averaging Still Matters:**
+Even with only 2 models:
+1. Formally addresses the tie (neither model arbitrarily selected)
+2. Provides methodological consistency across ROOT RQs
+3. Documents that Linear and Exponential_proxy yield similar conclusions
+
+**Reference:** Burnham, K. P., & Anderson, D. R. (2002). *Model Selection and Multimodel Inference* (2nd ed.). Springer.
 
 **Fixed Effect Estimates:**
 
-| Effect | ² | SE | z | p (uncorr) | Cohen's d |
+| Effect | ï¿½ | SE | z | p (uncorr) | Cohen's d |
 |--------|---------|--------|---------|------------|-----------|
 | Intercept | -0.377 | 0.054 | -6.92 | < .001 *** | - |
 | Paradigm (IFR vs ICR) | 0.015 | 0.040 | 0.37 | .713 | 0.03 |
 | Paradigm (IRE vs ICR) | 0.066 | 0.040 | 1.65 | .099 | 0.13 |
 | Time (log_TSVR) | -0.124 | 0.008 | -16.35 | < .001 *** | 1.64 |
-| Paradigm × Time (IFR) | 0.008 | 0.011 | 0.72 | .470 | 0.07 |
-| Paradigm × Time (IRE) | -0.017 | 0.011 | -1.61 | .107 | -0.15 |
+| Paradigm ï¿½ Time (IFR) | 0.008 | 0.011 | 0.72 | .470 | 0.07 |
+| Paradigm ï¿½ Time (IRE) | -0.017 | 0.011 | -1.61 | .107 | -0.15 |
 
 **Key Findings:**
 
 1. **Time Main Effect (SIGNIFICANT):**
-   - Confidence declines significantly over retention interval (² = -0.124, p < .001)
+   - Confidence declines significantly over retention interval (ï¿½ = -0.124, p < .001)
    - Effect size: Large (Cohen's d = 1.64 based on z-statistic)
    - Interpretation: Universal confidence decline across all paradigms
 
-2. **Paradigm × Time Interaction (NULL):**
-   - IFR interaction: ² = 0.008, p = .470 (n.s.)
-   - IRE interaction: ² = -0.017, p = .107 (n.s.)
-   - Minimum p-value: .107 (well above ± = .05 threshold)
+2. **Paradigm ï¿½ Time Interaction (NULL):**
+   - IFR interaction: ï¿½ = 0.008, p = .470 (n.s.)
+   - IRE interaction: ï¿½ = -0.017, p = .107 (n.s.)
+   - Minimum p-value: .107 (well above ï¿½ = .05 threshold)
    - **Conclusion: NULL hypothesis SUPPORTED - paradigm decline rates equivalent**
 
 3. **Paradigm Main Effects (Marginal for IRE):**
-   - IFR vs ICR: ² = 0.015, p = .713 (n.s.) - no baseline difference
-   - IRE vs ICR: ² = 0.066, p = .099 (marginal, not significant) - Recognition shows trend toward higher baseline confidence
+   - IFR vs ICR: ï¿½ = 0.015, p = .713 (n.s.) - no baseline difference
+   - IRE vs ICR: ï¿½ = 0.066, p = .099 (marginal, not significant) - Recognition shows trend toward higher baseline confidence
 
 **Variance Components:**
 - Participant intercepts: Not explicitly reported in logs
@@ -105,7 +141,7 @@
 ### Post-Hoc Contrasts
 
 **Decision (Per Decision D068):**
-- Paradigm × Time interaction NOT SIGNIFICANT (minimum p = .107)
+- Paradigm ï¿½ Time interaction NOT SIGNIFICANT (minimum p = .107)
 - **Contrasts SKIPPED** - post-hoc pairwise comparisons not appropriate when omnibus interaction null
 - Result: step06_post_hoc_contrasts.csv is empty (0 rows) as expected
 
@@ -121,7 +157,7 @@ Confidence decline trajectories do NOT differ significantly across retrieval par
 - step03_theta_confidence.csv:  (400 rows, 4 columns)
 - step05_lmm_coefficients.csv:  (6 rows)
 - step06_post_hoc_contrasts.csv:  (0 rows - empty as expected due to NULL interaction)
-- step07_trajectory_theta_data.csv:  (12 rows - 3 paradigms × 4 timepoints)
+- step07_trajectory_theta_data.csv:  (12 rows - 3 paradigms ï¿½ 4 timepoints)
 - step07_trajectory_probability_data.csv:  (12 rows)
 
 **Substance Criteria Met:**
@@ -151,20 +187,20 @@ The plot displays forgetting trajectories across 4 test sessions for three retri
 - **Lines:** Three paradigm trajectories (IFR, ICR, IRE) with 95% confidence bands (shaded)
 
 **Paradigm Trajectories (Theta Scale):**
-- **IFR (Free Recall):** Starts ¸ = -0.46 (Day 0), declines to ¸ = -0.99 (Day 6) - 0.53 SD decline
-- **ICR (Cued Recall):** Starts ¸ = -0.49 (Day 0), declines to ¸ = -1.07 (Day 6) - 0.58 SD decline
-- **IRE (Recognition):** Starts ¸ = -0.43 (Day 0), declines to ¸ = -1.07 (Day 6) - 0.64 SD decline
+- **IFR (Free Recall):** Starts ï¿½ = -0.46 (Day 0), declines to ï¿½ = -0.99 (Day 6) - 0.53 SD decline
+- **ICR (Cued Recall):** Starts ï¿½ = -0.49 (Day 0), declines to ï¿½ = -1.07 (Day 6) - 0.58 SD decline
+- **IRE (Recognition):** Starts ï¿½ = -0.43 (Day 0), declines to ï¿½ = -1.07 (Day 6) - 0.64 SD decline
 
 **Key Patterns:**
 1. **Parallel trajectories:** All three lines decline at similar rates (visual parallelism)
-2. **IRE highest at baseline:** Recognition shows slightly higher Day 0 confidence (¸ = -0.43 vs -0.49 for ICR)
-3. **Convergence at Day 6:** All paradigms converge to similar endpoint (¸ H -1.0 to -1.07)
-4. **Steeper early decline:** Day 0 ’ Day 1 shows steeper drop than Day 3 ’ Day 6 (non-linear forgetting)
+2. **IRE highest at baseline:** Recognition shows slightly higher Day 0 confidence (ï¿½ = -0.43 vs -0.49 for ICR)
+3. **Convergence at Day 6:** All paradigms converge to similar endpoint (ï¿½ H -1.0 to -1.07)
+4. **Steeper early decline:** Day 0 ï¿½ Day 1 shows steeper drop than Day 3 ï¿½ Day 6 (non-linear forgetting)
 5. **Wide confidence intervals:** Shaded bands widen over time, indicating increasing uncertainty in estimates
 
 **Connection to Findings:**
-- Visual parallelism confirms statistical NULL Paradigm × Time interaction (p = .470, .107)
-- All lines show monotonic decline, consistent with significant Time main effect (² = -0.124, p < .001)
+- Visual parallelism confirms statistical NULL Paradigm ï¿½ Time interaction (p = .470, .107)
+- All lines show monotonic decline, consistent with significant Time main effect (ï¿½ = -0.124, p < .001)
 - Baseline separation (IRE highest) aligns with marginal Paradigm main effect (IRE vs ICR: p = .099)
 
 ---
@@ -184,9 +220,9 @@ Same data as Figure 1, transformed to probability scale for practical interpreta
 - **Lines:** Three paradigm trajectories with observed data points (circles) and fitted lines
 
 **Paradigm Trajectories (Probability Scale):**
-- **IFR:** 16.3% ’ 2.9% (13.4 percentage point decline)
-- **ICR:** 12.9% ’ 1.6% (11.3 percentage point decline)
-- **IRE:** 20.0% ’ 3.1% (16.9 percentage point decline)
+- **IFR:** 16.3% ï¿½ 2.9% (13.4 percentage point decline)
+- **ICR:** 12.9% ï¿½ 1.6% (11.3 percentage point decline)
+- **IRE:** 20.0% ï¿½ 3.1% (16.9 percentage point decline)
 
 **Key Patterns:**
 1. **Low baseline probabilities:** All paradigms start below 20% at Day 0 (indicates LOW average confidence overall)
@@ -211,7 +247,7 @@ Both theta (Figure 1) and probability (Figure 2) scales presented, enabling both
 
 **Original Hypothesis (from 1_concept.md):**
 
-*"Paradigm × Time interaction will be NULL (no differential decline rates across Free Recall, Cued Recall, Recognition), paralleling Ch5 5.3.1-5.3.2 accuracy findings. Retrieval support affects baseline confidence but not confidence decay rate."*
+*"Paradigm ï¿½ Time interaction will be NULL (no differential decline rates across Free Recall, Cued Recall, Recognition), paralleling Ch5 5.3.1-5.3.2 accuracy findings. Retrieval support affects baseline confidence but not confidence decay rate."*
 
 **Secondary Hypotheses:**
 1. Recognition may show highest baseline confidence (retrieval support creates fluency-based confidence boost)
@@ -220,14 +256,14 @@ Both theta (Figure 1) and probability (Figure 2) scales presented, enabling both
 
 **Hypothesis Status:** **PRIMARY HYPOTHESIS SUPPORTED**
 
-The statistical findings confirm NULL Paradigm × Time interaction:
+The statistical findings confirm NULL Paradigm ï¿½ Time interaction:
 - IFR interaction: p = .470 (n.s.)
 - IRE interaction: p = .107 (n.s.)
-- Minimum p = .107, well above ± = .05 threshold
+- Minimum p = .107, well above ï¿½ = .05 threshold
 - Confidence decline rates statistically equivalent across paradigms
 
 **Secondary Hypotheses:**
-1.  **Partially supported:** IRE (Recognition) shows numerically highest baseline (¸ = -0.43, 20% probability), but difference only marginal (p = .099 vs ICR)
+1.  **Partially supported:** IRE (Recognition) shows numerically highest baseline (ï¿½ = -0.43, 20% probability), but difference only marginal (p = .099 vs ICR)
 2.  **Not supported:** ICR (Cued Recall) shows lowest baseline, not IFR (Free Recall). IFR intermediate.
 3.  **Supported:** Visual parallelism and NULL interaction confirm parallel slopes
 
@@ -235,7 +271,7 @@ The statistical findings confirm NULL Paradigm × Time interaction:
 
 **Theta Scale Findings:**
 
-Confidence ability declined 0.53-0.64 SD from baseline (Day 0: ¸ = -0.43 to -0.49) to 6-day retention (Day 6: ¸ = -0.99 to -1.07) across paradigms:
+Confidence ability declined 0.53-0.64 SD from baseline (Day 0: ï¿½ = -0.43 to -0.49) to 6-day retention (Day 6: ï¿½ = -0.99 to -1.07) across paradigms:
 - IFR: 0.53 SD decline
 - ICR: 0.58 SD decline
 - IRE: 0.64 SD decline
@@ -249,9 +285,9 @@ A 0.53-0.64 SD decline represents a **medium-to-large effect** (Cohen's d H 0.5-
 **Probability Scale Findings:**
 
 Translating to performance probabilities, high-confidence responses dropped 11-17 percentage points:
-- IFR: 16.3% ’ 2.9% (13.4 pp decline)
-- ICR: 12.9% ’ 1.6% (11.3 pp decline)
-- IRE: 20.0% ’ 3.1% (16.9 pp decline)
+- IFR: 16.3% ï¿½ 2.9% (13.4 pp decline)
+- ICR: 12.9% ï¿½ 1.6% (11.3 pp decline)
+- IRE: 20.0% ï¿½ 3.1% (16.9 pp decline)
 
 **Practical Interpretation:**
 
@@ -262,9 +298,9 @@ The probability scale reveals that **high confidence is rare** at baseline (12-2
 
 **Why Both Scales Matter:**
 
-- **Theta:** The 0.53-0.64 SD decline is comparable to episodic memory effect sizes (medium-large), enabling meta-analytic comparison to prior literature. NULL interaction (”AIC = 431 for models with interaction vs without) provides strong evidence for parallel trajectories.
+- **Theta:** The 0.53-0.64 SD decline is comparable to episodic memory effect sizes (medium-large), enabling meta-analytic comparison to prior literature. NULL interaction (ï¿½AIC = 431 for models with interaction vs without) provides strong evidence for parallel trajectories.
 
-- **Probability:** The 11-17 pp decline has practical implications: clinicians can interpret "16% baseline ’ 3% at Day 6" without psychometric training, whereas "¸ = -0.46 ’ -0.99" requires IRT literacy. Low absolute probabilities (< 20% baseline) suggest confidence items measure high-confidence threshold, not average confidence.
+- **Probability:** The 11-17 pp decline has practical implications: clinicians can interpret "16% baseline ï¿½ 3% at Day 6" without psychometric training, whereas "ï¿½ = -0.46 ï¿½ -0.99" requires IRT literacy. Low absolute probabilities (< 20% baseline) suggest confidence items measure high-confidence threshold, not average confidence.
 
 - **Together:** We demonstrate both scientific rigor (standardized effect sizes, model comparison evidence) and practical utility (interpretable performance metrics showing severe confidence loss over retention interval).
 
@@ -272,7 +308,7 @@ The probability scale reveals that **high confidence is rare** at baseline (12-2
 
 **Episodic Memory Theory:**
 
-The NULL Paradigm × Time interaction aligns with **parallel forgetting curves** across retrieval conditions, consistent with:
+The NULL Paradigm ï¿½ Time interaction aligns with **parallel forgetting curves** across retrieval conditions, consistent with:
 
 1. **Transfer-Appropriate Processing (TAP):**
    - Morris et al. (1977): Retrieval support (cues, recognition options) enhances **baseline performance** through encoding-retrieval match
@@ -303,17 +339,17 @@ The NULL Paradigm × Time interaction aligns with **parallel forgetting curves** 
 **Paradigm-Specific Patterns:**
 
 **IFR (Free Recall):**
-- Baseline confidence: Moderate (16.3% high confidence, ¸ = -0.46)
+- Baseline confidence: Moderate (16.3% high confidence, ï¿½ = -0.46)
 - Decline: 0.53 SD / 13.4 pp (moderate)
 - Interpretation: Minimal retrieval support leads to moderate baseline confidence. Participants aware of recall difficulty (appropriate metacognitive monitoring).
 
 **ICR (Cued Recall):**
-- Baseline confidence: **Lowest** (12.9% high confidence, ¸ = -0.49)
+- Baseline confidence: **Lowest** (12.9% high confidence, ï¿½ = -0.49)
 - Decline: 0.58 SD / 11.3 pp (moderate)
 - Interpretation: Surprisingly, cued recall shows **lower** baseline confidence than free recall, contradicting retrieval support hypothesis. Possible explanation: Spatial cues create **retrieval conflict** (presented location may mismatch memory, reducing confidence despite aiding accuracy).
 
 **IRE (Recognition):**
-- Baseline confidence: **Highest** (20.0% high confidence, ¸ = -0.43)
+- Baseline confidence: **Highest** (20.0% high confidence, ï¿½ = -0.43)
 - Decline: 0.64 SD / 16.9 pp (largest decline, but not significantly different)
 - Interpretation: Recognition shows modest confidence boost at baseline (consistent with fluency theory), but declines at similar rate to other paradigms. Familiarity cues provide initial confidence boost that **dissipates** over retention interval.
 
@@ -347,7 +383,7 @@ The NULL Paradigm × Time interaction aligns with **parallel forgetting curves** 
 
 **Pattern 3: Linear Model Wins Kitchen Sink (Not Log)**
 
-**Observation:** Linear time transformation (raw TSVR hours) tied for best model (AIC = 298.37) with Exponential_proxy. Log transformation (benchmark) performed poorly (rank #45, AIC = 729.69, ”AIC = 431).
+**Observation:** Linear time transformation (raw TSVR hours) tied for best model (AIC = 298.37) with Exponential_proxy. Log transformation (benchmark) performed poorly (rank #45, AIC = 729.69, ï¿½AIC = 431).
 
 **Possible Explanations:**
 1. **True Linear Forgetting:** Confidence decay may be **linear in clock time** rather than logarithmic (contradicts typical forgetting curve assumptions).
@@ -414,7 +450,7 @@ For cognitive assessment applications:
 - N = 100 participants provides adequate power (0.80) for medium effects (d = 0.5)
 - Underpowered for small effects (d = 0.2, power H 0.45)
 - Marginal paradigm effect (IRE vs ICR: p = .099) may reflect insufficient power rather than true null effect
-- 1200 observations (100 × 4 × 3) sufficient for LMM convergence but limits detection of subtle interaction effects
+- 1200 observations (100 ï¿½ 4 ï¿½ 3) sufficient for LMM convergence but limits detection of subtle interaction effects
 
 **Demographic Constraints:**
 - University undergraduate sample (inferred from typical REMEMVR recruitment)
@@ -441,7 +477,7 @@ For cognitive assessment applications:
    - Low baseline probabilities (< 20%) suggest scale may be **top-heavy** (participants rarely use 1.0 rating)
 
 3. **GRM Assumptions:**
-   - Assumes **monotonic item response functions** (higher confidence ’ higher theta)
+   - Assumes **monotonic item response functions** (higher confidence ï¿½ higher theta)
    - Assumes **local independence** (confidence ratings on different items are conditionally independent given theta)
    - Violations may bias item parameters and theta estimates
 
@@ -478,7 +514,7 @@ For cognitive assessment applications:
 2. **Linear Time Assumption:**
    - Linear model wins kitchen sink, but 50% uncertainty (tied with Exponential_proxy)
    - May not capture true forgetting curve shape (need longer intervals to differentiate)
-   - Log transformation performs poorly (”AIC = 431) - contradicts typical forgetting assumptions
+   - Log transformation performs poorly (ï¿½AIC = 431) - contradicts typical forgetting assumptions
 
 3. **Multiple Comparisons:**
    - 65 models tested in kitchen sink comparison - inflates Type I error risk
@@ -486,9 +522,9 @@ For cognitive assessment applications:
    - But interpretation assumes best model is "true" model (model uncertainty acknowledged via Akaike weights)
 
 4. **Interaction Test Power:**
-   - Paradigm × Time interaction marginal for IRE (p = .107)
+   - Paradigm ï¿½ Time interaction marginal for IRE (p = .107)
    - May reflect insufficient power (N = 100) rather than true null
-   - Effect size small (² = -0.017) - clinically negligible even if statistically significant with larger N
+   - Effect size small (ï¿½ = -0.017) - clinically negligible even if statistically significant with larger N
 
 ### Generalizability Constraints
 
@@ -543,7 +579,7 @@ For cognitive assessment applications:
 ### Limitations Summary
 
 Despite these constraints, findings are **robust within scope:**
-- NULL Paradigm × Time interaction consistent across model specifications (kitchen sink confirms linear/exponential equivalence)
+- NULL Paradigm ï¿½ Time interaction consistent across model specifications (kitchen sink confirms linear/exponential equivalence)
 - Effect sizes medium-to-large for time main effect (d H 1.64), not reliant on marginal significance
 - Results align with Ch5 accuracy findings (parallel trajectories across paradigms)
 - Replication strengthens conclusion: **Retrieval support affects baseline, not forgetting dynamics**
@@ -641,7 +677,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 - **Feasibility:** Requires new data collection (~6 months for extended longitudinal study)
 
 **3. Do Confidence Trajectories Predict Subsequent Memory?**
-- **Question:** Does rate of confidence decline predict future memory performance (e.g., fast confidence loss ’ poor retention at Day 6)?
+- **Question:** Does rate of confidence decline predict future memory performance (e.g., fast confidence loss ï¿½ poor retention at Day 6)?
 - **Next Steps:** Extract individual participant confidence slopes (BLUPs from LMM), correlate with Day 6 accuracy
 - **Expected Insight:** Test if confidence trajectory is **prognostic** (metacognitive signal of future memory failure)
 - **Feasibility:** Immediate (data available from current analysis + Ch5 accuracy data)

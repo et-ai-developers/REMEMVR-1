@@ -15,12 +15,44 @@
 **Participants:**
 - Total N: 100 participants with complete data
 - Day 0 calibration scores: 100 participants (from RQ 6.2.1)
-- Trajectory residuals: 400 observations (100 participants × 4 test sessions from Ch5 5.1.1)
+- Trajectory residuals: 400 observations (100 participants ï¿½ 4 test sessions from Ch5 5.1.1)
 - No missing data: All participants had both calibration metrics and complete 4-timepoint trajectories
 
 **Data Sources:**
 - Day 0 calibration: RQ 6.2.1 Step 2 (confidence-accuracy alignment, z-standardized)
 - Trajectory residuals: Ch5 5.1.1 best LMM (power law model with alpha=0.4)
+
+### Model Averaging Update (2025-12-13)
+
+**IMPORTANT:** Original analysis used single-model (PowerLaw_04) residuals. Model averaging validation now complete:
+
+**Original Single-Model Approach:**
+- Model: PowerLaw_04 (best model with 5.6% Akaike weight)
+- Residuals: From single model fit
+- r = 0.0195, p = 0.847 (two-tailed)
+
+**Model-Averaged Validation (Burnham & Anderson 2002):**
+- Threshold: Î”AIC < 7
+- Competitive models: 51 (representing 99.9% of total model weight)
+- Effective N models: 40.09 (EXTREME model uncertainty)
+- r = -0.0455, p = 0.653 (two-tailed)
+
+**Conclusion:** NULL finding is ROBUST across model specifications:
+- Both single-model and model-averaged approaches show negligible effect (|r| < 0.05)
+- Both p-values highly non-significant (p > 0.65)
+- Direction switches (0.02 â†’ -0.05) but remains negligible
+- Model uncertainty does NOT explain the null finding
+
+**Updated Trajectory Variability (MA Residuals):**
+- Mean variability: 0.533 (vs 0.558 original)
+- SD of variability: 0.205 (vs 0.209 original)
+- Range: [0.070, 1.140]
+- Minimal change from single-model estimates
+
+**Data Files (Model-Averaged):**
+- Source: Ch5 5.1.1 step05d_model_averaged_residuals.csv
+- Analysis: steps_00_to_04_ma.py
+- Log: steps_00_to_04_ma.log
 
 ### Calibration Variable
 
@@ -113,7 +145,7 @@ The plot displays the relationship between Day 0 calibration quality (x-axis) an
 - Visual confirms r = 0.020 (essentially zero correlation)
 - Flat regression line matches p = 0.847 (highly non-significant)
 - Scatter pattern shows calibration and stability are independent variables
-- No visual evidence of hypothesized negative correlation (good calibration ’ low variability)
+- No visual evidence of hypothesized negative correlation (good calibration ï¿½ low variability)
 
 **Statistical Annotation on Plot:**
 - r = 0.020
@@ -185,7 +217,7 @@ Residuals computed from best LMM (power law with alpha=0.4), which showed superi
 
 While non-significant, the observed r = +0.020 is slightly positive rather than zero or negative:
 
-- **Expected:** r < 0 (better calibration ’ lower variability)
+- **Expected:** r < 0 (better calibration ï¿½ lower variability)
 - **Observed:** r = +0.020 (very weak positive trend, essentially zero)
 - **Interpretation:** No meaningful relationship, but if anything, trend is opposite to prediction
 - **Possible Explanation:** Sampling noise in small correlation (N=100), or calibration and stability genuinely unrelated
@@ -284,8 +316,8 @@ For cognitive assessment applications:
 
 1. **Cross-Sectional Correlation:**
    - Cannot infer causality (even if correlation were significant)
-   - Calibration ’ stability direction assumed but not tested
-   - Alternative explanation: Stability ’ calibration (stable forgetters develop better calibration over time)
+   - Calibration ï¿½ stability direction assumed but not tested
+   - Alternative explanation: Stability ï¿½ calibration (stable forgetters develop better calibration over time)
 
 2. **No Control for Confounds:**
    - No covariates included (age, sleep quality, cognitive ability)
@@ -453,8 +485,8 @@ Findings may not generalize to:
 - **Question:** If calibration doesn't predict stability, what does?
 - **Candidates:**
   - **Sleep quality:** Consolidation depends on sleep (Pittsburgh Sleep Quality Index)
-  - **Cognitive reserve:** Higher reserve ’ more stable consolidation (education, IQ proxies)
-  - **Encoding context consistency:** Variable encoding ’ variable consolidation
+  - **Cognitive reserve:** Higher reserve ï¿½ more stable consolidation (education, IQ proxies)
+  - **Encoding context consistency:** Variable encoding ï¿½ variable consolidation
   - **Hippocampal integrity:** Structural MRI hippocampal volume
 - **Next Steps:** Collect additional measures in new sample, test as trajectory variability predictors
 - **Feasibility:** Moderate (PSQI immediate, MRI long-term collaboration)

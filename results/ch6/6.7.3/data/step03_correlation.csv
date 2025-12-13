@@ -1,2 +1,2 @@
-r,p_one_tailed,p_two_tailed,n,effect_size,direction
-0.01954296335864438,0.42348300243384523,0.8469660048676905,100,negligible,null
+r,p_one_tailed,p_two_tailed,n,effect_size,direction,methodology
+-0.04554949760655634,0.3263545135045565,0.652709027009113,100,negligible,null,model_averaged_residuals

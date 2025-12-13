@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2025-12-09 (Model-averaged variance decomposition tool added to tools_catalog and tools_inventory)
+**Last Updated:** 2025-12-13 (lmm_methodology.md updated with model averaging procedure)
 
 ---
 
@@ -53,10 +53,10 @@
 **Key Topics:** Graded Response Model (GRM), multidimensional IRT, deepirtools IWAVE implementation, theta estimation, composite_ID stacking, downstream usage in LMM pipeline (theta scores + TSVR)
 
 ### lmm_methodology.md
-**Purpose:** LMM deep dive, formula syntax, random effects structure, IRT→LMM data flow
-**Audience:** Analysis-executor agent, main claude when building LMM tools, statistics-expert agent
-**Status:** Current
-**Key Topics:** Linear Mixed Models, longitudinal trajectories, statsmodels.MixedLM, fixed and random effects, REMEMVR-specific IRT→LMM data flow (composite_ID parsing, TSVR merge, theta as outcome), time variable requirements (TSVR, NOT nominal days)
+**Purpose:** LMM deep dive including MODEL AVERAGING procedure (Burnham & Anderson 2002) for handling functional form uncertainty
+**Audience:** Analysis-executor agent, main claude when building LMM tools, statistics-expert agent, all agents working on ROOT RQs
+**Status:** Current (2025-12-13, major update with model averaging documentation)
+**Key Topics:** Linear Mixed Models, model averaging (ΔAIC < 7 threshold, Akaike weights, effective N models), kitchen sink model comparison (65+ functional forms), uncertainty classification (LOW/MODERATE/HIGH/EXTREME), random effects for ICC decomposition, tools/model_averaging.py API, Ch5/Ch6 ROOT RQ uncertainty levels
 
 ### cognitive_tests.md
 **Purpose:** RAVLT, BVMT, NART, RPM scoring procedures with exact tag names

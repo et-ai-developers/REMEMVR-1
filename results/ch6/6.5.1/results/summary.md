@@ -31,9 +31,9 @@
 - Model structure: Same as Pass 1 (3-factor GRM, 5 ordinal categories)
 
 **Theta Score Characteristics:**
-- Common baseline (Day 0): ¸ = -0.45 (SE ~0.05, probability ~16%)
-- Congruent baseline (Day 0): ¸ = -0.47 (SE ~0.05, probability ~16%)
-- Incongruent baseline (Day 0): ¸ = -0.47 (SE ~0.05, probability ~14%)
+- Common baseline (Day 0): ï¿½ = -0.45 (SE ~0.05, probability ~16%)
+- Congruent baseline (Day 0): ï¿½ = -0.47 (SE ~0.05, probability ~16%)
+- Incongruent baseline (Day 0): ï¿½ = -0.47 (SE ~0.05, probability ~14%)
 - All 400 composite_IDs present (no data loss from Pass 1 to Pass 2)
 
 ### Longitudinal Trajectory Analysis
@@ -50,9 +50,45 @@
 - Convergence: TRUE
 - Final LMM fit: AIC = 598.21, BIC = 638.93
 
+### Model Averaging Methodology (Added 2025-12-13)
+
+**IMPORTANT UPDATE:** Although the best model (Quad+Log+SquareRoot) had 65.3% Akaike weight, model averaging was implemented for methodological consistency with other ROOT RQs.
+
+**Kitchen Sink Model Comparison:**
+- **Models tested:** 66 functional forms
+- **Best model:** Quad+Log+SquareRoot (Î”AIC = 0.00, weight = 65.3%)
+- **Uncertainty level:** LOW (best model has clear majority weight)
+
+**Model Averaging Implementation (Burnham & Anderson 2002):**
+- **Threshold:** Î”AIC < 7 (includes models with weak-to-substantial support)
+- **Competitive models:** 2 models (representing 87.5% of total model weight)
+- **Effective N models:** 1.8 (low - Quad+Log+SquareRoot dominates with 74.5% renormalized weight)
+- **Factor variable:** congruence (Common/Unique)
+- **Output:** Model-averaged predictions weighted by renormalized Akaike weights
+
+**Key Model Averaging Outputs:**
+- `step05b_competitive_models.csv` - 2 models with Î”AIC < 7
+- `step05b_model_averaged_predictions.csv` - MA predictions (mean = -0.780, SD = 0.220)
+- `step05b_model_averaged_theta.csv` - MA theta for derivative RQs
+- `step05b_model_averaged_random_effects.csv` - MA intercepts for clustering
+- `step05b_metadata.csv` - Summary statistics (effective_n=1.8)
+
+**Impact on Findings:**
+- **Schema Ã— Time interaction ROBUST:** NULL finding (p > 0.3) holds across competitive models
+- **Model-averaged trajectory:** Quad+Log+SquareRoot dominates (74.5% renormalized weight)
+- **Limited MA impact:** With Effective N = 1.8, model averaging has minimal effect on predictions
+
+**Why Model Averaging Still Matters:**
+Even with concentrated weights, model averaging:
+1. Documents model uncertainty formally (not zero, even if small)
+2. Provides methodological consistency across ROOT RQs
+3. Enables sensitivity analysis in derivative RQs
+
+**Reference:** Burnham, K. P., & Anderson, D. R. (2002). *Model Selection and Multimodel Inference* (2nd ed.). Springer.
+
 **Fixed Effect Estimates:**
 
-| Effect | ² | SE | z | p (uncorr) | 95% CI |
+| Effect | ï¿½ | SE | z | p (uncorr) | 95% CI |
 |--------|---|----|---|------------|---------|
 | Intercept (Common baseline) | -0.341 | 0.057 | -6.02 | <.001*** | [-0.452, -0.230] |
 | Congruent vs Common (baseline) | -0.019 | 0.042 | -0.44 | .660 | [-0.102, 0.064] |
@@ -104,21 +140,21 @@ The plot displays confidence forgetting trajectories across 4 test sessions (app
 - **Three trajectories:** Common (red), Congruent (blue), Incongruent (green)
 
 **Trajectory Patterns (Theta Scale):**
-- **Common:** Starts at ¸ = -0.45 (Hour 1), declines to ¸ = -1.02 (Hour 151) - 0.57 theta unit decline
-- **Congruent:** Starts at ¸ = -0.47 (Hour 1), declines to ¸ = -1.06 (Hour 151) - 0.59 theta unit decline
-- **Incongruent:** Starts at ¸ = -0.47 (Hour 1), declines to ¸ = -1.09 (Hour 151) - 0.62 theta unit decline
+- **Common:** Starts at ï¿½ = -0.45 (Hour 1), declines to ï¿½ = -1.02 (Hour 151) - 0.57 theta unit decline
+- **Congruent:** Starts at ï¿½ = -0.47 (Hour 1), declines to ï¿½ = -1.06 (Hour 151) - 0.59 theta unit decline
+- **Incongruent:** Starts at ï¿½ = -0.47 (Hour 1), declines to ï¿½ = -1.09 (Hour 151) - 0.62 theta unit decline
 
 **Key Visual Patterns:**
 1. **Parallel trajectories:** All three congruence levels show similar decline rates (lines nearly overlapping)
 2. **Overlapping confidence intervals:** Shaded bands around trajectories overlap extensively across all timepoints
 3. **No separation:** Congruence groups visually indistinguishable at baseline or any follow-up session
 4. **Monotonic decline:** All trajectories show continuous confidence loss over time (no consolidation or stabilization)
-5. **Logarithmic shape:** Steeper decline Hour 1’29 than Hour 79’151 (consistent with log_TSVR model)
+5. **Logarithmic shape:** Steeper decline Hour 1ï¿½29 than Hour 79ï¿½151 (consistent with log_TSVR model)
 
 **Connection to Findings:**
 - Visual confirms statistical NULL Congruence x Time interaction (p = 0.634, 0.338) - parallel slopes
 - Overlapping confidence intervals support NON-SIGNIFICANT baseline differences (p = 0.660, 0.921)
-- Monotonic decline matches significant Time main effect (² = -0.123, p < .001)
+- Monotonic decline matches significant Time main effect (ï¿½ = -0.123, p < .001)
 
 ---
 
@@ -137,9 +173,9 @@ Probability-scale transformation of theta trajectories showing practical perform
 - **Three trajectories:** Common (red), Congruent (blue), Incongruent (green)
 
 **Trajectory Patterns (Probability Scale):**
-- **Common:** 16.0% ’ 2.4% (13.6 percentage point decline over 150 hours)
-- **Congruent:** 16.4% ’ 2.5% (13.9 percentage point decline)
-- **Incongruent:** 14.4% ’ 2.1% (12.3 percentage point decline)
+- **Common:** 16.0% ï¿½ 2.4% (13.6 percentage point decline over 150 hours)
+- **Congruent:** 16.4% ï¿½ 2.5% (13.9 percentage point decline)
+- **Incongruent:** 14.4% ï¿½ 2.1% (12.3 percentage point decline)
 
 **Key Visual Patterns:**
 1. **Severe confidence decline:** All groups drop from ~14-16% initial confidence to ~2-3% by Day 6
@@ -164,10 +200,10 @@ Probability-scale transformation of theta trajectories showing practical perform
 **Hypothesis Status:** **CONFIRMED**
 
 The statistical findings fully support the primary NULL hypothesis:
-- Congruent x Time: ² = -0.005, p = 0.634 (NON-SIGNIFICANT)
-- Incongruent x Time: ² = -0.011, p = 0.338 (NON-SIGNIFICANT)
+- Congruent x Time: ï¿½ = -0.005, p = 0.634 (NON-SIGNIFICANT)
+- Incongruent x Time: ï¿½ = -0.011, p = 0.338 (NON-SIGNIFICANT)
 - Trajectories visually parallel across all congruence levels (Figure 1)
-- Effect sizes negligible (² < 0.01 for both interactions)
+- Effect sizes negligible (ï¿½ < 0.01 for both interactions)
 
 **Secondary Hypothesis (Exploratory):**
 "Possible main effect of Congruence on baseline confidence (intercept): Congruent items may show HIGHER initial confidence than Common or Incongruent items due to schema-based fluency heuristic."
@@ -175,14 +211,14 @@ The statistical findings fully support the primary NULL hypothesis:
 **Hypothesis Status:** **NOT SUPPORTED**
 
 Baseline confidence differences were non-significant and negligible:
-- Congruent vs Common: ² = -0.019, p = 0.660 (opposite direction from hypothesis)
-- Incongruent vs Common: ² = -0.004, p = 0.921 (near-zero difference)
-- All three groups started at ¸ H -0.45 (probability H 15%), functionally equivalent
+- Congruent vs Common: ï¿½ = -0.019, p = 0.660 (opposite direction from hypothesis)
+- Incongruent vs Common: ï¿½ = -0.004, p = 0.921 (near-zero difference)
+- All three groups started at ï¿½ H -0.45 (probability H 15%), functionally equivalent
 
 ### Dual-Scale Trajectory Interpretation (Decision D069)
 
 **Theta Scale Findings:**
-Schema congruence showed NO effect on confidence trajectories. All groups declined approximately 0.6 theta units from Hour 1 (¸ H -0.45) to Hour 151 (¸ H -1.05). This represents a medium effect size for time (Cohen's d H 0.6 based on 0.6 SD decline), but ZERO effect for schema congruence (d < 0.05 for all pairwise comparisons).
+Schema congruence showed NO effect on confidence trajectories. All groups declined approximately 0.6 theta units from Hour 1 (ï¿½ H -0.45) to Hour 151 (ï¿½ H -1.05). This represents a medium effect size for time (Cohen's d H 0.6 based on 0.6 SD decline), but ZERO effect for schema congruence (d < 0.05 for all pairwise comparisons).
 
 **Statistical Interpretation:**
 The lack of congruence x time interaction (p > 0.3 for both terms) indicates that schema-congruent, common, and incongruent items exhibit statistically indistinguishable forgetting rates. This NULL result has two important implications:
@@ -199,7 +235,7 @@ The probability scale reveals a critical practical concern: by Hour 151 (Day 6),
 - **No schema rescue:** Schema congruence does NOT protect confidence from floor effects, unlike predictions from schema theory (Bartlett, 1932; Ghosh & Gilboa, 2014).
 
 **Why Both Scales Matter:**
-- **Theta:** Demonstrates statistically rigorous NULL finding (p > 0.3, ² < 0.01) comparable to accuracy RQ 5.4.1 for meta-analysis and theoretical integration.
+- **Theta:** Demonstrates statistically rigorous NULL finding (p > 0.3, ï¿½ < 0.01) comparable to accuracy RQ 5.4.1 for meta-analysis and theoretical integration.
 - **Probability:** Reveals practical implications (2-3% confidence floor) accessible to clinicians and test developers without IRT expertise.
 - **Together:** We establish both scientific rigor (standardized effect sizes, cross-RQ comparisons) and practical utility (interpretable confidence benchmarks for VR assessment).
 
@@ -235,9 +271,9 @@ The NULL findings challenge fluency heuristic predictions (Kelley & Jacoby, 1996
 
 **Schema Congruence (Common/Congruent/Incongruent):**
 
-- **Common items (everyday objects):** Baseline confidence ¸ = -0.45 (16%), declined to ¸ = -1.02 (2%). No advantage from real-world frequency or typicality.
-- **Congruent items (schema-consistent placements):** Baseline confidence ¸ = -0.47 (16%), declined to ¸ = -1.06 (3%). Schema consistency did NOT enhance confidence.
-- **Incongruent items (schema-violating placements):** Baseline confidence ¸ = -0.47 (14%), declined to ¸ = -1.09 (2%). Schema violations did NOT impair confidence relative to other types.
+- **Common items (everyday objects):** Baseline confidence ï¿½ = -0.45 (16%), declined to ï¿½ = -1.02 (2%). No advantage from real-world frequency or typicality.
+- **Congruent items (schema-consistent placements):** Baseline confidence ï¿½ = -0.47 (16%), declined to ï¿½ = -1.06 (3%). Schema consistency did NOT enhance confidence.
+- **Incongruent items (schema-violating placements):** Baseline confidence ï¿½ = -0.47 (14%), declined to ï¿½ = -1.09 (2%). Schema violations did NOT impair confidence relative to other types.
 
 **Key Insight:** Schema congruence categories are functionally equivalent for confidence monitoring in VR episodic memory. This contrasts with verbal memory literature where schema congruence often biases confidence judgments (Roediger & McDermott, 1995 false memory paradigm).
 
@@ -308,7 +344,7 @@ For VR-based cognitive assessment applications:
 
 **Sample Size:**
 - N = 100 participants provides adequate power (0.80) for medium effects (d = 0.5) but underpowered for small effects (d = 0.2, power = 0.30).
-- NULL congruence x time interactions had small effect sizes (|²| < 0.01), but power analysis confirms ability to detect medium+ effects if present.
+- NULL congruence x time interactions had small effect sizes (|ï¿½| < 0.01), but power analysis confirms ability to detect medium+ effects if present.
 - Confidence intervals for interaction terms wide (95% CI: [-0.03, 0.02]), but all include zero with substantial margin.
 
 **Demographic Constraints:**
@@ -349,7 +385,7 @@ For VR-based cognitive assessment applications:
 
 2. **Test Session Timing:**
    - Fixed retention intervals (~1, 29, 79, 151 hours) may miss critical confidence decline dynamics.
-   - Logarithmic TSVR transformation best fit, but steepest decline appears Hour 1’29 (rapid early confidence loss).
+   - Logarithmic TSVR transformation best fit, but steepest decline appears Hour 1ï¿½29 (rapid early confidence loss).
    - Additional intermediate sessions (e.g., Hour 12, Hour 48) could refine trajectory shape estimation.
 
 3. **Confidence-Accuracy Dissociation Not Directly Tested:**
@@ -426,7 +462,7 @@ For VR-based cognitive assessment applications:
 Despite these constraints, findings are **robust within scope:**
 - NULL congruence x time interactions consistent across both interaction terms (p = 0.634, 0.338).
 - Visual plot inspection confirms parallel trajectories with overlapping confidence intervals (no hint of hidden effects).
-- Effect sizes negligible (|²| < 0.01 for interactions, Cohen's d < 0.05 for all pairwise comparisons).
+- Effect sizes negligible (|ï¿½| < 0.01 for interactions, Cohen's d < 0.05 for all pairwise comparisons).
 - Replicates Ch5 5.4.1 NULL schema effects on accuracy, strengthening conclusion (converging evidence across accuracy and confidence).
 
 Limitations indicate **directions for future work** (see Section 5: Next Steps).

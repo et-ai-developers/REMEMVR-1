@@ -85,9 +85,45 @@
   - AIC = 299.94
   - Akaike weight = 55.6% (moderate uncertainty)
 - **Log model:** Ranked #45 out of 65 models
-  - ”AIC = 19.29 from best model (substantial evidence against simple log)
+  - Î”AIC = 19.29 from best model (substantial evidence against simple log)
 - **Top 10 models:** All involve power law, polynomial, or complex transformations
 - **Interpretation:** Confidence decline trajectory is MORE COMPLEX than simple logarithmic decay, supporting sophisticated forgetting dynamics
+
+### Model Averaging Methodology (Added 2025-12-13)
+
+**IMPORTANT UPDATE:** Although the best model (Ultimate) had 55.6% Akaike weight, model averaging was implemented for methodological consistency with other ROOT RQs.
+
+**Kitchen Sink Model Comparison:**
+- **Models tested:** 65 functional forms
+- **Best model:** Ultimate (Î”AIC = 0.00, weight = 55.6%)
+- **Uncertainty level:** MODERATE (best model has majority weight but not overwhelming)
+
+**Model Averaging Implementation (Burnham & Anderson 2002):**
+- **Threshold:** Î”AIC < 7 (includes models with weak-to-substantial support)
+- **Competitive models:** 4 models (representing 92.0% of total model weight)
+- **Effective N models:** 2.4 (low - Ultimate model dominates)
+- **Factor variable:** domain (What/Where/When)
+- **Output:** Model-averaged predictions weighted by renormalized Akaike weights
+
+**Key Model Averaging Outputs:**
+- `step05b_competitive_models.csv` - 4 models with Î”AIC < 7
+- `step05b_model_averaged_predictions.csv` - MA predictions (mean = -0.767, SD = 0.216)
+- `step05b_model_averaged_theta.csv` - MA theta for derivative RQs
+- `step05b_model_averaged_random_effects.csv` - MA intercepts for clustering
+- `step05b_metadata.csv` - Summary statistics (effective_n=2.4)
+
+**Impact on Findings:**
+- **Domain Ã— Time interaction ROBUST:** When domain's faster decline (p = .0202) holds across competitive models
+- **Model-averaged trajectory:** Provides weighted synthesis, though Ultimate dominates (60.5% renormalized weight)
+- **Limited MA impact:** With Effective N = 2.4, model averaging has modest effect on predictions
+
+**Why Model Averaging Still Matters:**
+Even with concentrated weights, model averaging:
+1. Documents model uncertainty formally
+2. Provides methodological consistency across ROOT RQs
+3. Enables sensitivity analysis in derivative RQs
+
+**Reference:** Burnham, K. P., & Anderson, D. R. (2002). *Model Selection and Multimodel Inference* (2nd ed.). Springer.
 
 ---
 
@@ -106,21 +142,21 @@ The plot displays confidence ability trajectories across 4 test sessions (T1 ~1 
 - **X-axis:** Hours Since VR Encoding (TSVR, log scale for visualization)
 - **Y-axis:** Theta confidence scores (latent ability, standardized): -1.5 to 0.5
 - **Three domain trajectories:**
-  - **What (red):** ¸ = -0.47 (T1) -> -1.02 (T4), decline = 0.55 SD
-  - **When (green):** ¸ = -0.39 (T1) -> -1.03 (T4), decline = 0.64 SD
-  - **Where (blue):** ¸ = -0.49 (T1) -> -1.04 (T4), decline = 0.55 SD
+  - **What (red):** ï¿½ = -0.47 (T1) -> -1.02 (T4), decline = 0.55 SD
+  - **When (green):** ï¿½ = -0.39 (T1) -> -1.03 (T4), decline = 0.64 SD
+  - **Where (blue):** ï¿½ = -0.49 (T1) -> -1.04 (T4), decline = 0.55 SD
 
 **Key Patterns:**
 
 1. **All domains show monotonic decline** (confidence decreases over 6-day retention)
-2. **Baseline differences modest:** When starts marginally higher (¸ = -0.39 vs -0.47/-0.49), but NOT significant (p = .0596)
+2. **Baseline differences modest:** When starts marginally higher (ï¿½ = -0.39 vs -0.47/-0.49), but NOT significant (p = .0596)
 3. **When domain shows STEEPER decline** (0.64 SD vs 0.55 SD), visually evident in plot divergence
 4. **Confidence bands (95% CI) narrow throughout** - high precision in estimates
-5. **All trajectories converge near ¸ = -1.0** at Day 6 (floor effect emerging)
+5. **All trajectories converge near ï¿½ = -1.0** at Day 6 (floor effect emerging)
 
 **Connection to Findings:**
 
-- Visual confirms significant When x Time interaction (² = -0.025, p = .0202)
+- Visual confirms significant When x Time interaction (ï¿½ = -0.025, p = .0202)
 - Steeper When trajectory matches post-hoc contrasts (When vs What/Where: p < .05 Bonferroni)
 - Where and What trajectories nearly parallel, consistent with non-significant Where x Time interaction (p = .9159)
 
@@ -169,7 +205,7 @@ NULL hypothesis expected: "Domain x Time interaction will be non-significant (p 
 **Hypothesis Status:** **REJECTED**
 
 The statistical findings **refute the NULL hypothesis:**
-- When x Time interaction: ² = -0.025, p = .0202 (significant)
+- When x Time interaction: ï¿½ = -0.025, p = .0202 (significant)
 - Post-hoc contrasts: When vs What/Where both significant after Bonferroni correction
 - Effect size: Small (Cohen's d ~ -0.11) but consistent
 
@@ -179,17 +215,17 @@ The statistical findings **refute the NULL hypothesis:**
 
 **What Domain (Object Confidence):**
 - **Trajectory:** Moderate decline (0.55 SD over 6 days, 14% -> 2% probability)
-- **Baseline:** Lowest initial confidence (¸ = -0.47) among domains
+- **Baseline:** Lowest initial confidence (ï¿½ = -0.47) among domains
 - **Interpretation:** Object identification confidence remains relatively stable compared to temporal domain, consistent with What domain's relatively preserved accuracy in Ch5 findings
 
 **Where Domain (Spatial Confidence):**
 - **Trajectory:** Moderate decline (0.55 SD over 6 days, 12% -> 2% probability), parallel to What
-- **Baseline:** Similar to What (¸ = -0.49, no significant difference)
+- **Baseline:** Similar to What (ï¿½ = -0.49, no significant difference)
 - **Interpretation:** Spatial confidence trajectory identical to object confidence. This parallels Ch5 5.2.1 finding where Where accuracy was NOT significantly different from What over time (both domains showed similar forgetting rates). Confidence tracks accuracy pattern for spatial domain.
 
 **When Domain (Temporal Confidence):**
 - **Trajectory:** FASTEST decline (0.64 SD over 6 days, 20% -> 3% probability)
-- **Baseline:** Marginally higher than What/Where (¸ = -0.39, p = .0596), possibly reflecting **overconfidence**
+- **Baseline:** Marginally higher than What/Where (ï¿½ = -0.39, p = .0596), possibly reflecting **overconfidence**
 - **Critical Finding:** When confidence declines FASTER despite starting HIGHER
 - **Interpretation:** Temporal confidence shows accelerated decay NOT observed in Where domain. This could reflect:
   1. **Metacognitive awareness of temporal memory weakness** - participants recognize temporal order is hardest to recall
@@ -235,7 +271,7 @@ Mixed evidence for validity:
 
 2. **Extended Model Comparison Valuable:**
    - Kitchen sink approach identified "Ultimate" complex model (AIC=299.94)
-   - Simple log model ranked #45 (”AIC=19.29) - substantial evidence against
+   - Simple log model ranked #45 (ï¿½AIC=19.29) - substantial evidence against
    - Confidence trajectories follow MORE COMPLEX forgetting dynamics than accuracy
 
 3. **Dual-Scale Reporting Limited by Floor Effects (Decision D069):**
@@ -362,14 +398,14 @@ For cognitive assessment applications:
 **Dual-Scale Transformation Issues (Decision D069):**
 
 1. **2PL vs GRM Mismatch:**
-   - **ANOMALY IDENTIFIED:** Probability scale shows When starting HIGHER (20%) despite theta starting LOWER (¸ = -0.39 vs -0.47 for What). This CONTRADICTS expected IRT relationship (higher theta = higher probability).
+   - **ANOMALY IDENTIFIED:** Probability scale shows When starting HIGHER (20%) despite theta starting LOWER (ï¿½ = -0.39 vs -0.47 for What). This CONTRADICTS expected IRT relationship (higher theta = higher probability).
    - **Root Cause:** GRM uses category-specific thresholds (b1, b2, b3, b4 for 5-category model), NOT single difficulty parameter like 2PL. Transformation formula in plots may use 2PL approximation (single b), which doesn't accurately represent GRM ordinal structure.
    - **Investigation Needed:** Clarify whether probability transformation uses GRM category averaging or 2PL simplification. If 2PL, transformation is INVALID for GRM data.
 
 2. **Extreme Negative Theta Values:**
    - All theta < 0 throughout retention interval (range [-2.3, +0.6], heavily negative-skewed)
-   - IRT probability transformation P(correct) = 1 / (1 + exp(-(a*(¸ - b)))) yields probabilities <25% for ¸ < -0.5
-   - When ¸ approaches -2.0, probabilities approach 0% (floor effect)
+   - IRT probability transformation P(correct) = 1 / (1 + exp(-(a*(ï¿½ - b)))) yields probabilities <25% for ï¿½ < -0.5
+   - When ï¿½ approaches -2.0, probabilities approach 0% (floor effect)
    - **Conclusion:** Probability scale provides minimal additional information beyond "very low confidence throughout"
 
 3. **Confidence vs Accuracy Interpretation:**
@@ -481,7 +517,7 @@ Despite these constraints, findings are **scientifically interpretable within sc
 - **Question:** Probability scale transformation yields <25% "correct" probabilities, approaching 0% by Day 6. Does probability scale add interpretability OR obscure findings?
 - **Hypotheses:**
   - **Confidence ` Accuracy:** Probability scale assumes confidence maps to performance probability, may not hold
-  - **Extreme theta values:** IRT probability transformation breaks down for ¸ < -2.0 (floor effects)
+  - **Extreme theta values:** IRT probability transformation breaks down for ï¿½ < -2.0 (floor effects)
   - **Context-dependent:** D069 appropriate for accuracy data (Ch5), questionable for confidence data (Ch6)
 - **Next Steps:** Consult IRT methodologists on probability transformation validity for confidence ratings, consider alternative confidence interpretability metrics (percentiles? effect sizes?)
 - **Feasibility:** Short-term (consultation, literature review)

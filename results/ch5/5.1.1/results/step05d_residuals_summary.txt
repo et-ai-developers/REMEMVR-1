@@ -1,0 +1,35 @@
+======================================================================
+RQ 5.1.1 - Model-Averaged Residuals Summary
+======================================================================
+
+Methodology: Burnham & Anderson (2002) Model Averaging
+ΔAIC threshold: 7.0
+
+Model Selection:
+  Total models tested: 65
+  Competitive models (ΔAIC < 7): 51
+  Total original weight: 99.9%
+  Effective N models: 40.09
+
+Top 5 Models:
+  1. PowerLaw_04               w=0.056
+  2. PowerLaw_05               w=0.053
+  3. PowerLaw_03               w=0.050
+  4. LogLog                    w=0.049
+  5. Root_033                  w=0.044
+
+Residual Statistics:
+  Mean: -0.000000
+  SD: 0.5087
+  Min: -1.3361
+  Max: 1.5078
+
+Output:
+  File: step05d_model_averaged_residuals.csv
+  Rows: 400
+  UIDs: 100
+  Tests per UID: 4
+
+Usage:
+  RQ 6.7.3 should use 'residual_ma' column for trajectory variability
+  This replaces single-model (PowerLaw_04) residuals with MA residuals

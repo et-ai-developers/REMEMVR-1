@@ -31,7 +31,7 @@
 - **Technical note:** Threshold ordering violations detected in all 72 items (GRM estimation artifacts, non-blocking)
 
 **Theta Confidence Score Characteristics:**
-- N = 400 observations (100 participants × 4 test sessions: T1, T2, T3, T4)
+- N = 400 observations (100 participants ï¿½ 4 test sessions: T1, T2, T3, T4)
 - Theta range: [-4, 4] (latent confidence ability estimates)
 - Standard errors: Uniform SE = 0.033 across all observations (indicating consistent measurement precision)
 - Composite IDs: Format P###_TN (e.g., A010_T1, A011_T2)
@@ -46,13 +46,13 @@
 
 **Best CONVERGED Model: Recip_sq (Reciprocal Squared)**
 - AIC: 1073.13
-- ” AIC from best: 4.15 (competitive range)
+- ï¿½ AIC from best: 4.15 (competitive range)
 - Akaike weight: 2.7%
 - Convergence: TRUE
 
 **Top 10 Models by Akaike Weight:**
 
-| Rank | Model Name | AIC | ” AIC | Weight | Cumulative | Converged |
+| Rank | Model Name | AIC | ï¿½ AIC | Weight | Cumulative | Converged |
 |------|------------|-----|-------|---------|------------|-----------|
 | 1 | Sin+Cos | 1068.98 | 0.00 | 21.7% | 21.7% | **FALSE** |
 | 2 | Tanh+Log | 1072.04 | 3.06 | 4.7% | 26.4% | FALSE |
@@ -75,9 +75,53 @@
 **Logarithmic Model Benchmark (Ch5 Comparison):**
 - Rank: #38 out of 65 models
 - AIC: 1075.24
-- ” AIC from best: 6.25
+- ï¿½ AIC from best: 6.25
 - Akaike weight: 0.95% (<1%)
 - **Interpretation:** Logarithmic model NOT competitive in kitchen sink comparison
+
+### Model Averaging Methodology (Added 2025-12-13)
+
+**IMPORTANT UPDATE:** The original analysis selected a single best model (Sin+Cos), but this model had only **21.7% Akaike weight** - meaning 78.3% of model evidence supported OTHER functional forms. This represents **HIGH model uncertainty** (effective N = 31.1 models).
+
+**Kitchen Sink Model Comparison:**
+- **Models tested:** 65 functional forms (linear, polynomial, logarithmic, power law, trigonometric, etc.)
+- **Best model:** Sin+Cos (Î”AIC = 0.00, weight = 21.7%)
+- **Problem:** With top model having <30% weight, selecting single model ignores >75% of evidence
+
+**Model Averaging Implementation (Burnham & Anderson 2002):**
+- **Threshold:** Î”AIC < 7 (includes models with weak-to-substantial support)
+- **Competitive models:** 48 models (representing 97.5% of total model weight)
+- **Effective N models:** 31.1 (high - indicating distributed weight across many models)
+- **Random slopes:** All 48 competitive models fitted with random slopes for ICC analysis
+- **Output:** Model-averaged predictions and random effects weighted by renormalized Akaike weights
+
+**Key Model Averaging Outputs:**
+- `step05b_competitive_models.csv` - 48 models with Î”AIC < 7
+- `step05b_model_averaged_predictions.csv` - MA predictions (mean = -0.604, SD = 0.157)
+- `step05b_model_averaged_theta.csv` - MA theta for derivative RQs
+- `step05b_model_averaged_random_effects.csv` - MA intercepts AND slopes (critical for 6.1.4 ICC)
+- `step05b_metadata.csv` - Summary statistics (effective_n=31.1, intercept_sd=0.314, slope_sd=0.099)
+
+**Random Effects Summary (Model-Averaged):**
+- **MA Intercept SD:** 0.314 (individual baseline confidence variability)
+- **MA Slope SD:** 0.099 (individual decline rate variability)
+- **Implication:** 824Ã— ICC ratio finding (RQ 6.1.4) now has model-averaged validation foundation
+
+**Impact on Findings:**
+- **Time main effect ROBUST:** Confidence decline highly significant across ALL competitive models
+- **Model-averaged trajectory:** Provides weighted synthesis across 48 functional forms
+- **Derivative RQ support:** Model-averaged random effects available for 6.1.4 (ICC) and 6.1.5 (clustering)
+
+**Why Model Averaging Matters:**
+When best model has <30% weight, model averaging is essential for:
+1. Acknowledging functional form uncertainty in thesis
+2. Providing robust predictions not tied to arbitrary model choice
+3. Propagating model uncertainty to derivative RQs (6.1.2-6.1.5)
+4. Computing model-averaged random effects for ICC decomposition
+
+**Reference:** Burnham, K. P., & Anderson, D. R. (2002). *Model Selection and Multimodel Inference* (2nd ed.). Springer.
+
+---
 
 ### Model Comparison: Original 5 Models (Ch5 Parallel)
 
@@ -109,7 +153,7 @@
 
 **Test Sessions:**
 - 4 sessions per participant: T1 (Day 0), T2 (Day 1), T3 (Day 3), T4 (Day 6)
-- Total observations: 400 (100 × 4)
+- Total observations: 400 (100 ï¿½ 4)
 - Missing data: None (100% retention across all sessions)
 - TSVR time variable: Actual hours since encoding per Decision D070 (range: 0-168 hours)
 
@@ -173,7 +217,7 @@ Probability scale transformation of Figure 1:
 **Key Patterns:**
 1. **Bimodal distribution:** Points cluster at extremes (0-20% and 40-80% ranges)
 2. **Sparse middle range:** Few observations in 20-40% confidence range
-3. **Mean trajectory decline:** ~30% at Day 0 ’ ~5% at Day 6 (approximately)
+3. **Mean trajectory decline:** ~30% at Day 0 ï¿½ ~5% at Day 6 (approximately)
 4. **Extreme floor effect:** Day 6 observations heavily concentrated near 0% probability
 5. **Comparable heterogeneity:** Similar scatter magnitude as theta scale
 
@@ -305,12 +349,12 @@ Bar chart displaying Akaike weights for top 10 models:
 - **Alternative interpretation:** High model uncertainty for confidence may indicate metacognitive monitoring is NOISIER than memory performance (greater individual differences in confidence calibration)
 
 **Dual-Process Theory:**
-- **Prediction:** Confidence relies on familiarity (fast-decaying), accuracy on recollection (slower consolidation) ’ divergent functional forms
+- **Prediction:** Confidence relies on familiarity (fast-decaying), accuracy on recollection (slower consolidation) ï¿½ divergent functional forms
 - **Finding:** Cannot test (Ch5 comparison incomplete)
 - **Speculative:** Reciprocal squared (fast decay) vs logarithmic (Ch5 likely) would support dual-process prediction
 
 **Sleep-Dependent Consolidation:**
-- **Prediction:** Rapid Day 0’1 decline (pre-consolidation) followed by leveling
+- **Prediction:** Rapid Day 0ï¿½1 decline (pre-consolidation) followed by leveling
 - **Finding:** Visual trajectory shows decline across all intervals (plots), but functional form ambiguous
 - **Interpretation:** Reciprocal squared and power law forms compatible with consolidation pattern (steep early decline)
 
@@ -384,13 +428,13 @@ Bar chart displaying Akaike weights for top 10 models:
 
 **4. Decision D069 Dual-Scale Reporting:**
 - Theta scale reveals measurement precision (SE = 0.033 uniform)
-- Probability scale reveals practical interpretation (30% ’ 5% decline)
+- Probability scale reveals practical interpretation (30% ï¿½ 5% decline)
 - Both scales essential: Scientific rigor (theta) + accessibility (probability)
 
 **Clinical Relevance:**
 
 **VR-Based Metacognitive Assessment:**
-- Confidence trajectories show substantial decline over 6 days (30% ’ 5% probability scale)
+- Confidence trajectories show substantial decline over 6 days (30% ï¿½ 5% probability scale)
 - Decline rate comparable to accuracy trajectories (Ch5 comparison pending)
 - High individual heterogeneity suggests confidence monitoring is person-specific trait
 
@@ -589,7 +633,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 ### Planned Thesis RQs (Chapter 6 Continuation)
 
 **RQ 6.1.2: Age Effects on Confidence Trajectories (Planned):**
-- **Focus:** Test Age × Time interaction (do older adults show steeper confidence decline?)
+- **Focus:** Test Age ï¿½ Time interaction (do older adults show steeper confidence decline?)
 - **Builds On:** Uses theta_confidence.csv from this RQ, adds age grouping variable
 - **Expected Timeline:** Next RQ in Ch6 sequence (derivative RQ)
 
@@ -619,7 +663,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 
 **2. Trial-by-Trial Confidence Ratings:**
 - **Current Limitation:** Aggregate confidence per item, no within-item variability
-- **Extension:** Collect confidence rating on EVERY trial (102 items × 4 tests = 408 ratings per participant)
+- **Extension:** Collect confidence rating on EVERY trial (102 items ï¿½ 4 tests = 408 ratings per participant)
 - **Expected Insight:** Capture confidence dynamics at finer temporal resolution
 - **Feasibility:** Moderate (increases testing duration, participant burden)
 
