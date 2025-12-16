@@ -1,0 +1,58 @@
+{
+  "status": "error",
+  "error_type": "no_matching_topic",
+  "message": "Session 2025-12-13 21:30 contains Ch6 validity audit planning content that doesn't match any active topics",
+  "details": {
+    "session_date": "2025-12-13 21:30",
+    "session_content_summary": "Ch6 Statistical Validity Audit & Comprehensive Rework Plan Creation - Created 18-task rework plan in rq_rework.md with TIER 1-4 tasks",
+    "active_topics_provided": [
+      "supervisor_meeting_prep_ch5_ch6",
+      "power_law_paradigm_shift_corrected",
+      "age_effects_nuanced",
+      "learning_approach_3_5_15"
+    ],
+    "content_needs_topic_like": "ch6_validity_rework_planning OR ch6_statistical_validity_audit",
+    "archival_status": "Session 2025-12-13 20:50 CAN be archived to existing ch6_model_averaging_implementation_complete_5_root_rqs.md, but Session 2025-12-13 21:30 CANNOT proceed without topic clarification"
+  },
+  "sessions_analyzed": {
+    "session_2025_12_13_20_50": {
+      "age_sessions_old": 4,
+      "eligible_for_archival": true,
+      "topic_match": "ch6_model_averaging_implementation_complete_5_root_rqs.md (existing archive file)",
+      "decision": "READY TO ARCHIVE"
+    },
+    "session_2025_12_13_21_30": {
+      "age_sessions_old": 4,
+      "eligible_for_archival": true,
+      "topic_match": "NONE - needs ch6_validity_rework_planning topic",
+      "decision": "BLOCKED - no matching active topic"
+    },
+    "session_2025_12_14_16_20": {
+      "age_sessions_old": 3,
+      "eligible_for_archival": true,
+      "relevance_to_current_work": "HIGH - thesis defense validity context still relevant to supervisor meeting",
+      "decision": "KEEP (conservative approach - still relevant to current supervisor meeting prep)"
+    },
+    "session_2025_12_14_16_55": {
+      "age_sessions_old": 2,
+      "status": "N-1 session - NEVER TOUCH",
+      "decision": "VERBATIM KEEP"
+    },
+    "session_2025_12_14_18_45": {
+      "age_sessions_old": 1,
+      "status": "N-1 session - NEVER TOUCH",
+      "decision": "VERBATIM KEEP"
+    },
+    "session_2025_12_17_11_30": {
+      "age_sessions_old": 0,
+      "status": "N session (most recent) - NEVER TOUCH",
+      "decision": "VERBATIM KEEP"
+    }
+  },
+  "state_md_current_tokens": 10500,
+  "state_md_limit": 20000,
+  "utilization_percent": 52,
+  "recommendation": "State.md is at 52% utilization (10.5k/20k tokens). User should either:\n  A) Add topic 'ch6_validity_rework_planning' to active topics list\n  B) Specify which existing topic should contain validity planning content\n  C) Skip archival of Session 2025-12-13 21:30 (keep it)\n  D) Archive only Session 2025-12-13 20:50 (minimal token reduction ~500 tokens)",
+  "partial_work_completed": false,
+  "conservative_safe_action": "Archive ONLY Session 2025-12-13 20:50 (model averaging completion) to existing ch6_model_averaging_implementation_complete_5_root_rqs.md file, skip Session 2025-12-13 21:30 (keep it in state.md due to topic uncertainty)"
+}

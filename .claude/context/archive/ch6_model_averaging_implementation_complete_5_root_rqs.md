@@ -132,3 +132,114 @@ This archive documents the implementation of Burnham & Anderson (2002) model ave
 **Success Rate:** 100%
 
 ---
+
+## Model Averaging Rework Completion - Final Updates (2025-12-13 20:50)
+
+**Archived from:** state.md Session (2025-12-13 20:50)
+**Original Date:** 2025-12-13 20:50
+**Reason:** Session 3+ sessions old, task complete and superseded by Dec 14 validity work
+
+**Task:** Complete Remaining Ch6 Model Averaging Rework Items - ALL COMPLETE
+
+**Context:** Continued from previous session (2025-12-13 14:30). User requested all remaining work from rq_rework.md be completed in logical order. This session completed: ROOT RQ summary.md updates, Ch5 5.1.1 MA residuals, RQ 6.7.3 fix, documentation updates, and validation checklist.
+
+### 1. ROOT RQ Summary.md Updates (4 files)
+
+Added "Model Averaging Methodology (Added 2025-12-13)" sections to:
+
+**6.1.1/results/summary.md** - Overall Confidence Trajectory
+- 48 competitive models (ΔAIC < 7)
+- Effective N = 31.1 (EXTREME uncertainty)
+- MA intercept SD = 0.314
+- MA slope SD = 0.099
+
+**6.3.1/results/summary.md** - Domain (What/Where/When)
+- 4 competitive models (ΔAIC < 7)
+- Effective N = 2.4 (low uncertainty)
+- Ultimate model dominates (60.5% weight)
+
+**6.4.1/results/summary.md** - Paradigm (IFR/ICR/IRE)
+- 2 competitive models (ΔAIC < 7)
+- Effective N = 2.0 (perfect tie)
+- Linear and Exponential_proxy tied at 50% each
+
+**6.5.1/results/summary.md** - Schema Congruence (Common/Unique)
+- 2 competitive models (ΔAIC < 7)
+- Effective N = 1.8 (low uncertainty)
+- Quad+Log+SquareRoot dominates (65.3% weight)
+
+### 2. Ch5 5.1.1 Model-Averaged Residuals (Prerequisite for 6.7.3)
+
+**Script Created:** `results/ch5/5.1.1/code/step05d_model_averaged_residuals.py`
+
+**Execution Results:**
+- Competitive models: 51 (ΔAIC < 7)
+- Effective N: 40.09 (EXTREME uncertainty - even higher than Ch6 RQs)
+- Total original weight: 99.9%
+- Residuals computed: mean = 0.000, SD = 0.509
+- Output: `step05d_model_averaged_residuals.csv` (400 rows: 100 participants × 4 tests)
+
+**Key Finding:** Ch5 5.1.1 forgetting curve has EXTREME model uncertainty (Effective N = 40.09), validating need for model averaging even more strongly than Ch6 RQs.
+
+### 3. RQ 6.7.3 Fix - Now Uses MA Residuals
+
+**Problem:** Original analysis used single "best model" residuals from Ch5 5.1.1.
+
+**Solution:** Updated `results/ch6/6.7.3/code/analysis_script.py` to load MA residuals from `step05d_model_averaged_residuals.csv`.
+
+**Correlation Results Comparison:**
+
+| Metric | Original (Single Model) | Model-Averaged | Change |
+|--------|------------------------|----------------|--------|
+| Pearson r | 0.0195 | -0.0455 | -0.065 |
+| p-value (two-tailed) | 0.847 | 0.653 | -0.19 |
+| Sample size | 100 | 100 | 0 |
+
+**Conclusion:** NULL finding is **ROBUST** across model specifications. Even with model averaging, correlation between accuracy residuals and confidence remains negligible and non-significant.
+
+**Interpretation:** Confidence judgments are NOT predicted by memory performance after accounting for forgetting trajectories. This supports dissociation between memory (Ch5) and metacognition (Ch6).
+
+### 4. Documentation Created
+
+**New File:** `docs/lmm_methodology.md` (comprehensive MA procedure)
+
+**Content:**
+- Burnham & Anderson (2002) model averaging framework
+- Competitive model selection (ΔAIC < 7 threshold)
+- Weight renormalization procedure
+- Effective N computation (measure of uncertainty)
+- Unconditional variance (model selection uncertainty)
+- Model-averaged random effects
+- When to use MA vs single model selection
+- Complete workflow with code examples
+
+**Purpose:** Authoritative reference for all future RQs requiring model averaging. Prevents re-implementing methodology from scratch.
+
+### 5. Validation Checklist Complete
+
+**Model Averaging Implementation Verified:**
+- ✅ 5/5 ROOT RQs implemented
+- ✅ 4/5 ROOT RQ summaries updated (6.8.1, 6.1.1, 6.3.1, 6.4.1, 6.5.1)
+- ✅ Ch5 5.1.1 MA residuals generated
+- ✅ RQ 6.7.3 updated to use MA residuals
+- ✅ Documentation created (lmm_methodology.md)
+- ✅ rq_status.tsv updated with MA implementation dates
+- ✅ All scripts tested and outputs verified
+
+**What Remains:**
+- Derivative RQs NOT re-run (MA outputs available for sensitivity analysis if needed)
+- No outstanding model averaging work identified
+
+### Session Metrics
+
+**Session Duration:** ~90 minutes
+**Tokens Used:** ~80k
+**Scripts Created:** 1 (step05d_model_averaged_residuals.py)
+**Scripts Modified:** 1 (6.7.3/analysis_script.py)
+**Documentation Files Created:** 1 (lmm_methodology.md)
+**Summary Files Updated:** 4 (6.1.1, 6.3.1, 6.4.1, 6.5.1)
+**Success Rate:** 100%
+
+**Status:** ✅ **ALL MODEL AVERAGING REWORK ITEMS COMPLETE**
+
+---
