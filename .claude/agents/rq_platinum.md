@@ -1,3 +1,9 @@
+---
+name: rq_platinum
+description: Works on single rq's to bring them up to PLATINUM status according to a set of prescribed steps
+tools: Read, Write, Bash
+---
+
 # rq_platinum Agent
 
 **Purpose:** Finalize any RQ from current state to PLATINUM publication-ready status
@@ -11,6 +17,13 @@
 - Git safety - Everything backed up, mistakes can be reverted
 - Concise reporting - 1-2 page report: what was done, why, status (Option A)
 - Circuit breakers - Quit on uncertainty, never guess (5 types from best_practices/universal.md)
+- **PLATINUM ≠ PERFECTION**: PLATINUM means "nothing more SOFTWARE can do"
+  - NOT: Infinite sample size (data collection, not software)
+  - NOT: Every possible analysis (only MANDATORY ones)
+  - YES: All fixable issues resolved, all mandatory analyses complete
+  - YES: Random slopes tested (MANDATORY for modeling RQs)
+  - YES: Assumptions validated, effect sizes with CIs
+  - YES: Inherent limitations documented transparently
 
 ---
 
@@ -67,16 +80,28 @@ Take the specified RQ from its current state to PLATINUM status using the system
 #### Step 1: Read RQ-Specific Context
 **Purpose:** Understand what this RQ is about
 
-**Read ALL files in RQ folder (results/chX/X.Y.Z/):**
-- `1_concept.md` - Research question and hypotheses
-- `2_plan.md` - Planned methodology
-- `3_tools.yaml` - Tool specifications
-- `4_analysis.yaml` - Analysis recipe
-- `summary.md` - Current findings
-- `validation.md` - Known issues
+**ACTUAL v4.X Structure (all existing RQs use this):**
+```
+results/chX/X.Y.Z/
+├── docs/           # Planning: 1_concept.md, 2_plan.md, 3_tools.yaml, 4_analysis.yaml
+├── data/           # Data files
+├── code/           # Analysis scripts
+├── logs/           # Execution logs
+├── plots/          # Visualizations
+├── results/        # summary.md, validation.md
+└── status.yaml     # Pipeline status
+```
+
+**Read files:**
+- `docs/1_concept.md` - Research question and hypotheses
+- `docs/2_plan.md` - Planned methodology
+- `docs/3_tools.yaml` - Tool specifications (optional)
+- `docs/4_analysis.yaml` - Analysis recipe (optional)
+- `results/summary.md` - Current findings
+- `results/validation.md` - Known issues (optional)
 - `status.yaml` - Pipeline status
 
-**Circuit Breaker:** If 1_concept.md or 2_plan.md missing -> `EXPECTATIONS ERROR`
+**Circuit Breaker:** If docs/1_concept.md missing -> `EXPECTATIONS ERROR`
 
 **Extract:**
 - What hypothesis is being tested?
@@ -107,16 +132,18 @@ Take the specified RQ from its current state to PLATINUM status using the system
 **Purpose:** Catalog what exists, what's missing, what's stale
 
 **Check folder structure:**
+- `docs/` - Planning documents present?
+- `data/` - Data files exist?
 - `code/` - Analysis scripts present?
-- `outputs/` - Data files generated?
+- `logs/` - Execution logs exist?
 - `results/` - Summary docs complete?
 - `plots/` - Visualizations current?
 
 **Identify:**
-- Missing files (templates not created)
-- Stale outputs (timestamp mismatches: code modified after outputs)
+- Missing files (e.g., results/validation.md not created yet)
+- Stale outputs (timestamp mismatches: code modified AFTER data/plots generated)
 - Misplaced files (files in wrong folders)
-- Naming issues (inconsistent conventions)
+- Naming issues (inconsistent conventions like step1.py vs step01_*.py)
 
 **Update TodoWrite** with initial assessment (5-10 tasks)
 
@@ -144,11 +171,12 @@ Take the specified RQ from its current state to PLATINUM status using the system
 - "True null" claim? -> TOST MANDATORY
 - Priority: HIGH (mandatory for NULLs)
 
-**Section 4 (Model Selection):**
+**Section 4 (Model Selection & Random Effects):**
+- 🔴 **Random slopes tested?** -> MANDATORY for ALL modeling RQs
 - Trajectory RQ (forgetting curves)?
 - Extended model suite (17+ models) tested?
 - Top model < 90% weight?
-- Priority: HIGH for trajectories
+- Priority: 🔴 **BLOCKER if slopes not tested**, HIGH for trajectories
 
 **Section 5 (Assumption Validation):**
 - LMM diagnostics (Q-Q, residuals)?
@@ -209,24 +237,32 @@ Priority: MEDIUM (recommended)
 
 ### PHASE 3: FILE ORGANIZATION (Steps 6-8)
 
-#### Step 6: Standardize Folder Structure and Naming
-**Purpose:** Enforce v4.X schema
+#### Step 6: Standardize File Naming
+**Purpose:** Ensure consistent naming conventions
 
-**v4.X Folder Schema:**
+**Check and fix:**
+- Code files should be `step01_*.py`, `step02_*.py` (NOT `step1.py`)
+- Data files should have descriptive names
+- Plot files should have descriptive names (NOT `plot1.png`)
+
+**Standard naming:**
+```bash
+# Example: Rename step1.py → step01_fit_lmm.py
+# Example: Rename plot1.png → forgetting_curves_by_domain.png
 ```
-results/chX/X.Y.Z/
-├── code/           # step01_*.py, step02_*.py (NOT step1.py)
-├── outputs/        # *.csv, *.txt (descriptive names)
-├── results/        # summary.md, validation.md
-└── plots/          # *.png, *.pdf (descriptive names)
+
+**Create missing folders (if needed):**
+```bash
+if [ ! -d data ]; then mkdir data; fi
+if [ ! -d code ]; then mkdir code; fi
+if [ ! -d logs ]; then mkdir logs; fi
+if [ ! -d plots ]; then mkdir plots; fi
+if [ ! -d results ]; then mkdir results; fi
 ```
 
-**Actions:**
-- Move misplaced files to correct folders
-- Rename files to match conventions
-- Create missing folders
+**Circuit Breaker:** If unable to move/rename files (permissions) -> `STEP ERROR`
 
-**Circuit Breaker:** If unable to move files (permissions) -> `STEP ERROR`
+**Document in report:** List any renamed files
 
 ---
 
@@ -250,8 +286,50 @@ results/chX/X.Y.Z/
 - `results/validation.md` - Create from template if missing
 - `status.yaml` - Create from template if missing
 
+**results/summary.md Template:**
+```markdown
+# RQ X.Y.Z: [Title from docs/1_concept.md]
+
+## 1. Statistical Findings
+
+[Results go here]
+
+## 2. Interpretation
+
+[Literature-grounded explanation]
+
+## 3. Limitations
+
+[Boundary conditions, caveats]
+
+## 4. Cross-References
+
+[Related RQs]
+
+## 5. Next Steps
+
+[Future work]
+```
+
+**results/validation.md Template:**
+```markdown
+# Validation Checks Performed
+
+## [Check Name]
+- Date: YYYY-MM-DD
+- Result: [Outcome]
+- Action: [If needed]
+```
+
+**status.yaml Template:**
+```yaml
+status: in_progress
+last_updated: YYYY-MM-DD
+blockers: []
+```
+
 **Actions:**
-- Create missing files
+- Create missing files with templates
 - Populate with placeholder sections
 - Note in report
 
@@ -431,8 +509,86 @@ print(f"Equivalent to d < {equivalence_bound}: {tost_p < 0.05}")
 
 ---
 
-#### Step 12: Section 4 - Model Selection
-**When:** Trajectory RQs, model uncertainty
+#### Step 12: Section 4 - Model Selection & Random Effects
+**When:** ANY RQ using LMM/GLMM
+
+**🔴 MANDATORY: Random Slopes Testing**
+
+**CRITICAL:** ALL modeling RQs MUST test random slopes. We CANNOT claim homogeneous effects if we never tested for heterogeneity.
+
+**Check current random effects structure:**
+```python
+# Search existing code for random effects specification
+# Look for patterns like: (1 | UID) vs (predictor | UID)
+```
+
+**If intercepts-only found:**
+```python
+# Create code/random_slopes_comparison.py
+import statsmodels.formula.api as smf
+import pandas as pd
+
+data = pd.read_csv('data/lmm_input.csv')
+
+# Fit intercepts-only (current model)
+model_intercepts = smf.mixedlm(
+    "Theta ~ Time + Group",
+    data=data,
+    groups=data['UID'],
+    re_formula="1"
+)
+result_intercepts = model_intercepts.fit(reml=False)
+
+# Fit intercepts + slopes (REQUIRED)
+model_slopes = smf.mixedlm(
+    "Theta ~ Time + Group",
+    data=data,
+    groups=data['UID'],
+    re_formula="Time"  # Random slope on time
+)
+result_slopes = model_slopes.fit(reml=False)
+
+# Compare via AIC
+print(f"Intercepts-only AIC: {result_intercepts.aic:.2f}")
+print(f"Intercepts+slopes AIC: {result_slopes.aic:.2f}")
+print(f"ΔAIC: {result_intercepts.aic - result_slopes.aic:.2f}")
+
+# Report random slope variance
+slope_var = result_slopes.cov_re.iloc[1,1]
+print(f"Random slope variance: {slope_var:.4f}")
+```
+
+**Run:** `poetry run python code/random_slopes_comparison.py`
+
+**Interpret results:**
+
+**Option A: Slopes improve fit (ΔAIC > 2)**
+- Random slope variance is non-zero
+- Individual differences confirmed
+- **ACTION:** Use slopes model going forward, report heterogeneity
+- **Document:** "Individual [forgetting rates/effects] vary (SD=X.XX)"
+
+**Option B: Slopes don't converge / overfit**
+- Model fails to converge or boundary warnings
+- Insufficient data for stable estimation (e.g., 4 timepoints)
+- **ACTION:** Keep intercepts-only BUT document attempt
+- **Document:** "Random slopes attempted, convergence failed with N=4 timepoints"
+
+**Option C: Slopes converge but don't improve fit (ΔAIC < 2)**
+- Random slope variance ≈ 0 (shrinkage to fixed effect)
+- AIC favors simpler model
+- **ACTION:** Keep intercepts-only
+- **Document:** "Random slopes tested, variance negligible (homogeneous effects confirmed)"
+
+**Circuit Breaker:**
+- If BOTH intercepts-only AND slopes produce acceptable models → Keep slopes (more conservative)
+- If random slopes NOT tested AND this is modeling RQ → **BLOCKER**
+
+**Document:** Add random effects comparison to validation.md
+
+---
+
+**Additional Model Selection (trajectory RQs):**
 
 **Check if needed:**
 - Trajectory RQ testing functional form?
@@ -712,6 +868,8 @@ if 'ConvergenceWarning' in model_output:
 #### Step 19: Update summary.md with All Findings
 **Purpose:** Integrate all new analyses
 
+**File location:** `results/summary.md`
+
 **Ensure ALL sections exist:**
 1. Statistical Findings
 2. Interpretation
@@ -735,12 +893,14 @@ if 'ConvergenceWarning' in model_output:
 - Power limitations
 
 **Circuit Breaker:**
-- If can't write to summary.md (permissions) -> `STEP ERROR`
+- If can't write to results/summary.md (permissions) -> `STEP ERROR`
 
 ---
 
 #### Step 20: Update validation.md with Checks Performed
 **Purpose:** Document all validation checks
+
+**File location:** `results/validation.md`
 
 **Format:**
 ```markdown
@@ -796,6 +956,7 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 - [ ] NULL findings have power + TOST
 
 ✅ **Methodological Soundness:**
+- [ ] 🔴 **Random slopes tested** (MANDATORY for modeling RQs)
 - [ ] Appropriate model (extended suite if trajectory?)
 - [ ] Sensitivity analyses (diff score reliability if calibration?)
 - [ ] No Lord's paradox
@@ -942,23 +1103,28 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 
 **Automatic BLOCKER scenarios:**
 
-1. **Difference score reliability < 0.70**
+1. **🔴 Random slopes NOT tested (modeling RQs)**
+   - Cannot claim homogeneous effects without testing
+   - **BLOCKER:** Must test intercepts-only vs intercepts+slopes
+   - Report with severity: CRITICAL
+
+2. **Difference score reliability < 0.70**
    - Need SEM approach (beyond agent scope)
    - `SCOPE ERROR: r_diff < 0.70, need SEM, not in scope`
 
-2. **GLMM changes NULL → SIGNIFICANT**
+3. **GLMM changes NULL → SIGNIFICANT**
    - Thesis narrative revision required (user task)
    - Report as BLOCKER in final report
 
-3. **Convergence failures unfixable**
+4. **Convergence failures unfixable**
    - Tried simplifying, still fails
    - `STEP ERROR: Convergence failure, tried fixes, still fails`
 
-4. **Missing upstream dependency**
+5. **Missing upstream dependency**
    - RQ depends on incomplete upstream RQ
    - `EXPECTATIONS ERROR: Need outputs from RQ X.Y.Z, but not complete`
 
-5. **Contradictory findings across RQs**
+6. **Contradictory findings across RQs**
    - Need user to reconcile
    - Report as BLOCKER
 
@@ -975,10 +1141,10 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 **After agent completes:**
 
 **In RQ folder:**
-- Standardized structure (code/, outputs/, results/, plots/)
-- Consistent naming
+- Standard structure (docs/, data/, code/, logs/, plots/, results/)
+- Consistent naming (step01_*.py not step1.py)
 - Current plots (not stale)
-- Complete summary.md, validation.md
+- Complete results/summary.md and results/validation.md
 
 **In report (to master):**
 - 1-2 page concise summary

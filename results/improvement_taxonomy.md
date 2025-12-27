@@ -115,12 +115,23 @@
 - [ ] Power law time ((Days + 1)^α)
 - [ ] Compare AIC/BIC across transformations
 
-### 4.4 Random Effects Structure
-- [ ] Test intercepts-only vs random slopes
+### 4.4 Random Effects Structure (🔴 MANDATORY FOR MODELING RQs)
+- [ ] 🔴 **Test intercepts-only vs random slopes** (NON-NEGOTIABLE)
 - [ ] Test correlated vs uncorrelated random effects
 - [ ] AIC/BIC model selection
 - [ ] Report variance components with CIs
 - [ ] Flag boundary warnings (variance near zero)
+
+**CRITICAL:** Cannot claim homogeneous effects without testing for heterogeneity.
+
+**Required for:** ALL RQs using LMM/GLMM with time or continuous predictors
+
+**Acceptable outcomes:**
+1. **Slopes improve fit (ΔAIC > 2)** → Use slopes model, report individual differences
+2. **Slopes don't converge** → Document attempt, explain why (e.g., 4 timepoints insufficient)
+3. **Slopes converge but don't improve (ΔAIC < 2)** → Keep intercepts, document negligible variance
+
+**NOT acceptable:** Never testing slopes at all
 
 ### 4.5 Non-Linear Effects
 - [ ] Test quadratic time terms (Time²)
