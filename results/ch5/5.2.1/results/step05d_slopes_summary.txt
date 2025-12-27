@@ -1,0 +1,31 @@
+============================================================
+RANDOM SLOPES TESTING SUMMARY
+============================================================
+
+Convergence:
+  Both structures converged: 10/10
+  Slopes failed to converge: 0/10
+
+Model Selection:
+  Slopes improve fit (ΔAIC > 2): 10/10
+  Intercepts-only preferred: 0/10
+
+Slope Variance:
+  Mean: 0.0304
+  Range: [0.0033, 0.0487]
+
+============================================================
+DETAILED RESULTS
+============================================================
+
+        model_name  aic_intercepts  aic_slopes  delta_aic  slopes_improve_fit  slope_variance  converged_intercepts  converged_slopes interpretation
+         Recip+Log     2589.201355 2575.014429  14.186926                True        0.048489                  True              True     SLOPES_WIN
+      PowerLaw_Log     2589.376052 2575.160354  14.215698                True        0.048530                  True              True     SLOPES_WIN
+      CubeRoot+Log     2589.523464 2575.526779  13.996685                True        0.048241                  True              True     SLOPES_WIN
+          Tanh+Log     2589.537815 2575.356734  14.181081                True        0.048503                  True              True     SLOPES_WIN
+    SquareRoot+Lin     2588.850084 2583.766059   5.084025                True        0.003327                  True              True     SLOPES_WIN
+           Lin+Log     2590.419705 2585.280530   5.139175                True        0.003334                  True              True     SLOPES_WIN
+           Exp+Log     2590.419705 2576.061862  14.357843                True        0.048731                  True              True     SLOPES_WIN
+         Recip+Lin     2589.197915 2584.114635   5.083281                True        0.003352                  True              True     SLOPES_WIN
+PowerLaw+Recip+Log     2591.125534 2576.972452  14.153082                True        0.048451                  True              True     SLOPES_WIN
+      PowerLaw_Lin     2589.487262 2584.402733   5.084530                True        0.003330                  True              True     SLOPES_WIN

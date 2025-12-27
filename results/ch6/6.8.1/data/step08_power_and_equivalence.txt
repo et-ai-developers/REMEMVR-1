@@ -1,0 +1,28 @@
+================================================================================
+POWER ANALYSIS & EQUIVALENCE TESTING - RQ 6.8.1
+================================================================================
+
+INTERACTION EFFECT:
+  β = -0.0088
+  SE = 0.0131
+  p = 0.5015
+  N = 800
+
+POST-HOC POWER:
+  Power for observed effect: 0.103
+
+POWER FOR MEANINGFUL EFFECTS:
+  Small (β=0.05): 0.968
+  Medium (β=0.12): 1.000
+  Large (β=0.20): 1.000
+
+EQUIVALENCE TESTING (TOST):
+  Equivalence bound: β < 0.05
+  TOST p-value: 0.0011
+  90% CI: [-0.0306, 0.0130]
+  Result: EQUIVALENCE ESTABLISHED (TRUE NULL)
+
+SAMPLE SIZE FOR 80% POWER:
+  To detect small effect (β=0.05): N ≈ 424
+  Current N: 800
+  Assessment: ADEQUATELY POWERED for small effects

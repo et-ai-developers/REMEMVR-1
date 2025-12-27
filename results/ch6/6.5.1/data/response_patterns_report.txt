@@ -1,0 +1,43 @@
+================================================================================
+RESPONSE PATTERN ANALYSIS - RQ 6.5.1
+Taxonomy Section 8.3 + validation.md Section 1.4
+================================================================================
+
+PURPOSE:
+Analyze confidence rating patterns to detect response biases that may
+limit confidence-accuracy calibration quality.
+
+--------------------------------------------------------------------------------
+SUMMARY STATISTICS
+--------------------------------------------------------------------------------
+
+N participants: 100
+N TC_* items: 72
+
+Full scale usage (all 5 Likert values): 0.0%
+Extremes only (0 and 1.0 only): 0.0%
+Mean rating SD: 0.299
+Median rating SD: 0.312
+Restricted range (SD < 0.10): 0.0%
+
+--------------------------------------------------------------------------------
+INTERPRETATION
+--------------------------------------------------------------------------------
+
+⚠️ 1 RESPONSE PATTERN ISSUES DETECTED:
+
+1. Low full scale usage
+
+IMPLICATIONS:
+Response biases may limit confidence-accuracy calibration quality.
+Consider:
+  - Participant training on scale usage
+  - Alternative confidence scales (e.g., 9-point, continuous slider)
+  - Post-hoc adjustment for response styles
+
+--------------------------------------------------------------------------------
+DATA FILES
+--------------------------------------------------------------------------------
+
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/data/response_patterns_by_participant.csv (participant-level)
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/data/response_patterns_summary.csv (summary statistics)

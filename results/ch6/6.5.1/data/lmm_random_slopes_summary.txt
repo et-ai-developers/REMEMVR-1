@@ -1,0 +1,56 @@
+================================================================================
+LMM WITH RANDOM SLOPES - RQ 6.5.1
+================================================================================
+
+Formula: theta ~ C(congruence) * log_TSVR
+Random effects: (1 + log_TSVR | UID)
+
+Converged: True
+AIC: 399.07
+BIC: 449.98
+Log-Likelihood: -189.5372
+
+--------------------------------------------------------------------------------
+FIXED EFFECTS
+--------------------------------------------------------------------------------
+
+                                        Coef. Std.Err.  ...  [0.025  0.975]
+Intercept                              -0.341    0.054  ...  -0.447  -0.234
+C(congruence)[T.Congruent]             -0.019    0.036  ...  -0.089   0.052
+C(congruence)[T.Incongruent]           -0.004    0.036  ...  -0.074   0.066
+log_TSVR                               -0.123    0.011  ...  -0.144  -0.103
+C(congruence)[T.Congruent]:log_TSVR    -0.005    0.010  ...  -0.024   0.013
+C(congruence)[T.Incongruent]:log_TSVR  -0.011    0.010  ...  -0.030   0.008
+Group Var                               0.232    0.168  ...                
+Group x log_TSVR Cov                   -0.011    0.022  ...                
+log_TSVR Var                            0.007    0.005  ...                
+
+[9 rows x 6 columns]
+
+--------------------------------------------------------------------------------
+RANDOM EFFECTS
+--------------------------------------------------------------------------------
+
+Variance-Covariance Matrix:
+             Group  log_TSVR
+Group     0.232050 -0.010961
+log_TSVR -0.010961  0.006643
+
+Intercept variance: 0.2320
+Slope variance: 0.0066
+Slope SD: 0.0815
+Intercept-Slope correlation: -0.279
+
+--------------------------------------------------------------------------------
+INTERPRETATION
+--------------------------------------------------------------------------------
+
+Conclusion: NULL interaction (robust)
+
+✅ NULL FINDING ROBUST:
+Schema × time interaction remains NON-SIGNIFICANT even with
+random slopes. Original conclusion (intercepts-only) was correct,
+but now has stronger empirical support (tested for heterogeneity).
+
+RECOMMENDATION: Document random slopes test in validation.md.
+Original results valid, no need to regenerate.

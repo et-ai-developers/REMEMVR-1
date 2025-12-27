@@ -157,9 +157,12 @@ results/chX/X.Y.Z/
 **For each section, ask:**
 
 **Section 1 (GLMM Validation):**
-- Does RQ test group intercepts/baselines (Age, Domain, Paradigm, Schema)?
-- NULL or marginal intercept findings (p > 0.04)?
-- Priority: HIGH if intercepts, SKIP if slopes only
+- 🔴 **Check glmm_candidates.md:** Is THIS RQ listed as HIGH/MEDIUM priority?
+- **If listed:** GLMM MANDATORY (Step 9 will implement)
+- **If not listed:** Evaluate manually in Step 9A.1
+  - Does RQ test INTERCEPT hypothesis (baseline group differences)?
+  - NULL or marginal finding (p > 0.04)?
+- Priority: 🔴 **BLOCKER if listed in glmm_candidates.md**, SKIP if slope/interaction only
 
 **Section 2 (Statistical Robustness):**
 - Marginal findings (0.03 < p < 0.07)?
@@ -349,50 +352,224 @@ blockers: []
 
 ---
 
-#### Step 9: Section 1 - GLMM Validation
-**When:** RQ tests group intercepts (Age, Domain, Paradigm, Schema)
+#### Step 9: Section 1 - GLMM Validation (🔴 MANDATORY WHEN APPLICABLE)
+**When:** RQ tests **INTERCEPT hypotheses** (baseline group differences)
 
-**Check if needed:**
-- NULL or marginal intercept findings?
-- Flagged in glmm_candidates.md?
-- Skip if slope/interaction only
+**🔴 CRITICAL:** GLMM validation is MANDATORY for RQs testing intercept-only hypotheses where IRT→LMM aggregation may miss effects.
 
-**If needed:**
+---
+
+### Step 9A: Check If RQ in glmm_candidates.md
+
+**FIRST: Cross-reference THIS RQ against glmm_candidates.md:**
+
+1. **Read results/glmm_candidates.md** (already read in Step 2)
+2. **Search for current RQ number** (e.g., "6.5.1", "5.4.1")
+3. **Check priority level:**
+   - **HIGH priority** → GLMM MANDATORY (proceed to Step 9B)
+   - **MEDIUM priority** → GLMM MANDATORY (proceed to Step 9B)
+   - **LOW priority** or **EXCLUDED** → Skip GLMM (proceed to Step 10)
+   - **Not listed** → Evaluate manually (Step 9A.1)
+
+**If RQ listed as HIGH/MEDIUM priority:**
+- 🔴 **GLMM VALIDATION MANDATORY**
+- 🔴 **STOP** - Do NOT skip
+- 🔴 Proceed to Step 9B (implement GLMM)
+
+---
+
+### Step 9A.1: Manual Evaluation (If RQ Not in glmm_candidates.md)
+
+**If RQ not explicitly listed, determine if GLMM needed:**
+
+**GLMM NEEDED if:**
+1. **Tests intercept-only hypothesis** (baseline group differences without trajectories):
+   - Age/Domain/Paradigm/Schema **main effect** (NOT × Time interaction)
+   - "What vs Where baseline at T1"
+   - "Congruent vs Incongruent baseline memory strength"
+   - "Older vs Younger baseline accuracy"
+
+2. **Finding is NULL or marginal** (p > 0.04 and p < 0.13):
+   - IRT→LMM p=0.06-0.12 (marginal, might be significant with GLMM)
+   - IRT→LMM p > 0.13 (null, GLMM may reveal hidden effect)
+
+**GLMM NOT NEEDED if:**
+1. **Tests slope/interaction hypothesis:**
+   - Age × Time, Domain × Time, Paradigm × Time
+   - Trajectory shape differences
+   - From glmm.md: "Slopes/interactions ALWAYS agree between IRT→LMM and GLMM"
+
+2. **Finding is highly significant** (p < 0.01):
+   - GLMM will likely confirm (not change conclusion)
+
+3. **Correlation/prediction RQ:**
+   - Not testing group comparisons
+
+**Decision:**
+- If GLMM NEEDED → Proceed to Step 9B
+- If GLMM NOT NEEDED → Skip to Step 10
+- If UNCERTAIN → `CLARITY ERROR: Unclear if intercept vs slope hypothesis`
+
+---
+
+### Step 9B: Implement GLMM Validation
+
+**🔴 BLOCKER RESOLUTION:** Create and run GLMM validation script
+
+**Determine outcome type:**
+- Binary (accuracy: Correct/Incorrect) → Use binomial GLMM
+- Continuous (confidence ratings 1-5) → Use Gaussian GLMM
+- **Circuit Breaker:** If unclear → `CLARITY ERROR: Don't know if binary or continuous outcome`
+
+**Implementation:**
+
 ```python
 # Create code/glmm_validation.py
 import statsmodels.formula.api as smf
+import statsmodels.api as sm
 import pandas as pd
+import numpy as np
 
-# Load item-level data
-data = pd.read_csv('outputs/item_level_data.csv')
+# Load item-level data from master.xlsx or intermediates
+# CRITICAL: Use RAW item-level responses, NOT aggregated theta
+data = pd.read_csv('data/item_level_responses.csv')
 
-# For binary outcomes (accuracy)
-model = smf.mixedlm(
-    "Correct ~ Group + Time + Group:Time + (1|UID) + (1|Item)",
-    data=data,
-    groups=data['UID'],
-    family=sm.families.Binomial()
-)
+# Identify group variable from concept.md/plan.md
+# Examples: 'Domain' (What/Where/When), 'Schema' (Congruent/Incongruent), 'Age' (continuous)
 
-# For continuous outcomes (confidence)
-model = smf.mixedlm(
-    "Rating ~ Group + Time + Group:Time + (1|UID) + (1|Item)",
-    data=data,
-    groups=data['UID']
-)
+# For binary outcomes (accuracy: 0/1)
+if outcome_type == 'binary':
+    model_glmm = smf.mixedlm(
+        "Correct ~ Group + Time + Group:Time + (1|UID) + (1|Item)",
+        data=data,
+        groups=data['UID'],
+        family=sm.families.Binomial()
+    )
 
-result = model.fit()
-print(result.summary())
+# For continuous outcomes (confidence ratings)
+elif outcome_type == 'continuous':
+    model_glmm = smf.mixedlm(
+        "Rating ~ Group + Time + Group:Time + (1|UID) + (1|Item)",
+        data=data,
+        groups=data['UID']
+        # No family= for Gaussian (default)
+    )
+
+result_glmm = model_glmm.fit()
+print(result_glmm.summary())
+
+# Extract intercept effect p-value
+group_effect_p = result_glmm.pvalues['Group']
+print(f"\nGLMM Group Intercept p-value: {group_effect_p:.3f}")
+
+# Compare to IRT→LMM p-value (from summary.md)
+# Read from summary.md or validation.md
+irt_lmm_p = 0.548  # Example from RQ 5.4.1
+
+print(f"IRT→LMM p-value: {irt_lmm_p:.3f}")
+print(f"GLMM p-value: {group_effect_p:.3f}")
+print(f"Change: {irt_lmm_p:.3f} → {group_effect_p:.3f}")
+
+# Interpret
+if irt_lmm_p > 0.05 and group_effect_p < 0.05:
+    print("⚠️ CRITICAL: NULL → SIGNIFICANT (GLMM reveals hidden effect)")
+    print("ACTION: Thesis narrative revision required")
+elif irt_lmm_p > 0.05 and group_effect_p < 0.10:
+    print("⚠️ MODERATE: NULL → MARGINAL (GLMM strengthens effect)")
+else:
+    print("✅ Finding robust across methods")
+
+# Save results
+comparison = pd.DataFrame({
+    'Method': ['IRT→LMM', 'GLMM'],
+    'p_value': [irt_lmm_p, group_effect_p],
+    'Significant': [irt_lmm_p < 0.05, group_effect_p < 0.05]
+})
+comparison.to_csv('data/glmm_comparison.csv', index=False)
 ```
 
-**Run script:** `poetry run python results/chX/X.Y.Z/code/glmm_validation.py`
-
-**Document:** Add GLMM results to summary.md Section 1
+**Run:** `poetry run python code/glmm_validation.py`
 
 **Circuit Breaker:**
-- If item_level_data.csv missing -> `EXPECTATIONS ERROR`
-- If can't import statsmodels -> `TOOL ERROR`
-- If unclear binary vs continuous -> `CLARITY ERROR`
+- If item_level_responses.csv missing → `EXPECTATIONS ERROR: Need item-level data, but file missing`
+- If can't import statsmodels → `TOOL ERROR: statsmodels import failed`
+- If GLMM fails to converge → Try simplifying (remove interaction), report in validation.md
+
+---
+
+### Step 9C: Interpret GLMM Results (3 Outcomes)
+
+**Outcome A: Finding STRENGTHENED (p decreases)**
+- IRT→LMM p=0.061 → GLMM p=0.014 (marginal → significant)
+- **Interpretation:** GLMM's higher power detected real effect
+- **ACTION:** Update summary.md with GLMM p-value, note method comparison
+- **DOCUMENT:** "GLMM validation (Section 1): p=0.014 vs IRT→LMM p=0.061, effect confirmed"
+
+**Outcome B: Finding ROBUST (p similar)**
+- IRT→LMM p=0.032 → GLMM p=0.028 (both significant)
+- **Interpretation:** Finding robust across statistical approaches
+- **ACTION:** Document GLMM confirmation in validation.md
+- **DOCUMENT:** "GLMM validation (Section 1): Confirmed IRT→LMM findings (p=0.028 vs 0.032)"
+
+**Outcome C: Finding CHANGED (NULL → SIGNIFICANT) 🔴 BLOCKER**
+- IRT→LMM p=0.548 → GLMM p=0.011 (null → significant)
+- **Interpretation:** IRT aggregation masked baseline effect
+- **ACTION:** **BLOCKER** - Thesis narrative revision required (user task)
+- **REPORT IN FINAL REPORT:**
+  ```
+  🔴 BLOCKER: GLMM Reveals Hidden Effect
+
+  **Severity:** HIGH (affects thesis claims)
+  **Issue:** IRT→LMM showed null (p=0.548), GLMM shows significant (p=0.011)
+  **Impact:** Changes conclusion from "no effect" to "significant effect"
+  **Example:** RQ 5.4.1 schema effect null → significant undermines "quadruple null" narrative
+  **Action Required:** User must decide:
+    - Option A: Report GLMM finding, revise thesis narrative
+    - Option B: Document as methodological limitation
+    - Option C: Run additional robustness checks
+  ```
+- **STOP:** Do NOT proceed to PLATINUM certification
+- **Generate report with BLOCKER**
+
+---
+
+### Step 9D: Document GLMM Validation
+
+**Update summary.md Section 1 (Statistical Findings):**
+```markdown
+### GLMM Validation
+
+Item-level GLMM analysis with N=28,800 observations (vs IRT→LMM N=400):
+- IRT→LMM: Group effect p=0.061 (marginal)
+- GLMM: Group effect p=0.014 (significant)
+- **Conclusion:** Effect confirmed with higher statistical power
+```
+
+**Update validation.md:**
+```markdown
+## GLMM Validation (Section 1)
+- Date: 2025-12-27
+- Method: Binomial GLMM, item-level data (N=28,800)
+- IRT→LMM p-value: 0.061
+- GLMM p-value: 0.014
+- Outcome: Effect strengthened (marginal → significant)
+- File: code/glmm_validation.py, data/glmm_comparison.csv
+```
+
+**If Outcome C (NULL → SIGNIFICANT):**
+- Add to summary.md Section 3 (Limitations):
+  ```markdown
+  ### Methodological Note
+
+  IRT→LMM aggregation approach (N=400 observations) showed null effect (p=0.548).
+  Item-level GLMM analysis (N=28,800 observations) revealed significant effect (p=0.011).
+  This reflects IRT aggregation's reduced power for intercept detection (see glmm.md).
+  ```
+
+---
+
+**🔴 BLOCKER RESOLVED** (if Outcome A or B)
+**🔴 BLOCKER CREATED** (if Outcome C - report to user)
 
 ---
 

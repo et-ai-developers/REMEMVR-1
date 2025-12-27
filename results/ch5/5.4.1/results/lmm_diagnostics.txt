@@ -1,0 +1,33 @@
+======================================================================
+LMM RESIDUAL DIAGNOSTICS REPORT
+======================================================================
+
+Date: 2025-12-27
+Model: step05_lmm_fitted_model.pkl
+N observations: 1200
+AIC: 2652.57
+
+DIAGNOSTIC PLOTS
+----------------------------------------
+1. Q-Q Plot: qq_plot.png
+2. Residuals vs Fitted: residuals_vs_fitted.png
+3. Scale-Location: scale_location.png
+4. Residuals Histogram: residuals_histogram.png
+
+STATISTICAL TESTS
+----------------------------------------
+Shapiro-Wilk (normality): W=0.9980, p=0.149104
+Breusch-Pagan (homoscedasticity): LM=0.2301, p=0.631441
+
+Outliers (|std resid| > 3): 1 (0.08%)
+
+ASSESSMENT
+----------------------------------------
+ALL CHECKS PASSED ✓
+LMM assumptions are met.
+
+ACTION REQUIRED
+----------------------------------------
+1. Add diagnostic plots to plots/diagnostics/
+2. Update validation.md with diagnostic results
+3. Document any violations in summary.md Limitations

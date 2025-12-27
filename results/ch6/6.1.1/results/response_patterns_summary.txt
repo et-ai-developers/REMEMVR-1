@@ -1,0 +1,32 @@
+RESPONSE PATTERN ANALYSIS SUMMARY
+================================================================================
+
+RQ 6.1.1 Confidence Rating Response Patterns
+Analysis Date: 2025-12-27
+
+Observation-Level Patterns (N=400):
+  Full scale usage:     75.5%
+  Extremes only:         1.0%
+  Mean rating SD:       0.28
+  Mean categories:       4.7 / 5
+
+Response Category Distribution:
+   0.2:    9267 ( 32.2%)
+   0.4:    5173 ( 18.0%)
+   0.6:    3682 ( 12.8%)
+   0.8:    2434 (  8.5%)
+   1.0:    8244 ( 28.6%)
+
+  Extremes (0.2 + 1.0):   60.8%
+  Middle (0.4-0.8):       39.2%
+
+Participant-Level Classification (N=100):
+  Consistent full scale:   66 ( 66.0%)
+  Consistent extreme:       0 (  0.0%)
+  Moderate/mixed:          34 ( 34.0%)
+
+Interpretation:
+  → BIMODAL response pattern (binary-like confidence)
+  → May explain GRM threshold ordering violations
+  ✓  Acceptable extreme response style (<30%)
+  ✓  Good full scale usage

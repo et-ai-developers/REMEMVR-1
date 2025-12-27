@@ -1,0 +1,36 @@
+================================================================================
+RANDOM SLOPES COMPARISON - DIAGNOSTICS REPORT
+RQ 6.3.1: Domain Confidence Trajectories
+================================================================================
+
+QUESTION: Do individual forgetting rates vary (heterogeneous effects)?
+OR are all participants declining at similar rates (homogeneous effects)?
+
+METHOD: Compare intercepts-only vs intercepts+slopes LMM via AIC
+  - Intercepts-only: Individual baselines vary, but same decline rate for all
+  - Intercepts+slopes: Both baselines AND decline rates vary by individual
+
+--------------------------------------------------------------------------------
+MODEL COMPARISON RESULTS
+--------------------------------------------------------------------------------
+
+            model                      formula random_effects  converged        AIC        BIC  log_likelihood  n_params  random_intercept_var  random_slope_var  delta_AIC
+  Intercepts-only theta ~ C(domain) * log_TSVR             ~1       True 506.185664 546.906278     -245.092832         7              0.191615               NaN 188.762624
+Intercepts+slopes theta ~ C(domain) * log_TSVR      ~log_TSVR       True 317.423040 368.323809     -148.711520         9                   NaN          0.006036   0.000000
+
+--------------------------------------------------------------------------------
+DECISION: SLOPES IMPROVE FIT - Individual differences confirmed
+--------------------------------------------------------------------------------
+
+Random slopes model preferred (ΔAIC > 2). Individual forgetting rates vary.
+
+IMPLICATION FOR THESIS:
+  - Confidence decline rates are HETEROGENEOUS across participants
+  - Some individuals forget faster, others slower
+  - Domain × Time interaction reflects AVERAGE effect, but individual variation exists
+  - Future work: Cluster participants by decline trajectories
+
+REFERENCE:
+  Per rq_platinum agent protocol (Section 4.4), testing random slopes is
+  MANDATORY for modeling RQs. We cannot claim homogeneous effects without
+  testing for heterogeneity. This comparison fulfills that requirement.

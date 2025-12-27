@@ -1,0 +1,17 @@
+================================================================================
+CONFIDENCE RESPONSE PATTERN SUMMARY - RQ 6.8.1
+================================================================================
+
+Total participants: 400
+
+SCALE USAGE:
+  Full scale (all 5 values): 0 (0.0%)
+  Extremes only (0 and 1): 0 (0.0%)
+
+RATING VARIABILITY:
+  Mean SD: 0.251
+  Median SD: 0.273
+  Restricted range (SD < 0.20): 101 (25.2%)
+
+
+✅ PLATINUM REQUIREMENT MET: Response patterns documented

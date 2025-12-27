@@ -1,0 +1,30 @@
+================================================================================
+PLATINUM FINALIZATION: Confidence Response Patterns (Section 1.4)
+================================================================================
+
+[LOAD] Loading raw confidence ratings...
+[LOADED] 400 rows (composite_IDs)
+[INFO] 72 TC_* confidence items identified
+[INFO] 100 unique participants
+
+[ANALYSIS] Computing participant-level response patterns...
+
+[SUMMARY] Aggregate response pattern statistics...
+[RESULT] Full scale usage (all 5 values): 0/100 (0.0%)
+[RESULT] Extremes only (0 and 1): 0/100 (0.0%)
+[RESULT] Mean rating SD: 0.292 (median: 0.299)
+[RESULT] Mean rating: 0.637
+[RESULT] Median unique values per participant: 4
+
+[INTERPRETATION] GRM assumption validation...
+[WARNING] Only 0.0% of participants use full 5-point scale
+[WARNING] GRM assumes ordinal scale usage - restricted range may violate assumptions
+[PASS] Only 0.0% use extremes only (acceptable)
+[PASS] Mean rating SD = 0.292 (acceptable variability)
+
+[SAVE] Saving response pattern results...
+[SAVED] step08_response_patterns.csv (100 participants)
+[SAVED] step08_response_patterns_summary.txt
+
+[SUCCESS] Confidence response patterns documented
+[RECOMMENDATION] GRM assumptions moderately satisfied

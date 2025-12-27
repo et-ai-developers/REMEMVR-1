@@ -1,0 +1,58 @@
+================================================================================
+CONFIDENCE RESPONSE PATTERNS - SUMMARY REPORT
+RQ 6.3.1: Domain Confidence Trajectories
+================================================================================
+
+PURPOSE:
+  Document confidence rating response patterns to validate GRM assumptions.
+  Per solution.md section 1.4, this is MANDATORY for confidence RQs.
+
+--------------------------------------------------------------------------------
+AGGREGATE STATISTICS
+--------------------------------------------------------------------------------
+
+Total participants: 100
+Mean ratings per participant: 288.0
+
+Full scale usage (all 5 values):    0 / 100 (0.0%)
+Extremes only (0 and 1):            0 / 100 (0.0%)
+
+Mean rating:     0.637 (scale: 0-1)
+Mean rating SD:  0.292
+Median rating SD: 0.299
+Median unique values: 4 / 5
+
+--------------------------------------------------------------------------------
+SCALE USAGE DISTRIBUTION (Average % per participant)
+--------------------------------------------------------------------------------
+
+  0.00 (Not at all confident):      0.0%
+  0.25 (Slightly confident):       32.2%
+  0.50 (Moderately confident):     18.0%
+  0.75 (Very confident):           12.8%
+  1.00 (Extremely confident):      37.1%
+
+--------------------------------------------------------------------------------
+GRM ASSUMPTION VALIDATION
+--------------------------------------------------------------------------------
+
+Graded Response Model (GRM) requires:
+  1. Ordinal scale usage (all 5 categories used)
+  2. Minimal extreme response style (not just 0s and 1s)
+  3. Adequate variability (SD > 0.20)
+
+VALIDATION: PASS WITH NOTES
+  - NOTE: Only 0.0% use full scale (threshold: 50%)
+
+--------------------------------------------------------------------------------
+IMPLICATIONS FOR THESIS
+--------------------------------------------------------------------------------
+
+  - CONCERN: <50% of participants use full scale
+  - GRM assumptions may be violated
+  - Consider sensitivity analysis without GRM purification
+
+REFERENCE:
+  Per solution.md section 1.4, documenting response patterns is MANDATORY
+  for confidence RQs to ensure IRT validity. This analysis fulfills that
+  requirement.

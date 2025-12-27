@@ -1,0 +1,50 @@
+================================================================================
+LMM DIAGNOSTICS REPORT - RQ 6.5.1
+Taxonomy Section 5.1
+================================================================================
+
+MODEL SPECIFICATION:
+  Formula: theta ~ C(congruence) * log_TSVR
+  Random effects: (1 + log_TSVR | UID)
+  Converged: True
+  N observations: 1200
+
+--------------------------------------------------------------------------------
+DIAGNOSTIC CHECKS
+--------------------------------------------------------------------------------
+
+1. RESIDUAL NORMALITY:
+   Shapiro-Wilk test: W = 0.9952, p = 0.0007
+   Result: REJECTED
+   NOTE: LMM is robust to moderate non-normality with large N.
+
+2. HOMOSCEDASTICITY:
+   Breusch-Pagan test: LM = 33.2598, p = 0.0000
+   Result: REJECTED
+   NOTE: Consider robust standard errors if heteroscedasticity severe.
+
+3. INFLUENTIAL OBSERVATIONS:
+   Outliers (|std resid| > 3): 5 / 1200 (0.42%)
+   Result: OUTLIERS DETECTED
+   NOTE: Outliers may be legitimate extreme values, not errors.
+
+--------------------------------------------------------------------------------
+PLOTS CREATED
+--------------------------------------------------------------------------------
+
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/plots/diagnostics/qq_plot_residuals.png
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/plots/diagnostics/residuals_histogram.png
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/plots/diagnostics/residuals_vs_fitted.png
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/plots/diagnostics/scale_location.png
+  - /home/etai/projects/REMEMVR/results/ch6/6.5.1/plots/diagnostics/standardized_residuals.png
+
+--------------------------------------------------------------------------------
+OVERALL ASSESSMENT
+--------------------------------------------------------------------------------
+
+⚠️ 2 ISSUES DETECTED:
+  - Non-normal residuals
+  - Heteroscedasticity
+
+NOTE: LMM is generally robust to moderate violations with N = 100+.
+Consider sensitivity analyses if violations severe.

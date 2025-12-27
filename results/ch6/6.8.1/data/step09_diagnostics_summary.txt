@@ -1,0 +1,20 @@
+================================================================================
+LMM DIAGNOSTIC CHECKS - RQ 6.8.1
+================================================================================
+
+RESIDUAL NORMALITY:
+  Shapiro-Wilk p = 0.0730
+  Kolmogorov-Smirnov p = 0.7131
+  Result: NORMAL
+
+HOMOSCEDASTICITY:
+  Spearman correlation p = 0.1588
+  Levene's test p = 0.0181
+  Result: Heteroscedasticity detected (consider robust SE)
+
+INFLUENTIAL OBSERVATIONS:
+  N outliers (|std_resid| > 3): 1
+  Percentage: 0.1%
+  Result: Some outliers present (inspect if >5%)
+
+✅ PLATINUM REQUIREMENT MET: LMM diagnostics completed

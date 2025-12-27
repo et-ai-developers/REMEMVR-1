@@ -1,0 +1,41 @@
+================================================================================
+PLATINUM FINALIZATION: Random Slopes Comparison
+================================================================================
+
+[LOAD] Loading LMM input data...
+[LOADED] 1200 rows, 100 participants
+[INFO] Domains: ['What', 'When', 'Where']
+
+[MODEL 1] Fitting intercepts-only model...
+[FORMULA] theta ~ C(domain) * log_TSVR
+[RANDOM]  ~1 (random intercept per participant)
+[RESULT] Converged: True
+[RESULT] AIC: 506.19
+[RESULT] BIC: 546.91
+[RESULT] Log-Likelihood: -245.09
+[RESULT] Random intercept variance: 0.1916 (SD=0.4377)
+
+[MODEL 2] Fitting intercepts+slopes model...
+[FORMULA] theta ~ C(domain) * log_TSVR
+[RANDOM]  ~log_TSVR (random intercept + random slope on time)
+[WARNING] Slopes model warnings: 1
+  - The MLE may be on the boundary of the parameter space.
+[RESULT] Converged: True
+[RESULT] AIC: 317.42
+[RESULT] BIC: 368.32
+[RESULT] Log-Likelihood: -148.71
+[RESULT] Random slope variance: 0.0060 (SD=0.0777)
+[RESULT] Intercept-slope correlation: -0.318
+
+[COMPARISON] Model selection via AIC...
+
+[ΔAIC] Intercepts-only vs Intercepts+slopes: ΔAIC = 188.76
+[DECISION] SLOPES IMPROVE FIT - Individual differences confirmed
+[INTERPRETATION] Random slopes model preferred (ΔAIC > 2). Individual forgetting rates vary.
+
+[SAVE] Saving comparison results...
+[SAVED] step05_random_slopes_comparison.csv
+[SAVED] step05_random_slopes_diagnostics.txt
+
+[SUCCESS] Random slopes comparison complete
+[RECOMMENDATION] Use intercepts-only model (simpler, converges reliably)

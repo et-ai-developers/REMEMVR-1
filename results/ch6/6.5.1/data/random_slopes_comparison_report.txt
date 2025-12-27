@@ -1,0 +1,58 @@
+================================================================================
+RANDOM SLOPES COMPARISON - RQ 6.5.1
+Taxonomy Section 4.4 MANDATORY CHECK
+================================================================================
+
+RESEARCH QUESTION:
+Do schema congruence groups (Common/Congruent/Incongruent) show different
+confidence decline patterns across 6-day retention interval?
+
+NULL HYPOTHESIS (Random Slopes):
+All participants have identical confidence decline rates (homogeneous slopes).
+Random slope variance = 0.
+
+ALTERNATIVE HYPOTHESIS (Random Slopes):
+Participants differ in confidence decline rates (heterogeneous slopes).
+Random slope variance > 0.
+
+--------------------------------------------------------------------------------
+MODEL COMPARISON RESULTS
+--------------------------------------------------------------------------------
+
+Intercepts-only:
+  AIC: 598.21
+  Intercept variance: 0.2311
+  Converged: TRUE
+
+Intercepts+slopes:
+  AIC: 399.07
+  Slope variance: 0.0066
+  Slope SD: 0.0815
+  Converged: TRUE
+
+--------------------------------------------------------------------------------
+DECISION
+--------------------------------------------------------------------------------
+
+Outcome: Option A: Slopes improve fit
+Recommendation: Use slopes model
+
+ΔAIC (intercepts - slopes): 199.14
+
+Slopes model improves fit (ΔAIC > 2).
+Random slope variance is non-zero, indicating individual differences
+in confidence decline rates across participants.
+
+INTERPRETATION: Participants do NOT show homogeneous forgetting.
+Some maintain confidence longer than others.
+
+--------------------------------------------------------------------------------
+TAXONOMY SECTION 4.4 COMPLIANCE
+--------------------------------------------------------------------------------
+
+✅ Random slopes TESTED (no longer a BLOCKER)
+✅ Comparison documented with AIC
+✅ Variance components reported
+
+MANDATORY CHECK COMPLETE.
+Can now claim homogeneous/heterogeneous effects based on empirical test.

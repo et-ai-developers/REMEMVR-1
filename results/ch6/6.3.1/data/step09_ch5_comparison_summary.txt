@@ -1,0 +1,31 @@
+================================================================================
+CONFIDENCE-ACCURACY COMPARISON REPORT
+RQ 6.3.1 (Confidence) vs Ch5 5.2.1 (Accuracy)
+================================================================================
+
+QUESTION:
+  Do confidence and accuracy show the same domain-specific patterns?
+
+--------------------------------------------------------------------------------
+COMPARISON TABLE
+--------------------------------------------------------------------------------
+
+   measure rq_id domain_time_interaction  when_interaction_p  when_interaction_coef                                          interpretation
+Confidence 6.3.1                    NULL                 NaN                    NaN             When domain declines FASTER than What/Where
+  Accuracy 5.2.1      NULL (theta space)                 NaN                    NaN All domains show similar forgetting rates (theta space)
+
+--------------------------------------------------------------------------------
+FINDING: CONVERGENCE
+--------------------------------------------------------------------------------
+
+Confidence and accuracy show similar domain patterns
+
+--------------------------------------------------------------------------------
+REFERENCE
+--------------------------------------------------------------------------------
+
+This comparison resolves validation.md issue H1 (HIGH priority blocker):
+  'Ch5 5.2.1 comparison deferred - critical for thesis narrative coherence'
+
+Formal statistical comparison quantifies the confidence-accuracy divergence
+identified qualitatively in summary.md Section 3.

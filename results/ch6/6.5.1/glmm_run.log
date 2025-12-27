@@ -1,0 +1,70 @@
+================================================================================
+GLMM VALIDATION: RQ 6.5.1 - Schema Congruence Baseline Effects
+================================================================================
+
+[1] Loading item-level IRT input data...
+   Loaded 400 participant-test observations
+   Loaded 72 items with factor assignments
+   Loaded TSVR mapping for 400 observations
+
+[2] Reshaping data to item-level long format...
+   Item-level data shape: 28800 item responses
+   Unique participants: 100
+   Unique items: 72
+   Schema distribution:
+     Common: 9600 (33.3%)
+     Congruent: 9600 (33.3%)
+     Incongruent: 9600 (33.3%)
+
+[3] Creating time transformations...
+   Time range: 1.0 to 246.2 hours
+   log(TSVR) range: 0.00 to 5.51
+
+[4] Fitting GLMM with schema intercept effects...
+   Formula: Response ~ Schema_Congruent + Schema_Incongruent + log_TSVR +              Schema_Congruent:log_TSVR + Schema_Incongruent:log_TSVR
+   Random effects: (1 | UID) participant intercepts + (1 | Item) item intercepts
+   Family: Gaussian (continuous approximation of ordinal 0-4)
+   N observations: 28800
+
+   Fitting GLMM (this may take 2-3 minutes with ~28,000 observations)...
+   GLMM fit complete!
+
+[5] Extracting schema intercept effects...
+
+Effect                         IRT→LMM p       GLMM p          GLMM β         
+===========================================================================
+Congruent vs Common:           0.660           0.003           0.025          
+Incongruent vs Common:         0.921           0.000           -0.053         
+
+[6] Interpretation...
+
+   ⚠️ CRITICAL: Significance status CHANGED with GLMM
+      Congruent: IRT→LMM p=0.660 → GLMM p=0.003
+      Incongruent: IRT→LMM p=0.921 → GLMM p=0.000
+      ACTION: Thesis narrative revision may be required
+
+   Note: P-values DECREASED (stronger evidence), but still NULL:
+      Congruent: p 0.660 → 0.003
+      Incongruent: p 0.921 → 0.000
+
+[7] Saving GLMM validation results...
+   Saved: data/glmm_comparison.csv
+   Saved: data/glmm_summary.txt
+
+================================================================================
+GLMM VALIDATION COMPLETE
+================================================================================
+
+Observations: 28800 item-level responses
+Participants: 100
+Items: 72
+
+Outcome:
+   ⚠️ SIGNIFICANCE CHANGED - review comparison table
+   ⚠️ Thesis narrative may require revision
+
+Files created:
+   - data/glmm_comparison.csv
+   - data/glmm_summary.txt
+
+================================================================================

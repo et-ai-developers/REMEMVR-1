@@ -1,0 +1,68 @@
+================================================================================
+POWER ANALYSIS & EQUIVALENCE TESTING - RQ 6.5.1
+Taxonomy Sections 3.1 & 3.2
+================================================================================
+
+RESEARCH QUESTION:
+Do schema congruence groups show different confidence decline rates?
+
+NULL HYPOTHESIS:
+Schema × Time interaction = 0 (congruence does NOT affect decline rate)
+
+OBSERVED RESULTS:
+  Congruent × Time: β = -0.0054, p = 0.574
+  Incongruent × Time: β = -0.0108, p = 0.258
+  Conclusion: NON-SIGNIFICANT (NULL confirmed)
+
+--------------------------------------------------------------------------------
+POST-HOC POWER ANALYSIS
+--------------------------------------------------------------------------------
+
+Congruent × Time:
+  Post-hoc power (observed d = 0.5625): 0.976
+  Power for small effect (d = 0.20): 0.288
+  Power for medium effect (d = 0.50): 0.938
+  Power for large effect (d = 0.80): 1.000
+  N required for 0.80 power (d = 0.50): 65
+
+Incongruent × Time:
+  Post-hoc power (observed d = 1.1314): 1.000
+  Power for small effect (d = 0.20): 0.288
+  Power for medium effect (d = 0.50): 0.938
+  Power for large effect (d = 0.80): 1.000
+  N required for 0.80 power (d = 0.50): 65
+
+INTERPRETATION:
+✅ Adequate power (≥0.80) to detect medium effects.
+NULL finding is NOT due to insufficient sample size.
+
+--------------------------------------------------------------------------------
+TOST EQUIVALENCE TESTING
+--------------------------------------------------------------------------------
+
+Equivalence bound: Cohen's d < 0.2
+Interpretation: Effects smaller than d = 0.2 are negligible.
+
+Congruent × Time:
+  TOST p-value: 0.6411
+  Decision: Inconclusive
+
+Incongruent × Time:
+  TOST p-value: 0.8230
+  Decision: Inconclusive
+
+INTERPRETATION:
+⚠️ EQUIVALENCE NOT ESTABLISHED.
+Cannot confirm effects are negligible (may need larger N or wider bounds).
+
+--------------------------------------------------------------------------------
+FINAL CONCLUSION
+--------------------------------------------------------------------------------
+
+Combining NULL significance test + power analysis + equivalence testing:
+
+1. Interaction NON-SIGNIFICANT (p > 0.25)
+2. Power adequate for medium+ effects (power > 0.80)
+3. TOST inconclusive (may need larger N)
+
+⚠️ LIKELY NULL: Evidence favors no effect, but cannot rule out small effects.

@@ -1,0 +1,61 @@
+======================================================================
+POST-HOC POWER ANALYSIS REPORT
+======================================================================
+
+Date: 2025-12-27
+Purpose: Determine if null schema effects are conclusive
+
+STUDY DESIGN
+----------------------------------------
+N participants: 100
+N observations: 1200
+Predictors tested: 2 interactions
+Alpha: 0.05
+
+OBSERVED EFFECTS
+----------------------------------------
+TSVR_log:C(congruence, Treatment('common'))[T.congruent]:
+  f² observed = 0.000389
+  Power at observed = 0.0867
+  Power for small (f²=0.02) = 0.9952
+  Power for medium (f²=0.15) = 1.0000
+  N for 0.80 power at observed = 24767
+  N for 0.80 power at f²=0.02 = 485
+
+TSVR_log:C(congruence, Treatment('common'))[T.incongruent]:
+  f² observed = 0.000481
+  Power at observed = 0.0959
+  Power for small (f²=0.02) = 0.9952
+  Power for medium (f²=0.15) = 1.0000
+  N for 0.80 power at observed = 20050
+  N for 0.80 power at f²=0.02 = 485
+
+EQUIVALENCE TESTING
+----------------------------------------
+Equivalence bound: f² < 0.02
+TSVR_log:C(congruence, Treatment('common'))[T.congruent]: EQUIVALENT TO ZERO (f² < 0.02)
+TSVR_log:C(congruence, Treatment('common'))[T.incongruent]: EQUIVALENT TO ZERO (f² < 0.02)
+
+INTERPRETATION
+----------------------------------------
+WELL-POWERED FOR SMALL EFFECTS
+
+Average power for small effects (f²=0.02): 0.9952
+
+RECOMMENDATION
+----------------------------------------
+
+The study is WELL-POWERED (>0.80) to detect small effects.
+Null findings are CONCLUSIVE - schema effects are absent or negligible.
+
+RECOMMENDATION:
+  - Null findings are robust
+  - If true effects exist, they are smaller than f² = 0.02 (very small)
+  - Claim "no meaningful schema effects" is justified
+
+ACTION REQUIRED
+----------------------------------------
+1. Add Power Analysis section to summary.md Section 3 (Limitations)
+2. Document power for small effects
+3. Acknowledge ambiguity if power < 0.80
+4. Update validation.md with power analysis results

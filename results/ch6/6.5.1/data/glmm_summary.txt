@@ -1,0 +1,30 @@
+GLMM VALIDATION: RQ 6.5.1 - Schema Confidence Baseline Effects
+================================================================================
+
+                 Mixed Linear Model Regression Results
+=======================================================================
+Model:                 MixedLM      Dependent Variable:      Response  
+No. Observations:      28800        Method:                  ML        
+No. Groups:            100          Scale:                   0.0875    
+Min. group size:       288          Log-Likelihood:          -5984.3397
+Max. group size:       288          Converged:               Yes       
+Mean group size:       288.0                                           
+-----------------------------------------------------------------------
+                            Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------
+Intercept                    0.682    0.013  51.668 0.000  0.657  0.708
+Schema_Congruent             0.025    0.008   3.020 0.003  0.009  0.041
+Schema_Incongruent          -0.053    0.008  -6.398 0.000 -0.069 -0.036
+log_TSVR                    -0.032    0.002 -20.567 0.000 -0.035 -0.029
+Schema_Congruent:log_TSVR   -0.003    0.002  -1.363 0.173 -0.007  0.001
+Schema_Incongruent:log_TSVR -0.001    0.002  -0.540 0.589 -0.006  0.003
+Group Var                    0.014    0.007                            
+=======================================================================
+
+
+================================================================================
+COMPARISON TO IRT→LMM:
+================================================================================
+               Effect  IRT_LMM_p       GLMM_p  GLMM_beta  GLMM_SE  Significance_Changed  Both_NULL
+  Congruent vs Common      0.660 2.528716e-03   0.024783 0.008207                  True      False
+Incongruent vs Common      0.921 1.569537e-10  -0.052510 0.008207                  True      False
