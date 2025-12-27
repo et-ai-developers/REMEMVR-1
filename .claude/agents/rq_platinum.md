@@ -516,79 +516,191 @@ print(f"Equivalent to d < {equivalence_bound}: {tost_p < 0.05}")
 
 **CRITICAL:** ALL modeling RQs MUST test random slopes. We CANNOT claim homogeneous effects if we never tested for heterogeneity.
 
-**Check current random effects structure:**
+---
+
+### Step 12A: Check If Random Slopes Already Tested
+
+**FIRST: Look for evidence that random slopes comparison was already done:**
+
+1. **Check for comparison script:**
+   - Look in `code/` for files like `random_slopes_comparison.py`, `step08_*.py`, etc.
+   - Search for "random slopes", "intercepts+slopes", "re_formula" in code files
+
+2. **Check validation.md:**
+   - Search for "Random Slopes Comparison", "Section 4.4", "ΔAIC"
+   - Look for documentation of intercepts vs slopes testing
+
+3. **Check summary.md:**
+   - Search for "random effects structure", "homogeneous effects", "heterogeneity"
+   - Look for AIC comparison table
+
+**If evidence found:**
+- ✅ Read results and verify documented correctly
+- ✅ Verify outcome justified (Option A/B/C with reasoning)
+- ✅ Proceed to Step 12D (Additional Model Selection for trajectories)
+
+**If NO evidence found:**
+- 🔴 **BLOCKER** - Random slopes NOT tested
+- 🔴 **STOP** - Do NOT proceed to Step 13
+- 🔴 Proceed to Step 12B (resolve BLOCKER)
+
+---
+
+### Step 12B: If Random Slopes NOT Tested → RESOLVE BLOCKER
+
+**Check current implementation:**
 ```python
-# Search existing code for random effects specification
-# Look for patterns like: (1 | UID) vs (predictor | UID)
+# Read existing LMM code (e.g., code/step05_fit_lmm.py)
+# Search for random effects specification:
+# - mixedlm(..., re_formula="~1") → Intercepts-only
+# - mixedlm(..., re_formula="~predictor") → Intercepts+slopes
+# - (1 | UID) → Intercepts-only (R formula syntax)
+# - (1 + predictor | UID) → Intercepts+slopes (R formula syntax)
 ```
 
-**If intercepts-only found:**
+**If intercepts-only found → Proceed to Step 12C (create comparison)**
+
+**If slopes already implemented:**
+- ✅ Verify variable matches fixed effects (see Step 12C guidance)
+- ✅ Document random slope variance with CI
+- ✅ Interpret heterogeneity
+- ✅ BLOCKER resolved
+
+---
+
+### Step 12C: Create Random Slopes Comparison
+
+**🔴 BLOCKER RESOLUTION:** Implement systematic comparison of intercepts-only vs intercepts+slopes
+
+**For Model Averaging Contexts (e.g., 66 models tested):**
+- **Do NOT refit all N models** (e.g., 66 × 2 = 132 models)
+- **Test slopes on reference model only:**
+  - Top-weighted model (e.g., PowerLaw_04 if weight=5.6%)
+  - OR baseline model (e.g., Log if originally specified in plan.md)
+  - OR model-averaged predictor (use effective α if available)
+- **Rationale:** Random effects structure applies to ALL models uniformly
+  - Slopes decision made once, applies across entire model set
+  - Testing one representative model sufficient for structural decision
+
+**For Single Model Contexts:**
+- Test slopes on the fitted model
+
+**CRITICAL: Variable Matching**
+- **Random slope variable MUST match fixed effect transformation**
+- If fixed effect uses `log_Days`, random slope on `log_Days` (NOT raw `Days`)
+- If fixed effect uses `(Days+1)^(-0.4)`, random slope on same transform
+
+**Example Code:**
 ```python
 # Create code/random_slopes_comparison.py
 import statsmodels.formula.api as smf
 import pandas as pd
+import numpy as np
 
 data = pd.read_csv('data/lmm_input.csv')
 
-# Fit intercepts-only (current model)
+# CRITICAL: Create transformed predictor matching fixed effects
+# Example 1: If Log model best
+data['log_Days_plus1'] = np.log(data['Days'] + 1)
+
+# Example 2: If Power-law model best (α=0.4)
+data['Days_pow_neg04'] = (data['Days'] + 1) ** (-0.4)
+
+# Example 3: If model averaging with effective α=0.410
+data['Days_pow_eff'] = (data['Days'] + 1) ** (-0.410)
+
+# Fit intercepts-only (current implementation)
 model_intercepts = smf.mixedlm(
-    "Theta ~ Time + Group",
+    "Theta ~ Days_pow_neg04",  # Use transformed predictor
     data=data,
     groups=data['UID'],
-    re_formula="1"
+    re_formula="~1"  # Intercepts only
 )
 result_intercepts = model_intercepts.fit(reml=False)
 
-# Fit intercepts + slopes (REQUIRED)
+# Fit intercepts + slopes (REQUIRED TEST)
 model_slopes = smf.mixedlm(
-    "Theta ~ Time + Group",
+    "Theta ~ Days_pow_neg04",  # Same fixed effects
     data=data,
     groups=data['UID'],
-    re_formula="Time"  # Random slope on time
+    re_formula="~Days_pow_neg04"  # Slope on SAME transformed variable
 )
 result_slopes = model_slopes.fit(reml=False)
 
 # Compare via AIC
+delta_aic = result_intercepts.aic - result_slopes.aic
 print(f"Intercepts-only AIC: {result_intercepts.aic:.2f}")
 print(f"Intercepts+slopes AIC: {result_slopes.aic:.2f}")
-print(f"ΔAIC: {result_intercepts.aic - result_slopes.aic:.2f}")
+print(f"ΔAIC (Intercepts - Slopes): {delta_aic:.2f}")
 
-# Report random slope variance
-slope_var = result_slopes.cov_re.iloc[1,1]
-print(f"Random slope variance: {slope_var:.4f}")
+# Report random slope variance (if model converged)
+if result_slopes.converged and result_slopes.cov_re.shape[0] >= 2:
+    slope_var = result_slopes.cov_re.iloc[1,1]
+    slope_sd = np.sqrt(slope_var)
+    print(f"Random slope variance: {slope_var:.4f}")
+    print(f"Random slope SD: {slope_sd:.4f}")
 ```
 
 **Run:** `poetry run python code/random_slopes_comparison.py`
 
-**Interpret results:**
+**Interpret Results (3 Possible Outcomes):**
 
-**Option A: Slopes improve fit (ΔAIC > 2)**
-- Random slope variance is non-zero
-- Individual differences confirmed
-- **ACTION:** Use slopes model going forward, report heterogeneity
-- **Document:** "Individual [forgetting rates/effects] vary (SD=X.XX)"
+**🔴 Option A: Slopes Improve Fit (ΔAIC > 2)**
+- Random slope variance is non-zero and substantial
+- AIC favors slopes model (complexity justified)
+- **INTERPRETATION:** Individual differences in [forgetting rates/effects] CONFIRMED
+- **ACTION:** Use slopes model for downstream analyses
+- **DOCUMENT in summary.md:**
+  - "Random slopes comparison (Section 4.4): ΔAIC = [value] > 2"
+  - "Individual [forgetting rates/effects] vary (SD = [slope_sd])"
+  - "Heterogeneous effects confirmed via AIC model selection"
+- **IMPACT:** May reduce model uncertainty (individual α captured in random slopes)
 
-**Option B: Slopes don't converge / overfit**
-- Model fails to converge or boundary warnings
-- Insufficient data for stable estimation (e.g., 4 timepoints)
-- **ACTION:** Keep intercepts-only BUT document attempt
-- **Document:** "Random slopes attempted, convergence failed with N=4 timepoints"
+**🟡 Option B: Slopes Don't Converge / Overfit**
+- Model fails to converge (singular covariance matrix)
+- OR boundary warnings (variance → 0)
+- **INTERPRETATION:** Insufficient data for stable slope estimation
+- **ACTION:** Keep intercepts-only model
+- **DOCUMENT in summary.md:**
+  - "Random slopes comparison (Section 4.4): Convergence failure"
+  - "Random slopes attempted but failed with N=[timepoints] timepoints"
+  - "Intercepts-only model retained (homogeneous effects ASSUMED, not confirmed)"
+- **LIMITATION:** Cannot definitively test homogeneity hypothesis
 
-**Option C: Slopes converge but don't improve fit (ΔAIC < 2)**
-- Random slope variance ≈ 0 (shrinkage to fixed effect)
-- AIC favors simpler model
-- **ACTION:** Keep intercepts-only
-- **Document:** "Random slopes tested, variance negligible (homogeneous effects confirmed)"
+**🟢 Option C: Slopes Converge But Don't Improve (ΔAIC < 2)**
+- Slopes model converges successfully
+- Random slope variance ≈ 0 OR AIC favors simpler model
+- **INTERPRETATION:** Homogeneous effects CONFIRMED (tested and validated)
+- **ACTION:** Keep intercepts-only model (validated choice, not assumption)
+- **DOCUMENT in summary.md:**
+  - "Random slopes comparison (Section 4.4): ΔAIC = [value], |ΔAIC| < 2"
+  - "Random slope variance negligible ([slope_var])"
+  - "Homogeneous effects CONFIRMED via empirical test"
+- **STRENGTH:** Can now claim homogeneity with evidence (not assumption)
 
 **Circuit Breaker:**
-- If BOTH intercepts-only AND slopes produce acceptable models → Keep slopes (more conservative)
-- If random slopes NOT tested AND this is modeling RQ → **BLOCKER**
+- If BOTH models produce equivalent fit (|ΔAIC| < 2) → Keep slopes (more conservative)
+- If slopes variance exactly zero (boundary) → Option B (convergence issue)
+
+**Save Results:**
+```python
+# Save comparison table to data/random_slopes_comparison.csv
+comparison = pd.DataFrame({
+    'model': ['Intercepts_Only', 'Intercepts_Slopes'],
+    'aic': [result_intercepts.aic, result_slopes.aic],
+    'delta_aic': [0.0, delta_aic],
+    'random_slope_var': [0.0, slope_var if slopes_success else np.nan]
+})
+comparison.to_csv('data/random_slopes_comparison.csv', index=False)
+```
 
 **Document:** Add random effects comparison to validation.md
 
+**🔴 BLOCKER RESOLVED** - Can now certify PLATINUM
+
 ---
 
-**Additional Model Selection (trajectory RQs):**
+### Step 12D: Additional Model Selection (Trajectory RQs)
 
 **Check if needed:**
 - Trajectory RQ testing functional form?
