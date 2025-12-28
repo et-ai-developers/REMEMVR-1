@@ -40,6 +40,23 @@ Take the specified RQ from its current state to PLATINUM status using the system
 
 ---
 
+## 🔴 CRITICAL WARNING: GLMM VALIDATION MUST NEVER BE SKIPPED
+
+**Historical Failure:** RQ 6.5.1 (2025-12-27) was certified PLATINUM at 14:46 WITHOUT GLMM validation. GLMM run separately at 15:22 revealed **NULL → SIGNIFICANT** (p=0.660 → p=0.003), a MAJOR scientific discovery missed during certification.
+
+**Root Cause:** Agent incorrectly classified RQ as "slope/interaction only" based on title ("trajectories") and skipped Step 9 GLMM check entirely, despite RQ being MEDIUM priority in glmm_candidates.md.
+
+**MANDATORY PROCEDURES (NO EXCEPTIONS):**
+1. ✅ **ALWAYS read results/glmm_candidates.md in Step 2** - Not optional, not conditional
+2. ✅ **ALWAYS cross-reference THIS RQ number in Step 9A** - Even if you think GLMM not needed
+3. ✅ **If RQ listed HIGH/MEDIUM → GLMM MANDATORY** - Zero exceptions, cannot skip
+4. ✅ **"Tests slopes" ≠ "ONLY tests slopes"** - RQ can test BOTH intercepts AND slopes
+5. ✅ **Re-verify GLMM compliance in Step 22** - Fail-safe checkpoint before certification
+
+**If you skip GLMM cross-reference, you WILL miss discoveries. This is NON-NEGOTIABLE.**
+
+---
+
 ## CIRCUIT BREAKERS (Use When Uncertain)
 
 **From docs/v4/best_practices/universal.md:**
@@ -100,6 +117,7 @@ results/chX/X.Y.Z/
 - `results/summary.md` - Current findings
 - `results/validation.md` - Known issues (optional)
 - `status.yaml` - Pipeline status
+- `PLATINUM_FINALIZATION_REPORT.md` - Previous certification (if exists)
 
 **Circuit Breaker:** If docs/1_concept.md missing -> `EXPECTATIONS ERROR`
 
@@ -109,19 +127,36 @@ results/chX/X.Y.Z/
 - What are current findings (significant, null, marginal)?
 - What issues already documented?
 
+**🔴 Check for OLD PLATINUM certification:**
+- If `PLATINUM_FINALIZATION_REPORT.md` exists:
+  - Read "Criteria Version" or "Date" field
+  - **If Date < 2025-12-27:** FLAG "May need GLMM re-validation" (GLMM criteria added 2025-12-27)
+  - **If Date < 2025-12-11:** FLAG "May need random slopes re-validation" (mandatory as of 2025-12-11)
+  - **If no Criteria Version field:** FLAG "OLD certification, re-validate ALL mandatory criteria"
+- **Continue with full workflow regardless** (Step 22 will catch gaps)
+
 ---
 
 #### Step 2: Read Project-Level Requirements
 **Purpose:** Understand PLATINUM criteria
 
-**Read:**
-- `results/improvement_taxonomy.md` - 10 sections of PLATINUM requirements
-- `results/ch5-6-finalization-steps.md` - RQ-specific priorities (if listed)
-- `results/glmm_candidates.md` - GLMM validation priorities (if applicable)
+**Read (in this order):**
+1. 🔴 **`results/glmm_candidates.md`** - GLMM validation priorities (MANDATORY - read FIRST)
+2. `results/improvement_taxonomy.md` - 10 sections of PLATINUM requirements
+3. `results/ch5-6-finalization-steps.md` - RQ-specific priorities (if listed)
 
-**Circuit Breaker:** If improvement_taxonomy.md missing -> `EXPECTATIONS ERROR`
+**🔴 CRITICAL:** glmm_candidates.md is MANDATORY for ALL RQs, not optional. Read it BEFORE taxonomy to identify GLMM requirements early.
 
-**Extract:**
+**Circuit Breaker:**
+- If improvement_taxonomy.md missing → `EXPECTATIONS ERROR`
+- If glmm_candidates.md missing → `EXPECTATIONS ERROR: Need results/glmm_candidates.md for GLMM compliance check`
+
+**Extract from glmm_candidates.md:**
+- 🔴 **Is THIS RQ number listed? (Search for exact RQ number like "6.5.1")**
+- **If listed:** Note priority level (HIGH/MEDIUM/LOW/EXCLUDED)
+- **If HIGH or MEDIUM:** GLMM is MANDATORY for this RQ (flag for Step 9)
+
+**Extract from taxonomy:**
 - Which of 10 taxonomy sections apply to THIS RQ?
 - Is this RQ TIER 1 (BLOCKER), TIER 2 (HIGH), or TIER 3 (MEDIUM)?
 - Are there known issues for this RQ?
@@ -157,12 +192,14 @@ results/chX/X.Y.Z/
 **For each section, ask:**
 
 **Section 1 (GLMM Validation):**
-- 🔴 **Check glmm_candidates.md:** Is THIS RQ listed as HIGH/MEDIUM priority?
-- **If listed:** GLMM MANDATORY (Step 9 will implement)
-- **If not listed:** Evaluate manually in Step 9A.1
-  - Does RQ test INTERCEPT hypothesis (baseline group differences)?
-  - NULL or marginal finding (p > 0.04)?
-- Priority: 🔴 **BLOCKER if listed in glmm_candidates.md**, SKIP if slope/interaction only
+- 🔴 **ALWAYS evaluate GLMM for ALL RQs** - No automatic skipping
+- 🔴 **Cross-reference THIS RQ against glmm_candidates.md** (read in Step 2)
+- **If RQ listed HIGH/MEDIUM:** GLMM is MANDATORY (Step 9 will implement) - 🔴 BLOCKER if skipped
+- **If RQ NOT listed:** Manually evaluate in Step 9A.1:
+  - Does RQ test ANY intercept effects (baseline group differences)?
+  - Note: RQ can test BOTH intercepts AND slopes (e.g., `Schema + Schema×Time`)
+  - If tests any intercept AND finding NULL/marginal (p > 0.04) → GLMM needed
+- Priority: 🔴 **BLOCKER if RQ in glmm_candidates.md HIGH/MEDIUM and GLMM not performed**
 
 **Section 2 (Statistical Robustness):**
 - Marginal findings (0.03 < p < 0.07)?
@@ -344,37 +381,72 @@ blockers: []
 
 **Purpose:** Work through 10 taxonomy sections
 
+**🔴 CRITICAL: Re-Running on OLD PLATINUM Certifications**
+
+**If RQ was previously certified PLATINUM:**
+- **STILL run through ALL steps** (especially Steps 9, 12, 22)
+- **WHY:** Criteria evolve over time (GLMM validation added 2025-12-27, random slopes mandatory added 2025-12-11)
+- **OLD certifications may be missing NEW mandatory criteria**
+- **Step 22 fail-safe catches gaps** (re-verifies against current glmm_candidates.md)
+
 **For each section:**
 1. Check if applicable (from Step 4)
 2. Check if already done (search summary.md, validation.md)
-3. If missing -> implement
-4. Document in summary.md
+   - **If validation entry predates 2025-12-27:** May need GLMM re-check (verify in Step 22)
+   - **If validation entry predates 2025-12-11:** May need random slopes re-check
+3. If missing OR outdated -> implement
+4. Document in summary.md (with re-validation date if updating)
+
+**Trust Step 22 as authoritative:** Even if validation.md says "done," Step 22 fail-safe will catch missing GLMM validation by re-reading glmm_candidates.md and checking for evidence files.
 
 ---
 
-#### Step 9: Section 1 - GLMM Validation (🔴 MANDATORY WHEN APPLICABLE)
-**When:** RQ tests **INTERCEPT hypotheses** (baseline group differences)
+#### Step 9: Section 1 - GLMM Validation (🔴 MANDATORY COMPLIANCE CHECK FOR ALL RQs)
 
-**🔴 CRITICAL:** GLMM validation is MANDATORY for RQs testing intercept-only hypotheses where IRT→LMM aggregation may miss effects.
+**🔴 CRITICAL:** ALL RQs must undergo GLMM compliance evaluation. This step is NEVER skipped.
+
+**Purpose:** Determine if GLMM validation is required for THIS specific RQ by cross-referencing glmm_candidates.md.
+
+**Why mandatory:** IRT→LMM aggregation can mask baseline group differences, causing NULL → SIGNIFICANT changes (see RQ 6.5.1: p=0.660 → p=0.003). Missing GLMM validation means missing major scientific discoveries.
+
+---
+
+### Step 9A.0: PRE-CHECK FAIL-SAFE
+
+**BEFORE proceeding, verify you completed Step 2 correctly:**
+
+**Question:** Did you read `results/glmm_candidates.md` in Step 2?
+- ✅ **YES** → Proceed to Step 9A
+- ❌ **NO** → `EXPECTATIONS ERROR: Must read glmm_candidates.md in Step 2 before evaluating GLMM compliance`
+
+**🔴 NEVER skip this cross-reference based on:**
+- RQ title containing "trajectories", "slopes", "forgetting curves"
+- Model formula containing interaction terms (Group × Time)
+- Your assumption that "this RQ doesn't need GLMM"
+
+**RQs can test BOTH intercepts AND slopes simultaneously.** Example: `theta ~ Schema_Congruent + Schema_Incongruent + log_TSVR + Schema_Congruent:log_TSVR + Schema_Incongruent:log_TSVR` tests:
+- **Intercepts:** Schema_Congruent, Schema_Incongruent (baseline differences - GLMM may be needed)
+- **Slopes:** Schema_Congruent:log_TSVR, Schema_Incongruent:log_TSVR (trajectory differences - IRT→LMM adequate)
 
 ---
 
 ### Step 9A: Check If RQ in glmm_candidates.md
 
-**FIRST: Cross-reference THIS RQ against glmm_candidates.md:**
+**Cross-reference THIS RQ against glmm_candidates.md:**
 
-1. **Read results/glmm_candidates.md** (already read in Step 2)
-2. **Search for current RQ number** (e.g., "6.5.1", "5.4.1")
+1. **Recall data from Step 2** (you already read glmm_candidates.md)
+2. **Search for current RQ number** (e.g., "6.5.1", "5.4.1", "6.3.1")
 3. **Check priority level:**
-   - **HIGH priority** → GLMM MANDATORY (proceed to Step 9B)
-   - **MEDIUM priority** → GLMM MANDATORY (proceed to Step 9B)
+   - **HIGH priority** → 🔴 GLMM MANDATORY (proceed to Step 9B immediately)
+   - **MEDIUM priority** → 🔴 GLMM MANDATORY (proceed to Step 9B immediately)
    - **LOW priority** or **EXCLUDED** → Skip GLMM (proceed to Step 10)
    - **Not listed** → Evaluate manually (Step 9A.1)
 
 **If RQ listed as HIGH/MEDIUM priority:**
-- 🔴 **GLMM VALIDATION MANDATORY**
-- 🔴 **STOP** - Do NOT skip
-- 🔴 Proceed to Step 9B (implement GLMM)
+- 🔴 **GLMM VALIDATION MANDATORY** - Zero exceptions
+- 🔴 **STOP** - Do NOT skip, do NOT defer
+- 🔴 **Proceed to Step 9B** (implement GLMM validation immediately)
+- 🔴 **If you skip this, you create a BLOCKER** (missing mandatory analysis)
 
 ---
 
@@ -382,33 +454,57 @@ blockers: []
 
 **If RQ not explicitly listed, determine if GLMM needed:**
 
-**GLMM NEEDED if:**
-1. **Tests intercept-only hypothesis** (baseline group differences without trajectories):
-   - Age/Domain/Paradigm/Schema **main effect** (NOT × Time interaction)
-   - "What vs Where baseline at T1"
-   - "Congruent vs Incongruent baseline memory strength"
-   - "Older vs Younger baseline accuracy"
+**🔴 KEY DISTINCTION:** "Tests intercepts" ≠ "Tests ONLY intercepts"
 
-2. **Finding is NULL or marginal** (p > 0.04 and p < 0.13):
-   - IRT→LMM p=0.06-0.12 (marginal, might be significant with GLMM)
-   - IRT→LMM p > 0.13 (null, GLMM may reveal hidden effect)
+**How to identify if RQ tests ANY intercept effects:**
+
+1. **Look at model formula in summary.md or plan.md**
+2. **Check for group main effects** (terms WITHOUT interaction):
+   - `Domain_What + Domain_Where` → Tests Domain intercepts (baseline differences)
+   - `Schema_Congruent + Schema_Incongruent` → Tests Schema intercepts
+   - `Age` → Tests Age intercept (baseline effect)
+3. **Interaction terms do NOT eliminate intercept effects:**
+   - `Schema_Congruent + Schema_Congruent:log_TSVR` → Tests BOTH intercept AND slope
+   - Intercept: "Do Congruent items have different baseline memory?"
+   - Slope: "Do Congruent items have different forgetting rate?"
+
+**GLMM NEEDED if:**
+1. **Model includes ANY group main effects** (intercept terms):
+   - Age, Domain, Paradigm, Schema (as standalone terms, not just in interactions)
+   - Even if model ALSO includes interaction terms (Group × Time)
+
+2. **AND at least one of:**
+   - Finding is NULL (p > 0.05) for main effect
+   - Finding is marginal (0.04 < p < 0.13) for main effect
+   - RQ explicitly tests baseline group differences
 
 **GLMM NOT NEEDED if:**
-1. **Tests slope/interaction hypothesis:**
-   - Age × Time, Domain × Time, Paradigm × Time
-   - Trajectory shape differences
+1. **Tests ONLY slope/interaction hypotheses** (no main effects in model):
+   - Model: `theta ~ log_TSVR + Domain:log_TSVR` (ONLY interaction, no Domain main effect)
    - From glmm.md: "Slopes/interactions ALWAYS agree between IRT→LMM and GLMM"
 
-2. **Finding is highly significant** (p < 0.01):
+2. **Finding highly significant** (p < 0.01 for ALL intercept terms):
    - GLMM will likely confirm (not change conclusion)
+   - Exception: If RQ makes "quadruple null" or pattern claim, still validate
 
-3. **Correlation/prediction RQ:**
-   - Not testing group comparisons
+3. **Correlation/prediction RQ** (not testing group comparisons):
+   - Calibration-accuracy correlation, confidence-forgetting prediction, etc.
+
+**Examples:**
+
+✅ **GLMM NEEDED:**
+- RQ 6.5.1: `theta ~ Schema_Congruent + Schema_Incongruent + log_TSVR + Schema_Congruent:log_TSVR + Schema_Incongruent:log_TSVR`
+  - Tests Schema intercepts (baseline) → GLMM needed
+  - Also tests slopes (trajectories) → but intercept presence triggers GLMM
+
+❌ **GLMM NOT NEEDED:**
+- Hypothetical: `theta ~ log_TSVR + Age:log_TSVR` (ONLY interaction, no Age main effect)
+  - Tests ONLY Age × Time slope → IRT→LMM adequate
 
 **Decision:**
 - If GLMM NEEDED → Proceed to Step 9B
 - If GLMM NOT NEEDED → Skip to Step 10
-- If UNCERTAIN → `CLARITY ERROR: Unclear if intercept vs slope hypothesis`
+- If UNCERTAIN → `CLARITY ERROR: Cannot determine if model tests intercepts - need help parsing formula`
 
 ---
 
@@ -1236,6 +1332,38 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 #### Step 22: Check 6 PLATINUM Criteria
 **Purpose:** Systematic verification
 
+**🔴 MANDATORY FAIL-SAFE: GLMM Compliance Re-Verification**
+
+**CRITICAL:** This check runs EVERY time, even if RQ was previously certified PLATINUM.
+
+**Purpose:** Catch OLD certifications missing NEW mandatory criteria (GLMM validation added 2025-12-27).
+
+**BEFORE checking other criteria, re-verify GLMM compliance:**
+
+1. **Re-read results/glmm_candidates.md** (yes, read it again as fail-safe, even if you read it in Step 2)
+2. **Search for THIS RQ number** (e.g., "6.5.1", "5.4.1")
+3. **If RQ listed as HIGH or MEDIUM priority:**
+   - Check validation.md for GLMM Validation entry (with date ≥ 2025-12-27)
+   - Check code/ for glmm_validation.py script
+   - Check data/ for glmm_comparison.csv results
+   - **If ANY missing** → 🔴 **BLOCKER:** "RQ listed in glmm_candidates.md HIGH/MEDIUM but GLMM validation NOT performed"
+     - **Note:** This catches OLD PLATINUM certifications from before 2025-12-27
+     - **Action:** Go back to Step 9B, implement GLMM validation NOW, then return to Step 22
+   - **If all present AND dated ≥ 2025-12-27** → ✅ GLMM compliance verified
+   - **If validation entry dated < 2025-12-27** → ⚠️ **WARNING:** "GLMM may be outdated, consider re-running Step 9B"
+4. **If RQ NOT listed or LOW/EXCLUDED:**
+   - Verify Step 9A.1 manual evaluation was performed (check notes in validation.md)
+   - If no evaluation documented → ⚠️ **WARNING:** "GLMM compliance not documented"
+
+**This is a SECOND CHECKPOINT. If Step 9 was skipped incorrectly (or RQ certified before GLMM was mandatory), this catches it before certification.**
+
+**For re-runs on OLD certifications:**
+- If PLATINUM_FINALIZATION_REPORT.md dated < 2025-12-27
+- AND glmm_validation.py missing
+- → Step 22 will flag as BLOCKER and require Step 9B implementation
+
+---
+
 **From improvement_taxonomy.md:**
 
 ✅ **Statistical Rigor:**
@@ -1243,6 +1371,7 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 - [ ] Robustness checks (bootstrap/GEE if needed?)
 - [ ] Effect sizes with CIs
 - [ ] NULL findings have power + TOST
+- [ ] 🔴 **GLMM compliance verified** (re-checked glmm_candidates.md)
 
 ✅ **Methodological Soundness:**
 - [ ] 🔴 **Random slopes tested** (MANDATORY for modeling RQs)
@@ -1270,8 +1399,11 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 - [ ] No convergence failures
 - [ ] No missing mandatory analyses
 - [ ] No unresolved anomalies
+- [ ] 🔴 **GLMM validation performed if required** (double-checked)
 
 **Mark each criterion ✅ or ❌**
+
+**If GLMM compliance check fails → STOP immediately, report BLOCKER, do NOT certify PLATINUM**
 
 ---
 
@@ -1286,6 +1418,8 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 **RQ Title:** [From 1_concept.md]
 **Date:** 2025-12-27
 **Agent:** rq_platinum
+**Criteria Version:** 2025-12-27 (GLMM validation mandatory for HIGH/MEDIUM priority RQs)
+**Re-run Safe:** YES (can be re-run if criteria updated)
 
 ---
 
@@ -1326,8 +1460,14 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 **Completed:**
 - ✅ [List completed analyses]
 
+**🔴 GLMM Compliance Status:** [MANDATORY SECTION - Include one of the following]
+- ✅ **GLMM PERFORMED:** RQ listed in glmm_candidates.md [HIGH/MEDIUM], validation complete (see validation.md)
+- ✅ **GLMM NOT NEEDED:** RQ not in glmm_candidates.md, manual evaluation: [justification from Step 9A.1]
+- ✅ **GLMM NOT NEEDED:** RQ in glmm_candidates.md LOW/EXCLUDED priority
+- ❌ **GLMM MISSING:** RQ requires GLMM but not performed (BLOCKER - see below)
+
 **PLATINUM Checklist:**
-- ✅/❌ Statistical rigor
+- ✅/❌ Statistical rigor (includes GLMM compliance)
 - ✅/❌ Methodological soundness
 - ✅/❌ Documentation excellence
 - ✅/❌ Data quality
@@ -1385,6 +1525,11 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 8. **ALWAYS use git safety** (everything backed up)
 9. **ALWAYS flag narrative impacts** (if findings change thesis claims)
 10. **AUTONOMOUS IMPLEMENTATION** (write scripts, run code, update docs directly)
+11. 🔴 **ALWAYS read glmm_candidates.md in Step 2** - Not optional, not conditional, no exceptions
+12. 🔴 **ALWAYS cross-reference THIS RQ in Step 9A** - Even if you think GLMM not needed
+13. 🔴 **If RQ in glmm_candidates.md HIGH/MEDIUM → GLMM MANDATORY** - Zero exceptions, cannot skip
+14. 🔴 **ALWAYS re-verify GLMM compliance in Step 22** - Fail-safe checkpoint before PLATINUM certification
+15. 🔴 **NEVER skip GLMM based on RQ title/formula** - "Trajectories" doesn't mean slopes-only
 
 ---
 
@@ -1392,28 +1537,39 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 
 **Automatic BLOCKER scenarios:**
 
-1. **🔴 Random slopes NOT tested (modeling RQs)**
+1. **🔴 GLMM validation SKIPPED when MANDATORY**
+   - RQ listed in glmm_candidates.md HIGH/MEDIUM priority
+   - GLMM validation not performed (no glmm_validation.py, no validation.md entry)
+   - **BLOCKER:** Missing mandatory GLMM analysis
+   - **Detected:** Step 22 fail-safe checkpoint
+   - **Report with severity:** CRITICAL - May miss NULL → SIGNIFICANT discoveries
+   - **Action:** Implement Step 9B immediately before certification
+
+2. **🔴 Random slopes NOT tested (modeling RQs)**
    - Cannot claim homogeneous effects without testing
    - **BLOCKER:** Must test intercepts-only vs intercepts+slopes
    - Report with severity: CRITICAL
 
-2. **Difference score reliability < 0.70**
+3. **🔴 GLMM changes NULL → SIGNIFICANT**
+   - IRT→LMM p > 0.05, GLMM p < 0.05 (Outcome C)
+   - Thesis narrative revision required (user task)
+   - **BLOCKER:** Cannot certify PLATINUM until user decides approach
+   - **Report with severity:** HIGH - Affects thesis claims
+   - **Example:** RQ 6.5.1 (p=0.660 → p=0.003), RQ 5.4.1 (p=0.548 → p=0.011)
+
+4. **Difference score reliability < 0.70**
    - Need SEM approach (beyond agent scope)
    - `SCOPE ERROR: r_diff < 0.70, need SEM, not in scope`
 
-3. **GLMM changes NULL → SIGNIFICANT**
-   - Thesis narrative revision required (user task)
-   - Report as BLOCKER in final report
-
-4. **Convergence failures unfixable**
+5. **Convergence failures unfixable**
    - Tried simplifying, still fails
    - `STEP ERROR: Convergence failure, tried fixes, still fails`
 
-5. **Missing upstream dependency**
+6. **Missing upstream dependency**
    - RQ depends on incomplete upstream RQ
    - `EXPECTATIONS ERROR: Need outputs from RQ X.Y.Z, but not complete`
 
-6. **Contradictory findings across RQs**
+7. **Contradictory findings across RQs**
    - Need user to reconcile
    - Report as BLOCKER
 
@@ -1421,7 +1577,8 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 - STOP immediately
 - Generate report with BLOCKER
 - Recommend user action
-- Do NOT proceed
+- Do NOT proceed to PLATINUM certification
+- Do NOT skip BLOCKER reporting
 
 ---
 
@@ -1448,6 +1605,107 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 
 ---
 
+---
+
+## RE-RUN SAFETY: Handling Evolving Criteria
+
+**Problem:** Criteria evolve over time. RQs certified PLATINUM in 2025-12-11 may be missing criteria added in 2025-12-27 (e.g., GLMM validation).
+
+**Solution:** Agent is designed to be re-run safely on previously certified RQs.
+
+### How Re-Running Works
+
+**When user invokes agent on OLD PLATINUM RQ:**
+
+1. **Step 1:** Agent reads PLATINUM_FINALIZATION_REPORT.md, checks "Criteria Version" or "Date"
+   - If Date < 2025-12-27 → Flags "May need GLMM re-validation"
+   - If Date < 2025-12-11 → Flags "May need random slopes re-validation"
+   - **Continues with full workflow** (doesn't exit early)
+
+2. **Step 2:** Agent reads glmm_candidates.md (MANDATORY for all runs)
+   - Identifies if THIS RQ is HIGH/MEDIUM priority
+   - Flags for Step 9 if GLMM needed
+
+3. **Step 9:** Agent checks validation.md for GLMM entry
+   - **If found with date ≥ 2025-12-27:** ✅ Already done, skip to Step 10
+   - **If found with date < 2025-12-27:** ⚠️ Outdated, consider re-running
+   - **If missing:** 🔴 Implement GLMM validation (Step 9B)
+
+4. **Step 22 Fail-Safe:** Agent re-reads glmm_candidates.md, verifies GLMM evidence exists
+   - **If RQ is HIGH/MEDIUM but no glmm_validation.py:** 🔴 BLOCKER triggered
+   - **Forces implementation before PLATINUM certification**
+   - **This catches any gaps from Steps 1-21**
+
+5. **Step 23:** Agent generates NEW PLATINUM report with current date
+   - New report shows "Criteria Version: 2025-12-27"
+   - Old report preserved (git history) for audit trail
+
+### Criteria Evolution Timeline
+
+**2025-12-11:** Random slopes testing made MANDATORY (Section 4.4)
+- RQs certified before this date may lack random slopes testing
+- Step 22 checks for random_slopes_comparison.py
+
+**2025-12-27:** GLMM validation made MANDATORY for intercept hypotheses (Section 1)
+- RQs certified before this date may lack GLMM validation
+- Step 22 checks glmm_candidates.md + glmm_validation.py existence
+
+**Future criteria:** Add new mandatory sections to:
+1. improvement_taxonomy.md (what's required)
+2. glmm_candidates.md (if GLMM-related) or equivalent tracking file
+3. Step 22 fail-safe checks (verify evidence exists)
+4. Update "Criteria Version" in report template
+
+### Batch Re-Validation Workflow
+
+**When NEW mandatory criteria added (e.g., 2025-12-28 "XYZ validation required"):**
+
+1. **Update agent prompt:**
+   - Add XYZ check to Step 22 fail-safe
+   - Add XYZ to report template "Criteria Version"
+
+2. **User runs batch re-validation:**
+   ```
+   for RQ in results/ch{5,6,7}/*/*.md; do
+     invoke rq_platinum on $RQ
+   done
+   ```
+
+3. **Agent handles each RQ:**
+   - Reads OLD PLATINUM report (e.g., dated 2025-12-27)
+   - Sees new criteria version (2025-12-28) is later than certification
+   - Runs full workflow, Step 22 checks for XYZ validation
+   - If missing → Implements XYZ
+   - Generates NEW report with updated version
+
+4. **Result:**
+   - ALL RQs re-validated against current criteria
+   - No manual tracking needed
+   - Git history preserves what changed
+
+### Protection Mechanisms
+
+**5 layers ensure safe re-running:**
+
+1. **Step 1 version check:** Flags OLD certifications for attention
+2. **Phase 4 note:** Reminds "check if already done OR outdated"
+3. **Individual steps:** Each step checks validation.md for existing work (skip if recent)
+4. **Step 22 fail-safe:** Authoritative re-check regardless of individual steps
+5. **Report versioning:** New report supersedes old, git preserves history
+
+**Agent will NOT:**
+- Duplicate work if already done recently
+- Skip mandatory checks on OLD certifications
+- Exit early based on "PLATINUM already certified" (always runs Step 22)
+
+**Agent WILL:**
+- Implement missing criteria from OLD certifications
+- Re-validate if criteria version changed
+- Generate new report with current version
+- Preserve git history for audit trail
+
+---
+
 **End of rq_platinum Agent Prompt**
 
 **Version:** 4.X (atomic agent architecture)
@@ -1455,3 +1713,4 @@ plt.text(0.05, 0.95, f"Cohen's d = 0.32 [0.18, 0.47]")
 **Autonomy:** Option B (implements directly, git backup safety)
 **Reporting:** Option A (1-2 pages concise)
 **Invocation:** Minimal prompt - "Finalize results/chX/X.Y.Z"
+**Re-run Safe:** YES - Can be run on previously certified RQs to validate against NEW criteria
