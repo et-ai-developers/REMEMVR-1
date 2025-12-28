@@ -1,0 +1,85 @@
+
+======================================================================
+STEP 04: Refit LMM with Random Slopes (PLATINUM UPDATE)
+======================================================================
+
+Data loaded: 800 observations
+  N participants: 100
+
+Fitting LMM: calibration ~ LocationType_Source * log_TSVR
+  Random effects: (log_TSVR | UID) - random intercepts + slopes
+
+  Converged: True
+
+==================================================
+LMM Results (Random Slopes Model)
+==================================================
+                 Mixed Linear Model Regression Results
+=======================================================================
+Model:                  MixedLM     Dependent Variable:     calibration
+No. Observations:       800         Method:                 REML       
+No. Groups:             100         Scale:                  0.4844     
+Min. group size:        8           Log-Likelihood:         -976.6503  
+Max. group size:        8           Converged:              Yes        
+Mean group size:        8.0                                            
+-----------------------------------------------------------------------
+                             Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------
+Intercept                     0.078    0.110  0.709 0.478 -0.137  0.293
+LocationType_Source          -0.138    0.111 -1.237 0.216 -0.356  0.080
+log_TSVR                     -0.023    0.026 -0.894 0.371 -0.074  0.028
+LocationType_Source:log_TSVR  0.041    0.030  1.379 0.168 -0.017  0.099
+Group Var                     0.584    0.197                           
+Group x log_TSVR Cov         -0.081    0.039                           
+log_TSVR Var                  0.023    0.010                           
+=======================================================================
+
+
+Saved: /home/etai/projects/REMEMVR/results/ch6/6.8.2/data/step04_lmm_slopes_summary.txt
+
+Fixed Effects:
+                      Effect  Estimate       SE         t  p_uncorrected  p_bonferroni  CI_lower  CI_upper
+                   Intercept  0.077865 0.109762  0.709393       0.478080      1.000000 -0.137269  0.292998
+         LocationType_Source -0.137767 0.111363 -1.237102       0.216049      0.864196 -0.356039  0.080504
+                    log_TSVR -0.023135 0.025873 -0.894185       0.371223      1.000000 -0.073846  0.027576
+LocationType_Source:log_TSVR  0.040987 0.029721  1.379073       0.167872      0.671489 -0.017266  0.099240
+
+==================================================
+Comparison to Intercepts-Only Model
+==================================================
+
+LocationType Main Effect:
+  Intercepts-only: β = -0.1378, p = 0.2478
+  Slopes model:     β = -0.1378, p = 0.2160
+  ✓ Estimates similar (differ by 0.0000)
+
+==================================================
+Random Effects Covariance Matrix
+==================================================
+
+  Intercept variance: 0.5841
+  Slope variance: 0.0227
+  Intercept-Slope covariance: -0.0810
+  Correlation: -0.703
+
+  INTERPRETATION: Strong negative correlation (-0.703)
+    Participants with higher baseline calibration show SLOWER change over time
+    Participants with lower baseline show FASTER change over time
+
+Model Fit Indices:
+  AIC: nan
+  BIC: nan
+  Log-Likelihood: -976.65
+
+✓ Random slopes model COMPLETE
+
+======================================================================
+RECOMMENDATION
+======================================================================
+
+Based on PLATINUM validation (ΔAIC = 21.00):
+  ✓ Random slopes model is PREFERRED
+  ✓ Individual differences in calibration trajectories CONFIRMED
+  ✓ Update summary.md with slopes model results
+  ✓ Report random slope variance in Section 1
+  ✓ Interpret negative intercept-slope correlation in Section 3

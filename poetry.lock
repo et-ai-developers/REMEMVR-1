@@ -626,6 +626,24 @@ test = ["pytest (>=7.2)", "pytest-cov (>=4.0)", "pytest-xdist (>=3.0)"]
 test-extras = ["pytest-mpl", "pytest-randomly"]
 
 [[package]]
+name = "numdifftools"
+version = "0.9.42"
+description = "Solves automatic numerical differentiation problems in one or more variables."
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "numdifftools-0.9.42-py3-none-any.whl", hash = "sha256:22f926b8de24aa44f740bc26744a74555c1c80413068b1dee2edb3c3d10566f6"},
+    {file = "numdifftools-0.9.42.tar.gz", hash = "sha256:866675171f293c4bf2f1e1c5bf9b88a07d5396903e3b3e7fcc3879e2a01cfbc1"},
+]
+
+[package.dependencies]
+numpy = ">=1.21.2"
+scipy = ">=1.7.3"
+
+[package.extras]
+plot = ["matplotlib (>=3.8.0)"]
+
+[[package]]
 name = "numpy"
 version = "2.3.5"
 description = "Fundamental package for array computing in Python"
@@ -1512,6 +1530,25 @@ docs = ["ipykernel", "nbconvert", "numpydoc", "pydata_sphinx_theme (==0.10.0rc2)
 stats = ["scipy (>=1.7)", "statsmodels (>=0.12)"]
 
 [[package]]
+name = "semopy"
+version = "2.3.11"
+description = "Structural Equation Modeling Optimization in Python."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "semopy-2.3.11.tar.gz", hash = "sha256:eb6336f8438f0ea6fcfdceb91d448196c3940827ff11a0948889ce6755895653"},
+]
+
+[package.dependencies]
+numdifftools = "*"
+numpy = "*"
+pandas = "*"
+scikit-learn = "*"
+scipy = "*"
+statsmodels = "*"
+sympy = "*"
+
+[[package]]
 name = "setuptools"
 version = "80.9.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -1757,4 +1794,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "45d22ac6be338d6ef9564047dcf142c8e8667829934e1f5c7a38f23226aefc6f"
+content-hash = "f88fcee023d5762a07c7fefe4d50d21d7231aebc49908623e13de60ac4ebd596"

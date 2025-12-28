@@ -1,0 +1,5 @@
+2025-12-28 11:40:24,325 - INFO - === RQ 6.4.2: GLMM Validation ===
+2025-12-28 11:40:24,325 - INFO - Validating IRT→LMM paradigm baseline effects with item-level GLMM
+2025-12-28 11:40:24,325 - INFO - 
+Loading item-level data from source RQs...
+2025-12-28 11:40:24,325 - ERROR - EXPECTATIONS ERROR: Accuracy source missing: /home/etai/projects/REMEMVR/results/ch5/5.3.1/data/step01_irt_input_paradigm.csv

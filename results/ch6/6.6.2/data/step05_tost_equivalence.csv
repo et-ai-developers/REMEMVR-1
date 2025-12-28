@@ -1,0 +1,14 @@
+metric,value
+f2_bound,0.02
+beta_bound,0.12603303147984266
+observed_beta,-0.0009469545265782
+SE,0.0021490596173511
+t1,58.20502881508879
+p1,0.0
+t2,59.086302204558926
+p2,0.0
+tost_p,0.0
+ci_90_lower,-0.00448215759712076
+ci_90_upper,0.0025882485439643593
+equivalent,1
+interpretation,Baseline accuracy effect is negligible. Dunning-Kruger hypothesis NOT SUPPORTED.

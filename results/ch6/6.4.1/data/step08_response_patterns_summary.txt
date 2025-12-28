@@ -1,0 +1,31 @@
+RQ 6.4.1 - Confidence Response Patterns Summary
+================================================================================
+
+N participants: 100
+N confidence items: 72
+
+AGGREGATE STATISTICS:
+  Full-range users (all 5 values): 0 (0.0%)
+  Extremes-only users (0 and 1.0): 0 (0.0%)
+  Mean unique values used: 4.97
+  Mean rating SD: 0.300
+VALUE USAGE:
+  Median rating SD: 0.313
+
+  0.0: 0 participants (0.0%)
+  0.25: 0 participants (0.0%)
+  0.5: 0 participants (0.0%)
+  0.75: 0 participants (0.0%)
+  1.0: 99 participants (99.0%)
+
+INTERPRETATION:
+  Full-range usage: CONCERN - Few (0.0%) use full scale → GRM assumptions may be violated
+  Extremes-only: GOOD - Low extremes-only (0.0%) → GRM assumptions met
+  Rating SD: GOOD - Adequate variability (mean SD = 0.300) → Confidence scale sensitive
+
+OVERALL: CONCERNS
+Response patterns raise concerns. 100% item retention may reflect lenient thresholds or GRM misfit.
+
+RECOMMENDATION FOR summary.md:
+Add to Section 4 (Limitations):
+"Confidence response patterns: 0% full-range, 0% extremes-only, mean SD=0.30. Response patterns raise concerns. 100% item retention may reflect lenient thresholds or GRM misfit.

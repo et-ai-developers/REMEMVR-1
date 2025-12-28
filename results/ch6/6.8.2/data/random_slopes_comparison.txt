@@ -1,0 +1,14 @@
+Random Slopes Comparison
+========================
+
+Model A (Intercepts Only):
+  AIC: 1971.24
+  BIC: 1999.34
+
+Model B (Intercepts + Slopes):
+  AIC: 1950.24
+  BIC: 1987.71
+  ΔAIC: 21.00
+  Slope variance: 0.0223
+
+Recommendation: USE_SLOPES

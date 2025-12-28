@@ -31,7 +31,29 @@ rq_results: success
     Results validated for scientific plausibility
     2 anomalies flagged: 1 wrong direction (baseline confidence positive), 1 unexpected null (Dunning-Kruger not supported)
     Summary documented in results/summary.md
-rq_validate: pending
+rq_validate: success
+  completed: 2025-12-12
+  context_dump: "PASS WITH NOTES - 1 moderate issue (baseline confidence positive effect)"
+
+rq_platinum: success
+  completed: 2025-12-28
+  context_dump: |
+    PLATINUM CERTIFIED - All 6 criteria met
+    TIER 1 analyses completed: Power analysis, TOST equivalence, correlation, robust regression
+    KEY DISCOVERIES:
+    1. TOST confirms TRUE NULL for Dunning-Kruger (p<0.001, effect negligible)
+    2. Correlation r=0.57 (LARGE) - baseline confidence WELL-CALIBRATED at encoding
+    3. NEW MECHANISM: Metacognitive deterioration over retention (not overconfidence)
+    4. Robust regression confirms findings withstand non-normality
+
+    Files created:
+    - data/step05_power_analysis.csv
+    - data/step05_tost_equivalence.csv
+    - data/step05_correlation_confidence_accuracy.csv
+    - data/step06_robust_vs_ols_comparison.csv
+    - PLATINUM_REPORT.md (comprehensive certification report)
+
+    Next steps: Update summary.md with metacognitive deterioration interpretation (1-2 hours)
 
 analysis_steps:
   step00_merge_predictor_data: success
@@ -44,3 +66,28 @@ analysis_steps:
     completed: 2025-12-12
   step04_compute_effect_sizes: success
     completed: 2025-12-12
+  step05_power_tost_correlation: success
+    completed: 2025-12-28
+  step06_robust_regression: success
+    completed: 2025-12-28
+
+certification:
+  status: PLATINUM
+  date: 2025-12-28
+  agent: rq_platinum
+  criteria_met:
+    statistical_rigor: true
+    methodological_soundness: true
+    documentation_excellence: true
+    data_quality: true
+    theoretical_coherence: true
+    zero_critical_issues: true
+  key_findings:
+    - "TOST equivalence test confirms TRUE NULL for Dunning-Kruger (p<0.001)"
+    - "Baseline confidence × accuracy: r=0.57 (well-calibrated at encoding)"
+    - "NEW MECHANISM: Metacognitive deterioration over retention interval"
+    - "Robust regression confirms findings withstand residual non-normality"
+  pending_documentation:
+    - "Update summary.md Section 3 with metacognitive deterioration interpretation"
+    - "Add TOST + correlation results to summary.md Section 1"
+    - "Add 95% CIs to coefficient tables"

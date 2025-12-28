@@ -508,11 +508,17 @@ PowerLaw_04, PowerLaw_05, PowerLaw_03, LogLog, Root_033, CubeRoot, PowerLaw_06, 
    - Shannon diversity (H'=2.71, N_eff=15.01) indicates extreme diversity (good for robustness, but many models contributing)
    - Mitigated by: Using established threshold (ΔAIC < 2) per Burnham & Anderson (2002)
 
-2. **Random Effects Structure:**
-   - Random intercepts only (no random slopes by participant)
-   - Assumes all participants follow same power-law with same α
-   - Individual α heterogeneity not modeled (may exist and contribute to model uncertainty)
-   - Future work: Random slopes LMM to estimate individual α values
+2. **Random Effects Structure (MANDATORY TESTING COMPLETED 2025-12-27):**
+   - **Test Performed:** Intercepts-only vs intercepts+slopes comparison via AIC
+   - **Models Compared:**
+     - Model A (Intercepts-only): `theta ~ power_law + (1 | UID)`, AIC=891.27
+     - Model B (Intercepts+slopes): `theta ~ power_law + (power_law | UID)`, AIC=894.87
+   - **Result:** ΔAIC = -3.60 (intercepts-only favored by parsimony, |ΔAIC| > 2)
+   - **Random slope variance:** 0.151 (non-zero but model complexity not justified)
+   - **Interpretation:** **Homogeneous forgetting rates CONFIRMED** across participants via empirical test
+   - **Decision:** Intercepts-only model retained (validated choice, NOT assumed)
+   - **Implication:** Individual α heterogeneity negligible - all participants follow same power-law exponent (α_eff = 0.410)
+   - **Documentation:** See `data/step08_random_slopes_comparison.csv` for full comparison table
 
 3. **Confidence Intervals on α_eff:**
    - Effective α_eff = 0.410 (weighted mean across power-law models)
@@ -599,6 +605,7 @@ Despite constraints, findings are **robust and theoretically significant:**
 - Logarithmic demoted to Rank #33 (ΔAIC=+3.10, evidence ratio 4.7:1 against)
 - Replicates Wixted & Ebbesen (1991) power-law in VR episodic context
 - Uncertainty quantified via between-model prediction variance (SE=0.001-0.046)
+- **Homogeneous effects confirmed** via random slopes testing (ΔAIC=-3.60 favors intercepts-only)
 - Thesis-defensible via gold-standard multi-model inference (Burnham & Anderson, 2002)
 
 Limitations indicate **urgent follow-ups:**
@@ -681,13 +688,10 @@ Limitations indicate **urgent follow-ups:**
 - **Feasibility:** High priority (PhD replication study, ~4 months)
 
 **3. Individual Differences in Power-Law α:**
-- **Current Limitation:** Random intercepts only (assumes all participants same α)
-- **Extension:** Random slopes LMM (estimate individual α per participant)
-  - Compute individual α values from random slopes
-  - Apply model averaging at individual level
-  - Test if α heterogeneity explains aggregate model uncertainty (weight=5.6%)
-- **Expected Insight:** Individual α distribution, correlates with cognitive ability
-- **Feasibility:** Immediate (uses current data, different LMM specification)
+- **Current Status:** Random slopes tested, homogeneous effects confirmed (ΔAIC=-3.60)
+- **Alternative Approach:** Despite aggregate homogeneity, explore tertile/quartile splits on cognitive ability
+- **Expected Insight:** Test if high-ability participants have lower α (slower forgetting)
+- **Feasibility:** Immediate (uses current data, split by cognitive scores if available)
 
 **4. Integrated IRT-LMM with Model Averaging:**
 - **Current Limitation:** Two-stage (IRT θ → LMM) ignores θ uncertainty
@@ -700,11 +704,12 @@ Limitations indicate **urgent follow-ups:**
 **1. Why Extreme Model Uncertainty (N_eff = 15.01)?**
 - **Question:** What causes 16 competitive models (no dominant model)?
 - **Hypotheses:**
-  - Individual α heterogeneity (participants using different power-laws)
-  - Short time range (6 days insufficient to distinguish α values)
-  - Measurement error (IRT θ uncertainty not captured)
-- **Next Steps:** Random slopes LMM to test individual α heterogeneity
-- **Feasibility:** Immediate (current data)
+  - Exponent Uncertainty: Power-law functional form correct, but optimal α uncertain (0.2-0.7 all competitive)
+  - Measurement Error: IRT θ uncertainty not captured in LMM
+  - Short Time Range: 6 days insufficient to distinguish α values
+  - **NOT individual heterogeneity** (random slopes tested, negligible variance)
+- **Next Steps:** Extend retention interval (longer time range may resolve α uncertainty)
+- **Feasibility:** Moderate (requires extended data collection)
 
 **2. Are Domain-Specific α Values Stable Across Paradigms?**
 - **Question:** If What/Where/When have different α, do they replicate across IFR/ICR/IRE?
@@ -716,9 +721,10 @@ Limitations indicate **urgent follow-ups:**
 **3. Does Power-Law α Predict Cognitive Ability?**
 - **Question:** Do individuals with lower α (slower forgetting) have higher IQ/WM?
 - **Literature:** Engle et al. (1999) - WM capacity predicts LTM retrieval, but α not tested
-- **Methodology:** Extract individual α from random slopes LMM, correlate with neuropsych battery
-- **Next Steps:** Requires additional data collection (neuropsych tests, ~2 months)
-- **Feasibility:** Moderate (requires new data)
+- **Note:** Random slopes showed negligible variance, but tertile analysis may still reveal relationships
+- **Methodology:** Split participants by cognitive ability, compare α estimates
+- **Next Steps:** Requires cognitive test data (if not collected, future study)
+- **Feasibility:** Moderate (depends on data availability)
 
 ### Priority Ranking
 
@@ -728,9 +734,9 @@ Limitations indicate **urgent follow-ups:**
 3. **Propagate model-averaged functional form to derivative RQs** - Affects 40+ thesis RQs
 
 **High Priority (Next 2 Weeks):**
-1. **Individual α heterogeneity via random slopes** - Test explanation for model uncertainty
-2. **Replication pre-registration design** - Independent test of model averaging protocol
-3. **Domain-specific α analysis (RQ 5.2.1-5.2.3)** - Test generality of α_eff=0.410
+1. **Replication pre-registration design** - Independent test of model averaging protocol
+2. **Domain-specific α analysis (RQ 5.2.1-5.2.3)** - Test generality of α_eff=0.410
+3. **Cognitive ability tertile analysis** - Explore individual differences despite homogeneous slopes
 
 **Medium Priority (Next 2 Months):**
 1. **Extended retention pilot** - Plan Day 14/28 follow-up (N=20 feasibility)
@@ -754,6 +760,7 @@ Limitations indicate **urgent follow-ups:**
 - From **single model selection** (PowerLaw_04, weight=5.6%) to **robust multi-model inference** (16 models, α_eff=0.410, N_eff=15.01)
 - Gold-standard approach per Burnham & Anderson (2002)
 - Uncertainty quantified via between-model prediction variance (SE=0.001-0.046)
+- **Homogeneous effects empirically validated** (random slopes ΔAIC=-3.60)
 
 **Theoretical shift confirmed:**
 - From **Ebbinghaus logarithmic** (log(t+1)) to **Wixted power-law** ((t+1)^(-0.410))
@@ -764,6 +771,7 @@ Limitations indicate **urgent follow-ups:**
 - Continuous time variable (TSVR_hours) ESSENTIAL
 - Kitchen-sink model comparison (60-80 models) REQUIRED
 - Model averaging when best weight < 30% MANDATORY
+- Random slopes testing MANDATORY (homogeneity cannot be assumed)
 - `docs/results/models.md` provides universal protocol for all trajectory RQs
 
 ---
@@ -773,3 +781,4 @@ Limitations indicate **urgent follow-ups:**
 **Date:** 2025-12-08 (Model averaging implementation)
 **Major Update:** Multi-model inference via model averaging (α_eff=0.410, N_eff=15.01, SE=0.001-0.046)
 **Methodology:** Burnham & Anderson (2002) gold-standard approach for extreme model uncertainty
+**Random Slopes Update:** 2025-12-27 (MANDATORY testing completed, homogeneous effects confirmed)

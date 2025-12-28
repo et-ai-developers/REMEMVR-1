@@ -1,0 +1,21 @@
+                  Mixed Linear Model Regression Results
+=========================================================================
+Model:                  MixedLM       Dependent Variable:       theta    
+No. Observations:       1200          Method:                   ML       
+No. Groups:             100           Scale:                    0.0454   
+Min. group size:        12            Log-Likelihood:           -139.1853
+Max. group size:        12            Converged:                Yes      
+Mean group size:        12.0                                             
+-------------------------------------------------------------------------
+                              Coef.  Std.Err.    z    P>|z| [0.025 0.975]
+-------------------------------------------------------------------------
+Intercept                     -0.542    0.049 -11.031 0.000 -0.638 -0.446
+C(paradigm)[T.ICR]            -0.020    0.023  -0.895 0.371 -0.064  0.024
+C(paradigm)[T.IRE]             0.011    0.023   0.485 0.627 -0.033  0.055
+TSVR_hours                    -0.003    0.000 -10.784 0.000 -0.004 -0.003
+C(paradigm)[T.ICR]:TSVR_hours -0.000    0.000  -1.217 0.224 -0.001  0.000
+C(paradigm)[T.IRE]:TSVR_hours -0.001    0.000  -2.590 0.010 -0.001 -0.000
+Group Var                      0.216    0.156                            
+Group x TSVR_hours Cov        -0.000    0.001                            
+TSVR_hours Var                 0.000    0.000                            
+=========================================================================
