@@ -1,0 +1,25 @@
+RQ 6.2.1: Calibration Trajectory LMM (SEM VERSION)
+==================================================
+
+Formula: latent_calibration ~ Time (TSVR_hours/100)
+Random effects: (1 + Time | UID) or (1 | UID) if slopes failed
+Estimation: ML (for LRT comparison)
+Input: SEM latent calibration (r=0.70 vs r_diff=-0.25)
+
+             Mixed Linear Model Regression Results
+================================================================
+Model:            MixedLM Dependent Variable: latent_calibration
+No. Observations: 400     Method:             ML                
+No. Groups:       100     Scale:              0.1055            
+Min. group size:  4       Log-Likelihood:     -202.1905         
+Max. group size:  4       Converged:          Yes               
+Mean group size:  4.0                                           
+-----------------------------------------------------------------
+                  Coef.   Std.Err.    z     P>|z|  [0.025  0.975]
+-----------------------------------------------------------------
+Intercept         -0.021     0.038  -0.559  0.576  -0.096   0.053
+Time               0.032     0.035   0.928  0.353  -0.036   0.100
+Group Var          0.085     0.078                               
+Group x Time Cov  -0.026     0.054                               
+Time Var           0.040     0.067                               
+================================================================
