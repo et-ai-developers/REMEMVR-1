@@ -1,0 +1,26 @@
+======================================================================
+RANDOM SLOPES COMPARISON SUMMARY
+======================================================================
+
+Outcome: OPTION A: Slopes Improve Fit (ΔAIC > 2)
+
+Model Comparison:
+  Intercepts-only AIC: 891.61
+  Intercepts+slopes AIC: 750.58
+  ΔAIC: 141.03
+
+  Intercepts-only BIC: 962.87
+  Intercepts+slopes BIC: 832.02
+  ΔBIC: 130.85
+
+Likelihood Ratio Test:
+  LRT statistic: 145.0294
+  p-value: 0.0000
+  Significant (p < 0.05): YES
+
+Random Slope Variance: 0.00000585
+Random Slope SD: 0.00241882
+
+Recommendation: Use slopes model for downstream analyses
+Interpretation: Individual differences in decline rates CONFIRMED
+Impact: May reduce model uncertainty (individual trajectories captured)
