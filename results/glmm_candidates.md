@@ -54,11 +54,16 @@ The "Quadruple NULL" pattern for schema effects is a **thesis centerpiece**. GLM
 | RQ | Measure | IRT→LMM Result | GLMM Value | Priority |
 |----|---------|---------------|------------|----------|
 | **5.4.1** | Schema → Accuracy intercept | NULL (p=.548) | **p=.011 (sig)** | ✅ VALIDATED |
-| **6.5.1** | Schema → Confidence intercept | NULL (p_bonf=.634) | Test if congruent baseline differs | MEDIUM |
+| **6.5.1** | Schema → Confidence intercept | NULL (p_bonf=.634) | **p=.003 (sig)** - Congruent > Common > Incongruent | ✅ VALIDATED |
 | **6.5.2** | Schema → Calibration intercept | NULL (p_bonf=.487) | Test if calibration baseline differs | MEDIUM |
-| **6.5.3** | Schema → HCE intercept | NULL (p_bonf=.130, GEE p=.056) | Already used GEE (GLMM-like) | DONE |
+| **6.5.3** | Schema → HCE intercept | NULL (p_bonf=.130, LPM only) | GEE recommended but NOT DONE | LOW |
 
-**CRITICAL:** RQ 5.4.1 already shows **null → significant** change with GLMM. If schema effects exist for intercepts, this undermines "quadruple null" narrative.
+**CRITICAL UPDATE (2025-12-30):**
+- **RQ 5.4.1 (Accuracy):** NULL → SIGNIFICANT (p=.548 → p=.011) ✅ VALIDATED
+- **RQ 6.5.1 (Confidence):** NULL → SIGNIFICANT (p=.634 → p=.003) ✅ VALIDATED
+- **Pattern:** Schema affects BASELINE (encoding strength), NOT TRAJECTORY (decline rates)
+- **Narrative revision required:** "Quadruple NULL" → "Baseline effects, trajectory nulls"
+- **Theoretical interpretation:** Schema affects acquisition (VR encoding), not retention (forgetting)
 
 ### Priority 4: EXCLUDED - Slope/Interaction Tests (Already Robust)
 

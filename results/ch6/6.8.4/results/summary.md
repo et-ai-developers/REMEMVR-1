@@ -17,6 +17,23 @@
 - Data source: Random effects from RQ 6.8.3 location-stratified LMMs
 - No exclusions or missing data
 
+### 1.4 Confidence Response Patterns
+
+**Data Source:** ROOT RQ 6.8.1 (inherited by RQ 6.8.3, used for random effects extraction)
+
+**Empirical Metrics (N=400 participant-session combinations):**
+- **Full scale usage (0-1 continuous):** 0% used only endpoints (good variability)
+- **Mean rating SD:** 0.251
+- **Median rating SD:** 0.273
+- **Restricted range (SD < 0.20):** 101/400 (25.2%)
+
+**Note:** RQ 6.8.1 uses 0-1 probability scale (not 1-5 ordinal). "0% extremes only" means no participants used ONLY values 0 and 1 exclusively, indicating adequate scale utilization across the continuous range.
+
+**Interpretation:** 75% of participant-sessions show adequate rating variability (SD ≥ 0.20). The 25% with restricted range may contribute to lower clustering quality (Silhouette = 0.33) by adding measurement noise to random effects. However, no systematic extreme response bias detected (0% using only endpoints).
+
+**Cross-Reference:** See Section 4 Limitations (lines 329-333) for discussion of response style variability impact on clustering.
+
+
 ### Cluster Selection Results
 
 **BIC Model Selection (K=1 to K=6):**

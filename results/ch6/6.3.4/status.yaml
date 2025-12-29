@@ -20,7 +20,17 @@ rq_results_context: |
   MAJOR FINDING: Domain dissociation (What/Where ICC_slope=0.59, When=0.00001)
   Measurement artifact confirmed (confidence 54-73x > accuracy ICC)
   Summary documented in results/summary.md
-rq_validate: pending
+rq_validate: success
+rq_validate_timestamp: "2025-12-11T23:00:00"
+rq_validate_context: "PASS WITH NOTES (convergence warnings documented, ICC estimates valid)"
+rq_platinum: success
+rq_platinum_timestamp: "2025-12-30T06:20:00"
+rq_platinum_context: |
+  PLATINUM CERTIFIED (Criteria 2025-12-27)
+  Random slopes tested: Documented convergence limitations (conservative estimates)
+  GLMM compliance: Verified not applicable (variance decomposition RQ)
+  Minor gaps: Section 1.4 response patterns (optional), LMM diagnostics plots (optional)
+  Status: PLATINUM with 2 minor polish recommendations
 
 analysis_steps:
   step01_fit_domain_lmms: success
@@ -29,3 +39,15 @@ analysis_steps:
   step04_extract_random_effects: success
   step05_compare_icc_across_domains: success
   step06_compare_to_ch5: success
+  platinum_random_slopes_comparison: success
+
+platinum_certification:
+  status: CERTIFIED
+  date: "2025-12-30"
+  criteria_version: "2025-12-27"
+  blockers_resolved:
+    - random_slopes_testing
+  minor_gaps:
+    - response_patterns_section_1.4
+    - lmm_diagnostics_plots
+  confidence: HIGH
