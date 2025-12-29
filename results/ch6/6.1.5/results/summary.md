@@ -90,7 +90,7 @@
 
 **Integration vs Dissociation Hypothesis Test:**
 
-- **Chi-Square Statistic:** ǲ = 34.34
+- **Chi-Square Statistic:** χ² = 34.34
 - **Degrees of Freedom:** df = 4 (calculated as (3-1) x (3-1))
 - **P-Value:** p < 0.000001 (highly significant)
 - **Effect Size (Cramer's V):** V = 0.414 (medium effect, range: 0.30-0.50)
@@ -102,22 +102,22 @@ The chi-square test reveals highly significant association between confidence an
 ### Cross-Reference to plan.md Expectations
 
 **Expected Outputs:** All 13 output files generated successfully
--  step01_random_effects_loaded.csv (100 rows)
--  step02_standardized_features.csv (100 rows, 5 columns)
--  step03_cluster_selection.csv (5 rows, K=2-6)
--  step04_cluster_assignments.csv (100 rows, all participants assigned)
--  step05_validation_metrics.csv (5 metrics)
--  step06_cluster_characterization.csv (3 clusters)
--  step07 crosstab files (3 files: counts, row %, column %)
--  step08 chi-square test files (2 files: statistics, interpretation)
+- ✅ step01_random_effects_loaded.csv (100 rows)
+- ✅ step02_standardized_features.csv (100 rows, 5 columns)
+- ✅ step03_cluster_selection.csv (5 rows, K=2-6)
+- ✅ step04_cluster_assignments.csv (100 rows, all participants assigned)
+- ✅ step05_validation_metrics.csv (5 metrics)
+- ✅ step06_cluster_characterization.csv (3 clusters)
+- ✅ step07 crosstab files (3 files: counts, row %, column %)
+- ✅ step08 chi-square test files (2 files: statistics, interpretation)
 
 **Substance Criteria Met:**
--  BIC minimum identified (K=3, though monotonic decrease pattern)
--  All cluster sizes >= 10% threshold (smallest cluster: 17%)
--  Silhouette > 0.40 (0.459, PASS)
-- � Jaccard < 0.75 (0.683, marginally below stability threshold)
--  Crosstab sums to 100 participants
--  Chi-square test significant (p < 0.000001, INTEGRATED)
+- ✅ BIC minimum identified (K=3, though monotonic decrease pattern)
+- ✅ All cluster sizes >= 10% threshold (smallest cluster: 17%)
+- ✅ Silhouette > 0.40 (0.459, PASS)
+- ⚠️ Jaccard < 0.75 (0.683, marginally below stability threshold)
+- ✅ Crosstab sums to 100 participants
+- ✅ Chi-square test significant (p < 0.000001, INTEGRATED)
 
 ---
 
@@ -169,7 +169,7 @@ The plot displays 100 participants in 2D feature space (baseline confidence x de
 
 **Cluster Spatial Patterns:**
 
-1. **Cluster 0 (Green, Resilient):** Centered near origin (intercept H 0, slope H -0.1), spread across mid-range baseline confidence with shallow-to-moderate decline rates. Forms central mass of distribution.
+1. **Cluster 0 (Green, Resilient):** Centered near origin (intercept ≈ 0, slope ≈ -0.1), spread across mid-range baseline confidence with shallow-to-moderate decline rates. Forms central mass of distribution.
 
 2. **Cluster 1 (Blue, Resilient):** Right-upper quadrant (high intercept, positive slope). Participants with high baseline confidence AND increasing confidence over time. Centroid at approximately (intercept = +0.8, slope = +0.9). Visually distinct from other clusters.
 
@@ -179,7 +179,7 @@ The plot displays 100 participants in 2D feature space (baseline confidence x de
 
 - Clear spatial separation between Cluster 1 (blue, upper-right) and Cluster 2 (red, lower-left), confirming Davies-Bouldin index of 0.676 (good separation)
 - Cluster 0 (green) occupies central region, overlapping partially with both other clusters (explains moderate silhouette score)
-- One extreme outlier in Cluster 2 (red point at intercept H -3.5, slope H -4) suggests participant with exceptionally low and rapidly declining confidence
+- One extreme outlier in Cluster 2 (red point at intercept ≈ -3.5, slope ≈ -4) suggests participant with exceptionally low and rapidly declining confidence
 
 **Connection to Findings:**
 
@@ -200,7 +200,7 @@ The heatmap displays 3x3 contingency table (Confidence clusters x Accuracy clust
 - **Rows:** RQ 6.1.5 Confidence Clusters (Conf 0, Conf 1, Conf 2)
 - **Columns:** Ch5 5.1.5 Accuracy Clusters (Acc 0, Acc 1, Acc 2)
 - **Color Scale:** Light blue (count=0) to dark blue (count=26), with cell annotations showing exact counts
-- **Statistical Annotation:** ǲ = 34.34, p < 0.000001, V = 0.41 (INTEGRATED)
+- **Statistical Annotation:** χ² = 34.34, p < 0.000001, V = 0.41 (INTEGRATED)
 
 **Heatmap Patterns:**
 
@@ -216,6 +216,8 @@ The heatmap displays 3x3 contingency table (Confidence clusters x Accuracy clust
 
 The heatmap visually confirms the chi-square test result (p < 0.000001, INTEGRATED). The dark blue cell (Conf 1 x Acc 1, count=26) and white cell (Conf 1 x Acc 0, count=0) provide visual evidence of strong association between confidence and accuracy phenotypes. Cramer's V = 0.41 (medium effect) is supported by the moderate color contrast across cells (not perfectly diagonal, but clear patterns visible). The integration interpretation is justified: participants with increasing confidence (Conf 1) tend to have moderate-to-high accuracy (Acc 1-2), while vulnerable confidence (Conf 2) aligns with lower accuracy (Acc 0-1).
 
+**Note:** Individual cell patterns (e.g., Conf 1 x Acc 0 = 0, Conf 2 concentration in Acc 0-1) are exploratory visualizations for interpretative purposes. Only the omnibus chi-square test (χ² = 34.34, p < 0.000001) is confirmatory for overall association. No pairwise cell comparisons were formally tested, so specific cell patterns should be interpreted as hypothesis-generating observations rather than statistically confirmed effects.
+
 ---
 
 ## 3. Interpretation
@@ -227,10 +229,10 @@ The heatmap visually confirms the chi-square test result (p < 0.000001, INTEGRAT
 **Hypothesis Status:** **PARTIALLY SUPPORTED**
 
 **Evidence:**
--  K=3 confidence phenotypes identified (matches Ch5 5.1.5 K=3 accuracy phenotypes)
--  Silhouette score = 0.459 > 0.40 threshold (PASS, acceptable quality)
-- � Jaccard stability = 0.683 < 0.75 threshold (marginally below, indicates moderate instability)
--  Two Resilient clusters (N=42, N=41) + one Vulnerable cluster (N=17) parallels Ch5 structure
+- ✅ K=3 confidence phenotypes identified (matches Ch5 5.1.5 K=3 accuracy phenotypes)
+- ✅ Silhouette score = 0.459 > 0.40 threshold (PASS, acceptable quality)
+- ⚠️ Jaccard stability = 0.683 < 0.75 threshold (marginally below, indicates moderate instability)
+- ✅ Two Resilient clusters (N=42, N=41) + one Vulnerable cluster (N=17) parallels Ch5 structure
 
 **Partial Support Rationale:**
 
@@ -241,7 +243,7 @@ The hypothesis is confirmed regarding cluster count (K=3), silhouette quality (0
 **Hypothesis Status:** **STRONGLY SUPPORTED**
 
 **Evidence:**
-- Chi-square test: ǲ = 34.34, df = 4, p < 0.000001 (highly significant, well below p < 0.05 threshold)
+- Chi-square test: χ² = 34.34, df = 4, p < 0.000001 (highly significant, well below p < 0.05 threshold)
 - Effect size: Cramer's V = 0.414 (medium effect, 0.30-0.50 range)
 - Cross-tabulation shows clear patterns: Conf 1 x Acc 1 (count=26, 63% of Conf 1), Conf 1 x Acc 0 (count=0, perfect exclusion)
 
@@ -494,7 +496,7 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 
 **2. Incorporate Quadratic Slopes:**
 - **Current Limitation:** Only linear random effects (intercept, slope) used. Confidence trajectories may be non-linear (e.g., rapid decline Day 0-1, plateau Day 3-6).
-- **Extension:** Re-run RQ 6.1.4 with quadratic time term (TSVR�) in LMM, extract random quadratic slopes. Cluster on 3 features (intercept, linear slope, quadratic slope). Test if non-linear phenotypes emerge.
+- **Extension:** Re-run RQ 6.1.4 with quadratic time term (TSVR²) in LMM, extract random quadratic slopes. Cluster on 3 features (intercept, linear slope, quadratic slope). Test if non-linear phenotypes emerge.
 - **Expected Insight:** May explain Cluster 1 positive slope (linear approximation to U-shaped trajectory: initial decline, then recovery).
 - **Feasibility:** ~3 days (requires re-running RQ 6.1.4 LMM with quadratic term, re-clustering with 3D feature space)
 
