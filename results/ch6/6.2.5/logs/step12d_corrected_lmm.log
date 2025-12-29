@@ -1,0 +1,76 @@
+RQ 6.2.5: Corrected LMM (Intercepts Only)
+======================================================================
+PLATINUM Fix: Random slopes NOT justified (ΔAIC = +0.47)
+
+Starting corrected LMM analysis...
+Data file: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step01_calibration_age_centered.csv
+
+======================================================================
+LOADING DATA
+======================================================================
+
+Loaded: 400 rows, 8 columns
+Unique participants: 100
+
+======================================================================
+CORRECTED LMM: Random Intercepts Only
+======================================================================
+
+Formula: calibration ~ TSVR_hours * Age_c
+Random effects: (1 | UID) - intercept only (per step12c comparison)
+
+✓ Model converged successfully
+✓ Full summary saved: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step12d_corrected_lmm_summary.txt
+
+--- Fixed Effects ---
+  Intercept           : β = -0.09509, SE = 0.07769, z =  -1.22, p = 0.2209 
+  TSVR_hours          : β =  0.00147, SE = 0.00064, z =   2.28, p = 0.0227 *
+  Age_c               : β =  0.00154, SE = 0.00535, z =   0.29, p = 0.7731 
+  TSVR_hours:Age_c    : β =  0.00002, SE = 0.00004, z =   0.42, p = 0.6713 
+
+--- Random Effects ---
+Var(Intercept): 0.289536
+SD(Intercept): 0.538086
+
+--- Model Fit ---
+Log-likelihood: -526.75
+AIC: 1063.50
+BIC: 1083.46
+
+--- Age Effects with Dual P-Values (Decision D068) ---
+Bonferroni alpha = 0.0167 (0.05 / 3 comparisons)
+
+Age_c:
+  Estimate: 0.001542
+  SE: 0.005349
+  z: 0.29
+  p_uncorrected: 0.7731 (sig @ 0.05: NO)
+  p_bonferroni: 1.0000 (sig @ 0.05: NO)
+
+TSVR_hours:Age_c:
+  Estimate: 0.000019
+  SE: 0.000045
+  z: 0.42
+  p_uncorrected: 0.6713 (sig @ 0.05: NO)
+  p_bonferroni: 1.0000 (sig @ 0.05: NO)
+
+======================================================================
+PRIMARY HYPOTHESIS TEST: Age × Time Interaction
+======================================================================
+
+Estimate: 0.000019
+p_uncorrected: 0.6713
+p_bonferroni: 1.0000
+
+CONCLUSION: NULL - Age-invariant calibration trajectory (parallels Ch5 accuracy findings)
+
+✓ Fixed effects saved: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step12d_corrected_fixed_effects.csv
+✓ Age effects saved: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step12d_corrected_age_effects.csv
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================
+
+✅ Corrected LMM complete
+Primary finding: Age × Time p_bonferroni = 1.0000
+Conclusion: NULL

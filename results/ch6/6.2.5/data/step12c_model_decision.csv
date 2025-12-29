@@ -1,0 +1,2 @@
+delta_AIC,delta_BIC,decision,preferred_model,justification
+0.4734210738324691,8.456350168048402,COMPARABLE,Intercepts Only (simpler),"ΔAIC < 2: Models equivalent, prefer simpler (parsimony)"

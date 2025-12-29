@@ -1,0 +1,96 @@
+RQ 6.2.5: Random Slopes Comparison
+======================================================================
+PLATINUM Requirement: Section 4.4 (MANDATORY)
+
+Starting random slopes comparison...
+Data file: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step01_calibration_age_centered.csv
+
+======================================================================
+LOADING DATA
+======================================================================
+
+Loaded: 400 rows, 8 columns
+Unique participants: 100
+Tests per participant: 4
+
+======================================================================
+MODEL 1: Random Intercepts Only
+======================================================================
+
+Formula: calibration ~ TSVR_hours * Age_c
+Random effects: (1 | UID) - intercept only
+✓ Model converged
+
+Model Fit:
+  Log-likelihood: -526.75
+  Parameters: 5
+  AIC: 1063.50
+  BIC: 1083.46
+
+Random Effects:
+  Var(Intercept): 0.289536
+  SD(Intercept): 0.538086
+
+======================================================================
+MODEL 2: Random Intercepts + Random Slopes
+======================================================================
+
+Formula: calibration ~ TSVR_hours * Age_c
+Random effects: (1 + TSVR_hours | UID) - intercept and slope
+✓ Model converged
+
+Model Fit:
+  Log-likelihood: -524.99
+  Parameters: 7
+  AIC: 1063.97
+  BIC: 1091.91
+
+Random Effects:
+  Var(Intercept): 0.348760
+  Var(TSVR_hours): 0.000015
+  Cov(Intercept, TSVR_hours): -0.000848
+  SD(Intercept): 0.590559
+  SD(TSVR_hours): 0.003920
+
+======================================================================
+MODEL COMPARISON
+======================================================================
+
+AIC Comparison:
+  Model 1 (Intercepts Only): AIC = 1063.50
+  Model 2 (Random Slopes):   AIC = 1063.97
+  ΔAIC (Model2 - Model1): +0.47
+
+BIC Comparison:
+  Model 1 (Intercepts Only): BIC = 1083.46
+  Model 2 (Random Slopes):   BIC = 1091.91
+  ΔBIC (Model2 - Model1): +8.46
+
+======================================================================
+DECISION (AIC-based)
+======================================================================
+
+Result: COMPARABLE
+Preferred Model: Intercepts Only (simpler)
+Justification: ΔAIC < 2: Models equivalent, prefer simpler (parsimony)
+
+======================================================================
+INTERPRETATION
+======================================================================
+
+⚠️  Random slopes NOT justified:
+  - Random slopes model does not improve fit (ΔAIC ≥ -2)
+  - Simpler intercepts-only model should be preferred (parsimony)
+  - Original analysis used random slopes unnecessarily
+  - Recommendation: Re-run with intercepts-only model
+
+✓ Comparison saved: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step12c_random_slopes_comparison.csv
+✓ Decision saved: /home/etai/projects/REMEMVR/results/ch6/6.2.5/data/step12c_model_decision.csv
+
+======================================================================
+ANALYSIS COMPLETE
+======================================================================
+
+✅ Random slopes comparison complete
+Preferred model: Intercepts Only (simpler)
+See step12c_random_slopes_comparison.csv for full comparison
