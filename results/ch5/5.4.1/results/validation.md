@@ -231,6 +231,54 @@
 
 ---
 
+### ✅ GLMM Validation (Section 1 - MANDATORY for Intercept Hypotheses)
+
+**Date:** 2025-12-30
+**Purpose:** Verify IRT→LMM baseline congruence findings with item-level GLMM
+**Files:** `results/glmm_comparison.md`, `code/GLMM.py`
+
+**Method:**
+- Sample: N=28,800 item-level binary responses (100 participants × 4 tests × 72 items)
+- Model: Generalized Linear Mixed Model with binomial family
+- Random effects: Crossed random effects for participant and item clustering (GEE approach)
+- Time variable: log(TSVR_hours) transformation
+
+**Baseline Congruence Effects (Intercept Differences):**
+
+| Contrast | IRT→LMM (N=1,200) | GLMM (N=28,800) | Interpretation |
+|----------|-------------------|-----------------|----------------|
+| **Congruent vs Common** | β=-0.026, p=.548 (null) | **β=0.195, p=.011** (SIGNIFICANT) | **Effect revealed** |
+| Incongruent vs Common | β=0.045, p=.293 (null) | β=-0.077, p=.242 (null) | NULL confirmed |
+
+**Trajectory Effects (Congruence × Time Interactions):**
+
+| Interaction | IRT→LMM | GLMM | Interpretation |
+|-------------|---------|------|----------------|
+| Congruent × Time | β=-0.00012, p=.662 | β=-0.0216, p=.324 | NULL (both methods) |
+| Incongruent × Time | β=-0.00011, p=.683 | β=-0.0109, p=.509 | NULL (both methods) |
+
+**Key Finding:** GLMM reveals **congruent items have higher baseline accuracy** (+4.6% at T1, p=.011) compared to common items—an effect **masked by IRT aggregation** (IRT→LMM p=.548). However, **forgetting rates remain identical** across congruence levels (interactions p>.32 in both methods).
+
+**Interpretation:**
+- Schema congruence affects **BASELINE ENCODING** (congruent items better encoded initially)
+- Schema congruence does NOT affect **FORGETTING RATE** (trajectories parallel over 6 days)
+- GLMM item-level power (N=28,800) detects baseline effect missed by IRT aggregation (24× compression)
+- Trajectory nulls ROBUST across both methods (convergent evidence)
+
+**Impact on Narrative:**
+- Original conclusion: "Schema congruence has no effect on memory"
+- Revised conclusion: "Schema affects ACQUISITION (encoding), not RETENTION (consolidation)"
+- Framework: "Baseline effects, trajectory nulls" (replicates in Ch6 RQ 6.5.1 for confidence)
+- Theoretical shift: Schema-enhanced encoding (Brod et al., 2018) ✓, Schema-mediated consolidation (Ghosh & Gilboa, 2014) ✗
+
+**Decision:** ✅ **Integrated into summary.md Sections 1, 2, 4** (2025-12-30)
+
+**Documentation:** GLMM validation complete. Baseline encoding effect documented, narrative revised.
+
+**Cross-Chapter Convergence:** This pattern replicates in RQ 6.5.1 (confidence: GLMM p=.003 baseline effect, trajectory null), establishing "baseline effects, trajectory nulls" as robust schema framework across accuracy and confidence.
+
+---
+
 ## Issues Requiring Attention
 
 ### CRITICAL (Must fix before thesis)
