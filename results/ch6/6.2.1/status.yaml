@@ -22,12 +22,17 @@ rq_results_context: |
   Plausibility acceptable (0 anomalies flagged)
   Summary documented in results/summary.md
 rq_platinum_context: |
-  PLATINUM CERTIFIED (2025-12-27)
+  PLATINUM-ROBUST CERTIFIED (2025-12-30 re-certification)
+  Previous certification: 2025-12-27
+  SEM validation: p=0.004→0.013 (effect survives artifact removal)
+  GLMM compliance: NOT REQUIRED (slope-only RQ, manual evaluation documented)
   Mandatory analyses completed:
   - Difference score reliability: r_diff=0.822 (ACCEPTABLE)
   - Confidence response patterns: 84.8% full scale usage, 0% extreme responding
   - Random slopes tested: Group Var=0.336, Time Var=0.141 (both converged)
+  - SEM latent variables: r=0.70, p=0.013 POST-SEM (ROBUST)
   All PLATINUM criteria met (0 blockers, 0 issues)
+  Status: PLATINUM-ROBUST (highest tier, SEM-validated)
 
 # Analysis Steps
 analysis_steps:
@@ -43,10 +48,12 @@ analysis_steps:
   step07_prepare_trajectory_plot: success
   step08_diff_score_reliability: success
   step09_confidence_response_patterns: success
+  steps_05_to_07_SEM: success
 
 # PLATINUM Certification
-platinum_status: CERTIFIED
-platinum_date: 2025-12-27
+platinum_status: PLATINUM-ROBUST
+platinum_date: 2025-12-30
+platinum_previous_date: 2025-12-27
 platinum_agent: rq_platinum
 platinum_criteria:
   statistical_rigor: PASS
@@ -55,6 +62,8 @@ platinum_criteria:
   data_quality: PASS
   theoretical_coherence: PASS
   zero_critical_issues: PASS
+  glmm_compliance: NOT_REQUIRED (slope-only RQ)
+  sem_validation: PASS (p=0.013 POST-SEM, effect survives)
 
 # Files Generated
 files_generated:
@@ -70,8 +79,12 @@ files_generated:
   - data/step07_calibration_trajectory_theta_data.csv
   - data/step08_diff_score_reliability.csv
   - data/step09_confidence_response_patterns.csv
+  - data/step06_time_effect_SEM.csv
+  - data/step07_calibration_trajectory_theta_data_SEM.csv
   - plots/calibration_trajectory.png
   - plots/brier_by_test.png
   - plots/ece_by_test.png
   - results/summary.md
   - results/validation.md
+  - PHASE3_SEM_COMPARISON_CRITICAL_FINDING.md
+  - PLATINUM_FINALIZATION_REPORT.md

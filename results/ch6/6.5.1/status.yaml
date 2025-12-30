@@ -67,6 +67,9 @@ analysis_steps:
   platinum_lmm_diagnostics: success
   platinum_response_patterns: success
 
-platinum_status: CERTIFIED
-platinum_date: 2025-12-27
-certification_report: PLATINUM_FINALIZATION_REPORT.md
+platinum_status: CERTIFIED_FULL
+platinum_date: 2025-12-30
+certification_report: PLATINUM_UPGRADE_2025-12-30.md
+previous_status: CONDITIONAL_PLATINUM (2025-12-27, GLMM baseline effects required narrative decision)
+upgrade_decision: Accept GLMM findings (baseline effects framework adopted)
+glmm_validation: COMPLETED (2025-12-27, N=28800, baseline p<0.01, trajectories NULL)

@@ -618,3 +618,82 @@ Per glmm.md precedent (RQ 5.4.1, 5.1.3, 6.1.3), **all intercept-only hypotheses*
 **GLMM Validation completed:** 2025-12-27 23:45
 **Outcome:** 🔴 **CRITICAL FINDING - Baseline effects discovered**
 **Recommendation:** **User must revise thesis narrative** to reflect GLMM findings
+
+---
+
+# PLATINUM UPGRADE ADDENDUM
+
+**Upgrade Date:** 2025-12-30
+**Upgrader:** User decision (Option A: Accept GLMM findings)
+**Status:** ✅ **FULL PLATINUM** (upgraded from CONDITIONAL)
+
+---
+
+## Decision Summary
+
+**Previous Status (2025-12-27):** CONDITIONAL PLATINUM
+- GLMM validation revealed NULL→SIGNIFICANT baseline effects (p<.01)
+- Required user decision on thesis narrative revision
+- All statistical work complete
+
+**User Decision (2025-12-30):** Accept GLMM findings as PRIMARY result
+
+**Rationale:**
+- GLMM has 72× more observations than IRT→LMM (N=28,800 vs N=400)
+- Baseline effects converge with RQ 5.4.1 (accuracy shows same pattern)
+- Trajectory nulls robust across both methods (Schema × Time interactions NULL)
+- RQ 6.5.3 GEE validation confirms HCE null (completes schema pattern)
+
+---
+
+## Revised Theoretical Framework
+
+**Narrative Change:** "Quadruple NULL" → **"Baseline Effects, Trajectory Nulls"**
+
+**Schema Pattern Across Measures:**
+
+| RQ | Measure | IRT→LMM | GLMM/GEE | Interpretation |
+|----|---------|---------|----------|----------------|
+| 5.4.1 | Accuracy baseline | NULL | SIG (p=.011) | Baseline effect |
+| 6.5.1 | Confidence baseline | NULL | SIG (p=.003) | Baseline effect |
+| 6.5.2 | Calibration baseline | NULL | Pending | - |
+| 6.5.3 | HCE rate | NULL | NULL (p=.169) | TRUE NULL |
+
+**Key Finding:** Schema affects ACQUISITION (encoding strength) not RETENTION (forgetting dynamics) or metacognitive dissociation (HCE)
+
+**Congruence Hierarchy:** Congruent > Common > Incongruent (baseline only)
+
+**Trajectory Universality:** Forgetting rates equivalent across schema types (state-like decay)
+
+---
+
+## Files Created
+
+**Upgrade Documentation:**
+1. `PLATINUM_UPGRADE_2025-12-30.md` - Comprehensive upgrade rationale
+2. `status.yaml` - Updated with CERTIFIED_FULL status
+3. `results/validation.md` - This addendum
+
+**Existing GLMM Files (Referenced):**
+1. `code/glmm_validation.py` (2025-12-27)
+2. `data/glmm_comparison.csv` (IRT→LMM vs GLMM results)
+3. `data/glmm_summary.txt` (N=28,800 model output)
+
+---
+
+## PLATINUM Status
+
+**Final Status:** ✅ **FULL PLATINUM** (all criteria met, all blockers resolved)
+
+**Decision:** GLMM baseline effects adopted as primary finding
+**Framework:** Baseline/Trajectory dissociation (encoding > retention schema effects)
+**Convergence:** RQ 5.4.1 (accuracy) + RQ 6.5.1 (confidence) + RQ 6.5.3 (HCE null)
+
+**Publication Ready:** YES - Demonstrates multi-method validation and theoretical nuance
+
+---
+
+**Upgrade completed:** 2025-12-30
+**Certification:** FULL PLATINUM
+**Thesis integration:** User task (Chapter 6 Discussion revision)
+

@@ -1,0 +1,36 @@
+RQ 6.5.3 - GEE Validation for High-Confidence Errors
+================================================================================
+Analysis Date: 2025-12-30 09:56:19
+Sample Size: 7,200 item-responses from 100 participants
+HCE Events: 358 (4.97%)
+
+                               GEE Regression Results                              
+===================================================================================
+Dep. Variable:                    HCE_flag   No. Observations:                 7200
+Model:                                 GEE   No. clusters:                      100
+Method:                        Generalized   Min. cluster size:                  72
+                      Estimating Equations   Max. cluster size:                  72
+Family:                           Binomial   Mean cluster size:                72.0
+Dependence structure:         Exchangeable   Num. iterations:                     4
+Date:                     Tue, 30 Dec 2025   Scale:                           1.000
+Covariance type:                    robust   Time:                         09:56:19
+=========================================================================================
+                            coef    std err          z      P>|z|      [0.025      0.975]
+-----------------------------------------------------------------------------------------
+const                    -3.0986      0.175    -17.695      0.000      -3.442      -2.755
+Congruent_vs_Common       0.0845      0.220      0.385      0.700      -0.346       0.515
+Incongruent_vs_Common     0.3781      0.198      1.908      0.056      -0.010       0.766
+Days                     -0.0193      0.048     -0.399      0.690      -0.114       0.075
+Congruent_x_Days          0.0626      0.065      0.964      0.335      -0.065       0.190
+Incongruent_x_Days       -0.0255      0.054     -0.471      0.638      -0.132       0.081
+==============================================================================
+Skew:                          4.1355   Kurtosis:                      15.1275
+Centered skew:                 3.8798   Centered kurtosis:             14.0913
+==============================================================================
+
+Post-Hoc Contrasts (Bonferroni Corrected):
+--------------------------------------------------------------------------------
+                Contrast  Estimate       SE        z  p_uncorrected  p_bonferroni Sig_uncorr Sig_bonf
+   Incongruent vs Common  0.378054 0.198099 1.908411       0.056338      0.169014         ns       ns
+     Congruent vs Common  0.084474 0.219614 0.384646       0.700500      1.000000         ns       ns
+Incongruent vs Congruent  0.293580 0.295759 0.992633       0.320889      0.962666         ns       ns

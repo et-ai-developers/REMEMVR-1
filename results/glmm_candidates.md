@@ -56,14 +56,16 @@ The "Quadruple NULL" pattern for schema effects is a **thesis centerpiece**. GLM
 | **5.4.1** | Schema → Accuracy intercept | NULL (p=.548) | **p=.011 (sig)** | ✅ VALIDATED |
 | **6.5.1** | Schema → Confidence intercept | NULL (p_bonf=.634) | **p=.003 (sig)** - Congruent > Common > Incongruent | ✅ VALIDATED |
 | **6.5.2** | Schema → Calibration intercept | NULL (p_bonf=.487) | Test if calibration baseline differs | MEDIUM |
-| **6.5.3** | Schema → HCE intercept | NULL (p_bonf=.130, LPM only) | GEE recommended but NOT DONE | LOW |
+| **6.5.3** | Schema → HCE intercept | NULL (p_bonf=.130, LPM + GEE) | **GEE validated (p_bonf=.169)** ✅ NULL CONFIRMED | ✅ DONE |
 
 **CRITICAL UPDATE (2025-12-30):**
 - **RQ 5.4.1 (Accuracy):** NULL → SIGNIFICANT (p=.548 → p=.011) ✅ VALIDATED
 - **RQ 6.5.1 (Confidence):** NULL → SIGNIFICANT (p=.634 → p=.003) ✅ VALIDATED
+- **RQ 6.5.2 (Calibration):** NULL (pending GLMM validation)
+- **RQ 6.5.3 (HCE):** NULL CONFIRMED via GEE (p_bonf=.169) ✅ VALIDATED
 - **Pattern:** Schema affects BASELINE (encoding strength), NOT TRAJECTORY (decline rates)
-- **Narrative revision required:** "Quadruple NULL" → "Baseline effects, trajectory nulls"
-- **Theoretical interpretation:** Schema affects acquisition (VR encoding), not retention (forgetting)
+- **Narrative revision required:** "Quadruple NULL" → "Baseline effects, trajectory nulls (except HCE)"
+- **Theoretical interpretation:** Schema affects acquisition (VR encoding), not retention (forgetting) or metacognitive dissociation (HCE)
 
 ### Priority 4: EXCLUDED - Slope/Interaction Tests (Already Robust)
 
