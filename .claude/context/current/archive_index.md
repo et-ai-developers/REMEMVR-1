@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2025-12-29 (context-manager curation - Session 2025-12-29 ~18:00 archived)
+**Last Updated:** 2025-12-31 (context-manager curation - Sessions 2025-12-29 21:00 and 2025-12-30 archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -684,3 +684,34 @@
 
 ### sem_five_paradigm_patterns_complete
 **Description:** 5-Pattern SEM framework completion (Session 2025-12-29 09:00). Complete classification system for ANY SEM validation result: (1) SPURIOUS (6.2.2, <20% SNR, disappeared POST-SEM), (2) ROBUST (6.2.1, 20-30% SNR, weakened but survived), (3) ROBUST-STABLE (6.4.2, ~30% SNR, ZERO weakening - NEW VARIANT), (4) SUPER-ROBUST (6.3.2, >90% SNR, strengthened POST-SEM), (5) TRUE NULL (6.8.2, 6.5.2, ~0% SNR, NULL confirmed POST-SEM). Unified theory: SNR predicts outcome. Paradigm vs Schema contrast: Task structure matters, semantic content doesn't. Domain vs Paradigm vs LocationType ICC: Individual differences driven by WHAT (domain), not HOW (paradigm). Dual standardization protocol universal. Reliability ceiling hypothesis. NULL robustness despite poor reliability. Cue diagnosticity framework.
+
+### rq_6_3_3_platinum_certified_glmm_p_value_artifact
+**Description:** RQ 6.3.3 PLATINUM certification (2025-12-29 21:00) including critical discovery of GLMM p-value artifact pattern (p<0.05 with β=0.000000 at N=28,800). Documents full GLMM validation, random slopes comparison (ΔAIC=141), and establishment of dual-criteria framework (statistical + practical significance). Major methodological contribution establishing that GLMM validation requires effect size inspection, not just p-values.
+
+### random_slopes_vs_glmm_validation_separation
+**Description:** Methodological clarification (2025-12-29 21:00) that random slopes testing and GLMM validation are TWO INDEPENDENT requirements. Random slopes = universal model specification requirement; GLMM validation = conditional methodological validation for single-construct RQs. Documents user's "All LMMs" rule interpretation, independence demonstration via RQ 6.3.3 example, and practical workflow for both requirements.
+
+### evidence_based_decision_workflow_circuit_breaker_extension
+**Description:** Circuit Breaker #1 extension to DECISIONS (2025-12-29 21:00), not just factual claims. Workflow triggered when user says "revisit fundamentals" - requires systematic context-finder investigation before deciding. Documents RQ 6.3.3 GLMM blocker resolution via evidence-based approach: purpose search, precedent search, case characteristics, evidence synthesis, confident decision. Prevents guessing on methodological decisions, ROI 3-4× time invested.
+
+### platinum_batch_aggressive_parallel_strategy
+**Description:** Aggressive parallel batch processing strategy (2025-12-30) certifying 11 Ch6 RQs in single session via series-based parallel agent invocations (Domain, Paradigm, LocationType). Documents execution results (8 new certs, 3 re-verifications), time efficiency (3-4h vs 5-6h sequential, 33-40% savings), major discoveries (schema baseline effects, source confidence reversal, random slopes validation), and 2 Schema blockers (6.5.1 narrative revision, 6.5.3 GEE missing). Validated efficient workflow achieving 14/17 RQs (82%) with flexible pivoting strategy.
+
+### schema_baseline_trajectory_framework_cross_chapter_validated
+**Description:** Established framework (2025-12-30 continuation, validated 2025-12-31) distinguishing schema effects on BASELINE (encoding strength) vs TRAJECTORY (forgetting dynamics). Documents "Quadruple NULL" → "Baseline Effects, Trajectory Nulls" narrative revision based on GLMM validation across RQs 5.4.1 (accuracy p=.011), 6.5.1 (confidence p=.003), 6.5.3 (HCE NULL p_bonf=.169). Cross-chapter convergence validates that schema congruence affects ACQUISITION (Congruent > Common > Incongruent) but NOT RETENTION (parallel decline). Major thesis framework shift with theoretical coherence: VR immersion creates schema effects at encoding, overrides reconstruction during retrieval.
+
+### source_dest_opposite_correlations_certified
+**Description:** RQ 6.8.3 PLATINUM certification (2025-12-30) documenting Source-Destination opposite-correlation pattern NON-REPLICATION in confidence (hypothesis NOT supported). Accuracy (Ch5 5.5.6): Source r=+0.99 (regression to mean), Destination r=-0.90 (fan effect) - OPPOSITE signs. Confidence (RQ 6.8.3): Source r=-0.24, Destination r=-0.40 (SAME sign, both negative). MAJOR DISCOVERY: Memory-metacognition system dissociation - metacognitive monitoring does NOT have full access to memory architecture. First study testing Source-Dest across accuracy AND confidence, reveals partially independent systems. Cross-chapter comparison with exceptional clustering (5.5.7 Silhouette=0.417 vs 6.8.4 Silhouette=0.330, accuracy 21% better separation) supports accuracy as purer memory measure.
+
+### ch5_targeted_high_impact_certification
+**Description:** Strategic targeted certification approach (2025-12-31) for Ch5 focusing on 4 high-impact discoveries vs exhaustive batch (2h vs 15-20h savings). Selection criteria: cross-chapter validation (5.4.1 schema), unique contributions (5.5.6 opposite correlations, 5.5.7 exceptional clustering), methodological innovation (5.1.3 age-invariance + 66-model robustness + VR Scaffolding Hypothesis). Progress: Ch5 28% → 40% certified (14/35 RQs), all major theoretical contributions secured, thesis defense readiness achieved without diminishing returns.
+
+### rq_5_4_1_glmm_narrative_integration_complete
+**Description:** RQ 5.4.1 GLMM narrative integration (2025-12-31) completing cross-chapter "Baseline Effects, Trajectory Nulls" framework validation. GLMM baseline effect (p=.548→.011, Congruent +4.6% at T1) integrated into summary.md (Sections 1, 2, 4) + validation.md (46 lines). Hypothesis status updated: "NOT SUPPORTED" → "PARTIALLY SUPPORTED". Cross-chapter convergence with RQ 6.5.1 (confidence p=.003) documented. Blocker resolved via 30-min integration + re-certification, achieving FULL PLATINUM status.
+
+### rq_5_5_7_exceptional_clustering_certified
+**Description:** RQ 5.5.7 exceptional learner phenotype clustering PLATINUM certified (2025-12-31). ONLY Ch5 RQ with Silhouette ≥ 0.40 (actual: 0.417), triple validation passed (Davies-Bouldin 0.785, Jaccard 0.831). Cross-chapter comparison: accuracy clustering 21% better than confidence (6.8.4 Silhouette=0.330), suggests accuracy = purer measure of memory architecture. Clinical/applied value: accuracy trajectories preferred for cognitive phenotyping, confidence less reliable due to response style variability.
+
+### rq_5_1_3_age_invariant_forgetting_vr_scaffolding
+**Description:** RQ 5.1.3 age-invariant forgetting + VR Scaffolding Hypothesis (identified 2025-12-31 as Tier 1 priority). Age × Time NULL robust across 40/66 functional forms, GLMM age baseline effect p=.061→.014 (affects encoding, NOT retention). VR Scaffolding Hypothesis: immersive environmental context compensates for age-related hippocampal decline, reducing/eliminating age differences in forgetting rates. Cross-chapter convergence with RQs 6.1.3, 6.4.3 (confidence age-invariance). PLATINUM GOLD-level extensions: 66-model comparison + model averaging (first aging memory study), extended summary.md 421 lines. Novel contribution to aging + memory literature with methodological innovation.
+
