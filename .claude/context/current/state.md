@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2025-12-31 (Ch5 100% completion session)
+**Last Updated:** 2025-12-31 (Post-curation: Ch5 100% completion session)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2025-12-31 (Ch5 100% completion - about to curate)
-**Token Count:** ~15k tokens (3 sessions: Evening + Late Evening + Ch5 100% Completion)
+**Last /save:** 2025-12-31 (Ch5 100% completion - curated)
+**Token Count:** ~3.8k tokens (2 sessions: Late Evening + Ch5 100% Completion, -80% reduction)
 
 ---
 
@@ -11,7 +11,7 @@
 
 **Current Task:** ✅ **CH5 100% COMPLETION ACHIEVED** (35/35 RQs PLATINUM CERTIFIED)
 
-**Context:** After resolving RQ 5.2.3 blocker (Late Evening session, 71% → 71%), user selected to "finish ch5" instead of moving to Ch7. Invoked context-finder to identify 10 remaining uncertified RQs. Executed Hybrid strategy (Batch 1: 2 quick wins parallel, Batch 2: 4 Tier 2 moderate parallel, Batch 3: 4 Tier 3 sequential). Achieved 10/10 successful PLATINUM certifications in ~11 hours.
+**Context:** After resolving RQ 5.2.3 blocker (Late Evening session, 71% → 71%), user selected to "finish ch5" instead of moving to Ch7. Invoked context-finder to identify 10 remaining uncertified RQs. Executed HYBRID strategy (Batch 1: 2 quick wins parallel, Batch 2: 4 Tier 2 moderate parallel, Batch 3: 4 Tier 3 sequential). Achieved 10/10 successful PLATINUM certifications in ~11 hours.
 
 **Status:** ✅ **CH6 100% COMPLETE (30/30)** + ✅ **CH5 100% COMPLETE (35/35)** + **CH7 0% (0/20)** → **TOTAL 65/85 RQs CERTIFIED (76%)**
 
@@ -36,193 +36,15 @@
 
 ## Session History
 
-**NOTE:** Sessions 2025-12-13 through 2025-12-31 Afternoon archived to topic files. Sessions 2025-12-31 Evening, Late Evening, and Ch5 100% Completion preserved verbatim (last 3 sessions per sliding window).
+**NOTE:** Session 2025-12-31 Evening archived to `ch5_selective_tier2_batch_certification.md`. Sessions 2025-12-31 Late Evening and Ch5 100% Completion preserved verbatim (last 2 sessions per sliding window).
 
-**Archived This Curation (2025-12-31 Late Evening):**
+**Archived This Curation (2025-12-31 Ch5 100%):**
+- Session 2025-12-31 Evening → `ch5_selective_tier2_batch_certification.md`
+
+**Previously Archived (2025-12-31 Evening + Late Evening):**
 - Session 2025-12-31 Afternoon → `ch5_tier1_batch_certification_complete.md`, `rq_5_1_4_critical_random_slopes_finding.md`, `purification_paradox_4th_replication_convergence_power.md`, `consolidation_piecewise_random_slopes_massive_improvement.md`, `random_slopes_testing_taxonomy_4_4_validation.md`, `icc_slope_investigation_validated_2025_12_03_lr_test.md`
-
-**Previously Archived (2025-12-31 Evening):**
 - Session 2025-12-31 Morning → `ch5_targeted_high_impact_certification.md`, `rq_5_4_1_glmm_narrative_integration_complete.md`, `schema_baseline_trajectory_framework_cross_chapter_validated.md`, `source_dest_opposite_correlations_certified.md`, `rq_5_5_7_exceptional_clustering_certified.md`, `rq_5_1_3_age_invariant_forgetting_vr_scaffolding.md`
-
-**Previous Curations:**
-- Session 2025-12-30 Continuation (2025-12-31 Morning) → `ch6_100_pct_certification_complete.md`, `schema_baseline_trajectory_framework_finalized.md`, `gee_validation_protocol_binary_outcomes.md`, `sem_validated_rqs_quick_wins.md`, `rq_6_7_1_confidence_trajectory_prediction.md`
-- Session 2025-12-29 21:00 (2025-12-31 Morning) → `glmm_policy_clarified_single_construct_vs_difference_score.md`, `platinum_certification_batch_ch6_24_rqs_started.md`, `rq_6_3_3_platinum_certified_glmm_p_value_artifact.md`, `random_slopes_vs_glmm_validation_separation.md`, `evidence_based_decision_workflow_circuit_breaker_extension.md`
-- Session 2025-12-30 (2025-12-31 Morning) → `platinum_batch_aggressive_parallel_strategy.md`, `schema_baseline_trajectory_framework_cross_chapter_validated.md`, `source_dest_opposite_correlations_certified.md`
-
----
-
-## Session (2025-12-31 Evening - Selective Tier 2 Batch)
-
-**Task:** CH5 SELECTIVE TIER 2 CERTIFICATION (OPTION B STRATEGY)
-
-**Context:** After Tier 1 completion, user selected "continue with ch5 certification". I presented uncertified breakdown: 17 total (11 Tier 2, 6 Tier 3). Recommended Option B: Selective Tier 2 (5 high-value RQs - 5.2.3 Age×Domain, 5.3.4 Age×Paradigm, 5.4.3 Age×Schema, 5.2.4 Purification, 5.3.5 Paradigm convergence). User chose Option B. Invoked rq_platinum on all 5 in parallel.
-
-**OUTCOME:** 4/5 PLATINUM certified successfully, 1 BLOCKER identified requiring ~1h resolution.
-
----
-
-### 1. Selective Tier 2 Strategy Selection
-
-**User Request:** "Lets do option B" (Selective Tier 2: 5 high-value RQs)
-
-**Strategic Rationale:**
-- **Critical patterns certified:** All major age-moderation analyses (5.2.3, 5.3.4, 5.4.3) validated
-- **Methodological rigor:** Purification (5.2.4) and paradigm convergence (5.3.5) strengthen foundations
-- **Time-efficient:** 5-7h vs 11-15h for full Tier 2
-- **Thesis-sufficient:** 66% certification demonstrates thoroughness without diminishing returns
-- **Defer intelligently:** Remaining 6 Tier 2 + 6 Tier 3 can be post-defense if needed
-
-**Selected RQs:**
-1. **5.2.3** - Age × Domain (What/Where) - NULL age moderation expected
-2. **5.3.4** - Age × Paradigm (Free/Cued/Recognition) - NULL age moderation expected
-3. **5.4.3** - Age × Schema (Common/Congruent/Incongruent) - NULL age moderation expected
-4. **5.2.4** - IRT-CTT Purification Convergence - Methodological validation
-5. **5.3.5** - IRT-CTT Paradigm Convergence - Measurement robustness
-
-**Target:** 25/35 certified (71%), ~5-7h estimated
-
----
-
-### 2. Parallel Certification Execution
-
-**Invocation:** rq_platinum on all 5 RQs simultaneously (~2h elapsed, agents ran in parallel)
-
-**SUCCESSFUL CERTIFICATIONS:**
-
-**RQ 5.3.4 - Age × Paradigm Interactions - PLATINUM** ✅
-- **Time:** ~60 min
-- **Key Work:** GLMM validation completed (NULL findings robust at item level N=28,800)
-- **Finding:** Age effects on forgetting do NOT vary by retrieval paradigm (p_bonf > 0.7)
-- **Model Correction:** Random slopes specification corrected (log_TSVR not TSVR_hours, 7.75× variance increase)
-- **Files:** glmm_validation.py, PLATINUM_FINALIZATION_REPORT.md
-
-**RQ 5.4.3 - Age × Schema Congruence - PLATINUM** ✅
-- **Time:** ~60 min
-- **Key Work:** Random slopes testing completed (MANDATORY blocker resolved)
-- **Finding:** Age effects uniform across schema congruence levels (p_bonf > 0.12)
-- **Discovery:** Large individual differences in rapid forgetting (σ²=1.389) NOT explained by age/schema
-- **Files:** random_slopes_comparison.py, random_slopes_validation.md, PLATINUM_FINALIZATION_REPORT.md
-
-**RQ 5.2.4 - IRT-CTT Purification Convergence - PLATINUM** ✅
-- **Time:** ~120 min (comprehensive review)
-- **Key Work:** GLMM compliance verified (N/A for methodological RQ), random slopes documented
-- **Finding:** IRT-CTT exceptional static convergence (r=0.906-0.970), dynamic divergence instructive
-- **Lesson:** Functional form (Recip+Log) matters MORE than measurement method (IRT vs CTT)
-- **Files:** PLATINUM_FINALIZATION_REPORT.md
-
-**RQ 5.3.5 - IRT-CTT Paradigm Convergence - PLATINUM** ✅
-- **Time:** ~45 min
-- **Key Work:** Convergence RQ type-specific evaluation (GLMM N/A, random slopes structural equivalence)
-- **Finding:** Paradigm-specific forgetting robust to measurement approach (r=0.84-0.88, kappa=0.667)
-- **Validation:** RQ 5.3.1 findings not IRT scaling artifact
-- **Files:** PLATINUM_FINALIZATION_REPORT.md
-
----
-
-**BLOCKER IDENTIFIED:**
-
-**RQ 5.2.3 - Age × Domain (What/Where) - CONDITIONAL PLATINUM** 🔴
-
-**Blockers:**
-1. **GLMM Validation MISSING** (CRITICAL)
-   - RQ 5.2.3 is MEDIUM priority in glmm_candidates.md line 45 → GLMM MANDATORY
-   - Current: IRT→LMM Age main effect p=0.156 (null), Age:Domain p=0.713 (null)
-   - Risk: Historical precedent shows NULL→SIGNIFICANT (RQ 5.4.1 p=0.548→0.011, RQ 6.5.1 p=0.660→0.003)
-   - **Action Required:** Implement GLMM validation (item-level N=28,800, ~30 min)
-
-2. **Random Slopes Testing NOT Documented** (MANDATORY Section 4.4)
-   - Plan specified random slopes, executed intercepts-only (convergence failure)
-   - No random_slopes_comparison.py file exists
-   - Convergence failure mentioned but not systematically documented
-   - **Action Required:** Create comparison script documenting attempt + failure (~20 min)
-
-**Additional Non-Blocking Issues:**
-- Plots outdated (Nov 30 with 3 domains vs Dec 2 analysis with 2 domains)
-- Power analysis for NULL findings recommended (not MANDATORY)
-
-**Agent Report Summary:**
-- Analysis quality: GOLD (well-executed, NULL findings)
-- Documentation: Adequate (summary.md comprehensive, validation.md present)
-- Missing: 2 MANDATORY analyses (GLMM + random slopes testing)
-- Estimated resolution time: ~1h total
-
----
-
-### 3. Certification Results Summary
-
-**Success Rate:** 4/5 PLATINUM (80%)
-
-**Time Investment:**
-- Estimated: 5-7h
-- Actual: ~2h elapsed (parallel processing, 1 blocker pending)
-- Efficiency: Excellent (agents ran concurrently)
-
-**Ch5 Progress:**
-- **Before Tier 2 batch:** 20/35 certified (57%)
-- **After Tier 2 batch:** 24/35 certified (69%, treating 5.2.3 as pending)
-- **Net gain:** +4 RQs fully certified, +1 conditional
-
----
-
-### 4. Next Steps - User Decision Point
-
-**Current Status:** 24/35 Ch5 certified (69%), 1 pending blocker resolution
-
-**Options for User:**
-
-**Option A: Resolve RQ 5.2.3 Blockers Now (~1h)**
-- Implement GLMM validation (~30 min)
-- Document random slopes comparison (~20 min)
-- Re-invoke rq_platinum (~10 min)
-- **Outcome:** 25/35 certified (71%), all Tier 2 batch complete
-
-**Option B: Accept 4/5 Success, Defer 5.2.3**
-- Move forward with 24/35 (69%) certification
-- Return to 5.2.3 later if needed
-- **Outcome:** Save ~1h, focus on Ch7 or thesis writing
-
-**Option C: Quick GLMM Check Only**
-- Implement GLMM validation only (highest risk blocker)
-- Skip random slopes documentation for now
-- **Outcome:** Reduce major risk (~30 min), partial resolution
-
-**Awaiting user decision.**
-
----
-
-### 5. Active Topics (For context-manager)
-
-- **ch5_selective_tier2_batch_certification** (Session 2025-12-31 evening)
-- **age_moderation_null_pattern_cross_validated** (Session 2025-12-31 evening)
-- **irt_ctt_convergence_trilogy_complete** (Session 2025-12-31 evening)
-- **rq_5_2_3_blocker_glmm_random_slopes_pending** (Session 2025-12-31 evening)
-- **selective_certification_strategy_validated** (Session 2025-12-31 evening)
-
-**Also active (from Afternoon):**
-- **ch5_tier1_batch_certification_complete** (Session 2025-12-31 afternoon)
-- **rq_5_1_4_critical_random_slopes_finding** (Session 2025-12-31 afternoon)
-- **purification_paradox_4th_replication_convergence_power** (Session 2025-12-31 afternoon)
-- **random_slopes_testing_taxonomy_4_4_validation** (Session 2025-12-31 afternoon)
-- **icc_slope_investigation_validated_2025_12_03_lr_test** (Session 2025-12-31 afternoon)
-- **consolidation_piecewise_random_slopes_massive_improvement** (Session 2025-12-31 afternoon)
-
-**Relevant Archived Topics Referenced:**
-- random_slopes_vs_glmm_validation_separation (2025-12-29 21:00)
-- rq_5_1_3_age_invariant_forgetting_vr_scaffolding (2025-12-31 morning)
-- ctt_irt_convergence_validated (2025-12-03 20:45)
-- ch5_targeted_high_impact_certification (2025-12-31 morning)
-- platinum_batch_aggressive_parallel_strategy (2025-12-30)
-- glmm_validation_calibration_rqs_applicability (2025-12-29 18:00)
-
----
-
-**Status:** ✅ **CH6 100% (30/30)** + **CH5 69% (24/35 certified, +4 TIER 2 EVENING)** + 🔴 **1 BLOCKER PENDING: RQ 5.2.3 needs GLMM + random slopes testing (~1h)**
-
-**Progress Today (Full Day):** Ch5 28% → 69% (+41pp), 14 total RQs certified across 3 sessions (morning: 4, afternoon: 6, evening: 4)
-
----
-
-**End of Session (2025-12-31 Evening)**
+- Earlier sessions → See archive_index.md
 
 ---
 
@@ -441,18 +263,10 @@
 - **random_slopes_extreme_convergence_failure_documented** (Session 2025-12-31 late evening)
 - **ch5_71_pct_certification_achieved_25_of_35** (Session 2025-12-31 late evening)
 
-**Also Active (From Evening Session):**
-- **age_moderation_null_pattern_cross_validated** (Session 2025-12-31 evening)
-- **irt_ctt_convergence_trilogy_complete** (Session 2025-12-31 evening)
-- **selective_certification_strategy_validated** (Session 2025-12-31 evening)
-
-**Also Active (From Afternoon Session):**
-- **ch5_tier1_batch_certification_complete** (Session 2025-12-31 afternoon)
-- **rq_5_1_4_critical_random_slopes_finding** (Session 2025-12-31 afternoon)
-- **purification_paradox_4th_replication_convergence_power** (Session 2025-12-31 afternoon)
-- **random_slopes_testing_taxonomy_4_4_validation** (Session 2025-12-31 afternoon)
-- **icc_slope_investigation_validated_2025_12_03_lr_test** (Session 2025-12-31 afternoon)
-- **consolidation_piecewise_random_slopes_massive_improvement** (Session 2025-12-31 afternoon)
+**Also Active (From Evening Session, now archived):**
+- **age_moderation_null_pattern_cross_validated** (Session 2025-12-31 evening) - See `ch5_selective_tier2_batch_certification.md`
+- **irt_ctt_convergence_trilogy_complete** (Session 2025-12-31 evening) - See `ch5_selective_tier2_batch_certification.md`
+- **selective_certification_strategy_validated** (Session 2025-12-31 evening) - See `ch5_selective_tier2_batch_certification.md`
 
 **Relevant Archived Topics Referenced:**
 - random_slopes_vs_glmm_validation_separation (2025-12-29 21:00) - Methodology precedent
@@ -460,6 +274,7 @@
 - rq_5_1_3_age_invariant_forgetting_vr_scaffolding (2025-12-31 morning) - Age-invariant pattern
 - ch5_targeted_high_impact_certification (2025-12-31 morning) - Certification strategy
 - glmm_validation_calibration_rqs_applicability (2025-12-29 18:00) - GLMM methodology
+- ch5_selective_tier2_batch_certification (2025-12-31 evening) - Full Tier 2 strategy + results
 
 ---
 
@@ -864,11 +679,6 @@
 - **glmm_validation_robust_null_age_domain_interaction** (Session 2025-12-31 late evening)
 - **random_slopes_extreme_convergence_failure_documented** (Session 2025-12-31 late evening)
 
-**Also Active (From Evening Session):**
-- **age_moderation_null_pattern_cross_validated** (Session 2025-12-31 evening)
-- **irt_ctt_convergence_trilogy_complete** (Session 2025-12-31 evening)
-- **selective_certification_strategy_validated** (Session 2025-12-31 evening)
-
 **Relevant Archived Topics Referenced (From context-finder search):**
 - ch5_tier1_batch_certification_complete (2025-12-31 afternoon) - Tier-based strategies
 - icc_slope_investigation_validated_2025_12_03_lr_test (2025-12-03, validated 2025-12-31) - Random slopes patterns
@@ -876,6 +686,7 @@
 - ch6_100_pct_certification_complete (2025-12-30) - Hybrid execution patterns
 - purification_paradox_4th_replication_convergence_power (2025-12-31 afternoon) - Purification findings
 - random_slopes_vs_glmm_validation_separation (2025-12-29 21:00) - Methodology precedent
+- ch5_selective_tier2_batch_certification (2025-12-31 evening) - Full Tier 2 details
 
 ---
 
