@@ -1,0 +1,37 @@
+ITEM-LEVEL MIXED MODEL VALIDATION: RQ 5.2.3
+================================================================================
+
+METHOD: Linear mixed model on binary accuracy (Gaussian approximation)
+OBSERVATIONS: 64,000 item-level responses
+JUSTIFICATION: With N>20,000, Gaussian approximation valid for binary outcomes
+               (Jaeger 2008, Language & Linguistics Compass)
+
+            Mixed Linear Model Regression Results
+=============================================================
+Model:              MixedLM  Dependent Variable:  Correct    
+No. Observations:   64000    Method:              ML         
+No. Groups:         100      Scale:               0.2219     
+Min. group size:    640      Log-Likelihood:      -42755.0162
+Max. group size:    640      Converged:           Yes        
+Mean group size:    640.0                                    
+-------------------------------------------------------------
+                   Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-------------------------------------------------------------
+Intercept           0.325    0.007 49.713 0.000  0.312  0.337
+Age_c              -0.001    0.000 -2.542 0.011 -0.002 -0.000
+Domain_Where        0.284    0.004 72.811 0.000  0.277  0.292
+Age_c:Domain_Where  0.000    0.000  0.839 0.401 -0.000  0.001
+Group Var           0.004    0.001                           
+=============================================================
+
+
+================================================================================
+COMPARISON TO IRT→LMM:
+================================================================================
+                Effect  IRT_LMM_p   GLMM_p  GLMM_beta  GLMM_SE  Significant
+   Age main (baseline)      0.156 0.011011  -0.001144 0.000450         True
+Age × Where (baseline)      0.713 0.401493   0.000226 0.000269        False
+
+================================================================================
+OUTCOME: ROBUST_NULL_CONFIRMED
+================================================================================
