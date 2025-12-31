@@ -1,12 +1,30 @@
 # Archive Index
 
-**Last Updated:** 2025-12-31 (context-manager curation - Session 2025-12-30 Continuation archived)
+**Last Updated:** 2025-12-31 (context-manager curation - Session 2025-12-31 Afternoon archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### ch5_tier1_batch_certification_complete
+**Description:** Ch5 Tier 1 comprehensive certification batch (2025-12-31 afternoon) achieving 6/7 PLATINUM certifications. Directory scan revealed 24 uncertified RQs, classified into 3 tiers. Successfully certified RQs 5.1.5 (K-means), 5.2.5 (CTT-IRT paradox), 5.5.5 (Purification 4th replication with convergence + power analysis), 5.3.3 (Piecewise LMM, slopes ΔAIC=+143.55), 5.5.1 (Source-Dest re-validation), 5.1.2 (Two-phase forgetting re-validation). RQ 5.1.4 received GOLD status with critical finding (random slopes NOT justified). Ch5 progress: 40% → 57% (+6 RQs, +17pp).
+
+### rq_5_1_4_critical_random_slopes_finding
+**Description:** RQ 5.1.4 ICC anomaly investigation revealing random slopes NOT justified (ΔAIC=-4.69 across all 10 models). Thesis-level methodological contribution demonstrating critical importance of Taxonomy Section 4.4 random slopes testing. Finding validates 2025-12-03 LR test (p=0.69). Theoretical revision: forgetting variance exists but is NOT predictive (state-dependent, not trait-like). Comparison to RQ 5.3.3 shows 148 AIC point difference. Cross-chapter validation: Ch6 confidence (ordinal) ICC=41% vs Ch5 accuracy (binary) ICC~0% (824× ratio). Session 2025-12-31 afternoon.
+
+### purification_paradox_4th_replication_convergence_power
+**Description:** RQ 5.5.5 purified CTT paradox 4th independent replication with extended investigation work (4h vs 1h estimated). LMM convergence investigation (2.5h) resolved model stability issues. Power analysis for Source null (1.5h) revealed ceiling effect (r_full=0.934, headroom=6.6%), validating NULL finding as scientifically meaningful. PLATINUM certified. Pattern robustness: 4/4 replications show purification improves static convergence BUT worsens dynamic fit. Session 2025-12-31 afternoon.
+
+### consolidation_piecewise_random_slopes_massive_improvement
+**Description:** RQ 5.3.3 piecewise LMM consolidation validation showing random slopes MASSIVELY improve fit (ΔAIC=+143.55). Contrasts with RQ 5.1.4 (ΔAIC=-4.69, 148 AIC point difference). Demonstrates critical importance of TESTING random slopes rather than assuming. Supports two-process consolidation model (early rapid forgetting 0-7 days, late slow forgetting 7-90 days). Individual differences in consolidation rate are REAL and SUBSTANTIAL. GLMM correctly excluded (slope-only hypothesis). Session 2025-12-31 afternoon.
+
+### random_slopes_testing_taxonomy_4_4_validation
+**Description:** Validation of improvement_taxonomy.md Section 4.4 MANDATORY requirement for random slopes testing across Tier 1 batch. Three-option framework validated: Option A (slopes improve, ΔAIC>2), Option B (convergence failure), Option C (slopes worsen, ΔAIC<-2). RQ 5.3.3 = Option A (+143.55), RQ 5.1.4 = Option C (-4.69), RQ 5.1.2 = Option B (N=100 insufficient). Demonstrates CRITICAL importance of testing (cannot assume). Integration with GLMM validation documented (separate but complementary). Session 2025-12-31 afternoon.
+
+### icc_slope_investigation_validated_2025_12_03_lr_test
+**Description:** Historical ICC slope investigation (2025-12-03) validated by 2025-12-31 random slopes testing. Original 6-hypothesis investigation: scale transformation (3.5×), model specification (22×), shrinkage (93%), LR test p=0.69 (slopes NOT significant), sleep covariates (no effect), dichotomous data (81% max reliability). 2025-12-31 AIC comparison (ΔAIC=-4.69) confirms LR test using independent method. Convergent evidence across methods strengthens thesis-level rigor. Explains 824× ratio (binary vs ordinal data). Session 2025-12-31 afternoon referencing 2025-12-03 work.
 
 ### ch6_100_pct_certification_complete
 **Description:** Complete history of achieving Ch6 100% PLATINUM certification (30/30 RQs) via strategic "quick wins" approach. Documents certification audit revealing 87% complete (not 82% as understood), targeted SEM-validated RQs, GEE validation for RQ 6.5.3, RQ 6.7.1 re-validation, and RQ 6.5.1 upgrade to FULL PLATINUM. Session 2025-12-30 continuation.
