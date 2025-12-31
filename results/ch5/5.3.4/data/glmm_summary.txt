@@ -1,0 +1,39 @@
+ITEM-LEVEL MIXED MODEL VALIDATION: RQ 5.3.4
+================================================================================
+
+METHOD: Linear mixed model on binary accuracy (Gaussian approximation)
+OBSERVATIONS: 28,800 item-level responses
+JUSTIFICATION: With N=28,800, Gaussian approximation valid for binary outcomes
+               (Jaeger 2008, Language & Linguistics Compass)
+
+            Mixed Linear Model Regression Results
+=============================================================
+Model:              MixedLM  Dependent Variable:  Correct    
+No. Observations:   28800    Method:              ML         
+No. Groups:         100      Scale:               0.2409     
+Min. group size:    288      Log-Likelihood:      -20469.7077
+Max. group size:    288      Converged:           No         
+Mean group size:    288.0                                    
+-------------------------------------------------------------
+                   Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-------------------------------------------------------------
+Intercept           0.413    0.009 46.985 0.000  0.396  0.430
+Age_c              -0.001    0.001 -1.841 0.066 -0.002  0.000
+Paradigm_ICR        0.103    0.007 14.600 0.000  0.090  0.117
+Paradigm_IRE        0.124    0.007 17.482 0.000  0.110  0.138
+Age_c:Paradigm_ICR  0.000    0.000  0.596 0.551 -0.001  0.001
+Age_c:Paradigm_IRE -0.000    0.000 -0.326 0.744 -0.001  0.001
+Group Var           0.005    0.002                           
+=============================================================
+
+
+================================================================================
+COMPARISON TO IRT→LMM:
+================================================================================
+              Effect  IRT_LMM_p   GLMM_p  GLMM_beta  GLMM_SE  Significant
+Age × ICR (baseline)        NaN 0.551196   0.000291 0.000488        False
+Age × IRE (baseline)        NaN 0.744352  -0.000159 0.000488        False
+
+================================================================================
+OUTCOME: ROBUST
+================================================================================

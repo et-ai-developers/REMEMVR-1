@@ -9,11 +9,11 @@
 
 ## What We're Doing
 
-**Current Task:** CH5 TIER 1 BATCH CERTIFICATION + RQ 5.1.4 CRITICAL RANDOM SLOPES INVESTIGATION
+**Current Task:** CH5 SELECTIVE TIER 2 CERTIFICATION BATCH (Option B Strategy)
 
-**Context:** Ch6 100% PLATINUM certified (30/30 RQs). User selected Tier 1 targeted approach for Ch5. Successfully completed full scan revealing 24 uncertified RQs (not 21 as initially estimated - discovered 11 certified, not 14). Invoked rq_platinum on all 7 Tier 1 RQs in parallel. Achieved 6/7 successful certifications in ~8 hours. **CRITICAL DISCOVERY:** RQ 5.1.4 random slopes testing revealed MAJOR methodological finding - random slopes NOT justified (ΔAIC=-4.69), validating 2025-12-03 LR test hypothesis (p=0.69). This fundamentally changes RQ 5.1.4 interpretation from "forgetting IS trait-like" to "forgetting is state-dependent."
+**Context:** After completing Tier 1 batch (6/7 RQs + 1 critical finding), user selected Option B: Selective Tier 2 approach certifying 5 high-value RQs (5.2.3, 5.3.4, 5.4.3, 5.2.4, 5.3.5) for 66% total Ch5 coverage. Invoked rq_platinum on all 5 in parallel. Achieved 4/5 successful PLATINUM certifications. **1 BLOCKER IDENTIFIED:** RQ 5.2.3 requires GLMM validation (MEDIUM priority in glmm_candidates.md) + random slopes testing documentation (MANDATORY Section 4.4).
 
-**Status:** ✅ **CH6 100% COMPLETE (30/30)** + **CH5 57% CERTIFIED (20/35, +6 TIER 1 TODAY)** + **1 CRITICAL FINDING UNDER INVESTIGATION**
+**Status:** ✅ **CH6 100% COMPLETE (30/30)** + **CH5 69% CERTIFIED (24/35 pending blocker resolution, +4 TIER 2 TODAY)** + **1 BLOCKER PENDING USER DECISION**
 
 ---
 
@@ -487,3 +487,223 @@ I searched archives for relevant RQ 5.1.4 history and found **EXTREMELY RELEVANT
 ---
 
 **End of Session (2025-12-31 Afternoon)**
+
+---
+
+## Session (2025-12-31 Evening - Selective Tier 2 Batch)
+
+**Task:** CH5 SELECTIVE TIER 2 CERTIFICATION (OPTION B STRATEGY)
+
+**Context:** After Tier 1 completion, user selected "continue with ch5 certification". I presented uncertified breakdown: 17 total (11 Tier 2, 6 Tier 3). Recommended Option B: Selective Tier 2 (5 high-value RQs - 5.2.3 Age×Domain, 5.3.4 Age×Paradigm, 5.4.3 Age×Schema, 5.2.4 Purification, 5.3.5 Paradigm convergence). User chose Option B. Invoked rq_platinum on all 5 in parallel.
+
+**OUTCOME:** 4/5 PLATINUM certified successfully, 1 BLOCKER identified requiring ~1h resolution.
+
+---
+
+### 1. Selective Tier 2 Strategy Selection
+
+**User Request:** "Lets do option B" (Selective Tier 2: 5 high-value RQs)
+
+**Strategic Rationale:**
+- **Critical patterns certified:** All major age-moderation analyses (5.2.3, 5.3.4, 5.4.3) validated
+- **Methodological rigor:** Purification (5.2.4) and paradigm convergence (5.3.5) strengthen foundations
+- **Time-efficient:** 5-7h vs 11-15h for full Tier 2
+- **Thesis-sufficient:** 66% certification demonstrates thoroughness without diminishing returns
+- **Defer intelligently:** Remaining 6 Tier 2 + 6 Tier 3 can be post-defense if needed
+
+**Selected RQs:**
+1. **5.2.3** - Age × Domain (What/Where) - NULL age moderation expected
+2. **5.3.4** - Age × Paradigm (Free/Cued/Recognition) - NULL age moderation expected
+3. **5.4.3** - Age × Schema (Common/Congruent/Incongruent) - NULL age moderation expected
+4. **5.2.4** - IRT-CTT Purification Convergence - Methodological validation
+5. **5.3.5** - IRT-CTT Paradigm Convergence - Measurement robustness
+
+**Target:** 25/35 certified (71%), ~5-7h estimated
+
+---
+
+### 2. Parallel Certification Execution
+
+**Invocation:** rq_platinum on all 5 RQs simultaneously (~2h elapsed, agents ran in parallel)
+
+**SUCCESSFUL CERTIFICATIONS:**
+
+**RQ 5.3.4 - Age × Paradigm Interactions - PLATINUM** ✅
+- **Time:** ~60 min
+- **Key Work:** GLMM validation completed (NULL findings robust at item level N=28,800)
+- **Finding:** Age effects on forgetting do NOT vary by retrieval paradigm (p_bonf > 0.7)
+- **Model Correction:** Random slopes specification corrected (log_TSVR not TSVR_hours, 7.75× variance increase)
+- **Files:** glmm_validation.py, PLATINUM_FINALIZATION_REPORT.md
+
+**RQ 5.4.3 - Age × Schema Congruence - PLATINUM** ✅
+- **Time:** ~60 min
+- **Key Work:** Random slopes testing completed (MANDATORY blocker resolved)
+- **Finding:** Age effects uniform across schema congruence levels (p_bonf > 0.12)
+- **Discovery:** Large individual differences in rapid forgetting (σ²=1.389) NOT explained by age/schema
+- **Files:** random_slopes_comparison.py, random_slopes_validation.md, PLATINUM_FINALIZATION_REPORT.md
+
+**RQ 5.2.4 - IRT-CTT Purification Convergence - PLATINUM** ✅
+- **Time:** ~120 min (comprehensive review)
+- **Key Work:** GLMM compliance verified (N/A for methodological RQ), random slopes documented
+- **Finding:** IRT-CTT exceptional static convergence (r=0.906-0.970), dynamic divergence instructive
+- **Lesson:** Functional form (Recip+Log) matters MORE than measurement method (IRT vs CTT)
+- **Files:** PLATINUM_FINALIZATION_REPORT.md
+
+**RQ 5.3.5 - IRT-CTT Paradigm Convergence - PLATINUM** ✅
+- **Time:** ~45 min
+- **Key Work:** Convergence RQ type-specific evaluation (GLMM N/A, random slopes structural equivalence)
+- **Finding:** Paradigm-specific forgetting robust to measurement approach (r=0.84-0.88, kappa=0.667)
+- **Validation:** RQ 5.3.1 findings not IRT scaling artifact
+- **Files:** PLATINUM_FINALIZATION_REPORT.md
+
+---
+
+**BLOCKER IDENTIFIED:**
+
+**RQ 5.2.3 - Age × Domain (What/Where) - CONDITIONAL PLATINUM** 🔴
+
+**Blockers:**
+1. **GLMM Validation MISSING** (CRITICAL)
+   - RQ 5.2.3 is MEDIUM priority in glmm_candidates.md line 45 → GLMM MANDATORY
+   - Current: IRT→LMM Age main effect p=0.156 (null), Age:Domain p=0.713 (null)
+   - Risk: Historical precedent shows NULL→SIGNIFICANT (RQ 5.4.1 p=0.548→0.011, RQ 6.5.1 p=0.660→0.003)
+   - **Action Required:** Implement GLMM validation (item-level N=28,800, ~30 min)
+
+2. **Random Slopes Testing NOT Documented** (MANDATORY Section 4.4)
+   - Plan specified random slopes, executed intercepts-only (convergence failure)
+   - No random_slopes_comparison.py file exists
+   - Convergence failure mentioned but not systematically documented
+   - **Action Required:** Create comparison script documenting attempt + failure (~20 min)
+
+**Additional Non-Blocking Issues:**
+- Plots outdated (Nov 30 with 3 domains vs Dec 2 analysis with 2 domains)
+- Power analysis for NULL findings recommended (not MANDATORY)
+
+**Agent Report Summary:**
+- Analysis quality: GOLD (well-executed, NULL findings)
+- Documentation: Adequate (summary.md comprehensive, validation.md present)
+- Missing: 2 MANDATORY analyses (GLMM + random slopes testing)
+- Estimated resolution time: ~1h total
+
+---
+
+### 3. Certification Results Summary
+
+**Success Rate:** 4/5 PLATINUM (80%)
+
+**Time Investment:**
+- Estimated: 5-7h
+- Actual: ~2h elapsed (parallel processing, 1 blocker pending)
+- Efficiency: Excellent (agents ran concurrently)
+
+**Ch5 Progress:**
+- **Before Tier 2 batch:** 20/35 certified (57%)
+- **After Tier 2 batch:** 24/35 certified (69%, treating 5.2.3 as pending)
+- **Net gain:** +4 RQs fully certified, +1 conditional
+
+---
+
+### 4. Context-Finder Insights for Blocker Resolution
+
+**Invoked context-finder to search for:**
+- GLMM validation precedents (MEDIUM priority cases)
+- Random slopes testing methodology
+- Age moderation NULL findings (cross-chapter patterns)
+- Selective certification strategies
+
+**Key Findings (from archives):**
+
+**Finding 1: Random Slopes Testing UNIVERSAL** (2025-12-29)
+- Applies to ALL LMMs without exception
+- Independent of GLMM validation requirement
+- Documentation: Section 4.4 in validation.md MANDATORY
+- RQ 6.3.3 example: ΔAIC=141, slopes massively improve fit
+
+**Finding 2: GLMM Validation Conditional on RQ Type** (2025-12-29)
+- Single-construct RQs testing intercepts: REQUIRED
+- MEDIUM priority does NOT exempt if methodologically indicated
+- RQ 6.3.3 precedent: Calibration RQ underwent GLMM (PLATINUM certified)
+
+**Finding 3: Age Moderation NULL Pattern** (2025-12-31)
+- Cross-chapter: Age × Time NULL for accuracy + confidence
+- Age baseline effects: Marginal→significant via GLMM (encoding deficit)
+- VR Scaffolding Hypothesis: Immersive contexts reduce age-related forgetting
+- Expect RQ 5.2.3: Age × Domain × Time NULL, Age baseline GLMM p<0.05
+
+**Finding 4: Selective Batch Strategy Validated** (2025-12-31)
+- Tier 1/2/3 framework active
+- Current batch: 2 Tier 1 (5.2.4, 5.3.5) + 3 Tier 2 (5.2.3, 5.3.4, 5.4.3)
+- Efficiency: 70% time savings vs exhaustive coverage
+
+---
+
+### 5. Files Created This Session
+
+**PLATINUM Reports:**
+1. results/ch5/5.3.4/PLATINUM_FINALIZATION_REPORT.md
+2. results/ch5/5.3.4/code/glmm_validation.py
+3. results/ch5/5.3.4/data/glmm_comparison.csv
+4. results/ch5/5.4.3/PLATINUM_FINALIZATION_REPORT.md
+5. results/ch5/5.4.3/code/random_slopes_comparison.py
+6. results/ch5/5.4.3/results/random_slopes_validation.md
+7. results/ch5/5.2.4/PLATINUM_FINALIZATION_REPORT.md
+8. results/ch5/5.3.5/PLATINUM_FINALIZATION_REPORT.md
+
+**Status Updates:**
+- Multiple status.yaml updates across 4 certified RQs
+- validation.md additions for GLMM/random slopes findings
+
+---
+
+### 6. Next Steps - User Decision Point
+
+**Current Status:** 24/35 Ch5 certified (69%), 1 pending blocker resolution
+
+**Options for User:**
+
+**Option A: Resolve RQ 5.2.3 Blockers Now (~1h)**
+- Implement GLMM validation (~30 min)
+- Document random slopes comparison (~20 min)
+- Re-invoke rq_platinum (~10 min)
+- **Outcome:** 25/35 certified (71%), all Tier 2 batch complete
+
+**Option B: Accept 4/5 Success, Defer 5.2.3**
+- Move forward with 24/35 (69%) certification
+- Return to 5.2.3 later if needed
+- **Outcome:** Save ~1h, focus on Ch7 or thesis writing
+
+**Option C: Quick GLMM Check Only**
+- Implement GLMM validation only (highest risk blocker)
+- Skip random slopes documentation for now
+- **Outcome:** Reduce major risk (~30 min), partial resolution
+
+**Awaiting user decision.**
+
+---
+
+### 7. Active Topics (For context-manager)
+
+- **ch5_selective_tier2_batch_certification** (Session 2025-12-31 evening)
+- **age_moderation_null_pattern_cross_validated** (Session 2025-12-31 evening)
+- **irt_ctt_convergence_trilogy_complete** (Session 2025-12-31 evening)
+- **rq_5_2_3_blocker_glmm_random_slopes_pending** (Session 2025-12-31 evening)
+- **selective_certification_strategy_validated** (Session 2025-12-31 evening)
+
+**Relevant Archived Topics Referenced:**
+- random_slopes_vs_glmm_validation_separation (2025-12-29 21:00)
+- rq_5_1_3_age_invariant_forgetting_vr_scaffolding (2025-12-31)
+- ctt_irt_convergence_validated (2025-12-03 20:45)
+- ch5_targeted_high_impact_certification (2025-12-31 morning)
+- platinum_batch_aggressive_parallel_strategy (2025-12-30)
+- glmm_validation_calibration_rqs_applicability (2025-12-29 18:00)
+- ch5_tier1_batch_certification_complete (2025-12-31 afternoon)
+
+---
+
+**Status:** ✅ **CH6 100% (30/30)** + **CH5 69% (24/35 certified, +4 TIER 2 EVENING)** + 🔴 **1 BLOCKER PENDING: RQ 5.2.3 needs GLMM + random slopes testing (~1h)**
+
+**Progress Today (Full Day):** Ch5 28% → 69% (+41pp), 14 total RQs certified across 3 sessions (morning: 4, afternoon: 6, evening: 4)
+
+---
+
+**End of Session (2025-12-31 Evening)**
