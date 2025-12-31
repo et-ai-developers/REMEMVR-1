@@ -1,0 +1,29 @@
+============================================================
+LMM DIAGNOSTIC SUMMARY: IRT vs CTT Comparison
+============================================================
+
+1. RESIDUAL NORMALITY (Shapiro-Wilk Test)
+   IRT: p=0.6427 ✓ Normal
+   CTT: p=0.3267 ✓ Normal
+
+2. HOMOSCEDASTICITY (Breusch-Pagan Test)
+   IRT: Heteroscedastic (p=0.0000)
+   CTT: Heteroscedastic (p=0.0329)
+
+3. INFLUENTIAL OBSERVATIONS (Cook's Distance)
+   IRT: 819 influential points
+   CTT: 789 influential points
+
+4. RANDOM EFFECTS NORMALITY (Q-Q Plot)
+   IRT: Not computed
+   CTT: Not computed
+
+============================================================
+DELTA-AIC EXPLANATION (CTT vastly superior: ΔAIC = -3607)
+============================================================
+
+Both models show similar assumption violations.
+Delta-AIC likely driven by scale properties (bounded vs unbounded)
+rather than differential assumption violations.
+
+============================================================
