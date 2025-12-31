@@ -1,12 +1,27 @@
 # Archive Index
 
-**Last Updated:** 2025-12-31 (context-manager curation - Sessions 2025-12-29 21:00 and 2025-12-30 archived)
+**Last Updated:** 2025-12-31 (context-manager curation - Session 2025-12-30 Continuation archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### ch6_100_pct_certification_complete
+**Description:** Complete history of achieving Ch6 100% PLATINUM certification (30/30 RQs) via strategic "quick wins" approach. Documents certification audit revealing 87% complete (not 82% as understood), targeted SEM-validated RQs, GEE validation for RQ 6.5.3, RQ 6.7.1 re-validation, and RQ 6.5.1 upgrade to FULL PLATINUM. Session 2025-12-30 continuation.
+
+### schema_baseline_trajectory_framework_finalized
+**Description:** Complete documentation of "Baseline Effects, Trajectory Nulls" framework finalized across Ch5 + Ch6 schema RQs. Cross-chapter convergence pattern: schema affects BASELINE (accuracy/confidence) via GLMM but NOT TRAJECTORY via IRT→LMM. RQ 6.5.1 upgraded from CONDITIONAL to FULL PLATINUM. Theoretical interpretation: schema congruence affects encoding (T1 acquisition) not retention (forgetting dynamics). Session 2025-12-30.
+
+### gee_validation_protocol_binary_outcomes
+**Description:** Complete protocol for validating Linear Probability Model (LPM) results using Generalized Estimating Equations (GEE) with binomial family and logit link. RQ 6.5.3 validation confirmed NULL result robust across methods (p_bonf=.169). Includes implementation template, convergence criteria, and when to use GEE vs LMM. Session 2025-12-30.
+
+### sem_validated_rqs_quick_wins
+**Description:** Strategic "quick wins" approach for RQs with complete SEM validation but missing formal PLATINUM finalization reports. Certified RQ 6.2.1 (PLATINUM-ROBUST, p=.004→.013 post-SEM, 24% attenuation) and RQ 6.4.2 (FULL PLATINUM, zero attenuation) in 35 min total. Documents 3-6× efficiency gain vs traditional certification. Session 2025-12-30.
+
+### rq_6_7_1_confidence_trajectory_prediction
+**Description:** RQ 6.7.1 re-validation documenting partial correlation analysis resolving baseline ability confounding. Two-component confidence model: 72% ability-driven, 28% metacognitive (unique). High T1 confidence predicts less improvement (rho=-0.66, partial rho=-0.35). GLMM correctly exempted (correlation design). Important: VR paradigm shows IMPROVEMENT not forgetting (positive slopes). Session 2025-12-30.
 
 ### automation_foundations
 **Description:** Pre-migration automation work completed before Memory System Overhaul. Includes tool suite (49/49 tests passing), 50 RQ specifications, Data-Prep Agent v3.0, Analysis-Executor Agent v2.0, agent testing learnings, automation architecture v2, item name preservation fix, and automation phase info.
