@@ -425,16 +425,11 @@ All three clustering analyses (domains, paradigms, congruence) show:
 - Likely automated labeling error (threshold-based logic misconfigured)
 - Manual re-interpretation provided in Section 3, but original labels should be corrected
 
-**PCA Sphericity Check COMPLETED (2025-12-31):**
-- **Quantitative PCA performed:** PC1 explains 67.5% variance (threshold <70%)
-- **Sphericity assumption MET:** K-means appropriate (no dominant axis violating sphericity)
-- **Dimensional structure:** 2 dominant dimensions explain 97.8% variance
-  - PC1: 67.5% (baseline performance differences across paradigms)
-  - PC2: 30.2% (forgetting trajectory differences)
-  - PC3-6: <2% each (negligible variance)
-- **Interpretation:** Clustering driven by 2 dimensions (intercepts + slopes), consistent with visual inspection showing separation on intercept axes but overlap on slope axes
-- **Scree plot:** Saved to plots/pca_scree_plot.png (validates threshold check)
-- **File:** data/pca_sphericity_results.csv, code/pca_sphericity_check.py
+**PCA Sphericity Check Not Quantified:**
+- Visual inspection of scatter matrix suggests spherical clusters (K-means assumption met)
+- Plan.md specified "PCA variance check: if first PC >70%, data may have dominant axis"
+- PCA not actually computed, only visual check conducted
+- Future analyses should include quantitative PCA variance decomposition
 
 ### Limitations Summary
 
@@ -457,11 +452,11 @@ Limitations indicate **directions for future work** (see Section 5: Next Steps).
 - **Expected Insight:** Determine if K=4 reveals paradigm-selective subgroups obscured by K=3 aggregation
 - **Timeline:** Immediate (2 hours, rerun Step 3-6 with K=4)
 
-✅ **2. Quantitative PCA Sphericity Check (COMPLETED 2025-12-31):**
+**2. Quantitative PCA Sphericity Check:**
 - **Why:** Plan.md specified PCA variance decomposition, but only visual check conducted
 - **How:** Run PCA on 6 standardized features, report variance explained by first 3 PCs
 - **Expected Insight:** If PC1 explains >70% variance, data may have dominant axis violating K-means sphericity assumption
-- **Timeline:** COMPLETE (30 min, results in data/pca_sphericity_results.csv)
+- **Timeline:** Immediate (1 hour, add PCA step to analysis)
 
 **3. External Validation with Cognitive Tests:**
 - **Why:** Clusters not validated against external criteria (neuropsych tests, questionnaires)
