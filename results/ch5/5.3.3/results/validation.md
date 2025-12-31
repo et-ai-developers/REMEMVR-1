@@ -366,3 +366,137 @@ This RQ passes all validation checks with one moderate issue (hypothesis directi
 **Date:** 2025-12-03 19:45:00Z
 **RQ Validated:** 5.3.3 (Paradigm Consolidation Window)
 **Validation Duration:** ~30 minutes (comprehensive 6-layer review)
+
+---
+
+## GLMM Compliance Check (Added 2025-12-31)
+
+**Evaluation Date:** 2025-12-31
+**Cross-reference:** results/glmm_candidates.md
+
+### RQ 5.3.3 Status in glmm_candidates.md
+- **Listed:** NO
+- **Manual evaluation performed:** YES (Step 9A.1)
+
+### Manual Evaluation (Step 9A.1)
+
+**Research Question:** Do retrieval paradigms show different consolidation benefits during Early (Day 0→1) vs Late (Day 3→6) segments?
+
+**Model Formula:** `theta ~ Days_within × Segment × paradigm + (1 + Days_within | UID)`
+
+**Hypothesis Tests:**
+1. **Main effects:** Days_within, Segment, paradigm
+2. **Two-way interactions:** Days_within:Segment, Days_within:paradigm, Segment:paradigm  
+3. **Three-way interaction:** Days_within:Segment:paradigm
+
+**GLMM Applicability Analysis:**
+
+**Does RQ test intercepts (baseline group differences)?**
+- **NO** - RQ does NOT test baseline paradigm differences
+- Paradigm main effect present in model, but primary interest is INTERACTION (consolidation benefit)
+- From summary.md: "None of 6 planned contrasts test intercepts - all test slopes or slope differences"
+- Contrasts:
+  1. IFR consolidation benefit (Late slope - Early slope)
+  2. ICR consolidation benefit (Late slope - Early slope)
+  3. IRE consolidation benefit (Late slope - Early slope)
+  4-6. Between-paradigm benefit differences
+
+**Does RQ test slopes/interactions?**
+- **YES** - All 6 contrasts test slope differences (consolidation benefits)
+- Primary hypothesis: Paradigm × Segment interaction on forgetting rates
+- Days_within:Segment:paradigm three-way interaction tests differential consolidation
+
+**Finding Status:**
+- ALL findings NON-SIGNIFICANT after Bonferroni correction (p > 0.08)
+- Between-paradigm differences: p > 0.59 (not even marginal)
+- Within-paradigm benefits: p = 0.048-0.135 uncorrected (marginal at best)
+
+**GLMM Guidance from glmm_candidates.md:**
+
+> "**Pattern Discovered:**
+> - ✅ **Slopes/interactions:** IRT→LMM and GLMM always agree  
+> - ⚠️ **Intercepts:** GLMM sometimes finds significant effects where IRT→LMM shows marginal/null"
+
+**Application to RQ 5.3.3:**
+- Tests slopes/interactions ONLY → IRT→LMM and GLMM will agree
+- Does NOT test baseline paradigm differences → GLMM higher power not relevant
+- All findings NULL/marginal for SLOPES → GLMM will NOT change this (slopes agree across methods)
+
+**Decision:** **GLMM NOT NEEDED**
+
+**Rationale:**
+1. RQ tests slope hypothesis (consolidation benefit = slope difference)
+2. glmm.md: "Slopes/interactions ALWAYS agree between IRT→LMM and GLMM"
+3. Finding is NULL (no paradigm-specific consolidation)
+4. GLMM higher power for intercepts irrelevant here (not testing intercepts)
+5. Cost-benefit: GLMM runtime ~10 min for no expected change in conclusion
+
+**Validation Status:** ✅ COMPLIANT - Correctly excluded per glmm_candidates.md guidance
+
+**Documented by:** rq_platinum agent (Step 9A.1)
+
+
+---
+
+## Random Slopes Validation (Added 2025-12-31)
+
+**Validation Date:** 2025-12-31
+**Script:** code/step02b_random_slopes_comparison.py
+**Cross-reference:** Section 4.4 of improvement_taxonomy.md (MANDATORY for modeling RQs)
+
+### Requirement
+
+**From rq_platinum protocol:**
+> "🔴 Random Effects Structure (MANDATORY FOR MODELING RQs)
+> - Cannot claim homogeneous effects without testing for heterogeneity
+> - Must test intercepts-only vs intercepts+slopes via ΔAIC"
+
+### Comparison Results
+
+**Model A: Random Intercepts Only**
+- Formula: `theta ~ Days_within × Segment × paradigm + (1 | UID)`
+- AIC: 2391.33
+- BIC: 2462.60
+- Random intercept variance: 0.368
+
+**Model B: Random Intercepts + Random Slopes**
+- Formula: `theta ~ Days_within × Segment × paradigm + (1 + Days_within | UID)`
+- AIC: 2247.79
+- BIC: 2329.23
+- Random intercept variance: 0.427
+- Random slope variance: 0.0191 (SD = 0.138)
+
+**Model Comparison:**
+- ΔAIC (Intercepts - Slopes): **+143.55** (MASSIVE improvement)
+- ΔBIC: +133.37
+- Both favor slopes model overwhelmingly
+
+### Decision: OPTION A - Use Slopes Model
+
+**Outcome:** Individual differences in forgetting rates **CONFIRMED**
+
+**Interpretation:**
+1. Random slope variance **non-zero** (SD = 0.138 θ/day)
+2. AIC improvement **far exceeds** threshold (ΔAIC = 143.55 >> 2)
+3. Participants vary significantly in forgetting rates (heterogeneous effects)
+4. Current model (step02) **correctly** uses random slopes
+
+**Implications:**
+- ✅ Can claim **individual heterogeneity** (participants vary in consolidation benefit)
+- ✅ Slope variance = 0.0191 means ~95% of participants have forgetting rates within ±0.27 θ/day of mean
+- ✅ Validates decision to use random slopes (not an assumption, empirically confirmed)
+- ✅ More accurate standard errors for slope estimates (accounts for participant variability)
+
+### Validation Status
+
+**✅ COMPLIANT** - Random slopes comparison performed, slopes model selected based on ΔAIC >> 2
+
+**Mandatory criterion met:** Section 4.4 requirement satisfied (tested heterogeneity, documented decision)
+
+**Documented by:** rq_platinum agent (Step 12)
+
+**Files created:**
+- code/step02b_random_slopes_comparison.py
+- logs/step02b_random_slopes_comparison.log  
+- data/step02b_random_slopes_comparison.csv
+
