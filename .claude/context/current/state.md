@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2026-01-01 (rq_report agent creation + 65 RQ parallel batch complete)
+**Last Updated:** 2026-01-01 (Post-curation: Late Evening session archived)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2026-01-01 (rq_report parallel documentation complete)
-**Token Count:** ~3.8k tokens → will be curated by context-manager
+**Last /save:** 2026-01-01 (rq_report complete - curated)
+**Token Count:** ~3.4k tokens (2 sessions: Ch5 100% Completion + 2026-01-01 Morning, -11% reduction from archiving Late Evening)
 
 ---
 
@@ -38,6 +38,9 @@
 
 **NOTE:** Last 2 sessions preserved verbatim per sliding window. Sessions 3+ sessions ago archived by context-manager during curation.
 
+**Archived This Curation (2026-01-01):**
+- Session 2025-12-31 Late Evening → `ch5_100_pct_completion_campaign_hybrid_strategy.md`
+
 **Previously Archived:**
 - Session 2025-12-31 Evening → `ch5_selective_tier2_batch_certification.md`
 - Session 2025-12-31 Afternoon → Multiple topics (see archive_index.md)
@@ -46,15 +49,9 @@
 
 ---
 
-## Session (2025-12-31 Late Evening - RQ 5.2.3 Blocker Resolution)
-
-[Previous session preserved verbatim - see lines 51-294 of original state.md]
-
----
-
 ## Session (2025-12-31 Ch5 100% Completion Campaign)
 
-[Previous session preserved verbatim - see lines 298-711 of original state.md]
+[Session content preserved verbatim from lines 250-663 of previous state.md]
 
 ---
 
