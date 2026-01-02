@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.6.2: RAVLT Delayed predicts REMEMVR slope
+    Type: Slopes / RAVLT Delayed Forgetting Correlation  
+    Analysis: Bivariate + partial correlation with cross-validation
+    Data: DERIVED from Ch5 5.1.1 slopes + master.xlsx RAVLT scores
+    Critical: Decision D068 dual p-values, bootstrap CIs, consolidation theory
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.6.2 validated: 9.1/10 CONDITIONAL. Strong theory, missing literature, good analysis plan. Need 3-5 citations for approval."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8.8/10 CONDITIONAL. Category 1: 2.5/3 (appropriate, minor concerns). Category 2: 2.0/2 (100% reuse). Category 3: 1.8/2 (good specs, Bonferroni α unclear). Category 4: 1.9/2 (comprehensive, minor gaps). Category 5: 0.6/1 (10 concerns, limited by no WebSearch)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8-step correlation pipeline: RAVLT forgetting vs REMEMVR slope. Bootstrap CIs, partial correlation, Decision D068 compliance, Ch5 dependency. Enhanced v5.1 statistical specs."
 
 rq_tools:
   status: pending

@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.6.4: Purification & Slope Predictors
+    Type: Individual Differences / Purification & Slope predictors
+    Analysis: Multiple regression comparing pre/post-purification slope prediction
+    Data: DERIVED from Ch5 slope analyses + master.xlsx cognitive tests
+    Critical: Tests purification paradox - predictor relationships may weaken after purification
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.6.4 validated: 9.3/10 APPROVED. Strong theory & methodology, needs literature citations. Ready for stats."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "9.4/10 APPROVED. Cat1: 2.9/3 (appropriate method, minor power concerns). Cat2: 2.0/2 (100% tool reuse). Cat3: 2.0/2 (well-specified). Cat4: 1.8/2 (strong validation, missing linearity test). Cat5: 0.7/1 (10 concerns: dependency issue critical)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8-step analysis plan created for purification paradox testing. Pre/post-purification model comparison with dependent samples bootstrap. Step 0: validation, Steps 1-7: analysis including comprehensive model comparison and coefficient differences. Ready for rq_tools."
 
 rq_tools:
   status: pending

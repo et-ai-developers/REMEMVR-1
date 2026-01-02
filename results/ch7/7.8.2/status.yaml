@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.8.2: Profile External Validation
+    Type: Profile Analysis / External Validation
+    Analysis: LPA (cognitive tests) + Chi-square + Cramer's V
+    Data: DERIVED from RQ 7.8.1 + master.xlsx cognitive tests
+    Critical: Dual p-value reporting (D068), test correspondence patterns
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.8.2 validated: 9.3/10 APPROVED. External validation theory excellent, clear analysis plan, minor literature gaps. Ready for stats."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8.8/10 CONDITIONAL. Category 1: 2.8/3 (appropriate). Category 2: 0.8/2 (tools 17% reuse). Category 3: 2.6/2 (well-specified). Category 4: 2.4/2 (comprehensive). Category 5: 0.8/1 (6 concerns, limited by WebSearch skip)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "6 steps planned: dependency validation + cognitive LPA + cross-tabulation + chi-square association. Random seed=42, bootstrap 1000 iterations, entropy >0.70 threshold. All steps with 4-layer validation. Expected cell count checks for chi-square validity. Missing LPA/chi-square tools identified."
 
 rq_tools:
   status: pending

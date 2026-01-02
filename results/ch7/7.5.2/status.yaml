@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.5.2: DASS predict memory performance
+    Type: Psychological/Individual Differences / DASS-21
+    Analysis: Multiple regression + hierarchical entry + cross-validation
+    Data: DERIVED from Ch5 5.1.1 theta + master.xlsx DASS scores
+    Critical: Bonferroni α=0.00060, dual p-value reporting (D068)
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.5.2 validated: 9.4/10 APPROVED. Strong theory, needs specific citations, comprehensive analysis. Ready for stats."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "9.3/10 APPROVED. Category 1: 3.0/3 (optimal method). Category 2: 1.8/2 (tools 88% reuse). Category 3: 2.0/2 (well-specified). Category 4: 2.0/2 (comprehensive). Category 5: 0.5/1 (4 concerns, could be more thorough)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8 steps planned (validation + 7 analysis). Hierarchical regression with comprehensive validation. Bootstrap/CV/power analysis specified. Ready for rq_tools."
 
 rq_tools:
   status: pending

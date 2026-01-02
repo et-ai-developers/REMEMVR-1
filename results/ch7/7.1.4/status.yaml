@@ -34,8 +34,8 @@ rq_planner:
     Expected outputs: 11 data files, 9 log files, 2 plots. Validation required at every step.
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: failed
+  context_dump: "FAILED - Missing 11 required tools for hierarchical regression analysis. Tools needed: data extraction from master.xlsx (4 tools), hierarchical regression with CV (2 tools), variance decomposition with Cohen's f² (2 tools), domain analysis (1 tool), plot data prep (2 tools). TDD workflow required."
 
 rq_analysis:
   status: pending

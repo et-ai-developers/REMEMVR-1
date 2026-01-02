@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.4.1: RAVLT predicts Free Recall > Recognition
+    Type: Process-Specific Prediction / Transfer-appropriate processing
+    Analysis: Bivariate correlations + Steiger's Z-test
+    Data: DERIVED from Ch5 5.3.x paradigm theta + master.xlsx RAVLT
+    Critical: Dual p-value reporting (D068), process-specificity hypothesis
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.4.1 validated: 9.3/10 APPROVED. Strong TAP theory, good interpretation guidelines, 4 minor improvements suggested. Ready for stats."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "9.3/10 APPROVED. Category 1: 3.0/3 (optimal method). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.8/2 (normality gap). Category 5: 0.5/1 (4 concerns, limited scope)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "Created 2_plan.md: 6-step bivariate correlation pipeline with Steiger Z-test for process-specificity. Enhanced v5.1 specs: seed=42, bootstrap CIs, dual p-values (D068), chapter-level correction (α=0.00179). Dependencies: Ch5 paradigm theta + RAVLT from master.xlsx. Ready for rq_tools."
 
 rq_tools:
   status: pending

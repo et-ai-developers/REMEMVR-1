@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.7.4: Clinical Profiles - False Negatives
+    Type: Clinical Utility / False Negative Reduction
+    Analysis: Cross-sectional classification with demographic characterization
+    Data: DERIVED from Ch5 5.1.1 theta + master.xlsx RAVLT/NART
+    Critical: Dual p-value reporting (D068), false negative identification
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.7.4 validated: 9.3/10 APPROVED. Strong theoretical grounding, comprehensive methodology, 3 suggested improvements. Ready for stats validation."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "9.0/10 CONDITIONAL. Category 1: 2.8/3 (appropriate method, minor threshold concerns). Category 2: 1.7/2 (75% tool reuse). Category 3: 1.9/2 (clear parameters, arbitrary thresholds). Category 4: 1.8/2 (D068 compliant, missing assumption checks). Category 5: 0.8/1 (5 concerns: power analysis critical gap)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: classification analysis with demographic characterization. Step 0: dependency validation, Steps 1-6: extract scores -> classification -> demographics -> group comparisons -> clinical metrics -> interpretation. Enhanced statistical specs: assumption checking, bootstrap CIs, dual p-values (D068). Cross-RQ dependency: Ch5 5.1.1 theta scores."
 
 rq_tools:
   status: pending

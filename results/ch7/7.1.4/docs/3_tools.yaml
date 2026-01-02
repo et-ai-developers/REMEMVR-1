@@ -1,0 +1,50 @@
+QUIT: FAIL - Missing Analysis Tools
+
+Required Analysis Tools (from 2_plan.md):
+
+**Step 0-3: Data Extraction Tools**
+- extract_cognitive_tests_from_master (tools.data_extraction.extract_cognitive_tests_from_master)
+- extract_demographics_from_master (tools.data_extraction.extract_demographics_from_master) 
+- extract_self_report_from_master (tools.data_extraction.extract_self_report_from_master)
+- extract_theta_scores_from_rq_results (tools.data_extraction.extract_theta_scores_from_rq_results)
+
+**Step 4: Data Merging Tools**
+- merge_predictors_complete_case (tools.data_manipulation.merge_predictors_complete_case)
+
+**Step 5: Hierarchical Regression Tools**
+- fit_hierarchical_regression_with_cv (tools.analysis_regression.fit_hierarchical_regression_with_cv)
+- validate_regression_assumptions (tools.validation.validate_regression_assumptions)
+
+**Step 6: Effect Size and Variance Decomposition Tools**
+- compute_cohens_f2_with_bootstrap_ci (tools.analysis_regression.compute_cohens_f2_with_bootstrap_ci)
+- compute_variance_decomposition (tools.analysis_regression.compute_variance_decomposition)
+
+**Step 7: Domain-Specific Analysis Tools**
+- fit_domain_specific_hierarchical_regression (tools.analysis_regression.fit_domain_specific_hierarchical_regression)
+
+**Step 8: Plot Data Preparation Tools**
+- prepare_incremental_validity_plot_data (tools.plotting.prepare_incremental_validity_plot_data)
+
+Missing from tool_inventory.md:
+- extract_cognitive_tests_from_master (NOT FOUND)
+- extract_demographics_from_master (NOT FOUND)
+- extract_self_report_from_master (NOT FOUND)
+- extract_theta_scores_from_rq_results (NOT FOUND)
+- merge_predictors_complete_case (NOT FOUND)
+- fit_hierarchical_regression_with_cv (NOT FOUND)
+- validate_regression_assumptions (NOT FOUND)
+- compute_cohens_f2_with_bootstrap_ci (NOT FOUND)
+- compute_variance_decomposition (NOT FOUND)
+- fit_domain_specific_hierarchical_regression (NOT FOUND)
+- prepare_incremental_validity_plot_data (NOT FOUND)
+
+Action Required:
+1. User + Claude migrate missing tools from v3.0 with TDD or develop new tools
+2. Update tool_inventory.md with function signatures for ALL missing tools
+3. Re-run rq_tools agent
+
+This is the TDD detection point. DO NOT IMPROVISE. DO NOT GUESS SIGNATURES.
+
+RQ 7.1.4 requires hierarchical regression and incremental validity analysis tools that are not 
+currently documented in tools_inventory.md. The existing tools are primarily focused on IRT/LMM
+analysis, whereas this RQ requires classical regression analysis tools.

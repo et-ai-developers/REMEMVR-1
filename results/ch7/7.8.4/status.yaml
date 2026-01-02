@@ -10,16 +10,21 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.8.4: Multivariate vs univariate prediction
+    Type: Predictive simplification / Model simplification
+    Analysis: Multiple regression with model comparison + cross-validation
+    Data: DERIVED from Ch5 5.2.X (domain theta) + master.xlsx (cognitive tests)
+    Critical: AIC comparison, dual p-values, overfitting check via CV
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.8.4 validated: 9.3/10 APPROVED. Excellent multivariate modeling approach, solid interpretation framework, minor literature gaps. Ready for stats validation."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.9/10 REJECTED. Category 1: 3.0/3 (excellent methods). Category 2: 1.0/2 (50% tool reuse). Category 3: 1.7/2 (good parameters, minor gaps). Category 4: 1.6/2 (validation gaps). Category 5: 0.6/1 (4 concerns, no citations due to WebSearch skip). Key issue: missing critical tools + validation gaps."
 
 rq_planner:
   status: pending

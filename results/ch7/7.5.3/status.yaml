@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.5.3: Memory Strategies Predicting Performance
+    Type: Lifestyle / Memory Strategies
+    Analysis: Correlation + t-test + hierarchical regression
+    Data: DERIVED from Ch5 5.1.1 theta_all + master.xlsx STR tags
+    Critical: Text coding required for mnemonic strategies, dual p-value reporting
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.5.3 validated: 9.1/10 CONDITIONAL. Theory solid, citations missing (critical), measurement validity needs attention. 2 required changes."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.4/10 REJECTED. Cat1: 2.2/3 (method appropriate, text coding concerns). Cat2: 1.8/2 (50% reuse). Cat3: 1.4/2 (bootstrap/coding params missing). Cat4: 1.6/2 (assumptions partial). Cat5: 0.4/1 (limited without WebSearch, 5 concerns)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "Memory strategies analysis plan: 8 steps (correlation + t-test + hierarchical regression). Key: text coding reliability kappa>=0.80, bootstrap CIs, Decision D068 dual p-values, Ch5 dependency validation."
 
 rq_tools:
   status: pending

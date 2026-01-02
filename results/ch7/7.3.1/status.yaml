@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.3.1: Do cognitive tests predict confidence trajectories?
+    Type: Metacognition Predictors / Confidence Prediction
+    Analysis: Multiple regression + cross-validation + hierarchical entry
+    Data: DERIVED from Ch6 6.1.1 confidence theta + master.xlsx cognitive tests
+    Critical: Compare R² pattern vs accuracy (7.1.1), test metacognitive dissociation
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.3.1 validated: 9.3/10 APPROVED. Strong theoretical grounding, clear implications. Minor suggestions on executive function characterization."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.8/10 REJECTED. Category 1: 2.8/3 (appropriate). Category 2: 1.0/2 (0% reuse). Category 3: 1.8/2 (well-specified). Category 4: 1.6/2 (good validation). Category 5: 0.6/1 (7 concerns, no WebSearch). Major tool gaps in regression analysis."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "Analysis plan created: 9 steps (hierarchical regression + CV + diagnostics). Dependencies: Ch6 6.1.1 (critical), RQ 7.1.1 (optional). Enhanced v5.1 specs with seeds, bootstrap, corrections, remedial actions."
 
 rq_tools:
   status: pending

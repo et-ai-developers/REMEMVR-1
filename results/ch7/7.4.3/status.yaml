@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.4.3: RPM Predicts Temporal Integration Performance
+    Type: Predictive Validity - Process-Specific / RPM Predicting When Domain Integration
+    Analysis: Multiple correlation + Steiger's Z-test for differential prediction
+    Data: DERIVED from Ch5 5.2.x (What/When theta) + master.xlsx (RPM_Scor)
+    Critical: Decision D068 dual p-values, temporal integration via When domain
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.4.3 validated: 9.1/10 CONDITIONAL. Strong theory/methods, literature support insufficient. 1 required change needed."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8.3/10 REJECTED. Category 1: 2.8/3 (appropriate). Category 2: 1.4/2 (50% tool reuse). Category 3: 1.6/2 (calculation error). Category 4: 1.9/2 (comprehensive). Category 5: 0.6/1 (limited without citations)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "9-step correlation analysis plan created with Steiger's Z-test for differential prediction. Bootstrap CIs, sensitivity analyses, and Decision D068 dual p-values implemented. All steps include 4-layer validation requirements."
 
 rq_tools:
   status: pending

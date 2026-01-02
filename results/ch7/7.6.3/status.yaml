@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.6.3: ICC slope replication across domains
+    Type: Individual Differences / ICC slope replication
+    Analysis: Variance component analysis (ICC) + bootstrap CIs
+    Data: DERIVED from Ch5 5.2.1, 5.2.2, 5.2.3 domain slopes
+    Critical: When domain expected lower ICC due to measurement issues
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.6.3 validated: 9.3/10 APPROVED. Strong theoretical grounding, needs literature. Ready for stats validation."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.6/10 REJECTED. Category 1: 2.9/3 (appropriate). Category 2: 0.8/2 (43% reuse). Category 3: 1.5/2 (parameters). Category 4: 1.7/2 (validation). Category 5: 0.7/1 (6 concerns). Critical: bootstrap tools missing."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8-step ICC replication analysis plan created. Complete statistical specifications (bootstrap seed=42, 1000 iterations, ICC(1,1), dual p-values). Cross-RQ dependencies on Ch5 5.2.1-5.2.3 validated. 4-layer validation for all steps. Missing bootstrap tools noted from rq_stats."
 
 rq_tools:
   status: pending

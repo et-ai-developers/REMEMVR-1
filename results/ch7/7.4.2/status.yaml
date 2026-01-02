@@ -10,20 +10,25 @@ rq_builder:
     Next: rq_concept extracts concept from specs
 
 rq_concept:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    RQ 7.4.2: BVMT predicts Where more than What
+    Type: Process-Specific Prediction / Domain-Specific Prediction
+    Analysis: Bivariate correlations + Steiger's Z-test
+    Data: DERIVED from Ch5 5.2.x domain theta + master.xlsx BVMT
+    Critical: Tests r(BVMT,Where) > r(BVMT,What), Decision D068 dual p-values
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "Ch7 7.4.2 validated: 9.3/10 APPROVED. Strong theoretical grounding, adequate methods. 4 suggested improvements for literature and effect sizes."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8.0/10 REJECTED. Category 1: 2.8/3 (appropriate). Category 2: 1.3/2 (75% reuse). Category 3: 1.7/2 (good params). Category 4: 1.8/2 (strong validation). Category 5: 0.4/1 (9 concerns, no citations). Missing power analysis, multiple testing consideration."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "RQ 7.4.2 plan complete: 8 steps (0: validation + 1-7: analysis). Dependent correlations comparison using Steiger's Z-test with bootstrap validation. Addresses statistical concerns: power analysis, specific assumption tests, multiple testing correction. Enhanced v5.1 specifications include random seeds, remedial actions, comprehensive validation."
 
 rq_tools:
   status: pending
