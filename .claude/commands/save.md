@@ -6,17 +6,19 @@
 
 ## Steps
 
-### 1. Re-read state.md:
+### 1. Re-read state.md if context window allows:
 
 - Read `.claude/context/current/state.md` to get current state (may have been updated since /refresh)
 - Understand current task context for finding relevant archived topics
+- If very limited context window available, prioritise dumping context to state.md
 
-### 2. Use context_finder to find relevant archived topics:
+### 2. Use context_finder to find relevant archived topics if context window allows:
 
 - Invoke context_finder agent to search `.claude/context/archive/` for topics relevant to current task
 - Search query based on current work (keywords, RQ numbers, tools, methodologies)
 - Get timestamped findings with source citations
 - This ensures state.md references relevant historical context
+- If very limited context window available, prioritise dumping context to state.md
 
 ### 3. Prepare state.md update:
 
