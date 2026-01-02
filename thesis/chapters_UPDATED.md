@@ -601,121 +601,161 @@ This chapter explains the two-stage psychometric analysis pipeline and why it's 
 
 # Chapter 7: INDIVIDUAL DIFFERENCES IN EPISODIC MEMORY
 
-**Status:** ⚠️ **0/20 RQs EXECUTED** (Ch7 deferred, no reports generated)
+**Status:** ⚠️ **0/28 RQs EXECUTED** (Specifications complete, execution pending)
 
 **RQ Reports Location:** N/A (Ch7 work not yet started)
 
-**Note:** Some preliminary CTT analyses exist (user notes "[DONE FOR CTT]" for 9 RQs), but IRT-based analyses needed for thesis-quality results
+**Specifications:** `results/ch7/specs.md` (comprehensive RQ specs, ready for rq_concept)
+
+**Central Thesis Question:** If REMEMVR (ecological VR memory) and traditional tests (RAVLT, BVMT) measure the same construct, they should correlate highly. If they don't, what explains the gap, and what does REMEMVR reveal that traditional tests miss?
+
+**Why Ch7 is the ANCHOR Chapter:** Ch7 connects REMEMVR (new, exploratory) to existing literature (RAVLT, BVMT - tried and tested). The divergence between REMEMVR and traditional tests is one of the key arguments of the thesis introduction.
 
 ---
 
-## 7.1 Predictive Validity (4 RQs)
+## Theme 1: Predictive Validity (Core) — 4 RQs
 
-**7.1.1 Do standard cognitive tests predict REMEMVR performance?** [DONE FOR CTT]
-- Hypothesis: Tests predict Day 0 ability but may not predict forgetting rate
-- Analysis: RAVLT/BVMT/NART/RPM predicting REMEMVR theta scores
-- **Status:** Preliminary CTT analysis done, IRT analysis needed
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.1.1** | Do cognitive tests predict overall REMEMVR ability? | TIER 1 |
+| **7.1.2** | Do tests predict intercept (Day 0) vs slope (forgetting)? | TIER 1 |
+| **7.1.3** | Which test predicts which domain? (RAVLT→What, BVMT→Where) | TIER 1 |
+| **7.1.4** | Unique REMEMVR variance unexplained by all predictors (>50%)? | TIER 1 |
 
-**7.1.2 Which cognitive test best predicts which REMEMVR domain?** [DONE FOR CTT]
-- Hypothesis: RAVLT (verbal) → What, BVMT (visuospatial) → Where, neither → When
-- **Status:** Preliminary CTT analysis done, IRT analysis needed
-
-**7.1.3 Do cognitive tests predict intercept vs slope?** [DONE FOR CTT]
-- Hypothesis: Tests predict encoding capacity but not consolidation efficiency
-- **Status:** Preliminary CTT analysis done, IRT analysis needed
-
-**7.1.4 Unique variance in REMEMVR not explained by standard tests?** [DONE FOR CTT]
-- Hypothesis: REMEMVR taps ecological episodic memory beyond pen-and-paper tests
-- **Status:** Preliminary CTT analysis done, IRT analysis needed
+**Key Finding Expected:** Cognitive tests predict ~35% of REMEMVR variance (convergent validity), but >50% remains unexplained (divergent validity = ecological validity gap).
 
 ---
 
-## 7.2 Domain Specificity (3 RQs)
+## Theme 2: Age × VR Scaffolding — 4 RQs
 
-**7.2.1 Does RAVLT predict Free Recall better than Recognition?** [TO DO]
-- Hypothesis: Both are generative retrieval tasks
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.2.1** | Does age predict REMEMVR after controlling for cognitive tests? | TIER 1 |
+| **7.2.2** | Do cognitive tests attenuate age effects on REMEMVR? | TIER 1 |
+| **7.2.3** | Is there Age × Cognitive Test interaction? | TIER 1 |
+| **7.2.4** | **VR Scaffolding Validation:** REMEMVR age-invariant while RAVLT declines? | TIER 1 (NEW) |
 
-**7.2.2 Does BVMT predict Where more than When?** [TO DO]
-- Hypothesis: BVMT is visuospatial, not temporal
-
-**7.2.3 Does RPM predict complex integration (What+Where+When)?** [TO DO]
-- Hypothesis: Relational binding requires fluid reasoning
-
----
-
-## 7.3 Age as Moderator (3 RQs)
-
-**7.3.1 Does age explain variance beyond cognitive test scores?** [DONE FOR CTT]
-- Hypothesis: Age has direct effects on consolidation not mediated by test performance
-- **Status:** Preliminary CTT analysis done
-
-**7.3.2 Do cognitive tests attenuate age effects?** [DONE FOR CTT]
-- Hypothesis: Age effects mediated by cognitive ability
-- **Status:** Preliminary CTT analysis done
-
-**7.3.3 Age × cognitive test interaction?** [TO DO]
-- Hypothesis: Tests may be better predictors in older adults
+**Key Finding Expected:** Same participants show age decline on RAVLT but not REMEMVR. This validates VR scaffolding hypothesis from Ch5 (Age×Time p=.96).
 
 ---
 
-## 7.4 Self-Reported & Contextual (3 RQs)
+## Theme 3: Metacognition Predictors — 5 RQs (NEW THEME)
 
-**7.4.1 Do self-reported factors predict performance?** [DONE FOR CTT]
-- Sleep quality, VR experience, education, typical sleep duration
-- **Status:** Preliminary CTT analysis done
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.3.1** | Do cognitive tests predict confidence trajectories? | TIER 2 (NEW) |
+| **7.3.2** | Do cognitive tests predict calibration quality? | TIER 2 (NEW) |
+| **7.3.3** | Do cognitive tests predict HCE (high-confidence error) rate? | TIER 2 (NEW) |
+| **7.3.4** | Does DASS-Anxiety predict metacognition more than memory? | TIER 2 |
+| **7.3.5** | Does confidence-accuracy gap predict cognitive reserve? | TIER 2 (NEW) |
 
-**7.4.2 Does DASS predict memory or metacognition?** [DONE FOR CTT]
-- Hypothesis: Anxiety may impair metacognitive accuracy more than memory
-- **Status:** Preliminary CTT analysis done
-
-**7.4.3 Do memory strategies correlate with performance?** [TO DO]
-- Method of loci, visualization, narrative strategies
-
----
-
-## 7.5 Latent Profiles (2 RQs)
-
-**7.5.1 Distinct memory profiles?** [AI]
-- Hypothesis: "Visualizers" vs "verbalizers", "generalists" vs "specialists"
-
-**7.5.2 Do cognitive test profiles predict REMEMVR profiles?** [AI]
-- Hypothesis: RAVLT-dominant → What-dominant REMEMVR
+**Key Finding Expected:** Traditional tests predict accuracy but NOT confidence/calibration. RPM may predict calibration (metacognition requires executive processes). Connects to Ch6's 824× ICC ratio.
 
 ---
 
-## 7.6 Predictive Model (3 RQs)
+## Theme 4: Process-Specific Prediction — 3 RQs
 
-**7.6.1 Parsimonious model to predict real-world memory?** [AI]
-- Stepwise regression, cross-validation, clinical prediction tool
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.4.1** | Does RAVLT Free Recall predict REMEMVR Free Recall > Recognition? | TIER 3 |
+| **7.4.2** | Does BVMT predict Where more than What? | TIER 3 |
+| **7.4.3** | Does RPM predict complex integration (What+Where+When)? | TIER 3 |
 
-**7.6.2 Proportion of REMEMVR variance unexplained?** [DONE FOR CTT]
-- Hypothesis: Ecological memory has substantial unique variance
-- **Status:** Preliminary CTT analysis done
-
-**7.6.3 Do multivariate models outperform univariate?** [AI]
-- Hypothesis: REMEMVR multidimensional, requires multivariate predictors
+**Key Finding Expected:** Process-specific transfer confirmed (RAVLT→Free Recall, BVMT→Where). Domain-specificity validates theoretical distinction between verbal and visuospatial memory systems.
 
 ---
 
-## 7.7 Reverse Inference (2 RQs)
+## Theme 5: Self-Report & Contextual — 4 RQs
 
-**7.7.1 Can REMEMVR predict standard test performance?** [TO DO]
-- Hypothesis: If REMEMVR is "purer" episodic measure, should predict test performance
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.5.1** | Do sleep, education, VR experience predict REMEMVR? | TIER 4 |
+| **7.5.2** | Does DASS predict memory performance? | TIER 4 |
+| **7.5.3** | Do memory strategies correlate with performance? | TIER 4 |
+| **7.5.4** | **Per-Test Sleep:** Does sleep BEFORE each test predict THAT test? | TIER 4 (NEW) |
 
-**7.7.2 Paradigm-specific cross-test correlations?** [TO DO]
-- Hypothesis: REMEMVR Recognition → BVMT Recognition (both familiarity-based)
+**Key Finding Expected:** Per-test sleep shows within-person state effects (unique longitudinal contribution). DASS effects small.
+
+---
+
+## Theme 6: Individual Differences in Forgetting — 4 RQs (NEW THEME)
+
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.6.1** | Do cognitive tests predict individual differences in slope? | TIER 3 |
+| **7.6.2** | Does RAVLT Delayed predict REMEMVR slope? | TIER 3 (NEW) |
+| **7.6.3** | ICC slope replication across domains? | TIER 3 (NEW) |
+| **7.6.4** | Purification & Slope: Do predictors change after IRT purification? | TIER 3 (NEW) |
+
+**Key Finding Expected:** Tests predict intercept but NOT slope. Ch5 found ICC_slope = 21% (individual differences exist), but they're unpredicted by traditional tests (different mechanism = consolidation vs encoding).
+
+---
+
+## Theme 7: Clinical Utility & Alternative Interpretation — 4 RQs (NEW THEME)
+
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.7.1** | Reverse Inference: Can REMEMVR predict RAVLT/BVMT? | TIER 1 |
+| **7.7.2** | Discrepancy Analysis: Who shows RAVLT-REMEMVR divergence? | TIER 1 (NEW) |
+| **7.7.3** | Alternative RAVLT Scoring: Learning Slope better than Total? | TIER 1 (NEW) |
+| **7.7.4** | Clinical Profiles: "False negatives" (low RAVLT, normal REMEMVR)? | TIER 1 (NEW) |
+
+**Key Finding Expected:** When tests and REMEMVR disagree, identify who diverges and why. Older adults may show VR-favored pattern (VR scaffolding). Alternative RAVLT scoring suggestions for clinical practice.
+
+---
+
+## Theme 8: Latent Profiles & Models — 4 RQs
+
+| RQ | Title | Priority |
+|----|-------|----------|
+| **7.8.1** | Distinct REMEMVR memory profiles (K=2-4)? | TIER 4 |
+| **7.8.2** | Cognitive test profiles predict REMEMVR profiles? | TIER 4 |
+| **7.8.3** | Parsimonious predictive model with 5-fold cross-validation | TIER 4 |
+| **7.8.4** | Multivariate vs univariate prediction | TIER 4 |
+
+**Key Finding Expected:** 2-3 latent profiles (Generalist, Average, Low). Age + RAVLT + BVMT achieves CV-R² ≈ 0.30-0.35 with acceptable shrinkage.
 
 ---
 
 ## Chapter 7 Status Summary
 
-- **Total RQs:** ~20 (conceptual count)
-- **IRT analyses complete:** 0/20
-- **CTT analyses complete:** 9/20 (preliminary, thesis needs IRT)
-- **Reports generated:** 0/20
-- **Estimated time to PLATINUM:** 14-16 hours (Tier 1 priority), 20-25 hours (100% completion)
+| Metric | Value |
+|--------|-------|
+| **Total RQs** | 28 (8 themes) |
+| **New RQs (vs old 20)** | 12 added (metacognition, clinical utility, slope predictors) |
+| **IRT analyses complete** | 0/28 |
+| **Specifications complete** | 28/28 (`results/ch7/specs.md`) |
+| **Reports generated** | 0/28 |
 
-**Note:** Ch7 work is FUTURE/POST-THESIS priority (user focusing on Ch5-Ch6 for PhD submission)
+### Priority Tiers
+
+| Tier | Theme | RQs | Est. Hours | Description |
+|------|-------|-----|------------|-------------|
+| **TIER 1** | 1, 2, 7 | 12 | ~12h | Core thesis: Predictive validity + Age + Clinical utility |
+| **TIER 2** | 3 | 5 | ~6h | Metacognition: Connects to Ch6 |
+| **TIER 3** | 4, 6 | 7 | ~8h | Process-specific + Slope predictors: Connects to Ch5 |
+| **TIER 4** | 5, 8 | 8 | ~8h | Self-report + Profiles: Nice-to-have |
+| **TOTAL** | - | 28 | ~34h | Full Ch7 execution |
+
+**Minimum Viable Ch7:** Tier 1 (12 RQs, ~12h) delivers the anchor chapter connecting REMEMVR to existing literature.
+
+### Data Sources
+
+| Source | Variables | Usage |
+|--------|-----------|-------|
+| Ch5 results | Theta_All, domain theta, slopes | DVs for prediction |
+| Ch6 results | Confidence theta, calibration, HCE | DVs for metacognition RQs |
+| master.xlsx | RAVLT, BVMT, NART, RPM | IVs: cognitive tests |
+| master.xlsx | Age, Education, Sleep, DASS | IVs: demographics/self-report |
+| master.xlsx | Per-test sleep (SLP tags) | State-dependent analysis (7.5.4) |
+
+### Key Theoretical Contributions Expected
+
+1. **Convergent + Divergent Validity:** Tests predict ~35%, but >50% unexplained = ecological validity gap
+2. **VR Scaffolding Validated:** RAVLT shows age decline, REMEMVR doesn't (same sample)
+3. **Metacognition Distinct:** Traditional tests don't predict confidence/calibration
+4. **Clinical Utility:** Discrepancy analysis + alternative scoring recommendations
+5. **Encoding vs Consolidation:** Tests predict intercept (encoding), NOT slope (consolidation)
 
 ---
 
@@ -764,9 +804,9 @@ Synthesizes findings across all empirical chapters, interprets within broader th
 | Ch4 (Analysis) | N/A | N/A | N/A | Not written |
 | **Ch5 (Forgetting)** | **35** | **35** ✅ | **35** ✅ | **READY FOR WRITING** |
 | **Ch6 (Metacognition)** | **30** | **30** ✅ | **30** ✅ | **READY FOR WRITING** |
-| Ch7 (Individual Diffs) | ~20 | 0 | 0 | Deferred (9/20 CTT preliminary) |
+| Ch7 (Individual Diffs) | 28 | 0 | 0 | Specs complete (results/ch7/specs.md) |
 | Ch8 (Discussion) | N/A | N/A | N/A | Not written |
-| **TOTAL** | **~85** | **65** | **65** | **76% PLATINUM certified** |
+| **TOTAL** | **93** | **65** | **65** | **70% PLATINUM certified** |
 
 ---
 
@@ -798,10 +838,14 @@ Synthesizes findings across all empirical chapters, interprets within broader th
    - Use rq_theme_writer to synthesize cross-RQ method descriptions
    - Resolve unresolved questions (IRT fit indices, DIF testing, multiple comparisons)
 
-5. **Chapter 7: Individual Differences** (if prioritized)
-   - Execute 14-16 Tier 1 RQs (70-80% completion target)
-   - Generate reports via rq_report
-   - Write Ch7 using same thesis/write.md architecture
+5. **Chapter 7: Individual Differences** (SPECIFICATIONS COMPLETE)
+   - Specs location: `results/ch7/specs.md` (28 RQs, 8 themes)
+   - Tier 1 (Core Thesis): 12 RQs, ~12h - Predictive validity + Age + Clinical utility
+   - Tier 2 (Metacognition): 5 RQs, ~6h - Connects to Ch6
+   - Tier 3 (Processes): 7 RQs, ~8h - Connects to Ch5
+   - Tier 4 (Profiles): 8 RQs, ~8h - Nice-to-have
+   - Execute via: rq_concept → rq_planner → remaining pipeline → rq_report
+   - NEW RQs: VR scaffolding validation (7.2.4), metacognition predictors (7.3.x), clinical utility (7.7.x)
 
 **LONG-TERM (Post-Thesis):**
 

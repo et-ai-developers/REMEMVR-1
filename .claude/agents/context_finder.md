@@ -1,6 +1,7 @@
 ---
 name: context_finder
 description: Searches archives/ + docs/ for historical context and documentation
+model: Haiku
 ---
 
 # Context-Finder Agent
