@@ -12,23 +12,26 @@ rq_builder:
 rq_concept:
   status: success
   context_dump: |
-    RQ 7.1.3: Domain-specific prediction (What/Where/When)
+    RQ 7.1.3: Domain-Specific Prediction Patterns
     Type: Predictive Validity / Domain-Specific Prediction
-    Analysis: MLR (3 domain models) + Steiger's Z-tests
-    Data: DERIVED from Ch5 5.2.x + master.xlsx cognitive tests
-    Critical: Tests RAVLT→What, BVMT→Where specificity hypothesis
+    Analysis: Multiple Linear Regression + Steiger Z-tests
+    Data: DERIVED from Ch5 5.2.x domain theta + master.xlsx
+    Critical: Cross-domain beta comparisons, Bonferroni correction
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.1.3 validated: 9.3/10 APPROVED. Strong theory, moderate lit gaps, excellent interpretation. Practice effects noted but non-critical. Ready for planning."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "9.3/10 APPROVED. Category 1: 3.0/3 (appropriate). Category 2: 1.8/2 (67% reuse). Category 3: 1.8/2 (well-specified). Category 4: 1.9/2 (comprehensive). Category 5: 0.8/1 (7 concerns, could be more thorough)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Analysis plan created: 6 steps planned (Step 0: extraction + Steps 1-5: analysis).
+    Tool requirements: Multiple regression, Steiger Z-tests, beta comparisons, heatmap data prep.
+    Expected outputs: 10 data files, 6 log files, 1 plot. Validation required at every step.
 
 rq_tools:
   status: pending

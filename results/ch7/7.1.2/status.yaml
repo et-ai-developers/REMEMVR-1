@@ -13,22 +13,25 @@ rq_concept:
   status: success
   context_dump: |
     RQ 7.1.2: Intercept vs Slope Prediction
-    Type: Predictive Validity / Differential Prediction Analysis
-    Analysis: Multiple Regression (intercept vs slope prediction)
-    Data: DERIVED from Ch5 5.1.1 random effects + master.xlsx
-    Critical: Tests encoding (intercept) vs consolidation (slope)
+    Type: Predictive Validity / Intercept vs Slope
+    Analysis: Linear regression on LMM random effects
+    Data: DERIVED from Ch5 5.1.1 LMM + master.xlsx tests
+    Critical: Tests predict encoding (intercept) NOT consolidation (slope)
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.1.2 validated: 9.3/10 APPROVED. Strong theory and methods, needs recent citations and practice effects discussion."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.9/10 REJECTED. Category 1: 2.3/3 (BLUP bias concerns). Category 2: 1.8/2 (75% reuse). Category 3: 1.7/2 (Bonferroni error). Category 4: 1.5/2 (missing remedies). Category 5: 0.6/1 (9 concerns, critical two-stage bias)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Analysis plan created: 6 steps planned (Step 0: dependency validation + Steps 1-5: analysis).
+    Tool requirements: Random effects extraction, linear regression, bootstrap comparison.
+    Expected outputs: 8 data files, 6 result files, 0 plots. Validation required at every step.
 
 rq_tools:
   status: pending

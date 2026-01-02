@@ -12,23 +12,26 @@ rq_builder:
 rq_concept:
   status: success
   context_dump: |
-    RQ 7.1.4: Incremental validity of REMEMVR beyond all predictors
-    Type: Predictive Validity / Incremental Validity Analysis  
-    Analysis: Hierarchical regression (3 blocks: demo + cognitive + self-report)
-    Data: DERIVED from Ch5 5.1.1 theta_all + master.xlsx predictors
-    Critical: Tests ecological validity gap, expects >50% unexplained variance
+    RQ 7.1.4: Unique REMEMVR variance unexplained by all predictors?
+    Type: Predictive Validity (Core) / Incremental Validity Assessment
+    Analysis: Hierarchical regression (3 blocks) + Cohen's f² + domain residuals
+    Data: DERIVED from Ch5 theta scores + RAW from master.xlsx predictors
+    Critical: Chapter-level alpha 0.00179, expect >50% residual variance
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.1.4 validated: 9.3/10 APPROVED. Excellent theoretical grounding, solid methodology, needs recent citations. Ready for stats validation."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8.1/10 REJECTED. Category 1: 2.7/3 (appropriate method, minor power concerns). Category 2: 1.2/2 (25% tool reuse, major gaps). Category 3: 1.8/2 (well-specified parameters). Category 4: 1.5/2 (adequate validation, remedial gaps). Category 5: 0.9/1 (comprehensive critique, 11 concerns across all subsections)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Analysis plan created: 9 steps planned (Step 0: extraction + Steps 1-8: analysis).
+    Tool requirements: Data extraction, hierarchical regression (3-block), cross-validation, effect size computation, domain analysis, plot data preparation.
+    Expected outputs: 11 data files, 9 log files, 2 plots. Validation required at every step.
 
 rq_tools:
   status: pending

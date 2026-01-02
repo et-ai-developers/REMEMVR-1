@@ -1,7 +1,7 @@
-# RQ 7.1.2: Do tests predict intercept (Day 0) vs slope (forgetting)?
+# RQ 7.1.2: Intercept vs Slope Prediction
 
 **Chapter:** 7
-**Type:** Predictive Validity (Core)
+**Type:** Predictive Validity
 **Subtype:** Intercept vs Slope Prediction
 **Full ID:** 7.1.2
 
@@ -13,47 +13,46 @@
 Do cognitive tests predict baseline ability (Day 0 intercept) more than forgetting rate (slope), consistent with tests measuring encoding but not consolidation?
 
 **Scope:**
-100 participants analyzed for individual differences in intercept (baseline ability) and slope (forgetting rate) from LMM random effects
+This RQ examines differential prediction of LMM random effects (intercept and slope) using cognitive tests (RAVLT, BVMT, RPM). Intercept represents Day 0 baseline ability, slope represents forgetting rate across 6-day retention interval. Analysis uses per-participant random effects from Ch5 LMM models. N=100 participants.
 
 **Theoretical Framing:**
-Investigates whether traditional cognitive tests capture encoding/retrieval mechanisms (reflected in intercept) versus consolidation processes (reflected in slope) in multi-day episodic memory
+Tests whether traditional neuropsychological tests capture encoding processes (measured immediately) versus consolidation processes (measured over days). Critical for understanding what cognitive tests actually measure in relation to real-world memory function.
 
 ---
 
 ## Theoretical Background
 
 **Relevant Theories:**
-Two-process theory (Craik & Rose, 2012) distinguishes encoding from consolidation processes in memory. Traditional cognitive tests measure encoding/retrieval over 20-30 minutes, not multi-day consolidation.
+- **Two-process theory** (Craik & Rose, 2012): Distinguishes encoding from consolidation processes in episodic memory
+- **Consolidation Theory**: Multi-day memory retention involves different neural mechanisms than immediate encoding/retrieval
+- **Transfer-appropriate processing**: Performance depends on match between encoding and retrieval processes
 
 **Key Citations:**
-Craik & Rose (2012) - Two-process theory of encoding vs consolidation
-Eichenbaum (2014) - Hippocampal sequence encoding mechanisms
+Craik & Rose, 2012 (two-process theory of encoding vs consolidation)
 
 **Theoretical Predictions:**
-If cognitive tests primarily measure encoding capacity, they should predict Day 0 performance (intercept) strongly but show weak associations with forgetting rate (slope) across days.
+Two-process theory predicts cognitive tests should strongly predict encoding ability (intercept) but weakly predict consolidation efficiency (slope). Traditional tests measure immediate memory over 20-30 minutes, not multi-day retention processes.
 
 **Literature Gaps:**
-Limited research examining whether traditional tests predict forgetting rates in ecologically valid multi-day paradigms versus immediate performance.
+Limited research examining whether standard neuropsychological tests predict real-world forgetting patterns versus laboratory encoding performance.
 
 ---
 
 ## Hypothesis
 
 **Primary Hypothesis:**
-Cognitive tests predict intercept strongly (R² > 0.30) but slope weakly (R² < 0.10)
+Cognitive tests predict intercept strongly (RÂ² > 0.30) but slope weakly (RÂ² < 0.10). Tests measure encoding/retrieval capacity over minutes, not multi-day consolidation processes.
 
 **Secondary Hypotheses:**
-- RAVLT and BVMT show stronger intercept prediction than slope prediction
-- RPM shows similar weak prediction for both intercept and slope
-- R²_intercept significantly greater than R²_slope (bootstrap CI excludes 0)
+- RÂ²_intercept significantly > RÂ²_slope (bootstrap CI excludes 0)
+- No individual cognitive test significantly predicts slope after Bonferroni correction
+- RAVLT and BVMT should show similar pattern (both immediate memory tests)
 
 **Theoretical Rationale:**
-Traditional tests measure encoding/retrieval over minutes, not multi-day consolidation processes. Ch5 established power-law forgetting with individual differences in slope (ICC_slope = 21% under model averaging).
+Traditional neuropsychological tests assess immediate encoding and retrieval over 20-30 minute sessions. Multi-day forgetting involves consolidation processes (synaptic strengthening, replay, integration) that differ mechanistically from immediate memory performance.
 
 **Expected Effect Pattern:**
-- Intercept prediction: R² = 0.38, RAVLT_beta = 0.35***, BVMT_beta = 0.28**, RPM_beta = 0.15
-- Slope prediction: R² = 0.08, all betas < 0.15, non-significant
-- R²_intercept - R²_slope = 0.30, 95% CI [0.18, 0.42]
+Large effect for intercept prediction (RÂ² = 0.30-0.40), minimal effect for slope prediction (RÂ² < 0.10). Bootstrap confidence interval for difference should exclude zero, indicating significantly stronger intercept prediction.
 
 ---
 
@@ -63,114 +62,130 @@ Traditional tests measure encoding/retrieval over minutes, not multi-day consoli
 
 - [x] **What** (Object Identity)
   - Tag Code: `-N-`
-  - Description: Included in overall theta_all scores from Ch5 5.1.1
+  - Description: Uses overall episodic memory from Ch5 (all domains combined)
 
 - [x] **Where** (Spatial Location)
-  - [x] `-L-` tags (general location)
+  - [x] `-L-` tags (general location, legacy)
   - [x] `-U-` tags (pick-up location)
   - [x] `-D-` tags (put-down location)
-  - Description: Included in overall theta_all scores from Ch5 5.1.1
+  - Disambiguation: Uses overall episodic memory from Ch5 (all domains combined)
 
 - [x] **When** (Temporal Order)
   - Tag Code: `-O-`
-  - Description: Included in overall theta_all scores from Ch5 5.1.1
+  - Description: Uses overall episodic memory from Ch5 (all domains combined)
 
 **Inclusion Rationale:**
-Uses omnibus theta_all scores from Ch5 5.1.1 that aggregate across all episodic memory domains to examine overall encoding vs consolidation prediction patterns.
+RQ uses overall episodic memory theta scores from Ch5 5.1.1 which combines all domains (What, Where, When) into single omnibus factor. This provides sufficient power for intercept/slope analysis and matches cognitive test generality.
 
 **Exclusion Rationale:**
-Domain-specific analysis is addressed separately in RQ 7.1.3.
+No domain-specific exclusions. This RQ focuses on overall episodic memory rather than domain-specific patterns.
 
 ---
 
 ## Analysis Approach
 
 **Analysis Type:**
-Multiple Regression with differential prediction analysis
+Linear regression predicting LMM random effects (intercepts and slopes) using cognitive test T-scores
 
 **High-Level Workflow:**
 
-**Step 1:** Extract random effects from LMM
-- Use model-averaged predictions from Ch5 5.1.1
+**Step 1:** Extract random effects from Ch5 LMM
+- Use model-averaged predictions from Ch5 5.1.1 results
 - Extract BLUPs: Intercept_i (Day 0 ability), Slope_i (forgetting rate)
-- Alternative: Re-fit LMM: `Theta ~ log_Days + (1 + log_Days | UID)`
+- Alternative: Re-fit LMM `Theta ~ log_Days + (1 + log_Days | UID)`
 
-**Step 2:** Predict intercepts
+**Step 2:** Extract and standardize cognitive tests
+- Load RAVLT, BVMT, RPM scores from master.xlsx
+- Convert to T-scores (M=50, SD=10)
+- Exclude NART due to language validity concerns
+
+**Step 3:** Predict intercepts
 - Model: `Intercept ~ RAVLT_T + BVMT_T + RPM_T`
-- Report R², beta coefficients
+- Report RÂ², individual beta coefficients, p-values
+- Apply Bonferroni correction for 3 predictors Ã— 2 models (intercept + slope) = 6 tests
+- Alpha = 0.05/6 = 0.0083 (within-RQ family)
+- Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
 
-**Step 3:** Predict slopes
+**Step 4:** Predict slopes  
 - Model: `Slope ~ RAVLT_T + BVMT_T + RPM_T`
-- Report R², beta coefficients
+- Report RÂ², individual beta coefficients, p-values
+- Apply same Bonferroni correction (alpha = 0.0083)
+- CRITICAL: Acknowledge BLUP extraction bias - extracted random effects have shrinkage toward population mean
+- Consider sensitivity analysis with simultaneous modeling as alternative
 
-**Step 4:** Compare R² values
-- Bootstrap 95% CI for R²_intercept - R²_slope
-- Hypothesis: R²_intercept >> R²_slope
+**Step 5:** Compare RÂ² values
+- Bootstrap 95% CI for RÂ²_intercept - RÂ²_slope using participant-level block bootstrap (1000 replications)
+- Preserves within-participant correlation structure
+- Fisher's Z-test for comparing dependent RÂ² values (verify assumptions: bivariate normality)
+- Hypothesis test: RÂ²_intercept > RÂ²_slope
+- Alternative: Simultaneous LMM with cognitive test Ã— time interactions avoids two-stage bias
 
-**Step 5:** Test differential prediction
-- Fisher's Z-test for comparing model R²
+**Step 6:** Model diagnostics and limitations
+- Check residual normality (Q-Q plots, Shapiro-Wilk p > 0.05)
+- Check homoscedasticity (Breusch-Pagan test, p > 0.05)
+- Report VIF values for multicollinearity (VIF < 5)
+- CRITICAL LIMITATION: Two-stage analysis with BLUPs introduces bias (Hanusz & TarasiÅ„ska, 2015)
+- Document shrinkage effects: BLUPs pulled toward population mean, especially for extreme participants
+- Consider reporting both two-stage results AND simultaneous modeling comparison
+
+**CRITICAL for Ch7 and multiple comparisons:**
+- Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
+- Include effect sizes with 95% CIs (RÂ², beta coefficients)
+- Bootstrap confidence intervals for RÂ² difference
+- Include power analysis if null findings
 
 **Expected Outputs:**
 - data/step01_random_effects.csv (extracted intercepts and slopes)
-- data/step02_cognitive_tests.csv (RAVLT, BVMT, RPM T-scores)
-- data/step03_intercept_analysis.csv (intercept regression results)
-- data/step04_slope_analysis.csv (slope regression results)
-- data/step05_comparison_results.csv (R² difference testing)
-- results/differential_prediction_summary.md (text summary)
-- plots/intercept_vs_slope_prediction.png (visualization)
+- data/step02_cognitive_tests.csv (T-scored predictors)
+- data/step03_intercept_predictions.csv (intercept model results)
+- data/step04_slope_predictions.csv (slope model results)
+- data/step05_r_squared_comparison.csv (bootstrap results)
+- results/intercept_vs_slope_summary.md (interpretation for thesis)
+- plots/intercept_slope_prediction.png (visualization)
 
 **Success Criteria:**
-- [ ] R²_intercept > 0.25
-- [ ] R²_slope < 0.15
-- [ ] R²_intercept significantly > R²_slope (bootstrap CI excludes 0)
-- [ ] No individual predictor significantly predicts slope
+- RÂ²_intercept > 0.25
+- RÂ²_slope < 0.15
+- RÂ²_intercept significantly > RÂ²_slope (bootstrap CI excludes 0)
+- No individual predictor significantly predicts slope after correction
+- Model diagnostics pass (VIF < 5, residuals normal)
 
 ---
 
 ## Data Source
 
 **Data Type:**
-DERIVED (from Ch5 5.1.1 outputs + master.xlsx cognitive tests)
+DERIVED (from Ch5 LMM results and master.xlsx cognitive tests)
 
-### DERIVED Data Sources:
+### DERIVED Data Source:
 
 **Source RQ:**
-Ch5 5.1.1 (General episodic memory LMM with random intercepts and slopes)
+Ch5 5.1.1 (Functional Form Comparison - provides LMM with random intercepts/slopes)
 
 **File Paths:**
-- results/ch5/5.1.1/data/step03_lmm_random_effects.csv (individual intercepts/slopes)
-- data/cache/master.xlsx (cognitive test scores)
+- results/ch5/5.1.1/data/step06_best_model.pkl (saved LMM model with random effects)
+- results/ch5/5.1.1/data/step04_lmm_input.csv (400 observations with UID and time)
+- master.xlsx (cognitive test scores via tag patterns)
 
 **Dependencies:**
-Ch5 5.1.1 must complete successfully before this RQ can run
-
-### Cognitive Test Variables (master.xlsx):
-
-**RAVLT:**
-- Tag patterns: `{UID}-COG-X-RAV-T1Sc` through `T5Sc`
-- Computed score: RAVLT_Total = sum(T1-T5), converted to T-scores
-
-**BVMT:**
-- Tag patterns: `{UID}-COG-X-BVM-TotR`
-- Computed score: BVMT_Total, converted to T-scores
-
-**RPM:**
-- Tag pattern: `{UID}-COG-X-RPM-Scor`
-- Computed score: RPM raw score, converted to T-scores
+Ch5 5.1.1 must complete through Step 6 (LMM fitting with random intercepts/slopes) before this RQ can extract random effects. Cognitive tests are independent data from master.xlsx.
 
 ### Inclusion/Exclusion Criteria:
 
 **Participants:**
-- [x] All 100 participants with complete cognitive test data
-- [ ] Subset: Exclude if missing any of RAVLT, BVMT, RPM
+- [x] All 100 participants from Ch5 5.1.1 (inherited inclusion criteria)
+- [ ] Exclude: None (uses same sample as Ch5)
+
+**Items:**
+- [x] Uses theta scores (already aggregated from IRT calibration)
+- Description: Overall episodic memory theta from omnibus factor
 
 **Tests:**
-- [x] All 4 tests (T1, T2, T3, T4) from Ch5 5.1.1 theta scores
-- [x] Cognitive battery: RAVLT, BVMT, RPM (excluding NART due to language validity concerns)
+- [x] All 4 tests (T1, T2, T3, T4) - used to derive intercepts/slopes
+- Description: LMM random effects capture per-participant baseline and trajectory
 
-**Statistical Standards:**
-- Chapter-level alpha: 0.05/28 = 0.00179
-- Bonferroni correction for multiple predictors: 0.00179/3 = 0.000597 per predictor
-- Missing data: Listwise deletion, report final n per analysis
-
----
+**Cognitive Tests:**
+- [x] RAVLT Total (sum of T1-T5)
+- [x] BVMT Total Recognition
+- [x] RPM (Raven's Progressive Matrices)
+- [ ] NART - EXCLUDED (language validity concerns in diverse sample)

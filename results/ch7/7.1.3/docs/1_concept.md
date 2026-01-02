@@ -1,4 +1,4 @@
-# RQ 7.1.3: Which test predicts which domain?
+# RQ 7.1.3: Domain-Specific Prediction Patterns
 
 **Chapter:** 7
 **Type:** Predictive Validity (Core)
@@ -13,53 +13,49 @@
 Do verbal tests (RAVLT) preferentially predict What memory, visuospatial tests (BVMT) predict Where memory, and neither predicts When memory?
 
 **Scope:**
-100 participants across all domain-specific theta scores from Ch5 domain analyses
+This RQ examines domain-specific prediction patterns using IRT-derived theta scores for What, Where, and When domains. Compares predictive strength of RAVLT (verbal), BVMT (visuospatial), and RPM (fluid intelligence) across the three episodic memory domains. N=100 participants with complete cognitive test and REMEMVR data.
 
 **Theoretical Framing:**
-Tests cognitive test domain specificity by examining whether different neuropsychological tests show differential prediction patterns for episodic memory domains (What/Where/When) as measured by REMEMVR.
+Tests Baddeley's working memory model prediction that verbal and visuospatial systems are dissociable. If true, RAVLT should predict What (verbally encoded objects) more than Where (spatially encoded locations), while BVMT should show the opposite pattern. When (temporal sequence) may rely on distinct hippocampal mechanisms not captured by either test.
 
 ---
 
 ## Theoretical Background
 
 **Relevant Theories:**
-Baddeley's working memory model (1992) posits dissociable verbal and visuospatial subsystems. The RAVLT taps verbal/phonological processing while BVMT assesses visuospatial working memory. Temporal order memory may rely on hippocampal sequence encoding (Eichenbaum, 2014) not captured by either test.
+- **Baddeley's Working Memory Model (1992):** Posits dissociable verbal and visuospatial subsystems. Verbal tests should predict verbally-encoded domains (What), while visuospatial tests should predict spatially-encoded domains (Where).
+- **Hippocampal Sequence Processing (Eichenbaum, 2014):** Temporal order memory may rely on hippocampal sequence encoding mechanisms distinct from both verbal and visuospatial systems.
 
 **Key Citations:**
-- Baddeley (1992): Working memory model with domain-specific subsystems
-- Eichenbaum (2014): Hippocampal sequence encoding for temporal order
+To be enhanced by rq_scholar
 
 **Theoretical Predictions:**
-Domain-specific prediction pattern expected based on test modality:
-- RAVLT should predict What memory (object identity verbally encoded)
-- BVMT should predict Where memory (spatial locations visuospatially encoded) 
-- Neither should predict When memory (temporal order relies on distinct mechanism)
-- RPM should predict all domains equally (fluid intelligence is domain-general)
+Working memory theory predicts domain-specific patterns: RAVLT Â’ What, BVMT Â’ Where. Neither should strongly predict When due to reliance on distinct hippocampal sequence mechanisms. RPM (fluid intelligence) should predict all domains equally due to domain-general nature.
 
 **Literature Gaps:**
-Few studies have examined domain-specific prediction patterns between traditional neuropsychological tests and ecologically valid VR memory tasks across What/Where/When episodic memory domains.
+To be identified by rq_scholar
 
 ---
 
 ## Hypothesis
 
 **Primary Hypothesis:**
-RAVLT will show stronger prediction of What memory than Where memory, while BVMT will show stronger prediction of Where memory than What memory.
+Domain-specific prediction pattern expected:
+- RAVLT Â’ What (object identity verbally encoded)
+- BVMT Â’ Where (spatial locations visuospatially encoded)  
+- Neither Â’ When (temporal order relies on distinct mechanism)
+- RPM Â’ All domains equally (fluid intelligence is domain-general)
 
 **Secondary Hypotheses:**
-1. Neither RAVLT nor BVMT will significantly predict When memory
-2. RPM will show similar beta coefficients across all domains (domain-general fluid intelligence)
-3. R² for When memory models will be lower than What and Where memory models
+1. RAVLT beta coefficient for What domain > RAVLT beta for Where domain
+2. BVMT beta coefficient for Where domain > BVMT beta for What domain
+3. RÂ²_When < RÂ²_What H RÂ²_Where (temporal order less predictable)
 
 **Theoretical Rationale:**
-Working memory subsystems (verbal vs visuospatial) should map onto episodic memory encoding strategies, with objects encoded verbally and locations encoded spatially. Temporal order may depend on hippocampal sequence processing not assessed by traditional tests.
+Based on Baddeley's working memory model separating verbal and visuospatial systems. Object identity relies on verbal encoding/retrieval (phonological loop), spatial locations rely on visuospatial encoding (visuo-spatial sketchpad). Temporal sequence relies on hippocampal mechanisms not strongly tapped by either traditional test.
 
 **Expected Effect Pattern:**
-Domain-specificity tests using Steiger's Z:
-- RAVLT_beta_What > RAVLT_beta_Where (p < 0.05)
-- BVMT_beta_Where > BVMT_beta_What (p < 0.05) 
-- R² pattern: What H Where > When
-- RPM shows consistent beta coefficients across domains
+Steiger's Z-tests should show significant differences: RAVLT_What > RAVLT_Where (p < 0.05) and BVMT_Where > BVMT_What (p < 0.05). When domain RÂ² should be lowest across all models.
 
 ---
 
@@ -69,106 +65,104 @@ Domain-specificity tests using Steiger's Z:
 
 - [x] **What** (Object Identity)
   - Tag Code: `-N-`
-  - Description: RAVLT preferentially predicts object identity memory through verbal encoding strategies
+  - Description: Object identity / naming (verbally encoded)
 
 - [x] **Where** (Spatial Location)
-  - [x] `-L-` tags (general location)
-  - [x] `-U-` tags (pick-up location)
+  - [x] `-L-` tags (general location, legacy)
+  - [x] `-U-` tags (pick-up location) 
   - [x] `-D-` tags (put-down location)
-  - Description: BVMT preferentially predicts spatial location memory through visuospatial encoding strategies
+  - Disambiguation: All Where tags included (spatially encoded)
 
 - [x] **When** (Temporal Order)
   - Tag Code: `-O-`
-  - Description: Neither test predicts temporal order (distinct hippocampal mechanism)
+  - Description: Temporal order / sequence (hippocampally encoded)
 
 **Inclusion Rationale:**
-Uses domain-specific theta scores from Ch5 5.2.x analyses to test whether different cognitive tests show domain-specific prediction patterns based on test modality (verbal vs visuospatial).
+All three core episodic memory domains examined to test domain-specific prediction patterns. What domain expected to correlate with verbal tests (RAVLT), Where domain with visuospatial tests (BVMT), and When domain with neither due to distinct encoding mechanisms.
 
 **Exclusion Rationale:**
-None - all three core episodic memory domains are examined to test domain-specificity hypothesis.
+None - this RQ specifically requires all three domains to test cross-domain prediction patterns.
 
 ---
 
 ## Analysis Approach
 
 **Analysis Type:**
-Multiple Linear Regression with Domain-Specific Models and Cross-Domain Beta Comparisons
+Multiple Linear Regression with cross-domain beta coefficient comparisons
 
 **High-Level Workflow:**
 
-**Step 1:** Extract domain-specific theta scores
-- Load from Ch5 5.2.1/5.2.2/etc. results  
-- Compute mean theta per UID per domain
+**Step 1:** Extract domain-specific theta scores from Ch5 5.2.x results and compute mean per UID per domain
 
-**Step 2:** Fit domain-specific models
-- Model_What: `Theta_What ~ RAVLT_T + BVMT_T + RPM_T`
-- Model_Where: `Theta_Where ~ RAVLT_T + BVMT_T + RPM_T` 
+**Step 2:** Fit three domain-specific regression models:
+- Model_What: `Theta_What ~ RAVLT_T + BVMT_T + RPM_T`  
+- Model_Where: `Theta_Where ~ RAVLT_T + BVMT_T + RPM_T`
 - Model_When: `Theta_When ~ RAVLT_T + BVMT_T + RPM_T`
 
-**Step 3:** Compare beta coefficients across domains
-- Extract beta_RAVLT for each domain
-- Steiger's Z-test: Is beta_RAVLT_What > beta_RAVLT_Where?
-- Steiger's Z-test: Is beta_BVMT_Where > beta_BVMT_What?
+**Step 3:** Extract beta coefficients and RÂ² values for each domain model
 
-**Step 4:** Compare R² across domains
-- Bootstrap CIs for each model's R²
-- Hypothesis: R²_When < R²_What H R²_Where
+**Step 4:** Compare beta coefficients across domains using Steiger's Z-tests:
+- Test: beta_RAVLT_What > beta_RAVLT_Where
+- Test: beta_BVMT_Where > beta_BVMT_What
 
-**Step 5:** Create beta coefficient matrix
-- Heatmap visualization: rows=domains, columns=tests
+**Step 5:** Compare RÂ² across domains using bootstrap 95% CIs
+
+**Step 6:** Create beta coefficient heatmap visualization (rows=domains, columns=tests)
+
+**CRITICAL for Ch7 and multiple comparisons:**
+- Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
+- Include model diagnostics (residual normality, homoscedasticity, influential points)
+- Include effect sizes with 95% CIs (RÂ², Â² coefficients)
+- Bootstrap CIs for RÂ² comparisons
 
 **Expected Outputs:**
 - data/step01_domain_theta_scores.csv (mean theta per UID per domain)
-- data/step02_cognitive_tests.csv (RAVLT, BVMT, RPM scores)
-- data/step03_analysis_input.csv (merged dataset)
-- data/step04_domain_models.csv (regression results per domain)
-- data/step05_beta_comparisons.csv (Steiger's Z-test results)
-- results/domain_prediction_summary.md (text summary)
-- plots/domain_specificity_heatmap.png (beta coefficient matrix)
+- data/step02_what_model_results.csv (What domain regression results)
+- data/step03_where_model_results.csv (Where domain regression results)  
+- data/step04_when_model_results.csv (When domain regression results)
+- data/step05_beta_comparison_matrix.csv (cross-domain beta coefficients)
+- data/step06_steiger_z_tests.csv (cross-domain comparison statistics)
+- plots/domain_prediction_heatmap.png (beta coefficient visualization)
+- results/domain_specific_prediction_summary.md (text summary for thesis)
 
 **Success Criteria:**
 - RAVLT_beta_What > RAVLT_beta_Where (p < 0.05)
 - BVMT_beta_Where > BVMT_beta_What (p < 0.05)
-- R²_When < R²_What and R²_When < R²_Where  
-- RPM shows similar beta across all domains
+- RÂ²_When < RÂ²_What and RÂ²_When < RÂ²_Where
+- RPM shows similar beta coefficients across all domains
+- All models converge, residuals normally distributed
 
 ---
 
 ## Data Source
 
 **Data Type:**
-DERIVED (from Ch5 5.2.x domain theta scores + master.xlsx cognitive tests)
+DERIVED (from Ch5 domain analysis outputs + master.xlsx)
 
-### DERIVED Data Sources:
+### DERIVED Data Source:
 
 **Source RQ:**
-Ch5 5.2.x (domain-specific analyses)
+Ch5 5.2.x (Domain-specific analyses)
 
 **File Paths:**
-- results/ch5/5.2.1/data/step03_theta_scores.csv (What domain)
-- results/ch5/5.2.2/data/step03_theta_scores.csv (Where domain)  
-- results/ch5/5.2.3/data/step03_theta_scores.csv (When domain)
-- data/cache/master.xlsx (cognitive test scores)
+- results/ch5/5.2.1/data/step03_theta_what.csv (What domain theta scores)
+- results/ch5/5.2.2/data/step03_theta_where.csv (Where domain theta scores)  
+- results/ch5/5.2.3/data/step03_theta_when.csv (When domain theta scores)
+- data/cache/master.xlsx (cognitive test scores: RAVLT_T, BVMT_T, RPM_T)
 
 **Dependencies:**
-Ch5 5.2.1, 5.2.2, and 5.2.3 must complete before this RQ can run
+Ch5 domain analyses (5.2.1, 5.2.2, 5.2.3) must complete IRT calibration and theta estimation before this RQ can run.
 
 ### Inclusion/Exclusion Criteria:
 
 **Participants:**
-- [x] All 100 participants with complete cognitive test data
+- [x] All 100 participants with complete cognitive test and REMEMVR data
+- [ ] Exclude: Participants missing any cognitive test scores
 
 **Items:**
-- [x] Domain-specific theta scores from Ch5 analyses
+- N/A (theta scores already aggregated by domain)
 
 **Tests:**
-- [x] RAVLT Total Score (T1-T5 sum)
-- [x] BVMT Total Recall Score  
-- [x] RPM Total Score
-
-**Variables Extracted:**
-- **DVs:** Mean Theta_What, Theta_Where, Theta_When per UID
-- **IVs:** RAVLT_T, BVMT_T, RPM_T from master.xlsx
-- **Sample:** N=100 participants
+- [x] All tests aggregated into domain-specific theta scores
 
 ---

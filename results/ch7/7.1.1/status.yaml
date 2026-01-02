@@ -13,22 +13,25 @@ rq_concept:
   status: success
   context_dump: |
     RQ 7.1.1: Do cognitive tests predict overall REMEMVR ability?
-    Type: Predictive Validity (Core) / General episodic memory prediction
-    Analysis: Multiple regression (4 cognitive tests) + dominance analysis
-    Data: DERIVED from Ch5 5.1.1 theta_all + master.xlsx cognitive tests
-    Critical: Bonferroni alpha = 0.000448, expect R² = 0.30-0.45, residual > 50%
+    Type: Predictive Validity / Core convergent validity
+    Analysis: Multiple Linear Regression (4 cognitive tests -> theta)
+    Data: DERIVED from Ch5 5.1.1 theta + master.xlsx cognitive tests
+    Critical: Bonferroni alpha=0.000448, expect R²=0.35, residual>50%
 
 rq_scholar:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7.1.1 validated: 9.1/10 CONDITIONAL. Strong theory, need recent citations + practice effects discussion. 2 required changes."
 
 rq_stats:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8.3/10 CONDITIONAL. Category 1: 3.0/3 (appropriate). Category 2: 0.5/2 (0% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.8/2 (good validation). Category 5: 1.0/1 (8 concerns, comprehensive). Major tool gaps require regression module."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Analysis plan created: 8 steps planned (Step 0: extraction + Steps 1-7: analysis).
+    Tool requirements: Multiple linear regression, assumption checking, dual p-value correction (D068), cross-validation.
+    Expected outputs: 14 data files, 9 log files. Validation required at every step.
 
 rq_tools:
   status: pending
