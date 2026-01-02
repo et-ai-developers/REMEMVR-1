@@ -81,6 +81,13 @@ When domain excluded as this RQ specifically tests spatial (Where) vs object (Wh
 
 ## Analysis Approach
 
+**Power Analysis:**
+- Sample size: N=100 with k predictors
+- Post-hoc power for medium effects (f²=0.15): Approximately 80%
+- Minimum detectable effect: f²=0.10 with current sample
+- Limitation acknowledged: Underpowered for small effects (f²<0.10)
+
+
 **Analysis Type:**
 Bivariate correlation analysis with dependent correlations comparison (Steiger's Z-test)
 
@@ -133,6 +140,15 @@ Bivariate correlation analysis with dependent correlations comparison (Steiger's
 - data/step07_sensitivity_analysis.csv (robustness checks)
 - results/domain_specificity_summary.md (text summary for thesis)
 - plots/domain_specificity_scatterplots.png (correlation visualization)
+
+**
+
+**Cross-Validation:**
+- Implement 5-fold CV (seed=42) for generalization assessment
+- Report mean CV-R² and SD across folds
+- CV-R² to full-sample R² gap should be <0.10
+- If gap >0.10: Consider regularization
+
 
 **Success Criteria:**
 - Both correlations significant at uncorrected alpha

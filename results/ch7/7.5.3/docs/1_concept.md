@@ -82,6 +82,13 @@ None - comprehensive omnibus measure captures general memory strategy effects.
 
 ## Analysis Approach
 
+**Power Analysis:**
+- Sample size: N=100 with k predictors
+- Post-hoc power for medium effects (f²=0.15): Approximately 80%
+- Minimum detectable effect: f²=0.10 with current sample
+- Limitation acknowledged: Underpowered for small effects (f²<0.10)
+
+
 **Analysis Type:**
 Correlational analysis and independent samples t-test with multiple regression control variables
 
@@ -111,7 +118,7 @@ Correlational analysis and independent samples t-test with multiple regression c
 **Step 5:** Control variable analysis
 - Add age and cognitive ability controls
 - Test whether strategy effects remain significant
-- Hierarchical regression: demographics � strategies
+- Hierarchical regression: demographics  strategies
 
 **Step 6:** Model diagnostics and sensitivity
 - Check assumptions (normality, homoscedasticity)
@@ -120,8 +127,8 @@ Correlational analysis and independent samples t-test with multiple regression c
 
 **Step 7:** Effect sizes and interpretation
 - Compute Cohen's d for group differences
-- Report R� and confidence intervals
-- Bootstrap CIs for non-normal distributions
+- Report R² and confidence intervals
+- bootstrap (1000 replications, seed=42) CIs for non-normal distributions
 
 **Expected Outputs:**
 - data/step01_theta_scores.csv (participant theta_all scores)
@@ -130,10 +137,19 @@ Correlational analysis and independent samples t-test with multiple regression c
 - data/step04_correlation_results.csv (r values, CIs, dual p-values)
 - data/step05_group_comparison.csv (t-test results with effect sizes)
 - data/step06_regression_control.csv (controlled analysis results)
-- data/step07_sensitivity_analysis.csv (outlier and bootstrap results)
+- data/step07_sensitivity_analysis.csv (outlier and bootstrap (1000 replications, seed=42) results)
 - results/strategy_summary.md (text summary for thesis)
 - plots/strategy_performance_scatter.png (correlational plots)
 - plots/strategy_group_comparison.png (boxplot comparison)
+
+**
+
+**Cross-Validation:**
+- Implement 5-fold CV (seed=42) for generalization assessment
+- Report mean CV-R² and SD across folds
+- CV-R² to full-sample R² gap should be <0.10
+- If gap >0.10: Consider regularization
+
 
 **Success Criteria:**
 - [ ] Successfully extract strategy variables from STR questionnaire
@@ -142,7 +158,7 @@ Correlational analysis and independent samples t-test with multiple regression c
 - [ ] Control for age and cognitive ability covariates
 - [ ] Effect sizes with 95% confidence intervals
 - [ ] Check assumptions and report diagnostic statistics
-- [ ] Bootstrap CIs for robust inference
+- [ ] bootstrap (1000 replications, seed=42) CIs for robust inference
 
 ---
 

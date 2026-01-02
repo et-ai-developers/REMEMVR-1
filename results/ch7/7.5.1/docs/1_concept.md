@@ -102,17 +102,17 @@ Multiple regression with hierarchical entry and cross-validation
 **Step 2:** Hierarchical regression
 - Model 1: Demographics only (Age)
 - Model 2: + Self-report predictors (Education, Sleep, VR_Experience)
-- Report ”R² and F-test for model improvement
+- Report Â”RÂ² and F-test for model improvement
 
 **Step 3:** Test individual predictors
 - Extract standardized beta coefficients with 95% CIs
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (srÂ²) for unique variance
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary correction: Bonferroni (± = 0.00179/4 = 0.000448)
+- Primary correction: Bonferroni (Â± = 0.00179/4 = 0.000448)
 - Secondary: FDR correction for comparison
 
 **Step 4:** Effect sizes and importance
-- Cohen's f² = R²/(1-R²) for overall model
+- Cohen's fÂ² = RÂ²/(1-RÂ²) for overall model
 - Bootstrap CIs (1000 iterations) for robust estimates
 - Relative importance analysis for predictor rankings
 
@@ -124,8 +124,8 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 6:** Cross-validation
 - Method: 5-fold CV to assess generalizability
-- Metrics: Test R², RMSE, MAE
-- Check for overfitting if test R² << training R²
+- Metrics: Test RÂ², RMSE, MAE
+- Check for overfitting if test RÂ² << training RÂ²
 
 **Step 7:** Power analysis
 - Post-hoc power for observed effect sizes
@@ -134,7 +134,7 @@ Multiple regression with hierarchical entry and cross-validation
 **Step 8:** Sensitivity analyses
 - Exclude potential outliers, rerun analysis
 - Compare Bonferroni vs FDR correction results
-- Bootstrap CIs for non-normal distributions if needed
+- bootstrap (1000 replications, seed=42) CIs for non-normal distributions if needed
 
 **Expected Outputs:**
 - data/step01_self_report_data.csv (extracted measures from master.xlsx)
@@ -142,7 +142,7 @@ Multiple regression with hierarchical entry and cross-validation
 - data/step03_analysis_input.csv (merged analysis dataset)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step05_model_diagnostics.csv (VIF, residuals, Cook's D)
-- data/step06_effect_sizes.csv (R², f², sr², with 95% CIs)
+- data/step06_effect_sizes.csv (RÂ², fÂ², srÂ², with 95% CIs)
 - data/step07_cross_validation.csv (5-fold CV results)
 - data/step08_power_analysis.csv (post-hoc and sensitivity)
 - results/self_report_regression_summary.md (text summary for thesis)
@@ -152,13 +152,13 @@ Multiple regression with hierarchical entry and cross-validation
 **Success Criteria:**
 - Model converges with finite parameter estimates
 - Education shows significant association (primary hypothesis)
-- R² between 0.10 and 0.40 (modest but meaningful prediction)
+- RÂ² between 0.10 and 0.40 (modest but meaningful prediction)
 - VIF < 5 for all predictors (no multicollinearity)
 - Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - Homoscedasticity confirmed (Breusch-Pagan p > 0.05)
 - No influential outliers (Cook's D < 4/N)
-- Cross-validation R² within 15% of training R²
-- Power > 0.80 for medium effect (f² = 0.15) if effects detected
+- Cross-validation RÂ² within 15% of training RÂ²
+- Power > 0.80 for medium effect (fÂ² = 0.15) if effects detected
 
 ---
 

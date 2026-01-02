@@ -107,12 +107,12 @@ Multiple correlation analysis with Steiger's Z-test for dependent correlations
 **Step 4:** Test differential prediction
 - Steiger's Z-test for difference between dependent correlations
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni correction (� = 0.00179/4 = 0.000448)
+- Primary: Bonferroni correction (± = 0.00179/4 = 0.000448)
 - Secondary: FDR correction for comparison
 
 **Step 5:** Effect sizes and confidence intervals
 - Cohen's q for correlation difference
-- Bootstrap 95% CIs for correlation coefficients
+- bootstrap (1000 replications, seed=42) 95% CIs for correlation coefficients
 - Semi-partial correlations if control variables included
 
 **Step 6:** Model diagnostics
@@ -135,18 +135,27 @@ Multiple correlation analysis with Steiger's Z-test for dependent correlations
 - data/step03_theta_single_domain.csv (simple domain scores)
 - data/step04_correlation_analysis.csv (correlations with CIs, dual p-values)
 - data/step05_steiger_test.csv (differential prediction test results)
-- data/step06_effect_sizes.csv (Cohen's q, bootstrap CIs)
+- data/step06_effect_sizes.csv (Cohen's q, bootstrap (1000 replications, seed=42) CIs)
 - data/step07_sensitivity_analysis.csv (robustness checks)
 - data/step08_power_analysis.csv (post-hoc and sensitivity power)
 - results/rq_7_4_3_summary.md (text summary for thesis)
 - plots/correlation_comparison.png (visualization of differential prediction)
+
+**
+
+**Cross-Validation:**
+- Implement 5-fold CV (seed=42) for generalization assessment
+- Report mean CV-R² and SD across folds
+- CV-R² to full-sample R² gap should be <0.10
+- If gap >0.10: Consider regularization
+
 
 **Success Criteria:**
 - [ ] Both correlations computed successfully with valid 95% CIs
 - [ ] Steiger's Z-test completed for dependent correlation comparison
 - [ ] BOTH uncorrected AND corrected p-values reported (Decision D068)
 - [ ] Effect size (Cohen's q) computed for correlation difference
-- [ ] Power > 0.80 for medium correlation difference (�r e 0.20)
+- [ ] Power > 0.80 for medium correlation difference (r e 0.20)
 - [ ] No influential outliers (Cook's D < 4/N)
 - [ ] Variables approximately normally distributed (Shapiro-Wilk p > 0.05)
 - [ ] Sensitivity analyses confirm main results

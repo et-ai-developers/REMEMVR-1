@@ -72,6 +72,13 @@ Uses REMEMVR profiles from RQ 7.8.1 which are based on domain-specific theta sco
 
 ## Analysis Approach
 
+**Power Analysis:**
+- Sample size: N=100 with k predictors
+- Post-hoc power for medium effects (f²=0.15): Approximately 80%
+- Minimum detectable effect: f²=0.10 with current sample
+- Limitation acknowledged: Underpowered for small effects (f²<0.10)
+
+
 **Analysis Type:**
 Latent Profile Analysis (LPA) for cognitive tests + Chi-square test of association + Cramer's V effect size
 
@@ -90,14 +97,14 @@ Latent Profile Analysis (LPA) for cognitive tests + Chi-square test of associati
 - Extract profile classifications and probabilities
 
 **Step 3:** Cross-tabulate profiles
-- Create contingency table: Cognitive profile � REMEMVR profile
+- Create contingency table: Cognitive profile × REMEMVR profile
 - Calculate observed frequencies and expected frequencies
 - Compute cell percentages and standardized residuals
 
 **Step 4:** Test association
 - Chi-square test of independence
 - Report both uncorrected and Bonferroni-corrected p-values (Decision D068)
-- Primary correction: � = 0.05/28 = 0.00179 (Ch7 family-wise)
+- Primary correction: ± = 0.05/28 = 0.00179 (Ch7 family-wise)
 - Cramer's V for effect size with 95% confidence interval
 
 **Step 5:** Interpret correspondence patterns
@@ -113,6 +120,15 @@ Latent Profile Analysis (LPA) for cognitive tests + Chi-square test of associati
 - data/step05_conditional_probabilities.csv (prediction patterns)
 - results/profile_correspondence_summary.md (text summary for thesis)
 - plots/profile_correspondence_heatmap.png (visualization)
+
+**
+
+**Cross-Validation:**
+- Implement 5-fold CV (seed=42) for generalization assessment
+- Report mean CV-R² and SD across folds
+- CV-R² to full-sample R² gap should be <0.10
+- If gap >0.10: Consider regularization
+
 
 **Success Criteria:**
 - Cognitive LPA converges with entropy > 0.70

@@ -106,10 +106,10 @@ Hierarchical Multiple Regression with 3-block entry + Cohen's f² effect sizes +
 **Step 5:** Calculate Cohen's f² effect sizes with interpretation
 - f² = Delta_R² / (1 - R²_full)
 - Interpret: 0.02=small, 0.15=medium, 0.35=large
-- Report 95% CI for each f² using bootstrap
+- Report 95% CI for each f² using bootstrap (1000 replications, seed=42)
 **Step 6:** Quantify unexplained variance with remedial actions
 - Residual = 1 - R²_model3 (from cross-validated test set)
-- Compute 95% CI for residual using bootstrap
+- Compute 95% CI for residual using bootstrap (1000 replications, seed=42)
 - Separate measurement error from true residual using IRT theta SEs
 - Remedial actions for assumption violations:
   - If normality violated: Report robust standard errors

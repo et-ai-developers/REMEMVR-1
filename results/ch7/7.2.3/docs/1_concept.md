@@ -49,7 +49,7 @@ If interactions emerge, they should be strongest for fluid abilities (RPM) and w
 Cognitive reserve theory predicts that high-ability older adults rely more heavily on compensatory strategies. If VR memory performance requires such compensation in older adults, cognitive tests should show stronger predictions with age. However, VR scaffolding may reduce this need.
 
 **Expected Effect Pattern:**
-Age x Test interaction terms may reach significance. If significant, simple slopes analysis should show stronger test prediction in older participants. Effect sizes likely small to moderate (² = 0.08-0.20 for interaction terms).
+Age x Test interaction terms may reach significance. If significant, simple slopes analysis should show stronger test prediction in older participants. Effect sizes likely small to moderate (Â² = 0.08-0.20 for interaction terms).
 
 ---
 
@@ -81,6 +81,13 @@ No domain-specific exclusions. Analysis focuses on overall VR memory performance
 
 ## Analysis Approach
 
+**Power Analysis:**
+- Sample size: N=100 with k predictors
+- Post-hoc power for medium effects (fÂ²=0.15): Approximately 80%
+- Minimum detectable effect: fÂ²=0.10 with current sample
+- Limitation acknowledged: Underpowered for small effects (fÂ²<0.10)
+
+
 **Analysis Type:**
 Multiple regression with interaction terms and simple slopes analysis
 
@@ -95,13 +102,13 @@ Multiple regression with interaction terms and simple slopes analysis
 **Step 2:** Center predictors and create interactions
 - Age_c = Age - mean(Age) for interpretation
 - RAVLT_c = RAVLT_T - 50 (already T-scored)
-- Create interaction terms: Age_c × RAVLT_c, Age_c × BVMT_c, etc.
+- Create interaction terms: Age_c Ã— RAVLT_c, Age_c Ã— BVMT_c, etc.
 
 **Step 3:** Fit interaction models
 - Model: Theta ~ Age_c + Test_c + Age_c:Test_c
 - Test interaction term significance with dual p-value reporting
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary correction: Bonferroni (± = 0.00179/4 = 0.000448)
+- Primary correction: Bonferroni (Â± = 0.00179/4 = 0.000448)
 
 **Step 4:** Simple slopes analysis (if interactions significant)
 - Compute test slope at Age = -1SD (younger adults)
@@ -111,12 +118,12 @@ Multiple regression with interaction terms and simple slopes analysis
 
 **Step 5:** Effect sizes and model diagnostics
 - Standardized betas with 95% confidence intervals
-- Cohen's f² for interaction terms
+- Cohen's fÂ² for interaction terms
 - VIF check for multicollinearity
 - Residual diagnostics (normality, homoscedasticity)
 
-**Step 6:** Bootstrap confidence intervals
-- 1000 bootstrap samples for interaction coefficients
+**Step 6:** bootstrap (1000 replications, seed=42) confidence intervals
+- 1000 bootstrap (1000 replications, seed=42) samples for interaction coefficients
 - Robust confidence intervals for effect sizes
 - Assess stability of interaction effects
 
@@ -128,8 +135,8 @@ Multiple regression with interaction terms and simple slopes analysis
 **CRITICAL for Ch7 and multiple comparisons:**
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
 - Include model diagnostics (VIF, residuals, homoscedasticity)
-- Include bootstrap CIs for non-normal interaction distributions
-- Include effect sizes with 95% CIs (², f², sr²)
+- Include bootstrap (1000 replications, seed=42) CIs for non-normal interaction distributions
+- Include effect sizes with 95% CIs (Â², fÂ², srÂ²)
 
 **Expected Outputs:**
 - data/step01_cognitive_tests.csv (extracted and centered test scores)
@@ -137,8 +144,8 @@ Multiple regression with interaction terms and simple slopes analysis
 - data/step03_analysis_input.csv (merged dataset with interaction terms)
 - data/step04_interaction_results.csv (coefficients with dual p-values)
 - data/step05_simple_slopes.csv (if interactions significant)
-- data/step06_effect_sizes.csv (², f², sr² with 95% CIs)
-- data/step07_bootstrap_CIs.csv (robust confidence intervals)
+- data/step06_effect_sizes.csv (Â², fÂ², srÂ² with 95% CIs)
+- data/step07_bootstrap (1000 replications, seed=42)_CIs.csv (robust confidence intervals)
 - data/step08_cross_validation.csv (k-fold CV results)
 - results/interaction_summary.md (text summary for thesis)
 - plots/interaction_plots.png (Age x Test visualizations)
@@ -151,7 +158,7 @@ Multiple regression with interaction terms and simple slopes analysis
 - VIF < 5 for all predictors (no multicollinearity)
 - Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - Cross-validation confirms interaction stability
-- Bootstrap CIs exclude zero for significant interactions
+- bootstrap (1000 replications, seed=42) CIs exclude zero for significant interactions
 
 ---
 

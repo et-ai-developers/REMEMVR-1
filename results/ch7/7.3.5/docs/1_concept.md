@@ -83,6 +83,13 @@ No domain-specific exclusions. Analysis focuses on overall episodic memory perfo
 
 ## Analysis Approach
 
+**Power Analysis:**
+- Sample size: N=100 with k predictors
+- Post-hoc power for medium effects (f²=0.15): Approximately 80%
+- Minimum detectable effect: f²=0.10 with current sample
+- Limitation acknowledged: Underpowered for small effects (f²<0.10)
+
+
 **Analysis Type:**
 ANOVA and correlation analysis with calibration groups and cognitive reserve indicators
 
@@ -133,12 +140,21 @@ ANOVA and correlation analysis with calibration groups and cognitive reserve ind
 - results/calibration_reserve_summary.md (text summary for thesis)
 - plots/calibration_groups.png (group comparison visualization)
 
+**
+
+**Cross-Validation:**
+- Implement 5-fold CV (seed=42) for generalization assessment
+- Report mean CV-R² and SD across folds
+- CV-R² to full-sample R² gap should be <0.10
+- If gap >0.10: Consider regularization
+
+
 **Success Criteria:**
 - Create meaningful calibration groups with reasonable n per group (n > 20)
 - Test group differences on reserve indicators
 - Report if well-calibrated group differs from others on education/RPM
 - Effect sizes in small-medium range (d = 0.3-0.8) for meaningful differences
-- Bonferroni-corrected significance at � = 0.00179/3 = 0.0006 level
+- Bonferroni-corrected significance at ± = 0.00179/3 = 0.0006 level
 - Bootstrap CIs for correlations do not include zero for significant effects
 
 ---

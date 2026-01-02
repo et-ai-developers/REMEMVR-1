@@ -44,7 +44,7 @@ Limited research on domain-specificity of individual differences in episodic mem
 What and Where domains will show ICC_slope H 20% similar to overall findings from Ch5. When domain will show lower ICC_slope due to measurement issues with 77% item exclusion.
 
 **Secondary Hypotheses:**
-Bootstrap confidence intervals for What and Where ICC_slope values will overlap, while When domain 95% CI will be lower and potentially non-overlapping.
+bootstrap (1000 replications, seed=42) confidence intervals for What and Where ICC_slope values will overlap, while When domain 95% CI will be lower and potentially non-overlapping.
 
 **Theoretical Rationale:**
 Based on Ch5 findings where When domain showed measurement challenges with high item exclusion rates. What and Where domains have better item quality and should replicate the overall ICC_slope pattern. Individual differences in forgetting should be most reliable for well-measured domains.
@@ -83,7 +83,7 @@ None - all three domains required for comprehensive test of domain-specificity h
 ## Analysis Approach
 
 **Analysis Type:**
-Variance component analysis (ICC computation) with bootstrap confidence intervals and pairwise comparisons
+Variance component analysis (ICC computation) with bootstrap (1000 replications, seed=42) confidence intervals and pairwise comparisons
 
 **High-Level Workflow:**
 
@@ -98,13 +98,13 @@ Variance component analysis (ICC computation) with bootstrap confidence interval
 - ICC_slope_When: Between-person variance / Total variance for When slopes
 - Use variance component estimation
 
-**Step 3:** Bootstrap confidence intervals
+**Step 3:** bootstrap (1000 replications, seed=42) confidence intervals
 - Bootstrap resample participants (1000 iterations)
-- Compute ICC for each bootstrap sample
+- Compute ICC for each bootstrap (1000 replications, seed=42) sample
 - Extract 95% confidence intervals for each domain ICC
 
 **Step 4:** Statistical comparisons
-- Test differences between domain ICCs using bootstrap samples
+- Test differences between domain ICCs using bootstrap (1000 replications, seed=42) samples
 - Pairwise comparisons: What vs Where, What vs When, Where vs When
 - Report effect sizes for ICC differences
 
@@ -124,7 +124,7 @@ Variance component analysis (ICC computation) with bootstrap confidence interval
 **Expected Outputs:**
 - data/step01_domain_slopes.csv (extracted slopes from Ch5)
 - data/step02_icc_estimates.csv (ICC values by domain)
-- data/step03_bootstrap_cis.csv (confidence intervals)
+- data/step03_bootstrap (1000 replications, seed=42)_cis.csv (confidence intervals)
 - data/step04_pairwise_comparisons.csv (domain comparison statistics)
 - data/step05_outlier_analysis.csv (slope outlier diagnostics)
 - data/step06_split_half_reliability.csv (cross-validation results)
@@ -136,11 +136,11 @@ Variance component analysis (ICC computation) with bootstrap confidence interval
 **Success Criteria:**
 - [ ] Extract complete slope data for all 100 participants across 3 domains
 - [ ] Compute ICC_slope for What, Where, When domains
-- [ ] Bootstrap 95% CIs for each ICC estimate
+- [ ] bootstrap (1000 replications, seed=42) 95% CIs for each ICC estimate
 - [ ] Test statistical differences between domain ICCs
 - [ ] What/Where ICCs in range 0.15-0.30 (realistic for individual differences)
 - [ ] When ICC potentially lower due to measurement issues
-- [ ] Bootstrap CIs exclude 0.0 for What/Where domains
+- [ ] bootstrap (1000 replications, seed=42) CIs exclude 0.0 for What/Where domains
 - [ ] Split-half reliability r > 0.70 for ICC estimates
 - [ ] Power > 0.80 for detecting medium ICC differences (d = 0.50)
 

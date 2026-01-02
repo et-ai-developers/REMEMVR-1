@@ -89,44 +89,64 @@ Linear regression predicting LMM random effects (intercepts and slopes) using co
 
 **High-Level Workflow:**
 
-**Step 1:** Extract random effects from Ch5 LMM
-- Use model-averaged predictions from Ch5 5.1.1 results
-- Extract BLUPs: Intercept_i (Day 0 ability), Slope_i (forgetting rate)
-- Alternative: Re-fit LMM `Theta ~ log_Days + (1 + log_Days | UID)`
+**Step 1:** Extract random effects from Ch5 LMM with bias acknowledgment
+- PRIMARY APPROACH: Simultaneous modeling to avoid two-stage bias:
+  Model: `Theta ~ log_Days + (1 + log_Days | UID) + RAVLT*log_Days + BVMT*log_Days + RPM*log_Days`
+  This tests differential prediction directly without BLUP extraction bias
+- SECONDARY APPROACH (for comparison): Extract BLUPs from Ch5 5.1.1
+  WARNING: BLUPs exhibit shrinkage bias - extreme values pulled toward population mean
+  This differential shrinkage affects subsequent regression validity (Verbeke & Molenberghs, 2000)
+- Document shrinkage magnitude: Compare BLUP variance to empirical variance
 
 **Step 2:** Extract and standardize cognitive tests
 - Load RAVLT, BVMT, RPM scores from master.xlsx
 - Convert to T-scores (M=50, SD=10)
 - Exclude NART due to language validity concerns
 
-**Step 3:** Predict intercepts
+**Step 3:** Predict intercepts (if using two-stage approach)
 - Model: `Intercept ~ RAVLT_T + BVMT_T + RPM_T`
+- Check linearity: Partial regression plots for each predictor
+- If non-linear patterns: Consider polynomial terms or transformations
 - Report R², individual beta coefficients, p-values
-- Apply Bonferroni correction for 3 predictors × 2 models (intercept + slope) = 6 tests
-- Alpha = 0.05/6 = 0.0083 (within-RQ family)
+- Apply Bonferroni correction: alpha = 0.05/6 = 0.0083 (3 predictors × 2 models)
 - Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
+- Include bootstrap 95% CIs for all coefficients (1000 replications)
 
-**Step 4:** Predict slopes  
+**Step 4:** Predict slopes (if using two-stage approach)
 - Model: `Slope ~ RAVLT_T + BVMT_T + RPM_T`
+- Check linearity assumptions as in Step 3
 - Report R², individual beta coefficients, p-values
 - Apply same Bonferroni correction (alpha = 0.0083)
-- CRITICAL: Acknowledge BLUP extraction bias - extracted random effects have shrinkage toward population mean
-- Consider sensitivity analysis with simultaneous modeling as alternative
+- CRITICAL LIMITATION: BLUP shrinkage creates non-uniform bias
+  - Extreme slopes shrunk more than moderate slopes
+  - This differential shrinkage can artificially reduce/inflate R²
+  - Report bias-corrected standard errors if available
 
-**Step 5:** Compare R² values
-- Bootstrap 95% CI for R²_intercept - R²_slope using participant-level block bootstrap (1000 replications)
-- Preserves within-participant correlation structure
-- Fisher's Z-test for comparing dependent R² values (verify assumptions: bivariate normality)
+**Step 5:** Compare R² values with multiple approaches
+- PRIMARY: From simultaneous model, compare main effects (intercept prediction) vs interaction effects (slope prediction)
+- SECONDARY: For two-stage approach if used:
+  - Participant-level block bootstrap (1000 replications, seed=42)
+  - Preserves within-participant correlation structure
+  - Bootstrap 95% CI for R²_intercept - R²_slope difference
+  - Fisher's Z-test only if normality verified (Q-Q plots, Shapiro-Wilk)
+  - If normality violated: Use bootstrap percentile method exclusively
 - Hypothesis test: R²_intercept > R²_slope
-- Alternative: Simultaneous LMM with cognitive test × time interactions avoids two-stage bias
 
-**Step 6:** Model diagnostics and limitations
+**Step 6:** Model diagnostics and remedial actions
 - Check residual normality (Q-Q plots, Shapiro-Wilk p > 0.05)
+  - If violated: Use robust standard errors (HC3) or bootstrap inference
 - Check homoscedasticity (Breusch-Pagan test, p > 0.05)
-- Report VIF values for multicollinearity (VIF < 5)
-- CRITICAL LIMITATION: Two-stage analysis with BLUPs introduces bias (Hanusz & Tarasińska, 2015)
-- Document shrinkage effects: BLUPs pulled toward population mean, especially for extreme participants
-- Consider reporting both two-stage results AND simultaneous modeling comparison
+  - If violated: White's heteroscedasticity-consistent standard errors
+- Check multicollinearity (VIF < 5, noting context-dependent thresholds)
+  - If VIF > 5: Report predictor correlations, consider ridge regression
+- Check outliers (Cook's D < 4/n, leverage values)
+  - If influential points: Report results with and without outliers
+
+**CRITICAL LIMITATIONS TO REPORT:**
+1. Two-stage bias: BLUP extraction introduces non-uniform shrinkage (Hanusz & Tarasińska, 2015)
+2. Type I error inflation: Two-stage analysis inflates false positive rates (Clark, 2019)
+3. Solution: Report BOTH simultaneous model (primary) AND two-stage (sensitivity) results
+4. Interpretation caveat: Two-stage R² may be biased; simultaneous model provides unbiased estimates
 
 **CRITICAL for Ch7 and multiple comparisons:**
 - Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)

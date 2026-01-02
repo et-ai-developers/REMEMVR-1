@@ -103,7 +103,7 @@ Correlation analysis (bivariate and partial) with cross-validation and multiple 
 - r(RAVLT_Forgetting, REMEMVR_Slope)
 - Compute 95% confidence interval
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni correction (± = 0.00179)
+- Primary: Bonferroni correction (Â± = 0.00179)
 
 **Step 4:** Partial correlation analysis  
 - Control for initial encoding: RAVLT_T5 and REMEMVR_Intercept
@@ -138,7 +138,7 @@ Correlation analysis (bivariate and partial) with cross-validation and multiple 
 - data/step04_bivariate_correlation.csv (r, CI, dual p-values)
 - data/step05_partial_correlation.csv (partial r controlling encoding)
 - data/step06_diagnostics.csv (assumptions, outliers, normality tests)
-- data/step07_bootstrap_results.csv (resampling stability)
+- data/step07_bootstrap (1000 replications, seed=42)_results.csv (resampling stability)
 - data/step08_power_analysis.csv (post-hoc and sensitivity)
 - results/forgetting_correlation_summary.md (text summary for thesis)
 - plots/forgetting_scatterplot.png (bivariate relationship)
@@ -151,7 +151,7 @@ Correlation analysis (bivariate and partial) with cross-validation and multiple 
 - [ ] Both uncorrected and corrected p-values reported
 - [ ] Assumptions checked (linearity, normality, homoscedasticity)
 - [ ] No extreme outliers (Cook's D < 4/N = 0.04)
-- [ ] Bootstrap CIs stable across iterations
+- [ ] bootstrap (1000 replications, seed=42) CIs stable across iterations
 - [ ] Power analysis completed for effect size interpretation
 - [ ] Results interpretable in consolidation theory framework
 - [ ] Comparison to encoding correlations (7.1.1) meaningful

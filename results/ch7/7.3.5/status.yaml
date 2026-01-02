@@ -24,11 +24,11 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "5.8/10 REJECTED. Category 1: 2.4/3 (appropriate methods). Category 2: 0.9/2 (29% tool reuse). Category 3: 1.4/2 (parameters need justification). Category 4: 0.5/2 (missing assumption testing). Category 5: 0.6/1 (10 concerns, adequate coverage)."
+  context_dump: "9.3/10 APPROVED. Cat1: 3.0/3 (optimal). Cat2: 1.8/2 (67% reuse). Cat3: 1.9/2 (clear params). Cat4: 1.8/2 (good validation). Cat5: 0.8/1 (6 concerns, adequate)."
 
 rq_planner:
-  status: success
-  context_dump: "7 steps planned (Step 0: dependency validation + Steps 1-6: ANOVA/correlations). Pipeline: Calibration groups vs cognitive reserve indicators. Enhanced v5.1 specs: random seeds, bootstrap CIs, assumption testing, sensitivity analysis. Ready for rq_tools."
+  status: pending
+  context_dump: ""
 
 rq_tools:
   status: pending

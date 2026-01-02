@@ -1,0 +1,33 @@
+module	component	status	priority	description	inputs	outputs	rq_usage
+tools.analysis_regression	fit_multiple_regression	RED	CRITICAL	Fit multiple linear regression with diagnostics	X, y, feature_names	dict[coefficients, pvalues, rsquared, residuals]	7.1.1, 7.1.3, 7.1.4
+tools.analysis_regression	fit_hierarchical_regression	RED	CRITICAL	Fit hierarchical/block regression with incremental R²	X_blocks, y, block_names	dict[models, delta_r2, f_tests]	7.1.4, 7.3.1, 7.3.2
+tools.analysis_regression	compute_regression_diagnostics	RED	HIGH	Compute VIF, Cook's D, leverage, residual plots	model, X, y	dict[vif, cooks_d, leverage, plots]	7.1.1-7.1.4, 7.3.1-7.3.2
+tools.analysis_regression	cross_validate_regression	RED	HIGH	5-fold CV for regression with seed control	X, y, n_folds=5, seed=42	dict[cv_scores, mean_r2, std_r2]	7.1.1, 7.1.4, 7.3.1
+tools.analysis_regression	bootstrap_regression_ci	RED	HIGH	Bootstrap confidence intervals for coefficients	X, y, n_bootstrap=1000, seed=42	dict[ci_lower, ci_upper, boot_samples]	7.1.1-7.1.4
+tools.analysis_regression	compute_cohens_f2	RED	MEDIUM	Compute Cohen's f² effect size for regression blocks	r2_full, r2_reduced	float	7.1.4, 7.3.1
+tools.analysis_regression	compute_post_hoc_power	RED	MEDIUM	Post-hoc power analysis for regression	n, k_predictors, r2, alpha=0.05	float	7.1.1, 7.1.4, 7.3.1
+tools.analysis_regression	variance_decomposition	RED	LOW	Decompose variance into components	model, measurement_error	dict[true_var, error_var, icc]	7.1.4
+tools.data	extract_cognitive_tests	RED	CRITICAL	Extract RAVLT, BVMT, NART, RPM from master.xlsx	master_path, uid_list	DataFrame[uid, ravlt, bvmt, nart, rpm]	7.1.1-7.1.4
+tools.data	standardize_to_t_scores	RED	HIGH	Convert raw scores to T-scores (M=50, SD=10)	scores, population_mean, population_sd	array	7.1.1-7.1.4
+tools.data	extract_domain_theta_scores	RED	HIGH	Extract domain-specific theta from Ch5 results	rq_path, domain	DataFrame[uid, test, theta]	7.1.3, 7.4.1-7.4.3
+tools.data	merge_theta_cognitive	RED	HIGH	Merge theta scores with cognitive predictors	theta_df, cognitive_df	DataFrame	7.1.1-7.1.4
+tools.data	extract_dass_scores	RED	MEDIUM	Extract DASS subscales from master.xlsx	master_path, uid_list	DataFrame[uid, dass_d, dass_a, dass_s]	7.5.1-7.5.3
+tools.data	extract_sleep_per_test	RED	MEDIUM	Extract per-test sleep hours from master.xlsx	master_path, uid_list, test_num	DataFrame[uid, sleep_hours]	7.5.4
+tools.analysis_lmm	extract_random_effects	RED	HIGH	Extract BLUPs from fitted LMM	model	DataFrame[uid, intercept, slope]	7.1.2, 7.6.1
+tools.analysis_lmm	fit_interaction_model	RED	HIGH	Fit LMM with predictor × time interactions	formula, data, groups	MixedLMResults	7.1.2, 7.2.3
+tools.analysis_ctt	compute_cohens_q_effect_size	RED	MEDIUM	Cohen's q for correlation difference	r1, r2	float	7.4.3
+tools.analysis_ctt	compare_correlations_dependent	RED	MEDIUM	Steiger's Z-test for dependent correlations	r12, r13, r23, n	dict[z, p_value]	7.4.1-7.4.3
+tools.analysis_lpa	fit_lpa_models	RED	HIGH	Fit LPA models with multiple K values	X, k_range, seed=42	dict[models, bic, entropy]	7.8.1-7.8.4
+tools.analysis_lpa	extract_profile_membership	RED	HIGH	Extract profile assignments from LPA	model	array	7.8.1-7.8.4
+tools.analysis_stats	one_way_anova_d068	RED	HIGH	ANOVA with dual p-value reporting (D068)	groups, dv, correction='bonferroni'	dict[F, p_uncorr, p_corr, eta2]	7.3.5, 7.7.1-7.7.2
+tools.analysis_stats	chi_square_test_d068	RED	MEDIUM	Chi-square with dual p-value reporting	contingency_table	dict[chi2, p_uncorr, p_corr, cramers_v]	7.8.2
+tools.analysis_stats	compute_cramers_v	RED	LOW	Cramér's V effect size for contingency tables	chi2, n, k	float	7.8.2
+tools.bootstrap	bootstrap_correlation_ci	RED	HIGH	Bootstrap CIs for correlations	x, y, n_bootstrap=1000, seed=42	dict[r, ci_lower, ci_upper]	7.4.1-7.4.3, 7.6.2
+tools.clinical	compute_sensitivity_specificity	RED	MEDIUM	Clinical classification metrics	y_true, y_pred	dict[sens, spec, ppv, npv]	7.7.3-7.7.4
+tools.analysis_discrepancy	compute_discrepancy_scores	RED	MEDIUM	Compute standardized discrepancy scores	traditional_scores, vr_scores	DataFrame[uid, discrepancy, z_score]	7.7.1-7.7.2
+tools.plotting	plot_heatmap	ORANGE	LOW	Correlation heatmap with annotations	corr_matrix, labels	matplotlib.figure	7.1.3
+tools.plotting	plot_scatter_with_quadrants	ORANGE	LOW	Scatter plot with quadrant classification	x, y, x_cutoff, y_cutoff	matplotlib.figure	7.7.1
+tools.validation	validate_regression_assumptions	RED	HIGH	Check all regression assumptions	residuals, X	dict[normality, homoscedasticity, linearity]	7.1.1-7.1.4
+tools.validation	validate_lmm_assumptions_comprehensive	YELLOW	MEDIUM	Comprehensive LMM validation	model, data	dict[assumption_checks]	7.1.2, 7.2.1-7.2.4
+tools.preprocessing	standardize_scores	RED	MEDIUM	Z-score standardization	scores	array	7.3.1-7.3.5
+tools.model_selection	cross_validate_lmm	RED	LOW	Cross-validation for LMM	formula, data, n_folds=5, seed=42	dict[cv_scores]	7.2.1-7.2.4

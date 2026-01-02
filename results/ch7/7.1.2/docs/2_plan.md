@@ -1,4 +1,4 @@
-# Analysis Plan: RQ 7.1.2 - Intercept vs Slope Prediction
+# Analysis Plan: RQ 7.1.2: Intercept vs Slope Prediction
 
 **Research Question:** 7.1.2
 **Created:** 2026-01-02
@@ -8,432 +8,771 @@
 
 ## Overview
 
-This RQ examines whether cognitive tests predict baseline ability (Day 0 intercept) more than forgetting rate (slope) from Chapter 5 LMM models. The analysis uses a two-stage approach: (1) extract random effects from Ch5 5.1.1 LMM, (2) predict intercepts and slopes using cognitive test scores (RAVLT, BVMT, RPM). The hypothesis is that traditional neuropsychological tests capture encoding processes (intercept) but not consolidation processes (slope).
+This RQ examines differential prediction of LMM random effects (intercepts vs slopes) using cognitive tests (RAVLT, BVMT, RPM). The analysis tests whether traditional neuropsychological tests predict baseline ability (Day 0 intercept) more than forgetting rate (slope), consistent with tests measuring encoding but not consolidation processes.
 
-**Pipeline:** Linear regression (two separate models - one for intercept, one for slope)
-**Steps:** 6 total analysis steps (Step 0: dependency validation + Steps 1-5: analysis)
-**Estimated Runtime:** Medium (~30-45 minutes total)
+**Pipeline:** LINEAR REGRESSION on LMM random effects with SIMULTANEOUS MODELING primary approach
+**Steps:** 7 total analysis steps (Step 0: data extraction + Steps 1-6: analysis)
+**Estimated Runtime:** HIGH (60-90 minutes total: 30-45 min LMM fitting + 15-30 min regression/bootstrap + 15 min validation)
 
 **Key Decisions Applied:**
-- Decision D068: Dual p-value reporting (uncorrected + Bonferroni-corrected)
-- Two-stage analysis with BLUP extraction bias acknowledged
+- Decision D068: Dual p-value reporting (uncorrected + Bonferroni correction)
+- CRITICAL: Simultaneous modeling as PRIMARY approach to avoid BLUP extraction bias
+- Bootstrap confidence intervals with participant-level resampling (preserves correlation structure)
+- Comprehensive bias documentation: BLUP shrinkage effects on subsequent regression validity
 
 ---
 
 ## Analysis Plan
 
-### Step 0: Validate Cross-RQ Dependencies
-**Dependencies:** None (prerequisite validation step)
-**Complexity:** Low (<5 minutes)
+### Step 0: Extract Random Effects and Cognitive Tests
 
-**Purpose:** Verify Ch5 5.1.1 outputs exist before proceeding with random effects extraction
+**Dependencies:** None (first step)
+**Complexity:** Low (data extraction, no model fitting)
 
 **Input:**
-- results/ch5/5.1.1/status.yaml (verify rq_results: success)
-- results/ch5/5.1.1/data/step05_lmm_model_summary.txt (verify LMM completed)
+
+**File 1:** results/ch5/5.1.1/data/step05_lmm_model_summary.txt
+**Source:** Ch5 5.1.1 LMM fitting results
+**Format:** Text summary containing model formula, random effects structure
+**Required Content:** Confirmation of random intercepts/slopes model fitted
+
+**File 2:** results/ch5/5.1.1/data/step04_lmm_input.csv
+**Source:** Ch5 5.1.1 theta scores merged with TSVR
+**Format:** CSV, long format (one row per observation)
+**Columns:**
+  - `UID` (string): Participant identifier (P001-P100)
+  - `test` (int): Test session (T1=0, T2=1, T3=3, T4=6)
+  - `theta_common` (float): IRT ability estimate
+  - `TSVR_hours` (float): Time since VR session in hours
+**Expected Rows:** ~400 (100 participants x 4 observations per participant)
+
+**File 3:** master.xlsx (Sheet: cognitive_tests)
+**Source:** Project-level cognitive test scores
+**Required Columns:**
+  - `UID` (string): Participant identifier matching LMM data
+  - `RAVLT_Total` (int): RAVLT sum of trials T1-T5
+  - `BVMT_Total_Recognition` (int): BVMT total recognition score
+  - `RPM` (int): Raven's Progressive Matrices score
+**Expected Rows:** 100 participants
 
 **Processing:**
-- Check Ch5 5.1.1 status shows complete analysis pipeline
-- Verify required dependency files exist
-- Log dependency validation results
+1. Load Ch5 5.1.1 LMM data and verify random intercepts/slopes structure exists
+2. Extract cognitive test scores from master.xlsx for all 100 participants
+3. Standardize cognitive tests to T-scores (M=50, SD=10) to enable coefficient comparison
+4. EXCLUDE NART due to language validity concerns in diverse sample
+5. Prepare data for simultaneous modeling approach (primary) and BLUP extraction (secondary sensitivity)
 
 **Output:**
-- data/step00_dependency_validation.txt (validation report)
+
+**File 1:** data/step00_lmm_input.csv
+**Format:** CSV, long format for simultaneous modeling
+**Columns:**
+  - `UID` (string): Participant identifier
+  - `test` (int): Test session
+  - `theta_common` (float): IRT ability estimate
+  - `TSVR_hours` (float): Time variable
+  - `log_TSVR` (float): Logarithmic transformation of time
+**Expected Rows:** ~400 observations
+**Note:** Direct input for simultaneous LMM in Step 1
+
+**File 2:** data/step00_cognitive_tests.csv
+**Format:** CSV, wide format (one row per participant)
+**Columns:**
+  - `UID` (string): Participant identifier
+  - `RAVLT_T` (float): RAVLT T-score (M=50, SD=10)
+  - `BVMT_T` (float): BVMT T-score (M=50, SD=10)
+  - `RPM_T` (float): RPM T-score (M=50, SD=10)
+**Expected Rows:** 100 participants
 
 **Validation Requirement:**
-Validation tools MUST be used after dependency validation execution. Validation will check that all required dependency files exist and Ch5 5.1.1 completed successfully.
+Validation tools MUST be used after data extraction execution. Specific validation tools will be determined by rq_tools based on data extraction requirements (file format validation, merge validation, standardization validation). The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_dependency_validation.txt: 1 file, text format
-- Content: Status checks for Ch5 5.1.1 completion
+- data/step00_lmm_input.csv: 400 rows x 5 columns (UID: object, test: int64, theta_common: float64, TSVR_hours: float64, log_TSVR: float64)
+- data/step00_cognitive_tests.csv: 100 rows x 4 columns (UID: object, RAVLT_T: float64, BVMT_T: float64, RPM_T: float64)
 
 *Value Ranges:*
-- Text file: Contains "PASS" indicators for each dependency
-- No numeric ranges applicable (text validation)
+- theta_common in [-3, 3] (typical IRT ability range)
+- TSVR_hours in [0, 168] (0 hours = encoding, 168 = 1 week max)
+- log_TSVR in [0, 5.13] (log(168) = 5.13 for 1-week max)
+- T-scores in [20, 80] (T-score range: M=50, SD=10, 3 SD range)
 
 *Data Quality:*
-- Required dependencies verified as existing
-- Ch5 5.1.1 status.yaml shows rq_results: success
-- No missing dependency files
+- All 100 participants present in both files (no missing UIDs)
+- No NaN values in cognitive T-scores (standardization must be complete)
+- T-score distributions approximately normal (mean ~50, SD ~10)
+- All UIDs match between LMM input and cognitive tests
 
 *Log Validation:*
-- Required pattern: "All dependencies validated: PASS"
-- Required pattern: "Ch5 5.1.1 status: success"
-- Forbidden patterns: "ERROR", "Missing dependency"
+- Required pattern: "Cognitive tests standardized: RAVLT_T mean=XX.X, SD=XX.X"
+- Required pattern: "LMM input prepared: 400 rows, 5 columns"
+- Forbidden patterns: "ERROR", "Missing UID", "Standardization failed"
+- Acceptable warnings: None expected for data extraction
 
-**Expected Behavior:**
-Validate all cross-RQ dependencies exist before proceeding to analysis steps
+**Expected Behavior on Validation Failure:**
+Raise error with specific failure message (e.g., "Expected 100 participants, found 97"), log failure to logs/step00_extract.log, quit script immediately, invoke g_debug for diagnosis.
 
 ---
 
-### Step 1: Extract Random Effects from Ch5 LMM
-**Dependencies:** Step 0 (dependency validation)
-**Complexity:** Low (<5 minutes)
+### Step 1: Fit Simultaneous LMM (Primary Approach)
 
-**Purpose:** Extract participant-level random intercepts and slopes from Ch5 5.1.1 LMM model
+**Dependencies:** Step 0 (requires LMM input and cognitive test data)
+**Complexity:** HIGH (30-45 minute LMM fitting with interactions)
 
 **Input:**
-- results/ch5/5.1.1/data/step05_lmm_model_summary.txt (or equivalent LMM output)
-- results/ch5/5.1.1/data/step04_lmm_input.csv (participant identifiers)
+
+**File 1:** data/step00_lmm_input.csv
+**Source:** Step 0 LMM data preparation
+**Format:** CSV, long format
+
+**File 2:** data/step00_cognitive_tests.csv
+**Source:** Step 0 cognitive test standardization
+**Format:** CSV, wide format
 
 **Processing:**
-- Extract random effects (BLUPs) from fitted LMM: Intercept_i and Slope_i per participant
-- Alternative approach: Re-fit simplified LMM Theta ~ log_TSVR + (1 + log_TSVR | UID)
-- Create participant-level dataset with UID, random intercept, random slope
-- Document BLUP extraction method and potential shrinkage bias
+Fit simultaneous LMM testing differential prediction hypothesis directly:
+
+**Model Formula:**
+`theta_common ~ log_TSVR + (1 + log_TSVR | UID) + RAVLT_T*log_TSVR + BVMT_T*log_TSVR + RPM_T*log_TSVR`
+
+**Model Components:**
+- **Fixed Intercept:** Overall Day 0 ability
+- **Fixed log_TSVR:** Population-level decline
+- **Random Intercepts:** Participant-specific Day 0 ability (what cognitive tests should predict strongly)
+- **Random Slopes:** Participant-specific decline rates (what cognitive tests should predict weakly)
+- **RAVLT_T main effect:** Intercept prediction by RAVLT
+- **BVMT_T main effect:** Intercept prediction by BVMT
+- **RPM_T main effect:** Intercept prediction by RPM
+- **RAVLT_T*log_TSVR interaction:** Slope prediction by RAVLT
+- **BVMT_T*log_TSVR interaction:** Slope prediction by BVMT
+- **RPM_T*log_TSVR interaction:** Slope prediction by RPM
+
+**Hypothesis Tests:**
+1. **Intercept prediction (main effects):** RAVLT_T, BVMT_T, RPM_T coefficients
+2. **Slope prediction (interaction effects):** RAVLT_T*log_TSVR, BVMT_T*log_TSVR, RPM_T*log_TSVR coefficients
+3. **Differential prediction test:** Main effects should be larger than interaction effects
 
 **Output:**
-- data/step01_random_effects.csv
 
-**Expected Format:**
-- Columns: UID (string), intercept (float), slope (float)
-- Rows: 100 participants
-- Values: intercept in [-2, 2], slope in [-1, 1] (typical random effect ranges)
+**File 1:** data/step01_simultaneous_lmm.pkl
+**Format:** Pickled statsmodels LMM object
+**Contents:** Fitted simultaneous model with all parameters
+**Note:** Enables coefficient extraction and variance component analysis
+
+**File 2:** data/step01_simultaneous_lmm_summary.txt
+**Format:** Text summary
+**Contents:** Fixed effects table, random effects variances, model diagnostics
+**Key Sections:** 
+  - Main effects (intercept prediction): RAVLT_T, BVMT_T, RPM_T coefficients + p-values
+  - Interaction effects (slope prediction): RAVLT_T*log_TSVR, BVMT_T*log_TSVR, RPM_T*log_TSVR coefficients + p-values
+  - Model fit indices (AIC, BIC, log-likelihood)
 
 **Validation Requirement:**
-Validation tools MUST be used after random effects extraction tool execution. Validation will verify successful extraction of random effects with appropriate value ranges.
+Validation tools MUST be used after simultaneous LMM execution. Specific validation tools will be determined by rq_tools based on LMM fitting requirements (convergence validation, parameter bounds validation, residual validation). The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step01_random_effects.csv: 100 rows x 3 columns (UID: object, intercept: float64, slope: float64)
+- data/step01_simultaneous_lmm.pkl: Binary file exists (statsmodels LMM object)
+- data/step01_simultaneous_lmm_summary.txt: Text file with model summary (50-100 lines expected)
 
 *Value Ranges:*
-- intercept in [-3, 3] (random intercepts centered around 0)
-- slope in [-2, 2] (random slopes centered around 0)
-- No NaN values (all participants must have random effects)
+- Fixed effect coefficients in [-2, 2] (reasonable for standardized predictors)
+- P-values in [0, 1] (valid probability range)
+- Random effect variances > 0 (positive variance components required)
+- AIC/BIC values positive (model comparison metrics)
 
 *Data Quality:*
-- All 100 participants present (no missing UIDs)
-- No duplicate UIDs
-- All numeric values finite (no inf values)
+- Model convergence achieved (no convergence warnings in summary)
+- All variance components estimated (no "unable to estimate" messages)
+- Expected degrees of freedom (6 fixed effects: intercept + log_TSVR + 3 main + 3 interactions)
+- Random effects structure: 2 components (intercept variance, slope variance, covariance)
 
 *Log Validation:*
-- Required pattern: "Random effects extracted: 100 participants"
-- Required pattern: "VALIDATION - PASS: intercept range"
-- Forbidden patterns: "ERROR", "NaN random effects", "Extraction failed"
+- Required pattern: "Model converged successfully"
+- Required pattern: "Fixed effects estimated: 6 parameters"
+- Required pattern: "Random effects estimated: intercept variance, slope variance"
+- Forbidden patterns: "CONVERGENCE FAILED", "Singular fit", "Unable to estimate"
+- Acceptable warnings: "Some correlations may be unreliable" (expected with many parameters)
 
-**Expected Behavior:**
-Successfully extract random intercepts and slopes for all 100 participants from Ch5 LMM
+**Expected Behavior on Validation Failure:**
+Raise error with specific failure message (e.g., "LMM convergence failed"), log failure to logs/step01_fit_simultaneous_lmm.log, quit script immediately, invoke g_debug for convergence diagnosis.
 
 ---
 
-### Step 2: Extract and Standardize Cognitive Tests
-**Dependencies:** Step 1 (participant list from random effects)
-**Complexity:** Low (<5 minutes)
+### Step 2: Extract Random Effects (Secondary Approach)
 
-**Purpose:** Extract cognitive test scores and convert to T-scores (M=50, SD=10) for standardized interpretation
+**Dependencies:** Step 0 (requires prepared LMM input for BLUP extraction)
+**Complexity:** MEDIUM (15-20 minute LMM fitting for BLUP extraction)
 
 **Input:**
-- data/master.xlsx (cognitive test scores)
-- data/step01_random_effects.csv (participant UIDs for matching)
+
+**File 1:** data/step00_lmm_input.csv
+**Source:** Step 0 LMM data preparation
+**Format:** CSV, long format
 
 **Processing:**
-- Extract RAVLT Total (sum of T1-T5), BVMT Total Recognition, RPM scores
-- Exclude NART per concept (language validity concerns)
-- Convert raw scores to T-scores: T = 50 + 10 * ((X - M) / SD)
-- Merge with participant UIDs from Step 1 for consistency
-- Handle any missing cognitive test data
+Fit baseline LMM without cognitive test predictors to extract BLUPs for sensitivity analysis:
+
+**Model Formula:**
+`theta_common ~ log_TSVR + (1 + log_TSVR | UID)`
+
+**BLUP Extraction:**
+- Extract participant-specific random intercepts (baseline ability estimates)
+- Extract participant-specific random slopes (decline rate estimates)
+- **CRITICAL BIAS WARNING:** BLUPs exhibit shrinkage toward population mean
+  - Extreme intercepts/slopes pulled toward zero
+  - Differential shrinkage affects subsequent regression validity
+  - Document shrinkage magnitude for transparency
+
+**Shrinkage Documentation:**
+1. Compute empirical intercepts/slopes (participant-specific OLS fits)
+2. Compare BLUP variance to empirical variance
+3. Report shrinkage factor: 1 - (var_BLUP / var_empirical)
+4. Expected shrinkage: 20-40% (typical for N=4 observations per participant)
 
 **Output:**
-- data/step02_cognitive_tests.csv
 
-**Expected Format:**
-- Columns: UID (string), RAVLT_T (float), BVMT_T (float), RPM_T (float)
-- Rows: 100 participants
-- Values: T-scores centered around 50, SD around 10 (20-80 typical range)
+**File 1:** data/step02_random_effects.csv
+**Format:** CSV, wide format (one row per participant)
+**Columns:**
+  - `UID` (string): Participant identifier
+  - `intercept` (float): Random intercept BLUP (baseline ability)
+  - `slope` (float): Random slope BLUP (decline rate)
+  - `se_intercept` (float): Standard error of intercept BLUP
+  - `se_slope` (float): Standard error of slope BLUP
+**Expected Rows:** 100 participants
+
+**File 2:** data/step02_shrinkage_analysis.csv
+**Format:** CSV, comparison of BLUP vs empirical variances
+**Columns:**
+  - `parameter` (string): "intercept" or "slope"
+  - `variance_empirical` (float): Empirical variance (OLS)
+  - `variance_blup` (float): BLUP variance (shrunken)
+  - `shrinkage_factor` (float): 1 - (var_BLUP / var_empirical)
+**Expected Rows:** 2 (intercept and slope variances)
+
+**File 3:** data/step02_baseline_lmm_summary.txt
+**Format:** Text summary of baseline LMM (without cognitive predictors)
+**Contents:** Model summary for BLUP extraction reference
 
 **Validation Requirement:**
-Validation tools MUST be used after cognitive test standardization execution. Validation will verify T-score conversion was performed correctly.
+Validation tools MUST be used after BLUP extraction execution. Specific validation tools will be determined by rq_tools based on LMM fitting and random effects extraction requirements. The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step02_cognitive_tests.csv: 100 rows x 4 columns (UID: object, RAVLT_T: float64, BVMT_T: float64, RPM_T: float64)
+- data/step02_random_effects.csv: 100 rows x 5 columns (UID: object, intercept: float64, slope: float64, se_intercept: float64, se_slope: float64)
+- data/step02_shrinkage_analysis.csv: 2 rows x 4 columns (parameter: object, variance_empirical: float64, variance_blup: float64, shrinkage_factor: float64)
 
 *Value Ranges:*
-- RAVLT_T in [20, 80] (T-scores 3 SD from mean)
-- BVMT_T in [20, 80] (T-scores 3 SD from mean)
-- RPM_T in [20, 80] (T-scores 3 SD from mean)
-- T-score distribution: mean approximately 50, SD approximately 10
+- intercept in [-2, 2] (reasonable baseline ability range)
+- slope in [-1, 1] (reasonable decline rate range)
+- Standard errors > 0 (positive uncertainty estimates)
+- shrinkage_factor in [0, 1] (0% = no shrinkage, 100% = complete shrinkage)
 
 *Data Quality:*
-- All 100 participants present
-- No duplicate UIDs
-- Missing data <10% per test (document exclusions if higher)
-- T-score standardization verified (mean near 50, SD near 10)
+- All 100 participants present (no missing random effects)
+- No NaN values in random effects (BLUP estimation must succeed for all)
+- Shrinkage factors in expected range: 0.15-0.50 (15-50% shrinkage typical)
+- Standard errors reasonable: se_intercept in [0.1, 0.5], se_slope in [0.05, 0.3]
 
 *Log Validation:*
-- Required pattern: "T-score conversion complete: 3 tests standardized"
-- Required pattern: "RAVLT_T mean: [45-55], SD: [8-12]" (approximate T-score distribution)
-- Forbidden patterns: "ERROR", "Standardization failed", "Invalid T-scores"
+- Required pattern: "Random effects extracted for 100 participants"
+- Required pattern: "Shrinkage analysis: intercept=XX.X%, slope=XX.X%"
+- Forbidden patterns: "BLUP extraction failed", "Missing random effects"
+- Acceptable warnings: "Some random effects may be unreliable" (expected with limited observations)
 
-**Expected Behavior:**
-Successfully extract and standardize cognitive test scores for all participants with T-score properties
+**Expected Behavior on Validation Failure:**
+Raise error with specific failure message (e.g., "Random effects missing for 5 participants"), log failure to logs/step02_extract_random_effects.log, quit script immediately, invoke g_debug for extraction diagnosis.
 
 ---
 
-### Step 3: Predict Intercepts (Baseline Ability)
-**Dependencies:** Steps 1-2 (random effects + cognitive tests)
-**Complexity:** Low (<5 minutes)
+### Step 3: Predict Intercepts (Two-Stage Analysis)
 
-**Purpose:** Fit linear regression predicting random intercepts using cognitive test T-scores
+**Dependencies:** Step 0 (cognitive tests), Step 2 (random effects)
+**Complexity:** LOW (5 minute regression fitting)
 
 **Input:**
-- data/step01_random_effects.csv (intercept values)
-- data/step02_cognitive_tests.csv (cognitive predictors)
+
+**File 1:** data/step00_cognitive_tests.csv
+**Source:** Step 0 standardized cognitive tests
+**Format:** CSV, wide format
+
+**File 2:** data/step02_random_effects.csv
+**Source:** Step 2 BLUP extraction
+**Format:** CSV, wide format
 
 **Processing:**
-- Merge datasets on UID
-- Fit model: Intercept ~ RAVLT_T + BVMT_T + RPM_T
-- Extract R², adjusted R², F-statistic, overall model p-value
-- Extract individual beta coefficients, standard errors, t-statistics
-- Compute uncorrected p-values for each predictor
-- Apply Bonferroni correction: alpha = 0.05/6 = 0.0083 (3 predictors x 2 models)
-- Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
-- Check model assumptions: residual normality, homoscedasticity, multicollinearity (VIF)
+Predict random intercepts using cognitive tests:
+
+**Model Formula:**
+`intercept ~ RAVLT_T + BVMT_T + RPM_T`
+
+**Statistical Procedures:**
+1. Fit multiple linear regression predicting baseline ability
+2. Check linearity assumptions: Partial regression plots for each predictor
+3. Test multicollinearity: VIF < 5 threshold
+4. Compute R-squared (key outcome for hypothesis test)
+5. Extract individual beta coefficients with confidence intervals
+6. Apply Bonferroni correction: alpha = 0.05/6 = 0.0083 (3 predictors x 2 models)
+7. Bootstrap 95% CIs for all coefficients (1000 replications, participant-level resampling)
+
+**Diagnostic Checks:**
+- Linearity: Partial residual plots (if non-linear, consider transformations)
+- Homoscedasticity: Breusch-Pagan test
+- Normality: Shapiro-Wilk test on residuals
+- Multicollinearity: VIF values for all predictors
 
 **Output:**
-- data/step03_intercept_predictions.csv (model results)
-- data/step03_intercept_diagnostics.txt (assumption checks)
 
-**Expected Format - Model Results:**
-- Columns: predictor (string), beta (float), se (float), t_stat (float), p_uncorrected (float), p_bonferroni (float)
-- Additional: R_squared (float), adj_R_squared (float), F_stat (float), model_p (float)
+**File 1:** data/step03_intercept_model_summary.txt
+**Format:** Text summary
+**Contents:** Model R-squared, F-test, individual coefficients with p-values
+**Key Metrics:** 
+  - R-squared (primary outcome for hypothesis)
+  - F-statistic and p-value for overall model
+  - Individual betas: RAVLT_T, BVMT_T, RPM_T with uncorrected + Bonferroni p-values
+
+**File 2:** data/step03_intercept_predictions.csv
+**Format:** CSV regression results
+**Columns:**
+  - `predictor` (string): Cognitive test name
+  - `beta` (float): Regression coefficient
+  - `se` (float): Standard error
+  - `t_stat` (float): T-statistic
+  - `p_uncorrected` (float): Uncorrected p-value
+  - `p_bonferroni` (float): Bonferroni-corrected p-value (Decision D068)
+  - `ci_lower` (float): Bootstrap 95% CI lower bound
+  - `ci_upper` (float): Bootstrap 95% CI upper bound
+**Expected Rows:** 3 (RAVLT, BVMT, RPM coefficients)
+
+**File 3:** data/step03_intercept_diagnostics.csv
+**Format:** CSV diagnostic results
+**Columns:**
+  - `test` (string): Diagnostic test name
+  - `statistic` (float): Test statistic
+  - `p_value` (float): P-value
+  - `interpretation` (string): PASS/FAIL result
+**Expected Rows:** 4 (linearity, homoscedasticity, normality, multicollinearity)
 
 **Validation Requirement:**
-Validation tools MUST be used after intercept regression execution. Validation will verify model fitting, dual p-value reporting, and assumption checks.
+Validation tools MUST be used after intercept prediction execution. Specific validation tools will be determined by rq_tools based on regression analysis requirements (R-squared validation, coefficient validation, diagnostic validation). The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step03_intercept_predictions.csv: 3 rows x 6 columns (predictors + statistics)
-- data/step03_intercept_diagnostics.txt: 1 file, text format (assumption tests)
+- data/step03_intercept_predictions.csv: 3 rows x 8 columns (predictor: object, beta: float64, se: float64, t_stat: float64, p_uncorrected: float64, p_bonferroni: float64, ci_lower: float64, ci_upper: float64)
+- data/step03_intercept_diagnostics.csv: 4 rows x 4 columns (test: object, statistic: float64, p_value: float64, interpretation: object)
 
 *Value Ranges:*
-- beta in [-2, 2] (standardized predictors, reasonable effect sizes)
-- se > 0 (standard errors must be positive)
-- t_stat in [-10, 10] (reasonable test statistics)
-- p_uncorrected in [0, 1], p_bonferroni in [0, 1] (valid p-values)
-- R_squared in [0, 1] (valid proportion of variance)
-- VIF < 10 (multicollinearity check, <5 preferred)
+- beta coefficients in [-1, 1] (reasonable for standardized predictors)
+- Standard errors > 0 (positive uncertainty estimates)
+- P-values in [0, 1] (valid probability range)
+- R-squared in [0, 1] (proportion of variance explained)
 
 *Data Quality:*
-- All 3 predictors present (RAVLT_T, BVMT_T, RPM_T)
-- Dual p-values for each predictor (Decision D068 compliance)
-- Model converged successfully (no estimation failures)
-- Assumption tests completed (normality, homoscedasticity)
+- All 3 cognitive tests present as predictors (no missing coefficients)
+- Bonferroni p-values >= uncorrected p-values (correction should increase p-values)
+- Bootstrap CIs contain point estimates (sanity check)
+- Diagnostic tests completed: linearity, homoscedasticity, normality, multicollinearity
 
 *Log Validation:*
-- Required pattern: "Intercept model fitted: R² = X.XX"
-- Required pattern: "VALIDATION - PASS: dual p-values"
-- Required pattern: "Assumption checks complete: VIF < 10"
-- Forbidden patterns: "ERROR", "Model failed", "Convergence issues"
-- Acceptable warnings: "Bonferroni correction applied"
+- Required pattern: "Intercept model R-squared = 0.XXX"
+- Required pattern: "All diagnostic tests completed: 4/4"
+- Required pattern: "Bootstrap confidence intervals computed: 1000 replications"
+- Forbidden patterns: "Regression failed", "Diagnostic test error"
+- Acceptable warnings: "Weak evidence for assumption violation" (p < 0.1 on diagnostics)
 
-**Expected Behavior:**
-Fit regression model predicting intercepts with dual p-value reporting and assumption validation
+**Expected Behavior on Validation Failure:**
+Raise error with specific failure message (e.g., "Bootstrap CI computation failed"), log failure to logs/step03_predict_intercepts.log, quit script immediately, invoke g_debug for regression diagnosis.
 
 ---
 
-### Step 4: Predict Slopes (Forgetting Rate)
-**Dependencies:** Steps 1-2 (random effects + cognitive tests)
-**Complexity:** Low (<5 minutes)
+### Step 4: Predict Slopes (Two-Stage Analysis)
 
-**Purpose:** Fit linear regression predicting random slopes using cognitive test T-scores
+**Dependencies:** Step 0 (cognitive tests), Step 2 (random effects)
+**Complexity:** LOW (5 minute regression fitting)
 
 **Input:**
-- data/step01_random_effects.csv (slope values)
-- data/step02_cognitive_tests.csv (cognitive predictors)
+
+**File 1:** data/step00_cognitive_tests.csv
+**Source:** Step 0 standardized cognitive tests
+**Format:** CSV, wide format
+
+**File 2:** data/step02_random_effects.csv
+**Source:** Step 2 BLUP extraction
+**Format:** CSV, wide format
 
 **Processing:**
-- Merge datasets on UID (same as Step 3)
-- Fit model: Slope ~ RAVLT_T + BVMT_T + RPM_T
-- Extract identical statistics as Step 3 (R², betas, dual p-values)
-- Apply same Bonferroni correction (alpha = 0.0083)
-- Check same model assumptions
-- Document BLUP extraction bias limitation for slopes
+Predict random slopes using cognitive tests:
+
+**Model Formula:**
+`slope ~ RAVLT_T + BVMT_T + RPM_T`
+
+**Statistical Procedures:** Same as Step 3, applied to slope prediction
+1. Fit multiple linear regression predicting decline rates
+2. Check linearity assumptions and multicollinearity (VIF < 5)
+3. Compute R-squared (key outcome for comparison with intercept R-squared)
+4. Extract individual beta coefficients with confidence intervals
+5. Apply same Bonferroni correction: alpha = 0.0083
+6. Bootstrap 95% CIs for all coefficients (1000 replications)
+
+**CRITICAL BIAS WARNING:**
+BLUP slopes exhibit differential shrinkage affecting regression validity:
+- Extreme slopes shrunken more than moderate slopes
+- This non-uniform shrinkage can artificially reduce or inflate R-squared
+- Results may not reflect true predictive relationships
+- Simultaneous model (Step 1) provides unbiased estimates
 
 **Output:**
-- data/step04_slope_predictions.csv (model results)
-- data/step04_slope_diagnostics.txt (assumption checks)
 
-**Expected Format:**
-Same as Step 3 (predictor, beta, se, t_stat, p_uncorrected, p_bonferroni, R², etc.)
+**File 1:** data/step04_slope_model_summary.txt
+**Format:** Text summary (same structure as Step 3)
+**Contents:** Model R-squared, F-test, individual coefficients with bias warning
+**Key Metrics:**
+  - R-squared (for comparison with intercept prediction)
+  - Individual betas with uncorrected + Bonferroni p-values
+  - BIAS WARNING: Note differential shrinkage effects
+
+**File 2:** data/step04_slope_predictions.csv
+**Format:** CSV regression results (same structure as Step 3)
+**Columns:** Same as Step 3 intercept predictions file
+**Expected Rows:** 3 (RAVLT, BVMT, RPM coefficients for slope prediction)
+
+**File 3:** data/step04_slope_diagnostics.csv
+**Format:** CSV diagnostic results (same structure as Step 3)
+**Expected Rows:** 4 (same diagnostic tests as intercept prediction)
 
 **Validation Requirement:**
-Validation tools MUST be used after slope regression execution. Validation will verify model fitting and dual p-value reporting identical to intercept model.
+Validation tools MUST be used after slope prediction execution. Specific validation tools will be determined by rq_tools based on regression analysis requirements. The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step04_slope_predictions.csv: 3 rows x 6 columns (predictors + statistics)
-- data/step04_slope_diagnostics.txt: 1 file, text format (assumption tests)
+- data/step04_slope_predictions.csv: 3 rows x 8 columns (same structure as intercept predictions)
+- data/step04_slope_diagnostics.csv: 4 rows x 4 columns (same structure as intercept diagnostics)
 
 *Value Ranges:*
-- Same ranges as Step 3 (beta, se, t_stat, p-values, R²)
-- VIF < 10 for multicollinearity
+- beta coefficients in [-0.5, 0.5] (smaller range expected for slope prediction)
+- Standard errors > 0 (positive uncertainty estimates)
+- P-values in [0, 1] (valid probability range)
+- R-squared in [0, 1], expected < 0.15 per hypothesis
 
 *Data Quality:*
-- Same requirements as Step 3 (3 predictors, dual p-values, convergence)
-- BLUP bias acknowledged in diagnostics file
+- All 3 cognitive tests present as predictors (consistent with Step 3)
+- Bonferroni p-values >= uncorrected p-values (correction consistency)
+- Bootstrap CIs contain point estimates
+- All diagnostic tests completed successfully
 
 *Log Validation:*
-- Required pattern: "Slope model fitted: R² = X.XX"
-- Required pattern: "VALIDATION - PASS: dual p-values"
-- Required pattern: "BLUP bias documented"
-- Forbidden patterns: "ERROR", "Model failed"
+- Required pattern: "Slope model R-squared = 0.XXX"
+- Required pattern: "BIAS WARNING: BLUP shrinkage may affect validity"
+- Required pattern: "Bootstrap confidence intervals computed: 1000 replications"
+- Forbidden patterns: "Regression failed", "Diagnostic test error"
+- Acceptable warnings: Same as Step 3 diagnostic warnings
 
-**Expected Behavior:**
-Fit regression model predicting slopes with same structure as intercept model
+**Expected Behavior on Validation Failure:**
+Raise error with specific failure message, log failure to logs/step04_predict_slopes.log, quit script immediately, invoke g_debug for regression diagnosis.
 
 ---
 
-### Step 5: Compare R² Values Between Models
-**Dependencies:** Steps 3-4 (both regression models)
-**Complexity:** Medium (5-15 minutes for bootstrap)
+### Step 5: Compare R-Squared Values
 
-**Purpose:** Test hypothesis that R²_intercept significantly > R²_slope using bootstrap confidence intervals
+**Dependencies:** Step 1 (simultaneous model), Step 3 (intercept prediction), Step 4 (slope prediction)
+**Complexity:** MEDIUM (15-20 minutes for bootstrap comparison)
 
 **Input:**
-- data/step03_intercept_predictions.csv (R²_intercept)
-- data/step04_slope_predictions.csv (R²_slope)
-- data/step01_random_effects.csv + data/step02_cognitive_tests.csv (for bootstrap resampling)
+
+**File 1:** data/step01_simultaneous_lmm.pkl
+**Source:** Step 1 simultaneous LMM
+**Format:** Pickled model object
+
+**File 2:** data/step03_intercept_model_summary.txt
+**Source:** Step 3 intercept prediction
+**Format:** Text summary containing R-squared value
+
+**File 3:** data/step04_slope_model_summary.txt
+**Source:** Step 4 slope prediction
+**Format:** Text summary containing R-squared value
 
 **Processing:**
-- Extract R² from both models
-- Compute R² difference: ” = R²_intercept - R²_slope
-- Implement participant-level block bootstrap (1000 replications)
-- For each bootstrap sample: resample participants, refit both models, compute ”_bootstrap
-- Compute 95% confidence interval for ” using percentile method
-- Test hypothesis: H€: ” d 0 vs H: ” > 0 (one-tailed)
-- Optional: Fisher's Z-test for comparing dependent correlations (if assumptions met)
+Compare predictive strength using multiple approaches:
+
+**1. Primary Analysis (Simultaneous Model):**
+- Extract main effect coefficients (intercept prediction): RAVLT_T, BVMT_T, RPM_T
+- Extract interaction coefficients (slope prediction): RAVLT_T*log_TSVR, BVMT_T*log_TSVR, RPM_T*log_TSVR
+- Compute pseudo-R-squared for main effects vs interaction effects
+- Test hypothesis: main effects significantly larger than interaction effects
+
+**2. Secondary Analysis (Two-Stage Comparison):**
+- Compare R²_intercept vs R²_slope from Steps 3-4
+- Bootstrap hypothesis test: R²_intercept > R²_slope
+- Participant-level block bootstrap (1000 replications, seed=42)
+- Preserves within-participant correlation structure
+- Bootstrap 95% CI for R²_intercept - R²_slope difference
+
+**3. Statistical Testing:**
+- Bootstrap percentile method (primary)
+- Fisher's Z-test only if normality verified (Q-Q plots, Shapiro-Wilk)
+- If normality violated: Use bootstrap exclusively
+
+**Hypothesis Tests:**
+1. **Primary:** Simultaneous model main effects > interaction effects
+2. **Secondary:** R²_intercept significantly > R²_slope (bootstrap CI excludes 0)
+3. **Individual tests:** No cognitive test significantly predicts slope after Bonferroni correction
 
 **Output:**
-- data/step05_r_squared_comparison.csv
 
-**Expected Format:**
-- Columns: R2_intercept (float), R2_slope (float), R2_difference (float), CI_lower (float), CI_upper (float), bootstrap_p (float)
-- Single row with comparison results
+**File 1:** data/step05_r_squared_comparison.csv
+**Format:** CSV comparison results
+**Columns:**
+  - `approach` (string): "simultaneous" or "two_stage"
+  - `intercept_r_squared` (float): Intercept prediction strength
+  - `slope_r_squared` (float): Slope prediction strength
+  - `difference` (float): R²_intercept - R²_slope
+  - `ci_lower` (float): Bootstrap 95% CI lower bound
+  - `ci_upper` (float): Bootstrap 95% CI upper bound
+  - `p_value` (float): Bootstrap hypothesis test p-value
+  - `conclusion` (string): "Supported" or "Not supported"
+**Expected Rows:** 2 (simultaneous and two-stage approaches)
+
+**File 2:** data/step05_bootstrap_results.csv
+**Format:** CSV bootstrap replications (for transparency)
+**Columns:**
+  - `replication` (int): Bootstrap sample number (1-1000)
+  - `r_squared_intercept` (float): R² for intercept prediction
+  - `r_squared_slope` (float): R² for slope prediction
+  - `difference` (float): R²_intercept - R²_slope for this replication
+**Expected Rows:** 1000 bootstrap replications
+
+**File 3:** data/step05_bias_comparison.txt
+**Format:** Text summary comparing approaches
+**Contents:** 
+  - Simultaneous model advantages (no BLUP bias)
+  - Two-stage limitations (shrinkage effects documented)
+  - Convergence between approaches (consistency check)
+  - Final conclusions with bias caveats
 
 **Validation Requirement:**
-Validation tools MUST be used after R² comparison execution. Validation will verify bootstrap procedure and confidence interval computation.
+Validation tools MUST be used after R-squared comparison execution. Specific validation tools will be determined by rq_tools based on bootstrap analysis requirements. The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step05_r_squared_comparison.csv: 1 row x 6 columns (R² statistics)
+- data/step05_r_squared_comparison.csv: 2 rows x 8 columns (approach: object, intercept_r_squared: float64, slope_r_squared: float64, difference: float64, ci_lower: float64, ci_upper: float64, p_value: float64, conclusion: object)
+- data/step05_bootstrap_results.csv: 1000 rows x 4 columns (replication: int64, r_squared_intercept: float64, r_squared_slope: float64, difference: float64)
 
 *Value Ranges:*
-- R2_intercept in [0, 1], R2_slope in [0, 1] (valid R² values)
-- R2_difference in [-1, 1] (difference of valid proportions)
-- CI_lower <= CI_upper (valid confidence interval)
-- bootstrap_p in [0, 1] (valid p-value)
+- R-squared values in [0, 1] (proportion variance explained)
+- Differences in [-1, 1] (R²_intercept - R²_slope)
+- P-values in [0, 1] (bootstrap hypothesis test)
+- Bootstrap CI bounds in [-1, 1] (difference confidence interval)
 
 *Data Quality:*
-- Bootstrap completed 1000 replications (check log for completion)
-- Confidence interval computed correctly
-- Hypothesis test performed (one-tailed for ” > 0)
+- Exactly 1000 bootstrap replications (complete bootstrap)
+- Both approaches present: simultaneous and two-stage
+- Bootstrap CIs calculated (ci_lower < ci_upper)
+- Hypothesis conclusions drawn ("Supported" or "Not supported")
 
 *Log Validation:*
-- Required pattern: "Bootstrap complete: 1000 replications"
-- Required pattern: "R² comparison: intercept X.XX vs slope X.XX"
-- Required pattern: "95% CI for difference: [X.XX, X.XX]"
-- Forbidden patterns: "ERROR", "Bootstrap failed", "Invalid CI"
+- Required pattern: "Bootstrap completed: 1000 replications"
+- Required pattern: "Hypothesis test: R²_intercept > R²_slope, p = 0.XXX"
+- Required pattern: "PRIMARY approach: Simultaneous model (unbiased)"
+- Required pattern: "SECONDARY approach: Two-stage (BLUP bias warning)"
+- Forbidden patterns: "Bootstrap failed", "R-squared computation error"
+- Acceptable warnings: "Some bootstrap samples failed to converge" (<5% failure acceptable)
 
-**Expected Behavior:**
-Complete bootstrap comparison of R² values with confidence intervals supporting hypothesis test
+**Expected Behavior on Validation Failure:**
+Raise error with specific failure message (e.g., "Bootstrap confidence interval invalid"), log failure to logs/step05_compare_r_squared.log, quit script immediately, invoke g_debug for bootstrap diagnosis.
 
 ---
 
-## Expected Outputs
+### Step 6: Prepare Results Summary Plot Data
 
-### Data Files (ALL analysis inputs and outputs - intermediate and final)
-- data/step00_dependency_validation.txt (from Step 0: cross-RQ validation)
-- data/step01_random_effects.csv (from Step 1: extracted intercepts/slopes)
-- data/step02_cognitive_tests.csv (from Step 2: T-scored predictors)
-- data/step03_intercept_predictions.csv (from Step 3: intercept model results)
-- data/step03_intercept_diagnostics.txt (from Step 3: assumption checks)
-- data/step04_slope_predictions.csv (from Step 4: slope model results)
-- data/step04_slope_diagnostics.txt (from Step 4: assumption checks)
-- data/step05_r_squared_comparison.csv (from Step 5: bootstrap comparison)
+**Dependencies:** Step 5 (R-squared comparison completed)
+**Complexity:** LOW (5 minute data aggregation for visualization)
 
-### Logs (ONLY execution logs - .log files capturing stdout/stderr)
-- logs/step00_validate_dependencies.log
-- logs/step01_extract_random_effects.log
-- logs/step02_extract_cognitive_tests.log
-- logs/step03_predict_intercepts.log
-- logs/step04_predict_slopes.log
-- logs/step05_compare_r_squared.log
+**  CRITICAL NOTE:** Plot data preparation IS an analysis step that gets executed in Step 14 CODE EXECUTION LOOP (g_code -> bash -> rq_inspect) and MUST have validation requirements.
 
-### Plots (EMPTY until rq_plots runs)
-- plots/intercept_slope_prediction.png (created by rq_plots, NOT analysis steps)
-- plots/model_diagnostics.png (created by rq_plots)
+**Purpose:** Aggregate R-squared comparison results for visualization showing intercept vs slope prediction strength
 
-### Results (EMPTY until rq_results runs)
-- results/summary.md (created by rq_results, NOT analysis steps)
+**Dependencies:** Step 5 (requires R-squared comparison results)
+
+**Input:**
+
+**File 1:** data/step05_r_squared_comparison.csv
+**Source:** Step 5 R-squared comparison
+**Format:** CSV with comparison results
+
+**File 2:** data/step03_intercept_predictions.csv
+**Source:** Step 3 individual predictor coefficients for intercept
+**Format:** CSV with predictor-level results
+
+**File 3:** data/step04_slope_predictions.csv
+**Source:** Step 4 individual predictor coefficients for slope
+**Format:** CSV with predictor-level results
+
+**Plot Description:** Bar chart comparing R-squared values for intercept vs slope prediction, with error bars showing bootstrap confidence intervals. Separate bars for individual cognitive tests and combined model.
+
+**Required Data Sources:**
+- R-squared comparison from simultaneous and two-stage approaches
+- Individual predictor results for cognitive tests
+- Bootstrap confidence intervals for uncertainty quantification
+
+**Output (Plot Source CSV):** data/step06_summary_plot_data.csv
+
+**Required Columns:**
+- `model` (string): Model type ("Simultaneous", "Two-Stage")
+- `outcome` (string): Predicted outcome ("Intercept", "Slope") 
+- `r_squared` (float): Model R-squared value
+- `ci_lower` (float): Bootstrap 95% CI lower bound
+- `ci_upper` (float): Bootstrap 95% CI upper bound
+- `predictor` (string): Individual cognitive test ("Combined", "RAVLT", "BVMT", "RPM")
+
+**Expected Rows:** 8-12 (2 approaches x 2 outcomes x 2-3 detail levels)
+
+**Aggregation Logic:**
+1. Extract R-squared values from step05_r_squared_comparison.csv
+2. Extract individual predictor R-squared from regression summaries
+3. Combine into plot-ready format with grouping variables
+4. Add bootstrap confidence intervals for error bars
+5. Include both combined model and individual predictor results
+6. Sort by model type, then outcome, then predictor
+
+**Validation Requirement:**
+Validation tools MUST be used after plot data preparation execution. Specific validation tools will be determined by rq_tools based on plot data format requirements.
+
+**Substance Validation Criteria (for rq_inspect post-execution validation):**
+
+*Output Files:*
+- data/step06_summary_plot_data.csv exists (exact path)
+- Expected rows: 8-12 (2 approaches x 2 outcomes x detailed breakdown)
+- Expected columns: 6 (model, outcome, r_squared, ci_lower, ci_upper, predictor)
+- Data types: string (model, outcome, predictor), float (r_squared, CI bounds)
+
+*Value Ranges:*
+- r_squared in [0, 1] (proportion variance explained)
+- ci_lower in [0, 1], ci_upper in [0, 1] (confidence bounds)
+- ci_upper > ci_lower for all rows (valid confidence intervals)
+- model in {"Simultaneous", "Two-Stage"} (categorical)
+- outcome in {"Intercept", "Slope"} (categorical)
+
+*Data Quality:*
+- No NaN values tolerated (all aggregation must succeed)
+- Expected N: 8-12 rows (complete factorial design)
+- No duplicate combinations of model x outcome x predictor
+- All cognitive tests represented: Combined, RAVLT, BVMT, RPM
+
+*Log Validation:*
+- Required pattern: "Plot data preparation complete: XX rows created"
+- Required pattern: "All approaches represented: Simultaneous, Two-Stage"
+- Required pattern: "All outcomes represented: Intercept, Slope"
+- Forbidden patterns: "ERROR", "NaN values detected", "Missing model type"
+- Acceptable warnings: None expected for plot data preparation
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure message (e.g., "Expected 2 approaches, found 1")
+- Log failure to logs/step06_prepare_summary_plot_data.log
+- Quit script immediately (do NOT proceed to rq_plots)
+- g_debug invoked to diagnose root cause
+
+**Plotting Function (rq_plots will call):** Bar chart with error bars comparing intercept vs slope prediction
+- rq_plots agent maps this description to specific tools/plots.py function
+- Plot reads data/step06_summary_plot_data.csv (created by this step)
+- No data aggregation in rq_plots (visualization only per Option B)
+- PNG output saved to plots/ folder by rq_plots
 
 ---
 
 ## Expected Data Formats
 
-### Step-to-Step Transformations
+### Data Transformations
 
-**Step 1 ’ Step 2:** Random effects provide participant UIDs for cognitive test extraction
+**Step 0 to Step 1 (Wide to Long Merge):**
+- Input Format: Two separate files (LMM data + cognitive tests)
+- Merge Logic: Left join on UID (all LMM observations retained, cognitive tests added)
+- Output Format: Long format with cognitive test predictors for simultaneous modeling
+- Critical Decision D068: Dual p-value reporting setup (uncorrected + Bonferroni)
 
-**Steps 1-2 ’ Steps 3-4:** Both datasets merged on UID to create predictor-outcome pairs for regression
+**Step 2 (BLUP Extraction):**
+- Input Format: Long format LMM data 
+- BLUP Logic: Extract participant-specific random intercepts and slopes via empirical Bayes
+- Shrinkage Documentation: Compare BLUP variance to empirical variance (bias quantification)
+- Output Format: Wide format (one row per participant with intercept/slope)
 
-**Steps 3-4 ’ Step 5:** R² values extracted from model summary statistics for comparison
+**Step 3-4 (Regression Analysis):**
+- Input Format: Wide format (random effects + cognitive tests)
+- Regression Logic: Multiple linear regression with standardized predictors
+- Bootstrap Logic: Participant-level resampling preserves correlation structure
+- Output Format: Regression results with dual p-values (Decision D068)
+
+**Step 5 (Comparison Analysis):**
+- Input Format: Multiple sources (simultaneous LMM + two regression models)
+- Comparison Logic: Bootstrap difference testing for R²_intercept vs R²_slope  
+- Statistical Methods: Bootstrap percentile CI, Fisher's Z-test conditional on normality
+- Output Format: Comparison table with confidence intervals and hypothesis test results
 
 ### Column Naming Conventions
 
-**Random Effects (Step 1):**
-- UID: Participant identifier (format: P### with leading zeros)
-- intercept: Random intercept (BLUP) from Ch5 LMM
-- slope: Random slope (BLUP) from Ch5 LMM
+**From names.md established patterns:**
+- `UID`: Participant identifier (consistent across all files)
+- `theta_common`: IRT ability estimate (from Ch5 5.1.1)
+- `TSVR_hours`: Time since VR in hours (Decision D070)
+- `CI_lower`, `CI_upper`: Confidence interval bounds (plotting standard)
 
-**Cognitive Tests (Step 2):**
-- UID: Participant identifier (matches Step 1)
-- RAVLT_T: T-score for RAVLT Total
-- BVMT_T: T-score for BVMT Total Recognition
-- RPM_T: T-score for Raven's Progressive Matrices
-
-**Regression Results (Steps 3-4):**
-- predictor: Test name (RAVLT_T, BVMT_T, RPM_T)
-- beta: Standardized regression coefficient
-- se: Standard error of beta
-- t_stat: t-statistic for significance test
-- p_uncorrected: Raw p-value
-- p_bonferroni: Bonferroni-corrected p-value (Decision D068)
+**New conventions for RQ 7.1.2:**
+- `intercept`, `slope`: Random effects from BLUP extraction
+- `se_intercept`, `se_slope`: Standard errors for random effects
+- `RAVLT_T`, `BVMT_T`, `RPM_T`: T-scored cognitive tests (M=50, SD=10)
+- `p_uncorrected`, `p_bonferroni`: Dual p-values (Decision D068)
+- `shrinkage_factor`: BLUP shrinkage documentation (transparency)
 
 ### Data Type Constraints
 
-**Participant identifiers:** Non-nullable strings (UID must be present for all)
-**Statistical estimates:** Non-nullable floats (all estimates must be finite)
-**P-values:** Must be in [0, 1] range (invalid p-values indicate computation error)
-**R²:** Must be in [0, 1] range (negative R² indicates model problems)
-**T-scores:** Should be approximately normal with mean H 50, SD H 10
+**Required Data Types:**
+- UID: string/object (participant identifiers)
+- theta_common: float64 (IRT ability estimates)
+- TSVR_hours: float64 (continuous time variable)
+- Cognitive T-scores: float64 (standardized test scores)
+- Random effects: float64 (BLUP estimates)
+- P-values: float64 (must be in [0,1] range)
+- Bootstrap results: float64 (confidence intervals)
+
+**Nullable vs Non-Nullable:**
+- UID: Non-nullable (all participants must have identifiers)
+- theta_common: Non-nullable (all participants have IRT estimates from Ch5)
+- Cognitive tests: Non-nullable after standardization (exclusions handled beforehand)
+- Random effects: Non-nullable (BLUP estimation must succeed for analysis validity)
+- Bootstrap results: Non-nullable (complete bootstrap required for inference)
 
 ---
 
 ## Cross-RQ Dependencies
 
-**This RQ depends on:** Ch5 5.1.1 (overall episodic memory LMM with random intercepts/slopes)
+**This RQ requires outputs from:**
+- **Ch5 5.1.1** (Functional Form Comparison - provides LMM data and theta scores)
+  - File 1: results/ch5/5.1.1/data/step04_lmm_input.csv
+  - File 2: results/ch5/5.1.1/data/step05_lmm_model_summary.txt
+  - Used in: Step 0 (LMM data preparation) and Step 1 (simultaneous modeling)
+  - Rationale: Ch5 5.1.1 provides baseline episodic memory trajectories. This RQ examines what predicts individual differences in those trajectories.
 
-**Required Files from Ch5 5.1.1:**
-- results/ch5/5.1.1/data/step05_lmm_model_summary.txt (fitted LMM with random effects)
-- results/ch5/5.1.1/data/step04_lmm_input.csv (participant identifiers)
+**Execution Order Constraint:**
+1. Ch5 5.1.1 must complete through Step 5 (LMM fitting with random intercepts/slopes)
+2. This RQ executes using Ch5 outputs as foundation
+3. All cognitive test data extracted independently from master.xlsx
 
-**Status Check:**
-- rq_planner should verify results/ch5/5.1.1/status.yaml shows rq_results: success
-- If Ch5 5.1.1 incomplete: QUIT with "FAIL: Ch5 5.1.1 must complete before RQ 7.1.2 (dependency)"
+**Data Source Boundaries:**
+- **RAW data:** master.xlsx cognitive test scores (RAVLT, BVMT, RPM)
+- **DERIVED data:** Ch5 5.1.1 LMM trajectories and theta scores
+- **Scope:** This RQ does NOT re-estimate IRT models (uses Ch5 theta scores as given)
 
-**Data Integration:**
-- Step 1: Extract random effects from Ch5 5.1.1 LMM model
-- Expected: 100 participants matched (no missing)
-- Alternative: Re-fit simplified LMM if random effects extraction problematic
+**Validation:**
+- Step 0: Check results/ch5/5.1.1/data/step04_lmm_input.csv exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- Step 0: Check results/ch5/5.1.1/data/step05_lmm_model_summary.txt exists (circuit breaker: EXPECTATIONS ERROR if absent)
+- If either file missing -> quit with error -> user must execute Ch5 5.1.1 first
 
 ---
 
@@ -451,102 +790,181 @@ This is not optional. This is the core architectural principle preventing cascad
 
 **Implementation:**
 - rq_tools (Step 11 workflow) will read tool_inventory.md validation tools section
-- rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
+- rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml  
 - rq_analysis (Step 12 workflow) will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
 - g_code (Step 14 workflow) will generate stepN_name.py scripts with validation function calls
-- bash execution (Step 14 workflow) will run analysis ’ validation ’ error on validation failure
+- bash execution (Step 14 workflow) will run analysis -> validation -> error on validation failure
 
 **Downstream Agent Requirements:**
 - **rq_tools:** MUST specify validation tool for EVERY analysis step (no exceptions)
-- **rq_analysis:** MUST embed validation tool call for EVERY analysis step (no exceptions)
+- **rq_analysis:** MUST embed validation tool call for EVERY analysis step (no exceptions)  
 - **g_code:** MUST generate code with validation function calls (no exceptions)
 - **rq_inspect:** MUST verify validation ran successfully (checks logs/stepN_name.log for validation output)
 
 ### Validation Requirements By Step
 
-#### Step 0: Validate Cross-RQ Dependencies
-**Analysis Tool:** (determined by rq_tools - likely custom dependency checker)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_dependencies)
+#### Step 0: Extract Random Effects and Cognitive Tests
+
+**Analysis Tool:** (determined by rq_tools - likely tools.data.extract_cognitive_tests + tools.data.merge_with_lmm)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_standardization + tools.validation.validate_data_merge)
 
 **What Validation Checks:**
-- Ch5 5.1.1 status.yaml shows rq_results: success
-- Required dependency files exist and are non-empty
-- Dependency validation report created successfully
+- Output files exist (step00_lmm_input.csv, step00_cognitive_tests.csv)
+- Expected dimensions (400 rows LMM input, 100 rows cognitive tests)
+- T-score standardization successful (mean ~50, SD ~10)
+- All UIDs matched between files (complete merge)
+- Value ranges reasonable (theta in [-3,3], TSVR in [0,168], T-scores in [20,80])
 
 **Expected Behavior on Validation Failure:**
-- Raise error with specific missing dependency
-- Log failure to logs/step00_validate_dependencies.log
-- Quit immediately (do NOT proceed to Step 1)
-- User must ensure Ch5 5.1.1 completes before re-running this RQ
+- Raise error with specific failure message (e.g., "Standardization failed: RAVLT mean=45.2, expected ~50")
+- Log failure to logs/step00_extract.log
+- Quit script immediately (do NOT proceed to Step 1)
+- g_debug invoked by master to diagnose root cause
 
-#### Step 1: Extract Random Effects
-**Analysis Tool:** (determined by rq_tools - likely custom random effects extractor)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_numeric_range)
+---
 
-**What Validation Checks:**
-- Output file exists with expected 100 rows x 3 columns
-- Random effects in reasonable ranges (intercept/slope not extreme)
-- All UIDs present (no missing participants)
-- No NaN or infinite values in random effects
+#### Step 1: Fit Simultaneous LMM (Primary Approach)
 
-#### Step 2: Extract Cognitive Tests
-**Analysis Tool:** (determined by rq_tools - likely tools.data.extract_cognitive_tests)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_standardization)
+**Analysis Tool:** (determined by rq_tools - likely tools.analysis_lmm.fit_lmm_with_interactions)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_lmm_convergence + tools.validation.validate_lmm_parameters)
 
 **What Validation Checks:**
-- T-score conversion performed correctly (mean H 50, SD H 10)
-- All 3 cognitive tests extracted (RAVLT, BVMT, RPM)
-- Participant count matches Step 1 (100 participants)
-- T-scores in reasonable range [20, 80]
+- Model convergence achieved (no convergence warnings)
+- All parameters estimated (6 fixed effects, 2 random variances + covariance)
+- Parameter values reasonable (coefficients in [-2,2], variances > 0)
+- Model summary generated successfully
+- Fixed effects table contains all expected predictors and interactions
 
-#### Steps 3-4: Regression Models
-**Analysis Tool:** (determined by rq_tools - likely linear regression functions)
-**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_hypothesis_test_dual_pvalues)
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "LMM did not converge: maximum iterations reached")
+- Log failure to logs/step01_fit_simultaneous_lmm.log
+- Quit script immediately
+- g_debug invoked to diagnose (common causes: insufficient data, model misspecification)
+
+---
+
+#### Step 2: Extract Random Effects (Secondary Approach)
+
+**Analysis Tool:** (determined by rq_tools - likely tools.analysis_lmm.extract_random_effects_with_shrinkage)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_random_effects + tools.validation.validate_shrinkage_analysis)
 
 **What Validation Checks:**
-- Model converged successfully
-- Dual p-values present (uncorrected + Bonferroni) per Decision D068
-- VIF values <10 for multicollinearity
-- Residuals meet assumptions (normality, homoscedasticity)
-- R² in valid [0, 1] range
+- Random effects extracted for all 100 participants (no missing BLUPs)
+- Standard errors positive and reasonable (se in [0.1, 1.0])
+- Shrinkage analysis completed (empirical vs BLUP variance comparison)
+- Shrinkage factors in expected range (15-50% typical)
+- No extreme outliers in random effects (|intercept| < 3, |slope| < 2)
 
-#### Step 5: R² Comparison
-**Analysis Tool:** (determined by rq_tools - bootstrap comparison function)
-**Validation Tool:** (determined by rq_tools - bootstrap validation)
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Random effects missing for 5 participants")
+- Log failure to logs/step02_extract_random_effects.log
+- Quit script immediately
+- g_debug invoked to diagnose BLUP extraction issues
+
+---
+
+#### Step 3: Predict Intercepts (Two-Stage Analysis)
+
+**Analysis Tool:** (determined by rq_tools - likely tools.analysis_regression.fit_multiple_regression_with_bootstrap)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_regression_diagnostics + tools.validation.validate_hypothesis_test_dual_pvalues)
 
 **What Validation Checks:**
-- Bootstrap completed specified number of replications (1000)
-- Confidence interval bounds are valid (CI_lower <= CI_upper)
-- R² values extracted correctly from both models
-- Bootstrap p-value in valid [0, 1] range
+- Regression model fitted successfully (R-squared computed)
+- All diagnostic tests completed (linearity, homoscedasticity, normality, multicollinearity)
+- Bootstrap confidence intervals computed (1000 replications successful)
+- Dual p-values present (uncorrected + Bonferroni per Decision D068)
+- Coefficient values reasonable (standardized predictors: beta in [-1,1])
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Bootstrap failed: only 734 successful replications")
+- Log failure to logs/step03_predict_intercepts.log
+- Quit script immediately
+- g_debug invoked to diagnose bootstrap or regression issues
+
+---
+
+#### Step 4: Predict Slopes (Two-Stage Analysis)
+
+**Analysis Tool:** (Same as Step 3, applied to slope outcomes)
+**Validation Tool:** (Same as Step 3, with BLUP bias warning checks)
+
+**What Validation Checks:** (Same as Step 3, plus BLUP bias documentation)
+- BLUP bias warning documented in outputs
+- Shrinkage effects noted in model summary
+- Results interpreted with bias caveats
+
+**Expected Behavior on Validation Failure:** (Same as Step 3)
+
+---
+
+#### Step 5: Compare R-Squared Values
+
+**Analysis Tool:** (determined by rq_tools - likely tools.analysis_regression.compare_r_squared_bootstrap)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_bootstrap_comparison + tools.validation.validate_hypothesis_test)
+
+**What Validation Checks:**
+- Bootstrap comparison completed (1000 replications)
+- Confidence intervals calculated (percentile method)
+- Hypothesis test performed (R²_intercept > R²_slope)
+- Both approaches compared (simultaneous + two-stage)
+- Conclusions drawn with appropriate caveats
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Bootstrap confidence interval calculation failed")
+- Log failure to logs/step05_compare_r_squared.log
+- Quit script immediately
+- g_debug invoked to diagnose bootstrap comparison issues
+
+---
+
+#### Step 6: Prepare Results Summary Plot Data
+
+**Analysis Tool:** (determined by rq_tools - likely tools.plotting.prepare_summary_plot_data)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_plot_data_completeness)
+
+**What Validation Checks:**
+- Plot source CSV created with all required columns
+- All factor levels present (approaches, outcomes, predictors)
+- Value ranges appropriate (R-squared in [0,1], valid CIs)
+- No missing data in plot source file
+- Expected row count matches factorial design
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Missing approach: Expected 'Simultaneous', 'Two-Stage'")
+- Log failure to logs/step06_prepare_summary_plot_data.log
+- Quit script immediately
+- g_debug invoked to diagnose data aggregation issues
 
 ---
 
 ## Summary
 
-**Total Steps:** 6 (Step 0: dependency validation + Steps 1-5: analysis)
-**Estimated Runtime:** 30-45 minutes (mostly bootstrap in Step 5)
-**Cross-RQ Dependencies:** Ch5 5.1.1 (LMM with random effects)
-**Primary Outputs:** Regression models predicting intercepts vs slopes, R² comparison with bootstrap CI
-**Validation Coverage:** 100% (all 6 steps have validation requirements)
+**Total Steps:** 7 (Step 0: extraction + Steps 1-6: analysis)
+**Estimated Runtime:** HIGH (60-90 minutes: 45 min LMM + 30 min regression + 15 min validation)
+**Cross-RQ Dependencies:** Ch5 5.1.1 (LMM trajectories and theta scores)
+**Primary Outputs:** 
+  - Simultaneous LMM results (unbiased approach)
+  - Two-stage regression comparison (sensitivity analysis)
+  - R-squared comparison with bootstrap hypothesis test
+  - Plot source CSV for visualization
+**Validation Coverage:** 100% (all 7 steps have validation requirements)
 
-**Key Hypothesis:** Cognitive tests predict baseline ability (intercept) more strongly than forgetting rate (slope), consistent with tests measuring encoding but not consolidation processes.
-
-**Critical Methodological Notes:**
-- Two-stage analysis with BLUP extraction bias acknowledged
-- Decision D068 dual p-value reporting implemented
-- Bootstrap confidence intervals for dependent R² comparison
-- Bonferroni correction for multiple testing (6 tests total)
+**CRITICAL METHODOLOGICAL NOTE:**
+This analysis uses SIMULTANEOUS MODELING as the primary approach to avoid BLUP extraction bias. Two-stage analysis (Steps 2-4) serves as sensitivity analysis but results may be biased due to differential shrinkage. All interpretations will prioritize simultaneous model results with two-stage results reported for completeness.
 
 ---
 
 **Next Steps (Workflow):**
 1. User reviews and approves this plan (Step 7 user gate)
-2. Workflow continues to Step 11: rq_tools reads this plan ’ creates 3_tools.yaml
-3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml ’ creates 4_analysis.yaml
-4. Workflow continues to Step 14: g_code reads 4_analysis.yaml ’ generates stepN_name.py scripts
+2. Workflow continues to Step 11: rq_tools reads this plan -> creates 3_tools.yaml
+3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml -> creates 4_analysis.yaml
+4. Workflow continues to Step 14: g_code reads 4_analysis.yaml -> generates stepN_name.py scripts
 
 ---
 
 **Version History:**
-- v1.0 (2026-01-02): Initial plan created by rq_planner agent
+- v1.0 (2026-01-02): Initial plan created by rq_planner agent for RQ 7.1.2
+- Incorporates simultaneous modeling approach per validated concept (stats score 9.5/10)
+- Addresses BLUP bias concerns with dual approach and comprehensive bias documentation
+- Implements Decision D068 (dual p-value reporting) throughout
+- Bootstrap methodology with participant-level resampling for valid inference

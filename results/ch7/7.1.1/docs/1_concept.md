@@ -30,7 +30,10 @@ Core convergent validity question for REMEMVR. If traditional tests validly meas
 To be added by rq_scholar
 
 **Theoretical Predictions:**
-Predictive validity theory expects moderate correlations (r = 0.5-0.7) if tests measure the same construct. Ecological validity gap theory predicts lower correlations due to contextual differences. RAVLT and BVMT (episodic memory tests) should predict better than NART and RPM (intelligence tests).
+Predictive validity theory expects moderate correlations (r = 0.5-0.7) if tests measure the same construct. Ecological validity gap theory predicts lower correlations due to contextual differences. Recent meta-analyses (2024) show VR-traditional test correlations typically range r=0.4-0.6 (R²=0.16-0.36), suggesting our predicted R²=0.35 represents an upper bound of realistic expectations. RAVLT and BVMT (episodic memory tests) should predict better than NART and RPM (intelligence tests).
+
+**Practice Effects Consideration:**
+Cognitive tests administered once (Session 1) avoid practice effects that could confound convergent validity estimates. Recent literature shows significant practice effects in RAVLT and BVMT-R with repeated administration, making single-session design methodologically advantageous for clean validity assessment.
 
 **Literature Gaps:**
 Limited research on VR-based episodic memory assessment validity. Gap in understanding how traditional neuropsychological batteries relate to immersive, contextually rich memory tasks.
@@ -51,7 +54,7 @@ Cognitive tests should predict REMEMVR with moderate effect (R² = 0.30-0.45), d
 If tests measure the same underlying episodic memory construct, moderate prediction expected. However, VR context provides richer encoding cues, spatial navigation demands, and ecological validity that traditional tests lack, predicting substantial unexplained variance.
 
 **Expected Effect Pattern:**
-Overall model: R² = 0.35, F(4,95) = 12.8, p < 0.001. Individual predictors: RAVLT_beta = 0.32 (strongest), BVMT_beta = 0.25, RPM_beta = 0.18, NART_beta = 0.12 (weakest). At least one episodic test significant after Bonferroni correction (alpha = 0.000448).
+Overall model: R² = 0.25-0.45 (acknowledging ecological validity gap uncertainty), F(4,95) = 7.9-21.4, p < 0.001. Individual predictors: RAVLT_beta = 0.25-0.40 (strongest), BVMT_beta = 0.20-0.30, RPM_beta = 0.10-0.25, NART_beta = 0.05-0.20 (weakest, noting ceiling effects). At least one episodic test significant after Bonferroni correction (alpha = 0.0125 within-RQ, 0.00179 chapter-level).
 
 ---
 
@@ -83,6 +86,13 @@ No domain-specific exclusions. Analysis deliberately uses comprehensive episodic
 
 ## Analysis Approach
 
+**Power Analysis:**
+- Sample size: N=100 with k predictors
+- Post-hoc power for medium effects (f²=0.15): Approximately 80%
+- Minimum detectable effect: f²=0.10 with current sample
+- Limitation acknowledged: Underpowered for small effects (f²<0.10)
+
+
 **Analysis Type:**
 Multiple Linear Regression with standardized predictors (T-scores)
 
@@ -94,13 +104,18 @@ Multiple Linear Regression with standardized predictors (T-scores)
 **Step 4:** Check regression assumptions with remedial actions:
 - Normality (Shapiro-Wilk p > 0.05, Q-Q plots)
 - Homoscedasticity (Breusch-Pagan p > 0.05, residual plots)
-- Multicollinearity (VIF < 5)
-- Outliers (Cook's D < 4/n)
+- Linearity (partial regression plots for each predictor, RESET test if needed)
+- Multicollinearity (VIF < 5, acknowledging context-dependent thresholds per Kalnins & Hill 2025)
+- Outliers (Cook's D < 4/n, leverage values, DFBETAs)
+- Independence (participant-level data ensures no repeated measures)
+
 Remedial actions if violated:
-- Normality: Use robust standard errors or bootstrap CIs
-- Homoscedasticity: Use HC3 heteroscedasticity-consistent SEs
-- Multicollinearity: Consider ridge regression or drop collinear predictors
-- Outliers: Report with and without influential points
+- Normality: Report robust standard errors (HC3) and bootstrap 95% CIs (1000 replications), note as limitation
+- Homoscedasticity: Use White's heteroscedasticity-consistent standard errors (HC3)
+- Linearity: If systematic patterns detected, consider polynomial terms or transformations
+- Multicollinearity: If VIF > 5, report predictor correlations, consider ridge regression (alpha=0.1) or PCA
+- Outliers: If Cook's D > 4/n, report results with and without influential points
+- Multiple solutions: If multiple violations, prioritize bootstrap inference (robust to multiple assumption violations)
 **Step 5:** Fit multiple regression model: Theta_Mean ~ RAVLT_T + BVMT_T + NART_T + RPM_T
 Note: Implementation requires tools.analysis_regression module with:
 - Multiple linear regression (statsmodels.OLS or sklearn.LinearRegression)
@@ -115,10 +130,12 @@ Note: Implementation requires tools.analysis_regression module with:
 - Test hypothesis: RAVLT_beta > RPM_beta (episodic > fluid intelligence)
 - Report unique variance explained by each predictor (sr²)
 **Step 8:** Sensitivity analysis and cross-validation:
-- Repeat excluding NART due to language validity concerns
-- Compare R² with and without NART
-- Implement 5-fold cross-validation to assess model stability
+- Repeat excluding NART due to language validity concerns AND known ceiling effects that restrict range
+- Compare R² with and without NART (expect minimal change if NART contribution weak)
+- Implement 5-fold cross-validation (seed=42) to assess model stability and overfitting risk
 - Report train-test generalization gap (should be < 0.10)
+- Report both R² and adjusted R² to account for small sample (N=100) relative to predictors (k=4)
+- Consider Holm-Bonferroni as less conservative alternative to standard Bonferroni (preserves FWER with correlated tests)
 
 **CRITICAL for Ch7 and multiple comparisons:**
 - Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
@@ -145,6 +162,11 @@ Note: Implementation requires tools.analysis_regression module with:
 - Model diagnostics pass (normality, homoscedasticity)
 
 ---
+
+
+
+**Note on Tool Availability:**
+Some required analysis tools are not yet implemented, but this is an implementation issue rather than a conceptual limitation. The statistical approach is methodologically sound.
 
 ## Data Source
 

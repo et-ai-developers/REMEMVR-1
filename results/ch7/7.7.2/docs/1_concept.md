@@ -111,7 +111,7 @@ Discrepancy analysis with one-way ANOVA and post-hoc comparisons, plus descripti
 - One-way ANOVA for each predictor across 3 groups
 - Post-hoc Tukey HSD for pairwise comparisons
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary correction: Bonferroni (� = 0.00179/4 = 0.000448)
+- Primary correction: Bonferroni (± = 0.00179/4 = 0.000448)
 
 **Step 6:** Effect sizes and clinical interpretation
 - Cohen's d for pairwise group differences
@@ -134,6 +134,15 @@ Discrepancy analysis with one-way ANOVA and post-hoc comparisons, plus descripti
 - results/discrepancy_analysis_summary.md (text summary for thesis)
 - plots/discrepancy_distribution.png (histogram of discrepancy scores)
 - plots/group_comparisons.png (box plots of demographic variables by group)
+
+**
+
+**Cross-Validation:**
+- Implement 5-fold CV (seed=42) for generalization assessment
+- Report mean CV-R² and SD across folds
+- CV-R² to full-sample R² gap should be <0.10
+- If gap >0.10: Consider regularization
+
 
 **Success Criteria:**
 - [ ] Create meaningful discrepancy groups with adequate n per group (n e 10)
