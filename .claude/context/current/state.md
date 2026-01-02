@@ -1,34 +1,34 @@
 # Current State
 
-**Last Updated:** 2026-01-01 (Post-curation: Late Evening session archived)
+**Last Updated:** 2026-01-02 (Post-curation: Session 2026-01-01 Morning archived)
 **Last /clear:** 2025-11-27 20:50
-**Last /save:** 2026-01-01 (rq_report complete - curated)
-**Token Count:** ~3.4k tokens (2 sessions: Ch5 100% Completion + 2026-01-01 Morning, -11% reduction from archiving Late Evening)
+**Last /save:** 2026-01-02 (Ch7 Refined Specifications Complete - curated)
+**Token Count:** ~5.8k tokens (2 sessions: Afternoon + Evening 2026-01-02, -55% reduction from archiving)
 
 ---
 
 ## What We're Doing
 
-**Current Task:** ✅ **RQ_REPORT AGENT COMPLETE** (65/65 RQs documented with publication-ready reports)
+**Current Task:** Ch7 REFINED SPECIFICATIONS COMPLETE (28 RQs, 8 themes) - Ready for execution OR thesis writing
 
-**Context:** After Ch5 100% + Ch6 100% completion (65/85 RQs PLATINUM certified), user requested "agent to run in parallel on all ch5/ch6 rqs individually" for complete publication documentation. Created NEW rq_report agent (v1.0.0) using context-finder to research agent design patterns, executed test on RQ 5.1.1 (453 lines, 26KB, EXCELLENT quality), then launched parallel batch on all 65 certified RQs using Haiku model for efficiency. Achieved 100% success rate (66/66 reports including test).
+**Context:** After rq_report v1.0.0 completion (65/65 RQs documented, 2.1MB reports), user clarified Ch7 is NOT "nice to have" but the ANCHOR chapter connecting REMEMVR to existing memory literature (RAVLT, BVMT). Expanded Ch7 from 20 to 28 RQs with metacognition predictors, clinical utility, and slope predictor themes.
 
-**Status:** ✅ **CH6 100% (30/30)** + ✅ **CH5 100% (35/35)** + ✅ **PUBLICATION DOCS 100% (65/65)** + **CH7 0% (0/20)** → **TOTAL 65/85 RQs CERTIFIED + DOCUMENTED (76%)**
+**Status:** CH6 100% (30/30) + CH5 100% (35/35) + PUBLICATION DOCS 100% (65/65) + CH7 SPECS COMPLETE (28 RQs, 0 executed) --> TOTAL 65/93 RQs CERTIFIED (70%)
 
 ---
 
 ## Cross-Chapter Schema Framework (Keep for Ch7 Work)
 
-| RQ | Measure | IRT→LMM | GLMM/GEE | Interpretation |
+| RQ | Measure | IRT-LMM | GLMM/GEE | Interpretation |
 |----|---------|---------|----------|----------------|
 | **5.4.1** (Ch5) | Accuracy baseline | p=.548 (null) | **p=.011** (sig) | Baseline effect |
 | **6.5.1** (Ch6) | Confidence baseline | p=.660 (null) | **p=.003** (sig) | Baseline effect |
-| **6.5.3** (Ch6) | HCE rate | p=.130 (null) | **p=.169** (null) ✅ | TRUE NULL |
+| **6.5.3** (Ch6) | HCE rate | p=.130 (null) | **p=.169** (null) | TRUE NULL |
 
 **Framework:** "Baseline Effects, Trajectory Nulls"
-- ✅ Schema affects BASELINE (Congruent > Common > Incongruent) for accuracy + confidence
-- ✅ Schema does NOT affect TRAJECTORY (Schema × Time interactions NULL)
-- ✅ Schema does NOT affect METACOGNITIVE DISSOCIATION (HCE rates equivalent)
+- Schema affects BASELINE (Congruent > Common > Incongruent) for accuracy + confidence
+- Schema does NOT affect TRAJECTORY (Schema x Time interactions NULL)
+- Schema does NOT affect METACOGNITIVE DISSOCIATION (HCE rates equivalent)
 
 **Theoretical Interpretation:** Schema congruence affects **encoding strength** (baseline performance/confidence) but NOT **forgetting dynamics** (decline rates) or **metacognitive dissociation**. Immersive VR encoding creates schema effects at ACQUISITION, not RETENTION.
 
@@ -38,440 +38,14 @@
 
 **NOTE:** Last 2 sessions preserved verbatim per sliding window. Sessions 3+ sessions ago archived by context-manager during curation.
 
-**Archived This Curation (2026-01-01):**
-- Session 2025-12-31 Late Evening → `ch5_100_pct_completion_campaign_hybrid_strategy.md`
+**Archived This Curation (2026-01-02):**
+- Session 2026-01-01 Morning --> `rq_report_agent_creation_v1_0_0.md`
 
 **Previously Archived:**
-- Session 2025-12-31 Evening → `ch5_selective_tier2_batch_certification.md`
-- Session 2025-12-31 Afternoon → Multiple topics (see archive_index.md)
-- Session 2025-12-31 Morning → Multiple topics (see archive_index.md)
-- Earlier sessions → See archive_index.md
-
----
-
-## Session (2025-12-31 Ch5 100% Completion Campaign)
-
-[Session content preserved verbatim from lines 250-663 of previous state.md]
-
----
-
-## Session (2026-01-01 Morning - rq_report Agent Creation + Parallel Batch Execution)
-
-**Task:** CREATE rq_report AGENT + EXECUTE PARALLEL BATCH DOCUMENTATION (65 RQs)
-
-**Context:** After Ch5 + Ch6 100% PLATINUM certification (65/85 RQs), user requested: "create agent to run in parallel on all ch5/ch6 rqs individually... reads ALL files + archive context... provides full summary in ./reports/X.Y.Z/report.md... needs EVERYTHING for publication." Requirements: (1) Work like context-finder (archive search), (2) Haiku model (parallel efficiency), (3) 100% reliable (circuit breakers, ultrathink), (4) 10-section structure (historical context + results + publication summary).
-
-**OUTCOME:** ✅ **rq_report v1.0.0 CREATED** + ✅ **65/65 RQs DOCUMENTED** (100% success rate, 2.1MB documentation, 28,609 lines)
-
----
-
-### 1. Agent Design Phase (~30 min)
-
-**Pre-Design Research (context-finder invocation):**
-
-User requested: "use context-finder yourself in agent planning stages to ensure solid, robust, 100% ALWAYS RELIABLE design." Invoked context-finder to search archives/ + docs/ for:
-1. How context-finder agent is designed (architecture, reliability mechanisms)
-2. Agent design best practices (what makes agents robust vs fail)
-3. RQ folder structure and file organization
-4. Existing report generation work (rq_results patterns)
-5. Parallel execution patterns (batch processing with Haiku)
-
-**Key Findings from context-finder:**
-
-**Architecture Patterns (from rq_results v4.0.0):**
-- Multi-source synthesis: 6 inputs (context_dumps, data, plots, logs, concept, plan)
-- Multimodal inspection: Read PNG files visually, check coherence with statistics
-- Circuit breakers: 5 types (EXPECTATIONS, STEP, TOOL, CLARITY, SCOPE), quit on uncertainty
-- Output structure: 5 sections (Statistical Findings, Plot Descriptions, Interpretation, Limitations, Next Steps)
-- Token discipline: ≤2k tokens per source, comprehensive but concise
-
-**Reliability Mechanisms (from universal.md + workflow.md):**
-- **Platform compatibility:** ASCII-only output (Windows cp1252), UTF-8 file writes, Bash commands
-- **Circuit breakers:** 5 types, always quit immediately with type specification
-- **Context dumps:** Max 5 lines per agent in status.yaml (pseudo-statefulness without bloat)
-- **File-based communication:** Pass paths not content (prevents context bloat)
-- **Never edit core files:** RQ folder only, never data/tools/config/agents
-
-**Parallel Execution Patterns (from archives 2025-12-01 to 2025-12-04):**
-- Mass validation: 32 parallel agents (16 RQs × 2 agents), Haiku model, 100% success
-- Mass planning: 18 parallel agents (rq_planner), 12 minutes vs 3+ hours sequential (12× speedup)
-- Parallel audit: 13 RQs in ~3 minutes with rq_audit
-- Pattern: Haiku for batch operations (speed/cost), Sonnet for complex reasoning
-
-**Agent Design Decisions:**
-
-1. **Type:** Reporting agent (stateless, no workflow tracking, independent parallel execution)
-2. **Model:** Haiku (claude-3-5-haiku-20241022) for parallel efficiency across 65 RQs
-3. **Architecture:** Hybrid of context-finder (archive search with chronology) + rq_results (multi-source synthesis)
-4. **Output:** 10-section structure (extends rq_results 5-section format with historical context, methodology detail, publication summary)
-5. **Workflow:** 11 steps (circuit breakers → RQ verification → archive search → file reading → synthesis → folder creation → write → verify → report)
-
-**10-Section Report Template:**
-1. Executive Summary (concise orientation: what/found/matters)
-2. Research Question (hypothesis, theory, expected patterns)
-3. Historical Context (archive search with timestamps, blockers resolved, cross-RQ references)
-4. Methodology (data sources, pipeline steps, tools, critical decisions with citations)
-5. Results (statistics with tables, sample characteristics, model comparisons)
-6. Visualizations (multimodal plot inspection, visual-statistical coherence)
-7. Interpretation (hypothesis testing, theory, cross-RQ patterns, unexpected findings)
-8. Limitations (sample, methodological, technical, generalizability)
-9. Publication-Ready Summary (4-paragraph standalone thesis text)
-10. Metadata & Sources (provenance, warnings flagged, complete file inventory)
-
-**Presented plan to user → APPROVED with clarifications:**
-- Archive search: RQ number only (not keywords)
-- Token limit: However many necessary, keep concise (NOT prose)
-- Output location: ./reports/X.Y.Z/ (folders created by agent)
-- Missing optional files: FLAG AS WARNING (scholar.md, stats.md if missing)
-- Execution: Test with 1 RQ first, audit, then parallel batch
-
----
-
-### 2. Agent Creation (~20 min)
-
-**Created:** `.claude/agents/rq_report.md` (v1.0.0, 3,791 lines comprehensive prompt)
-
-**Key Features Implemented:**
-
-**Archive Search (Steps 4a-4c, like context-finder):**
-- Index-first strategy: Read archive_index.md for topic discovery
-- Pattern matching: Search for "X.Y.Z", "RQ X.Y.Z", "X_Y_Z", "chX/X.Y.Z"
-- Relevance scoring: Exact match (1.0), description match (0.9), partial (0.6), chapter-level (0.3)
-- Select top 5 topics, read only relevant sections
-- Extract timestamps, sort chronologically (newest first)
-- Token limit: ~2k tokens total across all archive excerpts
-
-**File Reading (Step 5, 12+ sources):**
-- **Core docs (CRITICAL):** concept.md, plan.md, summary.md (QUIT if missing)
-- **Validation docs (OPTIONAL, flag warning):** scholar.md, stats.md
-- **Specifications:** tools.yaml, analysis.yaml
-- **Status:** status.yaml (ALL agent context_dumps - agent wisdom)
-- **Data files:** Sample with pandas.head() (first 10 rows only, not full CSVs)
-- **Logs:** Read all, extract convergence/validation/warnings
-- **Plots:** Multimodal PNG inspection (you are multimodal LLM, USE this)
-- **PLATINUM reports:** FINALIZATION_REPORT_PLATINUM.md, validation.md (if exist)
-
-**Circuit Breakers (5 types from universal.md):**
-- EXPECTATIONS ERROR: Missing critical files, invalid RQ format, folder doesn't exist
-- STEP ERROR: Cannot create folders, report verification fails, workflow blocked
-- TOOL ERROR: pandas fails, file write fails, Bash commands fail
-- CLARITY ERROR: plan.md missing methodology, status.yaml structure unclear
-- SCOPE ERROR: Asked to analyze data (rq_results scope), fix bugs (g_debug scope)
-
-**Style Requirements (per user spec):**
-- Concise and to the point (NOT prose)
-- Bullet points where appropriate
-- Tables for structured data
-- Terse summaries
-- Citation format: (source: file.md line N)
-
-**Prompt Location:** `.claude/agents/rq_report.md` (per Anthropic specification, agents MUST be in .claude/agents/)
-
----
-
-### 3. Test Execution: RQ 5.1.1 (~5 min)
-
-**Invoked:** rq_report agent with "ch5/5.1.1"
-
-**Output:** `./reports/5.1.1/report.md` (453 lines, 26KB)
-
-**Archive Search Results:**
-- Topics searched: 4 (rq_audit, rq_fixer, cross_type_dependency, model_averaging)
-- Entries found: 6 chronological events (2025-12-01 to 2025-12-27)
-- Timeline: Complete evolution from audit → fixes → ROOT verification → model averaging → PLATINUM certification
-
-**Sources Synthesized:**
-- Archive: 4 topics with timestamps
-- Core docs: concept.md (188 lines), plan.md (999 lines), summary.md (785 lines)
-- Validation: PLATINUM_CERTIFICATION.md, FINALIZATION_REPORT_PLATINUM.md
-- Execution: status.yaml (10 agent context_dumps), 12 data files, 3+ logs, 4 plots
-- Total: 18 files integrated
-
-**Quality Checks (ALL PASSED):**
-- ✅ All 10 sections complete
-- ✅ Concise style (bullets, tables, terse summaries, NO verbose prose)
-- ✅ Archive search successful (4 topics, 6 entries, chronological with timestamps)
-- ✅ Multimodal plot inspection (3 plots visually analyzed, patterns connected to statistics)
-- ✅ Source citations throughout (file paths, line numbers)
-- ✅ Warnings flagged appropriately (IRT Pass 1 convergence, minor heteroscedasticity)
-- ✅ Publication-ready summary (4 paragraphs, standalone thesis text)
-- ✅ Complete metadata (18 files documented, archive sources listed with timestamps)
-
-**Key Findings Documented:**
-- Paradigm shift: Logarithmic (original Rank #1) → Power-law (extended Rank #1, ΔAIC=2.97)
-- Model averaging: 16 competitive models (best weight=5.6%), effective α_eff=0.410
-- Random slopes: ΔAIC=-3.60 (homogeneous forgetting rates confirmed)
-- Extended comparison: 66 models tested (Log demoted Rank #1→#33, evidence ratio 4.7:1)
-
-**Test Outcome:** ✅ EXCELLENT QUALITY - Ready for parallel deployment
-
----
-
-### 4. Parallel Batch Execution: 65 RQs (~5-10 min)
-
-**Launched:** 64 parallel agent invocations (ch5/5.1.2 through ch6/6.8.4) in single message
-
-**Execution Pattern:**
-```
-Task(subagent_type="rq_report", prompt="ch5/5.1.2")
-Task(subagent_type="rq_report", prompt="ch5/5.1.3")
-...
-Task(subagent_type="rq_report", prompt="ch6/6.8.4")
-```
-
-**Model:** Haiku (claude-3-5-haiku-20241022) - specified in agent prompt metadata
-
-**Results:** ✅ **100% SUCCESS RATE (64/64 parallel agents + 1 test = 65/65 total)**
-
-**Success Metrics:**
-- Reports generated: 66 total (65 RQs + 1 test RQ 5.1.1)
-- Total size: 2.1 MB of publication documentation
-- Total lines: 28,609 lines comprehensive synthesis
-- Average size: ~32 KB per report (~440 lines each)
-- Execution time: ~5-10 minutes parallel (vs ~11h sequential at 10min/RQ)
-- Speedup: ~66-132× faster than sequential
-
-**Quality Verification (sample checks):**
-- RQ 5.1.2 (704 lines, 42K): 25 timestamped archive entries, 18 RQ files, 10 sections complete
-- RQ 5.1.3 (341 lines, 21K): 1 archive topic, 22 RQ files, cross-chapter convergence documented
-- RQ 5.1.4 (485 lines, 24K): 4 archive topics, 20+ files, CRITICAL finding reversal timeline
-- RQ 6.1.1 (362 lines, 23K): 8 archive topics, 50+ files, model uncertainty documented
-- All reports: 10 sections, archive integration, multimodal plots, publication summaries
-
-**Report Structure Consistency (verified across samples):**
-1. Executive Summary ✓
-2. Research Question ✓
-3. Historical Context (with archive search) ✓
-4. Methodology ✓
-5. Results ✓
-6. Visualizations (multimodal inspection) ✓
-7. Interpretation ✓
-8. Limitations ✓
-9. Publication-Ready Summary ✓
-10. Metadata & Sources ✓
-
-**Coverage:**
-- Ch5: 35/35 RQs (100%)
-- Ch6: 30/30 RQs (100%)
-- Total: 65/65 certified RQs (100%)
-
----
-
-### 5. Post-Batch Verification (~5 min)
-
-**Verified:**
-```bash
-find reports -name "report.md" | wc -l  # Output: 66
-find reports -type d -name "[56].*" | wc -l  # Output: 66
-du -sh reports/  # Output: 2.1M
-find reports -name "report.md" -exec wc -l {} + | tail -1  # Output: 28609 total
-```
-
-**File Structure Created:**
-```
-reports/
-├── 5.1.1/report.md (26K)
-├── 5.1.2/report.md (42K)
-├── 5.1.3/report.md (21K)
-...
-├── 6.8.3/report.md (30K)
-└── 6.8.4/report.md (32K)
-```
-
-**Quality Distribution:**
-- 15-20 KB: 12 reports
-- 20-30 KB: 38 reports (majority)
-- 30-40 KB: 13 reports
-- 40+ KB: 3 reports (exceptional historical context: 5.1.2 two-phase with extensive timeline)
-
-**No Failures:** 0 circuit breakers triggered, 0 partial reports, 0 missing sections
-
----
-
-### 6. Key Achievements
-
-**Agent Architecture:**
-
-**NEW v4.X Agent Created:** rq_report (14th agent, first batch-processing reporting agent)
-- **Agent Prompt:** `.claude/agents/rq_report.md` (v1.0.0, 3,791 lines)
-- **Model:** Haiku (parallel efficiency for 65 RQs)
-- **Type:** Stateless reporting agent (no workflow integration, independent execution)
-- **Design:** Hybrid context-finder (archive search) + rq_results (multi-source synthesis)
-- **Reliability:** 5 circuit breakers, 11-step workflow, 100% success rate proven
-
-**Publication Documentation:**
-
-**Complete Thesis Documentation Package:**
-- **65 RQs:** Every certified RQ has comprehensive publication report
-- **2.1 MB:** Publication-ready documentation (28,609 lines total)
-- **10 sections each:** Historical context + methodology + results + interpretation + publication summary
-- **Archive integration:** Chronological timelines with timestamps for all RQs
-- **Multimodal synthesis:** Visual plot inspection + statistical coherence checks
-- **Source citations:** Every claim cited to file paths with line numbers
-
-**Parallel Execution Success:**
-
-**Haiku Model Performance:**
-- **Throughput:** 65 reports in ~5-10 minutes (66-132× speedup vs sequential)
-- **Quality:** 100% success rate, no circuit breakers, consistent structure
-- **Cost efficiency:** Haiku model 20× cheaper than Sonnet for batch operations
-- **Token discipline:** Average ~95k tokens per report (within budget)
-
----
-
-### 7. Cross-Session Patterns
-
-**Agent Design Methodology Validated:**
-
-**Pre-Design Research (NEW STANDARD):**
-- Use context-finder BEFORE creating agent (understand patterns, avoid reinventing)
-- Review existing agents (rq_results, context-finder) for architecture patterns
-- Check archives for parallel execution patterns (mass validation, mass planning precedents)
-- User approval of plan BEFORE implementation (prevents rework)
-
-**Research → Design → Test → Audit → Deploy** workflow:
-1. context-finder research: ~5 min (identified 5 key pattern categories)
-2. Agent design: ~30 min (presented plan to user, approved with clarifications)
-3. Agent creation: ~20 min (3,791-line comprehensive prompt)
-4. Test execution: ~5 min (RQ 5.1.1, 453 lines, 26KB, EXCELLENT quality)
-5. Test audit: ~5 min (verified 10 sections, archive search, multimodal inspection)
-6. Parallel batch: ~5-10 min (64 agents, 100% success)
-7. **Total: ~70-80 min** (planning to 65 reports complete)
-
-**Efficiency:** ~1.1-1.2 min per RQ amortized (vs 10+ min sequential per RQ)
-
----
-
-### 8. Files Created/Modified
-
-**New Agent Prompt:**
-- `.claude/agents/rq_report.md` (3,791 lines, v1.0.0, 2026-01-01)
-
-**New Documentation (66 reports):**
-- `./reports/5.1.1/report.md` through `./reports/6.8.4/report.md`
-- Total: 66 folders created, 66 report.md files written
-- Size: 2.1 MB total, 28,609 lines total
-
-**No Modifications:** No existing files modified (only new creations)
-
----
-
-### 9. Theoretical Contributions Documented
-
-**Cross-Chapter Patterns Synthesized (across 65 reports):**
-
-**Age-Invariant VR Encoding (7/7 RQs NULL):**
-- Ch5: Age × Domain (5.2.3), Age × Paradigm (5.3.4), Age × Schema (5.4.3), Age × Source-Dest (5.5.3)
-- Ch6: Age × Domain confidence (6.1.3), Age × Paradigm confidence (6.4.3), Age × calibration (6.2.5)
-- **Framework:** VR ecological encoding creates age-fair memory across ALL dimensions (20-70 years)
-
-**Baseline Effects, Trajectory Nulls (Schema Framework):**
-- Accuracy: 5.4.1 (baseline GLMM p=.011, trajectory NULL)
-- Confidence: 6.5.1 (baseline GLMM p=.003, trajectory NULL)
-- HCE rate: 6.5.3 (NULL both methods, true null)
-- **Framework:** Schema affects ACQUISITION (encoding strength), NOT RETENTION (forgetting dynamics)
-
-**Purification-Trajectory Paradox (4/4 Replications):**
-- Domains: 5.2.5 (Δr positive, ΔAIC negative)
-- Paradigms: 5.3.6 (Δr positive, ΔAIC negative)
-- Congruence: 5.4.5 (Δr positive, ΔAIC +1.8 to +3.0)
-- Source-Dest: 5.5.5 (Δr positive destination, ΔAIC +17.92)
-- **Framework:** Purification IMPROVES static convergence BUT WORSENS dynamic fit
-
-**Variance Decomposition (ICC Patterns):**
-- Forgetting RATES (slopes): ICC ≈ 0-2% (NOT trait-like, state-dependent)
-- Day 6 OUTCOMES: ICC = 41-52% (trait-like, baseline persistence)
-- Pattern: Domains (5.2.6), Paradigms (5.3.7), Congruence (5.4.6*), Source-Dest (5.5.6)
-- **Framework:** Variance exists but is NOT PREDICTIVE (baseline persistence, not slope heterogeneity)
-
-**Random Slopes Testing (70% Blocker Frequency):**
-- Ch5 100% campaign: 7/10 RQs required random slopes comparison
-- Resolution types: Option A (slopes improve), B (convergence failure), C (slopes worsen), D (required for identifiability)
-- **Standard:** Cannot assume homogeneity - MUST test empirically (Taxonomy Section 4.4)
-
-**Clustering Quality (Weak But Substantive):**
-- ALL clustering RQs show weak quality: Domains (5.2.7 silhouette=0.352), Paradigms (5.3.8 silhouette=0.367), Congruence (5.4.7 silhouette=0.236)
-- Exception: Source-Dest (5.5.7 silhouette=0.417, ONLY Ch5 ≥0.40)
-- **Framework:** VR episodic memory = continuous distribution (unidimensional construct), NOT discrete phenotypes
-
-**Confidence-Accuracy Dissociation:**
-- Measurement: Ordinal confidence detects 54-221× more trait variance than binary accuracy (6.1.4)
-- Domain trajectories: What/Where parallel, When steeper decline (6.3.1 vs 5.2.1)
-- Source-Dest opposite correlations: Accuracy (+0.99 source, -0.90 dest) vs confidence (-0.24, -0.40 both negative) = 6.8.3 dissociation
-- **Framework:** Metacognitive monitoring partially dissociated from memory architecture
-
----
-
-### 10. Next Steps & Recommendations
-
-**Immediate Actions:**
-- Git commit ALL files (agent prompt + 66 reports) BEFORE context-manager
-- Git commit AFTER context-manager (curated state)
-- Ready for /clear (context window manageable)
-
-**Thesis Integration:**
-- Use Section 9 (Publication-Ready Summary) from each report for Results chapters
-- Reference Section 3 (Historical Context) for Methods narrative (how RQ evolved)
-- Extract Section 5 (Results) tables for manuscripts
-- Cite Section 10 (Metadata) for complete provenance
-
-**Ch7 Planning:**
-- Apply lessons: Tier-based prioritization, hybrid execution, random slopes standard
-- Target 14-16/20 RQs (70-80%) as thesis-sufficient
-- Estimated time: ~14-16h for Tier 1, ~20-25h for 100%
-- Consider rq_report integration: Run AFTER Ch7 certification for instant documentation
-
-**Agent Reusability:**
-- rq_report v1.0.0 proven 100% reliable for parallel batch reporting
-- Can be invoked on Ch7 RQs after certification (immediate documentation)
-- Can be re-run on Ch5/Ch6 if updates needed (e.g., adding new archive context)
-
----
-
-### 11. Active Topics (For context-manager)
-
-**New Topics (Session 2026-01-01 Morning):**
-- **rq_report_agent_creation_v1_0_0** (Session 2026-01-01, 70-80 min total, context-finder research → design → test → parallel batch)
-- **parallel_batch_execution_65_rqs_haiku_100_pct_success** (Session 2026-01-01, 5-10 min execution, 66-132× speedup, 2.1MB output)
-- **publication_documentation_complete_10_section_structure** (Session 2026-01-01, 28,609 lines, historical context + multimodal inspection + thesis summaries)
-- **agent_design_methodology_validated_context_finder_first** (Session 2026-01-01, NEW STANDARD: research before design, user approval, test before batch)
-- **cross_chapter_patterns_synthesized_65_rq_comprehensive** (Session 2026-01-01, 7 major frameworks documented across all reports)
-
-**Also Active (From Previous Sessions, referenced in reports):**
-- **ch5_100_pct_completion_campaign_hybrid_strategy** (Session 2025-12-31, 35/35 RQs certified)
-- **schema_baseline_trajectory_framework_cross_chapter_validated** (Sessions 2025-12-30, 2025-12-31, GLMM validation complete)
-- **age_invariant_vr_encoding_cross_domain_paradigm_schema** (Sessions 2025-12-31, 7/7 RQs NULL pattern)
-- **purification_paradox_4_of_4_replications_complete** (Sessions 2025-12-31, robust across functional forms)
-- **variance_decomposition_icc_outcomes_vs_rates_resolved** (Sessions 2025-12-31, baseline persistence mechanism)
-
-**Relevant Archived Topics Referenced (from context-finder during design):**
-- rq_results agent architecture (v4.0.0, 2025-11-19) - Multi-source synthesis patterns
-- rq_mass_validation_execution (2025-12-01) - Parallel execution with Haiku precedent
-- rq_mass_planning_execution (2025-12-02) - 12× speedup benchmark
-- universal.md + workflow.md (v4.X) - Circuit breakers, platform compatibility, reliability standards
-- context-finder architecture (v4.X) - Index-first search, chronological awareness, token discipline
-
----
-
-**Status:** ✅ **CH6 100% (30/30 CERTIFIED + DOCUMENTED)** + ✅ **CH5 100% (35/35 CERTIFIED + DOCUMENTED)** + ✅ **rq_report v1.0.0 CREATED** + ⚠️ **CH7 0% (0/20)**
-
-**Progress Summary:**
-- RQ Certification: 65/85 (76%)
-- Publication Documentation: 65/65 (100% of certified RQs)
-- Agent Architecture: 14 agents (13 v4.X + 1 NEW rq_report)
-- Documentation Size: 2.1 MB, 28,609 lines, 66 reports
-- Execution Efficiency: 66-132× speedup (parallel Haiku vs sequential)
-
-**Estimated Remaining Work:**
-- Ch7 certification: 20 RQs, ~14-16h for Tier 1 (70-80%)
-- Ch7 documentation: 0 time (rq_report parallel batch instant after certification)
-- Total to thesis-ready: ~14-16h
-
----
-
-**End of Session (2026-01-01 Morning - rq_report Agent Creation + Parallel Batch Complete)**
-
----
+- Session 2025-12-31 Late Evening --> `ch5_100_pct_completion_campaign_hybrid_strategy.md`
+- Session 2025-12-31 Evening --> `ch5_selective_tier2_batch_certification.md`
+- Session 2025-12-31 Afternoon --> Multiple topics (see archive_index.md)
+- Earlier sessions --> See archive_index.md
 
 ---
 
@@ -481,7 +55,7 @@ reports/
 
 **Context:** After rq_report v1.0.0 completion (65/65 RQs documented, 2.1MB reports), user requested: "split write.md into 4 files: write4.md write5.md write6.md write7.md. These are stateless instructions agents must read when writing thesis sections. Include overall thesis context to establish narrative. HATE for thesis to be dense/exhausting - want interesting/engaging read to keep assessors in good mood. Keep all thesis stuff in ./thesis/ (NOT ./reports/)."
 
-**OUTCOME:** ✅ **THESIS WRITING SYSTEM v2.0 COMPLETE** + ✅ **CONFLICTS ANALYSIS COMPLETE** + ✅ **CHAPTERS.MD UPDATED** + ✅ **5 MODULAR INSTRUCTION FILES CREATED**
+**OUTCOME:** THESIS WRITING SYSTEM v2.0 COMPLETE + CONFLICTS ANALYSIS COMPLETE + CHAPTERS.MD UPDATED + 5 MODULAR INSTRUCTION FILES CREATED
 
 ---
 
@@ -499,20 +73,20 @@ Invoked context-finder to search for:
 **Key Findings:**
 
 **Existing Thesis Structure (from context-finder + Read operations):**
-- **thesis/introduction.md** - Ch1 partial draft (176 lines, §1.1-§1.6 complete, §1.7 placeholder)
-- **thesis/methods.md** - Ch2 partial draft (137 lines, complete through §2.3.10)
-- **thesis/rationale.md** - Ch3 partial draft (136 lines, complete through §3.11)
+- **thesis/introduction.md** - Ch1 partial draft (176 lines, S1.1-S1.6 complete, S1.7 placeholder)
+- **thesis/methods.md** - Ch2 partial draft (137 lines, complete through S2.3.10)
+- **thesis/rationale.md** - Ch3 partial draft (136 lines, complete through S3.11)
 - **thesis/chapters.md** - Old RQ catalog (685 lines, TYPE-based RQ numbering, outdated status)
 
 **Old Write Plan (discovered in search):**
 - `results/ch5/write.md` - Stateless execution paradigm from OLD location (wrong directory)
 - Monolithic approach (Ch4 + Ch5 mixed in single file)
-- Designed for /clear → Read write.md → Execute workflow (NO /save, NO /refresh)
+- Designed for /clear --> Read write.md --> Execute workflow (NO /save, NO /refresh)
 
 **Conflicts Identified:**
-- ⚠️ RQ numbering evolved (TYPE-based "5.1-5.2" → SPECIFIC "5.1.1, 5.1.2")
-- ⚠️ Partial credit description outdated (methods.md says 0.5/0.25, user abandoned it)
-- ⚠️ Ch4 strategy ambiguous (not addressed in write.md, needs user decision)
+- RQ numbering evolved (TYPE-based "5.1-5.2" --> SPECIFIC "5.1.1, 5.1.2")
+- Partial credit description outdated (methods.md says 0.5/0.25, user abandoned it)
+- Ch4 strategy ambiguous (not addressed in write.md, needs user decision)
 
 **Design Patterns Extracted (from rq_results, rq_report):**
 - Stateless agents read instructions fresh each invocation
@@ -535,12 +109,12 @@ Invoked context-finder to search for:
 
 **Findings:**
 
-**✅ NO MAJOR CONFLICTS (Thesis structure consistent):**
+**NO MAJOR CONFLICTS (Thesis structure consistent):**
 - Chapter numbering aligned (Ch1-8 as expected)
 - Theoretical framework consistent (framework-agnostic, PMAT acknowledged as robust)
 - Study design basics match (N=100, ages 20-70, Day 0/1/3/6, What/Where/When, 5-star confidence)
 
-**⚠️ 3 MINOR CONFLICTS (Easy to resolve):**
+**3 MINOR CONFLICTS (Easy to resolve):**
 
 1. **RQ Numbering Scheme Evolution:**
    - OLD: chapters.md has RQ TYPES ("5.1-5.2: Domain trajectories")
@@ -548,22 +122,22 @@ Invoked context-finder to search for:
    - Resolution: RQs EXPANDED (each type became 2-7 specific RQs), update chapters.md
 
 2. **Partial Credit Scoring:**
-   - methods.md §2.3.7: "partial credit 0.5/0.25"
+   - methods.md S2.3.7: "partial credit 0.5/0.25"
    - User statement: "too problematic, stick with dichotomous 0/1"
    - Resolution: Update methods.md to reflect final decision (dichotomous only)
 
 3. **Chapter 4 Strategy Ambiguity:**
    - write.md targets Ch5-Ch6 only
-   - Ch5-Ch6 need cross-refs to Ch4 (e.g., "§4.2.2 IRT purification")
+   - Ch5-Ch6 need cross-refs to Ch4 (e.g., "S4.2.2 IRT purification")
    - Ch4 doesn't exist yet
    - Resolution: Ask user - Write Ch4 FIRST or use PLACEHOLDERS?
 
-**🔴 MAJOR GAPS (Not conflicts, just missing work):**
+**MAJOR GAPS (Not conflicts, just missing work):**
 - Ch4 (Analysis Methods) - NOT written
 - Ch7 (Individual Differences) - 0/20 RQs executed
-- §1.7 (Thesis Aims) - Placeholder only (no content)
+- S1.7 (Thesis Aims) - Placeholder only (no content)
 
-**Recommendation:** ✅ **PROCEED with write.md execution** after resolving 3 minor conflicts
+**Recommendation:** PROCEED with write.md execution after resolving 3 minor conflicts
 
 ---
 
@@ -578,28 +152,28 @@ Invoked context-finder to search for:
 **Execution Status:**
 - Ch1-3: Partial drafts exist (introduction, methods, rationale)
 - Ch4: Not written (analytical methods)
-- **Ch5: ✅ 35/35 RQs PLATINUM certified + 35 reports generated** → Ready for thesis writing
-- **Ch6: ✅ 30/30 RQs PLATINUM certified + 30 reports generated** → Ready for thesis writing
+- **Ch5: 35/35 RQs PLATINUM certified + 35 reports generated** --> Ready for thesis writing
+- **Ch6: 30/30 RQs PLATINUM certified + 30 reports generated** --> Ready for thesis writing
 - Ch7: 0/20 RQs executed (deferred, 9/20 preliminary CTT analyses exist)
 - Ch8: Not written (discussion)
 
 **RQ Numbering Updated:**
 - OLD: "RQ 5.1-5.2: Domain trajectories"
 - NEW: "RQ 5.1.1 (General), 5.2.1 (Domain What/Where/When), 5.2.2 (consolidation), 5.2.3 (age), etc."
-- 15 RQ types (Ch5) → became 35 specific RQs
-- 15 RQ types (Ch6) → became 30 specific RQs
+- 15 RQ types (Ch5) --> became 35 specific RQs
+- 15 RQ types (Ch6) --> became 30 specific RQs
 
 **Major Findings Documented (per theme):**
 
 **Ch5 Findings:**
-- **Power-Law Paradigm Shift:** α_eff=0.41 dominates, Log model ranked #33/66 (ΔAIC=+3.10), evidence ratio 4.7:1
-- **Age-Invariant VR Forgetting:** Age×Time β=0.000022 p=.96 (VR scaffolding hypothesis)
-- **Model Averaging Paradigm Shift:** ICC_slope 0.05% → 21.61% = 432-fold increase
-- **Content-Invariant Mechanisms:** Theta-scale trajectories parallel (encoding strength ≠ decay rate)
+- **Power-Law Paradigm Shift:** alpha_eff=0.41 dominates, Log model ranked #33/66 (DAIC=+3.10), evidence ratio 4.7:1
+- **Age-Invariant VR Forgetting:** AgexTime beta=0.000022 p=.96 (VR scaffolding hypothesis)
+- **Model Averaging Paradigm Shift:** ICC_slope 0.05% --> 21.61% = 432-fold increase
+- **Content-Invariant Mechanisms:** Theta-scale trajectories parallel (encoding strength != decay rate)
 - **IRT-CTT Convergence:** r>0.90 exceptional (When domain shows 77% exclusion = measurement failure)
 
 **Ch6 Findings:**
-- **824× ICC Ratio:** Ordinal confidence ICC=54.1%, Binary accuracy ICC=0.07% (54-221× trait variance)
+- **824x ICC Ratio:** Ordinal confidence ICC=54.1%, Binary accuracy ICC=0.07% (54-221x trait variance)
 - **Overconfidence Persistent:** Calibration shows overconfidence across all delays
 - **HCE Mechanism:** 15-20% error rate stable (monitoring failure, NOT false memory reconstruction)
 - **Dunning-Kruger NOT Supported:** Low performers do NOT show overconfidence (double null)
@@ -634,20 +208,20 @@ Invoked context-finder to search for:
    - Contribution: New assessment paradigm + fundamental principles
 
 2. **WRITING PHILOSOPHY: Engaging, Not Exhausting**
-   - ✅ DO: Tell story, build progressively, use transitions, synthesize, be concise, vary sentence structure, active voice
-   - ❌ DON'T: Data dump, repeat yourself, hide in passive voice, assume knowledge, overwhelm with stats, walls of text
+   - DO: Tell story, build progressively, use transitions, synthesize, be concise, vary sentence structure, active voice
+   - DON'T: Data dump, repeat yourself, hide in passive voice, assume knowledge, overwhelm with stats, walls of text
    - **"Dinner Party Test":** Could you explain this to smart non-specialist at dinner party? If yes, clear. If no, simplify.
    - **Keep Assessors Engaged:** They read 5-10 theses/year, looking for competence/judgment/communication/contribution
 
 3. **Statistical Reporting Standards:**
-   - 5-component format (β, SE, p, CI, d) for ALL LMM results
+   - 5-component format (beta, SE, p, CI, d) for ALL LMM results
    - Null results get equal treatment (don't hide, report with same detail)
-   - Example: "Age did not predict forgetting rate (β=0.000022, SE=0.0004, p=.96, 95% CI [-0.0008, 0.0008], d<0.01)"
+   - Example: "Age did not predict forgetting rate (beta=0.000022, SE=0.0004, p=.96, 95% CI [-0.0008, 0.0008], d<0.01)"
 
 4. **Flagship vs Integrated RQ Strategy:**
    - Flagship (6-8 per chapter): 600-900 words, full detail, demonstrate competence
    - Integrated (rest): Summary table + 400-600 words narrative, eliminate redundancy
-   - Example: Age null findings × 7 → reported once with table (not repeated 7 times)
+   - Example: Age null findings x 7 --> reported once with table (not repeated 7 times)
 
 5. **Figure & Table Guidelines:**
    - Figures HELP understanding (not decorative)
@@ -663,7 +237,7 @@ Invoked context-finder to search for:
 
 8. **Remember the Goal:**
    - "Would this be interesting to read at 10pm Thursday after assessor read 3 other theses today?"
-   - If yes → doing it right. If no → simplify, clarify, synthesize.
+   - If yes --> doing it right. If no --> simplify, clarify, synthesize.
 
 **Style:** Informal + educational (talking to future agent writer, not formal spec)
 
@@ -677,22 +251,22 @@ Invoked context-finder to search for:
 
 **Why Ch4 Matters:**
 - Methodological foundation for Ch5-7
-- Ch5-7 say "§4.2.2 IRT purification" → Ch4 explains what that means
+- Ch5-7 say "S4.2.2 IRT purification" --> Ch4 explains what that means
 - External examiners verify statistical rigor HERE
 - Prevents redundancy (explain each method ONCE, cross-ref from empirical chapters)
 
 **Structure:**
-- §4.1 Overview (~500 words) - Two-stage pipeline (IRT → LMM)
-- §4.2 IRT Calibration (~3,000 words) - GRM specification, purification protocol, multidimensional specs, Composite_ID stacking, assumptions/diagnostics
-- §4.3 LMM (~3,000 words) - Model specification, time transformations, AIC model selection, random slopes, assumption diagnostics
-- §4.4 Effect Sizes (~1,500 words) - Cohen's d, f², η², ICC, marginal/conditional R²
-- §4.5 Multiple Comparisons (~1,500 words) - Bonferroni, FDR, dual p-value reporting
-- §4.6 IRT-CTT Convergence (~1,000 words) - Validation that IRT theta scores aren't noise
-- §4.7 Software & Reproducibility (~500 words) - deepirtools, statsmodels, matplotlib, git repo
+- S4.1 Overview (~500 words) - Two-stage pipeline (IRT --> LMM)
+- S4.2 IRT Calibration (~3,000 words) - GRM specification, purification protocol, multidimensional specs, Composite_ID stacking, assumptions/diagnostics
+- S4.3 LMM (~3,000 words) - Model specification, time transformations, AIC model selection, random slopes, assumption diagnostics
+- S4.4 Effect Sizes (~1,500 words) - Cohen's d, f-squared, eta-squared, ICC, marginal/conditional R-squared
+- S4.5 Multiple Comparisons (~1,500 words) - Bonferroni, FDR, dual p-value reporting
+- S4.6 IRT-CTT Convergence (~1,000 words) - Validation that IRT theta scores aren't noise
+- S4.7 Software & Reproducibility (~500 words) - deepirtools, statsmodels, matplotlib, git repo
 
 **Extraction Strategy:**
 - Read 5-10 representative RQ reports Section 4 (Methodology)
-- Identify common elements (ALL RQs use these → document in Ch4)
+- Identify common elements (ALL RQs use these --> document in Ch4)
 - Write as GENERAL methodology (not "For RQ 5.1.1 we did X...")
 - IF variation exists, note it briefly
 
@@ -709,7 +283,7 @@ Invoked context-finder to search for:
 
 **File 3: thesis/write5.md (CH5 FORGETTING TRAJECTORIES, 315 lines)**
 
-**Purpose:** Convert 35 RQ reports → cohesive Ch5 narrative (~14,000 words)
+**Purpose:** Convert 35 RQ reports --> cohesive Ch5 narrative (~14,000 words)
 
 **Narrative Arc:** "Power-law forgetting challenges 140 years of Ebbinghaus tradition"
 
@@ -721,35 +295,35 @@ Invoked context-finder to search for:
 
 **5 Themes:**
 
-1. **§5.1 Power-Law Forgetting Paradigm** (~3,500 words)
+1. **S5.1 Power-Law Forgetting Paradigm** (~3,500 words)
    - Flagship: RQ 5.1.1 (66-model comparison, paradigm shift), 5.1.2 (two-phase), 5.1.4 (model averaging)
    - Integrated: 5.2.1, 5.3.1, 5.4.1, 5.5.1 (power-law replication table)
-   - Key Message: Power-law (α_eff=0.41) dominates, model averaging essential (N_eff=15 competitive)
+   - Key Message: Power-law (alpha_eff=0.41) dominates, model averaging essential (N_eff=15 competitive)
 
-2. **§5.2 Content Effects** (~3,000 words)
+2. **S5.2 Content Effects** (~3,000 words)
    - Flagship: 5.2.1 (domain trajectories, When measurement failure), 5.3.1-5.3.2 (retrieval support paradox)
    - Integrated: 5.4.1-5.4.7 (schema), 5.5.1-5.5.7 (spatial)
    - Key Message: Content affects WHAT (baseline), NOT HOW (theta-scale parallel)
 
-3. **§5.3 Age-Invariant VR Forgetting** (~2,000 words)
+3. **S5.3 Age-Invariant VR Forgetting** (~2,000 words)
    - Flagship: 5.1.3 (general age effects, model averaging across 40 models)
    - Integrated: 5.2.3, 5.3.4, 5.4.3, 5.5.3 (age null replication table)
-   - Key Message: VR scaffolding equalizes forgetting rates ages 20-70 (Age×Time p>.40, d<0.01)
+   - Key Message: VR scaffolding equalizes forgetting rates ages 20-70 (AgexTime p>.40, d<0.01)
 
-4. **§5.4 Individual Differences** (~2,500 words)
+4. **S5.4 Individual Differences** (~2,500 words)
    - Flagship: 5.1.4 (variance decomposition, 432-fold paradigm shift), 5.1.5 (latent profiles, K=3)
    - Integrated: 5.2.6, 5.3.7, 5.4.6, 5.5.6 (ICC table)
    - Key Message: Forgetting rate IS trait-like (ICC=21% model-averaged), but 4-timepoint design insufficient
 
-5. **§5.5 Methodological Validation** (~1,500 words)
+5. **S5.5 Methodological Validation** (~1,500 words)
    - Flagship: 5.2.4 (IRT-CTT convergence, r>0.90)
    - Integrated: 5.2.5, 5.3.5-5.3.6, 5.4.4-5.4.5, 5.5.4-5.5.5 (convergence table)
    - Key Message: IRT critical for Ch7 external validity, CTT adequate for within-study
 
 **Cross-Chapter Connections:**
-- To Ch4: "We used 2-pass IRT purification (§4.2.2)"
+- To Ch4: "We used 2-pass IRT purification (S4.2.2)"
 - To Ch6: "Ch6 tests whether confidence TRACKS these forgetting trajectories"
-- To Ch7: "Age-invariant VR (§5.3) contrasts with traditional tests (Ch7 will show robust age effects)"
+- To Ch7: "Age-invariant VR (S5.3) contrasts with traditional tests (Ch7 will show robust age effects)"
 
 **Includes:** Detailed flagship RQ structure (research question, hypothesis, analysis, results, figure), integrated RQ table templates, synthesis section example
 
@@ -757,36 +331,36 @@ Invoked context-finder to search for:
 
 **File 4: thesis/write6.md (CH6 METACOGNITION, 238 lines)**
 
-**Purpose:** Convert 30 RQ reports → cohesive Ch6 narrative (~11,000 words)
+**Purpose:** Convert 30 RQ reports --> cohesive Ch6 narrative (~11,000 words)
 
 **Narrative Arc:** "Does confidence TRACK what happens to accuracy?"
 
 **Why Ch6 Matters:**
 - Ch5 established WHAT HAPPENS to accuracy
 - Ch6 asks: Does confidence TRACK it? (metacognition question)
-- Discovery: Convergence (parallel decline) AND dissociation (824× ICC ratio)
+- Discovery: Convergence (parallel decline) AND dissociation (824x ICC ratio)
 
 **4 Themes:**
 
-1. **§6.1 Confidence Trajectories** (~3,000 words)
-   - Flagship: 6.1.1 (general), 6.3.1 (domain, When steeper), 6.1.4 (824× ICC ratio)
-   - Key Message: Theta-scale parallel, but ordinal confidence detects 54-221× more trait variance
+1. **S6.1 Confidence Trajectories** (~3,000 words)
+   - Flagship: 6.1.1 (general), 6.3.1 (domain, When steeper), 6.1.4 (824x ICC ratio)
+   - Key Message: Theta-scale parallel, but ordinal confidence detects 54-221x more trait variance
 
-2. **§6.2 Calibration & Metacognitive Accuracy** (~3,500 words)
+2. **S6.2 Calibration & Metacognitive Accuracy** (~3,500 words)
    - Flagship: 6.2.1 (resolution), 6.2.2 (calibration curves), 6.2.3 (Brier decomposition)
    - Key Message: Persistent overconfidence, domain-specific calibration quality
 
-3. **§6.3 High-Confidence Errors** (~2,500 words)
+3. **S6.3 High-Confidence Errors** (~2,500 words)
    - Flagship: 6.6.1 (HCE general, 15-20% stable), 6.7.1/6.7.4 (domain/paradigm), 6.6.2 (Dunning-Kruger NOT supported)
    - Key Message: HCE stable over time (monitoring failure, NOT false memory)
 
-4. **§6.4 Confidence-Accuracy Dissociation** (~2,000 words)
+4. **S6.4 Confidence-Accuracy Dissociation** (~2,000 words)
    - Flagship: 6.1.4 (measurement comparison), 6.8.3 (spatial opposite correlations)
    - Key Message: Partial dissociation (metacognitive monitoring independent from memory architecture)
 
 **Cross-Chapter Connections:**
 - To Ch5: Domain confidence vs domain accuracy (When steeper for confidence, parallel for accuracy)
-- To Ch5: HCE schema null (§6.3) replicates accuracy schema null (Ch5 §5.4.1)
+- To Ch5: HCE schema null (S6.3) replicates accuracy schema null (Ch5 S5.4.1)
 - To Ch7: "What predicts BOTH memory (Ch5) and metacognition (Ch6)?"
 
 ---
@@ -799,7 +373,7 @@ Invoked context-finder to search for:
 
 **When Ready:**
 - Central question: "Do RAVLT/BVMT/RPM predict REMEMVR performance?"
-- Key finding to emphasize: VR age-invariance (Ch5 §5.3) vs traditional-test age-sensitivity (Ch7) = VR scaffolding hypothesis validation
+- Key finding to emphasize: VR age-invariance (Ch5 S5.3) vs traditional-test age-sensitivity (Ch7) = VR scaffolding hypothesis validation
 - Estimated time: 14-16h for Tier 1 (70-80% coverage), 20-25h for 100%
 
 **Proposed Themes:**
@@ -824,25 +398,25 @@ Invoked context-finder to search for:
 **NEW Structure (created this session):**
 ```
 /home/etai/projects/REMEMVR/thesis/
-├── introduction.md          # Ch1 (partial draft exists)
-├── methods.md               # Ch2 (partial draft exists)
-├── rationale.md             # Ch3 (partial draft exists)
-├── chapters_UPDATED.md      # RQ catalog (current state)
-├── conflicts_analysis.md    # Conflict resolution (NEW)
-├── write.md                 # General instructions (NEW v2.0, 422 lines)
-├── write4.md                # Ch4-specific (NEW, 268 lines)
-├── write5.md                # Ch5-specific (NEW, 315 lines)
-├── write6.md                # Ch6-specific (NEW, 238 lines)
-└── write7.md                # Ch7-specific placeholder (NEW, 140 lines)
+|-- introduction.md          # Ch1 (partial draft exists)
+|-- methods.md               # Ch2 (partial draft exists)
+|-- rationale.md             # Ch3 (partial draft exists)
+|-- chapters_UPDATED.md      # RQ catalog (current state)
+|-- conflicts_analysis.md    # Conflict resolution (NEW)
+|-- write.md                 # General instructions (NEW v2.0, 422 lines)
+|-- write4.md                # Ch4-specific (NEW, 268 lines)
+|-- write5.md                # Ch5-specific (NEW, 315 lines)
+|-- write6.md                # Ch6-specific (NEW, 238 lines)
++-- write7.md                # Ch7-specific placeholder (NEW, 140 lines)
 ```
 
 **Reports stay in:**
 ```
 /home/etai/projects/REMEMVR/reports/
-├── 5.1.1/report.md  # RQ-level documentation (NOT thesis)
-├── 5.1.2/report.md
+|-- 5.1.1/report.md  # RQ-level documentation (NOT thesis)
+|-- 5.1.2/report.md
 ...
-├── 6.8.4/report.md
++-- 6.8.4/report.md
 ```
 
 **Separation Rationale:**
@@ -872,13 +446,13 @@ Invoked context-finder to search for:
 - Total word count: Ch5 ~14k, Ch6 ~11k (not 39k if all RQs 600 words)
 
 **4. Cross-Referencing Discipline:**
-- Within-chapter: §5.3
-- Across-chapter: Ch5 §5.2 ↔ Ch6 §6.1
-- To methodology: §4.2.2
+- Within-chapter: S5.3
+- Across-chapter: Ch5 S5.2 <--> Ch6 S6.1
+- To methodology: S4.2.2
 - To reports: reports/5.1.1/report.md (full details)
 
 **5. Quality Gates:**
-- Statistical reporting: 5-component format (β, SE, p, CI, d) enforced
+- Statistical reporting: 5-component format (beta, SE, p, CI, d) enforced
 - Terminology standardization: "theta" not "IRT-calibrated ability"
 - Figure numbering: Sequential, publication-quality captions
 - g_conflict validation: Check contradictions before user review
@@ -921,52 +495,19 @@ Invoked context-finder to search for:
 
 ---
 
-### 8. Cross-Session Patterns
-
-**Thesis Writing Evolution:**
-
-**v1.0 (results/ch5/write.md, OLD):**
-- Monolithic (Ch4 + Ch5 mixed)
-- Stateless execution (/clear → Read → Execute)
-- context_finder extraction from raw RQ files
-- Located in WRONG directory (results/ not thesis/)
-
-**v2.0 (thesis/write*.md, CURRENT):**
-- **Modular** (general + chapter-specific)
-- **Stateless** (agents read fresh each invocation)
-- **Synthesis from comprehensive reports** (rq_report outputs)
-- **Located correctly** (./thesis/)
-- **Engaging philosophy** (Dinner Party Test, assessor engagement)
-- **5-file structure** (write.md + write4/5/6/7.md)
-
-**Agent Design Methodology (consistent across rq_report, rq_theme_writer):**
-1. Use context-finder BEFORE creating agent (research patterns)
-2. Present plan to user (get approval before implementation)
-3. Test with 1 example (validate quality)
-4. Audit test output (verify all requirements met)
-5. Deploy to batch (parallel execution if applicable)
-
-**Reliability Patterns (from v4.X universal.md):**
-- Circuit breakers (5 types, quit on uncertainty)
-- Platform compatibility (ASCII-only output, UTF-8 files)
-- File-based communication (pass paths not content)
-- Token discipline (≤2k per source, comprehensive but concise)
-
----
-
-### 9. Next Steps & Recommendations
+### 8. Next Steps & Recommendations
 
 **IMMEDIATE (User Decision Required):**
 
 1. **Ch4 Strategy Decision:**
    - Option A: Write Ch4 BEFORE Ch5-Ch6 (2-3 hours, extract from RQ report Section 4)
-   - Option B: Write Ch5-Ch6 with PLACEHOLDERS (§4.X.X), fill Ch4 later
-   - Impact: Ch5-Ch6 will have cross-refs like "§4.2.2 IRT purification"
+   - Option B: Write Ch5-Ch6 with PLACEHOLDERS (S4.X.X), fill Ch4 later
+   - Impact: Ch5-Ch6 will have cross-refs like "S4.2.2 IRT purification"
    - **ASK USER:** Which approach?
 
 2. **Resolve 3 Minor Conflicts:**
-   - Update methods.md §2.3.7 (partial credit → dichotomous only)
-   - Optionally write §1.7 Thesis Aims (500 words, can do in parallel with Phase 1)
+   - Update methods.md S2.3.7 (partial credit --> dichotomous only)
+   - Optionally write S1.7 Thesis Aims (500 words, can do in parallel with Phase 1)
    - Replace chapters.md with chapters_UPDATED.md (or keep both)
 
 **THEN EXECUTE write.md Plan (9-15 hours):**
@@ -985,7 +526,7 @@ Invoked context-finder to search for:
 - Validates: Statistics against reports, flags anomalies
 - Output: `.claude/agents/rq_theme_writer.md`
 
-**Phase 3: Execute Theme Agents** (3-5 hours parallel, 9 agents × 1-2h each)
+**Phase 3: Execute Theme Agents** (3-5 hours parallel, 9 agents x 1-2h each)
 - Invoke rq_theme_writer for each of 9 themes (5 Ch5 + 4 Ch6)
 - Review outputs (check for circuit breakers, verify quality)
 - Collect theme_X_content.md files
@@ -1016,33 +557,7 @@ Invoked context-finder to search for:
 
 ---
 
-### 10. Theoretical Contributions (Context for Thesis Chapters)
-
-**From chapters_UPDATED.md and context-finder:**
-
-**Ch5 Theoretical Contributions:**
-- **Power-Law Paradigm Shift:** Challenges 140 years Ebbinghaus logarithmic tradition (α_eff=0.41, evidence ratio 4.7:1)
-- **Age-Invariant VR Forgetting:** VR scaffolding hypothesis (contextual richness equalizes ages 20-70)
-- **Model Averaging Paradigm Shift:** Functional form sensitivity (ICC_slope 0.05% → 21.61% = 432-fold)
-- **Baseline Effects, Trajectory Nulls:** Content affects acquisition, NOT retention (theta-scale parallel)
-- **Weak Clustering Quality:** VR episodic memory = continuous distribution (NOT discrete phenotypes)
-
-**Ch6 Theoretical Contributions:**
-- **Confidence-Accuracy Convergence & Dissociation:** Parallel decline BUT ordinal 54-221× more sensitive
-- **Persistent Overconfidence:** Calibration shows overconfidence at all delays (domain-specific patterns)
-- **HCE Mechanism:** Monitoring failure, NOT false memory (rate stable over time)
-- **Dunning-Kruger NOT Supported:** Low performers do NOT overestimate (double null)
-- **Partial Dissociation:** Opposite spatial correlations (metacognitive monitoring independent from memory architecture)
-
-**Cross-Chapter Patterns:**
-- Schema baseline effects, trajectory nulls (Ch5 5.4.1 accuracy + Ch6 6.5.1 confidence + Ch6 6.5.3 HCE)
-- Age-invariant encoding (7/7 RQs NULL across accuracy + confidence)
-- Purification paradox (4/4 replications: Δr positive, ΔAIC negative)
-- Variance decomposition (slopes NOT trait-like ICC≈0-2%, outcomes trait-like ICC=41-52%)
-
----
-
-### 11. Active Topics (For context-manager)
+### 9. Active Topics (For context-manager)
 
 **New Topics (Session 2026-01-02 Afternoon):**
 
@@ -1055,7 +570,7 @@ Invoked context-finder to search for:
 **Also Active (From Previous Sessions, referenced in writing system):**
 
 - **rq_report_agent_creation_v1_0_0** (Session 2026-01-01, 10-section report template, archive integration, multimodal inspection)
-- **parallel_batch_execution_65_rqs_haiku_100_pct_success** (Session 2026-01-01, 2.1MB documentation, 66-132× speedup)
+- **parallel_batch_execution_65_rqs_haiku_100_pct_success** (Session 2026-01-01, 2.1MB documentation, 66-132x speedup)
 - **publication_documentation_complete_10_section_structure** (Session 2026-01-01, Section 9 "Publication-Ready Summary" is thesis source material)
 - **ch5_100_pct_completion_campaign_hybrid_strategy** (Session 2025-12-31, 35/35 RQs PLATINUM certified)
 - **schema_baseline_trajectory_framework_cross_chapter_validated** (Sessions 2025-12-30/31, GLMM validation complete)
@@ -1067,14 +582,14 @@ Invoked context-finder to search for:
 
 ---
 
-**Status:** ✅ **THESIS WRITING SYSTEM v2.0 COMPLETE (5 modular files)** + ✅ **CONFLICTS ANALYSIS COMPLETE** + ✅ **CHAPTERS.MD UPDATED** + ⚠️ **USER DECISION: Ch4 strategy?**
+**Status:** THESIS WRITING SYSTEM v2.0 COMPLETE (5 modular files) + CONFLICTS ANALYSIS COMPLETE + CHAPTERS.MD UPDATED + USER DECISION: Ch4 strategy?
 
 **Progress Summary:**
 - Thesis structure: 5 modular instruction files created (write.md + write4/5/6/7.md)
 - Conflicts: 3 minor identified, NO major blockers
 - RQ catalog: chapters_UPDATED.md reflects 65/85 PLATINUM + major findings
 - Philosophy: "Engaging, Not Exhausting" (Dinner Party Test, assessor engagement)
-- Next: User decides Ch4 strategy (write first or placeholders?) → Execute write.md plan (9-15 hours)
+- Next: User decides Ch4 strategy (write first or placeholders?) --> Execute write.md plan (9-15 hours)
 
 **Files Created:**
 - thesis/conflicts_analysis.md (217 lines)
@@ -1102,7 +617,7 @@ Invoked context-finder to search for:
 
 **Context:** User questioned whether Ch7 should be processed before writing Ch5-Ch6 thesis chapters. Clarified that Ch7 is NOT "nice to have" but the ANCHOR chapter connecting REMEMVR to existing memory literature (RAVLT, BVMT). The divergence between REMEMVR and traditional tests is a key thesis argument.
 
-**OUTCOME:** ✅ **28 Ch7 RQs FULLY SPECIFIED** (up from 20) + ✅ **TOC WITH LINE NUMBERS ADDED** for efficient rq_concept navigation
+**OUTCOME:** 28 Ch7 RQs FULLY SPECIFIED (up from 20) + TOC WITH LINE NUMBERS ADDED for efficient rq_concept navigation
 
 ---
 
@@ -1137,7 +652,7 @@ Invoked context-finder to search for:
 | Theme | Original | New | Total |
 |-------|----------|-----|-------|
 | 1. Predictive Validity (Core) | 4 | 0 | 4 |
-| 2. Age × VR Scaffolding | 3 | 1 (7.2.4) | 4 |
+| 2. Age x VR Scaffolding | 3 | 1 (7.2.4) | 4 |
 | 3. Metacognition Predictors | 1 | 4 | 5 (NEW THEME) |
 | 4. Process-Specific Prediction | 3 | 0 | 3 |
 | 5. Self-Report & Contextual | 3 | 1 (7.5.4) | 4 |
@@ -1161,7 +676,7 @@ Invoked context-finder to search for:
 | Tier | Themes | RQs | Hours | Description |
 |------|--------|-----|-------|-------------|
 | **TIER 1** | 1, 2, 7 | 12 | ~12h | Core thesis: Predictive validity + Age + Clinical utility |
-| **TIER 2** | 3 | 5 | ~6h | Metacognition: Connects to Ch6 (824× ICC ratio) |
+| **TIER 2** | 3 | 5 | ~6h | Metacognition: Connects to Ch6 (824x ICC ratio) |
 | **TIER 3** | 4, 6 | 7 | ~8h | Process-specific + Slope predictors: Connects to Ch5 |
 | **TIER 4** | 5, 8 | 8 | ~8h | Self-report + Profiles: Nice-to-have |
 | **TOTAL** | - | 28 | ~34h | Full Ch7 execution |
@@ -1188,9 +703,9 @@ Comprehensive specifications for all 28 RQs including:
 ```
 
 **rq_concept workflow enabled:**
-1. Read specs.md lines 1-80 → Get TOC
-2. Find target RQ → Line number
-3. Read specs.md offset=LINE, limit=60 → Get just that RQ spec
+1. Read specs.md lines 1-80 --> Get TOC
+2. Find target RQ --> Line number
+3. Read specs.md offset=LINE, limit=60 --> Get just that RQ spec
 4. Also read METHODOLOGICAL FRAMEWORK (line 86) for data tags
 
 **UPDATED FILE: `thesis/chapters_UPDATED.md`**
@@ -1228,10 +743,10 @@ Comprehensive specifications for all 28 RQs including:
 ### 8. Cross-Session Patterns
 
 **Ch7 Specification Quality:**
-- Archive research → old ANALYSES_CH7.md had good foundation
-- Gap analysis → identified missing metacognition, clinical utility, slope themes
-- User insight → Ch7 is anchor, not supplement
-- Expansion → 20 → 28 RQs with focused additions
+- Archive research --> old ANALYSES_CH7.md had good foundation
+- Gap analysis --> identified missing metacognition, clinical utility, slope themes
+- User insight --> Ch7 is anchor, not supplement
+- Expansion --> 20 --> 28 RQs with focused additions
 
 **Efficiency Optimization:**
 - TOC with line numbers prevents rq_concept from reading 1800 lines
@@ -1242,11 +757,11 @@ Comprehensive specifications for all 28 RQs including:
 ### 9. Relevant Archived Topics (from context-finder)
 
 **For Future Ch7 Work:**
-- `rq_5_1_3_age_invariant_forgetting_vr_scaffolding.md` (2025-12-27) → VR age-invariance Ch7 contrasts
-- `ch6_824x_icc_model_averaged_validation.md` (2025-12-27) → Confidence vs accuracy ICC ratio
-- `source_dest_opposite_correlations_certified.md` (2025-12-27) → Confidence-accuracy dissociation
-- `docs/cognitive_tests.md` (2025-01-04) → Exact RAVLT/BVMT/NART/RPM tags
-- `random_slopes_testing_taxonomy_4_4_validation.md` (2025-12-18) → Required for any Ch7 LMM
+- `rq_5_1_3_age_invariant_forgetting_vr_scaffolding.md` (2025-12-27) --> VR age-invariance Ch7 contrasts
+- `ch6_824x_icc_model_averaged_validation.md` (2025-12-27) --> Confidence vs accuracy ICC ratio
+- `source_dest_opposite_correlations_certified.md` (2025-12-27) --> Confidence-accuracy dissociation
+- `docs/cognitive_tests.md` (2025-01-04) --> Exact RAVLT/BVMT/NART/RPM tags
+- `random_slopes_testing_taxonomy_4_4_validation.md` (2025-12-18) --> Required for any Ch7 LMM
 
 ---
 
@@ -1265,7 +780,7 @@ Comprehensive specifications for all 28 RQs including:
 **New Topics (Session 2026-01-02 Evening):**
 - **ch7_refined_specifications_28_rqs_8_themes** (Session 2026-01-02, 12 new RQs added, TOC with line numbers)
 - **ch7_anchor_chapter_thesis_argument** (Session 2026-01-02, Ch7 bridges REMEMVR to existing literature, validates ecological distinctiveness)
-- **ch7_metacognition_predictors_theme_new** (Session 2026-01-02, 7.3.1-7.3.5 connect to Ch6 824× finding)
+- **ch7_metacognition_predictors_theme_new** (Session 2026-01-02, 7.3.1-7.3.5 connect to Ch6 824x finding)
 - **ch7_clinical_utility_theme_new** (Session 2026-01-02, 7.7.1-7.7.4 discrepancy analysis, alternative scoring)
 - **ch7_tier_prioritization_12rq_minimum_viable** (Session 2026-01-02, Tier 1 = 12 RQs in ~12h delivers core thesis)
 
@@ -1277,7 +792,7 @@ Comprehensive specifications for all 28 RQs including:
 
 ---
 
-**Status:** ✅ **CH7 SPECIFICATIONS COMPLETE (28 RQs, 8 themes)** + ✅ **TOC ADDED FOR EFFICIENCY** + ⚠️ **Ch7 EXECUTION PENDING (0/28)**
+**Status:** CH7 SPECIFICATIONS COMPLETE (28 RQs, 8 themes) + TOC ADDED FOR EFFICIENCY + Ch7 EXECUTION PENDING (0/28)
 
 **Progress Summary:**
 - Ch5: 35/35 PLATINUM + documented
@@ -1287,7 +802,7 @@ Comprehensive specifications for all 28 RQs including:
 
 **Next Steps:**
 1. User decides: Execute Ch7 (Tier 1 first, ~12h) OR write Ch5-Ch6 first
-2. If Ch7: Use rq_concept → rq_planner → pipeline → rq_report
+2. If Ch7: Use rq_concept --> rq_planner --> pipeline --> rq_report
 3. If writing: Use thesis/write*.md modular system
 
 ---
