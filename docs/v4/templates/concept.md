@@ -148,13 +148,13 @@ Exploratory analysis to determine optimal functional form for subsequent analyse
 - **Consolidation Theory** (Dudai, 2004): Hippocampal-dependent memories (Where, When) consolidate more slowly and show greater vulnerability during consolidation compared to perirhinal-dependent memories (What).
 
 **Key Citations:**
-[To be added by rq_scholar]
+[List key papers if known, otherwise leave blank - do NOT use placeholder text like "To be added by rq_scholar"]
 
 **Theoretical Predictions:**
-[Extracted from Hypothesis column]
+[What the theories predict for this RQ based on theoretical framework]
 
 **Literature Gaps:**
-[To be identified by rq_scholar]
+[What gaps this RQ addresses - leave blank if not yet known, do NOT use placeholder text]
 ```
 
 **Extraction Guidance for rq_concept:**
@@ -303,11 +303,23 @@ rq_stats agent will validate hypotheses are testable and statistically appropria
 **Step 4:** [Fourth step]
 [Additional steps as needed]
 
+**CRITICAL for Ch7 and multiple comparisons:**
+- If testing multiple predictors: Report BOTH uncorrected AND corrected p-values (Decision D068)
+- Include model diagnostics step (VIF, residuals, homoscedasticity)
+- Include cross-validation for predictive models
+- Include power analysis for null findings
+- Include effect sizes with 95% CIs (R², f², sr², β)
+
 **Expected Outputs:**
-[From Expected_Output - file names and structure]
+[List ALL outputs with correct folder placement:
+- data/step##_*.csv for ALL CSV outputs
+- results/*.md or results/*.txt for summary documents ONLY
+- plots/*.png for visualizations
+- Use R² or R-squared, never R�]
 
 **Success Criteria:**
 [From Success_Criteria - validation requirements]
+[For Ch7: Include diagnostic checks, cross-validation metrics, power thresholds]
 ```
 
 **Example:**
@@ -324,19 +336,21 @@ IRT (Item Response Theory) for ability estimation + LMM (Linear Mixed Models) fo
 **Step 3:** IRT Pass 2 re-calibration on purified items
 **Step 4:** Merge theta with TSVR, create time transformations
 **Step 5:** Fit 5 LMMs with REML=False: Linear, Quadratic, Logarithmic, Lin+Log, Quad+Log; all with random slopes by UID
-**Step 6:** Model selection via AIC, compute Akaike weights
-**Step 7:** Prepare plot data: observed means + model predictions, theta and probability scales (Decision D069)
+**Step 6:** Model selection via AIC, compute Akaike weights. Report BOTH uncorrected AND Bonferroni-corrected p-values (Decision D068)
+**Step 7:** Model diagnostics: Check residual normality (Q-Q plot), homoscedasticity (Breusch-Pagan), influential points (Cook's D)
+**Step 8:** Prepare plot data: observed means + model predictions, theta and probability scales (Decision D069)
 
 **Expected Outputs:**
-- data/step01_theta_scores.csv
-- data/step02_purified_items.csv (40-60 items)
-- data/step03_theta_scores.csv (final)
-- data/step04_lmm_input.csv (400 rows)
-- results/step05_model_comparison.csv (5 models)
-- data/step06_best_model.pkl
-- results/step06_aic_comparison.csv
-- plots/step07_functional_form_theta_data.csv
-- plots/step07_functional_form_probability_data.csv
+- data/step01_theta_scores.csv (IRT theta estimates)
+- data/step02_purified_items.csv (40-60 items retained)
+- data/step03_theta_scores.csv (final theta after purification)
+- data/step04_lmm_input.csv (400 rows merged with time)
+- data/step05_model_comparison.csv (5 models AIC comparison)
+- data/step06_best_model.pkl (pickled model object)
+- data/step07_functional_form_theta_data.csv (plot source data)
+- data/step07_functional_form_probability_data.csv (plot source data)
+- results/step06_aic_summary.md (text summary for thesis)
+- plots/functional_form_comparison.png (final visualization)
 
 **Success Criteria:**
 - IRT convergence: theta in [-4,4], SE in [0.1,1.5]

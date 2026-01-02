@@ -83,6 +83,41 @@ This document contains complete specifications for all Ch7 RQs. Each specificati
 
 ---
 
+## FILE ORGANIZATION CONVENTIONS
+
+### Standard RQ Folder Structure
+
+All Ch7 RQs follow the standard folder organization:
+
+```
+results/ch7/{RQ_ID}/
+├── code/          # Python analysis scripts (step##_description.py)
+├── data/          # ALL CSV outputs from analysis (step##_description.csv)
+├── docs/          # Documentation (1_concept.md, 2_plan.md)
+├── logs/          # Execution logs
+├── plots/         # Visualizations (PNG/PDF files)
+├── results/       # Summary documents ONLY (.md, .txt files)
+└── status.yaml    # Execution status tracker
+```
+
+**CRITICAL FILE PLACEMENT RULES:**
+- **data/** folder: ALL CSV outputs from analysis steps (step01_*.csv, step02_*.csv, etc.)
+- **results/** folder: Summary documents ONLY (markdown, text files) - NO CSV FILES
+- **plots/** folder: Visualization files (PNG, PDF)
+- **code/** folder: Python scripts for analysis
+- **docs/** folder: Agent-created documents (1_concept.md, 2_plan.md, etc.)
+
+**File Naming Conventions:**
+- Analysis outputs: `step##_description.csv` (e.g., step01_cognitive_tests.csv)
+- Summary documents: descriptive names (e.g., regression_summary.md)
+- Plots: descriptive names (e.g., predictor_importance.png)
+
+**Character Encoding:**
+- Use "R²" or "R-squared" (NOT corrupted "R�")
+- Use standard ASCII or UTF-8 encoding
+
+---
+
 ## METHODOLOGICAL FRAMEWORK
 
 ### Dependent Variables (REMEMVR Theta Scores)

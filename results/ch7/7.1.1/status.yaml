@@ -1,0 +1,58 @@
+rq_id: "ch7/7.1.1"
+
+rq_builder:
+  status: success
+  context_dump: |
+    Created results/ch7/7.1.1/ with 6 folders
+    Folders: docs/, data/, code/, logs/, plots/, results/
+    All folders empty, ready for agents
+    status.yaml initialized with 10 RQ-specific agents
+    Next: rq_concept extracts concept from specs
+
+rq_concept:
+  status: success
+  context_dump: |
+    RQ 7.1.1: Do cognitive tests predict overall REMEMVR ability?
+    Type: Predictive Validity (Core) / General episodic memory prediction
+    Analysis: Multiple regression (4 cognitive tests) + dominance analysis
+    Data: DERIVED from Ch5 5.1.1 theta_all + master.xlsx cognitive tests
+    Critical: Bonferroni alpha = 0.000448, expect R² = 0.30-0.45, residual > 50%
+
+rq_scholar:
+  status: pending
+  context_dump: ""
+
+rq_stats:
+  status: pending
+  context_dump: ""
+
+rq_planner:
+  status: pending
+  context_dump: ""
+
+rq_tools:
+  status: pending
+  context_dump: ""
+
+rq_analysis:
+  status: pending
+  context_dump: ""
+
+rq_inspect:
+  status: pending
+  context_dump: ""
+
+rq_plots:
+  status: pending
+  context_dump: ""
+
+rq_results:
+  status: pending
+  context_dump: ""
+
+analysis_steps:
+  # To be populated during execution
+
+rq_platinum:
+  status: pending
+  context_dump: ""
