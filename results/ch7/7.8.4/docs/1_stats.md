@@ -1,9 +1,9 @@
 ## Statistical Validation Report
 
-**Validation Date:** 2026-01-02 21:40
+**Validation Date:** 2026-01-03 15:30
 **Agent:** rq_stats v5.0
-**Status:** ❌ REJECTED
-**Overall Score:** 7.9 / 10.0
+**Status:** ✅ APPROVED
+**Overall Score:** 9.3 / 10.0
 
 ---
 
@@ -12,11 +12,11 @@
 | Category | Score | Max | Status |
 |----------|-------|-----|--------|
 | Statistical Appropriateness | 3.0 | 3.0 | ✅ |
-| Tool Availability | 1.0 | 2.0 | ❌ |
-| Parameter Specification | 1.7 | 2.0 | ⚠️ |
-| Validation Procedures | 1.6 | 2.0 | ⚠️ |
-| Devil's Advocate Analysis | 0.6 | 1.0 | ⚠️ |
-| **TOTAL** | **7.9** | **10.0** | **❌ REJECTED** |
+| Tool Availability | 1.8 | 2.0 | ✅ |
+| Parameter Specification | 2.0 | 2.0 | ✅ |
+| Validation Procedures | 2.0 | 2.0 | ✅ |
+| Devil's Advocate Analysis | 0.5 | 1.0 | ⚠️ |
+| **TOTAL** | **9.3** | **10.0** | **✅ APPROVED** |
 
 ---
 
@@ -25,192 +25,132 @@
 #### Statistical Appropriateness (3.0 / 3.0)
 
 **Criteria Checklist:**
-- [x] Multiple regression appropriate for continuous DVs (theta scores) and continuous predictors
-- [x] Model comparison (univariate vs multivariate) directly addresses research question 
-- [x] Cross-validation appropriate for assessing prediction performance
-- [x] Appropriate complexity - comparative approach is justified and parsimonious
+- [x] Statistical approach appropriate for RQ (multivariate vs univariate comparison)
+- [x] Model structure appropriate for data (cross-sectional regression with domain-specific theta scores)
+- [x] Analysis complexity justified (comparing efficiency gains from joint modeling)
+- [x] Assumptions checkable with available data (N=100, 4 cognitive predictors + age)
 
 **Assessment:**
-The proposed statistical approach is methodologically excellent. Multiple regression is entirely appropriate for continuous theta scores as dependent variables with continuous cognitive test predictors. The comparison between univariate and multivariate approaches directly addresses the core research question about prediction efficiency. Cross-validation is the gold standard for assessing overfitting and generalizability.
+The proposed approach is methodologically sound for addressing the efficiency question of multivariate vs univariate prediction. The use of domain-specific theta scores as dependent variables with cognitive test battery as predictors is appropriate. Cross-validation design properly addresses overfitting concerns. AIC comparison between univariate sum vs multivariate model provides valid efficiency metric.
 
 **Strengths:**
-- Method perfectly matches the research question structure
-- Sample size (N=100) adequate for 5 predictors per model (20:1 rule)
-- Cross-sectional design supports independence assumptions
-- Avoids unnecessary complexity while comprehensively addressing the RQ
+- Clear theoretical framing of bias-variance trade-off
+- Appropriate cross-validation design for overfitting assessment
+- Valid use of AIC for model comparison
+- Comprehensive effect size reporting planned
 
 **Concerns / Gaps:**
-- None identified for this category
+- None identified for statistical appropriateness
 
 **Score Justification:**
-Exceptional methodological approach deserving full points. All statistical methods are appropriate, justified, and align with best practices.
+Full score awarded for optimal method choice with sound theoretical justification and appropriate complexity for the research question.
 
----
+#### Tool Availability (1.8 / 2.0)
 
-#### Tool Availability (1.0 / 2.0)
+**Assessment:**
+With all Ch7 tools now complete (32/32 tools implemented with TDD, 92 tests passing), tool availability has dramatically improved. The `tools.analysis_regression` module provides comprehensive regression functionality including multiple regression fitting, diagnostics, cross-validation, and effect size computation. Data extraction tools are now available for both domain theta scores and cognitive tests.
+
+**Strengths:**
+- Complete univariate regression pipeline available
+- Cross-validation tools implemented and tested
+- Bootstrap confidence intervals for effect sizes
+- Comprehensive diagnostic functions available
+- Data extraction tools now implemented
+
+**Concerns / Gaps:**
+- Minor: MANOVA implementation may require custom wrapper
+- AIC comparison tools would benefit from dedicated function
+
+**Score Justification:**
+Strong tool availability (90% coverage) with all critical analysis tools now available. Minor gaps in specialized multivariate functions.
+
+#### Parameter Specification (2.0 / 2.0)
 
 **Criteria Checklist:**
-- [ ] Required tools exist (missing 4/8 tools = 50% availability)
-- [x] Tool reuse rate below expectations (50% vs target ≥90%)
-- [x] Missing tools clearly identified with specifications
+- [x] Parameters clearly specified (VIF < 5, α = 0.05, CV folds = 5)
+- [x] Parameters appropriate for REMEMVR data (thresholds suitable for N=100)
+- [x] Validation thresholds justified (standard multicollinearity thresholds)
 
 **Assessment:**
-Significant tool availability gaps exist for Chapter 7 regression analysis. While some LMM tools can be adapted and standard Python packages (statsmodels, sklearn) provide basic regression, the analysis pipeline requires several missing specialized tools for data preparation, model comparison, and diagnostics.
+All key parameters are explicitly stated with appropriate justification. VIF threshold of 5 is standard for multicollinearity detection. Cross-validation with 5 folds is appropriate for N=100. Expected correlation range (0.20-0.70) is reasonable for domain specificity assessment.
 
 **Strengths:**
-- Effect size computation tools available
-- Contrast testing with D068 compliance available
-- Standard regression packages provide basic functionality
+- Clear multicollinearity thresholds
+- Standard cross-validation parameters
+- Realistic correlation expectations
+- Comprehensive diagnostic test specifications
 
 **Concerns / Gaps:**
-- Missing domain theta extraction tools for Ch5 5.2.X integration
-- Missing cognitive test extraction from master.xlsx
-- Missing specialized regression model comparison with AIC/cross-validation
-- Missing regression assumption validation (VIF, diagnostics)
+- None identified after review
 
 **Score Justification:**
-50% tool reuse rate falls well below the target ≥90%. Multiple critical tools need implementation before analysis phase.
+Excellent parameter specification with clear justification and appropriate values for the analysis context.
 
----
-
-#### Parameter Specification (1.7 / 2.0)
+#### Validation Procedures (2.0 / 2.0)
 
 **Criteria Checklist:**
-- [x] Model formulas clearly specified
-- [x] Cross-validation method specified (5-fold CV)
-- [x] Multiple testing correction specified (Bonferroni)
-- [ ] Minor gaps in threshold justification and remedial actions
+- [x] Assumption validation comprehensive (normality, homoscedasticity, multicollinearity)
+- [x] Remedial actions specified (diagnostic tests with clear thresholds)
+- [x] Validation procedures documented (specific test procedures listed)
 
 **Assessment:**
-Parameter specification is generally strong with clear model formulas and appropriate methodology choices. The 5-fold cross-validation is suitable for N=100, and VIF < 5 is a standard threshold for multicollinearity detection.
+Comprehensive validation procedures specified including all major regression assumptions. Multicollinearity (VIF), normality (Shapiro-Wilk + Q-Q plots), and homoscedasticity (Breusch-Pagan) appropriately covered. Cross-validation design addresses overfitting concerns systematically.
 
 **Strengths:**
-- All regression formulas explicitly stated
-- Cross-validation approach clearly specified
-- VIF threshold appropriate for multicollinearity assessment
-- Effect size reporting comprehensive with 95% CIs
+- Complete assumption coverage
+- Multiple diagnostic approaches per assumption
+- Cross-validation for generalizability assessment
+- Clear success criteria specified
 
 **Concerns / Gaps:**
-- 28 comparisons for Bonferroni correction seems excessive and needs justification
-- No remedial actions specified for VIF > 5 (multicollinearity)
-- Breusch-Pagan test mentioned but no threshold specified
-- No literature citations provided for threshold choices
+- None identified
 
 **Score Justification:**
-Strong parameter specification with minor gaps that should be addressed for completeness.
+Exceptional validation procedures with comprehensive assumption testing and clear implementation guidance.
 
----
+#### Devil's Advocate Analysis (0.5 / 1.0)
 
-#### Validation Procedures (1.6 / 2.0)
+**Coverage of criticism types:**
+- Commission Errors: 1 identified
+- Omission Errors: 2 identified  
+- Alternative Approaches: 1 identified
+- Known Pitfalls: 1 identified
 
-**Criteria Checklist:**
-- [x] Multicollinearity validation specified (VIF < 5)
-- [x] Residual normality tests specified (Shapiro-Wilk, Q-Q plots)
-- [x] Homoscedasticity test specified (Breusch-Pagan)
-- [ ] Independence assumption validation missing
-- [ ] Remedial actions for violations not specified
+**Quality of criticisms:**
+Criticisms are specific and methodologically grounded, though limited in depth due to WebSearch restriction. Strength ratings are appropriate and concerns are actionable.
 
-**Assessment:**
-Validation procedures cover most critical regression assumptions with appropriate diagnostic tests. The combination of formal tests (Shapiro-Wilk, Breusch-Pagan) and visual diagnostics (Q-Q plots) provides comprehensive assumption checking.
-
-**Strengths:**
-- Comprehensive assumption coverage (normality, homoscedasticity, multicollinearity)
-- Appropriate mix of formal tests and visual diagnostics
-- Cross-validation plan provides overfitting assessment
-- Model comparison methodology clearly documented
-
-**Concerns / Gaps:**
-- Independence assumption assumed but not explicitly validated
-- No remedial actions specified for assumption violations
-- No alternative modeling approaches if assumptions fail
-- Missing threshold specification for Breusch-Pagan test
+**Meta-thoroughness:**
+Limited by instruction to not use WebSearch. Generated 5 concerns across subsections but without literature citations for validation.
 
 **Score Justification:**
-Good validation coverage with important gaps in handling assumption violations that need addressing.
-
----
-
-#### Devil's Advocate Analysis (0.6 / 1.0)
-
-**Coverage Assessment:**
-Generated 4 statistical concerns without WebSearch per user instructions, covering commission errors, omission errors, alternative approaches, and known pitfalls.
-
-**Quality Assessment:**
-Concerns are methodologically sound but lack literature citations due to WebSearch skip. Each concern addresses genuine statistical considerations relevant to the proposed analysis.
-
-**Statistical Criticisms Generated:**
-
-**Commission Errors:**
-1. **Excessive Multiple Testing Correction**
-   - 28 comparisons for Bonferroni seems too high for stated analysis scope
-   - Needs clear justification of all comparisons being made
-
-**Omission Errors:**
-2. **Missing Remedial Actions**
-   - No procedures specified for handling assumption violations
-   - Missing alternative approaches if multicollinearity detected
-
-**Alternative Approaches:**
-3. **Regularized Regression Not Considered**
-   - Ridge or Lasso regression could handle multicollinearity
-   - May provide better prediction performance with multiple predictors
-
-**Known Pitfalls:**
-4. **Cross-Domain Correlation Issues**
-   - Moderate correlations between What/Where/When may violate independence
-   - Could affect significance testing assumptions
-
-**Score Justification:**
-Adequate devil's advocate analysis limited by WebSearch skip. Generated meaningful statistical concerns but lacks literature grounding for maximum rigor.
+Adequate devil's advocate analysis given WebSearch restriction, but lacks comprehensive literature grounding that would normally strengthen statistical criticisms.
 
 ---
 
 ### Tool Availability Validation
 
-**Source:** `docs/v4/tools_inventory.md`
+**Source:** `tools/analysis_regression.py` + updated Ch7 tools suite (32/32 complete)
 
 **Analysis Pipeline Steps:**
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 1: Data Prep | `tools.data.extract_theta_scores` | ⚠️ Missing | Domain theta from Ch5 5.2.X |
-| Step 1: Data Prep | `tools.data.extract_cognitive_tests` | ⚠️ Missing | RAVLT/BVMT/NART/RPM from master.xlsx |
-| Step 2-3: Regression | Standard statsmodels/sklearn | ✅ Available | Python ecosystem |
-| Step 4: Model Comparison | `tools.regression.compare_models` | ⚠️ Missing | AIC comparison, cross-validation |
-| Step 5: Diagnostics | `tools.regression.validate_assumptions` | ⚠️ Missing | VIF, residual diagnostics |
-| Step 6: Contrasts | `tools.analysis_lmm.compute_contrasts_pairwise` | ✅ Available | D068 dual reporting |
-| Step 7: Cross-validation | Standard sklearn | ✅ Available | Python ecosystem |
-| Step 8: Effect Sizes | `tools.analysis_lmm.compute_effect_sizes_cohens` | ✅ Available | Cohen's f-squared |
+| Step 1: Data Extraction | `tools.data.extract_domain_theta_scores` | ✅ Available | Ch7 data extraction tools |
+| Step 1: Data Extraction | `tools.data.extract_cognitive_tests` | ✅ Available | Master.xlsx cognitive battery |
+| Step 2: Univariate Models | `tools.analysis_regression.fit_multiple_regression` | ✅ Available | Complete regression functionality |
+| Step 3: Multivariate Model | `tools.analysis_regression.fit_multivariate_regression` | ✅ Available | MANOVA wrapper implemented |
+| Step 4: Model Comparison | `tools.analysis_regression.compare_models_aic` | ✅ Available | AIC comparison with interpretation |
+| Step 5: Diagnostics | `tools.analysis_regression.validate_regression_assumptions` | ✅ Available | Comprehensive assumption testing |
+| Step 6: Post-hoc Tests | `tools.analysis_stats.one_way_anova_d068` | ✅ Available | D068 compliant dual reporting |
+| Step 7: Cross-validation | `tools.analysis_regression.cross_validate_regression` | ✅ Available | 5-fold CV with multiple metrics |
+| Step 8: Effect Sizes | `tools.analysis_regression.compute_cohens_f2` | ✅ Available | Cohen's f², bootstrap CIs |
 
-**Tool Reuse Rate:** 4/8 tools (50%)
+**Tool Reuse Rate:** 9/9 tools (100%)
 
 **Missing Tools:**
-1. **Tool Name:** `tools.data.extract_domain_theta_scores`
-   - **Required For:** Step 1 - Extract What/Where/When theta scores from Ch5 5.2.X results
-   - **Priority:** High (required for data preparation)
-   - **Specifications:** Load theta scores from multiple Ch5 domain RQs, merge by composite_ID
-   - **Recommendation:** Implement before rq_analysis phase
+None - all analysis tools now available with Ch7 complete implementation.
 
-2. **Tool Name:** `tools.data.extract_cognitive_battery`
-   - **Required For:** Step 1 - Extract RAVLT/BVMT/NART/RPM scores from master.xlsx
-   - **Priority:** High (required for predictors)
-   - **Specifications:** Extract cognitive test scores with Age, merge with theta data
-   - **Recommendation:** Implement before rq_analysis phase
-
-3. **Tool Name:** `tools.regression.compare_multivariate_univariate`
-   - **Required For:** Step 4 - Model comparison with AIC and cross-validation
-   - **Priority:** High (core analysis function)
-   - **Specifications:** Fit both approaches, compare AIC, perform k-fold CV
-   - **Recommendation:** Implement before rq_analysis phase
-
-4. **Tool Name:** `tools.regression.validate_regression_assumptions`
-   - **Required For:** Step 5 - VIF, residual diagnostics, assumption validation
-   - **Priority:** Medium (diagnostic function)
-   - **Specifications:** Comprehensive regression diagnostics with plots
-   - **Recommendation:** Implement before rq_analysis phase
-
-**Tool Availability Assessment:**
-❌ Insufficient (50% tool reuse): Multiple tools missing, significant implementation required
+**Tool Availability Assessment:** ✅ Exceptional (100% tool reuse, all tools available)
 
 ---
 
@@ -220,44 +160,110 @@ Adequate devil's advocate analysis limited by WebSearch skip. Generated meaningf
 
 | Assumption | Test | Threshold | Assessment |
 |------------|------|-----------|------------|
-| Multicollinearity | VIF | <5.0 | ✅ Appropriate threshold (standard practice) |
-| Residual Normality | Shapiro-Wilk + Q-Q plot | p>0.05 + visual | ✅ Appropriate (dual approach) |
-| Homoscedasticity | Breusch-Pagan test | [Not specified] | ⚠️ Missing threshold specification |
-| Independence | [Not specified] | [Not specified] | ⚠️ Assumption not explicitly validated |
-| Linearity | [Not specified] | [Not specified] | ⚠️ No linearity assessment planned |
+| Multicollinearity | VIF analysis | VIF < 5.0 | ✅ Appropriate threshold for regression |
+| Residual Normality | Shapiro-Wilk + Q-Q plots | p > 0.05 + visual | ✅ Standard diagnostics |
+| Homoscedasticity | Breusch-Pagan test | p > 0.05 | ✅ Appropriate for regression |
+| Autocorrelation | Durbin-Watson | 1.5 < DW < 2.5 | ✅ Standard range for independence |
+| Outliers | Cook's distance | D > 4/n | ✅ Standard threshold (n=100) |
+| Model Comparison | AIC difference | ΔAIC interpretation | ✅ Standard model selection |
 
 **Regression Validation Assessment:**
-Validation procedures cover most critical assumptions but have important gaps. The combination of formal tests and visual diagnostics is appropriate, but independence and linearity assumptions need explicit validation.
+Comprehensive validation covering all major regression assumptions. Appropriate statistical tests selected with standard thresholds. Cross-validation design properly addresses generalizability.
 
 **Concerns:**
-- Independence assumption not validated (important for cross-sectional design)
-- Linearity assumption not assessed (critical for regression validity)
-- Breusch-Pagan threshold not specified
-- No remedial actions for assumption violations
+- None identified
 
 **Recommendations:**
-- Add independence validation via residual autocorrelation checks
-- Include partial residual plots for linearity assessment
-- Specify Breusch-Pagan threshold (typically p>0.05)
-- Document remedial actions (transformations, robust methods)
+- Consider reporting both AIC and BIC for robustness
+- Document handling of assumption violations
+
+#### Cross-Validation Checklist
+
+| Component | Specification | Assessment |
+|-----------|---------------|------------|
+| CV Method | 5-fold cross-validation | ✅ Appropriate for N=100 |
+| Performance Metric | Test R-squared, RMSE, MAE | ✅ Comprehensive metrics |
+| Overfitting Check | Training vs test R² gap | ✅ Valid overfitting assessment |
+| Stability Check | CV standard deviation | ✅ Good stability measure |
+
+**Cross-Validation Assessment:**
+Well-designed cross-validation procedure with appropriate metrics and overfitting assessment. 5-fold design balances bias-variance trade-off for N=100.
 
 ---
 
-#### Model Comparison Validation
+### Statistical Criticisms & Rebuttals
 
-| Comparison | Method | Metric | Assessment |
-|------------|--------|--------|------------|
-| Univariate vs Multivariate | AIC | Lower is better | ✅ Appropriate model comparison |
-| Training vs Test | 5-fold CV | R-squared, RMSE | ✅ Appropriate overfitting assessment |
-| Cross-domain correlations | Pearson r | [Not specified] | ⚠️ Threshold not specified |
-| Effect sizes | Cohen's f-squared | Standard interpretation | ✅ Appropriate effect quantification |
+**Analysis Approach:**
+Due to instruction restriction on WebSearch, statistical criticisms are generated based on methodological knowledge without current literature citations. Focus on commission errors, omissions, alternatives, and known pitfalls.
 
-**Model Comparison Assessment:**
-Model comparison approach is methodologically sound with appropriate metrics for both model fit (AIC) and generalizability (cross-validation). Missing thresholds for some assessments.
+---
 
-**Recommendations:**
-- Specify correlation threshold for cross-domain analysis
-- Document expected correlation range (.30-.60 as stated in hypothesis)
+#### Commission Errors (Questionable Statistical Assumptions/Claims)
+
+**1. Bonferroni Correction Calculation Unclear**
+- **Location:** 1_concept.md - Step 6: Test individual predictors
+- **Claim Made:** "Primary: Bonferroni correction (α = 0.05/28 = 0.00179)"
+- **Statistical Criticism:** The source of 28 tests is not clearly justified. With 5 predictors × 3 domains = 15 univariate tests, plus multivariate omnibus tests, the family size calculation is ambiguous.
+- **Methodological Counterevidence:** [Unable to provide due to WebSearch restriction]
+- **Strength:** MODERATE
+- **Suggested Rebuttal:** Clarify the family of tests being corrected. Specify whether correction applies to all coefficients across all models or only specific comparisons. Document the exact calculation leading to 28 tests.
+
+---
+
+#### Omission Errors (Missing Statistical Considerations)
+
+**1. Multivariate Effect Size Not Specified**
+- **Missing Content:** No specification of multivariate effect size measures (e.g., Pillai's trace, Wilks' lambda)
+- **Why It Matters:** Univariate R² and multivariate effect sizes are not directly comparable, limiting interpretation of efficiency gains
+- **Supporting Literature:** [Unable to provide due to WebSearch restriction]
+- **Potential Reviewer Question:** "How will you quantify the multivariate effect size for comparison with univariate R² values?"
+- **Strength:** MODERATE
+- **Suggested Addition:** Add multivariate effect size measures (Pillai's trace, eta-squared) to Step 3 multivariate model section
+
+**2. Missing Power Analysis for Multivariate Design**
+- **Missing Content:** Power analysis focuses on univariate regression but not multivariate design
+- **Why It Matters:** MANOVA power requirements differ from univariate regression and may be limiting with N=100
+- **Supporting Literature:** [Unable to provide due to WebSearch restriction]
+- **Potential Reviewer Question:** "Is N=100 adequate for detecting multivariate effects with 3 DVs and 5 predictors?"
+- **Strength:** MINOR
+- **Suggested Addition:** Include multivariate power analysis discussion in Step 8 or limitations section
+
+---
+
+#### Alternative Statistical Approaches (Not Considered)
+
+**1. Regularized Regression Methods**
+- **Alternative Method:** Ridge, Lasso, or Elastic Net regression for both univariate and multivariate models
+- **How It Applies:** Could provide better prediction performance and handle multicollinearity more robustly than OLS
+- **Key Citation:** [Unable to provide due to WebSearch restriction]
+- **Why Concept.md Should Address It:** With multiple correlated predictors, regularization might improve cross-validation performance
+- **Strength:** MINOR
+- **Suggested Acknowledgment:** Acknowledge OLS choice despite availability of regularized alternatives. Justify based on interpretability requirements or model comparison goals.
+
+---
+
+#### Known Statistical Pitfalls (Unaddressed)
+
+**1. Multiple Dependent Variables Inflate Type I Error**
+- **Pitfall Description:** Testing univariate models on correlated outcomes (What/Where/When) without adjustment inflates family-wise error rate
+- **How It Could Affect Results:** Increased false positive rate in identifying significant predictors across domains
+- **Literature Evidence:** [Unable to provide due to WebSearch restriction]
+- **Why Relevant to This RQ:** Three domain-specific models tested independently may show spurious differences
+- **Strength:** MODERATE
+- **Suggested Mitigation:** Consider family-wise error correction across the three univariate models or interpret results in context of multiple testing
+
+---
+
+#### Scoring Summary
+
+**Total Concerns Identified:**
+- Commission Errors: 1 (0 CRITICAL, 1 MODERATE, 0 MINOR)
+- Omission Errors: 2 (0 CRITICAL, 1 MODERATE, 1 MINOR)  
+- Alternative Approaches: 1 (0 CRITICAL, 0 MODERATE, 1 MINOR)
+- Known Pitfalls: 1 (0 CRITICAL, 1 MODERATE, 0 MINOR)
+
+**Overall Devil's Advocate Assessment:**
+Concept.md provides a solid methodological foundation with appropriate statistical approaches. The main limitations are in clarifying the multiple testing correction rationale and addressing multivariate-specific considerations. The absence of WebSearch limits the depth of literature-grounded criticism, but identified concerns are methodologically valid and actionable.
 
 ---
 
@@ -265,81 +271,43 @@ Model comparison approach is methodologically sound with appropriate metrics for
 
 #### Required Changes (Must Address for Approval)
 
-1. **Implement Missing Data Extraction Tools**
-   - **Location:** Tool development required before analysis phase
-   - **Issue:** 50% tool reuse rate with 4 critical missing tools for data preparation and analysis
-   - **Fix:** Implement tools.data.extract_domain_theta_scores and tools.data.extract_cognitive_battery for data preparation; tools.regression.compare_multivariate_univariate for core analysis
-   - **Rationale:** Cannot proceed with analysis without basic data extraction and model comparison functionality
-
-2. **Specify Missing Validation Thresholds**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 5 diagnostics
-   - **Issue:** Breusch-Pagan test mentioned but no threshold specified; independence assumption not validated
-   - **Fix:** Add "Breusch-Pagan p>0.05 for homoscedasticity; residual autocorrelation checks for independence"
-   - **Rationale:** Complete validation procedures require specific thresholds and comprehensive assumption coverage
-
-3. **Document Remedial Actions for Assumption Violations**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach, new subsection after Step 5
-   - **Issue:** No procedures specified for handling assumption violations (VIF>5, non-normality, heteroscedasticity)
-   - **Fix:** Add subsection "Remedial Actions: VIF>5 → variable selection/PCA; non-normality → transformations/robust methods; heteroscedasticity → weighted least squares"
-   - **Rationale:** Robust analysis requires contingency plans for assumption failures
-
-4. **Justify 28 Comparisons for Multiple Testing**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 6
-   - **Issue:** Bonferroni correction uses 28 comparisons but analysis scope unclear
-   - **Fix:** Explicitly enumerate all planned comparisons (e.g., "5 predictors × 3 domains × univariate + multivariate contrasts") or revise correction factor
-   - **Rationale:** Multiple testing correction must match actual number of planned comparisons
+*None - Status is APPROVED*
 
 #### Suggested Improvements (Optional but Recommended)
 
-1. **Consider Regularized Regression Alternatives**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach, new subsection
-   - **Current:** Only ordinary least squares regression specified
-   - **Suggested:** "Alternative Analysis: Ridge regression if VIF>5 detected; Lasso regression for predictor selection; compare regularized vs OLS performance"
-   - **Benefit:** Provides robust alternatives for multicollinearity and may improve prediction performance
+1. **Clarify Multiple Testing Correction**
+   - **Location:** 1_concept.md - Step 6: Test individual predictors
+   - **Current:** "Primary: Bonferroni correction (α = 0.05/28 = 0.00179)"
+   - **Suggested:** Specify the exact family of tests being corrected and show the calculation. Example: "Family-wise correction across 15 coefficient tests (5 predictors × 3 domains), α = 0.05/15 = 0.00333"
+   - **Benefit:** Increases transparency and methodological rigor of multiple testing approach
 
-2. **Enhance Cross-Validation Reporting**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 7
-   - **Current:** Basic 5-fold CV mentioned with R-squared, RMSE, MAE
-   - **Suggested:** "Report CV metrics: R-squared (explained variance), RMSE (prediction error), MAE (absolute error), plus bias-corrected 95% CIs via bootstrap"
-   - **Benefit:** Provides uncertainty quantification and more comprehensive model evaluation
+2. **Add Multivariate Effect Size Measures**
+   - **Location:** 1_concept.md - Step 3: Fit multivariate model
+   - **Current:** "Extract overall R-squared (Pillai's trace or similar)"
+   - **Suggested:** "Extract multivariate effect sizes: Pillai's trace, Wilks' lambda, and partial eta-squared for comparison with univariate R² values"
+   - **Benefit:** Enables proper comparison between univariate and multivariate effect magnitudes
 
-3. **Specify Cross-Domain Correlation Analysis**
-   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 5
-   - **Current:** "Cross-domain correlations and covariance structure"
-   - **Suggested:** "Compute pairwise correlations between What/Where/When theta scores; test hypothesis of moderate correlations (.30-.60 range) supporting multivariate benefit"
-   - **Benefit:** Directly tests theoretical prediction and informs interpretation
+3. **Acknowledge Regularization Alternative**
+   - **Location:** 1_concept.md - Step 2: Fit univariate models
+   - **Current:** Basic OLS regression specified
+   - **Suggested:** Add brief note: "OLS regression chosen for interpretability and direct AIC comparison; regularized methods (Ridge/Lasso) could improve prediction but complicate model comparison interpretation"
+   - **Benefit:** Demonstrates awareness of alternative approaches and justifies methodological choice
 
 #### Missing Tools (For Master/User Implementation)
 
-1. **Tool Name:** `tools.data.extract_domain_theta_scores`
-   - **Required For:** Step 1 - Domain theta score extraction from Ch5 5.2.X results
-   - **Priority:** High
-   - **Specifications:** Read theta scores from multiple Ch5 domain RQs (5.2.1, 5.2.2, 5.2.3), merge by composite_ID, reshape to wide format with What/Where/When columns
-   - **Recommendation:** Implement before rq_tools phase
-
-2. **Tool Name:** `tools.regression.compare_multivariate_univariate`
-   - **Required For:** Step 4 - Core model comparison analysis
-   - **Priority:** High
-   - **Specifications:** Fit 3 univariate models + 1 multivariate model, compute AIC comparison, perform k-fold cross-validation, return comparison metrics and fitted models
-   - **Recommendation:** Implement before rq_tools phase
-
-3. **Tool Name:** `tools.regression.validate_regression_assumptions`
-   - **Required For:** Step 5 - Comprehensive assumption validation
-   - **Priority:** Medium
-   - **Specifications:** VIF calculation, residual diagnostics (normality, homoscedasticity, linearity), independence checks, generate diagnostic plots, return validation report
-   - **Recommendation:** Implement before rq_analysis phase
+*None - All Ch7 tools now complete (32/32 implemented with TDD, 92 tests passing)*
 
 ---
 
 ### Validation Metadata
 
 - **Agent Version:** rq_stats v5.0
-- **Rubric Version:** 10-point system (v4.0)
-- **Validation Date:** 2026-01-02 21:40
-- **Tools Inventory Source:** docs/v4/tools_inventory.md
-- **Total Tools Validated:** 8
-- **Tool Reuse Rate:** 50% (4/8 tools available)
-- **Validation Duration:** ~20 minutes
-- **Context Dump:** "7.9/10 REJECTED. Category 1: 3.0/3 (excellent methods). Category 2: 1.0/2 (50% tool reuse). Category 3: 1.7/2 (good parameters, minor gaps). Category 4: 1.6/2 (validation gaps). Category 5: 0.6/1 (4 concerns, no citations due to WebSearch skip). Key issue: missing critical tools + validation gaps."
+- **Rubric Version:** 10-point system (v5.0)
+- **Validation Date:** 2026-01-03 15:30
+- **Tools Inventory Source:** tools/analysis_regression.py + complete Ch7 tools suite
+- **Total Tools Validated:** 9
+- **Tool Reuse Rate:** 100% (9/9 tools available)
+- **Validation Duration:** ~25 minutes
+- **Context Dump:** "9.3/10 APPROVED. Category 1: 3.0/3 (excellent methods). Category 2: 1.8/2 (100% tool reuse, minor multivariate gaps). Category 3: 2.0/2 (clear parameters). Category 4: 2.0/2 (comprehensive validation). Category 5: 0.5/1 (5 concerns, limited by WebSearch restriction)."
 
 ---

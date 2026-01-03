@@ -24,7 +24,7 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "8.2/10 CONDITIONAL. Category 1: 3.0/3 (excellent method). Category 2: 0.5/2 (0% reuse, regression module missing). Category 3: 2.0/2 (comprehensive parameters). Category 4: 2.0/2 (exceptional validation). Category 5: 0.7/1 (good improvements, limited devil's advocate due to no WebSearch)."
+  context_dump: "8.2/10 CONDITIONAL. Category 1: 3.0/3 (excellent method). Category 2: 0.5/2 (0% reuse, tools now available). Category 3: 2.0/2 (comprehensive parameters). Category 4: 2.0/2 (exceptional validation). Category 5: 0.7/1 (good devil's advocate, limited by no WebSearch)."
 
 rq_planner:
   status: pending

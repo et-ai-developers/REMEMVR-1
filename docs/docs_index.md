@@ -1,6 +1,34 @@
 # Documentation Index
 
-**Last Updated:** 2025-12-14 (ch6_limitations.md created, stale entries marked)
+**Last Updated:** 2026-01-03 (v4 tool documentation updated with Ch7 tools)
+
+---
+
+## v4.X Tool Documentation (Current)
+
+### v4/tools_inventory.md
+**Purpose:** Authoritative API reference for VALIDATED analysis tools (YELLOW/GREEN status only) with full parameter specifications
+**Audience:** rq_planner agent, rq_analysis agent, g_code agent when implementing analysis
+**Status:** Current (Updated 2026-01-03 with Ch7 tools)
+**Key Topics:** 32 Ch7 tools added (regression, data extraction, LPA, stats, bootstrap, clinical, extensions), full API signatures, module organization
+
+### v4/tools_catalog.md  
+**Purpose:** Lightweight tool discovery catalog with one-line descriptions for quick scanning
+**Audience:** rq_planner agent for tool discovery, main claude for quick reference
+**Status:** Current (Updated 2026-01-03 with Ch7 tools)
+**Key Topics:** All 100+ tool functions organized by category, concise descriptions, quick lookup
+
+### v4/tools_naming.md
+**Purpose:** Formulaic naming patterns for all tools/ functions (8 core patterns + special cases)
+**Audience:** Main claude when creating new tools, agent developers
+**Status:** Current (v2.0)
+**Key Topics:** 8 formulaic patterns (CONVERT, LOAD, RESOLVE, SET, COMPUTE, FIT, PREPARE, COMPARE), special cases (EXTRACT, PLOT, VALIDATE), consistency rules
+
+### v4/tools_status.tsv
+**Purpose:** Real-time status tracking of all tools (RED/ORANGE/YELLOW/GREEN color coding)
+**Audience:** Main claude for tracking tool development progress
+**Status:** Current (not included in this index - see results/ch7/tools.tsv)
+**Key Topics:** Tool implementation status, testing status, usage tracking
 
 ---
 

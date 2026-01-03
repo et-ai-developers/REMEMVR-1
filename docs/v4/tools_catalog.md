@@ -144,4 +144,98 @@ Path.mkdir, Path.exists, Path.read_text, Path.write_text
 
 ---
 
+## Regression Analysis Tools
+
+| Function | Description |
+|----------|-----------|
+| `fit_multiple_regression` | Fit multiple linear regression with VIF, R², F-statistic, and comprehensive diagnostics |
+| `fit_hierarchical_regression` | Hierarchical regression with block-wise entry and incremental R² calculation |
+| `compute_regression_diagnostics` | VIF, Cook's D, leverage, studentized residuals, heteroscedasticity tests |
+| `cross_validate_regression` | K-fold cross-validation with reproducible splits and multiple scoring metrics |
+| `bootstrap_regression_ci` | Bootstrap confidence intervals for regression coefficients (1000+ iterations) |
+| `compute_cohens_f2` | Cohen's f² effect size for nested model comparison (0.02=small, 0.15=medium, 0.35=large) |
+| `compute_post_hoc_power` | Post-hoc power analysis using non-central F distribution |
+| `variance_decomposition` | Decompose variance into unique and shared components per predictor |
+
+---
+
+## Data Extraction Tools  
+
+| Function | Description |
+|----------|-----------|
+| `load_participant_data` | Load participant-level data from dfnonvr.csv (100 rows × demographics/cognitive) |
+| `load_test_data` | Load test-level data from dfdata.csv (400 rows × per-test variables) |
+| `extract_cognitive_tests` | Extract RAVLT, BVMT, NART, RPM scores with derived metrics (totals, learning, forgetting) |
+| `standardize_to_t_scores` | Convert raw cognitive scores to T-scores (M=50, SD=10) |
+| `extract_domain_theta_scores` | Load theta scores from Ch5 IRT calibration results |
+| `merge_theta_cognitive` | Merge theta scores with cognitive test data by UID |
+| `extract_dass_scores` | Extract DASS anxiety and stress subscales (depression not available) |
+| `extract_sleep_per_test` | Extract per-test sleep hours from test-level data |
+| `extract_discrepancy_scores` | Compute VR-traditional test discrepancy scores with z-standardization |
+| `prepare_regression_data` | Prepare complete merged dataset for regression analysis |
+
+---
+
+## Latent Profile Analysis Tools
+
+| Function | Description |
+|----------|-----------|
+| `fit_lpa_models` | Fit Gaussian Mixture Models for LPA with multiple component numbers |
+| `extract_profile_membership` | Get profile assignments, probabilities, and entropy from fitted LPA |
+| `compare_lpa_models` | Compare models by BIC, AIC, entropy for optimal profile number selection |
+| `characterize_profiles` | Compute profile means, SDs, sizes for interpretation |
+| `validate_lpa_solution` | Internal validity via silhouette score and Davies-Bouldin index |
+| `plot_profile_means` | Visualize profile characteristics across variables |
+| `perform_external_validation` | Validate profiles against external criteria (ANOVA/chi-square) |
+
+---
+
+## Statistical Testing Tools (D068 Compliant)
+
+| Function | Description |
+|----------|-----------|
+| `one_way_anova_d068` | One-way ANOVA with dual p-values (uncorrected + Bonferroni/Holm), Tukey post-hoc |
+| `chi_square_test_d068` | Chi-square test with dual p-values, optional Yates correction, Cramér's V |
+| `compute_cramers_v` | Cramér's V effect size for contingency tables (0.1=small, 0.3=medium, 0.5=large) |
+
+---
+
+## Bootstrap Tools
+
+| Function | Description |
+|----------|-----------|
+| `bootstrap_correlation_ci` | Bootstrap CIs for Pearson/Spearman correlations with seed control |
+| `bootstrap_mean_ci` | Bootstrap CIs for mean with percentile or BCa method, paired samples support |
+| `bootstrap_median_ci` | Robust bootstrap CIs for median (outlier-resistant) |
+| `bootstrap_statistic` | General bootstrap for any custom statistic function |
+
+---
+
+## Clinical Metrics Tools
+
+| Function | Description |
+|----------|-----------|
+| `compute_sensitivity_specificity` | Full diagnostic metrics (sens, spec, PPV, NPV, accuracy, F1) |
+| `compute_roc_auc` | ROC curve and AUC with bootstrap confidence intervals |
+| `compute_diagnostic_odds_ratio` | DOR with Haldane correction for zero cells |
+| `compute_youden_index` | Optimal threshold selection via Youden's J statistic |
+| `compute_likelihood_ratios` | LR+ and LR- with clinical interpretation |
+
+---
+
+## Analysis Extensions Tools
+
+| Function | Description |
+|----------|-----------|
+| `extract_random_effects` | Extract BLUPs from fitted LMM (wrapper for existing functionality) |
+| `fit_interaction_model` | Fit LMM with interaction terms (thin wrapper for statsmodels) |
+| `compute_cohens_q_effect_size` | Cohen's q for correlation comparison (0.1=small, 0.3=medium, 0.5=large) |
+| `compare_correlations_dependent` | Steiger's Z-test for dependent correlations sharing one variable |
+| `compute_discrepancy_scores` | VR vs traditional assessment discrepancy with z-standardization |
+| `validate_regression_assumptions` | Comprehensive assumption checking (normality, homoscedasticity, VIF, outliers) |
+| `standardize_scores` | Z-score standardization with optional reference population parameters |
+| `cross_validate_lmm` | K-fold CV for LMMs with subject-wise splitting |
+
+---
+
 **End of Tools Catalog**

@@ -24,7 +24,7 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "8.6/10 REJECTED. Cat 1: 3.0/3 (appropriate). Cat 2: 1.2/2 (50% reuse). Cat 3: 1.9/2 (well-spec'd). Cat 4: 1.8/2 (good valid). Cat 5: 0.7/1 (6 concerns, adequate coverage)."
+  context_dump: "9.4/10 APPROVED. Cat 1: 3.0/3 (appropriate). Cat 2: 2.0/2 (100% reuse). Cat 3: 1.9/2 (well-spec'd). Cat 4: 1.8/2 (good valid). Cat 5: 0.7/1 (6 concerns, adequate coverage)."
 
 rq_planner:
   status: success

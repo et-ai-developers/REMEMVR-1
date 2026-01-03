@@ -814,4 +814,428 @@
 
 ---
 
+## Module: tools.analysis_regression
+
+### fit_multiple_regression
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit multiple linear regression with comprehensive diagnostics including VIF, R², adjusted R², F-statistic |
+| **Inputs** | `X: Union[np.ndarray, pd.DataFrame]` (predictor variables), `y: Union[np.ndarray, pd.Series]` (response variable), `add_constant: bool = True` (add intercept term), `return_diagnostics: bool = True` (compute VIF and other diagnostics) |
+| **Outputs** | `Dict` with keys: model (fitted OLS results), coefficients (DataFrame), r2, adj_r2, f_statistic, p_value, aic, bic, diagnostics (optional Dict with VIF, condition_number, breusch_pagan, durbin_watson) |
+
+### fit_hierarchical_regression
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit hierarchical regression with block-wise variable entry and incremental R² calculation |
+| **Inputs** | `X_blocks: List[Union[np.ndarray, pd.DataFrame]]` (predictor blocks in order), `y: Union[np.ndarray, pd.Series]` (response), `block_names: List[str] = None` (names for each block), `add_constant: bool = True` |
+| **Outputs** | `Dict` with keys: models (list of fitted models per block), incremental_r2 (change in R² per block), summary (DataFrame with cumulative R², ΔR², F-change, p-value per block) |
+
+### compute_regression_diagnostics
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute comprehensive regression diagnostics including VIF, Cook's D, leverage, studentized residuals |
+| **Inputs** | `model: sm.regression.linear_model.RegressionResultsWrapper` (fitted model), `X: Union[np.ndarray, pd.DataFrame]` (predictors), `return_dataframe: bool = True` (return as DataFrame) |
+| **Outputs** | `Dict` with keys: vif (variance inflation factors), cooks_d (Cook's distance per observation), leverage (hat matrix diagonal), studentized_residuals, condition_number, breusch_pagan (heteroscedasticity test), durbin_watson (autocorrelation) |
+
+### cross_validate_regression
+
+| Field | Value |
+|-------|-------|
+| **Description** | Perform k-fold cross-validation for regression with reproducible splits |
+| **Inputs** | `X: Union[np.ndarray, pd.DataFrame]` (predictors), `y: Union[np.ndarray, pd.Series]` (response), `n_folds: int = 5` (number of folds), `random_state: int = 42` (seed for reproducibility), `scoring_metrics: List[str] = ['mse', 'r2']` |
+| **Outputs** | `Dict` with keys: scores (per-fold metrics), mean_scores (averaged across folds), std_scores (standard deviation), predictions (out-of-fold predictions) |
+
+### bootstrap_regression_ci
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute bootstrap confidence intervals for regression coefficients |
+| **Inputs** | `X: Union[np.ndarray, pd.DataFrame]` (predictors), `y: Union[np.ndarray, pd.Series]` (response), `n_bootstrap: int = 1000` (bootstrap iterations), `confidence_level: float = 0.95`, `random_state: int = 42` |
+| **Outputs** | `pd.DataFrame` with columns: coefficient, mean, std, ci_lower, ci_upper (one row per predictor) |
+
+### compute_cohens_f2
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Cohen's f² effect size for comparing nested regression models |
+| **Inputs** | `r2_full: float` (R² of full model), `r2_reduced: float` (R² of reduced model) |
+| **Outputs** | `float` (Cohen's f² value, interpretation: 0.02=small, 0.15=medium, 0.35=large) |
+
+### compute_post_hoc_power
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute post-hoc power analysis for regression using non-central F distribution |
+| **Inputs** | `n: int` (sample size), `k: int` (number of predictors), `r2: float` (observed R²), `alpha: float = 0.05` (significance level) |
+| **Outputs** | `Dict` with keys: power (statistical power), f2 (Cohen's f²), non_centrality (parameter), critical_f |
+
+### variance_decomposition
+
+| Field | Value |
+|-------|-------|
+| **Description** | Decompose total variance into components attributable to each predictor |
+| **Inputs** | `X: Union[np.ndarray, pd.DataFrame]` (predictors), `y: Union[np.ndarray, pd.Series]` (response), `method: str = 'commonality'` (decomposition method) |
+| **Outputs** | `pd.DataFrame` with columns: predictor, unique_variance, shared_variance, total_variance |
+
+---
+
+## Module: tools.data
+
+### load_participant_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Load participant-level data from dfnonvr.csv (single timepoint variables) |
+| **Inputs** | `path: str = './data/dfnonvr.csv'` (file path) |
+| **Outputs** | `pd.DataFrame` with 100 rows (participants) × ~100 columns (demographics, cognitive tests, etc.) |
+
+### load_test_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Load test-level data from dfdata.csv (per-test variables) |
+| **Inputs** | `path: str = './data/dfdata.csv'` (file path) |
+| **Outputs** | `pd.DataFrame` with 400 rows (4 tests × 100 participants) × ~377 columns |
+
+### extract_cognitive_tests
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract cognitive test scores (RAVLT, BVMT, NART, RPM) with derived metrics |
+| **Inputs** | `df: pd.DataFrame` (participant data), `tests: List[str] = None` (subset of tests to extract) |
+| **Outputs** | `pd.DataFrame` with columns: UID, RAVLT_T1-T5, RAVLT_total, RAVLT_learning, RAVLT_delayed, RAVLT_forgetting, BVMT_T1-T3, BVMT_total, BVMT_delayed, NART, RPM |
+
+### standardize_to_t_scores
+
+| Field | Value |
+|-------|-------|
+| **Description** | Convert raw cognitive scores to T-scores (M=50, SD=10) |
+| **Inputs** | `scores: Union[pd.Series, pd.DataFrame]` (raw scores), `population_mean: float = None`, `population_sd: float = None` |
+| **Outputs** | `Union[pd.Series, pd.DataFrame]` (T-scores with same shape as input) |
+
+### extract_domain_theta_scores
+
+| Field | Value |
+|-------|-------|
+| **Description** | Load theta scores from Ch5 IRT calibration results |
+| **Inputs** | `path: str = None` (path to theta scores CSV), `domains: List[str] = ['What', 'Where', 'When']` |
+| **Outputs** | `pd.DataFrame` with columns: composite_ID, UID, test, domain_name, theta |
+
+### merge_theta_cognitive
+
+| Field | Value |
+|-------|-------|
+| **Description** | Merge theta scores with cognitive test data by UID |
+| **Inputs** | `theta_df: pd.DataFrame` (theta scores), `cognitive_df: pd.DataFrame` (cognitive tests) |
+| **Outputs** | `pd.DataFrame` (merged data with both theta and cognitive measures) |
+
+### extract_dass_scores
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract DASS anxiety and stress subscale scores (depression not available) |
+| **Inputs** | `df: pd.DataFrame` (participant data), `subscales: List[str] = ['anxiety', 'stress']` |
+| **Outputs** | `pd.DataFrame` with columns: UID, DASS_anxiety, DASS_stress |
+
+### extract_sleep_per_test
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract per-test sleep data (hours slept before each test) |
+| **Inputs** | `df: pd.DataFrame` (test-level data) |
+| **Outputs** | `pd.DataFrame` with columns: composite_ID, UID, test, sleep_hours |
+
+### extract_discrepancy_scores
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute VR-traditional memory test discrepancy scores |
+| **Inputs** | `vr_scores: pd.DataFrame` (VR theta scores), `traditional_scores: pd.DataFrame` (RAVLT/BVMT scores) |
+| **Outputs** | `pd.DataFrame` with columns: UID, test, vr_score, traditional_score, discrepancy, z_discrepancy |
+
+### prepare_regression_data
+
+| Field | Value |
+|-------|-------|
+| **Description** | Prepare complete dataset for regression analysis with all predictors and outcomes |
+| **Inputs** | `participant_path: str = None`, `test_path: str = None`, `theta_path: str = None`, `include_interactions: bool = False` |
+| **Outputs** | `pd.DataFrame` (analysis-ready dataset with merged participant, test, and theta data) |
+
+---
+
+## Module: tools.analysis_lpa
+
+### fit_lpa_models
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit multiple Gaussian Mixture Models for Latent Profile Analysis |
+| **Inputs** | `data: Union[np.ndarray, pd.DataFrame]` (input features), `n_components_range: Union[List[int], range] = range(2, 6)` (number of profiles to test), `covariance_type: str = 'full'` (full/tied/diag/spherical), `n_init: int = 10` (random initializations), `random_state: int = 42` |
+| **Outputs** | `Dict[int, GaussianMixture]` (mapping n_components -> fitted model) |
+
+### extract_profile_membership
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract profile assignments and posterior probabilities from fitted LPA model |
+| **Inputs** | `model: GaussianMixture` (fitted model), `data: Union[np.ndarray, pd.DataFrame]` (input data), `uid_column: str = None` (participant ID column if DataFrame) |
+| **Outputs** | `pd.DataFrame` with columns: UID (optional), profile, probability_0, probability_1, ..., entropy |
+
+### compare_lpa_models
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compare LPA models using BIC, AIC, and entropy for model selection |
+| **Inputs** | `models: Dict[int, GaussianMixture]` (fitted models), `data: Union[np.ndarray, pd.DataFrame]` (input data) |
+| **Outputs** | `pd.DataFrame` with columns: n_components, BIC, AIC, log_likelihood, entropy, n_parameters (sorted by BIC) |
+
+### characterize_profiles
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute profile means, standard deviations, and sizes for interpretation |
+| **Inputs** | `model: GaussianMixture` (fitted model), `data: pd.DataFrame` (input data with variable names), `profile_labels: pd.Series` (profile assignments) |
+| **Outputs** | `Dict` with keys: means (DataFrame), stds (DataFrame), sizes (Series), proportions (Series) |
+
+### validate_lpa_solution
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate LPA solution using internal validity metrics (silhouette, Davies-Bouldin) |
+| **Inputs** | `data: Union[np.ndarray, pd.DataFrame]` (input data), `labels: Union[np.ndarray, pd.Series]` (profile assignments), `metric: str = 'euclidean'` |
+| **Outputs** | `Dict` with keys: silhouette_score, davies_bouldin_score, silhouette_by_profile (mean per profile) |
+
+### plot_profile_means
+
+| Field | Value |
+|-------|-------|
+| **Description** | Create visualization of profile characteristics across variables |
+| **Inputs** | `profile_means: pd.DataFrame` (means per profile), `profile_sizes: pd.Series` (n per profile), `variable_names: List[str] = None`, `output_path: str = None` |
+| **Outputs** | `Tuple[Figure, Axes]` (matplotlib figure and axes objects) |
+
+### perform_external_validation
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate profiles against external criteria using ANOVA or chi-square tests |
+| **Inputs** | `profile_labels: pd.Series` (profile assignments), `external_variables: pd.DataFrame` (validation variables), `test_type: str = 'auto'` (auto/anova/chi2) |
+| **Outputs** | `pd.DataFrame` with columns: variable, test_statistic, p_value, effect_size, significant |
+
+---
+
+## Module: tools.analysis_stats
+
+### one_way_anova_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | One-way ANOVA with Decision D068 dual p-value reporting (uncorrected + Bonferroni/Holm) |
+| **Inputs** | `data: pd.DataFrame` (long format), `group_col: str` (grouping variable), `value_col: str` (dependent variable), `correction_method: str = 'bonferroni'` (bonferroni/holm), `n_comparisons: int = None` (for correction), `post_hoc: bool = True` (run Tukey HSD) |
+| **Outputs** | `Dict` with keys: f_statistic, p_uncorrected, p_corrected, df_between, df_within, eta_squared, post_hoc_results (if requested) |
+
+### chi_square_test_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Chi-square test with Decision D068 dual p-value reporting and optional Yates correction |
+| **Inputs** | `contingency_table: Union[pd.DataFrame, np.ndarray]` (observed frequencies), `correction: bool = False` (Yates continuity correction), `n_comparisons: int = None` (for Bonferroni) |
+| **Outputs** | `Dict` with keys: chi2_statistic, p_uncorrected, p_corrected, df, expected_frequencies, cramers_v |
+
+### compute_cramers_v
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Cramér's V effect size for contingency tables |
+| **Inputs** | `chi2: float` (chi-square statistic), `n: int` (total sample size), `k: int` (minimum of rows-1 or cols-1) |
+| **Outputs** | `float` (Cramér's V, interpretation: 0.1=small, 0.3=medium, 0.5=large) |
+
+---
+
+## Module: tools.bootstrap
+
+### bootstrap_correlation_ci
+
+| Field | Value |
+|-------|-------|
+| **Description** | Bootstrap confidence intervals for Pearson or Spearman correlations |
+| **Inputs** | `x: Union[np.ndarray, pd.Series]` (first variable), `y: Union[np.ndarray, pd.Series]` (second variable), `n_bootstrap: int = 1000`, `confidence_level: float = 0.95`, `method: str = 'pearson'` (pearson/spearman), `random_state: int = None` |
+| **Outputs** | `Dict` with keys: correlation, ci_lower, ci_upper, bootstrap_distribution |
+
+### bootstrap_mean_ci
+
+| Field | Value |
+|-------|-------|
+| **Description** | Bootstrap confidence intervals for mean with percentile or BCa method |
+| **Inputs** | `data: Union[np.ndarray, pd.Series]` (input data), `n_bootstrap: int = 1000`, `confidence_level: float = 0.95`, `method: str = 'percentile'` (percentile/bca), `paired: bool = False` (for paired samples), `random_state: int = None` |
+| **Outputs** | `Dict` with keys: mean, ci_lower, ci_upper, se_bootstrap, bootstrap_distribution |
+
+### bootstrap_median_ci
+
+| Field | Value |
+|-------|-------|
+| **Description** | Bootstrap confidence intervals for median (robust to outliers) |
+| **Inputs** | `data: Union[np.ndarray, pd.Series]` (input data), `n_bootstrap: int = 1000`, `confidence_level: float = 0.95`, `random_state: int = None` |
+| **Outputs** | `Dict` with keys: median, ci_lower, ci_upper, bootstrap_distribution |
+
+### bootstrap_statistic
+
+| Field | Value |
+|-------|-------|
+| **Description** | General bootstrap for any custom statistic function |
+| **Inputs** | `data: Union[np.ndarray, pd.DataFrame]` (input data), `statistic_func: Callable` (function to compute statistic), `n_bootstrap: int = 1000`, `confidence_level: float = 0.95`, `method: str = 'percentile'`, `random_state: int = None` |
+| **Outputs** | `Dict` with keys: statistic, ci_lower, ci_upper, bootstrap_distribution |
+
+---
+
+## Module: tools.clinical
+
+### compute_sensitivity_specificity
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute full diagnostic metrics including sensitivity, specificity, PPV, NPV, accuracy |
+| **Inputs** | `y_true: Union[np.ndarray, pd.Series]` (true labels 0/1), `y_pred: Union[np.ndarray, pd.Series]` (predictions 0/1 or probabilities), `threshold: float = 0.5` (for probability predictions) |
+| **Outputs** | `Dict` with keys: sensitivity, specificity, ppv, npv, accuracy, balanced_accuracy, f1_score, confusion_matrix |
+
+### compute_roc_auc
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute ROC curve and AUC with bootstrap confidence intervals |
+| **Inputs** | `y_true: Union[np.ndarray, pd.Series]` (true labels), `y_scores: Union[np.ndarray, pd.Series]` (probability scores), `n_bootstrap: int = 1000` (for CI), `confidence_level: float = 0.95` |
+| **Outputs** | `Dict` with keys: auc, ci_lower, ci_upper, fpr (false positive rates), tpr (true positive rates), thresholds |
+
+### compute_diagnostic_odds_ratio
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute diagnostic odds ratio (DOR) with Haldane correction for zero cells |
+| **Inputs** | `tp: int` (true positives), `tn: int` (true negatives), `fp: int` (false positives), `fn: int` (false negatives), `correction: float = 0.5` (Haldane correction) |
+| **Outputs** | `Dict` with keys: dor, log_dor, se_log_dor, ci_lower, ci_upper |
+
+### compute_youden_index
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Youden's J statistic for optimal threshold selection |
+| **Inputs** | `y_true: Union[np.ndarray, pd.Series]` (true labels), `y_scores: Union[np.ndarray, pd.Series]` (probability scores) |
+| **Outputs** | `Dict` with keys: optimal_threshold, youden_j, sensitivity_at_optimal, specificity_at_optimal |
+
+### compute_likelihood_ratios
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute positive and negative likelihood ratios with clinical interpretation |
+| **Inputs** | `sensitivity: float` (test sensitivity), `specificity: float` (test specificity) |
+| **Outputs** | `Dict` with keys: lr_positive, lr_negative, lr_positive_interpretation, lr_negative_interpretation |
+
+---
+
+## Module: tools.analysis_extensions
+
+### extract_random_effects
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract random effects (BLUPs) from fitted LMM - wrapper for existing functionality |
+| **Inputs** | `model: MixedLMResults` (fitted LMM) |
+| **Outputs** | `pd.DataFrame` with columns: UID, random_intercept, random_slope (if applicable) |
+
+### fit_interaction_model
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit LMM with interaction terms - thin wrapper for statsmodels MixedLM |
+| **Inputs** | `formula: str` (model formula with interactions), `data: pd.DataFrame` (input data), `groups: str` (grouping variable) |
+| **Outputs** | `MixedLMResults` (fitted model object) |
+
+### compute_cohens_q_effect_size
+
+| Field | Value |
+|-------|-------|
+| **Description** | Cohen's q effect size for comparing two correlations |
+| **Inputs** | `r1: float` (first correlation), `r2: float` (second correlation) |
+| **Outputs** | `float` (Cohen's q, interpretation: 0.1=small, 0.3=medium, 0.5=large) |
+
+### compare_correlations_dependent
+
+| Field | Value |
+|-------|-------|
+| **Description** | Steiger's Z-test for comparing dependent correlations sharing one variable |
+| **Inputs** | `r12: float` (correlation between vars 1-2), `r13: float` (correlation between vars 1-3), `r23: float` (correlation between vars 2-3), `n: int` (sample size) |
+| **Outputs** | `Dict` with keys: z_statistic, p_value, significant (at α=0.05), interpretation |
+
+### compute_discrepancy_scores
+
+| Field | Value |
+|-------|-------|
+| **Description** | Calculate standardized discrepancy scores between VR and traditional assessments |
+| **Inputs** | `vr_scores: pd.Series` (VR test scores), `traditional_scores: pd.Series` (traditional test scores), `standardize: bool = True` (z-score standardization) |
+| **Outputs** | `pd.DataFrame` with columns: vr_score, traditional_score, discrepancy, z_discrepancy (if standardized) |
+
+### validate_regression_assumptions
+
+| Field | Value |
+|-------|-------|
+| **Description** | Comprehensive validation of regression assumptions with diagnostic tests |
+| **Inputs** | `model: RegressionResultsWrapper` (fitted regression), `X: pd.DataFrame` (predictors), `return_plots: bool = False` |
+| **Outputs** | `Dict` with keys: normality (Shapiro-Wilk test), homoscedasticity (Breusch-Pagan test), multicollinearity (VIF values), autocorrelation (Durbin-Watson), outliers (Cook's D > 4/n), all_assumptions_met (bool) |
+
+### standardize_scores
+
+| Field | Value |
+|-------|-------|
+| **Description** | Z-score standardization with optional reference population parameters |
+| **Inputs** | `scores: Union[pd.Series, pd.DataFrame]` (raw scores), `reference_mean: float = None` (population mean), `reference_sd: float = None` (population SD) |
+| **Outputs** | `Union[pd.Series, pd.DataFrame]` (standardized scores, same shape as input) |
+
+### cross_validate_lmm
+
+| Field | Value |
+|-------|-------|
+| **Description** | K-fold cross-validation for Linear Mixed Models with subject-wise splitting |
+| **Inputs** | `formula: str` (model formula), `data: pd.DataFrame` (input data), `groups: str` (subject grouping variable), `n_folds: int = 5`, `random_state: int = 42` |
+| **Outputs** | `Dict` with keys: mae_scores (per fold), rmse_scores, r2_scores, mean_mae, mean_rmse, mean_r2, predictions (out-of-fold) |
+
+---
+
+## Module: tools.analysis_ctt
+
+### compute_ctt_mean_scores_by_factor
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute CTT mean scores (proportion correct) per UID × test × factor for IRT-CTT convergence analyses |
+| **Inputs** | `df_wide: DataFrame` (wide format with item columns), `item_factor_df: DataFrame` (item-to-factor mapping), `factor_col: str = 'factor'`, `item_col: str = 'item_name'`, `include_factors: List[str] = None` |
+| **Outputs** | `DataFrame` with columns: composite_ID, UID, test, factor, CTT_score, n_items |
+
+### compute_pearson_correlations_with_correction
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Pearson correlations with Holm-Bonferroni correction (Decision D068 compliance) |
+| **Inputs** | `df: DataFrame` (with score columns), `irt_col: str = 'IRT_score'`, `ctt_col: str = 'CTT_score'`, `factor_col: str = 'factor'`, `thresholds: List[float] = [0.70, 0.90]` |
+| **Outputs** | `DataFrame` with columns: factor, r, CI_lower, CI_upper, p_uncorrected, p_holm, n, threshold_met |
+
+### compute_cohens_kappa_agreement
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute Cohen's kappa for agreement between two significance classifications |
+| **Inputs** | `classifications_1: List[bool]` (first model results), `classifications_2: List[bool]` (second model results), `labels: List[str] = None` |
+| **Outputs** | `Dict` with keys: kappa, agreement_percent, interpretation, n_effects, substantial_agreement, confusion_matrix |
+
+### compare_lmm_fit_aic_bic
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compare model fit between two LMMs using AIC and BIC differences |
+| **Inputs** | `aic_model1: float`, `bic_model1: float`, `aic_model2: float`, `bic_model2: float`, `model1_name: str = 'Model1'`, `model2_name: str = 'Model2'` |
+| **Outputs** | `DataFrame` with columns: metric, model1_value, model2_value, delta, interpretation |
+
+---
+
 **End of Tools Inventory**
