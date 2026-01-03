@@ -1,12 +1,15 @@
 # Archive Index
 
-**Last Updated:** 2026-01-03 (context-manager curation - Sessions 2026-01-02 archived)
+**Last Updated:** 2026-01-03 Evening (context-manager curation - Session 2026-01-03 Morning archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### ch7_complete_agent_pipeline_28rqs
+**Description:** Complete execution history of Ch7 agent pipeline across all 28 research questions (2026-01-03). Documents performance optimization research (86% time reduction via no-WebSearch), infrastructure setup with correct folder structure, complete pipeline execution (concepts, scholar/stats validations, plans), rq_planner v5.1 improvements, critical tool infrastructure gaps identification, and parallel execution performance achievements (92% total time saved). Identified missing regression/LPA/bootstrap tools as main execution blocker. Session 2026-01-03 Morning.
 
 ### thesis_writing_system_v2_modular_stateless_restructure
 **Description:** Complete restructuring of thesis writing system from monolithic write.md into 5 modular stateless instruction files (write.md + write4/5/6/7.md). Implements "Engaging, Not Exhausting" philosophy with Dinner Party Test principle. Includes conflicts analysis revealing NO major blockers, chapters.md update with current execution status, and flagship vs integrated RQ strategy documentation. Session 2026-01-02 Afternoon.
