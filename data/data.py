@@ -50,7 +50,10 @@ def addData(master_df, data_df, variable):
                     item = np.nan
 
                 if func != "string":
-                    results_list.append(float(item))
+                    try:
+                        results_list.append(float(item))
+                    except:
+                        results_list.append(item)
                 else:
                     results_list.append(item)
             
@@ -74,8 +77,13 @@ def addData(master_df, data_df, variable):
                 result = round(np.mean(results_list),2)
                 
             if func == "string":
-                        
-                result = ', '.join(results_list)
+                
+                try:
+                    result = ', '.join(results_list)
+                except:
+                    result = ""
+                    for item in results_list:
+                        result += str(item) + ", "
 
             if func == "multi":
 
