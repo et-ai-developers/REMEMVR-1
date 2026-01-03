@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2026-01-04 Afternoon (context-manager curation - Session 2026-01-03 Evening archived)
+**Last Updated:** 2026-01-04 Evening (context-manager curation - Sessions 2026-01-03 Late Evening & 2026-01-04 Early Morning archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -34,6 +34,9 @@
 
 ### tdd_strict_enforcement
 **Description:** Documentation of successful TDD methodology enforcement during Ch7 tool development. Achieved 100% test coverage (29/29 tests passing) with strict RED→GREEN→REFACTOR discipline. Documents TDD process examples, quality metrics, edge case coverage, reproducibility standards, and established workflow patterns. Zero production bugs achieved through test-driven development. Session 2026-01-03 Evening.
+
+### tdd_41_tests_passing
+**Description:** Complete TDD implementation history for Ch7 critical tools development. Documents creation of 4 new modules (analysis_regression, data, analysis_lpa, analysis_stats) with 41 passing tests. Covers rigorous TDD methodology (RED→GREEN→REFACTOR), statistical implementation features (D068 dual p-value reporting, bootstrap BCa methods, edge case handling), and comprehensive test coverage achieving 100% success rate. Session 2026-01-04 19:30.
 
 ### tdd_methodology_retrieved
 **Description:** Complete TDD methodology retrieval from Ch5/Ch6 tool development. Documents 9-step workflow, color progression (RED→ORANGE→YELLOW→GREEN), dual documentation system, testing requirements, and systematic tracking standards. Session 2026-01-03 Afternoon.
