@@ -1,12 +1,21 @@
 # Archive Index
 
-**Last Updated:** 2026-01-04 Evening (context-manager curation - Sessions 2026-01-03 Late Evening & 2026-01-04 Early Morning archived)
+**Last Updated:** 2026-01-05 01:45 (context-manager curation - Session 2026-01-04 Afternoon archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### ch7_rq_stats_reassessment_campaign
+**Description:** Complete history of Ch7 RQ stats re-assessment campaign achieving 33% improvement rate (4/12 RQs moved to APPROVED). Documents tool availability as primary blocker resolution, parallel re-assessment strategy, and scoring improvements from 62.5% to 75% approval rate. Session 2026-01-04 Afternoon.
+
+### ch7_rejection_analysis_documented
+**Description:** Comprehensive rejection analysis documentation for Ch7 RQs created in rejects.md (700+ lines). Identifies systematic patterns: tool availability issues (75% of rejections), devil's advocate limitations, specification gaps, and missing remedial actions. Session 2026-01-04 Afternoon.
+
+### ch7_tool_documentation_verification
+**Description:** Complete verification and updating of Ch7 tool documentation achieving 100% coverage. Added 800+ lines to tools_inventory.md and 45+ descriptions to tools_catalog.md covering 32 Ch7 tools across 8 modules. Includes naming convention compliance analysis (51% formulaic). Session 2026-01-04 Afternoon.
 
 ### ch7_complete_agent_pipeline_28rqs
 **Description:** Complete execution history of Ch7 agent pipeline across all 28 research questions (2026-01-03). Documents performance optimization research (86% time reduction via no-WebSearch), infrastructure setup with correct folder structure, complete pipeline execution (concepts, scholar/stats validations, plans), rq_planner v5.1 improvements, critical tool infrastructure gaps identification, and parallel execution performance achievements (92% total time saved). Identified missing regression/LPA/bootstrap tools as main execution blocker. Session 2026-01-03 Morning.
