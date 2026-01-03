@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "8-step analysis plan created: Age x Test interactions with bootstrap CIs, simple slopes, 5-fold CV. Enhanced v5.1 specs: seed=42, 2000 bootstrap, Cook's D outliers, HC3 robust SEs, dual p-values (D068)."
+  context_dump: "8 steps planned: Age x Test interactions with bootstrap, CV, diagnostics. Enhanced v5.1 specs: 2000 bootstrap, seed=42, dual p-values, remedial actions. Multiple regression pipeline targeting medium interactions (f2≥0.15). 4-layer validation all steps."
 
 rq_tools:
   status: pending

@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "Successfully created 2_plan.md for ch7/7.5.1 - 9 steps planned. Pipeline: Multiple Linear Regression with Bootstrap Validation. Enhanced v5.1 statistical specifications applied (seeds, bootstrap, CV, corrections, remedial actions)."
+  context_dump: "9 steps planned: hierarchical regression with CV and bootstrap CIs. Ch5 dependency + self-report predictors analysis. Complete v5.1 statistical specifications with remedial actions."
 
 rq_tools:
   status: pending

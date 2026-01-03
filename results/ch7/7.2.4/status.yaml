@@ -35,6 +35,9 @@ rq_planner:
     Method: Steiger's Z-test for dependent correlations
     Features: Bootstrap CIs, sensitivity analysis, power analysis
     Dependencies: Ch5 5.1.1 theta scores + master.xlsx RAVLT
+    v5.1 specs: All steps have statistical implementation details
+    Random seeds: 42 throughout, bootstrap 1000 iterations
+    Validation: 4-layer substance criteria for all 8 steps
 
 rq_tools:
   status: pending

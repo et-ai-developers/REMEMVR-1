@@ -121,13 +121,6 @@ Latent Profile Analysis (LPA) for cognitive tests + Chi-square test of associati
 - results/profile_correspondence_summary.md (text summary for thesis)
 - plots/profile_correspondence_heatmap.png (visualization)
 
-**
-
-**Cross-Validation:**
-- Implement 5-fold CV (seed=42) for generalization assessment
-- Report mean CV-R² and SD across folds
-- CV-R² to full-sample R² gap should be <0.10
-- If gap >0.10: Consider regularization
 
 
 **Success Criteria:**

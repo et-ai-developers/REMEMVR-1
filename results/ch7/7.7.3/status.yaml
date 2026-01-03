@@ -34,6 +34,9 @@ rq_planner:
     Data: DERIVED from Ch5 5.1.1 theta + master.xlsx RAVLT scores
     Statistical specs: Bootstrap CIs, 5-fold CV, power analysis, dual p-values
     Runtime: 45-60 minutes estimated
+    v5.1 enhancements: Random seeds (42), remedial actions, fallback paths
+    Validation: 4-layer criteria for all 9 steps, dual p-values (D068)
+    Dependencies: Ch5 5.1.1 theta + master.xlsx RAVLT with circuit breakers
 
 rq_tools:
   status: pending

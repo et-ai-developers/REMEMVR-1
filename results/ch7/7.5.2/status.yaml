@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "8 steps planned (validation + 7 analysis). Hierarchical regression with comprehensive validation. Bootstrap/CV/power analysis specified. Ready for rq_tools."
+  context_dump: "8 steps planned: Step 0 validation + Steps 1-7 analysis. Hierarchical regression with DASS predictors, bootstrap CIs, dual p-values (D068), cross-validation, power analysis. Enhanced v5.1 specifications with detailed statistical implementation (seeds, iterations, corrections, remedial actions). Ready for rq_tools."
 
 rq_tools:
   status: pending

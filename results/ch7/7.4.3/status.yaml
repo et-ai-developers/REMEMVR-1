@@ -24,11 +24,11 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "8.3/10 REJECTED. Category 1: 2.8/3 (appropriate). Category 2: 1.4/2 (50% tool reuse). Category 3: 1.6/2 (calculation error). Category 4: 1.9/2 (comprehensive). Category 5: 0.6/1 (limited without citations)."
+  context_dump: "9.1/10 CONDITIONAL. Category 1: 2.8/3 (appropriate). Category 2: 2.0/2 (100% reuse). Category 3: 1.6/2 (calculation error). Category 4: 1.9/2 (comprehensive). Category 5: 0.8/1 (8 concerns, limited citations)."
 
 rq_planner:
   status: success
-  context_dump: "9-step correlation analysis plan created with Steiger's Z-test for differential prediction. Bootstrap CIs, sensitivity analyses, and Decision D068 dual p-values implemented. All steps include 4-layer validation requirements."
+  context_dump: "8-step correlation analysis plan created. Pipeline: Multiple correlation + Steiger's Z-test for differential prediction. Bootstrap CIs (1000 iter, seed=42), 5-fold CV, comprehensive sensitivity analyses. All steps have 4-layer validation. Dependencies: Ch5 5.1.1 + 5.2.1 theta + master.xlsx RPM. Decision D068 dual p-values. Runtime: ~45 min."
 
 rq_tools:
   status: pending

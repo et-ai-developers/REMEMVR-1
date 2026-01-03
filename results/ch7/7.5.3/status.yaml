@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "Memory strategies analysis plan: 8 steps (correlation + t-test + hierarchical regression). Key: text coding reliability kappa>=0.80, bootstrap CIs, Decision D068 dual p-values, Ch5 dependency validation."
+  context_dump: "8-step strategy-performance analysis plan created. Pipeline: correlation + t-test + hierarchical regression. v5.1 enhanced: complete statistical specs (CV, bootstrap, power, corrections). Dependencies: Ch5 5.1.1 theta scores + STR questionnaire text coding. Ready for rq_tools."
 
 rq_tools:
   status: pending

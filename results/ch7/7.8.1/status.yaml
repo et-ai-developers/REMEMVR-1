@@ -28,7 +28,13 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "7 steps planned: dependency validation + LPA K=1-4 comparison + external validation. Random seed=42, bootstrap stability, entropy >0.80 threshold. All steps with 4-layer validation. Missing LPA tools identified for rq_tools."
+  context_dump: |
+    7.8.1 analysis plan created: 7 steps (LPA K=1-4 + external validation)
+    Pipeline: LPA with bootstrap stability, entropy >0.80, external validation
+    Dependencies: Ch5 5.2.1/5.2.2/5.2.3 domain theta scores + master.xlsx
+    Statistical specs: v5.1 enhanced (seeds, bootstrap, CV, corrections)
+    Validation: 4-layer criteria embedded for all 7 steps
+    Next: rq_tools (NOTE: LPA tools need implementation)
 
 rq_tools:
   status: pending

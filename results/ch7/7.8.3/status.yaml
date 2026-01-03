@@ -34,6 +34,9 @@ rq_planner:
     Pipeline: Nested multiple regression with 5-fold cross-validation
     Models: 4 nested (Minimal→Core→Extended→Full) with parsimony selection
     Key features: seed=42, bootstrap CIs, dual p-values, assumption remedies
+    Enhanced v5.1: Complete statistical specs with CV, bootstrap, corrections
+    Dependencies: Ch5 5.1.1 theta_all + master.xlsx cognitive tests
+    Validation: 4-layer validation embedded in all 9 steps
 
 rq_tools:
   status: pending

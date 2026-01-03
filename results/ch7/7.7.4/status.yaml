@@ -28,31 +28,31 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "7 steps planned: classification analysis with demographic characterization. Step 0: dependency validation, Steps 1-6: extract scores -> classification -> demographics -> group comparisons -> clinical metrics -> interpretation. Enhanced statistical specs: assumption checking, bootstrap CIs, dual p-values (D068). Cross-RQ dependency: Ch5 5.1.1 theta scores."
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."
 
 rq_inspect:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."
 
 rq_plots:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."
 
 analysis_steps:
   # To be populated during execution
 
 rq_platinum:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: Step 0 validation + Steps 1-6 analysis. Cross-sectional classification pipeline identifying false negatives (low RAVLT + normal REMEMVR). Comprehensive validation requirements with 4-layer criteria. Bootstrap CIs, assumption checking, dual p-values (D068). ~25min runtime."

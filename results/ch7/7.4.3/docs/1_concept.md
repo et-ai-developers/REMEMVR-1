@@ -107,7 +107,7 @@ Multiple correlation analysis with Steiger's Z-test for dependent correlations
 **Step 4:** Test differential prediction
 - Steiger's Z-test for difference between dependent correlations
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni correction (± = 0.00179/4 = 0.000448)
+- Primary: Bonferroni correction (α = 0.05/4 = 0.0125)
 - Secondary: FDR correction for comparison
 
 **Step 5:** Effect sizes and confidence intervals

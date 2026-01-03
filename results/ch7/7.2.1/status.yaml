@@ -32,7 +32,7 @@ rq_planner:
     Successfully created 2_plan.md for ch7/7.2.1 - 11 steps planned
     
     Plan Summary:
-    - Pipeline: Hierarchical Multiple Regression with Cross-Validation
+    - Pipeline: Hierarchical Multiple Regression with Cross-Validation and Bootstrap Mediation Analysis
     - Total Steps: 11 (Step 0: validation + Steps 1-10: analysis)
     - Estimated Runtime: 45-60 minutes
     - Decisions Applied: D068 (dual p-value reporting), Ch7 alpha correction

@@ -24,11 +24,11 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "8.7/10 REJECTED. Category 1: 3.0/3 (appropriate). Category 2: 1.6/2 (75% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.7/2 (good validation). Category 5: 0.4/1 (limited without WebSearch). Need remedial actions + tool implementation."
+  context_dump: "9.4/10 APPROVED. Category 1: 3.0/3 (appropriate). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.9/2 (comprehensive). Category 5: 0.5/1 (limited scope, 2 concerns). Strong methodology with minor threshold gap."
 
 rq_planner:
   status: success
-  context_dump: "9 steps planned: Step 0 dependency validation + Steps 1-8 multiple regression analysis. Hierarchical regression (calibration ~ demographics + cognitive) with bootstrap CIs, cross-validation, effect sizes, comparison to 7.1.1 accuracy prediction. Enhanced v5.1 specs: seed=42, 1000 bootstrap iterations, 5-fold CV, Bonferroni α=0.0167, remedial actions specified. Ready for rq_tools."
+  context_dump: "Plan created: 8 steps (validation + 7 analysis). Multiple regression with hierarchical entry, CV, bootstrap CIs, comprehensive diagnostics. Ch6 dependency validation, D068 dual p-values, Bonferroni α=0.000597. Ready for rq_tools."
 
 rq_tools:
   status: pending

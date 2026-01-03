@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "RQ 7.6.1 analysis plan created: 9 steps (validation + hierarchical regression + CV + power). Comprehensive statistical specs with seed=42, bootstrap CIs, assumption checks, remedial actions. All steps have 4-layer validation. Addresses rq_stats concerns about tool gaps and methodological details."
+  context_dump: "8-step analysis plan created with enhanced v5.1 specifications. Pipeline: Multiple regression + hierarchical entry + CV. All steps have mandatory 4-layer validation, random seed=42, comprehensive statistical specs (bootstrap 1000x, 5-fold CV, power analysis, dual p-values per D068). Dependencies: Ch5 5.1.4 slopes + master.xlsx cognitive tests. Ready for rq_tools."
 
 rq_tools:
   status: pending

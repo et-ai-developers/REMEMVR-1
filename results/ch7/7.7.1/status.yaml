@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: |
+  context_dump: ""
     Analysis plan created: 9 steps planned (Step 0: validation + Steps 1-8: analysis)
     Pipeline: Reverse Multiple Linear Regression with bidirectional comparison
     Cross-RQ dependencies: Ch5 5.1.1 (required), Ch7 7.1.1 (optional for comparison)

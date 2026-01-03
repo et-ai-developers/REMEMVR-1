@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "8-step ICC replication analysis plan created. Complete statistical specifications (bootstrap seed=42, 1000 iterations, ICC(1,1), dual p-values). Cross-RQ dependencies on Ch5 5.2.1-5.2.3 validated. 4-layer validation for all steps. Missing bootstrap tools noted from rq_stats."
+  context_dump: "Analysis plan created: 8 steps (validation + 7 analysis). ICC replication across What/Where/When domains. Bootstrap CIs (1000 iter, seed=42), pairwise comparisons, reliability assessment. Dependencies: Ch5 5.2.1/5.2.2/5.2.3 slope outputs. Enhanced v5.1 statistical specifications implemented."
 
 rq_tools:
   status: pending

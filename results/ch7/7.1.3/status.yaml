@@ -29,9 +29,11 @@ rq_stats:
 rq_planner:
   status: success
   context_dump: |
-    Analysis plan created: 6 steps planned (Step 0: extraction + Steps 1-5: analysis).
-    Tool requirements: Multiple regression, Steiger Z-tests, beta comparisons, heatmap data prep.
-    Expected outputs: 10 data files, 6 log files, 1 plot. Validation required at every step.
+    Analysis plan created: 6 steps planned (Step 0: validation + Steps 1-5: analysis).
+    Pipeline: Multiple Linear Regression with Steiger Z-tests for cross-domain comparisons.
+    Expected outputs: 21 data files, 6 log files, 1 heatmap plot data file.
+    Statistical specs: Bootstrap (1000 iter, seed=42), Bonferroni correction, assumption remedies.
+    Tool requirements: Domain theta extraction, regression models, Steiger tests, beta comparisons.
 
 rq_tools:
   status: pending

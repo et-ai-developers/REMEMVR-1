@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "Created 2_plan.md: 6-step bivariate correlation pipeline with Steiger Z-test for process-specificity. Enhanced v5.1 specs: seed=42, bootstrap CIs, dual p-values (D068), chapter-level correction (α=0.00179). Dependencies: Ch5 paradigm theta + RAVLT from master.xlsx. Ready for rq_tools."
+  context_dump: "6-step analysis plan created: dependency validation + RAVLT extraction + paradigm theta aggregation + correlation analysis + Steiger's Z-test + visualization. Enhanced v5.1 specs: seed=42, bootstrap 1000 iterations, dual p-values (D068), chapter alpha=0.00179. Ready for rq_tools."
 
 rq_tools:
   status: pending

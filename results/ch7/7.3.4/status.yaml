@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "9-step differential prediction analysis plan created. Tests DASS-Anxiety selective impairment of metacognition vs memory. Includes bootstrap coefficient comparison, hierarchical controls, cross-validation, and v5.1 statistical specifications."
+  context_dump: "8-step analysis plan created for DASS differential prediction. Pipeline: Multiple regression with cross-model beta comparison. Mandatory statistical specs: seed=42, 1000 bootstrap iterations, 5-fold CV, Bonferroni corrections, remedial actions. All steps have 4-layer validation. Dependencies: Ch5 theta + Ch6 confidence/calibration + master.xlsx DASS. Ready for rq_tools."
 
 rq_tools:
   status: pending

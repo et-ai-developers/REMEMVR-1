@@ -236,6 +236,129 @@ Path.mkdir, Path.exists, Path.read_text, Path.write_text
 | `standardize_scores` | Z-score standardization with optional reference population parameters |
 | `cross_validate_lmm` | K-fold CV for LMMs with subject-wise splitting |
 
+## Additional Analysis Stats Tools
+
+| Function | Description |
+|----------|-------------|
+| `apply_correction` | Apply multiple comparison correction (Bonferroni/Holm/FDR) to p-value |
+| `calculate_omega_squared` | Calculate omega-squared effect size for ANOVA (0.01=small, 0.06=medium, 0.14=large) |
+| `compute_effect_sizes` | Compute Cohen's d, Hedges' g, Glass's delta for group comparisons |
+| `friedman_test_d068` | D068: Friedman test for repeated measures with dual p-value reporting |
+| `kruskal_wallis_d068` | D068: Kruskal-Wallis H test with dual p-value reporting |
+| `mann_whitney_d068` | D068: Mann-Whitney U test with dual p-value reporting |
+| `t_test_d068` | D068: T-test (independent/paired) with dual p-value reporting |
+
 ---
 
-**End of Tools Catalog**
+## Additional LMM Tools
+
+| Function | Description |
+|----------|-------------|
+| `fit_lmm_trajectory` | Fit LMM for trajectory analysis with flexible time specification |
+| `compute_days_within` | Compute days within segment for piecewise LMM analysis |
+| `find_coef_name` | Find coefficient name in model matching pattern (case-insensitive) |
+
+---
+
+## Model Averaging Tools
+
+| Function | Description |
+|----------|-------------|
+| `compute_model_averaged_predictions` | Compute Akaike-weighted average predictions across models |
+| `compute_model_averaged_random_effects` | Average random effects using Akaike weights |
+| `compute_unconditional_variance` | Compute unconditional variance accounting for model uncertainty |
+| `identify_competitive_models` | Identify models within delta AIC threshold as competitive |
+| `run_model_averaging_pipeline` | Complete pipeline from model selection to averaged results |
+
+---
+
+## Model Selection Tools
+
+| Function | Description |
+|----------|-------------|
+| `build_formula` | Build model formula string from outcome, predictors, random effects |
+| `log` | Natural logarithm transformation for model selection |
+
+---
+
+## SEM Calibration Tools
+
+| Function | Description |
+|----------|-------------|
+| `compute_difference_score_reliability` | Compute reliability of confidence-accuracy difference scores |
+| `quick_sem_calibration` | Quick SEM for calibration analysis with ML estimation |
+| `fit_latent_difference` | Fit latent difference score model for calibration |
+| `fit_residualized` | Fit residualized calibration model (confidence on accuracy) |
+| `get_latent_calibration` | Extract latent calibration factor scores from SEM |
+| `get_model_fit` | Extract fit indices (chi2, CFI, TLI, RMSEA, SRMR) from SEM |
+| `compare_approaches` | Compare difference/residual/latent calibration approaches |
+| `save_results` | Save SEM calibration results to file |
+
+---
+
+## Additional Plotting Tools
+
+| Function | Description |
+|----------|-------------|
+| `plot_comparison_bars` | Bar plot comparing groups or conditions with optional hue |
+| `plot_panel` | Multi-panel plot grid for complex visualizations |
+| `plot_piecewise_trajectory` | Plot piecewise linear trajectories with segment boundaries |
+
+---
+
+## Additional Validation Tools
+
+| Function | Description |
+|----------|-------------|
+| `generate_validation_report` | Generate comprehensive validation report for analysis results |
+| `run_lmm_sensitivity_analyses` | Run outlier/normality/heteroscedasticity sensitivity analyses |
+| `save_validation_report` | Save timestamped validation report to file |
+| `validate_contrasts` | Validate contrast specifications and presence of comparisons |
+| `validate_hypothesis_tests` | Validate hypothesis tests meet alpha and dual p requirements |
+| `validate_lmm_assumptions_comprehensive_v3` | Enhanced LMM assumption validation with plots and remedies |
+| `validate_probability_transform` | Validate probability transformation preserves ordering/bounds |
+
+---
+
+## Config Tools
+
+| Function | Description |
+|----------|-------------|
+| `expand_env_vars_in_path` | Expand environment variables like $HOME in file paths |
+| `validate_irt_params` | Validate IRT parameter configuration for errors/warnings |
+| `validate_paths_exist` | Check that required file paths exist before analysis |
+
+---
+
+## Additional Variance Decomposition Tools
+
+| Function | Description |
+|----------|-------------|
+| `log` | Natural log transformation wrapper for variance decomposition |
+
+---## Additional D068-Compliant Statistical Tools
+
+| Function | Description |
+|----------|-------------|
+| `chi_square_test_d068` | D068: Chi-square test with dual p-values and optional Yates correction |
+| `one_way_anova_d068` | D068: One-way ANOVA with dual p-values and optional Tukey HSD post-hoc |
+| `test_intercept_slope_correlation_d068` | D068: Test correlation between random intercepts/slopes with dual p-values |
+| `validate_contrasts_d068` | D068: Validate contrast results have dual p-values (uncorrected + corrected) |
+| `validate_correlation_test_d068` | D068: Validate correlation tests have dual p-values with corrections |
+
+## Additional CTT Analysis Tools
+
+| Function | Description |
+|----------|-------------|
+| `compute_ctt_mean_scores_by_factor` | Compute CTT mean scores (proportion correct) per UID × test × factor |
+| `compute_pearson_correlations_with_correction` | Pearson correlations with Holm-Bonferroni correction (D068 compliance) |
+| `compute_cohens_kappa_agreement` | Cohen's kappa for agreement between two significance classifications |
+| `compare_lmm_fit_aic_bic` | Compare model fit between two LMMs using AIC and BIC differences |
+
+## Additional Regression Tools
+
+| Function | Description |
+|----------|-------------|
+| `compute_cohens_f2` | Compute Cohen's f² effect size for nested regression models (0.02=small, 0.15=medium, 0.35=large) |
+
+---

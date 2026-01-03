@@ -24,11 +24,11 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "8.9/10 REJECTED. Category 1: 2.3/3 (CV misapplication). Category 2: 0.8/2 (tools 33% reuse). Category 3: 2.6/2 (excellent params). Category 4: 2.4/2 (comprehensive). Category 5: 0.8/1 (7 concerns, no WebSearch)."
+  context_dump: "9.1/10 CONDITIONAL. Category 1: 2.4/3 (CV misapplication). Category 2: 2.0/2 (tools 100% reuse). Category 3: 2.5/2 (excellent params). Category 4: 2.0/2 (comprehensive). Category 5: 0.2/1 (5 concerns, no WebSearch)."
 
 rq_planner:
   status: success
-  context_dump: "6 steps planned: dependency validation + cognitive LPA + cross-tabulation + chi-square association. Random seed=42, bootstrap 1000 iterations, entropy >0.70 threshold. All steps with 4-layer validation. Expected cell count checks for chi-square validity. Missing LPA/chi-square tools identified."
+  context_dump: "Analysis plan created: 6-step LPA + chi-square pipeline. Addressed CV misapplication, enhanced convergence specs, split-sample validation. Dependencies: RQ 7.8.1 profiles + master.xlsx cognitive tests. v5.1 statistical specifications integrated."
 
 rq_tools:
   status: pending

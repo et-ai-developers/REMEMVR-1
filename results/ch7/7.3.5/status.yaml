@@ -27,8 +27,8 @@ rq_stats:
   context_dump: "9.3/10 APPROVED. Cat1: 3.0/3 (optimal). Cat2: 1.8/2 (67% reuse). Cat3: 1.9/2 (clear params). Cat4: 1.8/2 (good validation). Cat5: 0.8/1 (6 concerns, adequate)."
 
 rq_planner:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 steps planned: ANOVA + correlations pipeline. Dependencies: Ch5 5.1.1 + Ch6 confidence + master.xlsx. Enhanced v5.1 specs: bootstrap CIs (1000 iter, seed=42), Bonferroni correction (6 tests), assumption checks with remedial actions. Runtime: ~45 min."
 
 rq_tools:
   status: pending

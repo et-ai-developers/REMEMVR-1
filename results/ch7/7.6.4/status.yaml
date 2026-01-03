@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "8-step analysis plan created for purification paradox testing. Pre/post-purification model comparison with dependent samples bootstrap. Step 0: validation, Steps 1-7: analysis including comprehensive model comparison and coefficient differences. Ready for rq_tools."
+  context_dump: "Plan created: 8 steps (validation + 7 analysis), comparative regression testing purification paradox. Enhanced v5.1 specs: seed=42, bootstrap CIs, CV, power analysis, remedial actions specified."
 
 rq_tools:
   status: pending

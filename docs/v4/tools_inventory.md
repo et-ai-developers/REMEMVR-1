@@ -1237,5 +1237,351 @@
 | **Outputs** | `DataFrame` with columns: metric, model1_value, model2_value, delta, interpretation |
 
 ---
+## Module: tools.analysis_stats (Additional Functions)
 
+### apply_correction
+
+| Field | Value |
+|-------|-------|
+| **Description** | Apply multiple comparison correction to p-value (Bonferroni, Holm, FDR) |
+| **Inputs** | `p_value: float` (uncorrected p-value), `method: str = 'bonferroni'` (correction method), `n_comparisons: int` (number of comparisons) |
+| **Outputs** | `float` (corrected p-value) |
+
+### calculate_omega_squared
+
+| Field | Value |
+|-------|-------|
+| **Description** | Calculate omega-squared effect size for ANOVA |
+| **Inputs** | `F: float` (F-statistic), `df_between: int` (between groups df), `df_within: int` (within groups df), `n: int` (total sample size) |
+| **Outputs** | `float` (omega-squared value, interpretation: 0.01=small, 0.06=medium, 0.14=large) |
+
+### compute_effect_sizes
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute various effect sizes (Cohen's d, Hedges' g, Glass's delta) for group comparisons |
+| **Inputs** | `group1: np.ndarray` (first group data), `group2: np.ndarray` (second group data), `test_type: str = 'independent'` (independent/paired) |
+| **Outputs** | `Dict` with keys: cohens_d, hedges_g, glass_delta, interpretation |
+
+### friedman_test_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Friedman test for repeated measures with D068 dual p-value reporting |
+| **Inputs** | `measurements: np.ndarray` (n_subjects × n_conditions), `correction: str = 'bonferroni'`, `n_comparisons: int = None` |
+| **Outputs** | `Dict` with keys: chi2_statistic, p_uncorrected, p_corrected, df, kendall_w |
+
+### kruskal_wallis_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Kruskal-Wallis H test with D068 dual p-value reporting |
+| **Inputs** | `*groups: np.ndarray` (variable number of group arrays), `correction: str = 'bonferroni'`, `n_comparisons: int = None` |
+| **Outputs** | `Dict` with keys: H_statistic, p_uncorrected, p_corrected, df, eta_squared |
+
+### mann_whitney_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | Mann-Whitney U test with D068 dual p-value reporting |
+| **Inputs** | `group1: np.ndarray` (first group), `group2: np.ndarray` (second group), `correction: str = 'bonferroni'`, `n_comparisons: int = None` |
+| **Outputs** | `Dict` with keys: U_statistic, p_uncorrected, p_corrected, effect_size_r |
+
+### t_test_d068
+
+| Field | Value |
+|-------|-------|
+| **Description** | T-test with D068 dual p-value reporting (independent or paired) |
+| **Inputs** | `group1: np.ndarray` (first group), `group2: np.ndarray` (second group), `paired: bool = False`, `correction: str = 'bonferroni'`, `n_comparisons: int = None` |
+| **Outputs** | `Dict` with keys: t_statistic, p_uncorrected, p_corrected, df, cohens_d, mean_diff, ci_lower, ci_upper |
+
+---
+
+## Module: tools.analysis_lmm (Additional Functions)
+
+### fit_lmm_trajectory
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit Linear Mixed Model for trajectory analysis with flexible time specification |
+| **Inputs** | `data: pd.DataFrame` (long format), `formula: str` (model formula), `groups: str = 'composite_ID'`, `method: str = 'REML'` |
+| **Outputs** | `MixedLM` fitted model object |
+
+### compute_days_within
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute days within segment for piecewise LMM analysis |
+| **Inputs** | `df: pd.DataFrame` (with Segment and Day columns), `segment_col: str = 'Segment'`, `day_col: str = 'Day'` |
+| **Outputs** | `pd.Series` (days within segment, reset at segment boundaries) |
+
+### find_coef_name
+
+| Field | Value |
+|-------|-------|
+| **Description** | Find coefficient name in model that matches pattern (case-insensitive) |
+| **Inputs** | `model: MixedLM` (fitted model), `pattern: str` (search pattern) |
+| **Outputs** | `str` (matching coefficient name or None) |
+
+---
+
+## Module: tools.model_averaging
+
+### compute_model_averaged_predictions
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute model-averaged predictions using Akaike weights |
+| **Inputs** | `models: List[MixedLM]` (fitted models), `data: pd.DataFrame` (prediction data), `aic_values: List[float]` (model AICs) |
+| **Outputs** | `np.ndarray` (weighted average predictions) |
+
+### compute_model_averaged_random_effects
+
+| Field | Value |
+|-------|-------|
+| **Description** | Average random effects across models using Akaike weights |
+| **Inputs** | `models: List[MixedLM]` (fitted models), `weights: np.ndarray` (Akaike weights) |
+| **Outputs** | `pd.DataFrame` (averaged random effects per participant) |
+
+### compute_unconditional_variance
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute unconditional variance of model parameters accounting for model uncertainty |
+| **Inputs** | `estimates: List[float]` (parameter estimates), `variances: List[float]` (parameter variances), `weights: np.ndarray` (Akaike weights) |
+| **Outputs** | `float` (unconditional variance) |
+
+### identify_competitive_models
+
+| Field | Value |
+|-------|-------|
+| **Description** | Identify models within delta AIC threshold as competitive |
+| **Inputs** | `aic_values: List[float]` (model AICs), `delta_threshold: float = 2.0`, `max_models: int = 10` |
+| **Outputs** | `List[int]` (indices of competitive models) |
+
+### run_model_averaging_pipeline
+
+| Field | Value |
+|-------|-------|
+| **Description** | Complete model averaging pipeline from model selection to averaged results |
+| **Inputs** | `data: pd.DataFrame` (input data), `formulas: List[str]` (model formulas), `groups: str = 'composite_ID'`, `delta_aic: float = 2.0` |
+| **Outputs** | `Dict` with keys: averaged_predictions, averaged_variance, model_weights, selected_models |
+
+---
+
+## Module: tools.model_selection
+
+### build_formula
+
+| Field | Value |
+|-------|-------|
+| **Description** | Build model formula string from components |
+| **Inputs** | `outcome: str` (dependent variable), `predictors: List[str]` (independent variables), `random: str = None` (random effects) |
+| **Outputs** | `str` (complete model formula) |
+
+### log
+
+| Field | Value |
+|-------|-------|
+| **Description** | Logarithm transformation for model selection (natural log) |
+| **Inputs** | `x: Union[float, np.ndarray]` (input value(s)) |
+| **Outputs** | `Union[float, np.ndarray]` (log-transformed value(s)) |
+
+---
+
+## Module: tools.sem_calibration
+
+### compute_difference_score_reliability
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compute reliability of difference scores for confidence-accuracy calibration |
+| **Inputs** | `reliability_x: float` (confidence reliability), `reliability_y: float` (accuracy reliability), `correlation: float` (confidence-accuracy correlation) |
+| **Outputs** | `float` (difference score reliability) |
+
+### quick_sem_calibration
+
+| Field | Value |
+|-------|-------|
+| **Description** | Quick structural equation model for calibration analysis |
+| **Inputs** | `confidence: np.ndarray` (confidence ratings), `accuracy: np.ndarray` (accuracy scores), `method: str = 'ml'` (estimation method) |
+| **Outputs** | `Dict` with keys: calibration_coefficient, standard_error, p_value, model_fit |
+
+### fit_latent_difference
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit latent difference score model for calibration |
+| **Inputs** | `data: pd.DataFrame` (with confidence and accuracy), `indicators_conf: List[str]`, `indicators_acc: List[str]` |
+| **Outputs** | `SEMResults` object with latent calibration estimates |
+
+### fit_residualized
+
+| Field | Value |
+|-------|-------|
+| **Description** | Fit residualized calibration model (confidence regressed on accuracy) |
+| **Inputs** | `confidence: np.ndarray`, `accuracy: np.ndarray` |
+| **Outputs** | `Dict` with keys: residual_variance, r_squared, calibration_index |
+
+### get_latent_calibration
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract latent calibration scores from SEM model |
+| **Inputs** | `model: SEMResults` (fitted SEM), `data: pd.DataFrame` (input data) |
+| **Outputs** | `np.ndarray` (latent calibration factor scores) |
+
+### get_model_fit
+
+| Field | Value |
+|-------|-------|
+| **Description** | Extract model fit indices from SEM results |
+| **Inputs** | `model: SEMResults` (fitted model) |
+| **Outputs** | `Dict` with keys: chi2, df, p_value, CFI, TLI, RMSEA, SRMR |
+
+### compare_approaches
+
+| Field | Value |
+|-------|-------|
+| **Description** | Compare different calibration measurement approaches |
+| **Inputs** | `data: pd.DataFrame` (calibration data), `approaches: List[str] = ['difference', 'residual', 'latent']` |
+| **Outputs** | `pd.DataFrame` (comparison of reliability, validity, and model fit across approaches) |
+
+### save_results
+
+| Field | Value |
+|-------|-------|
+| **Description** | Save SEM calibration results to file |
+| **Inputs** | `results: Dict` (analysis results), `filepath: str` (output path) |
+| **Outputs** | `None` (writes to file) |
+
+---
+
+## Module: tools.plotting
+
+### plot_comparison_bars
+
+| Field | Value |
+|-------|-------|
+| **Description** | Create bar plot comparing groups or conditions |
+| **Inputs** | `data: pd.DataFrame` (plot data), `x: str` (x-axis variable), `y: str` (y-axis variable), `hue: str = None` (grouping variable) |
+| **Outputs** | `matplotlib.figure.Figure` object |
+
+### plot_panel
+
+| Field | Value |
+|-------|-------|
+| **Description** | Create multi-panel plot grid for complex visualizations |
+| **Inputs** | `data: pd.DataFrame`, `panels: List[Dict]` (panel specifications), `ncols: int = 2` |
+| **Outputs** | `matplotlib.figure.Figure` object |
+
+### plot_piecewise_trajectory
+
+| Field | Value |
+|-------|-------|
+| **Description** | Plot piecewise linear trajectories with segment boundaries |
+| **Inputs** | `data: pd.DataFrame` (trajectory data), `x: str` (time variable), `y: str` (outcome), `segment: str` (segment indicator) |
+| **Outputs** | `matplotlib.figure.Figure` object |
+
+---
+
+## Module: tools.validation (Additional Functions)
+
+### generate_validation_report
+
+| Field | Value |
+|-------|-------|
+| **Description** | Generate comprehensive validation report for analysis results |
+| **Inputs** | `results: Dict` (analysis results), `checks: List[str]` (validation checks to perform) |
+| **Outputs** | `Dict` with keys: passed_checks, failed_checks, warnings, report_text |
+
+### run_lmm_sensitivity_analyses
+
+| Field | Value |
+|-------|-------|
+| **Description** | Run sensitivity analyses for LMM assumptions and specifications |
+| **Inputs** | `model: MixedLM` (fitted model), `data: pd.DataFrame` (input data), `analyses: List[str] = ['outliers', 'normality', 'heteroscedasticity']` |
+| **Outputs** | `Dict` with sensitivity analysis results per check |
+
+### save_validation_report
+
+| Field | Value |
+|-------|-------|
+| **Description** | Save validation report to file with timestamp |
+| **Inputs** | `report: Dict` (validation report), `filepath: str` (output path) |
+| **Outputs** | `None` (writes to file) |
+
+### validate_contrasts
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate contrast specifications and results |
+| **Inputs** | `contrasts: pd.DataFrame` (contrast results), `expected_comparisons: List[str]` |
+| **Outputs** | `Dict` with keys: all_present, missing_comparisons, valid_statistics |
+
+### validate_hypothesis_tests
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate hypothesis test results meet requirements |
+| **Inputs** | `tests: pd.DataFrame` (test results), `alpha: float = 0.05`, `require_dual_p: bool = True` |
+| **Outputs** | `Dict` with keys: valid_tests, invalid_tests, dual_p_compliance |
+
+### validate_lmm_assumptions_comprehensive_v3
+
+| Field | Value |
+|-------|-------|
+| **Description** | Comprehensive LMM assumption validation (version 3 with enhanced diagnostics) |
+| **Inputs** | `model: MixedLM` (fitted model), `data: pd.DataFrame` (input data), `create_plots: bool = True` |
+| **Outputs** | `Dict` with assumption test results, plots, and remedial action recommendations |
+
+### validate_probability_transform
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate probability transformation preserves ordering and bounds |
+| **Inputs** | `original: np.ndarray` (original scale), `transformed: np.ndarray` (probability scale) |
+| **Outputs** | `Dict` with keys: ordering_preserved, bounds_valid, correlation |
+
+---
+
+## Module: tools.config
+
+### expand_env_vars_in_path
+
+| Field | Value |
+|-------|-------|
+| **Description** | Expand environment variables in file paths |
+| **Inputs** | `path: str` (path with potential env vars like $HOME) |
+| **Outputs** | `str` (expanded path) |
+
+### validate_irt_params
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate IRT parameter configuration |
+| **Inputs** | `params: Dict` (IRT parameters) |
+| **Outputs** | `Dict` with keys: valid, errors, warnings |
+
+### validate_paths_exist
+
+| Field | Value |
+|-------|-------|
+| **Description** | Validate that required file paths exist |
+| **Inputs** | `paths: List[str]` (file paths to check) |
+| **Outputs** | `Dict` with keys: all_exist, missing_paths |
+
+---
+
+## Module: tools.variance_decomposition (Additional Functions)
+
+### log
+
+| Field | Value |
+|-------|-------|
+| **Description** | Natural logarithm transformation (wrapper for variance decomposition) |
+| **Inputs** | `x: Union[float, np.ndarray]` (input value(s)) |
+| **Outputs** | `Union[float, np.ndarray]` (log-transformed value(s)) |
+
+---
 **End of Tools Inventory**

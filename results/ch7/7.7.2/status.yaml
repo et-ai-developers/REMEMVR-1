@@ -28,7 +28,7 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "8-step analysis plan created: discrepancy analysis (REMEMVR_z - RAVLT_z) with 3-group ANOVA. Enhanced v5.1 specs: random seeds, bootstrap CIs, power analysis, sensitivity analysis for thresholds, comprehensive remedial actions. Addresses all statistical concerns from validation."
+  context_dump: "8-step plan created with v5.1 enhancements. Pipeline: Discrepancy Analysis + Group ANOVA. Comprehensive validation (4-layer per step). Statistical specs: seed=42, 1000 bootstrap iterations, dual p-values, remedial actions. Dependencies: Ch5 5.1.1 theta + master.xlsx. Runtime: ~45 min."
 
 rq_tools:
   status: pending

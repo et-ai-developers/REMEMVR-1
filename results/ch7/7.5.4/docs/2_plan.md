@@ -1,30 +1,24 @@
 # Analysis Plan: RQ 7.5.4 - Per-Test Sleep Effects on Same-Test Performance
 
 **Research Question:** 7.5.4
-**Created:** 2026-01-02
+**Created:** 2026-01-03
 **Status:** Planning complete, ready for tool specification (rq_tools)
 
 ---
 
 ## Overview
 
-**Research Question:** Does sleep quality BEFORE each test predict THAT test's performance, demonstrating within-person state-dependent sleep effects?
+This RQ examines within-person sleep variability across four REMEMVR test sessions using 400 observations (100 participants x 4 tests). Tests state-dependent effects of sleep hours and sleep quality on same-test episodic memory performance using multilevel modeling with comprehensive statistical validation.
 
-**Analysis Approach:** Multilevel modeling of within-person sleep variability across four test sessions, decomposing state-dependent (acute) sleep effects from trait-dependent (chronic) individual differences.
-
-**Pipeline:** Linear Mixed-Effects Model (LMM) with participant-level bootstrap and hierarchical cross-validation
-**Steps:** 8 total analysis steps (Step 0: dependency validation + Steps 1-7: analysis)
-**Estimated Runtime:** ~45 minutes total
+**Pipeline:** Linear Mixed-Effects Model (LMM) with hierarchical cross-validation and bootstrap confidence intervals
+**Steps:** 8 total analysis steps (Step 0: validation + Steps 1-7: analysis)
+**Estimated Runtime:** ~45 minutes
 
 **Key Decisions Applied:**
 - Decision D068: Dual p-value reporting (uncorrected + corrected)
-- Ch7 Bonferroni: alpha = 0.05/28 = 0.00179 for chapter-level correction
-- Bootstrap/CV seed: 42 for reproducibility
-
-**Data Structure:**
-- 400 observations (100 participants x 4 tests)
-- DERIVED data from Ch5 5.1.1 theta scores + master.xlsx sleep tags
-- Within-person design enables state-dependent effect isolation
+- Bonferroni correction within-RQ (multiple sleep predictors)
+- Participant-level bootstrap and cross-validation (hierarchical structure)
+- Random seed=42 for all randomized procedures
 
 ---
 
@@ -34,21 +28,22 @@
 **Dependencies:** None (prerequisite validation step)
 **Complexity:** Low (<5 minutes)
 
-**Purpose:** Verify required Ch5 outputs and master.xlsx exist before proceeding with sleep-memory analysis
+**Purpose:** Verify required Ch5 outputs and master.xlsx accessibility before proceeding
 
 **Input:**
-- Primary: results/ch5/5.1.1/data/step03_theta_scores.csv
-- Alternative: results/ch5/5.1.1/data/*theta*.csv
-- Fallback: results/ch5/5.1.1/data/*step03*.csv
-- Master data: data/cache/master.xlsx
-- Expected: 100 participants x 4 tests theta scores, SLP tag data
+- Primary: results/ch5/5.1.1/status.yaml (verify rq_results: success)
+- Alternative: results/ch5/5.1.1/data/step03_theta_scores.csv
+- Fallback: results/ch5/5.1.1/data/*theta*.{csv,txt}
+- Expected: Theta scores per UID per test (400 rows expected)
+- Master file: data/cache/master.xlsx (sleep tag access)
+- If Ch5 not found: QUIT with "Ch5 5.1.1 theta output not found"
 
 **Processing:**
-- Check Ch5 5.1.1 status: results/ch5/5.1.1/status.yaml (rq_results = success)
-- Locate theta score file using fallback patterns
-- Verify file contains columns: UID, Test, theta_all
-- Verify master.xlsx accessible and contains SLP tags
-- Log all validation checks with specific patterns found
+- Check Ch5 5.1.1 completed successfully (status.yaml)
+- Locate theta scores file (try multiple patterns)
+- Verify theta file contains 400 rows (100 UIDs x 4 tests)
+- Test master.xlsx accessibility and SLP tag patterns
+- Log all validation results with timestamps
 
 **Output:**
 - data/step00_dependency_validation.txt
@@ -59,483 +54,482 @@ Validation tools MUST be used after dependency check execution.
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_dependency_validation.txt: text file, 10-20 lines
-- Content: validation status for each checked dependency
+- data/step00_dependency_validation.txt: text file with validation results
+- Expected patterns: "Ch5 validation: PASS", "Master.xlsx access: PASS"
 
 *Value Ranges:*
-- N/A (text validation file)
+- N/A (validation step)
 
 *Data Quality:*
-- All required dependencies found and validated
-- Ch5 5.1.1 status confirmed as success
-- Master.xlsx accessible with SLP tags present
+- All dependency checks must pass
+- Ch5 theta file must contain 400 rows
+- Master.xlsx must be accessible
 
 *Log Validation:*
-- Required patterns: "Ch5 5.1.1 status: success", "Theta scores found:", "Master.xlsx accessible", "SLP tags detected"
-- Forbidden patterns: "ERROR", "not found", "missing", "FAIL"
+- Required patterns: "Dependency validation complete", "All checks: PASS"
+- Forbidden patterns: "ERROR", "FAIL", "not found"
 
 **Expected Behavior on Validation Failure:**
-QUIT immediately with specific error message identifying missing dependency
-
----
+Raise error with specific dependency issue, log to logs/step00_validate_dependencies.log, quit immediately
 
 ### Step 1: Extract Per-Test Sleep Data
 **Dependencies:** Step 0 (dependency validation)
-**Complexity:** Medium (~5 minutes)
+**Complexity:** Low (~5 minutes)
 
-**Purpose:** Extract sleep hours and quality data per test session from master.xlsx using SLP tag patterns
+**Purpose:** Extract sleep hours and quality data from master.xlsx for each test session
 
 **Input:**
-- data/cache/master.xlsx (validated in Step 0)
+- data/cache/master.xlsx (SLP tag patterns)
 - Tag patterns: {UID}-RVR-T{N}-SLP-X-HOUR- and {UID}-RVR-T{N}-SLP-X-QUAL-
+- Expected: 4 sleep entries per UID (T1, T2, T3, T4)
 
 **Processing:**
-- Parse master.xlsx for sleep tags across all UIDs and tests (T1, T2, T3, T4)
-- Extract sleep hours (continuous) and sleep quality (Likert scale)
-- Create long-format dataset: UID, Test, Sleep_Hours, Sleep_Quality
-- Handle missing values: flag if participant missing >1 test worth of sleep data
-- Exclude sleep values >3 SD from person mean (likely data entry errors)
-- Compute within-person sleep variability (SD within each UID)
+- Extract sleep hours using pattern: {UID}-RVR-T{N}-SLP-X-HOUR-
+- Extract sleep quality using pattern: {UID}-RVR-T{N}-SLP-X-QUAL-
+- Create long-format dataset: columns UID, Test, Sleep_Hours, Sleep_Quality
+- Handle missing data: exclude tests with missing sleep data
+- Data validation: sleep hours in [0, 24], quality in [1, 10]
+- Remove outliers: >3 SD from person-specific mean
+- Calculate completeness: require >=3 tests per UID for inclusion
 
 **Output:**
-- data/step01_sleep_per_test.csv
+- data/step01_per_test_sleep.csv
 
 **Validation Requirement:**
-Validation tools MUST be used after sleep data extraction.
+Validation tools MUST be used after sleep extraction execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step01_sleep_per_test.csv: 400 rows x 4 columns
-- Columns: UID (object), Test (int), Sleep_Hours (float64), Sleep_Quality (float64)
+- data/step01_per_test_sleep.csv: ~400 rows x 4 columns
+- Columns: UID (object), Test (int), Sleep_Hours (float), Sleep_Quality (int)
 
 *Value Ranges:*
-- Sleep_Hours in [3, 12] (biologically plausible range)
-- Sleep_Quality in [1, 7] (Likert scale)
-- Test in [1, 2, 3, 4] (four test sessions)
+- Sleep_Hours in [0, 24] (biologically plausible)
+- Sleep_Quality in [1, 10] (Likert scale range)
+- Test in [1, 2, 3, 4] (four sessions)
+- UID format consistent with master pattern
 
 *Data Quality:*
-- All 100 UIDs represented
-- Complete cases: >=75% (minimum 300/400 observations)
-- Within-person variability: Sleep_Hours SD > 0.5 for majority of participants
-- No duplicate UID-Test combinations
+- At least 300 rows (>=75% data completion)
+- No negative sleep values
+- All UIDs have >=3 test sessions
+- Missing data <25% per variable
 
 *Log Validation:*
-- Required patterns: "Sleep extraction complete", "400 observations expected", "Missing data: X%"
-- Forbidden patterns: "ERROR", "parsing failed", "no SLP tags found"
+- Required patterns: "Sleep extraction complete", "N=XXX observations"
+- Forbidden patterns: "ERROR", "parsing failed", "no data found"
 
 **Expected Behavior on Validation Failure:**
-Log error with specific issue, proceed if >75% complete data, QUIT if <75%
+Raise error with extraction issue, log to logs/step01_extract_sleep.log, invoke g_debug for data format issues
 
----
+### Step 2: Merge Sleep and Theta Data
+**Dependencies:** Step 1 (sleep extraction), Ch5 5.1.1 (theta scores)
+**Complexity:** Low (~5 minutes)
 
-### Step 2: Merge Sleep Data with Theta Scores
-**Dependencies:** Step 1 (sleep data extraction)
-**Complexity:** Low (~3 minutes)
-
-**Purpose:** Create unified dataset merging per-test sleep variables with corresponding theta scores
+**Purpose:** Create unified dataset combining per-test sleep and memory performance
 
 **Input:**
-- data/step01_sleep_per_test.csv (sleep data by test)
-- results/ch5/5.1.1/data/step03_theta_scores.csv (theta scores by test)
+- data/step01_per_test_sleep.csv (sleep data)
+- results/ch5/5.1.1/data/step03_theta_scores.csv (or fallback pattern)
+- Expected theta format: UID, Test, theta_all, SE
 
 **Processing:**
-- Merge datasets on UID and Test
-- Create 400-row longitudinal dataset
-- Verify merge completeness (expect minimal data loss)
-- Add test session variable (T1, T2, T3, T4) for practice effect control
-- Compute person-mean sleep variables for between-person effect decomposition
-- Center sleep variables within-person: Hours_centered = Hours - person_mean_Hours
+- Load theta scores from Ch5 (theta_all omnibus scores)
+- Merge sleep and theta data on UID and Test
+- Exclude participants with <3 complete test sessions
+- Create person-mean variables for between-person effects:
+  - Sleep_Hours_PM = person mean sleep hours
+  - Sleep_Quality_PM = person mean sleep quality
+- Center within-person variables:
+  - Sleep_Hours_WP = Sleep_Hours - Sleep_Hours_PM
+  - Sleep_Quality_WP = Sleep_Quality - Sleep_Quality_PM
+- Final dataset: 400 rows with complete sleep and theta data
 
 **Output:**
 - data/step02_theta_sleep_merged.csv
 
 **Validation Requirement:**
-Validation tools MUST be used after data merging.
+Validation tools MUST be used after merging execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step02_theta_sleep_merged.csv: 350-400 rows x 8 columns
-- Columns: UID, Test, theta_all, Sleep_Hours, Sleep_Quality, Hours_mean, Quality_mean, Test_Session
+- data/step02_theta_sleep_merged.csv: ~400 rows x 9 columns
+- Columns: UID, Test, theta_all, SE, Sleep_Hours, Sleep_Quality, Sleep_Hours_PM, Sleep_Quality_PM, Sleep_Hours_WP, Sleep_Quality_WP
 
 *Value Ranges:*
 - theta_all in [-3, 3] (IRT ability scale)
-- Sleep_Hours in [3, 12] (unchanged from Step 1)
-- Hours_mean in [5, 10] (person-level average)
-- Test_Session in [1, 2, 3, 4]
+- SE in [0.1, 1.0] (standard errors positive)
+- Sleep_Hours_WP in [-12, 12] (within-person deviation)
+- Sleep_Quality_WP in [-9, 9] (within-person deviation)
 
 *Data Quality:*
-- Successful merge rate >90% (minimal loss from Ch5 data)
-- All variables non-missing for merged cases
-- Within-person centering: mean(Hours_centered) ≈ 0 within each UID
+- All 100 UIDs present (no exclusions expected)
+- Person-mean centering: mean(WP variables) ≈ 0 for each UID
+- Complete data: no missing theta or sleep values
+- Reasonable within-person variability (SD_WP > 0)
 
 *Log Validation:*
-- Required patterns: "Merge complete", "N merged observations:", "Person-mean centering applied"
-- Forbidden patterns: "ERROR", "merge failed", "key columns missing"
+- Required patterns: "Merge complete", "N=400 observations", "100 participants"
+- Forbidden patterns: "ERROR", "missing data", "merge failed"
 
 **Expected Behavior on Validation Failure:**
-Log specific merge issue, attempt alternative column names, QUIT if <300 observations
+Raise error with merge issue, log to logs/step02_merge_data.log, check data compatibility
 
----
-
-### Step 3: Descriptive Analysis and Data Quality Assessment
+### Step 3: Descriptive Analysis and Data Quality
 **Dependencies:** Step 2 (merged dataset)
-**Complexity:** Medium (~5 minutes)
+**Complexity:** Low (~5 minutes)
 
-**Purpose:** Examine within-person sleep variability and data quality before multilevel modeling
+**Purpose:** Examine within-person sleep variability and data quality before modeling
 
 **Input:**
 - data/step02_theta_sleep_merged.csv
 
 **Processing:**
-- Compute descriptive statistics by person and overall
-- Assess within-person sleep variability (require SD > 0.5 for meaningful analysis)
-- Check for outliers using Cook's distance threshold (>4/n)
-- Examine sleep-memory correlations at within and between-person levels
-- Create correlation matrix decomposing within vs between-person effects
-- Document participants with insufficient sleep variability for exclusion consideration
+- Calculate descriptive statistics by variable
+- Compute within-person sleep variability (SD within each UID)
+- Assess sleep range per person (max - min sleep hours/quality)
+- Examine theta distribution and outliers (Cook's D > 4/n threshold)
+- Check correlation between sleep variables (multicollinearity assessment)
+- Summarize missing data patterns and participant exclusions
+- Generate data quality flags for potential issues
 
 **Output:**
 - data/step03_descriptive_stats.csv
-- data/step03_correlation_matrix.csv
-- data/step03_outlier_flagging.csv
 
 **Validation Requirement:**
-Validation tools MUST be used after descriptive analysis.
+Validation tools MUST be used after descriptive analysis execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step03_descriptive_stats.csv: 100+ rows x 6 columns (person-level stats)
-- data/step03_correlation_matrix.csv: 4 x 4 correlation matrix
-- data/step03_outlier_flagging.csv: flagged cases with Cook's D > threshold
+- data/step03_descriptive_stats.csv: summary statistics table
+- Expected sections: overall_stats, within_person_variability, correlations, outliers
 
 *Value Ranges:*
-- Correlations in [-1, 1] (valid correlation bounds)
-- Sleep variability SDs in [0.1, 3.0] (reasonable within-person variation)
-- Outlier flags: binary 0/1
+- Within-person SD > 0 (variability required for analysis)
+- Correlation between sleep variables <0.90 (multicollinearity check)
+- Number of outliers <10% of sample
 
 *Data Quality:*
-- >=80% of participants with meaningful sleep variability (SD > 0.5)
-- Outlier rate <10% (Cook's D flagging)
-- Within-person correlations present and non-zero
+- All 100 participants analyzed
+- Sleep variability present (not all identical values)
+- Theta scores follow expected IRT distribution
+- Reasonable correlation structure
 
 *Log Validation:*
-- Required patterns: "Descriptive analysis complete", "Within-person variability adequate", "Outliers detected: N"
-- Forbidden patterns: "ERROR", "insufficient variability", "correlation failed"
+- Required patterns: "Descriptive analysis complete", "Sleep variability confirmed"
+- Forbidden patterns: "ERROR", "no variability", "excessive missing"
 
 **Expected Behavior on Validation Failure:**
-Log specific data quality issues, proceed with available data, note limitations
+Log warning for data quality issues, proceed unless critical problems detected
 
----
-
-### Step 4: Fit Multilevel Models for Sleep Effects
+### Step 4: Fit Multilevel Models
 **Dependencies:** Step 3 (descriptive analysis)
-**Complexity:** High (~10 minutes)
+**Complexity:** High (~15 minutes including diagnostics)
 
-**Purpose:** Fit linear mixed-effects models to decompose within-person vs between-person sleep effects
+**Purpose:** Fit linear mixed-effects models to test within-person sleep effects
 
 **Input:**
-- data/step02_theta_sleep_merged.csv (primary analysis dataset)
-- data/step03_outlier_flagging.csv (for sensitivity analysis)
+- data/step02_theta_sleep_merged.csv
 
 **Processing:**
-- Model 1: `theta_all ~ Sleep_Hours_centered + Sleep_Quality_centered + Test_Session + (1|UID)`
-- Model 2: Add between-person effects: `+ Hours_mean + Quality_mean`
-- Implementation: statsmodels mixed linear model with REML estimation
-- Random seed: 42 for any stochastic components
-- Extract fixed effects: coefficients, SEs, t-statistics, p-values
-- Extract random effects: participant-level intercepts, ICC
-- Compute effect sizes: standardized betas, R² marginal and conditional
-- Practice effect control: Test_Session as covariate per scholar/stats feedback
+- Model 1 (within-person only): theta_all ~ Sleep_Hours_WP + Sleep_Quality_WP + Test_Session + (1|UID)
+- Model 2 (decomposed effects): theta_all ~ Sleep_Hours_WP + Sleep_Quality_WP + Sleep_Hours_PM + Sleep_Quality_PM + Test_Session + (1|UID)
+- Implementation: statsmodels MixedLM with REML estimation
+- Extract fixed effects: coefficients, standard errors, t-statistics
+- Extract random effects: participant-specific intercepts
+- Compute model fit: AIC, BIC, log-likelihood, R² (marginal and conditional)
+- Test session as covariate: controls for practice effects
+- Multiple comparison correction:
+  - Family: Within-RQ (4 sleep predictors in Model 2)
+  - Bonferroni: alpha = 0.05/4 = 0.0125 per test
+  - Report BOTH uncorrected AND corrected p-values (Decision D068)
 
 **Output:**
-- data/step04_lmm_model1_summary.csv (within-person model)
-- data/step04_lmm_model2_summary.csv (full decomposition model)
-- data/step04_random_effects.csv (participant-level intercepts)
+- data/step04_multilevel_model_results.csv
 
 **Validation Requirement:**
-Validation tools MUST be used after LMM fitting.
+Validation tools MUST be used after model fitting execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step04_lmm_model1_summary.csv: 4 rows x 6 columns (fixed effects table)
-- data/step04_lmm_model2_summary.csv: 6 rows x 6 columns (full model)
-- data/step04_random_effects.csv: 100 rows x 3 columns (UID, intercept, prediction)
+- data/step04_multilevel_model_results.csv: model results table
+- Expected: 2 models x 5-6 predictors each, coefficients with CIs
 
 *Value Ranges:*
-- Coefficients in [-1, 1] (standardized predictors)
-- p-values in [0, 1] (valid probabilities)
-- R² in [0, 1] (variance explained)
-- Random intercepts in [-2, 2] (centered around 0)
+- Coefficients in [-1, 1] (standardized scale expected)
+- Standard errors > 0
+- t-statistics in [-10, 10] (reasonable range)
+- p-values in [0, 1]
+- AIC/BIC positive, reasonable magnitude
 
 *Data Quality:*
-- Model convergence successful (no convergence warnings)
-- All coefficients finite (no NaN values)
-- Standard errors positive and reasonable
-- ICC between 0.1-0.8 (meaningful clustering)
+- Both models converged successfully
+- Random effects variance > 0 (participant differences)
+- Fixed effects reasonable magnitude
+- No convergence warnings
 
 *Log Validation:*
-- Required patterns: "Model 1 converged successfully", "Model 2 fitted", "Random effects extracted"
+- Required patterns: "Model fitting complete", "REML converged"
+- Required patterns: "Model 1 fitted", "Model 2 fitted"
 - Forbidden patterns: "ERROR", "convergence failed", "singular fit"
 
 **Expected Behavior on Validation Failure:**
-Log convergence issues, try alternative optimization, QUIT if persistent convergence failure
+Check convergence issues, try different optimizers, log to logs/step04_fit_models.log
 
----
+### Step 5: Model Diagnostics and Assumptions
+**Dependencies:** Step 4 (fitted models)
+**Complexity:** Medium (~10 minutes)
 
-### Step 5: Model Diagnostics and Assumption Checking
-**Dependencies:** Step 4 (LMM models fitted)
-**Complexity:** Medium (~8 minutes)
-
-**Purpose:** Comprehensive validation of LMM assumptions with remedial actions if violated
+**Purpose:** Validate LMM assumptions and check model adequacy
 
 **Input:**
-- data/step04_lmm_model1_summary.csv (fitted models)
-- Model objects from Step 4 (residuals, fitted values)
+- data/step04_multilevel_model_results.csv (fitted models)
+- data/step02_theta_sleep_merged.csv (for residual computation)
 
 **Processing:**
-- Check residual normality: Shapiro-Wilk test + Q-Q plots
-- Test homoscedasticity: Breusch-Pagan test + residual vs fitted plots
-- Examine random effects normality: Q-Q plots for random intercepts
-- Test multicollinearity: VIF for sleep predictors
-- Detect influential observations: Cook's distance for mixed models
+- Extract residuals from both models
+- Check normality: Shapiro-Wilk test on residuals
+- Check homoscedasticity: Breusch-Pagan test
+- Check multicollinearity: VIF for sleep predictors
+- Examine influential observations: Cook's D > 4/n
+- Test random effects normality: Q-Q plot of participant intercepts
+- Residual vs fitted plots: visual inspection for patterns
 - Remedial actions if violated:
-  - Normality p < 0.05: Use bootstrap CIs (1000 iterations, seed=42)
-  - Heteroscedasticity p < 0.05: Report HC3 robust SEs
+  - Normality p < 0.05: Report bootstrap CIs as primary (see Step 6)
+  - Heteroscedasticity p < 0.05: Add robust standard errors (HC3)
   - VIF > 5: Document multicollinearity, consider ridge if VIF > 10
-  - Outliers (Cook's D > 4/n): Report with/without outliers
+  - Outliers (Cook's D > 4/n): Report results with/without outliers
 
 **Output:**
-- data/step05_assumption_tests.csv (diagnostic test results)
-- data/step05_model_diagnostics.txt (summary + remedial actions)
+- data/step05_model_diagnostics.csv
 
 **Validation Requirement:**
-Validation tools MUST be used after model diagnostics.
+Validation tools MUST be used after diagnostic execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step05_assumption_tests.csv: 5-8 rows x 3 columns (test, statistic, p_value)
-- data/step05_model_diagnostics.txt: text summary, 20-40 lines
+- data/step05_model_diagnostics.csv: diagnostic test results
+- Expected tests: normality, homoscedasticity, VIF, Cook's D, random effects
 
 *Value Ranges:*
-- Test statistics: context-dependent but finite
-- p-values in [0, 1]
-- VIF values in [1, 15] (higher values indicate multicollinearity)
+- VIF values in [1, 10] (multicollinearity acceptable if <10)
+- Cook's D values in [0, 1] (outlier detection)
+- Shapiro-Wilk p-values in [0, 1]
+- Number of outliers <10% of sample
 
 *Data Quality:*
-- All diagnostic tests completed successfully
+- All diagnostic tests completed
 - Remedial actions documented if assumptions violated
-- Clear pass/fail determination for each assumption
+- Residual patterns reasonable
+- No critical assumption violations
 
 *Log Validation:*
-- Required patterns: "Assumption checking complete", "Normality test:", "Heteroscedasticity test:"
-- Forbidden patterns: "ERROR", "diagnostic failed", "cannot compute"
+- Required patterns: "Diagnostics complete", "Assumption checks: COMPLETE"
+- Required patterns: "Normality: [PASS/FAIL]", "Homoscedasticity: [PASS/FAIL]"
+- Forbidden patterns: "ERROR", "test failed to run"
 
 **Expected Behavior on Validation Failure:**
-Log specific diagnostic failure, attempt alternative tests, proceed with documented limitations
+Document assumption violations, implement remedial actions, proceed with robust methods if needed
 
----
+### Step 6: Cross-Validation and Bootstrap
+**Dependencies:** Step 5 (model diagnostics)
+**Complexity:** High (~15 minutes)
 
-### Step 6: Effect Decomposition and Multiple Comparison Correction
-**Dependencies:** Step 5 (diagnostics complete)
-**Complexity:** Medium (~7 minutes)
-
-**Purpose:** Decompose within vs between-person sleep effects with appropriate multiple comparison corrections
+**Purpose:** Assess model generalizability and compute robust confidence intervals
 
 **Input:**
-- data/step04_lmm_model2_summary.csv (full decomposition model)
-- data/step05_assumption_tests.csv (for correction guidance)
+- data/step02_theta_sleep_merged.csv
 
 **Processing:**
-- Extract within-person effects: Sleep_Hours_centered, Sleep_Quality_centered coefficients
-- Extract between-person effects: Hours_mean, Quality_mean coefficients
-- Compare effect sizes: within vs between-person sleep effects
-- Multiple comparison correction:
-  - Family: Within-RQ (4 main effects: 2 within + 2 between-person)
-  - Bonferroni: alpha = 0.05/4 = 0.0125 per test
-  - Also compute FDR using Benjamini-Hochberg procedure
-  - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Compute standardized effect sizes: Cohen's f² for model comparison
-- Format results: p_uncorrected, p_bonferroni, p_fdr for each effect
-
-**Output:**
-- data/step06_effect_decomposition.csv
-- data/step06_multiple_comparisons.csv
-
-**Validation Requirement:**
-Validation tools MUST be used after effect decomposition.
-
-**Substance Validation Criteria (for rq_inspect post-execution validation):**
-
-*Output Files:*
-- data/step06_effect_decomposition.csv: 4 rows x 8 columns (effect, estimate, se, ci_lower, ci_upper, p_uncorrected, p_bonferroni, p_fdr)
-- data/step06_multiple_comparisons.csv: 4 rows x 5 columns (correction summary)
-
-*Value Ranges:*
-- Estimates in [-1, 1] (standardized effects)
-- Standard errors > 0 (positive values)
-- p-values in [0, 1] for all correction methods
-- Confidence intervals: ci_lower < estimate < ci_upper
-
-*Data Quality:*
-- All 4 main effects represented
-- Bonferroni corrections properly applied
-- FDR adjustments computed
-- Dual p-value reporting per Decision D068
-
-*Log Validation:*
-- Required patterns: "Effect decomposition complete", "Multiple corrections applied", "Within/between effects computed"
-- Forbidden patterns: "ERROR", "correction failed", "invalid p-values"
-
-**Expected Behavior on Validation Failure:**
-Log specific correction issue, use uncorrected values, note limitation in results
-
----
-
-### Step 7: Cross-Validation and Bootstrap Confidence Intervals
-**Dependencies:** Step 6 (effect decomposition)
-**Complexity:** High (~12 minutes including bootstrap)
-
-**Purpose:** Assess model generalizability and provide robust confidence intervals for sleep effects
-
-**Input:**
-- data/step02_theta_sleep_merged.csv (for resampling)
-- Model specifications from Steps 4-6
-
-**Processing:**
-- Participant-level 5-fold cross-validation:
-  - Implementation: sklearn.model_selection.GroupKFold with groups=UID
+- **Cross-Validation:**
+  - Implement 5-fold participant-level cross-validation
+  - Use GroupKFold from sklearn.model_selection (groups=UID)
   - Random seed: 42 for reproducibility
-  - For each fold: fit LMM on training participants, evaluate on test participants
-  - Compute R² marginal and conditional for each fold
-  - Flag overfitting if train-test gap > 0.10
-- Bootstrap confidence intervals for within-person effects:
-  - Participant-level bootstrap (preserves within-participant correlation)
+  - For each fold: fit Model 2 on training UIDs, evaluate on test UIDs
+  - Compute R² for each fold (marginal and conditional)
+  - Flag overfitting if train-test R² gap > 0.10
+- **Bootstrap Confidence Intervals:**
+  - Participant-level block bootstrap (preserves within-participant correlation)
   - Iterations: 1000
   - Random seed: 42 for reproducibility
-  - Resample participants WITH replacement, keep all their observations
-  - For each iteration: fit Model 1, extract sleep effect coefficients
+  - For each iteration: resample 100 UIDs with replacement, keep all observations
+  - Fit Model 2, extract fixed effects coefficients
   - 95% CI: percentile method (2.5th, 97.5th percentiles)
-- Document bootstrap CI coverage and width
+- **Sensitivity Analysis:**
+  - Exclude outliers (Cook's D > 4/n) and refit models
+  - Compare effect sizes with/without outliers
 
 **Output:**
-- data/step07_cross_validation_results.csv
-- data/step07_bootstrap_CIs.csv
+- data/step06_cross_validation.csv
+- data/step06_bootstrap_CIs.csv
 
 **Validation Requirement:**
-Validation tools MUST be used after cross-validation and bootstrap.
+Validation tools MUST be used after CV/bootstrap execution.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step07_cross_validation_results.csv: 5 rows x 4 columns (fold, train_R2, test_R2, gap)
-- data/step07_bootstrap_CIs.csv: 2 rows x 6 columns (effect, estimate, bootstrap_mean, ci_lower, ci_upper, ci_width)
+- data/step06_cross_validation.csv: CV results (5 rows for folds)
+- data/step06_bootstrap_CIs.csv: bootstrap CIs (4 rows for sleep predictors)
 
 *Value Ranges:*
-- R² values in [0, 1] (proportion of variance)
-- Bootstrap means close to original estimates (within 10%)
-- CI bounds: ci_lower < estimate < ci_upper
-- CI widths > 0 (positive intervals)
+- CV R² in [0, 1] (reasonable model performance)
+- Bootstrap CIs contain original estimates
+- CV standard deviation <0.20 (stable performance)
 
 *Data Quality:*
 - All 5 CV folds completed successfully
-- Bootstrap: 1000 iterations completed
-- No excessive overfitting (gaps < 0.10)
-- Bootstrap CIs cover original estimates
+- Bootstrap iterations: 1000 completed
+- CIs have proper ordering (lower < estimate < upper)
+- No convergence failures in bootstrap
 
 *Log Validation:*
-- Required patterns: "Cross-validation complete: 5 folds", "Bootstrap complete: 1000 iterations", "CI coverage validated"
-- Forbidden patterns: "ERROR", "CV failed", "bootstrap convergence"
+- Required patterns: "Cross-validation complete: 5 folds"
+- Required patterns: "Bootstrap complete: 1000 iterations"
+- Forbidden patterns: "ERROR", "convergence failed", "fold failed"
 
 **Expected Behavior on Validation Failure:**
-Log specific CV/bootstrap failure, attempt fewer iterations/folds, proceed with available results
+Retry with different CV strategy, reduce bootstrap iterations if memory issues, log problems
+
+### Step 7: Power Analysis and Effect Size Interpretation
+**Dependencies:** Step 6 (CV and bootstrap)
+**Complexity:** Medium (~5 minutes)
+
+**Purpose:** Evaluate statistical power and interpret effect sizes for sleep interventions
+
+**Input:**
+- data/step04_multilevel_model_results.csv
+- data/step06_bootstrap_CIs.csv
+
+**Processing:**
+- **Post-hoc Power Analysis:**
+  - Given: N=400 observations, ~100 level-2 units (participants)
+  - Model: 4-6 fixed effects predictors
+  - Alpha: 0.05/4 = 0.0125 (Bonferroni corrected within-RQ)
+  - Calculate power for observed within-person sleep effects
+  - Use Monte Carlo simulation or analytic approximation
+  - Report power for each sleep predictor
+- **Effect Size Interpretation:**
+  - Convert standardized effects to practical units
+  - Sleep hours: effect per 1-hour change in sleep
+  - Sleep quality: effect per 1-point change in quality rating
+  - Compare within-person vs between-person effect sizes
+  - Clinical significance: meaningful for sleep interventions (>0.05 theta units)
+- **Model Comparison:**
+  - LRT test: Model 1 vs Model 2 (within vs decomposed effects)
+  - AIC/BIC comparison for model selection
+
+**Output:**
+- data/step07_power_effect_sizes.csv
+
+**Validation Requirement:**
+Validation tools MUST be used after power analysis execution.
+
+**Substance Validation Criteria (for rq_inspect post-execution validation):**
+
+*Output Files:*
+- data/step07_power_effect_sizes.csv: power and effect size results
+- Expected: power estimates, practical interpretations, model comparisons
+
+*Value Ranges:*
+- Power estimates in [0, 1]
+- Effect sizes in [-1, 1] (practical range)
+- LRT p-values in [0, 1]
+
+*Data Quality:*
+- Power analysis completed for all predictors
+- Effect size interpretations provided
+- Model comparison results available
+
+*Log Validation:*
+- Required patterns: "Power analysis complete", "Effect sizes interpreted"
+- Forbidden patterns: "ERROR", "calculation failed"
+
+**Expected Behavior on Validation Failure:**
+Use alternative power calculation method, document limitations if power cannot be computed
 
 ---
 
 ## Expected Outputs
 
-### Data Files (ALL analysis inputs and outputs in data/)
-- data/step00_dependency_validation.txt
-- data/step01_sleep_per_test.csv
-- data/step02_theta_sleep_merged.csv
-- data/step03_descriptive_stats.csv
-- data/step03_correlation_matrix.csv
-- data/step03_outlier_flagging.csv
-- data/step04_lmm_model1_summary.csv
-- data/step04_lmm_model2_summary.csv
-- data/step04_random_effects.csv
-- data/step05_assumption_tests.csv
-- data/step05_model_diagnostics.txt
-- data/step06_effect_decomposition.csv
-- data/step06_multiple_comparisons.csv
-- data/step07_cross_validation_results.csv
-- data/step07_bootstrap_CIs.csv
+### Data Files (ALL analysis inputs and outputs)
+- data/step00_dependency_validation.txt (dependency check results)
+- data/step01_per_test_sleep.csv (extracted sleep data per test)
+- data/step02_theta_sleep_merged.csv (400 rows: UID x Test x Sleep x Theta)
+- data/step03_descriptive_stats.csv (within-person sleep variability)
+- data/step04_multilevel_model_results.csv (fixed effects, random effects, model fit)
+- data/step05_model_diagnostics.csv (assumption checks, remedial actions)
+- data/step06_cross_validation.csv (CV performance metrics)
+- data/step06_bootstrap_CIs.csv (bootstrapped confidence intervals)
+- data/step07_power_effect_sizes.csv (power analysis, effect interpretation)
 
-### Logs (ONLY execution logs in logs/)
+### Logs (ONLY execution logs)
 - logs/step00_validate_dependencies.log
-- logs/step01_extract_sleep_data.log
+- logs/step01_extract_sleep.log
 - logs/step02_merge_data.log
 - logs/step03_descriptive_analysis.log
-- logs/step04_fit_lmm.log
+- logs/step04_fit_models.log
 - logs/step05_model_diagnostics.log
-- logs/step06_effect_decomposition.log
-- logs/step07_crossval_bootstrap.log
+- logs/step06_cross_validation.log
+- logs/step07_power_analysis.log
 
 ### Plots (EMPTY until rq_plots runs)
-- Plot source CSVs will be created in data/ for visualization
-- rq_plots will generate final PNG/PDF files in plots/
+Note: Plot source CSVs created in data/ folder for rq_plots agent:
+- data/step03_descriptive_plot_data.csv (for sleep variability plots)
+- data/step05_diagnostic_plot_data.csv (for residual plots)
+- data/step06_effect_plot_data.csv (for effect size visualization)
 
 ### Results (EMPTY until rq_results runs)
-- rq_results will create summary.md with key findings
+Note: summary.md created by rq_results agent using all data/ outputs
 
 ---
 
 ## Expected Data Formats
 
 ### Step-to-Step Transformations
-1. **Steps 0-1:** Raw SLP tags -> structured per-test sleep data (wide to long)
-2. **Step 2:** Sleep + theta merge -> unified longitudinal dataset (400 rows)
-3. **Step 3:** Descriptive summaries -> quality assessment and outlier detection
-4. **Step 4:** Longitudinal data -> multilevel models with random effects
-5. **Steps 5-7:** Model validation -> robust inference with corrections and CIs
+1. **Step 1->2:** Sleep data (wide by test) merged with theta scores on UID+Test
+2. **Step 2->3:** Long format maintained, person-mean variables added
+3. **Step 3->4:** Same dataset used for model fitting with descriptive context
+4. **Step 4->5:** Model objects converted to residuals for diagnostics
+5. **Step 5->6:** Raw data resampled for CV/bootstrap procedures
+6. **Step 6->7:** Effect estimates used for power and interpretation
 
 ### Column Naming Conventions
-- **ID variables:** UID (participant), Test (session 1-4)
-- **Sleep variables:** Sleep_Hours, Sleep_Quality, Hours_centered, Hours_mean
-- **Memory variable:** theta_all (IRT ability estimate)
-- **Effects:** estimate, se, ci_lower, ci_upper, p_uncorrected, p_bonferroni, p_fdr
+- **UID:** Participant identifier (consistent with master.xlsx)
+- **Test:** Test session number (1, 2, 3, 4)
+- **theta_all:** Omnibus ability estimate from Ch5 IRT analysis
+- **Sleep_Hours:** Actual sleep hours before test
+- **Sleep_Quality:** Subjective sleep quality rating (1-10)
+- **Sleep_Hours_WP:** Within-person centered sleep hours
+- **Sleep_Quality_WP:** Within-person centered sleep quality
+- **Sleep_Hours_PM:** Person-mean sleep hours (between-person)
+- **Sleep_Quality_PM:** Person-mean sleep quality (between-person)
 
 ### Data Type Constraints
-- UID: object (string identifiers, non-nullable)
-- Test: int64 (1-4, non-nullable)
-- Sleep_Hours: float64 (3-12 range, nullable <5%)
-- Sleep_Quality: float64 (1-7 range, nullable <5%)
-- theta_all: float64 (-3 to +3 range, non-nullable after merge)
+- **UID:** object (string identifier)
+- **Test:** int64 (1-4 range)
+- **theta_all:** float64 (IRT scale, nullable=False)
+- **Sleep variables:** float64 (nullable=False after cleaning)
+- **Model results:** float64 for coefficients, p-values, CIs
 
 ---
 
 ## Cross-RQ Dependencies
 
-**Source RQ:** Ch5 5.1.1 (Overall theta scores per test)
+### Dependency on Ch5 5.1.1
+**Required Output:** Omnibus theta scores per participant per test
+**File Location:** results/ch5/5.1.1/data/step03_theta_scores.csv
+**Format Expected:** UID, Test, theta_all, SE (400 rows)
+**Fallback Strategy:** Search for *theta*.{csv,txt} pattern in Ch5 5.1.1/data/
+**Validation:** Step 0 checks Ch5 completion before proceeding
 
-**Required Files:**
-- Primary: results/ch5/5.1.1/data/step03_theta_scores.csv
-- Alternative: results/ch5/5.1.1/data/*theta*.csv
-- Fallback: results/ch5/5.1.1/data/step03*.csv
-
-**Expected Content:**
-- 400 rows (100 UIDs x 4 tests)
-- Columns: UID, Test, theta_all
-- Data format: IRT ability estimates in [-3, +3] range
-
-**Dependency Verification:**
-- Step 0 validates Ch5 5.1.1 completion and file existence
-- If missing: QUIT with "Ch5 5.1.1 theta scores not found"
-- Alternative file discovery using pattern matching
+### No Dependencies on Other Ch7 RQs
+This RQ uses derived data from Ch5 and master.xlsx only. Independent of other Ch7 analyses.
 
 ---
 
@@ -544,18 +538,47 @@ Log specific CV/bootstrap failure, attempt fewer iterations/folds, proceed with 
 **CRITICAL MANDATE:**
 Every analysis step in this plan MUST use validation tools after analysis tool execution.
 
-### Validation Architecture
-- **4-layer validation** for each step: Output Files, Value Ranges, Data Quality, Log Validation
-- **Substance criteria** embedded for rq_inspect post-execution validation
-- **Circuit breakers** for critical failures (dependency missing, convergence failure)
-- **Quality thresholds** for data completeness and model validity
+### Validation Requirements By Step
 
-### Key Validation Checkpoints
-- **Step 0:** Dependency validation prevents pipeline failure
-- **Step 2:** Merge validation ensures data integrity
-- **Step 4:** Model convergence validation prevents invalid inference
-- **Step 5:** Assumption validation triggers remedial actions
-- **Step 7:** Bootstrap/CV validation ensures robust uncertainty quantification
+#### Step 0: Validate Dependencies
+**Validation Requirement:** Dependency validation MUST pass before proceeding
+**Validation Tools:** File existence checks, data format validation
+**Failure Action:** QUIT with specific dependency error message
+
+#### Step 1: Extract Sleep Data
+**Validation Requirement:** Sleep extraction completeness and format validation
+**Validation Tools:** Data range checks, missing data assessment
+**Failure Action:** Retry extraction, log parsing errors, invoke g_debug if needed
+
+#### Step 2: Merge Sleep and Theta Data
+**Validation Requirement:** Merge completeness and person-mean centering validation
+**Validation Tools:** Row count verification, centering accuracy checks
+**Failure Action:** Check data compatibility, retry merge with different approaches
+
+#### Step 3: Descriptive Analysis
+**Validation Requirement:** Sleep variability confirmation, outlier detection
+**Validation Tools:** Distribution checks, correlation validation
+**Failure Action:** Log data quality warnings, proceed unless critical issues
+
+#### Step 4: Fit Multilevel Models
+**Validation Requirement:** Model convergence and parameter reasonableness
+**Validation Tools:** Convergence status, effect size bounds checking
+**Failure Action:** Try alternative optimizers, simplify random structure if needed
+
+#### Step 5: Model Diagnostics
+**Validation Requirement:** Assumption test completion and remedial action documentation
+**Validation Tools:** Statistical test execution, threshold evaluation
+**Failure Action:** Implement remedial actions, document assumption violations
+
+#### Step 6: Cross-Validation and Bootstrap
+**Validation Requirement:** CV/bootstrap completion with reasonable uncertainty estimates
+**Validation Tools:** Iteration completion checks, CI bounds validation
+**Failure Action:** Reduce iterations, try alternative resampling if memory constraints
+
+#### Step 7: Power Analysis
+**Validation Requirement:** Power calculation completion and effect interpretation
+**Validation Tools:** Power estimate bounds, practical significance assessment
+**Failure Action:** Use alternative power methods, document calculation limitations
 
 ---
 
@@ -564,40 +587,28 @@ Every analysis step in this plan MUST use validation tools after analysis tool e
 **Total Steps:** 8 (Step 0: validation + Steps 1-7: analysis)
 **Estimated Runtime:** ~45 minutes
 **Cross-RQ Dependencies:** Ch5 5.1.1 (theta scores)
-**Primary Outputs:** Within-person sleep effects with robust statistical inference
+**Primary Outputs:** Multilevel model results with within-person sleep effects
 **Validation Coverage:** 100% (all 8 steps have 4-layer validation requirements)
 
 **Key Hypothesis:** Poor sleep before a specific test will impair that test's performance (within-person effect), independent of individual differences in overall sleep quality.
 
 **Critical Methodological Notes:**
-- Within-person design isolates state-dependent sleep effects from trait differences
-- Multilevel modeling appropriately handles hierarchical data structure (400 observations nested in 100 participants)
-- Bootstrap and cross-validation provide robust uncertainty quantification
-- Multiple comparison corrections address family-wise error rate
-- Practice effects controlled via Test_Session covariate per validation feedback
-- All randomized procedures use seed=42 for reproducibility
-
-**Statistical Implementation Highlights:**
-- Random seed: 42 for all CV, bootstrap, and stochastic procedures
-- Bootstrap: 1000 iterations, participant-level resampling, percentile CIs
-- Cross-validation: 5-fold GroupKFold respecting participant clustering
-- Multiple comparisons: Within-RQ family, Bonferroni + FDR, dual reporting (D068)
-- Assumption violations: Specific remedial actions (bootstrap CIs, robust SEs, outlier handling)
+- Within-person design controls for individual differences in chronic sleep patterns
+- Participant-level CV and bootstrap respect hierarchical data structure
+- Multiple comparison correction applied within-RQ (4 sleep predictors)
+- Decision D068 ensures dual p-value reporting throughout
+- Random seed=42 ensures full reproducibility
+- Practice effects controlled via test session covariate
 
 ---
 
 **Next Steps (Workflow):**
 1. User reviews and approves this plan
-2. rq_tools reads this plan -> creates 3_tools.yaml (specify tools from tool_inventory.md)
+2. rq_tools reads this plan -> creates 3_tools.yaml
 3. rq_analysis reads plan + tools -> creates 4_analysis.yaml
-4. g_code reads analysis -> generates executable Python code
+4. g_code reads analysis -> generates executable code
 
 ---
 
 **Version History:**
-- v1.0 (2026-01-02): Initial plan created by rq_planner v5.1 agent
-  - Enhanced statistical specifications (seeds, bootstrap, CV, corrections)
-  - Comprehensive 4-layer validation for all 8 steps
-  - Cross-RQ dependency validation with fallback paths
-  - Practice effect control per validation feedback
-  - Decision D068 dual p-value reporting integrated
+- v1.0 (2026-01-03): Initial plan created by rq_planner agent with v5.1 enhanced specifications

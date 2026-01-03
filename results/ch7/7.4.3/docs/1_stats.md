@@ -1,9 +1,9 @@
 ## Statistical Validation Report
 
-**Validation Date:** 2026-01-02 22:15
+**Validation Date:** 2026-01-03 15:30
 **Agent:** rq_stats v5.0
-**Status:** ❌ REJECTED
-**Overall Score:** 8.3 / 10.0
+**Status:** ⚠️ CONDITIONAL 
+**Overall Score:** 9.1 / 10.0
 
 ---
 
@@ -12,11 +12,11 @@
 | Category | Score | Max | Status |
 |----------|-------|-----|--------|
 | Statistical Appropriateness | 2.8 | 3.0 | ✅ |
-| Tool Availability | 1.4 | 2.0 | ⚠️ |
+| Tool Availability | 2.0 | 2.0 | ✅ |
 | Parameter Specification | 1.6 | 2.0 | ⚠️ |
 | Validation Procedures | 1.9 | 2.0 | ✅ |
-| Devil's Advocate Analysis | 0.6 | 1.0 | ⚠️ |
-| **TOTAL** | **8.3** | **10.0** | **❌ REJECTED** |
+| Devil's Advocate Analysis | 0.8 | 1.0 | ✅ |
+| **TOTAL** | **9.1** | **10.0** | **⚠️ CONDITIONAL** |
 
 ---
 
@@ -25,68 +25,48 @@
 #### Statistical Appropriateness (2.8 / 3.0)
 
 **Criteria Checklist:**
-- [x] Method matches RQ - Correlation analysis appropriate for predictive validity question
-- [x] Assumptions checkable with N=100 data
-- [x] Methodological soundness - Standard correlation methods, appropriate complexity
-- [x] Avoids unnecessary complexity - Simple correlation approach fits RQ scope
+- [x] Method matches RQ type (correlation analysis appropriate for predictive validity)
+- [x] Model structure appropriate for data (correlation with dependent comparisons)
+- [x] Analysis appropriate complexity (suitable for N=100, not over-complex)
+- [x] Assumptions checkable with REMEMVR data
+- [ ] Complete methodological soundness (minor calculation error present)
 
 **Assessment:**
-The statistical approach is well-matched to the research question examining whether RPM predicts integration performance differently than single-domain performance. Correlation analysis with Steiger's Z-test for comparing dependent correlations is methodologically sound and appropriate for this type of differential prediction analysis. The complexity level is appropriate - not over-engineered for what is essentially a straightforward correlation comparison study.
+The multiple correlation analysis with Steiger's Z-test is highly appropriate for examining differential prediction by fluid intelligence. The approach correctly recognizes the need to compare dependent correlations (both share RPM as predictor) rather than independent correlations. Bootstrap confidence intervals and cross-validation add methodological rigor appropriate for the sample size.
 
 **Strengths:**
-- Appropriate statistical method for predictive validity research question
-- Includes proper dependent correlation comparison test (Steiger's Z-test)
-- Acknowledges multiple testing correction need
-- Specifies sensitivity analyses and assumption checking procedures
+- Correct use of Steiger's Z-test for dependent correlation comparison
+- Integration complexity operationalized through Order (-O-) vs What-only contrast
+- Comprehensive sensitivity analyses including robust methods and outlier exclusion
+- Decision D068 compliance with dual p-value reporting
 
 **Concerns:**
-- Minor calculation error in Bonferroni correction formula
-- Could be more explicit about correlation interpretation limitations with cross-sectional data
+- Minor calculation error in Bonferroni correction (0.00179/4 should be 0.05/4)
+- Could benefit from clearer definition of "integration complexity"
 
 **Score Justification:**
-Strong methodological approach with appropriate statistical tests, but calculation error and minor interpretability concerns prevent perfect score.
+Strong methodological approach with appropriate complexity. Calculation error prevents perfect score but overall approach is sound.
 
 ---
 
-#### Tool Availability (1.4 / 2.0)
+#### Tool Availability (2.0 / 2.0)
 
 **Criteria Checklist:**
-- [x] Most required tools exist
-- [x] Core correlation and Steiger test available
-- [ ] Missing tools for effect sizes and power analysis
-- [x] Missing tools identified with alternative approaches
+- [x] All required tools exist in tools/ package
+- [x] Excellent tool reuse rate (>95%)
+- [x] API signatures verified
 
 **Assessment:**
-Review of tools_inventory.md shows good availability of core statistical functions. The `compare_correlations_dependent` tool provides exactly the Steiger's Z-test functionality needed. Standard correlation, normality testing, and outlier detection tools are available. However, specialized tools for Cohen's q effect size calculation and power analysis are missing.
+Excellent tool availability with all required functions now present in the expanded tools modules. Significant improvement from previous 50% tool reuse.
 
-**Analysis Pipeline Steps:**
-
-| Step | Tool Function | Status | Notes |
-|------|---------------|--------|-------|
-| Step 3: Correlations | `tools.analysis_ctt.compute_pearson_correlations_with_correction` | ✅ Available | Includes CI calculation |
-| Step 4: Steiger Test | `tools.analysis_ctt.compare_correlations_dependent` | ✅ Available | Exact match for dependent correlations |
-| Step 5: Effect Sizes | Manual Cohen's q calculation | ⚠️ Missing | Can be computed manually |
-| Step 6: Diagnostics | `tools.validation.validate_numeric_range` | ✅ Available | For outlier detection |
-| Step 6: Normality | Standard scipy functions | ✅ Available | Shapiro-Wilk test |
-| Step 8: Power Analysis | Manual calculation | ⚠️ Missing | Can use standard formulas |
-
-**Tool Reuse Rate:** 4/6 tools (67%)
-
-**Missing Tools:**
-1. **Tool Name:** `tools.analysis_ctt.compute_cohens_q_effect_size`
-   - **Required For:** Step 5 - Effect size for correlation difference
-   - **Priority:** Medium
-   - **Specifications:** Cohen's q = arctanh(r1) - arctanh(r2) with delta method SE
-   - **Recommendation:** Implement or use manual calculation
-
-2. **Tool Name:** `tools.analysis_power.correlation_difference_power`
-   - **Required For:** Step 8 - Power analysis for correlation differences
-   - **Priority:** Medium
-   - **Specifications:** Post-hoc power for observed correlation difference
-   - **Recommendation:** Use manual calculation via standard formulas
+**Strengths:**
+- `tools.analysis_extensions.compare_correlations_dependent()` available for Steiger's Z-test
+- `tools.bootstrap.bootstrap_correlation_ci()` available for confidence intervals  
+- `tools.analysis_regression.cross_validate_regression()` for 5-fold CV
+- `tools.data` functions for loading RPM and theta scores
 
 **Score Justification:**
-Good tool availability for core functions but missing specialized effect size and power tools. Tool reuse rate below 90% target.
+Perfect tool availability with comprehensive reuse of existing validated functions.
 
 ---
 
@@ -94,109 +74,73 @@ Good tool availability for core functions but missing specialized effect size an
 
 **Criteria Checklist:**
 - [x] Most parameters clearly specified
-- [ ] Bonferroni calculation contains error
-- [x] Validation thresholds appropriate
-- [x] Multiple criteria specified
+- [x] Parameters appropriate for REMEMVR data
+- [ ] Calculation error in Bonferroni correction formula
+- [x] Validation thresholds generally appropriate
 
 **Assessment:**
-Parameters are generally well-specified with clear statistical thresholds. Cook's D threshold (4/N) follows standard practice, Shapiro-Wilk p>0.05 is appropriate for normality testing, and bootstrap 95% confidence intervals are specified. Power threshold of 0.80 for medium effect sizes is standard.
+Parameters are generally well-specified with appropriate values for the sample size and study design. Bootstrap replications (1000) and CV folds (5) are standard. Confidence level (95%) and random seeds specified for reproducibility.
 
 **Strengths:**
-- Multiple validation criteria clearly specified
-- Standard statistical thresholds used (Cook's D, normality tests)
-- Bootstrap methods specified for robust confidence intervals
-- Appropriate power threshold (0.80) specified
+- Clear specification of bootstrap parameters (n=1000, seed=42)
+- Cross-validation parameters specified (5-fold, seed=42)
+- Effect size thresholds referenced (Cohen's conventions)
+- Decision D068 dual reporting acknowledged
 
 **Concerns:**
-- **Critical Error**: Bonferroni calculation incorrect - states "α = 0.0179/4 = 0.000448" but 0.0179/4 = 0.004475
-- Effect size interpretation thresholds not specified for Cohen's q
-- Cohen's q computation method not detailed
+- **CRITICAL CALCULATION ERROR:** "± = 0.00179/4 = 0.000448" should be "α = 0.05/4 = 0.0125" for Bonferroni correction
+- Integration complexity definition could be more precise
 
 **Score Justification:**
-Good parameter specification overall, but calculation error and missing effect size details reduce score significantly.
+Good parameter specification undermined by calculation error requiring correction.
 
 ---
 
 #### Validation Procedures (1.9 / 2.0)
 
 **Criteria Checklist:**
-- [x] Comprehensive assumption validation - Normality, outliers, linearity
-- [x] Remedial actions clearly specified
-- [x] Implementation procedures documented
+- [x] Most assumptions explicitly validated
+- [x] Remedial actions specified
+- [x] Validation procedures documented
+- [ ] Missing some assumption checks (bivariate normality)
 
 **Assessment:**
-Validation procedures are comprehensive with multiple assumption checks planned. Step 6 specifies normality testing via Shapiro-Wilk, outlier detection via Cook's D, and Step 7 includes robust alternatives (Spearman correlations) if parametric assumptions are violated. Sensitivity analyses are well-planned.
+Comprehensive validation procedures including normality testing (Shapiro-Wilk), outlier detection (Cook's D), and sensitivity analyses with robust methods. Good specification of remedial actions.
 
 **Strengths:**
-- Multiple assumption checks comprehensively planned
-- Robust statistical alternatives specified if assumptions violated
-- Clear remedial action strategy (Spearman if normality violated)
-- Sensitivity analyses include outlier exclusion and method comparison
+- Normality testing with Shapiro-Wilk specified
+- Outlier detection using Cook's D < 4/N threshold
+- Robust correlation methods (Spearman) as backup
+- Sensitivity analyses with outlier exclusion
 
 **Concerns:**
-- None major - procedures are thorough and appropriate
+- Could specify bivariate normality assessment for correlation analysis
+- Missing discussion of potential restriction of range issues
 
 **Score Justification:**
-Nearly perfect validation procedures with comprehensive assumption checking and clear remedial strategies.
+Strong validation framework with minor gaps in assumption coverage.
 
 ---
 
-#### Devil's Advocate Analysis (0.6 / 1.0)
+#### Devil's Advocate Analysis (0.8 / 1.0)
 
-**Note:** WebSearch skipped per user instruction - analysis based on standard methodological knowledge
+**Criteria Checklist:**
+- [x] Multiple subsections populated
+- [x] Specific and actionable criticisms
+- [ ] Limited evidence base without literature citations (no WebSearch)
+- [x] Appropriate strength ratings
 
-#### Commission Errors (Questionable Statistical Assumptions/Claims)
+**Assessment:**
+Generated meaningful statistical criticisms across multiple domains, focusing on calculation errors, missing methodological considerations, and alternative approaches. Limited by absence of literature citations due to no WebSearch instruction.
 
-**1. Bonferroni Correction Calculation Error**
-- **Location:** 1_concept.md - Step 4: Test differential prediction
-- **Claim Made:** "Primary: Bonferroni correction (α = 0.0179/4 = 0.000448)"
-- **Statistical Criticism:** Mathematical calculation error. 0.0179 ÷ 4 = 0.004475, not 0.000448 as stated. Error is factor of 10.
-- **Strength:** MINOR
-- **Suggested Rebuttal:** Correct calculation to 0.004475 or clarify if different family-wise error rate intended.
-
-#### Omission Errors (Missing Statistical Considerations)
-
-**1. Effect Size Interpretation Guidelines Missing**
-- **Missing Content:** No interpretation thresholds provided for Cohen's q effect sizes
-- **Why It Matters:** Readers need context for whether correlation differences are practically meaningful
-- **Strength:** MINOR
-- **Suggested Addition:** Add Cohen's q interpretation guidelines (0.1 small, 0.3 medium, 0.5 large difference)
-
-**2. Shared Variable Not Explicitly Identified**
-- **Missing Content:** Steiger's test requires one shared variable but this isn't explicitly stated
-- **Why It Matters:** Methodological clarity - should specify which variable (RPM) is shared across correlations
-- **Strength:** MODERATE
-- **Suggested Addition:** Explicitly state "RPM is shared variable in both correlations for Steiger's test"
-
-#### Alternative Statistical Approaches (Not Considered)
-
-**1. Williams' Test Not Considered**
-- **Alternative Method:** Williams' modification of Steiger's test
-- **How It Applies:** Alternative test for dependent correlation differences with slightly different assumptions
-- **Strength:** MINOR
-- **Suggested Acknowledgment:** Brief mention that Steiger's test chosen over Williams' test
-
-#### Known Statistical Pitfalls (Unaddressed)
-
-**1. Restriction of Range Effects**
-- **Pitfall Description:** Theta scores may have restricted range compared to raw scores
-- **How It Could Affect Results:** Could attenuate correlation magnitudes and reduce power to detect differences
-- **Strength:** MODERATE
-- **Suggested Mitigation:** Mention restriction of range as potential limitation in interpretation
-
-#### Scoring Summary
-
-**Total Concerns Identified:**
-- Commission Errors: 1 (1 MINOR)
-- Omission Errors: 2 (1 MINOR, 1 MODERATE)  
-- Alternative Approaches: 1 (1 MINOR)
-- Known Pitfalls: 1 (1 MODERATE)
-
-**Overall Devil's Advocate Assessment:**
-Concept.md provides reasonable methodological coverage but misses some standard considerations for correlation analysis. The calculation error should be corrected. Without literature citations (WebSearch skipped), this analysis is limited to basic methodological knowledge.
+**Strengths:**
+- Identified critical calculation error
+- Addressed missing methodological considerations
+- Covered alternative approaches and known pitfalls
+- Appropriate strength classifications
 
 **Score Justification:**
-Generated reasonable concerns across all categories but limited depth without literature support. Total of 5 concerns is adequate but not comprehensive.
+Good coverage of criticism types but limited literature grounding reduces thoroughness.
 
 ---
 
@@ -208,32 +152,20 @@ Generated reasonable concerns across all categories but limited depth without li
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 1: Data Extraction | `tools.data.load_and_merge` | ✅ Available | Standard data loading |
-| Step 2: Integration Variables | Manual computation | ⚠️ Manual | Straightforward data manipulation |
-| Step 3: Correlations | `tools.analysis_ctt.compute_pearson_correlations_with_correction` | ✅ Available | Includes bootstrap CIs |
-| Step 4: Steiger Test | `tools.analysis_ctt.compare_correlations_dependent` | ✅ Available | Perfect match for dependent correlations |
-| Step 5: Effect Sizes | Manual Cohen's q calculation | ⚠️ Missing | q = arctanh(r1) - arctanh(r2) |
-| Step 6: Diagnostics | `tools.validation.validate_numeric_range` + scipy | ✅ Available | Cook's D, Shapiro-Wilk |
-| Step 7: Sensitivity | Manual implementation | ⚠️ Manual | Spearman correlations, outlier exclusion |
-| Step 8: Power Analysis | Manual calculation | ⚠️ Missing | Standard power formulas |
+| Step 1: RPM Extraction | `tools.data.load_participant_data` | ✅ Available | Loads RPM_Scor from master.xlsx |
+| Step 2: Theta Extraction | `tools.data.load_test_data` | ✅ Available | Loads theta scores from Ch5 outputs |
+| Step 3: Correlation Analysis | `scipy.stats.pearsonr` + manual CI | ✅ Available | Standard scipy function |
+| Step 4: Bootstrap CIs | `tools.bootstrap.bootstrap_correlation_ci` | ✅ Available | 1000 replications, seed support |
+| Step 5: Steiger's Z-test | `tools.analysis_extensions.compare_correlations_dependent` | ✅ Available | Dependent correlations comparison |
+| Step 6: Effect Sizes | `tools.analysis_extensions.compute_cohens_q_effect_size` | ✅ Available | Cohen's q for correlation difference |
+| Step 7: Cross-validation | `tools.analysis_regression.cross_validate_regression` | ✅ Available | K-fold CV with reproducible splits |
+| Step 8: Diagnostics | `tools.validation.validate_regression_assumptions` | ✅ Available | Comprehensive assumption testing |
 
-**Tool Reuse Rate:** 4/8 steps (50%) use existing tools
+**Tool Reuse Rate:** 8/8 tools (100%)
 
-**Missing Tools (If Any):**
-1. **Tool Name:** `tools.analysis_ctt.compute_cohens_q_effect_size`
-   - **Required For:** Step 5 - Effect size computation for correlation differences
-   - **Priority:** Medium
-   - **Specifications:** Cohen's q = arctanh(r1) - arctanh(r2), delta method for SE
-   - **Recommendation:** Implement before analysis or use manual calculation
+**Missing Tools:** None - all required functionality available
 
-2. **Tool Name:** `tools.analysis_power.correlation_difference_power`
-   - **Required For:** Step 8 - Post-hoc power analysis
-   - **Priority:** Medium  
-   - **Specifications:** Power for correlation difference given observed effect size and N
-   - **Recommendation:** Use manual calculation with standard formulas
-
-**Tool Availability Assessment:**
-- ⚠️ Acceptable (50% tool reuse): Core statistical functions available but missing specialized effect size and power tools
+**Tool Availability Assessment:** ✅ Excellent (100% tool reuse)
 
 ---
 
@@ -243,19 +175,22 @@ Generated reasonable concerns across all categories but limited depth without li
 
 | Assumption | Test | Threshold | Assessment |
 |------------|------|-----------|------------|
-| Normality | Shapiro-Wilk | p>0.05 | ✅ Appropriate standard threshold |
-| Outliers | Cook's distance | D > 4/N | ✅ Standard threshold for N=100 |
+| Bivariate Normality | Shapiro-Wilk per variable | p > 0.05 | ⚠️ Should specify bivariate normality assessment |
 | Linearity | Scatterplot inspection | Visual assessment | ✅ Appropriate for correlation analysis |
-| Missing Data | Listwise deletion | Complete cases only | ✅ Appropriate given small N |
+| Independence | Study design | No repeated measures | ✅ Independent participants |
+| Homoscedasticity | Residual plots | Visual inspection | ✅ Standard for correlation |
+| Outliers | Cook's distance | D > 4/n | ✅ Appropriate threshold (Cook's D > 0.04) |
 
-**Correlation Analysis Assessment:**
-Validation procedures are appropriate for correlation analysis. Normality testing, outlier detection, and linearity assessment cover key assumptions. Missing data approach is reasonable given N=100 sample size.
+**Correlation Validation Assessment:**
+Good coverage of key assumptions with specific tests and thresholds. Could enhance with bivariate normality testing using 2D normality tests.
 
 **Concerns:**
-- None major
+- Missing bivariate normality assessment (could use Henze-Zirkler test)
+- Should specify restriction of range assessment given cognitive test context
 
 **Recommendations:**
-- Consider adding homoscedasticity check via residual plots if using parametric methods
+- Add bivariate normality testing to validation procedures
+- Consider restriction of range assessment for cognitive variables
 
 ---
 
@@ -263,10 +198,110 @@ Validation procedures are appropriate for correlation analysis. Normality testin
 
 | Decision | Requirement | Implementation | Compliance |
 |----------|-------------|----------------|------------|
-| D068: Dual Reporting | Report both uncorrected and Bonferroni p-values | Step 4: Dual p-value reporting specified | ✅ FULLY COMPLIANT |
+| D068: Dual Reporting | Report both uncorrected and Bonferroni p-values | Step 4: Dual p-value output specified | ⚠️ CALCULATION ERROR in Bonferroni formula |
 
 **Decision Compliance Assessment:**
-Fully compliant with Decision D068 dual p-value reporting requirement. Both uncorrected and corrected p-values will be reported.
+Conceptually aligned with Decision D068 dual reporting but contains calculation error that must be corrected.
+
+---
+
+### Statistical Criticisms & Rebuttals
+
+**Analysis Approach:**
+Generated statistical criticisms focusing on methodological appropriateness, calculation accuracy, and analytical completeness. Limited literature citations due to no WebSearch instruction but based on standard statistical methodology principles.
+
+---
+
+#### Commission Errors (Questionable Statistical Assumptions/Claims)
+
+**1. Incorrect Bonferroni Correction Calculation**
+- **Location:** 1_concept.md - Section 6: Analysis Approach, Step 4, paragraph 3
+- **Claim Made:** "Primary: Bonferroni correction (± = 0.00179/4 = 0.000448)"
+- **Statistical Criticism:** Mathematical error in Bonferroni correction formula. Uses unexplained value 0.00179 and incorrectly divides by 4. Should be α = 0.05/4 = 0.0125 for 4 comparisons.
+- **Methodological Counterevidence:** Standard Bonferroni correction divides α by number of comparisons (Dunn, 1961)
+- **Strength:** CRITICAL
+- **Suggested Rebuttal:** "Correct formula to: Primary: Bonferroni correction (α = 0.05/4 = 0.0125). Explain source of 4 comparisons if intended."
+
+**2. Vague Integration Complexity Definition**
+- **Location:** 1_concept.md - Section 6: Analysis Approach, Step 2
+- **Claim Made:** "Option A: Use Order (-O-) questions as proxy for temporal integration"
+- **Statistical Criticism:** Integration complexity operationalized only through temporal domain without clear justification for why Order questions represent "complex integration" compared to What questions.
+- **Methodological Counterevidence:** Construct validity requires clear operational definitions (Cronbach & Meehl, 1955)
+- **Strength:** MODERATE
+- **Suggested Rebuttal:** "Provide theoretical rationale for why temporal order requires more integration than object identification. Consider multi-domain operationalization."
+
+---
+
+#### Omission Errors (Missing Statistical Considerations)
+
+**1. Missing Bivariate Normality Assessment**
+- **Missing Content:** No discussion of bivariate normality testing for correlation analysis
+- **Why It Matters:** Pearson correlation assumes bivariate normality; univariate tests insufficient
+- **Supporting Literature:** Standard multivariate statistics textbooks emphasize bivariate normality
+- **Potential Reviewer Question:** "How did you assess bivariate normality for the correlation analysis?"
+- **Strength:** MODERATE
+- **Suggested Addition:** "Add bivariate normality testing (e.g., Henze-Zirkler test) to Step 6 validation procedures."
+
+**2. No Restriction of Range Discussion**
+- **Missing Content:** No mention of potential restriction of range in cognitive variables
+- **Why It Matters:** RPM and theta scores may have restricted ranges in university sample, attenuating correlations
+- **Supporting Literature:** Restriction of range reduces correlation magnitudes (Thorndike, 1949)
+- **Potential Reviewer Question:** "Could restriction of range explain the observed correlation magnitudes?"
+- **Strength:** MINOR
+- **Suggested Addition:** "Add restriction of range assessment to sensitivity analyses section."
+
+---
+
+#### Alternative Statistical Approaches (Not Considered)
+
+**1. Partial Correlation Not Considered**
+- **Alternative Method:** Partial correlation controlling for age and education
+- **How It Applies:** Could isolate fluid intelligence effects from demographic confounds
+- **Key Citation:** Standard practice in cognitive aging research
+- **Why Concept.md Should Address It:** Age stratified sampling (10 age groups) suggests age effects expected
+- **Strength:** MODERATE
+- **Suggested Acknowledgment:** "Consider partial correlation analysis controlling for age and education as sensitivity analysis."
+
+**2. Robust Correlation Methods as Primary**
+- **Alternative Method:** Spearman rank correlation as primary analysis instead of backup
+- **How It Applies:** More robust to outliers and non-normality common in cognitive data
+- **Key Citation:** Robust statistics literature recommends non-parametric methods for skewed cognitive data
+- **Why Concept.md Should Address It:** Cognitive test scores often non-normal
+- **Strength:** MINOR
+- **Suggested Acknowledgment:** "Justify Pearson as primary method or consider Spearman rank correlation as main analysis."
+
+---
+
+#### Known Statistical Pitfalls (Unaddressed)
+
+**1. Multiple Testing Beyond Bonferroni**
+- **Pitfall Description:** Bonferroni correction may be overly conservative for correlated tests
+- **How It Could Affect Results:** May reduce power unnecessarily when correlations are related
+- **Literature Evidence:** Holm-Bonferroni and FDR control family-wise error while maintaining power
+- **Why Relevant to This RQ:** Both correlations share RPM predictor (related tests)
+- **Strength:** MINOR
+- **Suggested Mitigation:** "Consider Holm-Bonferroni or FDR correction as alternatives to standard Bonferroni."
+
+**2. Regression to the Mean in Cognitive Scores**
+- **Pitfall Description:** Extreme RPM scores may regress toward mean, affecting correlation interpretation
+- **How It Could Affect Results:** Could inflate correlation between RPM and theta if both measured with error
+- **Literature Evidence:** Classic regression to mean in test-retest situations
+- **Why Relevant to This RQ:** Single time point reduces concern but worth acknowledging
+- **Strength:** MINOR
+- **Suggested Mitigation:** "Acknowledge potential regression to mean effects in limitations discussion."
+
+---
+
+#### Scoring Summary
+
+**Total Concerns Identified:**
+- Commission Errors: 2 (1 CRITICAL, 1 MODERATE, 0 MINOR)
+- Omission Errors: 2 (0 CRITICAL, 1 MODERATE, 1 MINOR)
+- Alternative Approaches: 2 (0 CRITICAL, 1 MODERATE, 1 MINOR)
+- Known Pitfalls: 2 (0 CRITICAL, 0 MODERATE, 2 MINOR)
+
+**Overall Devil's Advocate Assessment:**
+Concept.md presents a methodologically sound approach but contains a critical calculation error that must be corrected. The analysis appropriately handles dependent correlation comparison and includes comprehensive sensitivity analyses. Missing some standard considerations like bivariate normality assessment and restriction of range, but these are not fatal to the approach. The framework adequately anticipates most statistical challenges though additional robustness checks could strengthen the analysis.
 
 ---
 
@@ -274,61 +309,47 @@ Fully compliant with Decision D068 dual p-value reporting requirement. Both unco
 
 #### Required Changes (Must Address for Approval)
 
-1. **Correct Bonferroni Calculation**
-   - **Location:** 1_concept.md - Step 4: Test differential prediction, paragraph 2
-   - **Issue:** Mathematical error in Bonferroni correction calculation
-   - **Fix:** Change "α = 0.0179/4 = 0.000448" to "α = 0.0179/4 = 0.004475"
-   - **Rationale:** Accurate statistical computation required for Category 3 (Parameter Specification)
-
-2. **Improve Tool Availability**
-   - **Location:** 1_concept.md - Steps 5 and 8
-   - **Issue:** Missing specialized tools for effect sizes and power analysis
-   - **Fix:** Either implement missing tools or specify manual calculation procedures
-   - **Rationale:** Tool reuse rate below 90% target affects Category 2 (Tool Availability)
+1. **Correct Bonferroni Formula**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 4
+   - **Issue:** Mathematical error in correction formula using undefined value 0.00179
+   - **Fix:** Change to "Primary: Bonferroni correction (α = 0.05/4 = 0.0125)" and explain the 4 comparisons
+   - **Rationale:** Calculation errors undermine methodological credibility and could lead to incorrect statistical conclusions
 
 #### Suggested Improvements (Optional but Recommended)
 
-1. **Add Effect Size Interpretation Guidelines**
-   - **Location:** 1_concept.md - Step 5: Effect sizes and confidence intervals
-   - **Current:** "Cohen's q for correlation difference"
-   - **Suggested:** "Cohen's q for correlation difference (interpretation: 0.1 small, 0.3 medium, 0.5 large)"
-   - **Benefit:** Enhances interpretability of statistical results
+1. **Enhance Integration Complexity Definition**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 2
+   - **Current:** Vague definition using Order questions as proxy
+   - **Suggested:** Provide theoretical rationale for why temporal order represents complex integration
+   - **Benefit:** Strengthens construct validity of the integration complexity operationalization
 
-2. **Clarify Shared Variable in Steiger's Test**
-   - **Location:** 1_concept.md - Step 4: Test differential prediction
-   - **Current:** "Steiger's Z-test for difference between dependent correlations"
-   - **Suggested:** "Steiger's Z-test for dependent correlations (RPM as shared variable)"
-   - **Benefit:** Methodological clarity about test assumptions
+2. **Add Bivariate Normality Testing**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 6
+   - **Current:** Only univariate normality mentioned
+   - **Suggested:** Add bivariate normality assessment using appropriate test
+   - **Benefit:** More comprehensive assumption validation for correlation analysis
 
-3. **Address Potential Range Restriction**
-   - **Location:** 1_concept.md - Step 7: Sensitivity analyses or limitations section
-   - **Current:** Basic sensitivity analyses specified
-   - **Suggested:** Add note about potential restriction of range in theta scores affecting correlation magnitude
-   - **Benefit:** Acknowledges known limitation in IRT-based correlation studies
+3. **Consider Partial Correlation**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 7 (sensitivity)
+   - **Current:** No mention of controlling for demographics
+   - **Suggested:** Add partial correlation controlling for age/education as sensitivity analysis
+   - **Benefit:** Isolates fluid intelligence effects from potential demographic confounds
 
 #### Missing Tools (For Master/User Implementation)
 
-1. **Tool Name:** `tools.analysis_ctt.compute_cohens_q_effect_size`
-   - **Required For:** Step 5 - Effect size computation
-   - **Priority:** Medium
-   - **Specifications:** Input: two correlation coefficients and sample size. Output: Cohen's q with delta method standard error
-   - **Recommendation:** Implement before analysis phase or document manual calculation procedure
-
-2. **Tool Name:** `tools.analysis_power.correlation_difference_power`
-   - **Required For:** Step 8 - Power analysis
-   - **Priority:** Medium
-   - **Specifications:** Input: observed correlation difference, sample size. Output: post-hoc power estimate
-   - **Recommendation:** Implement before analysis phase or use standard statistical software
+None - all required tools are available with 100% reuse rate.
 
 ---
 
 ### Validation Metadata
 
 - **Agent Version:** rq_stats v5.0
-- **Rubric Version:** 10-point system (v4.2)
-- **Validation Date:** 2026-01-02 22:15
-- **Tools Inventory Source:** docs/v4/tools_inventory.md  
+- **Rubric Version:** 10-point system (v4.0)
+- **Validation Date:** 2026-01-03 15:30
+- **Tools Inventory Source:** docs/v4/tools_inventory.md
 - **Total Tools Validated:** 8
-- **Tool Reuse Rate:** 50% (4/8 steps use existing tools)
+- **Tool Reuse Rate:** 100% (8/8 tools available)
 - **Validation Duration:** ~25 minutes
-- **Context Dump:** "8.3/10 REJECTED. Category 1: 2.8/3 (appropriate). Category 2: 1.4/2 (50% tool reuse). Category 3: 1.6/2 (calculation error). Category 4: 1.9/2 (comprehensive). Category 5: 0.6/1 (limited without citations)."
+- **Context Dump:** "9.1/10 CONDITIONAL. Category 1: 2.8/3 (appropriate). Category 2: 2.0/2 (100% reuse). Category 3: 1.6/2 (calculation error). Category 4: 1.9/2 (comprehensive). Category 5: 0.8/1 (8 concerns, limited citations)."
+
+---

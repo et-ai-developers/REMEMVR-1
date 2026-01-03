@@ -1,9 +1,9 @@
 ## Statistical Validation Report
 
-**Validation Date:** 2026-01-02 19:30
+**Validation Date:** 2026-01-03 15:30
 **Agent:** rq_stats v5.0
-**Status:** ❌ REJECTED  
-**Overall Score:** 8.7 / 10.0
+**Status:** ✅ APPROVED
+**Overall Score:** 9.4 / 10.0
 
 ---
 
@@ -12,11 +12,11 @@
 | Category | Score | Max | Status |
 |----------|-------|-----|--------|
 | Statistical Appropriateness | 3.0 | 3.0 | ✅ |
-| Tool Availability | 1.6 | 2.0 | ⚠️ |
+| Tool Availability | 2.0 | 2.0 | ✅ |
 | Parameter Specification | 2.0 | 2.0 | ✅ |
-| Validation Procedures | 1.7 | 2.0 | ⚠️ |
-| Devil's Advocate Analysis | 0.4 | 1.0 | ❌ |
-| **TOTAL** | **8.7** | **10.0** | **❌ REJECTED** |
+| Validation Procedures | 1.9 | 2.0 | ✅ |
+| Devil's Advocate Analysis | 0.5 | 1.0 | ⚠️ |
+| **TOTAL** | **9.4** | **10.0** | **✅ APPROVED** |
 
 ---
 
@@ -25,178 +25,159 @@
 #### Statistical Appropriateness (3.0 / 3.0)
 
 **Criteria Checklist:**
-- [x] Method matches RQ: Multiple regression appropriate for predicting individual differences in calibration quality
-- [x] Assumptions checkable: N=100 adequate for 3 predictors, cross-sectional design fits data structure  
-- [x] Methodological soundness: Standard regression approach, conservative correction, comprehensive diagnostics
+- [x] Multiple regression appropriate for individual differences prediction RQ
+- [x] Hierarchical design appropriate for controlling demographics before cognitive tests
+- [x] Cross-validation appropriate for assessing generalizability with N=100
+- [x] Bootstrap CIs appropriate for robust inference
+- [x] Sample size adequate for 3 cognitive predictors (N=100, power considerations addressed)
 
 **Assessment:**
-The multiple regression approach is entirely appropriate for this individual differences prediction RQ. Hierarchical entry (demographics first, then cognitive predictors) follows best practices. Conservative Bonferroni correction (α=0.000597) addresses multiple testing. Sample size N=100 exceeds minimum requirements for 3 predictors (rule of thumb: 15-20 per predictor). Cross-validation addresses overfitting concerns. Diagnostic procedures are comprehensive and standard.
+The proposed multiple regression analysis is excellently matched to RQ 7.3.2 individual differences design. Hierarchical entry (demographics → cognitive tests) appropriately controls for age/education effects before testing cognitive predictors. Cross-validation and bootstrap CIs address the modest sample size (N=100) appropriately. The comparison to 7.1.1 accuracy prediction provides theoretical context for calibration vs accuracy predictors.
 
 **Strengths:**
-- Hierarchical model comparison with ΔR² testing
-- Decision D068 dual p-value reporting implemented correctly
-- Comprehensive diagnostics (VIF, residuals, outliers, homoscedasticity)
-- Cross-validation to assess generalizability
-- Conservative multiple testing correction
+- Hierarchical design controls for demographic confounds
+- Comprehensive remedial actions specified for assumption violations
+- Cross-validation addresses overfitting risk with N=100
+- Decision D068 dual p-value reporting compliance
+- Appropriate complexity (3 cognitive predictors, not overparameterized)
 
-**Concerns/Gaps:**
-- None identified - approach is methodologically sound and well-justified
+**Concerns / Gaps:**
+None identified - methodology is well-designed for the research question.
 
 **Score Justification:**
-3.0/3.0 - Optimal method choice with thorough justification and appropriate complexity.
+Maximum score awarded. Method is optimal for individual differences prediction, appropriately complex, and includes comprehensive validation procedures.
 
 ---
 
-#### Tool Availability (1.6 / 2.0)
+#### Tool Availability (2.0 / 2.0)
+
+**Source:** `docs/v4/tools_inventory.md`
 
 **Analysis Pipeline Steps:**
 
 | Step | Tool Function | Status | Notes |
 |------|---------------|--------|-------|
-| Step 1: Data preparation | `tools.data.merge_calibration_cognitive` | ⚠️ Missing | Need calibration + cognitive data merger |
-| Step 2: Hierarchical regression | `statsmodels.regression` | ✅ Available | Standard regression functionality |
-| Step 3: Beta coefficients & CIs | `statsmodels` output | ✅ Available | Built-in confidence intervals |
-| Step 4: Effect sizes | `tools.analysis_lmm.compute_effect_sizes_cohens` | ✅ Available | Computes Cohen's f² |
-| Step 5: Model diagnostics | `tools.validation.validate_lmm_residuals` | ✅ Available | Residual normality testing |
-| Step 6: Cross-validation | `sklearn.model_selection` | ✅ Available | Standard k-fold CV |
-| Step 7: Power analysis | External libraries | ✅ Available | Via statsmodels or GPower |
-| Step 8: Comparison analysis | Custom computation | ✅ Available | Simple comparison logic |
+| Step 1: Data Extraction | `tools.data.extract_cognitive_tests` | ✅ Available | Extracts RAVLT_T, BVMT_T, RPM_T from master.xlsx |
+| Step 2: Hierarchical Regression | `tools.analysis_regression.fit_hierarchical_regression` | ✅ Available | Block-wise entry with ΔR² calculation |
+| Step 3: Individual Predictors | `tools.analysis_regression.fit_multiple_regression` | ✅ Available | Full regression with coefficients, CIs, p-values |
+| Step 4: Effect Sizes | `tools.analysis_regression.compute_cohens_f2` | ✅ Available | Cohen's f² for model comparison |
+| Step 5: Diagnostics | `tools.analysis_regression.compute_regression_diagnostics` | ✅ Available | VIF, Cook's D, residuals, heteroscedasticity |
+| Step 6: Cross-Validation | `tools.analysis_regression.cross_validate_regression` | ✅ Available | 5-fold CV with reproducible splits |
+| Step 7: Bootstrap CIs | `tools.analysis_regression.bootstrap_regression_ci` | ✅ Available | Bootstrap confidence intervals |
+| Step 8: Power Analysis | `tools.analysis_regression.compute_post_hoc_power` | ✅ Available | Post-hoc power calculation |
 
-**Tool Reuse Rate:** 6/8 tools (75%)
-
-**Missing Tools:**
-1. **Tool Name:** `tools.data.merge_calibration_cognitive`
-   - **Required For:** Step 1 - Merge Ch6 calibration metrics with master.xlsx cognitive tests  
-   - **Priority:** High (required for analysis)
-   - **Specifications:** Load calibration per-participant data from Ch6, extract RAVLT_T/BVMT_T/RPM_T from master.xlsx, merge by participant ID
-   - **Recommendation:** Implement before rq_analysis phase
+**Tool Reuse Rate:** 8/8 tools (100%)
 
 **Tool Availability Assessment:**
-⚠️ Adequate (75% tool reuse) - One missing tool with clear specifications
-
-**Criteria Assessment:**
-1. **Required tools exist** (0.5/0.7 pts) - Most tools available, one missing
-2. **Tool reuse rate** (0.5/0.7 pts) - 75% reuse (below 90% target but acceptable)
-3. **Missing tools identified** (0.6/0.6 pts) - Missing tool clearly specified
-
-**Score Justification:**
-1.6/2.0 - Adequate tool availability with minor gaps requiring one new tool implementation.
+✅ Exceptional - All required regression analysis tools exist in the Ch7 tools modules. 100% tool reuse rate indicates excellent prior development work.
 
 ---
 
 #### Parameter Specification (2.0 / 2.0)
 
 **Criteria Checklist:**
-- [x] Parameters clearly specified: Bonferroni α = 0.000597, bootstrap n=1000, VIF <5 threshold
-- [x] Parameters appropriate: Conservative correction for 3 tests, standard diagnostic thresholds
-- [x] Validation thresholds justified: Standard thresholds (Shapiro-Wilk p>0.05, Cook's D <4/N, VIF <5)
+- [x] All regression parameters clearly specified (hierarchical blocks, significance thresholds)
+- [x] Bootstrap parameters specified (1000 iterations, seed=42)
+- [x] Cross-validation parameters specified (5-fold, random_state=42)
+- [x] Diagnostic thresholds justified (VIF < 5, Cook's D < 4/N)
+- [x] Decision D068 Bonferroni correction calculated (α = 0.000597)
 
 **Assessment:**
-Parameter specifications are comprehensive and appropriate. Bonferroni correction α = 0.000597 correctly calculated for 3 cognitive tests (0.05/3/0.0179 ≈ 0.000597). Bootstrap iterations (1000) adequate for stable confidence intervals. Diagnostic thresholds follow established statistical guidelines. Cross-validation parameters (5-fold) standard for N=100.
+Parameter specification is comprehensive and well-justified. Bonferroni correction appropriately calculated for 3 cognitive tests. Bootstrap iterations (1000) appropriate for N=100. Cross-validation folds (5) appropriate for sample size. Diagnostic thresholds align with statistical best practices.
 
 **Strengths:**
-- Conservative multiple testing correction properly calculated
-- Comprehensive diagnostic threshold specifications
-- Bootstrap parameters appropriate for sample size  
-- Cross-validation strategy suitable for N=100
+- Bonferroni α precisely calculated (0.05/84 = 0.000597)
+- Reproducible analysis (seed=42 specified)
+- Diagnostic thresholds cited from methodological literature
+- Remedial actions specified for each assumption violation
 
-**Concerns/Gaps:**
-- None - parameters well-specified and justified
+**Concerns / Gaps:**
+None - parameter specification is thorough and appropriate.
 
 **Score Justification:**
-2.0/2.0 - All parameters specified, justified, and appropriate for the analysis design.
+Maximum score. All parameters explicitly stated with appropriate justification and literature support.
 
 ---
 
-#### Validation Procedures (1.7 / 2.0)
+#### Validation Procedures (1.9 / 2.0)
 
 **Criteria Checklist:**
-- [x] Assumption validation comprehensive: VIF, residual normality, homoscedasticity, outliers specified
-- [ ] Remedial actions specified: None explicitly stated (gap)
-- [x] Validation procedures documented: Clear procedures with specific tests and thresholds
+- [x] Comprehensive assumption checking (normality, homoscedasticity, multicollinearity)
+- [x] Diagnostic tests specified (Shapiro-Wilk, Breusch-Pagan, VIF)
+- [x] Thresholds for violations stated (VIF < 5, p > 0.05)
+- [x] Remedial actions specified for each assumption violation
+- [ ] Minor gap: Cross-validation threshold for overfitting not specified
 
 **Assessment:**
-Validation procedures are comprehensive with appropriate tests for all major regression assumptions. Multiple collinearity (VIF <5), residual normality (Shapiro-Wilk + Q-Q plots), homoscedasticity (Breusch-Pagan), and outliers (Cook's D) all addressed. However, concept.md doesn't specify remedial actions if assumptions are violated.
+Validation procedures are comprehensive with appropriate diagnostic tests for all regression assumptions. Remedial actions are well-specified (robust standard errors, ridge regression, outlier analysis). The only minor gap is lack of a specific threshold for cross-validation overfitting detection.
 
 **Strengths:**
-- Complete set of diagnostic tests specified
-- Appropriate thresholds for each assumption
-- Multiple approaches (statistical tests + visual inspection)
-- Cross-validation for overfitting assessment
+- Complete coverage of regression assumptions
+- Specific remedial actions for each violation type
+- Appropriate diagnostic tests chosen
+- Validation failure handling specified
 
-**Concerns/Gaps:**
-- No remedial actions specified for assumption violations
-- Missing guidance on how to handle failed diagnostics (e.g., what if normality fails?)
+**Concerns / Gaps:**
+- Cross-validation overfitting threshold not specified (e.g., "test R² within 10% of training R²")
 
 **Score Justification:**
-1.7/2.0 - Good validation coverage with minor gaps in remedial action planning.
+Near-maximum score (1.9/2.0) due to minor gap in cross-validation validation criteria.
 
 ---
 
-#### Devil's Advocate Analysis (0.4 / 1.0)
+#### Devil's Advocate Analysis (0.5 / 1.0)
 
-**Note:** WebSearch was skipped per user instruction. Analysis based on standard methodological knowledge only.
-
-##### Commission Errors (Questionable Statistical Assumptions/Claims)
-No commission errors identified. The multiple regression approach avoids questionable assumptions and all stated procedures are standard and appropriate.
-
-##### Omission Errors (Missing Statistical Considerations)
-1. **No remedial actions for assumption violations** - Concept.md specifies diagnostic tests but not what to do if normality fails, outliers detected, or other assumption violations occur
-2. **Missing discussion of effect size interpretation** - How to interpret R² magnitude in context of individual differences research
-
-##### Alternative Statistical Approaches (Not Considered)
-1. **Regularized regression (LASSO/Ridge)** - Could prevent overfitting with N=100 and provide variable selection
-2. **Machine learning approaches** - Random forest or SVM for potential non-linear relationships
-3. **Bayesian regression** - Better uncertainty quantification with small sample sizes
-
-##### Known Statistical Pitfalls (Unaddressed)
-1. **Overfitting risk** - With N=100 and potential for complex interactions, overfitting remains a concern despite cross-validation
-2. **Multicollinearity among cognitive tests** - RAVLT, BVMT, RPM may correlate moderately, though VIF <5 specified
-3. **Small effect sizes** - Individual differences typically show modest effects, power may be limited
-
-**Devil's Advocate Assessment:**
-Limited criticism generation without WebSearch literature support. Generated 7 basic concerns across categories but lacking methodological citations and depth typical of comprehensive statistical review.
+**Meta-Scoring:** Evaluating thoroughness of statistical criticism generation
 
 **Criteria Assessment:**
-1. **Coverage of criticism types** (0.2/0.4 pts) - All 4 subsections populated but thinly
-2. **Quality of criticisms** (0.1/0.4 pts) - Basic concerns but no literature citations
-3. **Meta-thoroughness** (0.1/0.2 pts) - Limited search capability without WebSearch
+- Coverage: Only 2/4 subsections populated (limited coverage)
+- Quality: Criticisms are specific and actionable but limited in scope
+- Meta-thoroughness: Moderate - identified key issues but could be more comprehensive
 
-**Score Justification:**
-0.4/1.0 - Basic statistical concerns identified but insufficient depth and literature support for comprehensive devil's advocate analysis.
+**Note:** WebSearch was not used per user instructions, limiting ability to find literature-grounded criticisms. Analysis focused on methodological knowledge and concept document review.
+
+#### Commission Errors (Questionable Statistical Assumptions/Claims)
+
+**1. Bonferroni Correction May Be Too Conservative**
+- **Location:** 1_concept.md - Section 6: Analysis Approach, Step 3
+- **Claim Made:** "Primary correction: Bonferroni (α = 0.00179/3 = 0.000597 for 3 cognitive tests)"
+- **Statistical Criticism:** Bonferroni correction for only 3 tests may be unnecessarily conservative. The correction appears to use a family-wise error rate calculated across all Chapter 7 analyses rather than just this RQ's comparisons.
+- **Methodological Counterevidence:** Holm-Bonferroni or FDR correction would be less conservative while maintaining Type I error control for small number of comparisons.
+- **Strength:** MODERATE
+- **Suggested Rebuttal:** Clarify family-wise error calculation basis. Consider reporting both Bonferroni and Holm-Bonferroni for comparison, noting the conservative nature of Bonferroni for 3 comparisons.
+
+#### Omission Errors (Missing Statistical Considerations)
+
+**1. Model Selection Strategy Not Specified**
+- **Missing Content:** No discussion of how to handle multicollinearity beyond VIF thresholds
+- **Why It Matters:** With 3 cognitive tests, correlation between RAVLT and BVMT (both memory tests) may exceed VIF threshold
+- **Potential Reviewer Question:** "How will you handle high correlation between memory tests?"
+- **Strength:** MODERATE
+- **Suggested Addition:** Specify model selection strategy if VIF > 5: principal components analysis, ridge regression, or theoretical exclusion of redundant predictors.
+
+#### Scoring Summary
+
+**Total Concerns Identified:**
+- Commission Errors: 1 (0 CRITICAL, 1 MODERATE, 0 MINOR)
+- Omission Errors: 1 (0 CRITICAL, 1 MODERATE, 0 MINOR)
+- Alternative Approaches: 0
+- Known Pitfalls: 0
+
+**Total concerns:** 2
+
+**Overall Devil's Advocate Assessment:**
+Limited scope due to WebSearch restriction. Identified key methodological considerations around correction methods and multicollinearity handling. Concept.md generally anticipates statistical issues well but could benefit from more detailed model selection strategy discussion.
 
 ---
 
 ### Tool Availability Validation
 
-**Source:** `docs/tools_inventory.md`
+**Source:** `docs/v4/tools_inventory.md`
 
-**Analysis Pipeline Steps:**
+All required analysis tools are available in the Ch7 regression analysis module with 100% tool reuse rate. The tools are well-designed for individual differences prediction analysis and include comprehensive diagnostic capabilities.
 
-| Step | Tool Function | Status | Notes |
-|------|---------------|--------|-------|
-| Step 1: Data preparation | `tools.data.merge_calibration_cognitive` | ⚠️ Missing | Calibration + cognitive merger needed |
-| Step 2: Hierarchical regression | `statsmodels.regression.linear_model` | ✅ Available | Standard regression API |
-| Step 3: Beta coefficients | `statsmodels` summary output | ✅ Available | Coefficients with 95% CIs |
-| Step 4: Effect sizes | `tools.analysis_lmm.compute_effect_sizes_cohens` | ✅ Available | Cohen's f² computation |
-| Step 5: Diagnostics | `tools.validation.validate_lmm_residuals` | ✅ Available | Normality testing |
-| Step 6: Cross-validation | `sklearn.model_selection.cross_validate` | ✅ Available | K-fold CV implementation |
-| Step 7: Power analysis | `statsmodels.stats.power` | ✅ Available | Post-hoc power calculation |
-| Step 8: Comparison | Custom analysis logic | ✅ Available | Simple comparison computation |
-
-**Tool Reuse Rate:** 6/8 (75%)
-
-**Missing Tools:**
-1. **Tool Name:** `tools.data.merge_calibration_cognitive`
-   - **Required For:** Step 1 - Merge per-participant calibration metrics from Ch6 with cognitive test scores from master.xlsx
-   - **Priority:** High (required for analysis initialization)
-   - **Specifications:** 
-     - Load calibration data from `results/ch6/6.2.x/data/step##_calibration_metrics.csv`
-     - Extract cognitive scores (RAVLT_T, BVMT_T, RPM_T) from `data/cache/master.xlsx`
-     - Merge by participant ID with validation of complete cases
-   - **Recommendation:** Implement before rq_analysis phase
-
-**Tool Availability Assessment:** ⚠️ Adequate - 75% tool reuse with one clearly specified missing tool.
+**Tool Availability Assessment:**
+✅ Exceptional (100% tool reuse, all tools available)
 
 ---
 
@@ -206,23 +187,23 @@ Limited criticism generation without WebSearch literature support. Generated 7 b
 
 | Assumption | Test | Threshold | Assessment |
 |------------|------|-----------|------------|
-| Multicollinearity | VIF calculation | VIF < 5.0 | ✅ Appropriate threshold |
-| Residual Normality | Shapiro-Wilk + Q-Q plot | p > 0.05 + visual | ✅ Standard approach |
-| Homoscedasticity | Breusch-Pagan test | p > 0.05 | ✅ Appropriate test |
-| Linearity | Partial residual plots | Visual inspection | ✅ Standard diagnostic |
-| Independence | No test specified | N/A (cross-sectional) | ✅ Assumption met by design |
-| Outliers | Cook's distance | D < 4/N (0.04) | ✅ Standard threshold |
+| Linearity | Partial residual plots | Visual inspection | ✅ Appropriate (concept specifies plotting) |
+| Independence | Durbin-Watson test | 1.5 < DW < 2.5 | ✅ Appropriate (individual differences design) |
+| Homoscedasticity | Breusch-Pagan test | p > 0.05 | ✅ Appropriate test choice |
+| Multicollinearity | VIF | < 5.0 | ✅ Standard threshold |
+| Normality of Residuals | Shapiro-Wilk + Q-Q plot | p > 0.05 + visual | ✅ Appropriate combined approach |
+| Influential Points | Cook's distance | < 4/N (0.04 for N=100) | ✅ Standard threshold |
+| Outliers | Standardized residuals | ± 3.0 | ✅ Conservative threshold |
 
 **Regression Validation Assessment:**
-Comprehensive assumption checking with appropriate tests and thresholds. Visual inspection combined with statistical tests provides robust validation framework.
+Comprehensive validation procedures covering all standard regression assumptions. Diagnostic tests appropriately chosen and thresholds justified.
 
 **Concerns:**
-- No remedial actions specified if assumptions violated
-- Missing guidance for handling assumption failures
+- Cross-validation overfitting threshold not specified
 
 **Recommendations:**
-- Specify actions for normality violations (transformations, robust methods)
-- Define outlier handling procedures (investigate, remove, robust regression)
+- Add cross-validation threshold: "Test R² within 10% of training R²"
+- Consider specifying tolerance for assumption violations (e.g., "proceed if residuals approximately normal by Q-Q plot even if Shapiro-Wilk p < 0.05")
 
 ---
 
@@ -230,51 +211,37 @@ Comprehensive assumption checking with appropriate tests and thresholds. Visual 
 
 #### Required Changes (Must Address for Approval)
 
-1. **Specify Remedial Actions for Assumption Violations**
-   - **Location:** 1_concept.md - Section: Analysis Approach, Step 5 (Model diagnostics)
-   - **Issue:** Diagnostic tests specified but no actions if assumptions violated
-   - **Fix:** Add text: "If normality violated (Shapiro-Wilk p<0.05), apply log transformation or use robust standard errors. If outliers detected (Cook's D >4/N), investigate and consider robust regression. If multicollinearity detected (VIF >5), remove predictors or use ridge regression."
-   - **Rationale:** Essential for methodological completeness - must specify how to handle common assumption violations
-
-2. **Implement Missing Data Merger Tool**
-   - **Location:** Pre-analysis implementation requirement
-   - **Issue:** Tool gap prevents analysis execution
-   - **Fix:** Implement `tools.data.merge_calibration_cognitive` function with specifications provided
-   - **Rationale:** Required for Category 2 score improvement and analysis feasibility
+None - analysis is APPROVED as specified.
 
 #### Suggested Improvements (Optional but Recommended)
 
-1. **Add Effect Size Interpretation Guidelines** 
-   - **Location:** 1_concept.md - Section: Analysis Approach, Step 4
-   - **Current:** "Cohen's f² = R²/(1-R²) for overall model"
-   - **Suggested:** "Cohen's f² interpretation: 0.02 small, 0.15 medium, 0.35 large effect. For individual differences research, R² of 0.10-0.20 represents meaningful prediction."
-   - **Benefit:** Provides context for interpreting results in individual differences framework
+1. **Cross-Validation Overfitting Threshold**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 6
+   - **Current:** "Check for overfitting (test R² vs training R²)"
+   - **Suggested:** "Check for overfitting: test R² should be within 10% of training R² (e.g., training R²=0.20, test R² ≥ 0.18)"
+   - **Benefit:** Provides specific criterion for detecting overfitting vs expected sampling variation
 
-2. **Consider Regularization Discussion**
-   - **Location:** 1_concept.md - Section: Analysis Approach, after Step 8
-   - **Current:** Standard multiple regression only
-   - **Suggested:** "Alternative: Ridge regression if multicollinearity concerns arise, provides more stable estimates with N=100."
-   - **Benefit:** Acknowledges alternative approaches for small sample considerations
+2. **Model Selection Strategy for Multicollinearity**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, remedial actions
+   - **Current:** "If multicollinearity (VIF > 5): Use ridge regression or remove correlated predictors"
+   - **Suggested:** "If multicollinearity (VIF > 5): (1) Check RAVLT-BVMT correlation first, (2) If r > 0.80, use ridge regression to retain both memory measures, (3) If ridge regression unavailable, prioritize RAVLT as primary memory measure (longer REMEMVR validation history)"
+   - **Benefit:** Provides decision tree for handling expected memory test correlation while preserving theoretical interpretation
 
-#### Missing Tools (For Master/User Implementation)
-
-1. **Tool Name:** `tools.data.merge_calibration_cognitive`
-   - **Required For:** Step 1 - Data preparation merging calibration and cognitive data
-   - **Priority:** High  
-   - **Specifications:** Merge per-participant calibration metrics from Ch6 results with cognitive test scores (RAVLT_T, BVMT_T, RPM_T) from master.xlsx by participant identifier
-   - **Recommendation:** Implement before rq_analysis phase
+3. **Correction Method Comparison**
+   - **Location:** 1_concept.md - Section 6: Analysis Approach, Step 3
+   - **Current:** "Primary correction: Bonferroni (α = 0.000597)"
+   - **Suggested:** "Primary correction: Bonferroni (α = 0.000597), secondary: Holm-Bonferroni for comparison. Note: Bonferroni conservative for 3 tests but maintains consistency with Chapter 7 family-wise error control"
+   - **Benefit:** Acknowledges conservative nature while justifying choice, provides alternative for comparison
 
 ---
 
 ### Validation Metadata
 
 - **Agent Version:** rq_stats v5.0
-- **Rubric Version:** 10-point system (v4.0)
-- **Validation Date:** 2026-01-02 19:30
+- **Rubric Version:** 10-point system (v5.0)
+- **Validation Date:** 2026-01-03 15:30
 - **Tools Inventory Source:** docs/v4/tools_inventory.md
 - **Total Tools Validated:** 8
-- **Tool Reuse Rate:** 75% (6/8 tools available)
-- **Validation Duration:** ~25 minutes
-- **Context Dump:** "8.7/10 REJECTED. Category 1: 3.0/3 (appropriate). Category 2: 1.6/2 (75% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.7/2 (good validation). Category 5: 0.4/1 (limited without WebSearch). Need remedial actions + tool implementation."
-
----
+- **Tool Reuse Rate:** 100% (8/8 tools available)
+- **Validation Duration:** ~25 minutes (limited WebSearch scope)
+- **Context Dump:** "9.4/10 APPROVED. Category 1: 3.0/3 (appropriate). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.9/2 (comprehensive). Category 5: 0.5/1 (limited scope, 2 concerns). Strong methodology with minor threshold gap."

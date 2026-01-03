@@ -29,10 +29,13 @@ rq_stats:
 rq_planner:
   status: success
   context_dump: |
-    Analysis plan created: 7 steps planned (Step 0: extraction + Steps 1-6: analysis).
-    Tool requirements: LMM with interactions (simultaneous modeling), random effects extraction (BLUP), multiple regression with bootstrap, R-squared comparison.
-    Expected outputs: 15 data files, 1 plot source CSV. Validation required at every step.
-    Critical: Simultaneous modeling PRIMARY to avoid BLUP bias, two-stage SECONDARY for sensitivity.
+    Analysis plan created: 7 steps planned (Step 0: validation + Steps 1-6: analysis).
+    Pipeline: Mixed-effects modeling with simultaneous predictor testing (primary) and two-stage random effects extraction (secondary)
+    Key features: Simultaneous LMM PRIMARY to avoid BLUP bias, participant-level block bootstrap, dual p-value reporting
+    Tool requirements: LMM with interactions, BLUP extraction, multiple regression with bootstrap, R-squared comparison
+    Expected outputs: 13 data files, 1 plot source CSV, 7 log files. Validation required at every step.
+    Statistical specs: seed=42, 1000 bootstrap iterations, Bonferroni correction (alpha=0.0083), HC3 robust SEs for violations
+    Critical hypothesis: R²_intercept > R²_slope (tests predict encoding not consolidation)
 
 rq_tools:
   status: pending
