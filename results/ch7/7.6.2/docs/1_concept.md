@@ -103,7 +103,7 @@ Correlation analysis (bivariate and partial) with cross-validation and multiple 
 - r(RAVLT_Forgetting, REMEMVR_Slope)
 - Compute 95% confidence interval
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni correction (± = 0.00179)
+- Primary: Bonferroni correction (α = 0.00179, calculated as 0.05/28 where 28 is the total number of primary hypotheses tested across all Chapter 7 RQs)
 
 **Step 4:** Partial correlation analysis  
 - Control for initial encoding: RAVLT_T5 and REMEMVR_Intercept

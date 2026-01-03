@@ -122,6 +122,7 @@ Discrepancy analysis with one-way ANOVA and post-hoc comparisons, plus descripti
 - Check ANOVA assumptions: normality (Shapiro-Wilk), homogeneity (Levene's test)
 - Identify outliers using Cook's D and standardized residuals
 - Report sample sizes per group and power analysis
+- Power analysis: For one-way ANOVA with 3 groups, n≥16 per group provides 80% power to detect medium effects (f=0.25) at α=0.05. With N=100 and expected group distribution (33/33/34), power exceeds 0.95 for medium effects
 
 **Expected Outputs:**
 - data/step01_theta_ravlt_scores.csv (standardized scores)

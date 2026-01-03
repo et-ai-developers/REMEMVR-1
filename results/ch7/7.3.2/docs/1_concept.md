@@ -48,7 +48,7 @@ RAVLT and BVMT will show minimal prediction of calibration quality, as memory en
 Calibration requires executive control to detect discrepancies between confidence and accuracy. Fluid intelligence (RPM) measures executive reasoning capacity that should support metacognitive monitoring, while memory capacity tests (RAVLT, BVMT) measure encoding/retrieval abilities that are distinct from monitoring processes.
 
 **Expected Effect Pattern:**
-Multiple regression model: Calibration ~ RAVLT_T + BVMT_T + RPM_T. Expected: RPM ² > 0.20 (p < 0.05), RAVLT/BVMT ² H 0 (p > 0.10). Overall R² modest (0.10-0.20) reflecting individual differences complexity.
+Multiple regression model: Calibration ~ RAVLT_T + BVMT_T + RPM_T. Expected: RPM ï¿½ > 0.20 (p < 0.05), RAVLT/BVMT ï¿½ H 0 (p > 0.10). Overall Rï¿½ modest (0.10-0.20) reflecting individual differences complexity.
 
 ---
 
@@ -94,17 +94,17 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 **Step 2:** Hierarchical regression
 - Model 1: Demographics only (Age, Sex, Education)
 - Model 2: + Cognitive tests (RAVLT_T, BVMT_T, RPM_T)
-- Report ”R² and F-test for model improvement
+- Report ï¿½Rï¿½ and F-test for model improvement
 
 **Step 3:** Test individual predictors
 - Extract standardized beta coefficients with 95% CIs
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (srï¿½) for unique variance
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary correction: Bonferroni (± = 0.00179/3 = 0.000597 for 3 cognitive tests)
+- Primary correction: Bonferroni (ï¿½ = 0.00179/3 = 0.000597 for 3 cognitive tests)
 - Secondary: FDR correction for comparison
 
 **Step 4:** Effect sizes and importance
-- Cohen's f² = R²/(1-R²) for overall model
+- Cohen's fï¿½ = Rï¿½/(1-Rï¿½) for overall model
 - Standardized betas with 95% confidence intervals
 - Semi-partial correlations for unique variance explained
 - Bootstrap CIs (1000 iterations) for robust estimates
@@ -114,12 +114,19 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 - Residual normality: Shapiro-Wilk test, Q-Q plot
 - Homoscedasticity: Breusch-Pagan test, residual vs fitted plot
 - Influential points: Cook's D < 4/N threshold
-- Outliers: Standardized residuals within ±3
+- Outliers: Standardized residuals within Â±3
+
+**Remedial Actions for Assumption Violations:**
+- If multicollinearity (VIF > 5): Use ridge regression or remove correlated predictors
+- If non-normal residuals: Apply robust standard errors (HC3) or bootstrap inference
+- If heteroscedasticity detected: Use weighted least squares or heteroscedasticity-consistent (HC3) standard errors
+- If influential points (Cook's D > 4/N): Run sensitivity analysis with/without influential cases
+- If outliers present: Report results with and without outliers, or use robust regression (Huber M-estimator)
 
 **Step 6:** Cross-validation
 - Method: 5-fold cross-validation
-- Metrics: Test R², RMSE, MAE
-- Check for overfitting (test R² vs training R²)
+- Metrics: Test Rï¿½, RMSE, MAE
+- Check for overfitting (test Rï¿½ vs training Rï¿½)
 
 **Step 7:** Power analysis
 - Post-hoc power for observed effect sizes
@@ -127,7 +134,7 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 - Sample size adequacy assessment
 
 **Step 8:** Compare to accuracy prediction
-- Compare R² for calibration vs accuracy prediction (from 7.1.1)
+- Compare Rï¿½ for calibration vs accuracy prediction (from 7.1.1)
 - Identify which tests predict calibration vs accuracy differently
 - Connect findings to Ch6 confidence-accuracy dissociation
 
@@ -137,7 +144,7 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 - data/step03_analysis_input.csv (merged dataset for regression)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step05_model_diagnostics.csv (VIF, residuals, Cook's D)
-- data/step06_effect_sizes.csv (R², f², sr² with 95% CIs)
+- data/step06_effect_sizes.csv (Rï¿½, fï¿½, srï¿½ with 95% CIs)
 - data/step07_cross_validation.csv (k-fold CV results)
 - data/step08_power_analysis.csv (post-hoc and sensitivity analysis)
 - data/step09_accuracy_comparison.csv (comparison with 7.1.1 results)
@@ -146,15 +153,15 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 - plots/predictor_importance.png (calibration vs accuracy prediction comparison)
 
 **Success Criteria:**
-- R² for calibration prediction < R² for accuracy prediction (calibration is harder to predict)
-- At least modest prediction: R² > 0.05, p < 0.05
+- Rï¿½ for calibration prediction < Rï¿½ for accuracy prediction (calibration is harder to predict)
+- At least modest prediction: Rï¿½ > 0.05, p < 0.05
 - Identify which cognitive test(s) predict calibration quality after correction
 - VIF < 5 for all predictors (no multicollinearity)
 - Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - Homoscedasticity confirmed (Breusch-Pagan p > 0.05)
 - No influential outliers (Cook's D < 4/N = 0.04)
-- Cross-validation R² within 10% of training R²
-- Power > 0.60 for small-medium effect (f² = 0.10)
+- Cross-validation Rï¿½ within 10% of training Rï¿½
+- Power > 0.60 for small-medium effect (fï¿½ = 0.10)
 - Theoretical interpretation connecting to metacognition literature
 
 ---

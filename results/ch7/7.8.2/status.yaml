@@ -24,7 +24,7 @@ rq_scholar:
 
 rq_stats:
   status: success
-  context_dump: "8.8/10 CONDITIONAL. Category 1: 2.8/3 (appropriate). Category 2: 0.8/2 (tools 17% reuse). Category 3: 2.6/2 (well-specified). Category 4: 2.4/2 (comprehensive). Category 5: 0.8/1 (6 concerns, limited by WebSearch skip)."
+  context_dump: "8.9/10 REJECTED. Category 1: 2.3/3 (CV misapplication). Category 2: 0.8/2 (tools 33% reuse). Category 3: 2.6/2 (excellent params). Category 4: 2.4/2 (comprehensive). Category 5: 0.8/1 (7 concerns, no WebSearch)."
 
 rq_planner:
   status: success
