@@ -1,6 +1,6 @@
 # Archive Index
 
-**Last Updated:** 2026-01-03 Evening (context-manager curation - Session 2026-01-03 Morning archived)
+**Last Updated:** 2026-01-03 Late Evening (context-manager curation - Session 2026-01-03 Afternoon archived)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
@@ -16,6 +16,21 @@
 
 ### ch7_refined_specifications_28_rqs_8_themes
 **Description:** Ch7 specifications refined and expanded from 20 to 28 RQs across 8 themes, with TOC line numbers added for efficient rq_concept navigation. Documents Ch7 as anchor chapter bridging REMEMVR to existing literature, not supplementary work. Includes 12 new RQs covering metacognition predictors, clinical utility, and slope predictors themes. Session 2026-01-02 Evening.
+
+### ch7_batch_processing_20x_speedup
+**Description:** Parallel batch processing breakthrough achieving 20x speedup (30 min vs 8-10 hours) for Ch7 RQ fixes. Documents automated plan deletion, common fix templates, severity-based batching, and 92% total time saved through no-WebSearch optimization and parallel validation. Session 2026-01-03 Afternoon.
+
+### ch7_tool_bottleneck_identified
+**Description:** Root cause analysis identifying tool availability as the ONLY major blocker for Ch7 execution. 135 unique tool references consolidated to 32 critical tools needed. Documents missing regression, LPA, bootstrap modules affecting 15+ RQs. Key insight: all tools are standard scipy/statsmodels/sklearn procedures. Session 2026-01-03 Afternoon.
+
+### ch7_10_rqs_fixed_to_approved
+**Description:** Parallel re-validation results achieving 62.5% success rate (10/16 RQs moved to APPROVED) through batch processing. Documents batch-specific results, common fix patterns (power analysis, cross-validation, bootstrap specs), and 20x speedup demonstration. Session 2026-01-03 Afternoon.
+
+### ch7_tool_development_plan_complete
+**Description:** Comprehensive 3-week tool development roadmap and API specifications for 32 Ch7 tools. Documents critical path tools, TDD workflow, deliverables (tools.tsv, development plan, inventory additions), and 18-hour estimate to minimum viable Ch7. Session 2026-01-03 Afternoon.
+
+### tdd_methodology_retrieved
+**Description:** Complete TDD methodology retrieval from Ch5/Ch6 tool development. Documents 9-step workflow, color progression (RED→ORANGE→YELLOW→GREEN), dual documentation system, testing requirements, and systematic tracking standards. Session 2026-01-03 Afternoon.
 
 ### rq_report_agent_creation_v1_0_0
 **Description:** Complete history of rq_report agent design, testing, and parallel batch execution (2026-01-01). Documents context-finder research phase identifying 5 key pattern categories from existing agents (rq_results, context-finder, mass validation precedents). Agent designed as hybrid context-finder (archive search with chronology) + rq_results (multi-source synthesis). 10-section report template created (Executive Summary through Metadata & Sources). Test execution on RQ 5.1.1 produced 453 lines, 26KB output with EXCELLENT quality. Parallel batch execution on 65 RQs achieved 100% success rate in ~5-10 minutes (66-132x speedup vs sequential). Total output: 2.1MB documentation, 28,609 lines across 66 reports. Agent prompt location: `.claude/agents/rq_report.md` (3,791 lines, v1.0.0). Established NEW STANDARD: Research before design, user approval, test before batch. Session 2026-01-01 Morning.
