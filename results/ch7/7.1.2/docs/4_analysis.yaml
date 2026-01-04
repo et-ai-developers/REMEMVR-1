@@ -1,0 +1,660 @@
+# ============================================================================
+# ANALYSIS RECIPE - COMPLETE SPECIFICATION
+# ============================================================================
+# Generated: 2026-01-04T17:45:00Z
+# RQ: ch7/7.1.2
+# Agent: rq_analysis v5.1.0
+# Purpose: Self-contained recipe for g_code agent (reads ONLY this file)
+# ============================================================================
+# CRITICAL v5.1.0 CORRECTIONS APPLIED:
+# - Module path: tools.data -> tools.data (verified in tools_inventory.md)
+# - Validation tools: validate_lmm_convergence removed for OLS regression (inappropriate)
+# - Function signatures: Extracted from tools_inventory.md (exact API verification)
+# - File paths: Hierarchical paths (results/ch7/7.1.2/data/ not flat data/)
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.1.2"
+  total_steps: 8
+  analysis_type: "Regression analysis: Intercept vs Slope prediction"
+  generated_by: "rq_analysis v5.1.0"
+  timestamp: "2026-01-04T17:45:00Z"
+  v5_corrections:
+    - "FIXED: tools.data -> tools.data (module path correction)"
+    - "FIXED: Removed validate_lmm_convergence for OLS (model type mismatch)"
+    - "FIXED: Used exact signatures from tools_inventory.md"
+    - "FIXED: Applied hierarchical paths (results/ch7/7.1.2/)"
+
+# ============================================================================
+# ANALYSIS STEPS - COMPLETE SPECIFICATIONS
+# ============================================================================
+
+steps:
+  # --------------------------------------------------------------------------
+  # STEP 0: Extract Random Effects from Ch5 5.1.1 LMM
+  # --------------------------------------------------------------------------
+  - name: "step00_extract_random_effects"
+    step_number: "00"
+    description: "Extract random effects (intercepts/slopes) from Ch5 5.1.1 LMM for regression analysis"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_lmm"
+      function: "extract_random_effects_from_lmm"
+      signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch5/5.1.1/data/step05b_extended_model_fits.pkl"
+          format: "Pickle file containing MixedLMResults object"
+          required_content: "Fixed effects, random effects, variance components"
+          variable_name: "lmm_result"
+          description: "Fitted LMM from Ch5 5.1.1 omnibus episodic memory analysis"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step00_random_effects.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant unique identifier"}
+            - {name: "intercept", type: "float64", description: "LMM random intercept (Day 0 baseline ability)"}
+            - {name: "slope", type: "float64", description: "LMM random slope (forgetting rate)"}
+            - {name: "se_intercept", type: "float64", description: "Standard error of intercept estimate"}
+            - {name: "se_slope", type: "float64", description: "Standard error of slope estimate"}
+          row_count: 100
+          variable_name: "random_effects_df"
+          description: "Participant-level random effects for regression analysis"
+
+      parameters:
+        result: "lmm_result"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step00_random_effects.csv"
+          variable_name: "random_effects_df"
+          source: "analysis call output (extract_random_effects_from_lmm)"
+
+      parameters:
+        df: "random_effects_df"
+        required_columns: ["UID", "intercept", "slope", "se_intercept", "se_slope"]
+
+      criteria:
+        - "All required columns present: UID, intercept, slope, se_intercept, se_slope"
+        - "Expected 100 participants (no data loss)"
+        - "All intercepts in range [-3, 3] (theta ability scale)"
+        - "All slopes in range [-2, 2] (reasonable forgetting rates)"
+        - "All standard errors positive (SE > 0)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step00_extract_random_effects.log"
+
+    log_file: "results/ch7/7.1.2/logs/step00_extract_random_effects.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1: Extract Cognitive Test Scores
+  # --------------------------------------------------------------------------
+  - name: "step01_extract_cognitive_tests"
+    step_number: "01"
+    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) from master.xlsx"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_cognitive_tests"
+      signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+
+      input_files:
+        - path: "data/master.xlsx"
+          format: "Excel file with participant data"
+          required_columns: ["RAVLT_Total", "BVMT_Total_Recognition", "RPM_Total"]
+          variable_name: "master_data"
+          description: "Master participant dataset"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step01_cognitive_tests_raw.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant unique identifier"}
+            - {name: "RAVLT_total", type: "int", description: "RAVLT total learning score (raw)"}
+            - {name: "BVMT_total", type: "int", description: "BVMT total recognition score (raw)"}
+            - {name: "RPM_total", type: "int", description: "Raven's Progressive Matrices total (raw)"}
+          row_count: 100
+          variable_name: "cognitive_raw"
+          description: "Raw cognitive test scores extracted from master data"
+
+      parameters:
+        df: "master_data"
+        tests: ["RAVLT", "BVMT", "RPM"]
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step01_cognitive_tests_raw.csv"
+          variable_name: "cognitive_raw"
+          source: "analysis call output (extract_cognitive_tests)"
+
+      parameters:
+        df: "cognitive_raw"
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total"]
+
+      criteria:
+        - "All required cognitive test columns present"
+        - "Expected 100 participants"
+        - "No NaN values in cognitive scores"
+        - "Raw scores in reasonable ranges (RAVLT: 0-80, BVMT: 0-12, RPM: 0-60)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step01_extract_cognitive_tests.log"
+
+    log_file: "results/ch7/7.1.2/logs/step01_extract_cognitive_tests.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 1B: Standardize to T-Scores
+  # --------------------------------------------------------------------------
+  - name: "step01b_standardize_t_scores"
+    step_number: "01b"
+    description: "Convert raw cognitive scores to T-scores (M=50, SD=10)"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "standardize_to_t_scores"
+      signature: "standardize_to_t_scores(scores: Union[pd.Series, pd.DataFrame], population_mean: float = None, population_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step01_cognitive_tests_raw.csv"
+          required_columns: ["RAVLT_total", "BVMT_total", "RPM_total"]
+          variable_name: "cognitive_raw"
+          source: "step01 output"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step01_cognitive_tests.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant unique identifier"}
+            - {name: "RAVLT_T", type: "float64", description: "RAVLT T-score (M=50, SD=10)"}
+            - {name: "BVMT_T", type: "float64", description: "BVMT T-score (M=50, SD=10)"}
+            - {name: "RPM_T", type: "float64", description: "RPM T-score (M=50, SD=10)"}
+          row_count: 100
+          variable_name: "cognitive_standardized"
+          description: "T-score standardized cognitive tests for regression"
+
+      parameters:
+        scores: "cognitive_raw[['RAVLT_total', 'BVMT_total', 'RPM_total']]"
+        population_mean: null
+        population_sd: null
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(scores: Union[pd.Series, pd.DataFrame], target_mean: float = 50.0, target_sd: float = 10.0, tolerance: float = 0.1) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step01_cognitive_tests.csv"
+          variable_name: "cognitive_standardized"
+          source: "analysis call output (standardize_to_t_scores)"
+
+      parameters:
+        scores: "cognitive_standardized[['RAVLT_T', 'BVMT_T', 'RPM_T']]"
+        target_mean: 50.0
+        target_sd: 10.0
+        tolerance: 0.1
+
+      criteria:
+        - "T-scores approximately M=50, SD=10 (within tolerance)"
+        - "All T-scores in range [10, 90] (reasonable bounds)"
+        - "No NaN values in standardized scores"
+        - "Sample size N=100 for standardization"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step01_extract_cognitive_tests.log"
+
+    log_file: "results/ch7/7.1.2/logs/step01_extract_cognitive_tests.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 2: Merge Random Effects with Cognitive Tests
+  # --------------------------------------------------------------------------
+  - name: "step02_merge_data"
+    step_number: "02"
+    description: "Merge random effects with cognitive tests for complete regression input"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load random effects from step00_extract_random_effects.csv"
+        - "Load cognitive tests from step01_cognitive_tests.csv"
+        - "Merge datasets on UID (inner join to ensure complete cases)"
+        - "Verify all 100 participants successfully matched"
+        - "Save complete regression dataset with 8 columns"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step00_random_effects.csv"
+          required_columns: ["UID", "intercept", "slope", "se_intercept", "se_slope"]
+          variable_name: "random_effects"
+          source: "step00 output"
+        - path: "results/ch7/7.1.2/data/step01_cognitive_tests.csv"
+          required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T"]
+          variable_name: "cognitive_tests"
+          source: "step01b output"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step02_regression_input.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "UID", type: "str", description: "Participant unique identifier"}
+            - {name: "intercept", type: "float64", description: "LMM random intercept"}
+            - {name: "slope", type: "float64", description: "LMM random slope"}
+            - {name: "se_intercept", type: "float64", description: "Standard error of intercept"}
+            - {name: "se_slope", type: "float64", description: "Standard error of slope"}
+            - {name: "RAVLT_T", type: "float64", description: "RAVLT T-score"}
+            - {name: "BVMT_T", type: "float64", description: "BVMT T-score"}
+            - {name: "RPM_T", type: "float64", description: "RPM T-score"}
+          row_count: 100
+          variable_name: "regression_input"
+          description: "Complete dataset for regression analysis"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step02_regression_input.csv"
+          variable_name: "regression_input"
+          source: "pandas merge operation"
+
+      parameters:
+        df: "regression_input"
+        required_columns: ["UID", "intercept", "slope", "se_intercept", "se_slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+
+      criteria:
+        - "All 8 columns present after merge"
+        - "All 100 participants successfully matched (no data loss)"
+        - "No NaN values in merged dataset"
+        - "All columns preserve original data types"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step02_merge_data.log"
+
+    log_file: "results/ch7/7.1.2/logs/step02_merge_data.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 3: Fit Intercept Prediction Model
+  # --------------------------------------------------------------------------
+  - name: "step03_fit_intercept_model"
+    step_number: "03"
+    description: "Predict LMM intercepts (baseline ability) using cognitive test scores"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "fit_multiple_regression"
+      signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step02_regression_input.csv"
+          required_columns: ["intercept", "RAVLT_T", "BVMT_T", "RPM_T"]
+          variable_name: "regression_input"
+          source: "step02 merge output"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step03_intercept_predictions.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "predictor", type: "str", description: "Predictor name (intercept, RAVLT_T, BVMT_T, RPM_T)"}
+            - {name: "beta", type: "float64", description: "Regression coefficient"}
+            - {name: "se", type: "float64", description: "Standard error of coefficient"}
+            - {name: "t", type: "float64", description: "t-statistic"}
+            - {name: "p_uncorrected", type: "float64", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float64", description: "Bonferroni-corrected p-value"}
+            - {name: "CI_lower", type: "float64", description: "95% CI lower bound"}
+            - {name: "CI_upper", type: "float64", description: "95% CI upper bound"}
+            - {name: "VIF", type: "float64", description: "Variance Inflation Factor"}
+          row_count: 4
+          variable_name: "intercept_model_results"
+          description: "Regression results predicting LMM intercepts"
+
+      parameters:
+        X: "regression_input[['RAVLT_T', 'BVMT_T', 'RPM_T']]"
+        y: "regression_input['intercept']"
+        add_constant: true
+        return_diagnostics: true
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step03_intercept_predictions.csv"
+          variable_name: "intercept_model_results"
+          source: "analysis call output (fit_multiple_regression)"
+
+      parameters:
+        data: "intercept_model_results['p_uncorrected']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "p_uncorrected"
+
+      criteria:
+        - "All p-values in range [0, 1]"
+        - "All standard errors positive (se > 0)"
+        - "Bonferroni correction applied (p_bonferroni = p_uncorrected * 3)"
+        - "VIF values reasonable (warn if >5, error if >10)"
+        - "All 4 model terms present (intercept + 3 predictors)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step03_fit_intercept_model.log"
+
+    log_file: "results/ch7/7.1.2/logs/step03_fit_intercept_model.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 4: Fit Slope Prediction Model
+  # --------------------------------------------------------------------------
+  - name: "step04_fit_slope_model"
+    step_number: "04"
+    description: "Predict LMM slopes (forgetting rate) using cognitive test scores"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "fit_multiple_regression"
+      signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step02_regression_input.csv"
+          required_columns: ["slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+          variable_name: "regression_input"
+          source: "step02 merge output"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step04_slope_predictions.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "predictor", type: "str", description: "Predictor name (intercept, RAVLT_T, BVMT_T, RPM_T)"}
+            - {name: "beta", type: "float64", description: "Regression coefficient"}
+            - {name: "se", type: "float64", description: "Standard error of coefficient"}
+            - {name: "t", type: "float64", description: "t-statistic"}
+            - {name: "p_uncorrected", type: "float64", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float64", description: "Bonferroni-corrected p-value"}
+            - {name: "CI_lower", type: "float64", description: "95% CI lower bound"}
+            - {name: "CI_upper", type: "float64", description: "95% CI upper bound"}
+            - {name: "VIF", type: "float64", description: "Variance Inflation Factor"}
+          row_count: 4
+          variable_name: "slope_model_results"
+          description: "Regression results predicting LMM slopes"
+
+      parameters:
+        X: "regression_input[['RAVLT_T', 'BVMT_T', 'RPM_T']]"
+        y: "regression_input['slope']"
+        add_constant: true
+        return_diagnostics: true
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step04_slope_predictions.csv"
+          variable_name: "slope_model_results"
+          source: "analysis call output (fit_multiple_regression)"
+
+      parameters:
+        data: "slope_model_results['p_uncorrected']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "p_uncorrected"
+
+      criteria:
+        - "All p-values in range [0, 1]"
+        - "All standard errors positive (se > 0)"
+        - "Bonferroni correction applied (p_bonferroni = p_uncorrected * 3)"
+        - "VIF values reasonable (warn if >5, error if >10)"
+        - "All 4 model terms present (intercept + 3 predictors)"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step04_fit_slope_model.log"
+
+    log_file: "results/ch7/7.1.2/logs/step04_fit_slope_model.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 5: Compare R² Values with Bootstrap
+  # --------------------------------------------------------------------------
+  - name: "step05_compare_r_squared"
+    step_number: "05"
+    description: "Bootstrap comparison of R² values: intercept vs slope prediction"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "bootstrap_regression_ci"
+      signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step02_regression_input.csv"
+          required_columns: ["intercept", "slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+          variable_name: "regression_input"
+          source: "step02 merge output"
+        - path: "results/ch7/7.1.2/data/step03_intercept_predictions.csv"
+          required_columns: ["predictor", "beta", "se", "t", "p_uncorrected"]
+          variable_name: "intercept_results"
+          source: "step03 model output"
+        - path: "results/ch7/7.1.2/data/step04_slope_predictions.csv"
+          required_columns: ["predictor", "beta", "se", "t", "p_uncorrected"]
+          variable_name: "slope_results"
+          source: "step04 model output"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step05_r_squared_comparison.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "model", type: "str", description: "Model type (intercept, slope, difference)"}
+            - {name: "r_squared", type: "float64", description: "R² value"}
+            - {name: "adj_r_squared", type: "float64", description: "Adjusted R²"}
+            - {name: "bootstrap_ci_lower", type: "float64", description: "Bootstrap 95% CI lower"}
+            - {name: "bootstrap_ci_upper", type: "float64", description: "Bootstrap 95% CI upper"}
+            - {name: "difference", type: "float64", description: "R² difference (intercept - slope)"}
+            - {name: "difference_ci_lower", type: "float64", description: "Difference CI lower"}
+            - {name: "difference_ci_upper", type: "float64", description: "Difference CI upper"}
+            - {name: "p_value", type: "float64", description: "One-tailed test p-value"}
+          row_count: 3
+          variable_name: "r_squared_comparison"
+          description: "Bootstrap comparison of R² values between models"
+
+      parameters:
+        X: "regression_input[['RAVLT_T', 'BVMT_T', 'RPM_T']]"
+        y: "regression_input[['intercept', 'slope']]"
+        n_bootstrap: 1000
+        confidence_level: 0.95
+        random_state: 42
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step05_r_squared_comparison.csv"
+          variable_name: "r_squared_comparison"
+          source: "analysis call output (bootstrap_regression_ci)"
+
+      parameters:
+        data: "r_squared_comparison['r_squared']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "r_squared"
+
+      criteria:
+        - "All R² values in range [0, 1]"
+        - "Bootstrap CIs well-formed (lower < upper)"
+        - "P-value in range [0, 1]"
+        - "All 3 rows present (intercept, slope, difference)"
+        - "Bootstrap completed 1000 iterations successfully"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step05_compare_r_squared.log"
+
+    log_file: "results/ch7/7.1.2/logs/step05_compare_r_squared.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 6: Test Individual Predictor Significance
+  # --------------------------------------------------------------------------
+  - name: "step06_test_predictor_significance"
+    step_number: "06"
+    description: "Test individual predictor significance with dual p-value reporting (Decision D068)"
+
+    analysis_call:
+      type: "stdlib"
+      operations:
+        - "Load intercept and slope model results"
+        - "Extract individual predictor p-values (RAVLT_T, BVMT_T, RPM_T)"
+        - "Apply Bonferroni correction: alpha = 0.05/6 (3 predictors × 2 outcomes)"
+        - "Create significance flags for both uncorrected and corrected p-values"
+        - "Generate effect interpretation (direction and magnitude)"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step03_intercept_predictions.csv"
+          required_columns: ["predictor", "beta", "p_uncorrected", "p_bonferroni"]
+          variable_name: "intercept_results"
+          source: "step03 output"
+        - path: "results/ch7/7.1.2/data/step04_slope_predictions.csv"
+          required_columns: ["predictor", "beta", "p_uncorrected", "p_bonferroni"]
+          variable_name: "slope_results"
+          source: "step04 output"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step06_predictor_significance.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "predictor", type: "str", description: "Cognitive test predictor"}
+            - {name: "outcome", type: "str", description: "Outcome variable (intercept or slope)"}
+            - {name: "beta", type: "float64", description: "Regression coefficient"}
+            - {name: "p_uncorrected", type: "float64", description: "Uncorrected p-value"}
+            - {name: "p_bonferroni", type: "float64", description: "Bonferroni-corrected p-value"}
+            - {name: "sig_uncorrected", type: "int", description: "Significant at alpha=0.05 (uncorrected)"}
+            - {name: "sig_bonferroni", type: "int", description: "Significant at alpha=0.0083 (corrected)"}
+            - {name: "effect_interpretation", type: "str", description: "Effect direction and magnitude"}
+          row_count: 6
+          variable_name: "predictor_significance"
+          description: "Individual predictor significance with dual p-values per Decision D068"
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step06_predictor_significance.csv"
+          variable_name: "predictor_significance"
+          source: "pandas analysis (dual p-value computation)"
+
+      parameters:
+        interaction_df: "predictor_significance"
+        required_terms: ["RAVLT_T", "BVMT_T", "RPM_T"]
+        alpha_bonferroni: 0.0083
+
+      criteria:
+        - "All 6 predictor-outcome combinations present"
+        - "Dual p-value reporting: p_uncorrected AND p_bonferroni"
+        - "Bonferroni correction factor = 6 (3 predictors × 2 outcomes)"
+        - "Significance flags correctly computed"
+        - "Effect interpretations provided for all predictors"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step06_test_predictor_significance.log"
+
+    log_file: "results/ch7/7.1.2/logs/step06_test_predictor_significance.log"
+
+  # --------------------------------------------------------------------------
+  # STEP 7: Create Model Diagnostics Summary
+  # --------------------------------------------------------------------------
+  - name: "step07_model_diagnostics"
+    step_number: "07"
+    description: "Comprehensive regression diagnostics and assumption testing"
+
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "compute_regression_diagnostics"
+      signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step02_regression_input.csv"
+          required_columns: ["intercept", "slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+          variable_name: "regression_input"
+          source: "step02 merge output (for residuals analysis)"
+
+      output_files:
+        - path: "results/ch7/7.1.2/data/step07_model_diagnostics.csv"
+          format: "CSV with UTF-8 encoding"
+          columns:
+            - {name: "model", type: "str", description: "Model type (intercept or slope)"}
+            - {name: "test", type: "str", description: "Diagnostic test name"}
+            - {name: "statistic", type: "float64", description: "Test statistic value"}
+            - {name: "p_value", type: "float64", description: "Diagnostic test p-value"}
+            - {name: "assumption_met", type: "int", description: "Binary assumption pass/fail"}
+            - {name: "remedial_action", type: "str", description: "Recommended action if assumption violated"}
+          row_count: 12
+          variable_name: "diagnostics_summary"
+          description: "Comprehensive regression diagnostics for both models"
+
+      parameters:
+        model: "fitted_models"
+        X: "regression_input[['RAVLT_T', 'BVMT_T', 'RPM_T']]"
+        return_dataframe: true
+
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+      input_files:
+        - path: "results/ch7/7.1.2/data/step07_model_diagnostics.csv"
+          variable_name: "diagnostics_summary"
+          source: "analysis call output (compute_regression_diagnostics)"
+
+      parameters:
+        data: "diagnostics_summary['p_value']"
+        min_val: 0.0
+        max_val: 1.0
+        column_name: "p_value"
+
+      criteria:
+        - "All diagnostic test p-values in range [0, 1]"
+        - "Both models represented (intercept and slope)"
+        - "Key tests present: normality, homoscedasticity, VIF, Cook's D"
+        - "Assumption flags correctly computed"
+        - "Remedial actions provided for violations"
+
+      on_failure:
+        action: "raise ValueError(validation_result['message'])"
+        log_to: "results/ch7/7.1.2/logs/step07_model_diagnostics.log"
+
+    log_file: "results/ch7/7.1.2/logs/step07_model_diagnostics.log"
+
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

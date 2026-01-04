@@ -36,8 +36,9 @@ rq_tools:
   context_dump: "11 analysis + 11 validation tools cataloged for multiple regression analysis with comprehensive validation (bootstrap CIs, 5-fold CV, assumption checking)"
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: "2026-01-04T23:35:00Z"
+  context_dump: "9 steps specified with validation (multiple regression analysis with comprehensive validation)"
 
 rq_inspect:
   status: pending
@@ -52,7 +53,15 @@ rq_results:
   context_dump: ""
 
 analysis_steps:
-  # To be populated during execution
+  step00_validate_dependencies: pending
+  step01_extract_cognitive_tests: pending
+  step02_load_theta_means: pending
+  step03_merge_datasets: pending
+  step04_check_assumptions: pending
+  step05_fit_regression: pending
+  step06_multiple_comparisons: pending
+  step07_cross_validation: pending
+  step08_sensitivity_analysis: pending
 
 rq_platinum:
   status: pending

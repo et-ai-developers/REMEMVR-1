@@ -43,8 +43,14 @@ rq_tools:
     Decision D068 embedded: dual p-value reporting
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: "2026-01-04T17:45:00Z"
+  context_dump: |
+    8 analysis steps specified with full validation
+    Analysis: Regression on LMM random effects (intercept vs slope)
+    v5.1.0 corrections: tools.data path, exact signatures, proper validation tools
+    Critical: Intercept>Slope hypothesis with bootstrap CI and dual p-values
+    Pipeline: Ch5 5.1.1 random effects -> cognitive tests -> regression -> R² comparison
 
 rq_inspect:
   status: pending
@@ -59,7 +65,15 @@ rq_results:
   context_dump: ""
 
 analysis_steps:
-  # To be populated during execution
+  step00_extract_random_effects: pending
+  step01_extract_cognitive_tests: pending
+  step01b_standardize_t_scores: pending
+  step02_merge_data: pending
+  step03_fit_intercept_model: pending
+  step04_fit_slope_model: pending
+  step05_compare_r_squared: pending
+  step06_test_predictor_significance: pending
+  step07_model_diagnostics: pending
 
 rq_platinum:
   status: pending
