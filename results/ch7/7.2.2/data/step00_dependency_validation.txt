@@ -1,0 +1,15 @@
+DEPENDENCY VALIDATION REPORT FOR RQ 7.2.2
+======================================================================
+
+✓ PASS | RQ 7.2.1 regression: EXISTS: /home/etai/projects/REMEMVR/results/ch7/7.2.1/data/step04_mediation_analysis.csv (210 bytes)
+✓ PASS | Overall (5.1.1): VALID: step03_theta_scores.csv (400 rows)
+✓ PASS | What domain (5.2.1): VALID: step03_theta_scores.csv (400 rows)
+✗ FAIL | Where domain (5.2.2): FILE NOT FOUND: /home/etai/projects/REMEMVR/results/ch5/5.2.2/data/step03_theta_scores.csv
+✗ FAIL | When domain (5.2.3): FILE NOT FOUND: /home/etai/projects/REMEMVR/results/ch5/5.2.3/data/step03_theta_scores.csv
+
+======================================================================
+VALIDATION RESULT: DEPENDENCIES MISSING - CANNOT PROCEED
+
+Missing dependencies:
+  - Where domain (5.2.2): FILE NOT FOUND: /home/etai/projects/REMEMVR/results/ch5/5.2.2/data/step03_theta_scores.csv
+  - When domain (5.2.3): FILE NOT FOUND: /home/etai/projects/REMEMVR/results/ch5/5.2.3/data/step03_theta_scores.csv

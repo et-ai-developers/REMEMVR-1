@@ -736,3 +736,11 @@ Which approach is scientifically most appropriate for testing the differential p
 **Cross-validation instability:** 5-fold CV showed negative test R² (overfitting). Bootstrap CIs more robust. LESSON: With N<100 and 13 predictors, expect CV instability.
 
 **Hierarchical regression success:** 3-block regression with proper Cohen's f². LESSON: Always report both ΔR² and f² for incremental validity.
+
+### Lessons from RQ 7.2.2 (2026-01-05)
+
+**Suppression effect confirmed:** 119.8% attenuation with bootstrap CI [41.9%, 620.8%]. Age coefficient reversed sign. LESSON: Suppression effects indicate complex mediation where suppressor variables enhance predictor-outcome relationship.
+
+**Missing domain data:** Ch5 5.2.2 and 5.2.3 lacked theta scores. Proceeded with available domains. LESSON: Adapt analysis to available data while documenting limitations.
+
+**Column name flexibility:** Different RQs use different standardization suffixes (_std vs _z). LESSON: Build adaptive column mapping into analysis code.

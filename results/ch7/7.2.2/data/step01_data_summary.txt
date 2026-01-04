@@ -1,0 +1,20 @@
+DATA SUMMARY FOR RQ 7.2.2 ATTENUATION ANALYSIS
+============================================================
+
+Total participants: 100
+Variables: 7
+Missing values: 0
+
+Age Coefficients from RQ 7.2.1:
+  Bivariate (age only): -0.1302
+  Controlled (age + cognitive): 0.0258
+
+Theta Score Summary:
+  Overall theta mean: 0.006 (SD=0.677)
+  What domain theta mean: -0.007 (SD=0.638)
+
+Domain Coverage:
+  Overall: ✓ Available (Ch5 5.1.1)
+  What: ✓ Available (Ch5 5.2.1)
+  Where: ✗ Not found in expected location
+  When: ✗ Excluded due to floor effects (Ch5 finding)

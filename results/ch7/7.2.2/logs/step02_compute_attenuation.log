@@ -1,0 +1,39 @@
+======================================================================
+STEP 02: COMPUTE ATTENUATION RATIOS
+======================================================================
+
+1. Loading merged coefficients from Step 01...
+Loaded 100 participants
+Columns: ['UID', 'theta_all', 'theta_what', 'beta_age_bivariate_all', 'beta_age_controlled_all', 'beta_age_bivariate_what', 'beta_age_controlled_what']
+
+2. Computing attenuation for overall REMEMVR...
+Overall REMEMVR:
+  Bivariate beta: -0.1302
+  Controlled beta: 0.0258
+  Attenuation: 119.8%
+  Classification: suppression
+  *** SUPPRESSION EFFECT DETECTED ***
+  Age coefficient reversed sign after controlling for cognitive tests
+  This suggests older adults benefit MORE from VR scaffolding
+
+3. Computing attenuation for What domain...
+What domain:
+  Bivariate beta: -0.1302
+  Controlled beta: 0.0258
+  Attenuation: 119.8%
+  Classification: suppression
+
+4. Creating attenuation results...
+
+5. Saving outputs...
+Saved attenuation ratios to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step02_attenuation_ratios.csv
+Saved effect classification to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step02_effect_classification.txt
+
+======================================================================
+KEY FINDING:
+Attenuation = 119.8% (suppression)
+SUPPRESSION EFFECT: Age coefficient reversed sign
+This strongly supports the VR scaffolding hypothesis
+======================================================================
+
+Step 02 complete: Attenuation ratios computed

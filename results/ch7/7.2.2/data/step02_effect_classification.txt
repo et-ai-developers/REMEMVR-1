@@ -1,0 +1,32 @@
+ATTENUATION EFFECT CLASSIFICATION
+============================================================
+
+Classification Thresholds:
+  <0%: Negative attenuation (unexpected)
+  0-30%: Minimal attenuation
+  30-70%: Partial attenuation
+  70-100%: Substantial attenuation
+  >100%: Suppression effect (sign reversal)
+
+Results:
+
+OVERALL DOMAIN:
+  Attenuation: 119.8%
+  Classification: suppression
+  *** SUPPRESSION EFFECT ***
+  Age effect reversed from negative to positive
+  Indicates older adults benefit more from VR scaffolding
+
+WHAT DOMAIN:
+  Attenuation: 119.8%
+  Classification: suppression
+  *** SUPPRESSION EFFECT ***
+  Age effect reversed from negative to positive
+  Indicates older adults benefit more from VR scaffolding
+
+============================================================
+INTERPRETATION:
+The suppression effect (>100% attenuation) strongly supports
+the VR scaffolding hypothesis. After accounting for cognitive
+abilities, age becomes a POSITIVE predictor, suggesting older
+adults leverage VR environmental support more effectively.

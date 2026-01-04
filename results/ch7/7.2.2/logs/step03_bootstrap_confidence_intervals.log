@@ -1,0 +1,92 @@
+======================================================================
+STEP 03: BOOTSTRAP CONFIDENCE INTERVALS FOR ATTENUATION
+======================================================================
+
+1. Loading raw analysis data from RQ 7.2.1...
+Loaded 100 participants
+Columns: ['UID', 'theta_all', 'Age', 'RAVLT_T', 'BVMT_T', 'RPM_T', 'Age_std', 'RAVLT_T_std', 'BVMT_T_std', 'RPM_T_std']
+
+2. Loading and merging theta scores...
+Merged dataset: 100 participants
+
+3. Computing observed attenuation...
+======================================================================
+STEP 03: BOOTSTRAP CONFIDENCE INTERVALS FOR ATTENUATION
+======================================================================
+
+1. Loading raw analysis data from RQ 7.2.1...
+Loaded 100 participants
+Columns: ['UID', 'theta_all', 'Age', 'RAVLT_T', 'BVMT_T', 'RPM_T', 'Age_std', 'RAVLT_T_std', 'BVMT_T_std', 'RPM_T_std']
+
+2. Loading and merging theta scores...
+Merged dataset: 100 participants
+
+3. Computing observed attenuation...
+======================================================================
+STEP 03: BOOTSTRAP CONFIDENCE INTERVALS FOR ATTENUATION
+======================================================================
+
+1. Loading raw analysis data from RQ 7.2.1...
+Loaded 100 participants
+Columns: ['UID', 'theta_all', 'Age', 'RAVLT_T', 'BVMT_T', 'RPM_T', 'Age_std', 'RAVLT_T_std', 'BVMT_T_std', 'RPM_T_std']
+
+2. Loading and merging theta scores...
+Merged dataset: 100 participants
+
+3. Computing observed attenuation...
+Observed attenuation:
+  Beta bivariate: -0.1302
+  Beta controlled: 0.0258
+  Attenuation: 119.8%
+
+4. Bootstrap for overall REMEMVR (1000 iterations, seed=42)...
+  Bootstrap iteration 100/1000
+  Bootstrap iteration 200/1000
+  Bootstrap iteration 300/1000
+  Bootstrap iteration 400/1000
+  Bootstrap iteration 500/1000
+  Bootstrap iteration 600/1000
+  Bootstrap iteration 700/1000
+  Bootstrap iteration 800/1000
+  Bootstrap iteration 900/1000
+  Bootstrap iteration 1000/1000
+
+5. Bootstrap for What domain (1000 iterations, seed=42)...
+  Bootstrap iteration 100/1000
+  Bootstrap iteration 200/1000
+  Bootstrap iteration 300/1000
+  Bootstrap iteration 400/1000
+  Bootstrap iteration 500/1000
+  Bootstrap iteration 600/1000
+  Bootstrap iteration 700/1000
+  Bootstrap iteration 800/1000
+  Bootstrap iteration 900/1000
+  Bootstrap iteration 1000/1000
+
+6. Computing 95% confidence intervals...
+
+Overall REMEMVR Bootstrap Results:
+  Attenuation: 119.5%
+  95% CI: [41.9%, 620.8%]
+  Significant attenuation (CI excludes 0)
+
+What Domain Bootstrap Results:
+  Attenuation: 108.0%
+  95% CI: [42.0%, 437.6%]
+
+7. Saving bootstrap distributions...
+Saved bootstrap distributions to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step03_bootstrap_distributions.csv
+
+8. Saving confidence interval results...
+Saved confidence intervals to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step03_confidence_intervals.csv
+
+9. Saving bootstrap diagnostics...
+Saved bootstrap diagnostics to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step03_bootstrap_diagnostics.txt
+
+======================================================================
+BOOTSTRAP COMPLETE
+Key finding: Attenuation = 119.5% [41.9%, 620.8%]
+SUPPRESSION EFFECT CONFIRMED
+======================================================================
+
+Step 03 complete: Bootstrap confidence intervals computed

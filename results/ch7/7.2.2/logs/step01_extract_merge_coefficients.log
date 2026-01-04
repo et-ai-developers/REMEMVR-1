@@ -1,0 +1,30 @@
+======================================================================
+STEP 01: EXTRACT AND MERGE REGRESSION COEFFICIENTS
+======================================================================
+
+1. Loading age coefficients from RQ 7.2.1...
+Loaded mediation analysis: 1 rows
+Columns: ['beta_total', 'beta_direct', 'mediation_effect', 'proportion_mediated', 'ci_lower', 'ci_upper', 'p_mediation', 'effect_size_category']
+Age coefficient (bivariate): -0.1302
+Age coefficient (controlled): 0.0258
+
+2. Loading theta scores from Ch5 analyses...
+Loaded overall theta: 400 rows
+Overall theta columns: ['UID', 'test', 'Theta_All']
+Using theta column: Theta_All
+Aggregated to 100 participants
+Loaded What domain theta: 400 rows
+Aggregated What domain to 100 participants
+
+3. Merging datasets...
+
+Merged dataset summary:
+  Rows: 100
+  Columns: ['UID', 'theta_all', 'theta_what', 'beta_age_bivariate_all', 'beta_age_controlled_all', 'beta_age_bivariate_what', 'beta_age_controlled_what']
+  Missing values: 0
+
+4. Saving outputs...
+Saved merged coefficients to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step01_merged_coefficients.csv
+Saved data summary to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step01_data_summary.txt
+
+Step 01 complete: Coefficients extracted and merged
