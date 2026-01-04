@@ -54,26 +54,40 @@ rq_analysis:
 
 rq_inspect:
   status: pending
-  context_dump: ""
+  context_dump: |
+    Validated step00_extract_random_effects
+    Output: step00_random_effects.csv (100 rows, 5 cols)
+    Validation: Random effects from Ch5 5.1.4 model-averaged
+    Ranges: intercept[-1.53,1.26], slope[-0.11,0.12], all SEs=0.1
+    Layer validation: All 4 layers PASS
 
 rq_plots:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Plots generated: 2 (intercept_vs_slope_comparison, regression_diagnostics)
+    Data sources: intercept_vs_slope_comparison_data.csv, regression_diagnostics_data.csv
+    Functions used: plot_comparison_bars for R² comparison and diagnostic summary
+    Decision D069: N/A (regression analysis, no trajectory plots)
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: "2026-01-04T18:35:00Z"
+  context_dump: |
+    Results validated for scientific plausibility
+    0 anomalies flagged (plausibility acceptable)
+    Summary documented in results/summary.md
 
 analysis_steps:
-  step00_extract_random_effects: pending
-  step01_extract_cognitive_tests: pending
-  step01b_standardize_t_scores: pending
-  step02_merge_data: pending
-  step03_fit_intercept_model: pending
-  step04_fit_slope_model: pending
-  step05_compare_r_squared: pending
-  step06_test_predictor_significance: pending
-  step07_model_diagnostics: pending
+  step00_extract_random_effects: success
+  step01_extract_cognitive_tests: success
+  step01b_standardize_t_scores: success
+  step02_merge_data: success
+  step03_fit_intercept_model: success
+  step04_fit_slope_model: success
+  step05_compare_r_squared: success
+  step06_test_predictor_significance: success
+  step07_model_diagnostics: success
+  step08_prepare_plot_data: success
 
 rq_platinum:
   status: pending

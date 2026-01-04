@@ -1,0 +1,51 @@
+[START] Step 04: fit_slope_model
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[VERIFIED] All required columns present: ['slope', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[ANALYSIS] Running custom fit_multiple_regression for slope prediction...
+[ANALYSIS] Predictors: ['RAVLT_T', 'BVMT_T', 'RPM_T']
+[ANALYSIS] Outcome: slope (forgetting rate)
+[ANALYSIS] Sample size: N=100
+[ERROR] (0, 0)
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step04_fit_slope_model.py", line 230, in <module>
+    slope_results = fit_multiple_regression_custom(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step04_fit_slope_model.py", line 151, in fit_multiple_regression_custom
+    'CI_lower': conf_int[i, 0],  # conf_int returns numpy array
+                ~~~~~~~~^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/range.py", line 417, in get_loc
+    raise KeyError(key)
+KeyError: (0, 0)
+[START] Step 04: fit_slope_model
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[VERIFIED] All required columns present: ['slope', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[ANALYSIS] Running custom fit_multiple_regression for slope prediction...
+[ANALYSIS] Predictors: ['RAVLT_T', 'BVMT_T', 'RPM_T']
+[ANALYSIS] Outcome: slope (forgetting rate)
+[ANALYSIS] Sample size: N=100
+[DONE] Slope prediction analysis complete
+[RESULTS] R² = 0.0735, Adjusted R² = 0.0446
+[RESULTS] F(3, 96) = 2.539, p = 0.061024
+[SAVE] Saving step04_slope_predictions.csv...
+[SAVED] step04_slope_predictions.csv (4 rows, 9 cols)
+[RESULTS] Slope prediction model coefficients:
+  intercept: β = -0.0865, SE = 0.0320, p = 0.008195
+  RAVLT_T: β = 0.0007, SE = 0.0005, p = 0.155944, VIF = 1.152
+  BVMT_T: β = 0.0003, SE = 0.0006, p = 0.619744, VIF = 1.390
+  RPM_T: β = 0.0007, SE = 0.0006, p = 0.205937, VIF = 1.342
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] valid: True
+[VALIDATION] message: p_uncorrected: All values within range [0.0, 1.0] (n=4).
+[VALIDATION] out_of_range_count: 0
+[VALIDATION] violations: []
+[VALIDATION] PASS: All standard errors positive
+[VALIDATION] WARNING: Bonferroni correction may be incorrect
+[VALIDATION] PASS: VIF values reasonable (all <= 5)
+[VALIDATION] PASS: All 4 model terms present (intercept + 3 predictors)
+[SUCCESS] Step 04 complete

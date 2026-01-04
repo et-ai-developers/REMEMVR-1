@@ -1,0 +1,7 @@
+predictor,outcome,beta,p_uncorrected,p_bonferroni,term,sig_uncorrected,sig_bonferroni,effect_interpretation
+RAVLT_T,intercept,0.0062785311758329,0.2407974599122294,0.7223923797366884,RAVLT_T,0,0,negligible positive effect on intercept (non-significant)
+BVMT_T,intercept,0.0085069064792646,0.1486036841860789,0.4458110525582368,BVMT_T,0,0,negligible positive effect on intercept (non-significant)
+RPM_T,intercept,0.0194616880575442,0.0010159185468871,0.0030477556406614,RPM_T,1,1,negligible positive effect on intercept (significant (corrected))
+RAVLT_T,slope,0.0007379988608972,0.1559439379833885,0.6237757519335543,RAVLT_T,0,0,negligible positive effect on slope (non-significant)
+BVMT_T,slope,0.000282141360866,0.619743747928081,2.478974991712324,BVMT_T,0,0,negligible positive effect on slope (non-significant)
+RPM_T,slope,0.0007092532845607,0.2059374435445628,0.8237497741782513,RPM_T,0,0,negligible positive effect on slope (non-significant)

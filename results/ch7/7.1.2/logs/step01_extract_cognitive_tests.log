@@ -1,0 +1,40 @@
+[START] Step 01: Extract and Prepare Cognitive Test Data
+[SETUP] RQ Directory: /home/etai/projects/REMEMVR/results/ch7/7.1.2
+[SETUP] Output will be saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step01_cognitive_tests.csv
+[DATA] Loading participant data from dfnonvr.csv...
+[DATA] Loaded cognitive test data for 100 participants
+[DATA] Columns extracted: ['UID', 'NART Score', 'RPM Score', 'RPM Tr01 answer', 'RPM Tr02 answer', 'RPM Tr03 answer', 'RPM Tr04 answer', 'RPM Tr05 answer', 'RPM Tr06 answer', 'RPM Tr07 answer', 'RPM Tr08 answer', 'RPM Tr09 answer', 'RPM Tr10 answer', 'RPM Tr11 answer', 'RPM Tr12 answer', 'BVMT Form Number', 'BVMT trial 1 score', 'BVMT trial 2 score', 'BVMT trial 3 score', 'BVMT delayed recall delay period', 'BVMT delayed recall score', 'BVMT total recall', 'BVMT learning', 'BVMT percent retained', 'BVMT recognition hits', 'BVMT recognition falsealarms', 'BVMT recognition discrimination index', 'BVMT recognition response bias', 'RAVLT trial 1 score', 'RAVLT trial 2 score', 'RAVLT trial 3 score', 'RAVLT trial 4 score', 'RAVLT trial 5 score', 'RAVLT distraction trial score', 'RAVLT free recall score', 'RAVLT delayed recall delay period', 'RAVLT delayed recall score', 'RAVLT recognition hits ', 'RAVLT recognition semantic misses', 'RAVLT recognition phonetic misses', 'RAVLT recognition semantic phonetic misses', 'RAVLT recognition distraction misses', 'RAVLT recognition distract phonetic misses', 'RAVLT recognition distract semantic misses', 'RAVLT recognition distract smenaitc and pohonetic misses', 'REMEMVR bathroom task 01 duration', 'REMEMVR bathroom task 02 duration', 'REMEMVR bathroom task 03 duration', 'REMEMVR bathroom task 04 duration', 'REMEMVR bathroom task 05 duration', 'REMEMVR bathroom task 06 duration', 'REMEMVR bathroom task 07 duration', 'REMEMVR bathroom task 08 duration', 'REMEMVR bathroom task 09 duration', 'REMEMVR bathroom task 10 duration', 'REMEMVR bathroom task 11 duration', 'REMEMVR bathroom task 12 duration', 'REMEMVR bedroom task 01 duration', 'REMEMVR bedroom task 02 duration', 'REMEMVR bedroom task 03 duration', 'REMEMVR bedroom task 04 duration', 'REMEMVR bedroom task 05 duration', 'REMEMVR bedroom task 06 duration', 'REMEMVR bedroom task 07 duration', 'REMEMVR bedroom task 08 duration', 'REMEMVR bedroom task 09 duration', 'REMEMVR bedroom task 10 duration', 'REMEMVR bedroom task 11 duration', 'REMEMVR bedroom task 12 duration', 'REMEMVR kitchen task 01 duration', 'REMEMVR kitchen task 02 duration', 'REMEMVR kitchen task 03 duration', 'REMEMVR kitchen task 04 duration', 'REMEMVR kitchen task 05 duration', 'REMEMVR kitchen task 06 duration', 'REMEMVR kitchen task 07 duration', 'REMEMVR kitchen task 08 duration', 'REMEMVR kitchen task 09 duration', 'REMEMVR kitchen task 10 duration', 'REMEMVR kitchen task 11 duration', 'REMEMVR kitchen task 12 duration', 'REMEMVR livingroom task 01 duration', 'REMEMVR livingroom task 02 duration', 'REMEMVR livingroom task 03 duration', 'REMEMVR livingroom task 04 duration', 'REMEMVR livingroom task 05 duration', 'REMEMVR livingroom task 06 duration', 'REMEMVR livingroom task 07 duration', 'REMEMVR livingroom task 08 duration', 'REMEMVR livingroom task 09 duration', 'REMEMVR livingroom task 10 duration', 'REMEMVR livingroom task 11 duration', 'REMEMVR livingroom task 12 duration', 'Age in years', 'Sex 0=female 1=male', 'Education level ( High school (Year 9 or lower)\n High school (Year 10)\n High school (Year 12)\n Certificate 1 & 2\n Certificate 3 & 4\n Diploma / Advanced Diploma\n Bachelors Degree\n Graduate Certificate / Diploma\n Masters Degree\n Doctoral Degree)', 'VR Usage (Never\n Less than 1 hour\n 1 - 10 hours\n 10 - 50 hours\n More than 50 hours)', 'Typical sleep hours', 'Total DASS Anxiety Items', 'Total DASS Stress Items', 'Describe your technique here']
+[PROCESS] Computing derived scores...
+[PROCESS] Computing RAVLT_Total from trial scores...
+[PROCESS] Summing RAVLT trials 1-5: ['RAVLT trial 1 score', 'RAVLT trial 2 score', 'RAVLT trial 3 score', 'RAVLT trial 4 score', 'RAVLT trial 5 score']
+[DATA] Found RAVLT columns: ['RAVLT trial 1 score', 'RAVLT trial 2 score', 'RAVLT trial 3 score', 'RAVLT trial 4 score', 'RAVLT trial 5 score', 'RAVLT distraction trial score', 'RAVLT free recall score', 'RAVLT delayed recall delay period', 'RAVLT delayed recall score', 'RAVLT recognition hits ', 'RAVLT recognition semantic misses', 'RAVLT recognition phonetic misses', 'RAVLT recognition semantic phonetic misses', 'RAVLT recognition distraction misses', 'RAVLT recognition distract phonetic misses', 'RAVLT recognition distract semantic misses', 'RAVLT recognition distract smenaitc and pohonetic misses', 'RAVLT_Total']
+[DATA] Found BVMT columns: ['BVMT Form Number', 'BVMT trial 1 score', 'BVMT trial 2 score', 'BVMT trial 3 score', 'BVMT delayed recall delay period', 'BVMT delayed recall score', 'BVMT total recall', 'BVMT learning', 'BVMT percent retained', 'BVMT recognition hits', 'BVMT recognition falsealarms', 'BVMT recognition discrimination index', 'BVMT recognition response bias']
+[DATA] Found NART columns: ['NART Score']
+[DATA] Found RPM columns: ['RPM Score', 'RPM Tr01 answer', 'RPM Tr02 answer', 'RPM Tr03 answer', 'RPM Tr04 answer', 'RPM Tr05 answer', 'RPM Tr06 answer', 'RPM Tr07 answer', 'RPM Tr08 answer', 'RPM Tr09 answer', 'RPM Tr10 answer', 'RPM Tr11 answer', 'RPM Tr12 answer']
+[PROCESS] Selecting and renaming cognitive test columns...
+[DATA] Using BVMT total recall for BVMT
+[DATA] Using NART Score for NART
+[DATA] Using RPM Score for RPM
+[PROCESS] Converting raw scores to T-scores (M=50, SD=10)...
+[STATS] RAVLT: Mean=50.60, SD=8.42, N=100
+[VERIFY] RAVLT_T: Mean=50.00, SD=10.00
+[STATS] BVMT: Mean=28.22, SD=5.06, N=100
+[VERIFY] BVMT_T: Mean=50.00, SD=10.00
+[STATS] NART: Mean=31.90, SD=8.57, N=97
+[VERIFY] NART_T: Mean=50.00, SD=10.00
+[STATS] RPM: Mean=9.87, SD=1.93, N=100
+[VERIFY] RPM_T: Mean=50.00, SD=10.00
+[PROCESS] Checking for missing data...
+[MISSING] NART_Raw: 3 missing values (3.0%)
+[MISSING] NART_T: 3 missing values (3.0%)
+[DATA] Complete cases (all 4 T-scores): 97/100
+[SAVE] Saving cognitive test T-scores to /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step01_cognitive_tests.csv...
+[SAVED] 100 participants x 5 columns
+[VALIDATION] Verifying output file...
+[VALIDATION] Output file has 100 rows, 5 columns
+[VALIDATION] Columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T']
+[VALIDATION] RAVLT_T: Mean=50.00 (target=50), SD=10.00 (target=10)
+[VALIDATION] BVMT_T: Mean=50.00 (target=50), SD=10.00 (target=10)
+[VALIDATION] NART_T: Mean=50.00 (target=50), SD=10.00 (target=10)
+[VALIDATION] RPM_T: Mean=50.00 (target=50), SD=10.00 (target=10)
+[SUCCESS] Step 01 complete - Cognitive test T-scores extracted and saved

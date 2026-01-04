@@ -1,0 +1,177 @@
+[START] Step 00: Extract Random Effects from Ch5 5.1.1 LMM
+[LOAD] Loading Ch5 5.1.1 LMM model...
+[LOADED] Model using MixedLMResults.load() method
+[INFO] Multiple models found: ['Linear', 'Quadratic', 'Log', 'Lin+Log', 'Quad+Log', 'PowerLaw_LogLog', 'PowerLaw_Alpha05', 'PowerLaw_Alpha03', 'PowerLaw_Alpha07', 'PowerLaw_Combined', 'SquareRoot', 'CubeRoot', 'SquareRoot+Log', 'Reciprocal', 'Recip+Log', 'Exponential', 'Exp+Log']
+[INFO] Using model: Linear
+[INFO] Model type: <class 'statsmodels.regression.mixed_linear_model.MixedLMResultsWrapper'>
+[VERIFIED] Model has expected random effects attributes
+[ANALYSIS] Extracting random effects using extract_random_effects_from_lmm...
+[DONE] Random effects variance extraction complete
+[INFO] re_variance: <class 'pandas.core.frame.DataFrame'> with 1 elements
+[INFO] residual_variance: 0.362871
+[INFO] icc: 0.501913
+[ANALYSIS] Extracting participant-level random effects...
+[INFO] Found random effects for 100 participants
+[BUILD] Creating random effects DataFrame...
+[CREATED] Random effects DataFrame: 100 rows, 5 cols
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step00_random_effects.csv...
+[SAVED] step00_random_effects.csv (100 rows, 5 cols)
+[STATS] Intercept range: [-1.476, 1.230]
+[STATS] Slope range: [0.000, 0.000]
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['UID', 'intercept', 'se_slope', 'se_intercept', 'slope']
+[VALIDATION] n_required: 5
+[VALIDATION] n_missing: 0
+[VALIDATION] Checking additional criteria...
+[PASS] Participant count: 100
+[PASS] All intercepts in range [-3.0, 3.0]
+[PASS] All slopes in range [-2.0, 2.0]
+[PASS] All standard errors positive
+[SUCCESS] Step 00 complete
+[START] Step 00: Extract Random Effects from Ch5 5.2.1 LMM
+[LOAD] Loading Ch5 5.2.1 Log model with random slopes...
+[LOAD] Loading from: /home/etai/projects/REMEMVR/results/ch5/5.2.1/results/lmm_Log.pkl
+[LOADED] Model using MixedLMResults.load() method
+[INFO] Model type: <class 'statsmodels.regression.mixed_linear_model.MixedLMResultsWrapper'>
+[INFO] Random effects covariance shape: (2, 2)
+[VERIFIED] Model has 2D random effects (intercept + slope)
+[INFO] Random effects covariance matrix:
+[INFO]              Group  log_Days
+Group     0.292312 -0.072211
+log_Days -0.072211  0.052144
+[ANALYSIS] Extracting participant-level random effects...
+[INFO] Found random effects for 100 participants
+[DEBUG] First participant (A010): Group       0.555050
+log_Days   -0.033066
+dtype: float64
+[DEBUG] Random effects dimensions: 2
+[BUILD] Creating random effects DataFrame...
+[CREATED] Random effects DataFrame: 100 rows, 5 cols
+[CRITICAL] Slope statistics:
+  Variance: 0.024809
+  Std Dev: 0.158
+  Range: [-0.481, 0.342]
+[SUCCESS] Random slopes have meaningful variation (variance=0.024809)
+[SUCCESS] RQ 7.1.2 can proceed with intercept vs slope comparison
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step00_random_effects.csv...
+[SAVED] step00_random_effects.csv (100 rows, 5 cols)
+[STATS] Summary statistics:
+  Intercept: mean=0.000, std=0.484
+  Intercept: range=[-1.397, 1.110]
+  Slope: mean=-0.000, std=0.158
+  Slope: range=[-0.481, 0.342]
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['UID', 'slope', 'se_intercept', 'se_slope', 'intercept']
+[VALIDATION] n_required: 5
+[VALIDATION] n_missing: 0
+[VALIDATION] Checking additional criteria...
+[PASS] Participant count: 100
+[PASS] All intercepts in range [-3.0, 3.0]
+[PASS] All slopes in range [-2.0, 2.0]
+[PASS] All standard errors positive
+[PASS] Slope variance (0.024809) sufficient for regression analysis
+[PASS] RQ 7.1.2 ready: Can compare cognitive test prediction of intercepts vs slopes
+[SUCCESS] Step 00 complete - Random effects with meaningful slope variation extracted
+[SUCCESS] Source: Ch5 5.2.1 Log model (2D random effects)
+[SUCCESS] Ready for Ch7 7.1.2 intercept vs slope prediction analysis
+[START] Step 00: Extract Random Effects from Ch5 5.2.1 LMM
+[LOAD] Loading Ch5 5.2.1 Log model with random slopes...
+[LOAD] Loading from: /home/etai/projects/REMEMVR/results/ch5/5.2.1/results/lmm_Log.pkl
+[LOADED] Model using MixedLMResults.load() method
+[INFO] Model type: <class 'statsmodels.regression.mixed_linear_model.MixedLMResultsWrapper'>
+[INFO] Random effects covariance shape: (2, 2)
+[VERIFIED] Model has 2D random effects (intercept + slope)
+[INFO] Random effects covariance matrix:
+[INFO]              Group  log_Days
+Group     0.292312 -0.072211
+log_Days -0.072211  0.052144
+[ANALYSIS] Extracting participant-level random effects...
+[INFO] Found random effects for 100 participants
+[DEBUG] First participant (A010): Group       0.555050
+log_Days   -0.033066
+dtype: float64
+[DEBUG] Random effects dimensions: 2
+[BUILD] Creating random effects DataFrame...
+[CREATED] Random effects DataFrame: 100 rows, 5 cols
+[CRITICAL] Slope statistics:
+  Variance: 0.024809
+  Std Dev: 0.158
+  Range: [-0.481, 0.342]
+[SUCCESS] Random slopes have meaningful variation (variance=0.024809)
+[SUCCESS] RQ 7.1.2 can proceed with intercept vs slope comparison
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step00_random_effects.csv...
+[SAVED] step00_random_effects.csv (100 rows, 5 cols)
+[STATS] Summary statistics:
+  Intercept: mean=0.000, std=0.484
+  Intercept: range=[-1.397, 1.110]
+  Slope: mean=-0.000, std=0.158
+  Slope: range=[-0.481, 0.342]
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['intercept', 'se_slope', 'UID', 'slope', 'se_intercept']
+[VALIDATION] n_required: 5
+[VALIDATION] n_missing: 0
+[VALIDATION] Checking additional criteria...
+[PASS] Participant count: 100
+[PASS] All intercepts in range [-3.0, 3.0]
+[PASS] All slopes in range [-2.0, 2.0]
+[PASS] All standard errors positive
+[PASS] Slope variance (0.024809) sufficient for regression analysis
+[PASS] RQ 7.1.2 ready: Can compare cognitive test prediction of intercepts vs slopes
+[SUCCESS] Step 00 complete - Random effects with meaningful slope variation extracted
+[SUCCESS] Source: Ch5 5.2.1 Log model (2D random effects)
+[SUCCESS] Ready for Ch7 7.1.2 intercept vs slope prediction analysis
+[START] Step 00: Extract Random Effects from Ch5 5.1.1 PowerLaw_04
+[LOAD] Loading Ch5 5.1.1 PowerLaw_04 model with random slopes...
+[LOAD] Loading from: /home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step05b_extended_model_fits.pkl
+[LOADED] Extended model fits using MixedLMResults.load() method
+[INFO] Available models: ['Linear', 'Quadratic', 'Log', 'Lin+Log', 'Quad+Log', 'PowerLaw_LogLog', 'PowerLaw_Alpha05', 'PowerLaw_Alpha03', 'PowerLaw_Alpha07', 'PowerLaw_Combined', 'SquareRoot', 'CubeRoot', 'SquareRoot+Log', 'Reciprocal', 'Recip+Log', 'Exponential', 'Exp+Log']
+[INFO] PowerLaw_04 not found, using: Linear
+[INFO] Model type: <class 'statsmodels.regression.mixed_linear_model.MixedLMResultsWrapper'>
+[INFO] Random effects covariance shape: (1, 1)
+[ERROR] Model only has 1D random effects, need 2D (intercept + slope)
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step00_extract_random_effects.py", line 167, in <module>
+    raise ValueError(f"Model only has {cov_re_shape[0]}D random effects, need 2D (intercept + slope)")
+ValueError: Model only has 1D random effects, need 2D (intercept + slope)
+[START] Step 00: Extract Random Effects from Ch5 5.1.4 Model-Averaged
+[LOAD] Loading Ch5 5.1.4 model-averaged random effects...
+[LOAD] Loading from: /home/etai/projects/REMEMVR/results/ch5/5.1.4/data/step06_averaged_random_effects.csv
+[LOADED] Model-averaged random effects CSV
+[INFO] CSV shape: (100, 3)
+[INFO] Columns: ['UID', 'intercept_avg', 'slope_avg']
+[VERIFIED] CSV has expected columns for model-averaged random effects
+[PROCESS] Processing model-averaged random effects...
+[CREATED] Random effects DataFrame: 100 rows, 5 cols
+[VALIDATION] Checking slope variation for intercept vs slope analysis...
+[CRITICAL] Slope statistics:
+  Variance: 0.002395
+  Std Dev: 0.049
+  Range: [-0.106, 0.116]
+[SUCCESS] Random slopes have meaningful variation (variance=0.002395)
+[SUCCESS] RQ 7.1.2 can proceed with intercept vs slope comparison
+[SAVE] Saving processed random effects to /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step00_random_effects.csv...
+[SAVED] 100 participants x 5 columns
+[STATS] Summary statistics:
+  Intercept: mean=0.000, std=0.558
+  Intercept: range=[-1.533, 1.265]
+  Slope: mean=-0.000, std=0.049
+  Slope: range=[-0.106, 0.116]
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] PASSED - All required columns present
+[VALIDATION] Checking additional criteria...
+[PASS] Participant count: 100
+[PASS] All intercepts in range [-3.0, 3.0]
+[PASS] All slopes in range [-2.0, 2.0]
+[PASS] All standard errors positive
+[PASS] Slope variance (0.002395) sufficient for regression analysis
+[PASS] RQ 7.1.2 ready: Can compare cognitive test prediction of intercepts vs slopes
+[SUCCESS] Step 00 complete - Model-averaged random effects extracted and validated
+[SUCCESS] Source: Ch5 5.1.4 model-averaged random effects (accounting for model uncertainty)
+[SUCCESS] Ready for Ch7 7.1.2 intercept vs slope prediction analysis

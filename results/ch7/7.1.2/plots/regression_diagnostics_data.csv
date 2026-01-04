@@ -1,0 +1,13 @@
+model,test_type,test_name,statistic,p_value,assumption_met,status,remedial_action
+intercept,Multicollinearity,VIF 1,1.152134273713216,,1,PASS,None needed
+intercept,Multicollinearity,VIF 2,1.389569686574147,,1,PASS,None needed
+intercept,Multicollinearity,VIF 3,1.3419999805599172,,1,PASS,None needed
+intercept,Outliers,Cook's Distance,0.1367455110182582,,0,FAIL,Check for influential observations
+intercept,Autocorrelation,Durbin-Watson,1.684686148432537,,1,PASS,None needed
+intercept,Normality,Shapiro-Wilk,0.9939205833524988,0.9368755060189732,1,PASS,None needed
+slope,Multicollinearity,VIF 1,1.152134273713216,,1,PASS,None needed
+slope,Multicollinearity,VIF 2,1.389569686574147,,1,PASS,None needed
+slope,Multicollinearity,VIF 3,1.3419999805599172,,1,PASS,None needed
+slope,Outliers,Cook's Distance,0.1781306702822264,,0,FAIL,Check for influential observations
+slope,Autocorrelation,Durbin-Watson,1.991370393246635,,1,PASS,None needed
+slope,Normality,Shapiro-Wilk,0.9824537309497814,0.2054636350333479,1,PASS,None needed

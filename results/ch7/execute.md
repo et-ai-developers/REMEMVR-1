@@ -1,31 +1,84 @@
 # Chapter 7 RQ Execution Protocol
 
-**Purpose:** Context window primer for executing any Ch7 RQ after /refresh
+**Purpose:** Scientific execution protocol ensuring methodological correctness for PhD thesis
 **Usage:** `read ch7/execute.md` then proceed with specified RQ
 
 ---
 
-## EXECUTION FLOW
+## 🚨 SCIENTIFIC INTEGRITY PROTOCOL (MANDATORY - NO EXCEPTIONS)
+
+**CARDINAL RULE:** Getting it scientifically RIGHT is infinitely more important than getting it done quickly.
+
+**NEVER:**
+- Guess data sources or dependencies  
+- Assume files contain what you expect
+- Use data from different RQs without understanding what they studied
+- Make code "work" by substituting random data
+- Rush to implementation without understanding the science
+- **Skip steps or cut corners due to time/token constraints**
+- **Use "running short on time" as excuse for shortcuts**
+
+**ALWAYS:**
+- Read reports and understand the science FIRST
+- Verify dependencies are methodologically sound
+- Ask questions when uncertain
+- Document scientific reasoning for every choice
+- **Take time needed to do analysis properly**
+- **Use /save, /clear, /refresh if approaching token limit**
+
+**🔴 TIME/TOKEN CONSTRAINT PROTOCOL:**
+- You are NEVER running short on time - we have infinite time
+- You are NEVER stuck with token limits - /save + /clear + /refresh solves this
+- If context window approaching 150k: Recommend /save to user
+- If analysis needs 20 steps: Do all 20 steps properly
+- Scientific integrity >> Speed (ALWAYS, NO EXCEPTIONS)
+
+---
+
+## EXECUTION FLOW (SCIENCE-FIRST)
+
+### PHASE 1: SCIENTIFIC FOUNDATION (NEVER SKIP)
 
 ```
-1. READ: docs/1_concept.md → docs/2_plan.md → docs/4_analysis.yaml (understand pipeline)
-   NOTE: Specification files are in results/ch7/X.Y.Z/docs/ NOT the RQ root folder
-2. TODOWRITE: Create step-by-step task list from 4_analysis.yaml
-3. LOOP per step:
+1. READ & UNDERSTAND THE SCIENCE:
+   a. Read docs/1_concept.md - What is the scientific question?
+   b. Read docs/2_plan.md - What is the methodological approach? 
+   c. Read docs/4_analysis.yaml - What are the exact analysis steps?
+   
+2. CROSS-CHAPTER DEPENDENCY VALIDATION:
+   For ANY dependency on Ch5/Ch6 RQs:
+   a. 🔴 MANDATORY: Read ./reports/X.Y.Z/report.md FIRST
+   b. Understand: What did that RQ study? What models were used? What outputs exist?
+   c. Verify: Does the source RQ actually provide what current RQ needs?
+   d. Document: WHY is this dependency scientifically appropriate?
+   e. If uncertain: ASK USER - Do not guess or assume
+   
+3. METHODOLOGICAL SOUNDNESS CHECK:
+   a. Does the proposed analysis make scientific sense?
+   b. Are the data sources appropriate for the research question?
+   c. Will the analysis answer the stated hypothesis?
+   d. If uncertain: ASK USER - Do not proceed with questionable methods
+```
+
+### PHASE 2: IMPLEMENTATION (AFTER SCIENTIFIC VALIDATION)
+
+```
+4. CREATE EXECUTION PLAN:
+   a. TODOWRITE: Create step-by-step task list from 4_analysis.yaml
+   b. For each step, document expected inputs/outputs and WHY they're needed
+   
+5. EXECUTE WITH VALIDATION:
    a. Tell g_code to read ch7/gcode_lessons.md FIRST (contains all known bugs/fixes)
-   b. g_code generates stepXX_*.py (informed by lessons learned)
-   c. Run code, debug until output is statistically valid
-   d. If new bug found: ADD TO gcode_lessons.md immediately
-   e. Validate output makes theoretical sense
-   f. Mark step complete, proceed to next
-4. POST-EXECUTION: rq_inspect → rq_plots → rq_results → rq_validate
+   b. g_code generates stepXX_*.py (informed by lessons learned)  
+   c. BEFORE running: Verify inputs exist and contain expected data
+   d. Run code, debug until output is statistically valid
+   e. AFTER running: Verify output makes theoretical sense
+   f. If new bug found: ADD TO gcode_lessons.md immediately
+   g. Mark step complete, proceed to next
+   
+6. POST-EXECUTION VALIDATION: 
+   rq_inspect → rq_plots → rq_results → rq_validate
    ⚠️ CRITICAL: Run SEQUENTIALLY, not in parallel (rq_validate needs summary.md from rq_results)
-5. UPDATE STATUS: Update ch7/rq_status.tsv with completion status
-   ⚠️ MANDATORY: Do this IMMEDIATELY after validation completes, before reporting to user
-6. ADD LESSONS: 
-   - Add execution insights to "LESSONS LEARNED LOG" section below
-   - Add g_code bugs/fixes to ch7/gcode_lessons.md
-7. REPORT: Summary + thesis implications to user
 ```
 
 **⚠️ MANDATORY END-OF-RQ UPDATES (DO NOT SKIP):**
@@ -395,6 +448,22 @@ Run in sequence. Don't skip. Each catches different issues.
 
 **Purpose:** Capture critical insights discovered during Ch7 execution for cross-RQ learning. Add new lessons in terse format immediately after discovery. Format: `[Date] [RQ] [Lesson]`
 
+**[2026-01-04] [7.1.2] CRITICAL Cross-Chapter Dependency Error:** Blindly used Ch5 5.2.1 slopes without understanding what 5.2.1 studied. Nearly invalidated entire analysis. **LESSON:** ALWAYS read source RQ reports before using their data.
+
+**[2026-01-04] [7.1.2] Wrong Ch5 Dependency:** Concept said use 5.1.1 but it had no slopes. Found 5.1.4 had model-averaged slopes. **LESSON:** Verify source RQ actually provides needed data structure, don't trust concept blindly.
+
+**[2026-01-04] [7.1.2] "Running Short on Time" Mentality:** Tried to rush through final steps due to perceived time constraints. **LESSON:** NEVER rush. Use /save + /clear + /refresh if needed. Scientific integrity >> Speed.
+
+**[2026-01-04] [7.1.2] Regression Function Mismatches:** fit_multiple_regression had different signature than 4_analysis.yaml specified. **LESSON:** Always check actual function signatures, create wrappers if needed.
+
+**[2026-01-04] [7.1.2] Validation Function Missing:** validate_hypothesis_test_dual_pvalues didn't exist. **LESSON:** Check if validation functions exist before using, write simple custom validation if needed.
+
+**[2026-01-04] [7.1.2] Data Type Assumptions:** Assumed coefficients were DataFrame, actually dict. **LESSON:** Never assume data types, check with type() or print first.
+
+**[2026-01-04] [7.1.2] Plot Data Preparation Missing:** rq_plots failed because no plot source CSVs. **LESSON:** Must run plot data preparation steps to create plots/*_data.csv before rq_plots.
+
+**[2026-01-04] [7.1.2] status.yaml Not Updated:** rq_plots refused to run with analysis steps marked pending. **LESSON:** Update status.yaml analysis_steps to success after completing each step.
+
 ### Data Source Lessons
 
 **[2026-01-05] [7.1.x] Master.xlsx Reference Error:**
@@ -475,6 +544,154 @@ Run in sequence. Don't skip. Each catches different issues.
 - STR Questionnaire: Column 100
 - Demographics: Check DATA_DICTIONARY.md for exact columns
 - Cognitive scores: RAVLT_, BVMT_, RPM_ prefixes
+
+---
+
+## 🔴 CROSS-CHAPTER DEPENDENCY PROTOCOLS (CRITICAL)
+
+### For ANY Ch5/Ch6 RQ dependency:
+
+**STEP 1: READ REPORTS FIRST (MANDATORY)**
+```bash
+# Always read the source RQ report before using its data
+./reports/X.Y.Z/report.md
+```
+
+**STEP 2: SCIENTIFIC COMPATIBILITY CHECK**
+- What research question did the source RQ investigate?
+- What models/methods were used? (intercepts-only vs slopes? single model vs model averaging?)
+- What outputs were generated? 
+- Does the source RQ actually provide what current RQ needs?
+
+**STEP 3: DATA STRUCTURE VERIFICATION**
+- Check actual file structure (don't assume based on variable names)
+- Verify column names, data types, sample sizes
+- Confirm no missing/corrupted data
+
+**STEP 4: ASK-DON'T-GUESS PROTOCOL**
+If ANY uncertainty about:
+- Whether source RQ has appropriate data
+- Whether dependency makes scientific sense  
+- Whether data structures are compatible
+**→ STOP and ASK USER. Do not guess or assume.**
+
+### Context-Finder Usage for Science (Not Just Files):
+```
+Use context-finder to UNDERSTAND what analyses were done:
+- "What models did RQ 5.1.4 use and why?"
+- "Does RQ 5.1.1 have random slopes or intercepts-only?"
+- "What was the conclusion of RQ 6.2.3's hypothesis testing?"
+
+NOT just to find files:
+- "Find files related to 5.1.1" ❌
+```
+
+---
+
+## 📋 DEPENDENCY VALIDATION CHECKLIST
+
+**Before using ANY Ch5/Ch6 data:**
+
+- [ ] Read ./reports/X.Y.Z/report.md and understand what it studied
+- [ ] Verify source RQ provides the required data structure  
+- [ ] Document WHY this dependency is scientifically appropriate
+- [ ] Check actual file contents match expectations
+- [ ] If uncertain about ANY aspect: Asked user for clarification
+
+**Red Flags (STOP and ask user):**
+- Source RQ studied different research question than expected
+- Required data columns missing or different format
+- Sample sizes don't match between files
+- Methodology seems inappropriate for current research question
+
+---
+
+## 🚨 CAUTIONARY EXAMPLES (LEARN FROM THESE MISTAKES)
+
+### Mistake Example 1: Random Data Substitution
+**What happened:** Used Ch5 5.2.1 slopes for RQ 7.1.2 without understanding what 5.2.1 studied  
+**Why catastrophic:** 5.2.1 studied different paradigm domains; slopes weren't comparable to 7.1.2's needs
+**Prevention:** Always read reports FIRST, verify scientific compatibility
+
+### Mistake Example 2: Assumption-Based Implementation  
+**What happened:** Assumed 5.1.1 had random slopes without checking model structure
+**Why catastrophic:** 5.1.1 used intercepts-only models; no slope variation existed for analysis
+**Prevention:** Verify data structures before implementation
+
+### Mistake Example 3: "Make Code Work" Mentality
+**What happened:** Prioritized getting ANY result over getting CORRECT result
+**Why catastrophic:** Wrong methodology = wrong conclusions = invalid PhD thesis  
+**Prevention:** Science-first mindset; getting it RIGHT is infinitely more important than getting it done
+
+---
+
+## 📝 SCIENTIFIC REASONING DOCUMENTATION (MANDATORY)
+
+**For every cross-chapter dependency, document:**
+
+1. **Research Question Alignment:**
+   - "RQ 7.1.2 needs random slopes to compare intercept vs slope prediction"
+   - "Ch5 5.1.4 studied variance components and provides model-averaged random slopes"
+   - "This dependency is scientifically appropriate because..."
+
+2. **Methodological Justification:**  
+   - "Using model-averaged slopes accounts for uncertainty across functional forms"
+   - "Ch5 5.1.4 specifically analyzed individual differences in forgetting rates"
+   - "Alternative approaches considered and rejected because..."
+
+3. **Data Compatibility Verification:**
+   - "Confirmed Ch5 5.1.4 outputs have 2D random effects (intercept + slope)"
+   - "Verified slope variance (X.XXX) sufficient for regression analysis"
+   - "Sample sizes match: N=100 in both source and target analyses"
+
+**Template for documentation:**
+```
+DEPENDENCY: RQ [X.Y.Z] depends on RQ [A.B.C]
+SCIENTIFIC RATIONALE: [Why this dependency makes scientific sense]
+DATA VERIFICATION: [Confirmed source provides required data structure]
+ALTERNATIVE APPROACHES: [Other options considered and why rejected]
+```
+
+---
+
+## ⚡ EARLY CONSULTATION PROTOCOL
+
+**When to immediately consult user (don't wait):**
+
+1. **Dependency conflicts:** Concept says use 5.1.1 but 5.1.1 lacks required data structure
+2. **Multiple valid approaches:** Several Ch5 RQs could provide needed data
+3. **Methodological uncertainty:** Unclear which statistical approach is most appropriate  
+4. **Data compatibility issues:** Files exist but structure doesn't match expectations
+5. **Scientific interpretation questions:** Results seem valid but interpretation unclear
+
+**How to consult effectively:**
+- Present the scientific question/conflict clearly
+- Show what you've already verified/ruled out
+- Offer 2-3 specific alternatives with pros/cons
+- Ask for guidance on which approach is scientifically sound
+
+**Example:**
+```
+QUESTION: RQ 7.1.2 needs random slopes for intercept vs slope prediction analysis.
+
+RESEARCH SHOWS:
+- Ch5 5.1.1: Has intercepts-only models (no slopes)  
+- Ch5 5.1.4: Has model-averaged slopes with variance=0.002395
+- Ch5 5.2.1: Has slopes but studied different paradigm domains
+
+OPTIONS:
+A) Use Ch5 5.1.4 model-averaged slopes (accounts for uncertainty)
+B) Modify RQ 7.1.2 approach to work with available data
+C) Use different Ch5 source you recommend
+
+Which approach is scientifically most appropriate for testing the differential prediction hypothesis?
+```
+
+**Cross-Chapter RQ Information:**
+- For ANY information about Ch5/Ch6 RQs: Read `./reports/X.Y.Z/report.md` FIRST
+- Use context-finder to understand what analyses were done (not just find files)  
+- Report files contain: research questions, selected models, results, interpretations
+- NEVER use cross-chapter data without understanding the source RQ's purpose
 
 **Decision Compliance:**
 - D039: 2-pass IRT purification (if using IRT)

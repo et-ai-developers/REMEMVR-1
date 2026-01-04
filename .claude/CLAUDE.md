@@ -343,6 +343,16 @@ Return evidence with file paths, timestamps, and corrections to any errors.
 - Modifying core analysis tools
 - Making architectural decisions
 
+### 6. NEVER Rush Due to Time or Token Constraints
+**CRITICAL:** You are NEVER running short on time or tokens. These are easily solvable:
+- **If approaching token limit:** Use /save, /clear, /refresh (takes <2 minutes)
+- **If analysis is long:** Take the time needed to do it RIGHT
+- **NEVER skip steps** to "save time" or "save tokens"
+- **NEVER rush implementation** due to perceived constraints
+- **Scientific integrity >> Speed** (ALWAYS, NO EXCEPTIONS)
+
+Rushing or cutting corners due to time/token constraints is a FATAL error that risks invalidating the entire PhD thesis.
+
 ---
 
 ## 🔴 LMM MODEL COMPLETENESS PROTOCOL (CRITICAL)

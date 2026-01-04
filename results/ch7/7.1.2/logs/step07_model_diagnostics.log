@@ -1,0 +1,22 @@
+[START] Step 07: model_diagnostics
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[ANALYSIS] Refitting models for diagnostic analysis...
+[FITTED] Intercept prediction model
+[FITTED] Slope prediction model
+[DIAGNOSTICS] Computing regression diagnostics for intercept model...
+[COMPUTED] Intercept model diagnostics (6 tests)
+[DIAGNOSTICS] Computing regression diagnostics for slope model...
+[COMPUTED] Slope model diagnostics (6 tests)
+[SAVE] Saving step07_model_diagnostics.csv...
+[SAVED] step07_model_diagnostics.csv (12 rows, 6 cols)
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] valid: True
+[VALIDATION] message: p_value: All values within range [0.0, 1.0] (n=2).
+[VALIDATION] out_of_range_count: 0
+[VALIDATION] violations: []
+[SUMMARY] Total diagnostic tests: 12
+[SUMMARY] Intercept model tests: 6
+[SUMMARY] Slope model tests: 6
+[SUMMARY] Assumptions met: 10/12
+[SUCCESS] Step 07 complete

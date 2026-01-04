@@ -1,0 +1,13 @@
+model,test,statistic,p_value,assumption_met,remedial_action
+intercept,VIF_predictor_1,1.1521342737132159,,1,None needed
+intercept,VIF_predictor_2,1.389569686574147,,1,None needed
+intercept,VIF_predictor_3,1.3419999805599172,,1,None needed
+intercept,Cooks_distance,0.13674551101825827,,0,Check for influential observations
+intercept,Durbin_Watson,1.684686148432537,,1,None needed
+intercept,Shapiro_Wilk,0.9939205833524987,0.9368755060189733,1,None needed
+slope,VIF_predictor_1,1.1521342737132159,,1,None needed
+slope,VIF_predictor_2,1.389569686574147,,1,None needed
+slope,VIF_predictor_3,1.3419999805599172,,1,None needed
+slope,Cooks_distance,0.17813067028222643,,0,Check for influential observations
+slope,Durbin_Watson,1.991370393246635,,1,None needed
+slope,Shapiro_Wilk,0.9824537309497814,0.20546363503334797,1,None needed

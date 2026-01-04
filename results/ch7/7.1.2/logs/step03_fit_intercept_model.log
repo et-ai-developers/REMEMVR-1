@@ -1,0 +1,132 @@
+[START] Step 03: fit_intercept_model
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[VERIFY] All required columns present: ['UID', 'intercept', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[INFO] Intercept range: [-1.533, 1.265]
+[INFO] RAVLT_T range: [20.782, 70.666]
+[INFO] BVMT_T range: [17.935, 65.380]
+[INFO] RPM_T range: [19.525, 61.058]
+[ANALYSIS] Running fit_multiple_regression...
+[ANALYSIS] Predictors shape: (100, 3)
+[ANALYSIS] Response shape: (100,)
+[ERROR] fit_multiple_regression() got an unexpected keyword argument 'add_constant'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step03_fit_intercept_model.py", line 159, in <module>
+    regression_results = fit_multiple_regression(
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: fit_multiple_regression() got an unexpected keyword argument 'add_constant'
+[START] Step 03: fit_intercept_model
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[VERIFY] All required columns present: ['UID', 'intercept', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[INFO] Intercept range: [-1.533, 1.265]
+[INFO] RAVLT_T range: [20.782, 70.666]
+[INFO] BVMT_T range: [17.935, 65.380]
+[INFO] RPM_T range: [19.525, 61.058]
+[ANALYSIS] Running fit_multiple_regression...
+[ANALYSIS] Predictors shape: (100, 3)
+[ANALYSIS] Response shape: (100,)
+[DONE] Analysis complete
+[RESULTS] R² = 0.2432
+[RESULTS] Adjusted R² = 0.2196
+[RESULTS] F-statistic = 10.2840
+[RESULTS] Model p-value = 0.000006
+[FORMAT] Extracting regression coefficients...
+[ERROR] 'dict' object has no attribute 'shape'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step03_fit_intercept_model.py", line 180, in <module>
+    log(f"[FORMAT] Coefficients shape: {coefficients_df.shape}")
+                                        ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'shape'
+[START] Step 03: fit_intercept_model
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[VERIFY] All required columns present: ['UID', 'intercept', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[INFO] Intercept range: [-1.533, 1.265]
+[INFO] RAVLT_T range: [20.782, 70.666]
+[INFO] BVMT_T range: [17.935, 65.380]
+[INFO] RPM_T range: [19.525, 61.058]
+[ANALYSIS] Running fit_multiple_regression...
+[ANALYSIS] Predictors shape: (100, 3)
+[ANALYSIS] Response shape: (100,)
+[DONE] Analysis complete
+[RESULTS] R² = 0.2432
+[RESULTS] Adjusted R² = 0.2196
+[RESULTS] F-statistic = 10.2840
+[RESULTS] Model p-value = 0.000006
+[FORMAT] Extracting regression coefficients...
+[FORMAT] Coefficients: {'intercept': np.float64(-1.7123562856320906), 'RAVLT_T': np.float64(0.006278531175832947), 'BVMT_T': np.float64(0.00850690647926462), 'RPM_T': np.float64(0.01946168805754425)}
+[FORMAT] P-values: {'intercept': np.float64(1.186531741545667e-06), 'RAVLT_T': np.float64(0.24079745991222945), 'BVMT_T': np.float64(0.14860368418607894), 'RPM_T': np.float64(0.0010159185468871358)}
+[COEFF] intercept: β=-1.7124, p=0.0000, p_bonf=0.0000
+[COEFF] RAVLT_T: β=0.0063, p=0.2408, p_bonf=0.7224
+[COEFF] BVMT_T: β=0.0085, p=0.1486, p_bonf=0.4458
+[COEFF] RPM_T: β=0.0195, p=0.0010, p_bonf=0.0030
+[FORMAT] Results table created: 4 coefficients
+[SAVE] Saving step03_intercept_predictions.csv...
+[SAVED] step03_intercept_predictions.csv (4 rows, 8 cols)
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] PASS: All p-values in valid range [0, 1]
+[VALIDATION] Additional checks:
+[VALIDATION] Standard errors positive: PASS
+[VALIDATION] Bonferroni correction: PASS
+[ERROR] 'VIF'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'VIF'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step03_fit_intercept_model.py", line 281, in <module>
+    vif_values = intercept_model_results['VIF'].dropna()
+                 ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'VIF'
+[START] Step 03: fit_intercept_model
+[LOAD] Loading regression input data...
+[LOADED] step02_regression_input.csv (100 rows, 8 cols)
+[VERIFY] All required columns present: ['UID', 'intercept', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[INFO] Intercept range: [-1.533, 1.265]
+[INFO] RAVLT_T range: [20.782, 70.666]
+[INFO] BVMT_T range: [17.935, 65.380]
+[INFO] RPM_T range: [19.525, 61.058]
+[ANALYSIS] Running fit_multiple_regression...
+[ANALYSIS] Predictors shape: (100, 3)
+[ANALYSIS] Response shape: (100,)
+[DONE] Analysis complete
+[RESULTS] R² = 0.2432
+[RESULTS] Adjusted R² = 0.2196
+[RESULTS] F-statistic = 10.2840
+[RESULTS] Model p-value = 0.000006
+[FORMAT] Extracting regression coefficients...
+[FORMAT] Coefficients: {'intercept': np.float64(-1.7123562856320906), 'RAVLT_T': np.float64(0.006278531175832947), 'BVMT_T': np.float64(0.00850690647926462), 'RPM_T': np.float64(0.01946168805754425)}
+[FORMAT] P-values: {'intercept': np.float64(1.186531741545667e-06), 'RAVLT_T': np.float64(0.24079745991222945), 'BVMT_T': np.float64(0.14860368418607894), 'RPM_T': np.float64(0.0010159185468871358)}
+[COEFF] intercept: β=-1.7124, p=0.0000, p_bonf=0.0000
+[COEFF] RAVLT_T: β=0.0063, p=0.2408, p_bonf=0.7224
+[COEFF] BVMT_T: β=0.0085, p=0.1486, p_bonf=0.4458
+[COEFF] RPM_T: β=0.0195, p=0.0010, p_bonf=0.0030
+[FORMAT] Results table created: 4 coefficients
+[SAVE] Saving step03_intercept_predictions.csv...
+[SAVED] step03_intercept_predictions.csv (4 rows, 8 cols)
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] PASS: All p-values in valid range [0, 1]
+[VALIDATION] Additional checks:
+[VALIDATION] Standard errors positive: PASS
+[VALIDATION] Bonferroni correction: PASS
+[VALIDATION] VIF check skipped (multicollinearity assessment not implemented)
+[VALIDATION] All 4 terms present: PASS
+[VALIDATION] All validation checks PASSED
+[SUCCESS] Step 03 complete

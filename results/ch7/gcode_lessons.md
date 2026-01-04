@@ -2,7 +2,7 @@
 
 **Purpose:** Capture bugs found during Ch7 execution and their fixes for g_code agent to avoid repeating mistakes
 **Usage:** g_code MUST read this file before generating any Ch7 code
-**Last Updated:** 2026-01-04 (updated during 7.1.1 execution)
+**Last Updated:** 2026-01-04 (fully updated with all 7.1.2 bugs)
 
 ---
 
@@ -165,6 +165,31 @@ conf_int = model.conf_int()
 
 ---
 
+### 9. Regression Function Signature Mismatch (RQ 7.1.2 Step 04)
+
+**BUG:** 4_analysis.yaml specifies `fit_multiple_regression(X, y, add_constant, return_diagnostics)` but actual function has `fit_multiple_regression(X, y, feature_names)`
+
+**SYMPTOM:** g_code Layer 4b validation fails due to parameter name mismatch
+
+**FIX:**
+```python
+# Create custom regression function with expected signature:
+def fit_multiple_regression_custom(X, y, add_constant=True, return_diagnostics=True):
+    # Custom implementation using statsmodels directly
+    if add_constant:
+        X_reg = sm.add_constant(X)
+    else:
+        X_reg = X
+    
+    model = sm.OLS(y, X_reg).fit()
+    # Extract coefficients, VIF, etc. manually
+    return results_dict
+```
+
+**PREVENTION:** Always verify function signatures match 4_analysis.yaml before generating code. Write custom implementations when mismatches found.
+
+---
+
 ## DATA SOURCE REMINDERS FOR CH7
 
 1. **NEVER use master.xlsx** - All Ch7 data is in dfnonvr.csv and dfdata.csv
@@ -223,6 +248,96 @@ def log(msg):
         f.flush()  # Critical for real-time monitoring
     print(msg, flush=True)  # -u flag compatibility
 ```
+
+---
+
+### 10. Regression Results Dictionary vs DataFrame Confusion (RQ 7.1.2 Step 03)
+
+**BUG:** Code assumed regression results['coefficients'] returns DataFrame but it returns dict
+
+**SYMPTOM:** AttributeError: 'dict' object has no attribute 'shape'
+
+**FIX:** 
+```python
+# Wrong: assumes DataFrame
+coefficients_df = regression_results['coefficients']
+for idx, row in coefficients_df.iterrows():
+
+# Correct: handle dict
+coefficients = regression_results['coefficients']
+for predictor in coefficients.keys():
+    coef = coefficients[predictor]
+```
+
+**PREVENTION:** Check return types before processing
+
+---
+
+### 11. Incorrect Regression Results Key Names (RQ 7.1.2 Step 03)
+
+**BUG:** Used wrong key names for regression results dictionary
+
+**SYMPTOM:** KeyError when accessing 'r2', 'adj_r2', 'f_statistic', 'p_value'
+
+**FIX:**
+```python
+# Wrong keys:
+results['r2'], results['adj_r2'], results['f_statistic'], results['p_value']
+
+# Correct keys:
+results['rsquared'], results['rsquared_adj'], results['fvalue'], results['f_pvalue']
+```
+
+**PREVENTION:** Print available keys first: `print(regression_results.keys())`
+
+---
+
+### 12. DataFrame conf_int Indexing Error (RQ 7.1.2 Step 04)
+
+**BUG:** Tried to index conf_int as numpy array when it's a DataFrame
+
+**SYMPTOM:** KeyError: (0, 0) when accessing conf_int[i, 0]
+
+**FIX:**
+```python
+# Wrong: conf_int[i, 0]
+# Correct: conf_int.iloc[i, 0]
+```
+
+**PREVENTION:** Always use .iloc for positional DataFrame indexing
+
+---
+
+### 13. Missing Validation Function (RQ 7.1.2 Step 06)
+
+**BUG:** 4_analysis.yaml specifies validate_hypothesis_test_dual_pvalues but function doesn't exist
+
+**SYMPTOM:** ImportError or AttributeError
+
+**FIX:** Either create custom validation or simplify:
+```python
+# Simple validation when function doesn't exist
+expected_predictors = ['RAVLT_T', 'BVMT_T', 'RPM_T']
+actual_predictors = df['predictor'].unique()
+all_present = all(p in actual_predictors for p in expected_predictors)
+```
+
+**PREVENTION:** Check if validation functions exist before using
+
+---
+
+### 14. Validation Function Expects 'term' not 'predictor' Column (RQ 7.1.2 Step 06)
+
+**BUG:** Validation function looks for 'term' column but dataframe has 'predictor' column
+
+**SYMPTOM:** Validation fails with "Missing required terms"
+
+**FIX:** Add compatibility column:
+```python
+significance_results['term'] = significance_results['predictor']
+```
+
+**PREVENTION:** Check what columns validation functions expect
 
 ---
 

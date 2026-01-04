@@ -1,0 +1,50 @@
+[START] Step 06: Test Predictor Significance
+[LOAD] Loading intercept regression results...
+[LOADED] step03_intercept_predictions.csv (4 rows, 8 cols)
+[LOAD] Loading slope regression results...
+[LOADED] step04_slope_predictions.csv (4 rows, 9 cols)
+[FILTER] Extracting cognitive test predictors...
+[FILTERED] Intercept model: 3 cognitive predictors
+[FILTERED] Slope model: 3 cognitive predictors
+[ANALYSIS] Combining results and computing significance flags...
+[ANALYSIS] Generating effect interpretations...
+[COMPUTED] Effect interpretations for 6 predictor-outcome combinations
+[SAVE] Saving predictor significance results...
+[SAVED] step06_predictor_significance.csv (6 rows, 8 cols)
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] valid: False
+[VALIDATION] missing_terms: ['RAVLT_T', 'BVMT_T', 'RPM_T']
+[VALIDATION] d068_compliant: True
+[VALIDATION] message: Missing required terms: ['RAVLT_T', 'BVMT_T', 'RPM_T'].
+[VALIDATION] FAILED: Missing required terms: ['RAVLT_T', 'BVMT_T', 'RPM_T'].
+[ERROR] Validation failed: Missing required terms: ['RAVLT_T', 'BVMT_T', 'RPM_T'].
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.2/code/step06_test_predictor_significance.py", line 271, in <module>
+    raise ValueError(f"Validation failed: {validation_result.get('message')}")
+ValueError: Validation failed: Missing required terms: ['RAVLT_T', 'BVMT_T', 'RPM_T'].
+[START] Step 06: Test Predictor Significance
+[LOAD] Loading intercept regression results...
+[LOADED] step03_intercept_predictions.csv (4 rows, 8 cols)
+[LOAD] Loading slope regression results...
+[LOADED] step04_slope_predictions.csv (4 rows, 9 cols)
+[FILTER] Extracting cognitive test predictors...
+[FILTERED] Intercept model: 3 cognitive predictors
+[FILTERED] Slope model: 3 cognitive predictors
+[ANALYSIS] Combining results and computing significance flags...
+[ANALYSIS] Generating effect interpretations...
+[COMPUTED] Effect interpretations for 6 predictor-outcome combinations
+[SAVE] Saving predictor significance results...
+[SAVED] step06_predictor_significance.csv (6 rows, 9 cols)
+[VALIDATION] Running validate_hypothesis_test_dual_pvalues...
+[VALIDATION] valid: True
+[VALIDATION] missing_terms: []
+[VALIDATION] d068_compliant: True
+[VALIDATION] message: Decision D068 compliant: All 3 required terms present with both p_uncorrected and p_bonferroni.
+[VALIDATION] Predictor significance analysis PASSED validation
+[SUMMARY] Predictor significance test complete:
+  - Total predictor-outcome combinations: 6
+  - Significant (uncorrected p<0.05): 1
+  - Significant (Bonferroni p<0.0083): 1
+  - Dual p-value reporting: Decision D068 compliant
+[SUCCESS] Step 06 complete

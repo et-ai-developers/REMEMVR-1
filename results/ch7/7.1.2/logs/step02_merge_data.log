@@ -1,0 +1,50 @@
+[START] Step 02: Merge Datasets
+[DATA] Loading random effects from Step 00...
+[DATA] Loaded random effects: 100 participants
+[DATA] Random effects columns: ['UID', 'intercept', 'slope', 'se_intercept', 'se_slope']
+[DATA] Loading cognitive tests from Step 01...
+[DATA] Loaded cognitive tests: 100 participants
+[DATA] Cognitive test columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T']
+[DATA] Selected cognitive tests: RAVLT_T, BVMT_T, RPM_T (excluding NART)
+[MERGE] Merging random effects with cognitive tests...
+[MERGE] Merged dataset: 100 participants x 8 columns
+[MERGE] Final columns: ['UID', 'intercept', 'slope', 'se_intercept', 'se_slope', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[VALIDATION] Checking merged dataset...
+[VALIDATION] No missing values in merged dataset
+[VALIDATION] All expected columns present
+[VALIDATION] Checking value ranges...
+  - Intercepts: [-1.476, 1.230]
+  - Slopes: [0.000, 0.000]
+  - RAVLT_T: [20.8, 70.7]
+  - BVMT_T: [17.9, 65.4]
+  - RPM_T: [19.5, 61.1]
+[SAVE] Saving merged dataset to /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step02_regression_input.csv...
+[SAVED] 100 participants x 8 columns
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] PASSED - All required columns present
+[SUCCESS] Step 02 complete - Datasets merged successfully
+[START] Step 02: Merge Datasets
+[DATA] Loading random effects from Step 00...
+[DATA] Loaded random effects: 100 participants
+[DATA] Random effects columns: ['UID', 'intercept', 'slope', 'se_intercept', 'se_slope']
+[DATA] Loading cognitive tests from Step 01...
+[DATA] Loaded cognitive tests: 100 participants
+[DATA] Cognitive test columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T']
+[DATA] Selected cognitive tests: RAVLT_T, BVMT_T, RPM_T (excluding NART)
+[MERGE] Merging random effects with cognitive tests...
+[MERGE] Merged dataset: 100 participants x 8 columns
+[MERGE] Final columns: ['UID', 'intercept', 'slope', 'se_intercept', 'se_slope', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[VALIDATION] Checking merged dataset...
+[VALIDATION] No missing values in merged dataset
+[VALIDATION] All expected columns present
+[VALIDATION] Checking value ranges...
+  - Intercepts: [-1.533, 1.265]
+  - Slopes: [-0.106, 0.116]
+  - RAVLT_T: [20.8, 70.7]
+  - BVMT_T: [17.9, 65.4]
+  - RPM_T: [19.5, 61.1]
+[SAVE] Saving merged dataset to /home/etai/projects/REMEMVR/results/ch7/7.1.2/data/step02_regression_input.csv...
+[SAVED] 100 participants x 8 columns
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] PASSED - All required columns present
+[SUCCESS] Step 02 complete - Datasets merged successfully
