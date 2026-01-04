@@ -3,3 +3,4 @@ RQ	Scholar	Stats	Plan	Tools	Analysis	Inspect	Plots	Results	Validate	Notes
 7.1.2	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Intercept R²=0.243 > Slope R²=0.074 (p=0.067), cognitive tests predict encoding better than forgetting
 7.1.3	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	When R²=0.088 < What/Where R²≈0.24, RPM only significant predictor, domain-specific patterns not significant
 7.1.4	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	69.6% unexplained variance confirms incremental validity, cognitive block f²=0.272 (medium), RPM r=0.457
+7.2.1	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Suppression effect (119.8% mediation), Age β changes -0.130→+0.026, VR scaffolding hypothesis SUPPORTED

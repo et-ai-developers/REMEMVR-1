@@ -1,0 +1,474 @@
+{
+  "validation_timestamp": "2026-01-05T00:28:11.318762",
+  "rq_id": "ch7/7.2.1",
+  "rq_title": "Age Moderation of Test-VR Relationship",
+  "pipeline_status": "COMPLETE",
+  "validation_summary": {
+    "file_completeness": {
+      "status": "PASS",
+      "files_expected": 25,
+      "files_present": 25,
+      "missing_files": []
+    },
+    "data_integrity": {
+      "status": "PASS",
+      "issues_detected": 0,
+      "issues": []
+    },
+    "statistical_consistency": {
+      "status": "PASS",
+      "inconsistencies_detected": 0,
+      "inconsistencies": []
+    },
+    "reproducibility": {
+      "status": "WARN",
+      "missing_markers": 1,
+      "markers": [
+        "Few seed mentions: 4/10 log files"
+      ]
+    }
+  },
+  "detailed_reports": {
+    "file_info": {
+      "results/ch7/7.2.1/data/step00_dependency_validation.txt": {
+        "exists": true,
+        "size_bytes": 4866,
+        "modified": "2026-01-04T23:44:30.926293",
+        "type": "validation_report",
+        "description": "Cross-RQ dependency validation results"
+      },
+      "results/ch7/7.2.1/data/step01_analysis_dataset.csv": {
+        "exists": true,
+        "size_bytes": 15789,
+        "modified": "2026-01-04T23:48:36.711463",
+        "type": "analysis_data",
+        "description": "Merged analysis dataset (theta + cognitive + demographics)"
+      },
+      "results/ch7/7.2.1/data/step02_correlations.csv": {
+        "exists": true,
+        "size_bytes": 1456,
+        "modified": "2026-01-04T23:52:29.726329",
+        "type": "statistical_results",
+        "description": "Bivariate correlations with bootstrap confidence intervals"
+      },
+      "results/ch7/7.2.1/data/step03_hierarchical_models.csv": {
+        "exists": true,
+        "size_bytes": 367,
+        "modified": "2026-01-04T23:56:41.597804",
+        "type": "statistical_results",
+        "description": "Hierarchical regression model comparison results"
+      },
+      "results/ch7/7.2.1/data/step03_model_diagnostics.csv": {
+        "exists": true,
+        "size_bytes": 456,
+        "modified": "2026-01-04T23:56:41.608461",
+        "type": "diagnostic_results",
+        "description": "Regression model diagnostic test results"
+      },
+      "results/ch7/7.2.1/data/step04_mediation_analysis.csv": {
+        "exists": true,
+        "size_bytes": 210,
+        "modified": "2026-01-05T00:01:52.865124",
+        "type": "statistical_results",
+        "description": "Bootstrap mediation analysis results"
+      },
+      "results/ch7/7.2.1/data/step05_cross_validation.csv": {
+        "exists": true,
+        "size_bytes": 642,
+        "modified": "2026-01-05T00:07:03.709150",
+        "type": "model_validation",
+        "description": "Cross-validation performance metrics"
+      },
+      "results/ch7/7.2.1/data/step06_effect_sizes.csv": {
+        "exists": true,
+        "size_bytes": 562,
+        "modified": "2026-01-05T00:11:11.613597",
+        "type": "statistical_results",
+        "description": "Effect sizes and predictor importance rankings"
+      },
+      "results/ch7/7.2.1/data/step07_power_analysis.csv": {
+        "exists": true,
+        "size_bytes": 772,
+        "modified": "2026-01-05T00:15:48.863612",
+        "type": "statistical_results",
+        "description": "Post-hoc power analysis results"
+      },
+      "results/ch7/7.2.1/data/step08_correlation_plot_data.csv": {
+        "exists": true,
+        "size_bytes": 1126,
+        "modified": "2026-01-05T00:19:06.149711",
+        "type": "plot_data",
+        "description": "Correlation heatmap plot data"
+      },
+      "results/ch7/7.2.1/data/step08_diagnostic_plot_data.csv": {
+        "exists": true,
+        "size_bytes": 20353,
+        "modified": "2026-01-05T00:19:06.149711",
+        "type": "plot_data",
+        "description": "Regression diagnostic plot data"
+      },
+      "results/ch7/7.2.1/data/step08_mediation_plot_data.csv": {
+        "exists": true,
+        "size_bytes": 317,
+        "modified": "2026-01-05T00:19:06.149711",
+        "type": "plot_data",
+        "description": "Mediation path diagram plot data"
+      },
+      "results/ch7/7.2.1/data/step08_cv_plot_data.csv": {
+        "exists": true,
+        "size_bytes": 1058,
+        "modified": "2026-01-05T00:19:06.149711",
+        "type": "plot_data",
+        "description": "Cross-validation performance plot data"
+      },
+      "results/ch7/7.2.1/data/step08_age_effect_plot_data.csv": {
+        "exists": true,
+        "size_bytes": 10098,
+        "modified": "2026-01-05T00:19:06.149711",
+        "type": "plot_data",
+        "description": "Age effect visualization plot data"
+      },
+      "results/ch7/7.2.1/data/step09_analysis_summary.txt": {
+        "exists": true,
+        "size_bytes": 6884,
+        "modified": "2026-01-05T00:23:38.312601",
+        "type": "summary_report",
+        "description": "Comprehensive analysis summary for thesis integration"
+      },
+      "results/ch7/7.2.1/logs/step00_validate_dependencies.log": {
+        "exists": true,
+        "size_bytes": 4882,
+        "modified": "2026-01-04T23:44:30.926293",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step01_extract_merge_data.log": {
+        "exists": true,
+        "size_bytes": 1638,
+        "modified": "2026-01-04T23:48:36.711463",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step02_bivariate_correlations.log": {
+        "exists": true,
+        "size_bytes": 4362,
+        "modified": "2026-01-04T23:52:29.726329",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step03_hierarchical_regression.log": {
+        "exists": true,
+        "size_bytes": 1507,
+        "modified": "2026-01-04T23:56:41.608461",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step04_mediation_analysis.log": {
+        "exists": true,
+        "size_bytes": 4751,
+        "modified": "2026-01-05T00:01:52.865124",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step05_cross_validation.log": {
+        "exists": true,
+        "size_bytes": 556270,
+        "modified": "2026-01-05T00:07:03.709150",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step06_effect_sizes.log": {
+        "exists": true,
+        "size_bytes": 1935,
+        "modified": "2026-01-05T00:11:11.613597",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step07_power_analysis.log": {
+        "exists": true,
+        "size_bytes": 5714,
+        "modified": "2026-01-05T00:15:48.874445",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step08_generate_plot_data.log": {
+        "exists": true,
+        "size_bytes": 1823,
+        "modified": "2026-01-05T00:19:06.159711",
+        "type": "execution_log",
+        "description": "Step execution log"
+      },
+      "results/ch7/7.2.1/logs/step09_create_summary.log": {
+        "exists": true,
+        "size_bytes": 3164,
+        "modified": "2026-01-05T00:23:38.312601",
+        "type": "execution_log",
+        "description": "Step execution log"
+      }
+    },
+    "integrity_report": {
+      "step01_rows": {
+        "status": "PASS",
+        "value": 100,
+        "expected": "95-105"
+      },
+      "step01_missing": {
+        "status": "PASS",
+        "value": "0"
+      },
+      "step02_correlations": {
+        "status": "PASS",
+        "range": [
+          -0.5454815482953167,
+          0.4881396791745487
+        ]
+      },
+      "step03_r2": {
+        "status": "PASS",
+        "range": [
+          0.0373607264364626,
+          0.2471740374305241
+        ]
+      },
+      "step04_mediation": {
+        "status": "PASS",
+        "range": [
+          1.1981566820276497,
+          1.1981566820276497
+        ]
+      }
+    },
+    "consistency_report": {
+      "age_theta_consistency": {
+        "status": "PASS",
+        "correlation": -0.1932892300063886,
+        "r2_actual": 0.0373607264364626,
+        "r2_expected": 0.03736072643646259,
+        "difference": 6.938893903907228e-18
+      },
+      "cv_consistency": {
+        "status": "PASS",
+        "fitted_r2": 0.2471740374305241,
+        "cv_r2": 0.0209516735936484,
+        "penalty": 0.22622236383687572
+      }
+    },
+    "reproducibility_report": {
+      "step02_correlations": {
+        "status": "PASS",
+        "evidence": "confidence_intervals_present"
+      },
+      "step04_mediation_analysis": {
+        "status": "PASS",
+        "evidence": "confidence_intervals_present"
+      },
+      "step05_cross_validation": {
+        "status": "PASS",
+        "evidence": "confidence_intervals_present"
+      },
+      "log_seed_mentions": {
+        "status": "WARN",
+        "ratio": 0.4,
+        "count": 4,
+        "total": 10
+      }
+    },
+    "execution_report": {
+      "step00": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step00_dependency_validation.txt",
+            "exists": true,
+            "size": 4866
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step00_validate_dependencies.log",
+            "exists": true,
+            "size": 4882
+          }
+        ]
+      },
+      "step01": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step01_analysis_dataset.csv",
+            "exists": true,
+            "size": 15789
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step01_extract_merge_data.log",
+            "exists": true,
+            "size": 1638
+          }
+        ]
+      },
+      "step02": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step02_correlations.csv",
+            "exists": true,
+            "size": 1456
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step02_bivariate_correlations.log",
+            "exists": true,
+            "size": 4362
+          }
+        ]
+      },
+      "step03": {
+        "status": "SUCCESS",
+        "files_expected": 3,
+        "files_present": 3,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step03_hierarchical_models.csv",
+            "exists": true,
+            "size": 367
+          },
+          {
+            "path": "results/ch7/7.2.1/data/step03_model_diagnostics.csv",
+            "exists": true,
+            "size": 456
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step03_hierarchical_regression.log",
+            "exists": true,
+            "size": 1507
+          }
+        ]
+      },
+      "step04": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step04_mediation_analysis.csv",
+            "exists": true,
+            "size": 210
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step04_mediation_analysis.log",
+            "exists": true,
+            "size": 4751
+          }
+        ]
+      },
+      "step05": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step05_cross_validation.csv",
+            "exists": true,
+            "size": 642
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step05_cross_validation.log",
+            "exists": true,
+            "size": 556270
+          }
+        ]
+      },
+      "step06": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step06_effect_sizes.csv",
+            "exists": true,
+            "size": 562
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step06_effect_sizes.log",
+            "exists": true,
+            "size": 1935
+          }
+        ]
+      },
+      "step07": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step07_power_analysis.csv",
+            "exists": true,
+            "size": 772
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step07_power_analysis.log",
+            "exists": true,
+            "size": 5714
+          }
+        ]
+      },
+      "step08": {
+        "status": "SUCCESS",
+        "files_expected": 6,
+        "files_present": 6,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step08_correlation_plot_data.csv",
+            "exists": true,
+            "size": 1126
+          },
+          {
+            "path": "results/ch7/7.2.1/data/step08_diagnostic_plot_data.csv",
+            "exists": true,
+            "size": 20353
+          },
+          {
+            "path": "results/ch7/7.2.1/data/step08_mediation_plot_data.csv",
+            "exists": true,
+            "size": 317
+          },
+          {
+            "path": "results/ch7/7.2.1/data/step08_cv_plot_data.csv",
+            "exists": true,
+            "size": 1058
+          },
+          {
+            "path": "results/ch7/7.2.1/data/step08_age_effect_plot_data.csv",
+            "exists": true,
+            "size": 10098
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step08_generate_plot_data.log",
+            "exists": true,
+            "size": 1823
+          }
+        ]
+      },
+      "step09": {
+        "status": "SUCCESS",
+        "files_expected": 2,
+        "files_present": 2,
+        "files": [
+          {
+            "path": "results/ch7/7.2.1/data/step09_analysis_summary.txt",
+            "exists": true,
+            "size": 6884
+          },
+          {
+            "path": "results/ch7/7.2.1/logs/step09_create_summary.log",
+            "exists": true,
+            "size": 3164
+          }
+        ]
+      }
+    }
+  }
+}

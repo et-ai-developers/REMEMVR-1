@@ -1,0 +1,30 @@
+[START] Step 03: Hierarchical Multiple Regression
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (100 rows, 10 cols)
+[DATA] Response variable: theta_all (n=100)
+[DATA] Model 1 predictors: Age_std
+[DATA] Model 2 additional predictors: RAVLT_T_std, BVMT_T_std, RPM_T_std
+[ANALYSIS] Running hierarchical regression...
+[DONE] Hierarchical regression complete
+[RESULTS] Model 1 R² = 0.0374
+[RESULTS] Model 2 R² = 0.2472
+[RESULTS] ΔR² = 0.2098
+[RESULTS] F-change = 8.8255, p = 0.0000
+[HYPOTHESIS] Age coefficient Model 1: β = -0.1302, p = 0.0540
+[HYPOTHESIS] Age coefficient Model 2: β = 0.0258, p = 0.7219
+[HYPOTHESIS] Bonferroni α = 0.0125
+[HYPOTHESIS] Result: NO MEDIATION: Age not significant in bivariate model
+[SAVE] Saving hierarchical model results...
+[SAVED] step03_hierarchical_models.csv (2 rows, 8 cols)
+[VALIDATION] Running regression assumption checks...
+[VALIDATION] Regression assumption checks:
+[VALIDATION] normality_shapiro_wilk: OK (statistic=0.9920, p=0.8209)
+[VALIDATION] homoscedasticity_breusch_pagan: OK (statistic=4.1997, p=0.3797)
+[VALIDATION] multicollinearity_max_vif: OK (statistic=1.7497)
+[VALIDATION] outliers_max_cooks_d: VIOLATED (statistic=0.1170)
+[VALIDATION] autocorrelation_durbin_watson: OK (statistic=1.6964)
+[SAVE] Saving regression diagnostics...
+[SAVED] step03_model_diagnostics.csv (5 rows, 6 cols)
+[WARNING] 1 assumption violations detected:
+[WARNING] - outliers_max_cooks_d: Investigate high-leverage points
+[SUCCESS] Step 03 complete

@@ -1,0 +1,10 @@
+{
+  "rq_validation_status": "COMPLETE_WITH_WARNINGS",
+  "validation_timestamp": "2026-01-05T00:28:11.319482",
+  "status_message": "Core analysis complete but some validation warnings detected",
+  "files_validated": 25,
+  "total_files_expected": 25,
+  "ready_for_archive": true,
+  "ready_for_plots": true,
+  "ready_for_results": true
+}

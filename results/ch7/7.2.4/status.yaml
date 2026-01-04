@@ -50,8 +50,15 @@ rq_tools:
     Dependencies: Ch5 5.1.1 theta scores + master.xlsx RAVLT
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  completed: 2026-01-04 21:30
+  context_dump: |
+    8-step analysis recipe created with v5.3.0 verification framework
+    Primary: Age-correlation comparison (RAVLT vs REMEMVR) via Steiger's Z-test
+    Critical fixes: RAVLT_Total calculation from individual trials (dfnonvr.csv)
+    Data corrections: Theta_All -> theta_all, dfnonvr.csv paths verified
+    Verification: 8/8 tools exist, 6 major corrections applied, hierarchical paths
+    Tools verified: check_file_exists, compute_pearson_correlations_with_correction, compare_correlations_dependent
 
 rq_inspect:
   status: pending

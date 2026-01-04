@@ -1,0 +1,198 @@
+================================================================================
+RQ 7.2.1 ARCHIVE MANIFEST
+Age Moderation of Test-VR Relationship
+================================================================================
+Generated: 2026-01-05T00:28:11.318629
+Total files: 25
+
+ARCHIVE SUMMARY
+----------------------------------------
+Files present: 25/25
+Total size: 651,002 bytes (0.62 MB)
+
+EXECUTION SUMMARY
+----------------------------------------
+STEP00: SUCCESS (2/2 files)
+STEP01: SUCCESS (2/2 files)
+STEP02: SUCCESS (2/2 files)
+STEP03: SUCCESS (3/3 files)
+STEP04: SUCCESS (2/2 files)
+STEP05: SUCCESS (2/2 files)
+STEP06: SUCCESS (2/2 files)
+STEP07: SUCCESS (2/2 files)
+STEP08: SUCCESS (6/6 files)
+STEP09: SUCCESS (2/2 files)
+
+FILE INVENTORY BY TYPE
+----------------------------------------
+
+ANALYSIS_DATA (1 files):
+  [PRESENT] results/ch7/7.2.1/data/step01_analysis_dataset.csv
+           Merged analysis dataset (theta + cognitive + demographics)
+           Size: 15,789 bytes
+           Modified: 2026-01-04T23:48:36.711463
+
+
+DIAGNOSTIC_RESULTS (1 files):
+  [PRESENT] results/ch7/7.2.1/data/step03_model_diagnostics.csv
+           Regression model diagnostic test results
+           Size: 456 bytes
+           Modified: 2026-01-04T23:56:41.608461
+
+
+EXECUTION_LOG (10 files):
+  [PRESENT] results/ch7/7.2.1/logs/step00_validate_dependencies.log
+           Step execution log
+           Size: 4,882 bytes
+           Modified: 2026-01-04T23:44:30.926293
+
+  [PRESENT] results/ch7/7.2.1/logs/step01_extract_merge_data.log
+           Step execution log
+           Size: 1,638 bytes
+           Modified: 2026-01-04T23:48:36.711463
+
+  [PRESENT] results/ch7/7.2.1/logs/step02_bivariate_correlations.log
+           Step execution log
+           Size: 4,362 bytes
+           Modified: 2026-01-04T23:52:29.726329
+
+  [PRESENT] results/ch7/7.2.1/logs/step03_hierarchical_regression.log
+           Step execution log
+           Size: 1,507 bytes
+           Modified: 2026-01-04T23:56:41.608461
+
+  [PRESENT] results/ch7/7.2.1/logs/step04_mediation_analysis.log
+           Step execution log
+           Size: 4,751 bytes
+           Modified: 2026-01-05T00:01:52.865124
+
+  [PRESENT] results/ch7/7.2.1/logs/step05_cross_validation.log
+           Step execution log
+           Size: 556,270 bytes
+           Modified: 2026-01-05T00:07:03.709150
+
+  [PRESENT] results/ch7/7.2.1/logs/step06_effect_sizes.log
+           Step execution log
+           Size: 1,935 bytes
+           Modified: 2026-01-05T00:11:11.613597
+
+  [PRESENT] results/ch7/7.2.1/logs/step07_power_analysis.log
+           Step execution log
+           Size: 5,714 bytes
+           Modified: 2026-01-05T00:15:48.874445
+
+  [PRESENT] results/ch7/7.2.1/logs/step08_generate_plot_data.log
+           Step execution log
+           Size: 1,823 bytes
+           Modified: 2026-01-05T00:19:06.159711
+
+  [PRESENT] results/ch7/7.2.1/logs/step09_create_summary.log
+           Step execution log
+           Size: 3,164 bytes
+           Modified: 2026-01-05T00:23:38.312601
+
+
+MODEL_VALIDATION (1 files):
+  [PRESENT] results/ch7/7.2.1/data/step05_cross_validation.csv
+           Cross-validation performance metrics
+           Size: 642 bytes
+           Modified: 2026-01-05T00:07:03.709150
+
+
+PLOT_DATA (5 files):
+  [PRESENT] results/ch7/7.2.1/data/step08_age_effect_plot_data.csv
+           Age effect visualization plot data
+           Size: 10,098 bytes
+           Modified: 2026-01-05T00:19:06.149711
+
+  [PRESENT] results/ch7/7.2.1/data/step08_correlation_plot_data.csv
+           Correlation heatmap plot data
+           Size: 1,126 bytes
+           Modified: 2026-01-05T00:19:06.149711
+
+  [PRESENT] results/ch7/7.2.1/data/step08_cv_plot_data.csv
+           Cross-validation performance plot data
+           Size: 1,058 bytes
+           Modified: 2026-01-05T00:19:06.149711
+
+  [PRESENT] results/ch7/7.2.1/data/step08_diagnostic_plot_data.csv
+           Regression diagnostic plot data
+           Size: 20,353 bytes
+           Modified: 2026-01-05T00:19:06.149711
+
+  [PRESENT] results/ch7/7.2.1/data/step08_mediation_plot_data.csv
+           Mediation path diagram plot data
+           Size: 317 bytes
+           Modified: 2026-01-05T00:19:06.149711
+
+
+STATISTICAL_RESULTS (5 files):
+  [PRESENT] results/ch7/7.2.1/data/step02_correlations.csv
+           Bivariate correlations with bootstrap confidence intervals
+           Size: 1,456 bytes
+           Modified: 2026-01-04T23:52:29.726329
+
+  [PRESENT] results/ch7/7.2.1/data/step03_hierarchical_models.csv
+           Hierarchical regression model comparison results
+           Size: 367 bytes
+           Modified: 2026-01-04T23:56:41.597804
+
+  [PRESENT] results/ch7/7.2.1/data/step04_mediation_analysis.csv
+           Bootstrap mediation analysis results
+           Size: 210 bytes
+           Modified: 2026-01-05T00:01:52.865124
+
+  [PRESENT] results/ch7/7.2.1/data/step06_effect_sizes.csv
+           Effect sizes and predictor importance rankings
+           Size: 562 bytes
+           Modified: 2026-01-05T00:11:11.613597
+
+  [PRESENT] results/ch7/7.2.1/data/step07_power_analysis.csv
+           Post-hoc power analysis results
+           Size: 772 bytes
+           Modified: 2026-01-05T00:15:48.863612
+
+
+SUMMARY_REPORT (1 files):
+  [PRESENT] results/ch7/7.2.1/data/step09_analysis_summary.txt
+           Comprehensive analysis summary for thesis integration
+           Size: 6,884 bytes
+           Modified: 2026-01-05T00:23:38.312601
+
+
+VALIDATION_REPORT (1 files):
+  [PRESENT] results/ch7/7.2.1/data/step00_dependency_validation.txt
+           Cross-RQ dependency validation results
+           Size: 4,866 bytes
+           Modified: 2026-01-04T23:44:30.926293
+
+REPRODUCIBILITY MARKERS
+----------------------------------------
+Random seeds: Documented in analysis specifications (random_state=42)
+Bootstrap iterations: 1000 iterations used for confidence intervals
+Cross-validation: 5-fold cross-validation with stratification
+Analysis pipeline: Fully specified in 4_analysis.yaml
+
+DATA DEPENDENCIES
+----------------------------------------
+External dependencies:
+  - results/ch5/5.1.1/data/step03_theta_scores.csv (IRT ability estimates)
+  - data/dfnonvr.csv (cognitive test scores and demographics)
+
+Analysis outputs feed into:
+  - rq_plots agent for visualization generation
+  - rq_results agent for thesis integration
+
+TECHNICAL SPECIFICATIONS
+----------------------------------------
+Analysis type: Hierarchical Multiple Regression with Bootstrap Mediation
+Sample size: ~100 participants
+Statistical corrections: Bonferroni + FDR (Decision D068 compliance)
+Cross-validation: 5-fold stratified
+Bootstrap iterations: 1000
+Confidence level: 95%
+Random seed: 42 (reproducibility)
+
+================================================================================
+END OF MANIFEST
+================================================================================

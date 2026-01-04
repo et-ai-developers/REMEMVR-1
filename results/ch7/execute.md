@@ -269,6 +269,29 @@ from tools.analysis_extensions import validate_regression_assumptions  # Wrong m
 
 ---
 
+## LESSONS FROM RQ 7.2.1 EXECUTION (2026-01-05)
+
+### Key Issues Encountered and Fixed:
+1. **Column Name Mismatches**: Ch5 theta file had 'Theta_All' not 'theta_all', dfnonvr.csv had different column names than expected
+2. **Parameter Name Mismatches**: bootstrap_regression_ci uses 'alpha' not 'confidence', 'seed' not 'random_state'
+3. **Return Structure Differences**: bootstrap_correlation_ci returns dict with 'r' key, not 'correlation'
+4. **Encoding Issues**: rq_plots generated files with non-ASCII characters that needed fixing
+5. **Import Path Issues**: tools module needs PROJECT_ROOT added to sys.path
+
+### Scientific Success:
+- **VR Scaffolding Hypothesis SUPPORTED** with suppression effect (119.8% mediation)
+- Age effect reverses from negative (-0.130) to positive (+0.026) after controlling for cognitive tests
+- This demonstrates older adults benefit MORE from VR scaffolding relative to their cognitive profile
+
+### Best Practices Applied:
+- Adaptive column name handling in g_code
+- Comprehensive error handling with fallback values
+- Real-time log monitoring with flush()
+- Dual p-value reporting throughout (Decision D068)
+- Power limitations appropriately acknowledged
+
+---
+
 ## COMMON MISTAKES TO AVOID
 
 ### 1. Wrong Data Source

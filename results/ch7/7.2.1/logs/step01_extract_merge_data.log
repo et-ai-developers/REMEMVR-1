@@ -1,0 +1,33 @@
+[START] Step 01: Extract and Merge Data
+[LOAD] Loading Ch5 5.1.1 theta scores...
+[LOADED] step03_theta_scores.csv (400 rows, 3 cols)
+[INFO] Theta columns: ['UID', 'test', 'Theta_All']
+[PROCESS] Aggregating theta scores by UID (mean across test sessions)...
+[AGGREGATED] 100 participants (expected: 100)
+[LOAD] Loading cognitive test data from dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 rows, 101 cols)
+[PROCESS] Extracting cognitive measures with column adaptations...
+[PROCESS] Calculating RAVLT total from trials 1-5...
+[PROCESSED] Cognitive measures with T-scores calculated
+[INFO] RAVLT raw range: 26.0 - 68.0
+[INFO] BVMT raw range: 12.0 - 36.0
+[INFO] RPM raw range: 4.0 - 12.0
+[MERGE] Merging theta scores with cognitive measures...
+[MERGED] 100 participants after merge (expected: 100)
+[PASS] No missing data - complete case analysis dataset
+[STANDARDIZE] Creating standardized predictor variables...
+[COMPLETED] Standardized variables created (mean=0, SD=1)
+[DESCRIPTIVES] Final dataset summary:
+  N participants: 100
+  Age range: 20.0 - 70.0 years
+  Theta_all range: -1.95 - 1.56
+  RAVLT_T range: 20.8 - 70.7
+  BVMT_T range: 17.9 - 65.4
+  RPM_T range: 19.5 - 61.1
+[SAVE] Saving analysis dataset...
+[SAVED] step01_analysis_dataset.csv (100 rows, 10 cols)
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] valid: True
+[VALIDATION] message: DataFrame structure valid: 100 rows, 10 columns (required: 10).
+[VALIDATION] checks: {'row_count_valid': True, 'actual_rows': 100, 'columns_valid': True, 'missing_columns': [], 'types_valid': True}
+[SUCCESS] Step 01 complete - analysis dataset ready for hierarchical regression

@@ -1,0 +1,34 @@
+[START] Step 6: Effect Size and Importance Analysis
+[LOAD] Loading hierarchical regression results...
+[LOADED] step03_hierarchical_models.csv (2 models, 8 cols)
+[LOAD] Loading mediation analysis results...
+[LOADED] step04_mediation_analysis.csv (1 rows, 8 cols)
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (100 participants, 10 cols)
+[ANALYSIS] Computing Cohen's f² effect sizes...
+[ANALYSIS] Model 1 R² = 0.0374, Model 2 R² = 0.2472, ΔR² = 0.2098
+[COMPUTED] Model 1 f² = 0.0388, Model 2 f² = 0.3283, Comparison f² = 0.2787
+[COMPUTED] Model effect sizes: 3 entries created
+[ANALYSIS] Re-fitting hierarchical models to extract individual coefficients...
+[FITTED] Model 2 R² = 0.2472 (matches previous: 0.2472)
+[EXTRACTED] 4 predictor coefficients with 95% CIs
+[ANALYSIS] Computing semi-partial correlations (sr²) for unique variance...
+[COMPUTED] Age_std: β = 0.0258 [-0.1175, 0.1690], sr² = 0.0010
+[COMPUTED] RAVLT_T_std: β = 0.0804 [-0.0484, 0.2092], sr² = 0.0122
+[COMPUTED] BVMT_T_std: β = 0.1171 [-0.0404, 0.2745], sr² = 0.0173
+[COMPUTED] RPM_T_std: β = 0.2352 [0.0973, 0.3731], sr² = 0.0909
+[ANALYSIS] Ranking predictor importance based on |beta| values...
+[RANKED] Predictor importance: ['RPM_T', 'BVMT_T', 'RAVLT_T', 'Age']
+[TOP] Most important predictor: RPM_T (β = 0.2352, sr² = 0.0909)
+[SAVE] Saving predictor effect sizes and importance...
+[SAVED] step06_effect_sizes.csv (4 predictors, 8 cols)
+[SAVE] Saving model-level effect sizes...
+[SAVED] step06_model_effect_sizes.csv (3 models, 5 cols)
+[VALIDATION] Running validate_effect_sizes...
+[VALIDATION] Valid: True
+[VALIDATION] Message: All effect sizes valid (n=3, range=[0.039, 0.328]).
+[VALIDATION] No warnings
+[VALIDATION] Effect size range: f² = 0.0388 to 0.3283
+[VALIDATION] Model comparison f² = 0.2787 (medium effect)
+[VALIDATION] Model comparison shows medium to large effect (f² >= 0.15)
+[SUCCESS] Step 6 complete

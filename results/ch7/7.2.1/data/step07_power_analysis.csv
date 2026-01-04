@@ -1,0 +1,8 @@
+test_type,effect_size,power_achieved,power_adequate,min_detectable_effect,limitation_flag
+Overall_F_Test_Model2,0.13804936407375448,0.6717404492583205,False,0.17226416435737477,Low_Power
+Model_Comparison_Delta_R2,0.13690034941691898,0.7235800430318782,False,0.15713969738887498,Low_Power
+Mediation_Analysis_Bootstrap,,0.5,False,,Insufficient_N_for_Mediation
+Individual_Predictor_RPM_T,0.10339190220045616,0.730066260611531,False,0.11515950480115343,Low_Power
+Individual_Predictor_BVMT_T,0.019655208256611878,0.11650524039342536,False,0.11515950480115343,Low_Power
+Individual_Predictor_RAVLT_T,0.013853238959850947,0.08014848460441737,False,0.11515950480115343,Low_Power
+Individual_Predictor_Age,0.001149014656835508,0.01692376366441395,False,0.11515950480115343,Low_Power
