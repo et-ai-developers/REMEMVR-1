@@ -1,0 +1,443 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.6.3
+# Created by: rq_tools agent
+# Purpose: ICC slope replication analysis across domains (What/Where/When)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/*slopes*.csv"
+        required_columns: ["UID", "slope"]
+        expected_rows: "~100 (participants)"
+        data_types:
+          UID: "string (format: P### with leading zeros)"
+          slope: "float (forgetting slopes)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Validation summary with file paths found"
+    
+    parameters:
+      min_size_bytes: 500
+      search_patterns: ["*slopes*.csv", "*participant*.csv", "*participant*.txt"]
+    
+    description: "Validate Ch5 5.2.1, 5.2.2, 5.2.3 slope files exist for ICC analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  pandas_read_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "pd.read_csv(filepath_or_buffer: str, **kwargs) -> DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "Ch5 slope files as identified in Step 0"
+        required_columns: ["UID", "slope"]
+        expected_rows: "~100"
+    
+    output_files:
+      - path: "data/step01_domain_slopes.csv"
+        columns: ["UID", "slope_what", "slope_where", "slope_when"]
+        description: "Merged domain-specific slopes dataset"
+    
+    parameters:
+      index_col: 0
+      na_values: [".", "NA", "NaN"]
+    
+    description: "Load and merge domain-specific slopes from Ch5 analyses"
+    source_reference: "Standard pandas library function"
+
+  compute_icc_from_variance_components:
+    module: "tools.variance_decomposition"
+    function: "compute_icc_from_variance_components"
+    signature: "compute_icc_from_variance_components(variance_components_df: DataFrame, slope_name: str = 'TSVR_hours', timepoint: float = 6.0) -> DataFrame"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step01_domain_slopes.csv"
+        required_columns: ["UID", "slope_what", "slope_where", "slope_when"]
+        source: "analysis tool output (step01_extract_slopes)"
+    
+    output_files:
+      - path: "data/step02_icc_estimates.csv"
+        columns: ["domain", "icc_value", "variance_between", "variance_total"]
+        description: "ICC(1,1) estimates for each domain"
+      - path: "data/step02_variance_components.csv"
+        columns: ["domain", "variance_between", "variance_total", "n_participants"]
+        description: "Raw variance components for bootstrap resampling"
+    
+    parameters:
+      icc_type: "ICC(1,1)"
+      domains: ["What", "Where", "When"]
+    
+    description: "Compute ICC(1,1) values for each domain's slope variance"
+    source_reference: "tools_inventory.md section 'Variance Decomposition' - compute_icc_from_variance_components"
+
+  bootstrap_statistic:
+    module: "tools.bootstrap"
+    function: "bootstrap_statistic"
+    signature: "bootstrap_statistic(data: Union[np.ndarray, pd.DataFrame], statistic_func: Callable, n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'percentile', random_state: int = None) -> Dict[str, Any]"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step01_domain_slopes.csv"
+        required_columns: ["UID", "slope_what", "slope_where", "slope_when"]
+        source: "original slope data for resampling"
+      - path: "data/step02_variance_components.csv"
+        required_columns: ["domain", "variance_between", "variance_total"]
+        source: "baseline variance estimates"
+    
+    output_files:
+      - path: "data/step03_bootstrap_cis.csv"
+        columns: ["domain", "icc_original", "icc_boot_mean", "ci_lower", "ci_upper", "boot_bias"]
+        description: "95% confidence intervals for ICC estimates"
+      - path: "data/step03_bootstrap_distributions.csv"
+        columns: ["domain", "bootstrap_iteration", "icc_bootstrap"]
+        description: "Raw bootstrap samples (1000 iterations × 3 domains)"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "percentile"
+      random_state: 42
+      resampling_unit: "participants"
+    
+    description: "Bootstrap 95% confidence intervals for ICC estimates using participant-level resampling"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - bootstrap_statistic"
+
+  compute_effect_sizes_cohens:
+    module: "tools.analysis_lmm"
+    function: "compute_effect_sizes_cohens"
+    signature: "compute_effect_sizes_cohens(lmm_result: MixedLMResults, include_interactions: bool = False) -> DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+    
+    input_files:
+      - path: "data/step03_bootstrap_distributions.csv"
+        required_columns: ["domain", "bootstrap_iteration", "icc_bootstrap"]
+        source: "bootstrap samples by domain"
+      - path: "data/step02_icc_estimates.csv"
+        required_columns: ["domain", "icc_value"]
+        source: "original ICC values"
+    
+    output_files:
+      - path: "data/step04_pairwise_comparisons.csv"
+        columns: ["comparison", "diff_mean", "diff_ci_lower", "diff_ci_upper", "cohens_d", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        description: "Domain comparison statistics with dual p-values"
+    
+    parameters:
+      comparisons: ["What-Where", "What-When", "Where-When"]
+      family_alpha: 0.05
+      bonferroni_n_tests: 3
+      effect_size_type: "cohens_d"
+    
+    description: "Test pairwise differences between domain ICC estimates with effect sizes"
+    source_reference: "tools_inventory.md section 'LMM Analysis Tools' - compute_effect_sizes_cohens"
+
+  scipy_stats_zscore:
+    module: "scipy.stats"
+    function: "zscore"
+    signature: "scipy.stats.zscore(a: np.ndarray, axis: int = 0, ddof: int = 0, nan_policy: str = 'propagate') -> np.ndarray"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step01_domain_slopes.csv"
+        required_columns: ["UID", "slope_what", "slope_where", "slope_when"]
+        source: "original slope data for outlier detection"
+      - path: "data/step02_icc_estimates.csv"
+        required_columns: ["domain", "icc_value"]
+        source: "baseline ICC estimates"
+    
+    output_files:
+      - path: "data/step05_outlier_analysis.csv"
+        columns: ["domain", "UID", "z_score", "outlier_type"]
+        description: "Outlier diagnostics and impact assessment"
+      - path: "data/step05_robustness_checks.csv"
+        columns: ["domain", "icc_original", "icc_no_outliers", "delta_icc"]
+        description: "ICC estimates with/without outliers"
+    
+    parameters:
+      outlier_threshold: 3.29
+      outlier_method: ["z_score", "mad"]
+      robust_mad: True
+    
+    description: "Identify outliers in domain-specific slopes and assess ICC impact"
+    source_reference: "Standard scipy.stats library function"
+
+  numpy_random_choice:
+    module: "numpy.random"
+    function: "choice"
+    signature: "np.random.choice(a: np.ndarray, size: int = None, replace: bool = True, p: np.ndarray = None) -> np.ndarray"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "data/step01_domain_slopes.csv"
+        required_columns: ["UID", "slope_what", "slope_where", "slope_when"]
+        source: "complete slope dataset for split-half"
+    
+    output_files:
+      - path: "data/step06_split_half_reliability.csv"
+        columns: ["domain", "reliability_r", "reliability_ci_lower", "reliability_ci_upper", "mean_diff", "sd_icc"]
+        description: "Split-half reliability statistics by domain"
+    
+    parameters:
+      n_splits: 100
+      random_state: 42
+      split_size: 50
+      reliability_threshold: 0.70
+    
+    description: "Assess reliability of ICC estimates using split-half cross-validation"
+    source_reference: "Standard numpy library function"
+
+  compute_post_hoc_power:
+    module: "tools.statistics"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(observed_effect_size: float, n: int, alpha: float = 0.05, test_type: str = 'two_sample') -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step02_icc_estimates.csv"
+        required_columns: ["domain", "icc_value"]
+        source: "observed ICC values"
+      - path: "data/step04_pairwise_comparisons.csv"
+        required_columns: ["comparison", "cohens_d"]
+        source: "observed effect sizes"
+    
+    output_files:
+      - path: "data/step07_power_analysis.csv"
+        columns: ["comparison", "observed_d", "achieved_power", "min_detectable_d", "required_n_d02"]
+        description: "Power and sensitivity results"
+    
+    parameters:
+      n_participants: 100
+      alpha_bonferroni: 0.0167
+      power_target: 0.80
+      effect_size_small: 0.2
+    
+    description: "Post-hoc power analysis for ICC comparisons and sensitivity assessment"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - compute_post_hoc_power"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "dependency check output"
+    
+    parameters:
+      check_file_existence: True
+      min_files_required: 3
+      domains_required: ["What", "Where", "When"]
+    
+    criteria:
+      - "All 3 domain slope files located"
+      - "File paths contain 'slopes' or 'participant'"
+      - "Each file >500 bytes (sufficient detail)"
+      - "Validation summary contains required information"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate dependency check found required Ch5 slope files"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_domain_slopes.csv"
+        required_columns: ["UID", "slope_what", "slope_where", "slope_when"]
+        source: "analysis tool output (step01_extract_slopes)"
+    
+    parameters:
+      required_columns: ["UID", "slope_what", "slope_where", "slope_when"]
+      expected_rows: 100
+      allow_missing: False
+    
+    criteria:
+      - "Exactly 100 participants with complete slope data"
+      - "No missing slope values (NaN count = 0)"
+      - "No duplicate UIDs"
+      - "All slopes negative (forgetting over time)"
+      - "Slope values in expected range [-0.8, 0.2]"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        n_missing: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_slopes.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate merged slope dataset has complete data for all domains"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_icc_estimates.csv"
+        required_columns: ["domain", "icc_value", "variance_between", "variance_total"]
+        source: "ICC computation output"
+    
+    parameters:
+      icc_range: [0.0, 1.0]
+      variance_minimum: 0.0
+      check_mathematical_constraints: True
+    
+    criteria:
+      - "All ICC values in range [0, 1]"
+      - "All variance components > 0"
+      - "variance_between <= variance_total (mathematical constraint)"
+      - "No NaN ICC values"
+      - "All 3 domains present (What, Where, When)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        out_of_range_count: "int"
+        violations: "List"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_icc.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate ICC values are in acceptable range and variance components are valid"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_bootstrap_cis.csv"
+        required_columns: ["domain", "icc_original", "ci_lower", "ci_upper", "boot_bias"]
+        source: "bootstrap CI output"
+      - path: "data/step03_bootstrap_distributions.csv"
+        required_columns: ["domain", "bootstrap_iteration", "icc_bootstrap"]
+        source: "raw bootstrap samples"
+    
+    parameters:
+      n_iterations_expected: 1000
+      success_rate_threshold: 0.95
+      ci_bounds_check: [0.0, 1.0]
+      bias_threshold: 0.1
+    
+    criteria:
+      - "All 1000 bootstrap iterations completed successfully"
+      - "Success rate >95% for all domains"
+      - "CI bounds in [0,1] for all domains"
+      - "Bootstrap bias in [-0.1, 0.1] (acceptable range)"
+      - "CI widths reasonable (0.05-0.30 typical for ICC)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        mean_jaccard: "float"
+        above_threshold: "bool"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_bootstrap_cis.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate bootstrap procedure completed successfully with stable estimates"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_bootstrap_stability"
+
+  validate_contrasts_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_contrasts_dual_pvalues"
+    signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_pairwise_comparisons.csv"
+        required_columns: ["comparison", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        source: "statistical comparisons output"
+    
+    parameters:
+      required_comparisons: ["What-Where", "What-When", "Where-When"]
+      d068_compliance: True
+      effect_size_range: [-3.0, 3.0]
+    
+    criteria:
+      - "All 3 pairwise comparisons present"
+      - "BOTH uncorrected AND corrected p-values present (Decision D068)"
+      - "p_bonferroni >= p_uncorrected (mathematical constraint)"
+      - "Effect sizes (Cohen's d) in reasonable range [-3, 3]"
+      - "All p-values in [0, 1]"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_comparisons: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_pairwise_comparisons.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate statistical comparisons include all required tests with dual p-values"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_contrasts_dual_pvalues"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 5
+  total_unique_tools: 13
+  mandatory_decisions_embedded: ["D068"]
+  
+  key_capabilities:
+    - "Cross-RQ dependency validation (Ch5 5.2.1, 5.2.2, 5.2.3)"
+    - "ICC computation for individual differences analysis"
+    - "Bootstrap confidence intervals (1000 iterations, seed=42)"
+    - "Pairwise domain comparisons with effect sizes"
+    - "Outlier analysis and robustness checks"
+    - "Split-half reliability assessment"
+    - "Power analysis and sensitivity assessment"
+    - "Decision D068 dual p-value reporting"
+  
+  validation_coverage:
+    step00: "Dependency file validation"
+    step01: "Data format and completeness checks"
+    step02: "ICC range and variance component validation"
+    step03: "Bootstrap stability and convergence checks"
+    step04: "Statistical comparison and D068 compliance"
+    step05: "Outlier detection and impact assessment"
+    step06: "Reliability analysis validation"
+    step07: "Power analysis range checks"
+  
+  special_notes:
+    - "Bootstrap uses participant-level resampling (preserves within-subject dependencies)"
+    - "ICC(1,1) formulation appropriate for individual differences analysis"
+    - "Multiple comparison corrections applied within-RQ family (3 tests)"
+    - "Split-half reliability validates ICC stability with N=100"
+    - "Power analysis acknowledges limitations for small effect detection"

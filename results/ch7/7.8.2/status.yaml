@@ -31,8 +31,8 @@ rq_planner:
   context_dump: "Analysis plan created: 6-step LPA + chi-square pipeline. Addressed CV misapplication, enhanced convergence specs, split-sample validation. Dependencies: RQ 7.8.1 profiles + master.xlsx cognitive tests. v5.1 statistical specifications integrated."
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 analysis + 6 validation tools cataloged for LPA + chi-square external validation"
 
 rq_analysis:
   status: pending

@@ -29,17 +29,18 @@ rq_stats:
 rq_planner:
   status: success
   context_dump: |
-    Analysis plan created: 7 steps planned (Step 0: validation + Steps 1-6: analysis).
-    Pipeline: Mixed-effects modeling with simultaneous predictor testing (primary) and two-stage random effects extraction (secondary)
-    Key features: Simultaneous LMM PRIMARY to avoid BLUP bias, participant-level block bootstrap, dual p-value reporting
-    Tool requirements: LMM with interactions, BLUP extraction, multiple regression with bootstrap, R-squared comparison
-    Expected outputs: 13 data files, 1 plot source CSV, 7 log files. Validation required at every step.
-    Statistical specs: seed=42, 1000 bootstrap iterations, Bonferroni correction (alpha=0.0083), HC3 robust SEs for violations
-    Critical hypothesis: R²_intercept > R²_slope (tests predict encoding not consolidation)
+    Analysis plan created: 8 steps planned (Step 0: extractions + Steps 1-7: analysis).
+    Tool requirements: extract_random_effects_from_lmm, extract_cognitive_tests, standardize_to_t_scores, fit_multiple_regression, compute_regression_diagnostics, bootstrap_regression_ci.
+    Expected outputs: 8 data files, 8 log files, comprehensive regression analysis. Validation required at every step.
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    6 analysis + 4 validation tools cataloged for regression analysis
+    Tools: extract_random_effects_from_lmm, extract_cognitive_tests, standardize_to_t_scores, fit_multiple_regression, compute_regression_diagnostics, bootstrap_regression_ci
+    All tools verified exist in tools_inventory.md
+    Validation pairing complete per v4.X architecture
+    Decision D068 embedded: dual p-value reporting
 
 rq_analysis:
   status: pending

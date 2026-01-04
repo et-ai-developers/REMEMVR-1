@@ -1,0 +1,496 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.3.5
+# Created by: rq_tools agent
+# Consumed by: rq_analysis agent  
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Analysis Type: ANOVA + Correlations pipeline with bootstrap CIs and sensitivity analysis
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "check_file_exists"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string (format: P###)"
+          theta_all: "float (theta ability scores)"
+      - path: "results/ch6/*/data/*confidence*theta*.csv"
+        required_columns: ["UID", "confidence_theta"]  
+        expected_rows: "~100"
+        data_types:
+          UID: "string (format: P###)"
+          confidence_theta: "float (confidence on IRT scale)"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "EDUC_YEARS", "RPM_TOTAL", "AGE"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string (format: P###)"
+          EDUC_YEARS: "int (8-25 years)"
+          RPM_TOTAL: "int (0-60 points)"
+          AGE: "int (18-85 years)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Validation results for all cross-RQ dependencies"
+    
+    parameters:
+      min_size_bytes: 200
+    
+    description: "Validate cross-RQ dependencies exist before proceeding with analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        source: "Ch5 5.1.1 IRT calibration output"
+      - path: "results/ch6/*/data/*confidence*theta*.csv"
+        required_columns: ["UID", "confidence_theta"]
+        source: "Ch6 confidence calibration output"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "EDUC_YEARS", "RPM_TOTAL", "AGE"]
+        source: "Master participant data"
+    
+    output_files:
+      - path: "data/step01_merged_data.csv"
+        columns: ["UID", "theta_all", "confidence_theta", "education", "rpm", "age"]
+        description: "Merged dataset with theta, confidence, and cognitive reserve indicators"
+    
+    parameters:
+      tests: ["education", "rpm", "age"]
+      merge_method: "inner"
+      
+    description: "Extract and merge theta scores, confidence ratings, and cognitive reserve indicators"
+    source_reference: "tools_inventory.md section 'Data Tools' - extract_cognitive_tests"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+    
+    input_files:
+      - path: "data/step01_merged_data.csv"
+        required_columns: ["UID", "theta_all", "confidence_theta"]
+        source: "analysis tool output (step01_extract_merge)"
+    
+    output_files:
+      - path: "data/step02_calibration_groups.csv"
+        columns: ["UID", "theta_all", "confidence_theta", "residual", "group", "group_n"]
+        description: "Participants assigned to calibration groups based on confidence-accuracy residuals"
+      - path: "data/step02_group_descriptives.csv"
+        columns: ["group", "n", "theta_mean", "theta_sd", "confidence_mean", "confidence_sd", "education_mean", "rpm_mean", "age_mean"]
+        description: "Descriptive statistics per calibration group"
+    
+    parameters:
+      formula: "confidence_theta ~ theta_all"
+      grouping_method: "residual_sd"
+      cutoff_sd: 0.5
+      min_group_size: 15
+      
+    description: "Create calibration groups based on confidence-accuracy regression residuals"
+    source_reference: "tools_inventory.md section 'Regression Tools' - fit_multiple_regression"
+
+  one_way_anova_d068:
+    module: "tools.analysis_stats"
+    function: "one_way_anova_d068"
+    signature: "one_way_anova_d068(data: pd.DataFrame, group_col: str, value_col: str, correction_method: str = 'bonferroni', n_comparisons: int = None, post_hoc: bool = True) -> Dict"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+    
+    input_files:
+      - path: "data/step02_calibration_groups.csv"
+        required_columns: ["group", "education", "rpm", "age"]
+        source: "analysis tool output (step02_create_groups)"
+    
+    output_files:
+      - path: "data/step03_anova_results.csv"
+        columns: ["DV", "F_stat", "p_uncorrected", "p_bonferroni", "eta_squared", "eta_ci_lower", "eta_ci_upper"]
+        description: "ANOVA results with dual p-values per Decision D068"
+      - path: "data/step03_assumption_checks.csv"
+        columns: ["DV", "test", "statistic", "p_value", "assumption", "status"]
+        description: "ANOVA assumption test results (normality, homoscedasticity)"
+      - path: "data/step03_posthoc_comparisons.csv"
+        columns: ["DV", "comparison", "mean_diff", "se", "t_stat", "p_uncorrected", "p_tukey", "sig_uncorrected", "sig_tukey"]
+        description: "Tukey HSD post-hoc pairwise comparisons"
+    
+    parameters:
+      dependent_variables: ["education", "rpm", "age"]
+      group_col: "group"
+      correction_method: "bonferroni"
+      n_comparisons: 6
+      post_hoc: true
+      alpha: 0.05
+      assumption_checks: ["normality", "homoscedasticity"]
+      
+    description: "Compare calibration groups on cognitive reserve indicators using one-way ANOVA"
+    source_reference: "tools_inventory.md section 'Statistical Analysis Tools' - one_way_anova_d068"
+
+  bootstrap_correlation_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_correlation_ci"
+    signature: "bootstrap_correlation_ci(x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'pearson', random_state: int = None) -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+    
+    input_files:
+      - path: "data/step02_calibration_groups.csv"
+        required_columns: ["residual", "education", "rpm", "age"]
+        source: "analysis tool output (step02_create_groups)"
+    
+    output_files:
+      - path: "data/step04_correlations.csv"
+        columns: ["variable_pair", "r", "p_uncorrected", "p_bonferroni", "ci_lower", "ci_upper", "n_boot", "effect_size"]
+        description: "Correlations between calibration residuals and cognitive reserve with bootstrap CIs"
+      - path: "data/step04_bootstrap_distributions.csv"
+        columns: ["variable_pair", "iteration", "r_bootstrap"]
+        description: "Full bootstrap distributions for correlation CIs"
+    
+    parameters:
+      correlations:
+        - variables: ["residual", "education"]
+        - variables: ["residual", "rpm"]
+        - variables: ["residual", "age"]
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "pearson"
+      random_state: 42
+      correction_method: "bonferroni"
+      n_comparisons: 6
+      
+    description: "Correlate continuous calibration quality with cognitive reserve indicators"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - bootstrap_correlation_ci"
+
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step03_anova_results.csv"
+        required_columns: ["DV", "F_stat", "eta_squared"]
+        source: "analysis tool output (step03_anova_comparisons)"
+      - path: "data/step04_correlations.csv"
+        required_columns: ["variable_pair", "r"]
+        source: "analysis tool output (step04_correlations)"
+    
+    output_files:
+      - path: "data/step05_effect_sizes.csv"
+        columns: ["comparison", "dv", "cohens_d", "d_ci_lower", "d_ci_upper", "classification", "n1", "n2"]
+        description: "Cohen's d for all pairwise group comparisons"
+      - path: "data/step05_power_analysis.csv"
+        columns: ["test_type", "effect", "alpha_corrected", "achieved_power", "effect_size", "n"]
+        description: "Post-hoc power analysis for ANOVAs and correlations"
+    
+    parameters:
+      alpha_corrected: 0.0083
+      effect_size_thresholds:
+        small: 0.2
+        medium: 0.5
+        large: 0.8
+      power_threshold: 0.80
+      
+    description: "Compute effect sizes and post-hoc power analysis for group comparisons"
+    source_reference: "tools_inventory.md section 'Effect Size Tools' - compute_cohens_f2"
+
+  bootstrap_statistic:
+    module: "tools.bootstrap"
+    function: "bootstrap_statistic"
+    signature: "bootstrap_statistic(data: Union[np.ndarray, pd.DataFrame], statistic_func: Callable, n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'percentile', random_state: int = None) -> Dict"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step01_merged_data.csv"
+        required_columns: ["UID", "theta_all", "confidence_theta", "education", "rpm", "age"]
+        source: "analysis tool output (step01_extract_merge)"
+    
+    output_files:
+      - path: "data/step06_outlier_analysis.csv"
+        columns: ["variable", "outlier_method", "outlier_count", "cooks_d_threshold", "excluded_uids"]
+        description: "Outlier detection and exclusion analysis"
+      - path: "data/step06_tertile_reanalysis.csv"
+        columns: ["DV", "F_stat", "p_uncorrected", "p_bonferroni", "eta_squared", "method"]
+        description: "ANOVA results using tertile grouping method"
+      - path: "data/step06_robustness_summary.csv"
+        columns: ["analysis", "original_result", "outliers_excluded", "tertile_method", "effect_size_change", "robustness"]
+        description: "Summary of robustness across analysis methods"
+    
+    parameters:
+      outlier_methods: ["cooks_distance", "mahalanobis"]
+      alternative_grouping: "tertiles"
+      bootstrap_stability_n: 100
+      random_state: 42
+      
+    description: "Test robustness through outlier exclusion and alternative grouping methods"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - bootstrap_statistic"
+
+validation_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    
+    input_files: []
+    
+    parameters:
+      min_size_bytes: 200
+      
+    criteria:
+      - "File exists at specified path"
+      - "File size >= min_size_bytes (not empty/corrupted)"
+      - "Path points to file, not directory"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        file_path: "str (path checked)"
+        size_bytes: "int (actual file size)"
+        message: "str (human-readable result)"
+        
+    behavior_on_failure:
+      action: "return Dict with valid=False"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "Continue with specific error message"
+      
+    description: "Validate that required dependency files exist and are not empty"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_merged_data.csv"
+        required_columns: ["UID", "theta_all", "confidence_theta", "education", "rpm", "age"]
+        source: "analysis tool output (step01_extract_merge)"
+        
+    parameters:
+      required_columns: ["UID", "theta_all", "confidence_theta", "education", "rpm", "age"]
+      
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names case-sensitive exact match"
+      - "No missing required columns"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_merge.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate merged dataset has all required columns for analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: Any) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_calibration_groups.csv"
+        required_columns: ["group"]
+        source: "analysis tool output (step02_create_groups)"
+        
+    parameters:
+      min_group_size: 15
+      
+    criteria:
+      - "Regression model converged successfully"
+      - "All calibration groups have n >= 15 participants"
+      - "Residuals computed without errors"
+      - "Group assignments are valid (3 groups total)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        converged: "bool"
+        message: "str"
+        group_sizes: "List[int]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_create_groups.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate calibration group creation and regression convergence"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_model_convergence"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_anova_results.csv"
+        required_columns: ["DV", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step03_anova_comparisons)"
+        
+    parameters:
+      required_terms: ["Education", "RPM", "Age"]
+      alpha_bonferroni: 0.0083
+      
+    criteria:
+      - "All required ANOVA terms present in results"
+      - "Both uncorrected and Bonferroni p-values reported (Decision D068)"
+      - "All p-values in valid range [0, 1]"
+      - "Bonferroni correction properly applied"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_anova_comparisons.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate ANOVA results include all required tests with Decision D068 dual p-values"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_hypothesis_test_dual_pvalues"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: pd.DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_correlations.csv"
+        required_columns: ["variable_pair", "r", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step04_correlations)"
+        
+    parameters:
+      required_cols: ["variable_pair", "r", "p_uncorrected", "p_bonferroni", "ci_lower", "ci_upper"]
+      
+    criteria:
+      - "All 3 correlations computed (residual vs education/rpm/age)"
+      - "Bootstrap confidence intervals present"
+      - "Decision D068 dual p-value reporting (uncorrected + Bonferroni)"
+      - "Effect size classifications provided"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_correlations_bootstrap.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate correlation results include bootstrap CIs and Decision D068 dual p-values"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_correlation_test_d068"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_effect_sizes.csv"
+        required_columns: ["comparison", "cohens_d", "classification"]
+        source: "analysis tool output (step05_effect_sizes)"
+        
+    parameters:
+      f2_column: "cohens_d"
+      valid_range: [-2.0, 2.0]
+      
+    criteria:
+      - "All pairwise Cohen's d values in reasonable range [-2, 2]"
+      - "Effect size classifications provided (small/medium/large)"
+      - "Confidence intervals computed successfully"
+      - "No NaN or infinite effect sizes"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+        effect_size_range: "Tuple[float, float]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_effect_sizes_power.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate effect size calculations are within reasonable bounds"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_robustness_summary.csv"
+        required_columns: ["analysis", "original_result", "effect_size_change", "robustness"]
+        source: "analysis tool output (step06_sensitivity_analysis)"
+        
+    parameters:
+      stability_threshold: 0.75
+      max_effect_change: 0.5
+      
+    criteria:
+      - "Sensitivity analysis completed for all primary findings"
+      - "Effect size changes within reasonable bounds"
+      - "Robustness assessment covers outliers and alternative grouping"
+      - "Bootstrap stability adequate"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        stability_metrics: "Dict[str, float]"
+        robust_findings: "List[str]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_sensitivity_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate sensitivity analysis shows adequate robustness of primary findings"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_bootstrap_stability"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 7  
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "ANOVA + Correlations with bootstrap CIs and sensitivity analysis"
+  estimated_runtime: "~45 minutes"
+  key_features:
+    - "Cross-RQ dependency validation (Ch5 theta + Ch6 confidence + master.xlsx)"
+    - "Calibration group creation via confidence-accuracy regression residuals"
+    - "One-way ANOVA with assumption testing and remedial actions"
+    - "Bootstrap correlation CIs (1000 iterations, seed=42)"
+    - "Decision D068 dual p-value reporting throughout"
+    - "Bonferroni correction for family of 6 tests (3 ANOVAs + 3 correlations)"
+    - "Comprehensive effect size analysis (Cohen's d + power analysis)"
+    - "Robustness testing (outlier exclusion + alternative grouping methods)"

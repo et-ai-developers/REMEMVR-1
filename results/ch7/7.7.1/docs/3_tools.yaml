@@ -1,0 +1,538 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  validate_file_exists:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    signature: "validate_file_exists(file_path: str, min_size_bytes: int = 100) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "status file (YAML format)"
+        data_types:
+          status_content: "YAML structure with agent statuses"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          theta_all: "float (IRT ability estimate)"
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Dependency validation results with pass/fail status"
+
+    parameters:
+      files_to_check:
+        - path: "results/ch5/5.1.1/status.yaml"
+          min_size_bytes: 500
+        - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+          min_size_bytes: 2000
+        - path: "data/cache/master.xlsx"
+          min_size_bytes: 10000
+
+    description: "Validate cross-RQ dependencies exist before proceeding with analysis (Step 0)"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  extract_cognitive_tests:
+    module: "tools.analysis_cleaning"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_Total", "BVMT_TotR"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          RAVLT_Total: "int (verbal memory total score)"
+          BVMT_TotR: "int (visual memory total score)"
+
+    output_files:
+      - path: "data/step01_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_Total", "BVMT_TotR"]
+        description: "Extracted cognitive test scores for merge"
+
+    parameters:
+      tests: ["RAVLT", "BVMT"]
+      include_derived: false
+
+    description: "Extract RAVLT and BVMT cognitive test scores from master.xlsx (Step 1a)"
+    source_reference: "tools_inventory.md section 'Data Analysis and Cleaning Tools'"
+
+  extract_domain_theta_scores:
+    module: "tools.analysis_cleaning"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          theta_all: "float (omnibus IRT ability estimate)"
+
+    output_files:
+      - path: "data/step01_theta_scores.csv"
+        columns: ["UID", "theta_all"]
+        description: "Extracted theta_all scores from Ch5 5.1.1"
+
+    parameters:
+      path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+      domains: ["all"]
+
+    description: "Extract theta_all scores from Ch5 5.1.1 IRT calibration (Step 1b)"
+    source_reference: "tools_inventory.md section 'Data Analysis and Cleaning Tools'"
+
+  merge_theta_cognitive:
+    module: "tools.analysis_cleaning"
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/step01_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        source: "output from extract_domain_theta_scores"
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_Total", "BVMT_TotR"]
+        source: "output from extract_cognitive_tests"
+
+    output_files:
+      - path: "data/step01_merged_dataset.csv"
+        columns: ["UID", "theta_all", "RAVLT_Total", "BVMT_TotR"]
+        description: "Merged theta scores and cognitive test scores by UID"
+
+    parameters:
+      join_type: "inner"
+      on_column: "UID"
+
+    description: "Merge theta scores with cognitive test scores by participant UID (Step 1c)"
+    source_reference: "tools_inventory.md section 'Data Analysis and Cleaning Tools'"
+
+  standardize_to_t_scores:
+    module: "tools.analysis_cleaning"
+    function: "standardize_to_t_scores"
+    signature: "standardize_to_t_scores(scores: Union[pd.Series, pd.DataFrame], population_mean: float = None, population_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step01_merged_dataset.csv"
+        required_columns: ["UID", "theta_all", "RAVLT_Total", "BVMT_TotR"]
+        source: "output from merge_theta_cognitive"
+
+    output_files:
+      - path: "data/step02_standardized_data.csv"
+        columns: ["UID", "REMEMVR_T", "RAVLT_T", "BVMT_T"]
+        description: "T-score transformed variables (M=50, SD=10)"
+
+    parameters:
+      target_mean: 50.0
+      target_sd: 10.0
+      columns_to_transform: ["theta_all", "RAVLT_Total", "BVMT_TotR"]
+      new_column_names: ["REMEMVR_T", "RAVLT_T", "BVMT_T"]
+
+    description: "Convert all variables to T-scores (M=50, SD=10) for meaningful comparison (Step 2)"
+    source_reference: "tools_inventory.md section 'Data Analysis and Cleaning Tools'"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step02_standardized_data.csv"
+        required_columns: ["UID", "REMEMVR_T", "RAVLT_T", "BVMT_T"]
+        source: "output from standardize_to_t_scores"
+
+    output_files:
+      - path: "data/step03_reverse_models.csv"
+        columns: ["model", "outcome", "predictor", "R2", "adj_R2", "beta", "se", "p_uncorrected"]
+        description: "Reverse regression results (cognitive ~ REMEMVR)"
+
+    parameters:
+      models:
+        - outcome: "RAVLT_T"
+          predictor: "REMEMVR_T"
+          name: "RAVLT_reverse"
+        - outcome: "BVMT_T"
+          predictor: "REMEMVR_T"
+          name: "BVMT_reverse"
+      add_constant: true
+      return_diagnostics: true
+
+    description: "Fit reverse prediction models (cognitive tests ~ REMEMVR) with diagnostics (Step 3a)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step02_standardized_data.csv"
+        required_columns: ["REMEMVR_T", "RAVLT_T", "BVMT_T"]
+        source: "output from standardize_to_t_scores"
+
+    output_files:
+      - path: "data/step03_bootstrap_cis.csv"
+        columns: ["model", "coefficient", "mean", "std", "ci_lower", "ci_upper"]
+        description: "Bootstrap confidence intervals for regression coefficients"
+
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+
+    description: "Compute bootstrap 95% CIs for regression coefficients (Step 3b)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step03_reverse_models.csv"
+        required_columns: ["model", "R2"]
+        source: "output from fit_multiple_regression"
+
+    output_files:
+      - path: "data/step05_effect_sizes.csv"
+        columns: ["model", "cohens_f2", "f2_ci_lower", "f2_ci_upper", "effect_interpretation"]
+        description: "Cohen's f� effect sizes with bootstrap CIs and interpretations"
+
+    parameters:
+      r2_reduced: 0.0
+      effect_thresholds:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+
+    description: "Compute Cohen's f� effect sizes for reverse prediction models (Step 5)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+
+    input_files:
+      - path: "data/step02_standardized_data.csv"
+        required_columns: ["REMEMVR_T", "RAVLT_T", "BVMT_T"]
+        source: "output from standardize_to_t_scores"
+
+    output_files:
+      - path: "data/step06_model_diagnostics.csv"
+        columns: ["model", "normality_p", "bp_test_p", "max_cooks_d", "outlier_count", "assumptions_met"]
+        description: "Regression assumption diagnostics and remedial actions"
+
+    parameters:
+      cook_d_threshold: 0.042
+      alpha: 0.05
+
+    description: "Comprehensive regression assumption validation with remedial actions (Step 6)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step02_standardized_data.csv"
+        required_columns: ["REMEMVR_T", "RAVLT_T", "BVMT_T"]
+        source: "output from standardize_to_t_scores"
+
+    output_files:
+      - path: "data/step07_cross_validation.csv"
+        columns: ["model", "mean_test_R2", "sd_test_R2", "train_R2", "generalization_gap", "overfitting_flag"]
+        description: "5-fold CV results and overfitting assessment"
+
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2", "mae"]
+      overfitting_threshold: 0.10
+
+    description: "5-fold cross-validation to assess model generalizability (Step 7)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: []
+        source: "analysis tool output (validate_file_exists)"
+
+    parameters:
+      min_file_size: 100
+
+    criteria:
+      - "Dependency validation file exists and not empty"
+      - "File contains pass/fail status for each dependency"
+      - "All required dependencies checked"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate dependency validation output file format and content"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_Total", "BVMT_TotR"]
+        source: "analysis tool output (extract_cognitive_tests)"
+      - path: "data/step01_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+
+    parameters:
+      required_columns:
+        cognitive: ["UID", "RAVLT_Total", "BVMT_TotR"]
+        theta: ["UID", "theta_all"]
+
+    criteria:
+      - "All required columns present in extracted data"
+      - "No missing column names"
+      - "Column data types appropriate (UID string, scores numeric)"
+      - "Minimum 95 participants with complete data"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate extracted data has all required columns and appropriate format"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, t_score_columns: List[str], target_mean: float = 50.0, target_sd: float = 10.0, tolerance: float = 0.1) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_standardized_data.csv"
+        required_columns: ["UID", "REMEMVR_T", "RAVLT_T", "BVMT_T"]
+        source: "analysis tool output (standardize_to_t_scores)"
+
+    parameters:
+      target_mean: 50.0
+      target_sd: 10.0
+      tolerance: 0.1
+
+    criteria:
+      - "All T-scores have M=50.0 � 0.1"
+      - "All T-scores have SD=10.0 � 0.1"
+      - "T-scores in reasonable range [20, 80]"
+      - "No missing values introduced"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_deviations: "Dict[str, float]"
+        sd_deviations: "Dict[str, float]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_standardize_variables.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate T-score transformation achieved target M=50, SD=10"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_regression_assumptions:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+
+    input_files:
+      - path: "data/step03_reverse_models.csv"
+        required_columns: ["model", "R2", "beta", "se"]
+        source: "analysis tool output (fit_multiple_regression)"
+
+    parameters:
+      alpha: 0.05
+      cook_d_threshold: 0.042
+
+    criteria:
+      - "Residuals normally distributed (Shapiro-Wilk p > 0.05)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "No excessive outliers (Cook's D < 4/n threshold)"
+      - "All regression coefficients finite"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        all_assumptions_met: "bool"
+        normality: "Dict"
+        homoscedasticity: "Dict"
+        outliers: "List"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_reverse_models.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate regression assumptions with diagnostic tests"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_bootstrap_cis.csv"
+        required_columns: ["ci_lower", "ci_upper"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+      - path: "data/step07_cross_validation.csv"
+        required_columns: ["mean_test_R2", "generalization_gap"]
+        source: "analysis tool output (cross_validate_regression)"
+
+    parameters:
+      ranges:
+        r2: [0.0, 1.0]
+        ci_bounds: [-10.0, 10.0]
+        generalization_gap: [-0.5, 1.0]
+
+    criteria:
+      - "R� values in [0, 1] range"
+      - "CI bounds finite and ordered (lower < upper)"
+      - "Bootstrap iterations completed successfully"
+      - "CV metrics in reasonable ranges"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "List"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_reverse_models.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate numeric outputs are in expected ranges"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_effect_sizes.csv"
+        required_columns: ["cohens_f2"]
+        source: "analysis tool output (compute_cohens_f2)"
+
+    parameters:
+      f2_column: "cohens_f2"
+
+    criteria:
+      - "All f� values non-negative (f� >= 0)"
+      - "No NaN or infinite effect sizes"
+      - "Effect interpretations match Cohen guidelines"
+      - "Bootstrap CIs valid (lower < estimate < upper)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_effect_sizes.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate Cohen's f� effect sizes within reasonable bounds"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(diagnostics: Dict, convergence_criteria: Dict) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_model_diagnostics.csv"
+        required_columns: ["assumptions_met", "max_cooks_d"]
+        source: "analysis tool output (compute_regression_diagnostics)"
+
+    parameters:
+      convergence_criteria:
+        max_cook_d: 0.042
+        min_observations: 95
+
+    criteria:
+      - "Model diagnostics completed successfully"
+      - "Diagnostic tests produced valid results"
+      - "Remedial actions specified for violations"
+      - "Convergence status clearly documented"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        diagnostics_complete: "bool"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_diagnostics.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate model diagnostics completed and convergence achieved"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+summary:
+  analysis_tools_count: 9
+  validation_tools_count: 6
+  total_unique_tools: 15
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "Multiple Linear Regression (Reverse Prediction)"
+  cross_rq_dependencies: ["Ch5 5.1.1 (required)", "Ch7 7.1.1 (optional)"]
+  validation_coverage: "100% (validation tool paired with each analysis tool)"

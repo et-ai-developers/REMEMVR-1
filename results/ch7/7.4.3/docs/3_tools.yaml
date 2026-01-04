@@ -1,0 +1,441 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  validate_dependency_files:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    signature: "validate_file_exists(file_path: str, min_size_bytes: int = 1000) -> Dict[str, Any]"
+    validation_tool: "validate_dependency_check_results"
+    
+    input_files: []
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: ["validation_results"]
+        description: "Dependency check results with PASS/FAIL status"
+    
+    parameters:
+      files_to_check:
+        - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+          min_size_bytes: 1000
+        - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+          min_size_bytes: 1000
+        - path: "data/cache/master.xlsx"
+          min_size_bytes: 100000
+    
+    description: "Validate cross-RQ dependencies and master.xlsx exist before proceeding with analysis"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  extract_data_from_excel:
+    module: "pandas"
+    function: "read_excel"
+    signature: "read_excel(io, sheet_name=0, **kwargs) -> DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RPM_Scor"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string"
+          RPM_Scor: "int (0-60 range)"
+    
+    output_files:
+      - path: "data/step01_rpm_scores.csv"
+        columns: ["UID", "RPM_Scor", "RPM_standardized"]
+        description: "RPM scores extracted from master.xlsx with standardization"
+    
+    parameters:
+      io: "data/cache/master.xlsx"
+      sheet_name: 0
+      usecols: ["UID", "RPM_Scor"]
+    
+    description: "Extract Raven's Progressive Matrices scores from master.xlsx for all participants"
+    source_reference: "pandas documentation"
+
+  extract_data_from_csv:
+    module: "pandas"
+    function: "read_csv"
+    signature: "read_csv(filepath_or_buffer, **kwargs) -> DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta", "SE"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string"
+          theta: "float (-4 to 4 range)"
+          SE: "float (positive)"
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta", "SE"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string"
+          theta: "float (-4 to 4 range)"
+          SE: "float (positive)"
+    
+    output_files:
+      - path: "data/step02_overall_theta.csv"
+        columns: ["UID", "theta_overall", "se_overall"]
+        description: "Overall omnibus theta scores (complex integration performance)"
+      - path: "data/step03_what_theta.csv"
+        columns: ["UID", "theta_what", "se_what"]
+        description: "What-domain theta scores (simple single-domain performance)"
+    
+    parameters:
+      filepath_or_buffer: "varies by step"
+    
+    description: "Extract theta scores from Ch5 analyses for correlation analysis"
+    source_reference: "pandas documentation"
+
+  bootstrap_correlation_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_correlation_ci"
+    signature: "bootstrap_correlation_ci(x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'pearson', random_state: int = None) -> Dict[str, Any]"
+    validation_tool: "validate_correlation_results"
+    
+    input_files:
+      - path: "data/step01_rpm_scores.csv"
+        required_columns: ["UID", "RPM_Scor", "RPM_standardized"]
+        source: "analysis tool output (step01_extract_rpm)"
+      - path: "data/step02_overall_theta.csv"
+        required_columns: ["UID", "theta_overall", "se_overall"]
+        source: "analysis tool output (step02_extract_overall_theta)"
+      - path: "data/step03_what_theta.csv"
+        required_columns: ["UID", "theta_what", "se_what"]
+        source: "analysis tool output (step03_extract_what_theta)"
+    
+    output_files:
+      - path: "data/step04_correlation_results.csv"
+        columns: ["correlation_type", "r", "p_uncorrected", "p_bonferroni", "p_fdr", "ci_lower", "ci_upper", "n_participants"]
+        description: "Correlations between RPM and theta scores with bootstrap CIs and dual p-values"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "pearson"
+      random_state: 42
+    
+    description: "Compute correlations between RPM and both complexity levels with bootstrap confidence intervals"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools'"
+
+  compare_correlations_dependent:
+    module: "tools.analysis_extensions"
+    function: "compare_correlations_dependent"
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+    
+    input_files:
+      - path: "data/step04_correlation_results.csv"
+        required_columns: ["correlation_type", "r", "n_participants"]
+        source: "analysis tool output (step04_compute_correlations)"
+    
+    output_files:
+      - path: "data/step05_steiger_test.csv"
+        columns: ["z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr", "cohens_q", "diff_ci_lower", "diff_ci_upper", "n_participants"]
+        description: "Steiger's Z-test for differential prediction with effect size and CI for difference"
+    
+    parameters:
+      alpha: 0.05
+      family_size: 1
+    
+    description: "Test whether RPM shows differential prediction for complex vs simple episodic memory performance using Steiger's Z-test"
+    source_reference: "tools_inventory.md section 'Statistical Extensions'"
+
+  validate_correlation_assumptions:
+    module: "tools.validation"
+    function: "validate_correlation_assumptions"
+    signature: "validate_correlation_assumptions(data: pd.DataFrame, variables: List[str], alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_assumption_check_results"
+    
+    input_files:
+      - path: "data/merged_complete_cases.csv"
+        required_columns: ["UID", "RPM_Scor", "theta_overall", "theta_what"]
+        source: "merged data from steps 1-3"
+    
+    output_files:
+      - path: "data/step06_assumption_checks.csv"
+        columns: ["variable", "normality_p", "outlier_count", "assumption_met", "remedial_action"]
+        description: "Assumption validation and outlier detection results"
+    
+    parameters:
+      variables: ["RPM_Scor", "theta_overall", "theta_what"]
+      alpha: 0.05
+      outlier_threshold: 3.29
+    
+    description: "Validate assumptions for correlation analysis and identify potential outliers or violations"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  bootstrap_statistic:
+    module: "tools.bootstrap"
+    function: "bootstrap_statistic"
+    signature: "bootstrap_statistic(data: Union[np.ndarray, pd.DataFrame], statistic_func: Callable, n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'percentile', random_state: int = None) -> Dict[str, Any]"
+    validation_tool: "validate_sensitivity_results"
+    
+    input_files:
+      - path: "data/step04_correlation_results.csv"
+        required_columns: ["correlation_type", "r", "p_uncorrected"]
+        source: "analysis tool output (step04_compute_correlations)"
+      - path: "data/step06_assumption_checks.csv"
+        required_columns: ["variable", "outlier_count", "assumption_met"]
+        source: "analysis tool output (step06_check_assumptions)"
+    
+    output_files:
+      - path: "data/step07_sensitivity_analyses.csv"
+        columns: ["sensitivity_test", "correlation_difference", "p_value", "robust_result", "interpretation"]
+        description: "Robustness checks across multiple methods and outlier handling approaches"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "percentile"
+      random_state: 42
+    
+    description: "Conduct sensitivity analyses to assess robustness of differential prediction findings"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools'"
+
+validation_tools:
+  validate_dependency_check_results:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    signature: "validate_file_exists(file_path: str, min_size_bytes: int = 1000) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: ["validation_results"]
+        source: "analysis tool output (step00_validate_dependencies)"
+    
+    parameters:
+      min_size_bytes: 100
+    
+    criteria:
+      - "Dependency validation file exists and is readable"
+      - "File contains PASS status for all required dependencies"
+      - "No FAIL or ERROR patterns found in validation results"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        flagged_items: "List[str] (missing dependencies, empty if valid=True)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_dependency_validation.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate dependency check completed successfully with all required files found"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_rpm_scores.csv"
+        required_columns: ["UID", "RPM_Scor", "RPM_standardized"]
+        source: "analysis tool output (step01_extract_rpm)"
+      - path: "data/step02_overall_theta.csv"
+        required_columns: ["UID", "theta_overall", "se_overall"]
+        source: "analysis tool output (step02_extract_overall_theta)"
+      - path: "data/step03_what_theta.csv"
+        required_columns: ["UID", "theta_what", "se_what"]
+        source: "analysis tool output (step03_extract_what_theta)"
+    
+    parameters:
+      required_columns: "varies by step"
+      value_ranges:
+        RPM_Scor: [0, 60]
+        RPM_standardized: [-3, 3]
+        theta_overall: [-4, 4]
+        theta_what: [-4, 4]
+        se_overall: [0.1, 2.0]
+        se_what: [0.1, 2.0]
+    
+    criteria:
+      - "All required columns present in extracted data"
+      - "No missing values in key variables after cleaning"
+      - "Values within expected ranges (RPM 0-60, theta -4 to 4)"
+      - "Reasonable sample size (85-100 participants)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+        invalid_values: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_rpm_extraction.log, logs/step02_overall_theta.log, logs/step03_what_theta.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate extracted data has required columns and values in acceptable ranges"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_correlation_results:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(results_df: pd.DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_correlation_results.csv"
+        required_columns: ["correlation_type", "r", "p_uncorrected", "p_bonferroni", "p_fdr", "ci_lower", "ci_upper"]
+        source: "analysis tool output (step04_compute_correlations)"
+    
+    parameters:
+      required_cols: ["p_uncorrected", "p_bonferroni", "p_fdr"]
+      correlation_bounds: [-1, 1]
+      p_value_bounds: [0, 1]
+    
+    criteria:
+      - "All correlations in valid range [-1, 1]"
+      - "All p-values in valid range [0, 1]"
+      - "Bootstrap CIs valid (lower < point estimate < upper)"
+      - "Both correlations computed (complex and simple)"
+      - "Decision D068 compliance: dual p-value reporting present"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        message: "str"
+        invalid_correlations: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_correlations.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate correlation computation results and Decision D068 compliance"
+    source_reference: "tools_inventory.md section 'Hypothesis Test Validation Tools'"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(results_df: pd.DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_steiger_test.csv"
+        required_columns: ["z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr", "cohens_q"]
+        source: "analysis tool output (step05_steiger_test)"
+    
+    parameters:
+      required_cols: ["p_uncorrected", "p_bonferroni", "p_fdr"]
+      z_statistic_bounds: [-5, 5]
+      effect_size_bounds: [-1, 1]
+    
+    criteria:
+      - "Z-statistic finite and non-NaN"
+      - "All p-values present (Decision D068 compliance)"
+      - "Effect size interpretable and reasonable"
+      - "Confidence interval valid (lower < point estimate < upper)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        message: "str"
+        test_warnings: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_steiger_test.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate Steiger's test computation and Decision D068 compliance"
+    source_reference: "tools_inventory.md section 'Hypothesis Test Validation Tools'"
+
+  validate_assumption_check_results:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_assumption_checks.csv"
+        required_columns: ["variable", "normality_p", "outlier_count", "assumption_met"]
+        source: "analysis tool output (step06_check_assumptions)"
+    
+    parameters:
+      required_columns: ["variable", "normality_p", "outlier_count", "assumption_met"]
+      normality_p_bounds: [0, 1]
+      outlier_count_bounds: [0, 10]
+    
+    criteria:
+      - "All variables tested for normality"
+      - "Outlier detection completed"
+      - "Remedial actions specified for any violations"
+      - "Power analysis completed with reasonable values"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        assumption_violations: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_assumptions.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate assumption checking completed with appropriate tests and remedial actions"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_sensitivity_results:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step07_sensitivity_analyses.csv"
+        required_columns: ["sensitivity_test", "correlation_difference", "p_value", "robust_result"]
+        source: "analysis tool output (step07_sensitivity_analyses)"
+    
+    parameters:
+      required_columns: ["sensitivity_test", "correlation_difference", "p_value", "robust_result"]
+      correlation_diff_bounds: [-0.5, 0.5]
+      p_value_bounds: [0, 1]
+    
+    criteria:
+      - "All planned sensitivity analyses completed"
+      - "Robustness assessments provided for each test"
+      - "Consistent pattern interpretation across methods"
+      - "Cross-validation stability metrics within acceptable ranges"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        failed_analyses: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_sensitivity.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate sensitivity analyses completed successfully with robustness assessments"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 6
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Decision D068 dual p-value reporting enforced throughout"

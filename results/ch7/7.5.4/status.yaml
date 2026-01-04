@@ -39,8 +39,9 @@ rq_planner:
     Dependencies: Ch5 5.1.1 theta scores + master.xlsx SLP tags
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  completed: 2026-01-04 19:15
+  context_dump: "8 analysis + 8 validation tools cataloged for within-person sleep multilevel analysis"
 
 rq_analysis:
   status: pending

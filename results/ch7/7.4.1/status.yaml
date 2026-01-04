@@ -28,11 +28,14 @@ rq_stats:
 
 rq_planner:
   status: success
-  context_dump: "6-step analysis plan created: dependency validation + RAVLT extraction + paradigm theta aggregation + correlation analysis + Steiger's Z-test + visualization. Enhanced v5.1 specs: seed=42, bootstrap 1000 iterations, dual p-values (D068), chapter alpha=0.00179. Ready for rq_tools."
+  context_dump: |
+    Analysis plan created: 6 steps planned (Step 0: extraction + Steps 1-5: analysis).
+    Tool requirements: bootstrap_correlation_ci, compare_correlations_dependent, extract_cognitive_tests, extract_domain_theta_scores, merge_theta_cognitive.
+    Expected outputs: 5 data files, correlation results with bootstrap CIs, Steiger's Z-test results. Validation required at every step.
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "5 analysis + 5 validation tools cataloged for correlation analysis with process-specificity testing"
 
 rq_analysis:
   status: pending

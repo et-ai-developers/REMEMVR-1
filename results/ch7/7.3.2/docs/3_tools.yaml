@@ -1,0 +1,501 @@
+# 3_tools.yaml - Analysis + Validation Tool Catalog for RQ 7.3.2
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12) 
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  validate_rq_dependencies:
+    module: "tools.data"
+    function: "validate_rq_dependencies"
+    signature: "validate_rq_dependencies(required_files: List[str], ch6_pattern: str = 'results/ch6/*/data/*calibration*.csv', master_path: str = 'data/cache/master.xlsx') -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch6/*/data/*calibration*.csv"
+        required_columns: ["UID", "calibration_score"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          calibration_score: "float (calibration quality metric)"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          RAVLT_total: "int (verbal memory total)"
+          BVMT_total: "int (visuospatial memory total)"
+          RPM_total: "int (fluid intelligence total)"
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Dependency validation log with data source locations"
+
+    parameters:
+      required_files: ["calibration data from Ch6", "master.xlsx cognitive tests"]
+      ch6_pattern: "results/ch6/*/data/*calibration*.csv"
+      master_path: "data/cache/master.xlsx"
+
+    description: "Validate required Ch6 calibration data and master.xlsx accessibility before proceeding"
+    source_reference: "tools_inventory.md section 'Data Loading Tools'"
+
+  extract_calibration_metrics:
+    module: "tools.data"
+    function: "load_and_extract_calibration_data"
+    signature: "load_and_extract_calibration_data(ch6_data_path: str, output_path: str = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch6/*/data/*calibration*.csv"
+        required_columns: ["UID", "calibration_score"]
+        expected_rows: "~100 participants"
+        source: "Ch6 calibration analysis outputs"
+
+    output_files:
+      - path: "data/step01_calibration_metrics.csv"
+        columns: ["UID", "calibration_quality"]
+        description: "Per-participant calibration quality metrics from Ch6"
+
+    parameters:
+      ch6_data_path: "from Step 0 dependency validation"
+      output_path: "data/step01_calibration_metrics.csv"
+
+    description: "Extract per-participant calibration quality metrics from Ch6 outputs"
+    source_reference: "tools_inventory.md section 'Data Loading Tools'"
+
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total", "Age", "Sex", "Education"]
+        expected_rows: "~100 participants"
+        source: "master participant data"
+
+    output_files:
+      - path: "data/step02_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        description: "T-scored cognitive tests with demographics"
+
+    parameters:
+      tests: ["RAVLT", "BVMT", "RPM"]
+      t_score_conversion: true
+
+    description: "Extract and T-score cognitive test data from master.xlsx"
+    source_reference: "tools_inventory.md section 'Cognitive Test Tools' - extract_cognitive_tests"
+
+  standardize_to_t_scores:
+    module: "tools.data"
+    function: "standardize_to_t_scores"
+    signature: "standardize_to_t_scores(scores: Union[pd.Series, pd.DataFrame], population_mean: float = None, population_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step02_cognitive_tests.csv"
+        required_columns: ["RAVLT_total", "BVMT_total", "RPM_total"]
+        source: "raw cognitive test scores"
+
+    output_files:
+      - path: "data/step02_cognitive_tests.csv" 
+        columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        description: "T-scored cognitive tests (mean=50, SD=10)"
+
+    parameters:
+      population_mean: null
+      population_sd: null
+
+    description: "Convert raw cognitive scores to T-scores (M=50, SD=10)"
+    source_reference: "tools_inventory.md section 'Data Tools' - standardize_to_t_scores"
+
+  prepare_regression_data:
+    module: "tools.data"
+    function: "prepare_regression_data"
+    signature: "prepare_regression_data(participant_path: str = None, test_path: str = None, theta_path: str = None, include_interactions: bool = False) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/step01_calibration_metrics.csv"
+        required_columns: ["UID", "calibration_quality"]
+        source: "calibration data from step 1"
+      - path: "data/step02_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "cognitive test data from step 2"
+
+    output_files:
+      - path: "data/step03_analysis_dataset.csv"
+        columns: ["UID", "calibration_quality", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        description: "Complete analysis dataset with merged data"
+      - path: "data/step03_assumption_checks.csv"
+        columns: ["test", "statistic", "p_value", "result"]
+        description: "Assumption test results (linearity, normality, multicollinearity)"
+
+    parameters:
+      participant_path: "data/step02_cognitive_tests.csv"
+      calibration_path: "data/step01_calibration_metrics.csv"
+      include_interactions: false
+
+    description: "Merge calibration and cognitive data, check regression assumptions"
+    source_reference: "tools_inventory.md section 'Data Tools' - prepare_regression_data"
+
+  fit_hierarchical_regression:
+    module: "tools.regression"
+    function: "fit_hierarchical_regression" 
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict[str, Any]"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["calibration_quality", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "complete analysis dataset from step 3"
+
+    output_files:
+      - path: "data/step04_regression_results.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr", "sr_squared", "vif"]
+        description: "Hierarchical regression coefficients with dual p-values (Decision D068)"
+      - path: "data/step04_model_comparison.csv"
+        columns: ["model", "r2", "adj_r2", "delta_r2", "f_change", "p_value", "aic", "bic"]
+        description: "Model comparison statistics for hierarchical blocks"
+
+    parameters:
+      block_names: ["Demographics", "Full_Model"]
+      add_constant: true
+      blocks:
+        - ["Age", "Sex", "Education"]
+        - ["Age", "Sex", "Education", "RAVLT_T", "BVMT_T", "RPM_T"]
+
+    description: "Fit hierarchical regression with demographics and cognitive predictors"
+    source_reference: "tools_inventory.md section 'Regression Tools' - fit_hierarchical_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_stability"
+
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["calibration_quality", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "analysis dataset from step 3"
+
+    output_files:
+      - path: "data/step04_regression_results.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr", "sr_squared", "vif"]
+        description: "Regression results with bootstrap confidence intervals"
+
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+
+    description: "Compute bootstrap confidence intervals for regression coefficients"
+    source_reference: "tools_inventory.md section 'Regression Tools' - bootstrap_regression_ci"
+
+  compute_regression_diagnostics:
+    module: "tools.regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict[str, Any]"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step04_regression_results.csv"
+        required_columns: ["predictor", "beta", "se"]
+        source: "fitted regression model from step 4"
+
+    output_files:
+      - path: "data/step05_diagnostics.csv"
+        columns: ["test", "statistic", "p_value", "threshold", "result", "remedial_action"]
+        description: "Comprehensive regression diagnostics with remedial actions"
+      - path: "data/step05_outliers.csv"
+        columns: ["observation", "cooks_d", "leverage", "studentized_residual", "outlier_flag"]
+        description: "Outlier and influential point analysis"
+
+    parameters:
+      return_dataframe: true
+      thresholds:
+        vif: 5.0
+        cooks_d: 0.04
+        leverage: 0.12
+
+    description: "Comprehensive regression diagnostics with assumption testing"
+    source_reference: "tools_inventory.md section 'Regression Tools' - compute_regression_diagnostics"
+
+  cross_validate_regression:
+    module: "tools.regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["calibration_quality", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "analysis dataset from step 3"
+
+    output_files:
+      - path: "data/step06_cross_validation.csv"
+        columns: ["fold", "train_r2", "test_r2", "rmse", "mae", "n_train", "n_test"]
+        description: "Cross-validation results by fold"
+      - path: "data/step06_overfitting_assessment.csv"
+        columns: ["metric", "train_mean", "test_mean", "gap", "overfitting_flag"]
+        description: "Overfitting assessment and model stability"
+
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2", "mae"]
+
+    description: "5-fold cross-validation to assess model generalizability and overfitting"
+    source_reference: "tools_inventory.md section 'Regression Tools' - cross_validate_regression"
+
+  compute_post_hoc_power:
+    module: "tools.regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step06_cross_validation.csv"
+        required_columns: ["test_r2"]
+        source: "cross-validation results from step 6"
+
+    output_files:
+      - path: "data/step07_power_analysis.csv"
+        columns: ["analysis", "n", "k", "r2", "alpha", "power", "f2", "interpretation"]
+        description: "Post-hoc power analysis and effect size interpretation"
+      - path: "data/step07_effect_sizes.csv"
+        columns: ["predictor", "sr_squared", "f2", "cohens_convention", "practical_significance"]
+        description: "Effect size interpretations with practical significance"
+
+    parameters:
+      alpha: 0.000597  # Bonferroni corrected for 3 cognitive tests within RQ
+      effect_size_thresholds:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+
+    description: "Post-hoc power analysis and effect size interpretation"
+    source_reference: "tools_inventory.md section 'Power Analysis Tools' - compute_post_hoc_power"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(file_path: str, expected_format: str = 'csv', min_rows: int = 1, required_columns: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "dependency validation output from step 0"
+
+    parameters:
+      expected_format: "txt"
+      min_rows: 1
+      required_patterns: ["Ch6 calibration source", "master.xlsx: ACCESSIBLE", "Dependency validation: PASS"]
+
+    criteria:
+      - "Dependency validation file exists and readable"
+      - "Ch6 calibration data source identified"
+      - "master.xlsx accessibility confirmed"
+      - "No critical dependency failures"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all dependencies available)"
+        message: "str (dependency status summary)"
+        missing_dependencies: "List[str] (any missing data sources)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate dependency validation log contains required Ch6 and master.xlsx confirmations"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_calibration_metrics.csv"
+        required_columns: ["UID", "calibration_quality"]
+        source: "calibration data extraction output"
+      - path: "data/step02_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "cognitive test extraction output"
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "calibration_quality", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "merged analysis dataset"
+
+    parameters:
+      required_columns: "varies per step"
+      case_sensitive: true
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing required columns"
+      - "Column names match exactly (case-sensitive)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        missing_columns: "List[str] (any missing column names)"
+        existing_columns: "List[str] (columns that are present)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate that required columns exist in DataFrames"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_cognitive_tests.csv"
+        required_columns: ["RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "T-scored cognitive tests"
+      - path: "data/step06_cross_validation.csv"
+        required_columns: ["train_r2", "test_r2", "rmse", "mae"]
+        source: "cross-validation metrics"
+      - path: "data/step07_power_analysis.csv"
+        required_columns: ["power", "f2", "r2"]
+        source: "power analysis results"
+
+    parameters:
+      range_checks:
+        RAVLT_T: [20, 80]  # T-score range
+        BVMT_T: [20, 80]   # T-score range
+        RPM_T: [20, 80]    # T-score range
+        train_r2: [0, 1]   # R² range
+        test_r2: [0, 1]    # R² range
+        power: [0, 1]      # Power range
+        f2: [0, 10]        # Effect size range
+
+    criteria:
+      - "T-scores in acceptable range [20, 80] (approximately ±3 SD)"
+      - "R² values in valid range [0, 1]"
+      - "Power values in valid range [0, 1]"
+      - "Effect sizes in reasonable range [0, 10]"
+      - "No extreme outliers beyond physiological limits"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        violations: "List[Dict] (out-of-range values with details)"
+        n_violations: "int (count of violations)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate numeric values are within expected ranges"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+  validate_regression_assumptions:
+    module: "tools.regression"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_regression_results.csv"
+        required_columns: ["predictor", "beta", "vif"]
+        source: "fitted regression model"
+      - path: "data/step05_diagnostics.csv"
+        required_columns: ["test", "statistic", "p_value", "result"]
+        source: "diagnostic test results"
+
+    parameters:
+      assumption_thresholds:
+        shapiro_alpha: 0.05      # normality
+        breusch_pagan_alpha: 0.05  # homoscedasticity
+        vif_threshold: 5.0       # multicollinearity
+        durbin_watson_range: [1.5, 2.5]  # independence
+        cooks_d_threshold: 0.04  # outliers
+
+    criteria:
+      - "Residuals approximately normal (Shapiro-Wilk p > 0.05 OR bootstrap CIs used)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05 OR robust SE used)"
+      - "No severe multicollinearity (all VIF < 5.0)"
+      - "Independence approximately satisfied (DW  [1.5, 2.5])"
+      - "Outliers identified and addressed appropriately"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        normality: "Dict[str, float] (Shapiro-Wilk test results)"
+        homoscedasticity: "Dict[str, float] (Breusch-Pagan test)"
+        multicollinearity: "Dict[str, float] (VIF values per predictor)"
+        autocorrelation: "Dict[str, float] (Durbin-Watson statistic)"
+        outliers: "Dict[str, List] (Cook's D > threshold)"
+        all_assumptions_met: "bool (True if all assumptions satisfied)"
+
+    behavior_on_failure:
+      action: "log warnings, continue analysis"
+      log_to: "logs/step04_regression.log or logs/step05_diagnostics.log"
+      invoke: "document remedial actions taken"
+
+    description: "Comprehensive validation of regression assumptions with diagnostic tests"
+    source_reference: "tools_inventory.md section 'Regression Tools' - validate_regression_assumptions"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_regression_results.csv"
+        required_columns: ["ci_lower", "ci_upper", "beta"]
+        source: "bootstrap confidence intervals"
+
+    parameters:
+      bootstrap_checks:
+        n_bootstrap: 1000
+        confidence_level: 0.95
+        stability_threshold: 0.75
+        ci_coverage_check: true
+
+    criteria:
+      - "Bootstrap iterations completed successfully (n=1000)"
+      - "Confidence intervals valid (ci_lower < beta < ci_upper)"
+      - "Bootstrap distribution approximately normal"
+      - "Coefficient estimates stable across bootstrap samples"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if bootstrap stable)"
+        n_bootstrap: "int (actual iterations completed)"
+        coverage_rate: "float (proportion with valid CIs)"
+        stability_metric: "float (bootstrap stability measure)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_regression.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate bootstrap confidence interval stability and coverage"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - validate_bootstrap_stability"
+
+summary:
+  analysis_tools_count: 11
+  validation_tools_count: 5
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "Multiple regression with hierarchical entry, cross-validation, and comprehensive diagnostics"
+  special_features: 
+    - "Bootstrap confidence intervals (1000 iterations)"
+    - "5-fold cross-validation for generalizability"
+    - "Post-hoc power analysis with effect size interpretation"
+    - "Dual p-value reporting per Decision D068"
+    - "Comprehensive assumption testing with remedial actions"
+    - "Comparison to RQ 7.1.1 accuracy prediction (if available)"

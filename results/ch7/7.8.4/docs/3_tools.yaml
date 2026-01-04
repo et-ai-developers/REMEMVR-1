@@ -1,0 +1,507 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.8.4 
+# Created by: rq_tools agent
+# Consumed by: rq_analysis agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/status.yaml"
+        required_columns: []
+        expected_rows: "status file"
+        data_types:
+          text: "YAML status content"
+      - path: "results/ch5/5.2.2/status.yaml"
+        required_columns: []
+        expected_rows: "status file"
+      - path: "results/ch5/5.2.3/status.yaml"
+        required_columns: []
+        expected_rows: "status file"
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: []
+        description: "Dependency validation results for Ch5 5.2.X completion"
+
+    parameters:
+      file_paths:
+        - "results/ch5/5.2.1/status.yaml"
+        - "results/ch5/5.2.2/status.yaml"
+        - "results/ch5/5.2.3/status.yaml"
+        - "data/cache/master.xlsx"
+      min_size_bytes: 100
+
+    description: "Validate Ch5 domain-specific RQ completion and data accessibility"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  extract_domain_theta_scores:
+    module: "tools.analysis_cognitive"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta", "SE"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          theta: "float64 in [-3, 3]"
+          SE: "float64 > 0"
+      - path: "results/ch5/5.2.2/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta", "SE"]
+        expected_rows: "~100 participants"
+      - path: "results/ch5/5.2.3/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta", "SE"]
+        expected_rows: "~100 participants"
+
+    output_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        columns: ["UID", "What_theta", "Where_theta", "When_theta"]
+        description: "Domain-specific theta scores merged into single dataset"
+      - path: "data/step01_domain_correlations.csv"
+        columns: ["domain1", "domain2", "correlation", "p_value"]
+        description: "Inter-domain correlation matrix for multivariate modeling assessment"
+
+    parameters:
+      domains: ["What", "Where", "When"]
+      correlation_threshold: [0.20, 0.70]
+      complete_cases_only: true
+
+    description: "Extract and merge domain-specific theta scores from Ch5 5.2.X analyses"
+    source_reference: "tools_inventory.md section 'Cognitive Analysis Tools' - extract_domain_theta_scores"
+
+  extract_cognitive_tests:
+    module: "tools.analysis_cognitive"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "NART", "RPM", "Age"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          RAVLT_total: "numeric (cognitive test score)"
+          BVMT_total: "numeric (cognitive test score)" 
+          NART: "numeric (cognitive test score)"
+          RPM: "numeric (cognitive test score)"
+          Age: "numeric (years)"
+
+    output_files:
+      - path: "data/step02_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+        description: "Standardized (z-score) cognitive test predictors"
+      - path: "data/step02_predictor_correlations.csv"
+        columns: ["predictor1", "predictor2", "correlation", "p_value"]
+        description: "Predictor correlation matrix for multicollinearity assessment"
+
+    parameters:
+      tests: ["RAVLT_total", "BVMT_total", "NART", "RPM", "Age"]
+      standardize: true
+      correlation_threshold: 0.80
+
+    description: "Extract cognitive test battery and standardize for regression analysis"
+    source_reference: "tools_inventory.md section 'Cognitive Analysis Tools' - extract_cognitive_tests"
+
+  merge_theta_cognitive:
+    module: "tools.analysis_cognitive"
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "check_missing_data"
+
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "What_theta", "Where_theta", "When_theta"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+      - path: "data/step02_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+        source: "analysis tool output (extract_cognitive_tests)"
+
+    output_files:
+      - path: "data/step03_analysis_dataset.csv"
+        columns: ["UID", "What_theta", "Where_theta", "When_theta", "RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+        description: "Complete analysis dataset with domain outcomes and cognitive predictors"
+      - path: "data/step03_descriptive_stats.csv"
+        columns: ["variable", "n", "mean", "sd", "min", "max"]
+        description: "Descriptive statistics for all analysis variables"
+
+    parameters:
+      merge_type: "inner"
+      complete_cases_only: true
+      compute_descriptives: true
+
+    description: "Merge domain theta scores with cognitive predictors for complete analysis dataset"
+    source_reference: "tools_inventory.md section 'Cognitive Analysis Tools' - merge_theta_cognitive"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "What_theta", "Where_theta", "When_theta", "RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    output_files:
+      - path: "data/step04_univariate_models.csv"
+        columns: ["domain", "R2", "adj_R2", "F_stat", "p_value", "AIC", "BIC", "df_resid"]
+        description: "Univariate model results (3 separate models for What/Where/When)"
+      - path: "data/step04_univariate_coefficients.csv"
+        columns: ["domain", "predictor", "beta", "se", "t_value", "p_value"]
+        description: "Coefficient estimates for all univariate models"
+      - path: "data/step04_univariate_cv_results.csv"
+        columns: ["domain", "cv_r2_mean", "cv_r2_std", "overfitting_flag"]
+        description: "Cross-validation results for overfitting assessment"
+      - path: "data/step04_univariate_diagnostics.csv"
+        columns: ["domain", "normality_p", "homoscedasticity_p", "vif_max", "outliers_n"]
+        description: "Assumption test results for all univariate models"
+
+    parameters:
+      domains: ["What_theta", "Where_theta", "When_theta"]
+      predictors: ["RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+      cv_folds: 5
+      cv_random_state: 42
+      vif_threshold: 5.0
+
+    description: "Fit separate multiple regression models for each domain (univariate approach)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - fit_multiple_regression"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_probability_range"
+
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["What_theta", "Where_theta", "When_theta", "RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    output_files:
+      - path: "data/step05_multivariate_cv_results.csv"
+        columns: ["fold", "r2_what", "r2_where", "r2_when", "overall_performance"]
+        description: "Cross-validation performance for multivariate model"
+      - path: "data/step05_multivariate_model.csv"
+        columns: ["test_statistic", "statistic_name", "F_stat", "p_value", "partial_eta2"]
+        description: "MANOVA results (Pillai, Wilks, Hotelling, Roy)"
+      - path: "data/step05_multivariate_coefficients.csv"
+        columns: ["predictor", "what_beta", "where_beta", "when_beta"]
+        description: "Multivariate coefficient matrix"
+
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["r2", "mse"]
+      manova_tests: ["Pillai", "Wilks", "Hotelling", "Roy"]
+
+    description: "Fit multivariate model (MANOVA framework) with cross-validation"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - cross_validate_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_probability_range"
+
+    input_files:
+      - path: "data/step04_univariate_models.csv"
+        required_columns: ["domain", "AIC"]
+        source: "analysis tool output (fit_multiple_regression)"
+      - path: "data/step05_multivariate_model.csv"
+        required_columns: ["test_statistic", "F_stat", "p_value"]
+        source: "analysis tool output (cross_validate_regression)"
+
+    output_files:
+      - path: "data/step06_model_comparison.csv"
+        columns: ["comparison_type", "univariate_value", "multivariate_value", "delta", "interpretation"]
+        description: "AIC and CV performance comparison between approaches"
+      - path: "data/step06_effect_size_comparison.csv"
+        columns: ["effect_type", "univariate_mean", "multivariate_mean", "ci_lower", "ci_upper"]
+        description: "Bootstrap confidence intervals for effect size differences"
+      - path: "data/step06_significance_tests.csv"
+        columns: ["test_type", "statistic", "p_uncorrected", "p_bonferroni", "significant"]
+        description: "Statistical tests comparing univariate vs multivariate (Decision D068)"
+
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      bonferroni_n_tests: 3
+      delta_aic_thresholds: [4, 10]
+
+    description: "Compare univariate vs multivariate approaches with bootstrap CIs and dual p-values"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - bootstrap_regression_ci"
+
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step04_univariate_coefficients.csv"
+        required_columns: ["domain", "predictor", "beta", "p_value"]
+        source: "analysis tool output (fit_multiple_regression)"
+      - path: "data/step05_multivariate_coefficients.csv"
+        required_columns: ["predictor", "what_beta", "where_beta", "when_beta"]
+        source: "analysis tool output (cross_validate_regression)"
+
+    output_files:
+      - path: "data/step07_predictor_coefficients.csv"
+        columns: ["predictor", "context", "domain", "beta", "se", "ci_lower", "ci_upper"]
+        description: "Predictor effects in univariate vs multivariate contexts"
+      - path: "data/step07_predictor_effect_sizes.csv"
+        columns: ["predictor", "context", "cohens_f2", "ci_lower", "ci_upper"]
+        description: "Cohen's f² effect sizes with bootstrap confidence intervals"
+      - path: "data/step07_predictor_rankings.csv"
+        columns: ["context", "rank", "predictor", "importance_score"]
+        description: "Predictor importance rankings by context"
+      - path: "data/step07_predictor_significance.csv"
+        columns: ["predictor", "context", "p_uncorrected", "p_bonferroni", "p_fdr", "significant"]
+        description: "Multiple comparison corrected p-values (Decision D068)"
+
+    parameters:
+      predictors: ["RAVLT_z", "BVMT_z", "NART_z", "RPM_z", "Age_z"]
+      contexts: ["univariate", "multivariate"]
+      n_bootstrap: 1000
+      random_state: 42
+      bonferroni_n_tests: 10
+      fdr_method: "benjamini-hochberg"
+
+    description: "Analyze individual predictor contributions across univariate/multivariate contexts"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_cohens_f2"
+
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step06_model_comparison.csv"
+        required_columns: ["comparison_type", "univariate_value", "multivariate_value"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+      - path: "data/step07_predictor_effect_sizes.csv"
+        required_columns: ["predictor", "cohens_f2"]
+        source: "analysis tool output (compute_cohens_f2)"
+
+    output_files:
+      - path: "data/step08_power_analysis.csv"
+        columns: ["model_type", "n", "k", "r2", "power", "minimum_detectable_effect"]
+        description: "Post-hoc power analysis for all fitted models"
+      - path: "data/step08_effect_size_summary.csv"
+        columns: ["effect_type", "value", "interpretation", "cohen_category"]
+        description: "Effect size summary with Cohen's conventions"
+
+    parameters:
+      n: 100
+      alpha: 0.05
+      cohen_thresholds:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+
+    description: "Conduct post-hoc power analysis and summarize effect sizes"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_post_hoc_power"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "analysis tool outputs"
+        required_columns: "varies by step"
+        source: "analysis tool output validation"
+
+    parameters:
+      case_sensitive: true
+      allow_extra_columns: true
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names match exactly (case-sensitive)"
+      - "DataFrame is not empty"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        missing_columns: "List[str] (column names missing from DataFrame)"
+        existing_columns: "List[str] (column names found in DataFrame)"
+        n_required: "int (number of required columns)"
+        n_missing: "int (number of missing columns)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate required columns exist in analysis outputs"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  check_missing_data:
+    module: "tools.validation"
+    function: "check_missing_data"
+    signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+
+    input_files:
+      - path: "merged datasets"
+        source: "analysis tool output (merge operations)"
+
+    parameters:
+      max_missing_percent: 5.0
+
+    criteria:
+      - "Missing data percentage below threshold"
+      - "No completely empty rows or columns"
+      - "Missing patterns documented"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        has_missing: "bool"
+        total_missing: "int"
+        total_cells: "int"
+        percent_missing: "float"
+        missing_by_column: "Dict[str, int]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate merged datasets have acceptable missing data levels"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_missing_data"
+
+  validate_regression_assumptions:
+    module: "tools.analysis_regression"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+
+    input_files:
+      - path: "fitted regression models"
+        source: "analysis tool output (regression fitting)"
+
+    parameters:
+      alpha: 0.05
+      vif_threshold: 5.0
+      cooks_d_threshold: "4/n"
+
+    criteria:
+      - "Residuals normally distributed (Shapiro-Wilk p > 0.05)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "No severe multicollinearity (all VIF < 5)"
+      - "No influential outliers (Cook's D < 4/n)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        all_assumptions_met: "bool"
+        normality: "Dict with test results"
+        homoscedasticity: "Dict with test results"
+        multicollinearity: "Dict with VIF values"
+        outliers: "Dict with Cook's D results"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate regression assumptions with comprehensive diagnostic tests"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - validate_regression_assumptions"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(df: DataFrame, probability_columns: List[str], min_val: float = 0.0, max_val: float = 1.0) -> Dict[str, Any]"
+
+    input_files:
+      - path: "statistical test results"
+        source: "analysis tool output (statistical testing)"
+
+    parameters:
+      min_val: 0.0
+      max_val: 1.0
+      probability_columns: ["p_value", "p_uncorrected", "p_bonferroni"]
+
+    criteria:
+      - "All p-values in [0, 1] range"
+      - "No negative probabilities"
+      - "No probabilities > 1"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        out_of_range_values: "List[float]"
+        problematic_columns: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate probability values are within valid [0,1] range"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_probability_range"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "effect size results"
+        source: "analysis tool output (effect size computation)"
+
+    parameters:
+      f2_column: "cohens_f2"
+      min_valid: 0.0
+      warn_threshold: 1.0
+
+    criteria:
+      - "All effect sizes non-negative"
+      - "No NaN or infinite values"
+      - "Very large effects (f² > 1.0) flagged but valid"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        warnings: "List[str]"
+        min_effect_size: "float"
+        max_effect_size: "float"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_<step_name>.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Cohen's f² effect sizes are within reasonable bounds"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
+
+summary:
+  analysis_tools_count: 9
+  validation_tools_count: 5
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "MANOVA functionality integrated into cross_validate_regression"
+    - "Decision D068 dual p-value reporting applied throughout"
+    - "Bootstrap confidence intervals provide robust effect size estimation"
+    - "Cross-validation serves as primary performance comparison metric"

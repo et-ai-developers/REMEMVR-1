@@ -1,0 +1,542 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.7.3 Alternative RAVLT Scoring
+# Created by: rq_tools agent 
+# RQ: 7.7.3 - Alternative RAVLT Scoring (Multiple regression comparing 5 RAVLT scoring methods)
+# Architecture: Tool Catalog (v4.X) - Each tool listed once, deduplication
+# Dependencies: Ch5 5.1.1 (theta scores), master.xlsx (RAVLT scores)
+
+analysis_tools:
+  
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: str, min_size_bytes: int = 100) -> Dict[str, Any]"
+    validation_tool: "validate_dependency_check"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "~20 status lines"
+        description: "Ch5 5.1.1 completion status verification"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100 participants"
+        description: "Omnibus theta scores from IRT calibration"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["T1Sc", "T2Sc", "T3Sc", "T4Sc", "T5Sc", "DRSc", "FRSc"]
+        expected_rows: "~100 participants"
+        description: "RAVLT test scores from master data"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: []
+        description: "Dependency validation report with pass/fail status"
+    
+    parameters:
+      min_file_size: 100
+      check_columns: true
+      
+    description: "Validate cross-RQ dependencies exist before proceeding with analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "T1Sc", "T2Sc", "T3Sc", "T4Sc", "T5Sc", "DRSc", "FRSc"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          T1Sc: "int (values: 0-15, RAVLT trial 1)"
+          T2Sc: "int (values: 0-15, RAVLT trial 2)"
+          T3Sc: "int (values: 0-15, RAVLT trial 3)"
+          T4Sc: "int (values: 0-15, RAVLT trial 4)"
+          T5Sc: "int (values: 0-15, RAVLT trial 5)"
+          DRSc: "int (values: 0-15, delayed recall)"
+          FRSc: "int (values: 0-50, false recognition hits)"
+    
+    output_files:
+      - path: "data/step01_ravlt_scores.csv"
+        columns: ["UID", "T1Sc", "T2Sc", "T3Sc", "T4Sc", "T5Sc", "DRSc", "FRSc", "Total", "Learning", "LearningSlope", "Forgetting", "Recognition", "Total_z", "Learning_z", "LearningSlope_z", "Forgetting_z", "Recognition_z"]
+        description: "RAVLT raw scores plus computed alternative metrics with standardized versions"
+    
+    parameters:
+      tests: ["RAVLT"]
+      compute_derived: true
+      standardize: true
+      
+    description: "Extract RAVLT test scores and compute alternative scoring metrics (Total, Learning, LearningSlope, Recognition)"
+    source_reference: "tools_inventory.md section 'Data Tools' - extract_cognitive_tests"
+
+  extract_domain_theta_scores:
+    module: "tools.data"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          theta_all: "float (IRT ability estimate range: [-4, 4])"
+    
+    output_files:
+      - path: "data/step02_theta_scores.csv"
+        columns: ["UID", "theta_all", "theta_standardized"]
+        description: "REMEMVR omnibus theta scores (episodic memory ability estimates)"
+    
+    parameters:
+      path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+      domains: ["All"]
+      column_filter: "theta_all"
+      
+    description: "Load omnibus theta_all scores from Ch5 5.1.1 IRT calibration results"
+    source_reference: "tools_inventory.md section 'Data Tools' - extract_domain_theta_scores"
+
+  prepare_regression_data:
+    module: "tools.data"
+    function: "prepare_regression_data"
+    signature: "prepare_regression_data(participant_data: pd.DataFrame, theta_data: pd.DataFrame, merge_on: str = 'UID') -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step01_ravlt_scores.csv"
+        required_columns: ["UID", "Total_z", "Learning_z", "LearningSlope_z", "Recognition_z"]
+        source: "analysis tool output (step01_extract_ravlt)"
+      - path: "data/step02_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        source: "analysis tool output (step02_extract_theta)"
+    
+    output_files:
+      - path: "data/step03_analysis_dataset.csv"
+        columns: ["UID", "Total_z", "Learning_z", "LearningSlope_z", "Recognition_z", "theta_all"]
+        description: "Merged analysis-ready dataset with standardized predictors and outcome"
+      - path: "data/step03_correlation_matrix.csv"
+        columns: ["Total_z", "Learning_z", "LearningSlope_z", "Recognition_z"]
+        description: "Predictor intercorrelation matrix for multicollinearity screening"
+    
+    parameters:
+      merge_on: "UID"
+      compute_correlations: true
+      check_multicollinearity: true
+      vif_threshold: 5.0
+      
+    description: "Merge RAVLT and theta data into analysis-ready dataset with quality checks"
+    source_reference: "tools_inventory.md section 'Data Tools' - prepare_regression_data"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "Total_z", "Learning_z", "LearningSlope_z", "Recognition_z", "theta_all"]
+        source: "analysis tool output (step03_prepare_dataset)"
+    
+    output_files:
+      - path: "data/step04_model_results.csv"
+        columns: ["model", "R2", "adj_R2", "F_stat", "p_uncorrected", "p_bonferroni", "AIC", "BIC", "R2_CI_lower", "R2_CI_upper"]
+        description: "Regression model statistics with dual p-values per Decision D068"
+      - path: "data/step04_regression_coefficients.csv"
+        columns: ["model", "predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni"]
+        description: "Standardized coefficients with bootstrap CIs and dual p-values"
+    
+    parameters:
+      models:
+        - name: "Model_1"
+          predictors: ["Total_z"]
+        - name: "Model_2"
+          predictors: ["Learning_z"]
+        - name: "Model_3"
+          predictors: ["LearningSlope_z"]
+        - name: "Model_4"
+          predictors: ["Recognition_z"]
+        - name: "Model_5"
+          predictors: ["Total_z", "Learning_z"]
+      add_constant: true
+      return_diagnostics: true
+      bootstrap_ci: true
+      bootstrap_iterations: 1000
+      random_state: 42
+      bonferroni_alpha: 0.000358  # 0.05/28 Chapter 7 tests / 5 models
+      
+    description: "Fit 5 regression models comparing RAVLT scoring methods with bootstrap CIs"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - fit_multiple_regression"
+
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step04_model_results.csv"
+        required_columns: ["model", "R2"]
+        source: "analysis tool output (step04_fit_models)"
+    
+    output_files:
+      - path: "data/step05_effect_sizes.csv"
+        columns: ["model", "f2", "f2_CI_lower", "f2_CI_upper", "sr2", "sr2_CI_lower", "sr2_CI_upper", "AIC_weight"]
+        description: "Effect sizes (Cohen's f², semi-partial r²) with bootstrap CIs and AIC weights"
+      - path: "data/step05_incremental_validity.csv"
+        columns: ["delta_R2", "F_stat", "df1", "df2", "p_uncorrected", "p_bonferroni", "delta_R2_CI"]
+        description: "Incremental validity test (Model 5 vs Model 1) with significance tests"
+    
+    parameters:
+      effect_size_metrics: ["cohens_f2", "semi_partial_r2"]
+      bootstrap_ci: true
+      bootstrap_iterations: 1000
+      random_state: 42
+      aic_weights: true
+      incremental_validity: true
+      
+    description: "Compute effect sizes, AIC weights, and incremental validity tests with bootstrap CIs"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_cohens_f2"
+
+  validate_regression_assumptions:
+    module: "tools.data"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    validation_tool: "validate_lmm_assumptions_comprehensive"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["Total_z", "Learning_z", "LearningSlope_z", "Recognition_z", "theta_all"]
+        source: "analysis tool output (step03_prepare_dataset)"
+    
+    output_files:
+      - path: "data/step06_assumption_tests.csv"
+        columns: ["model", "shapiro_stat", "shapiro_p", "bp_stat", "bp_p", "dw_stat", "max_vif", "outlier_count"]
+        description: "Assumption test results (normality, homoscedasticity, independence, multicollinearity)"
+      - path: "data/step06_diagnostic_data.csv"
+        columns: ["model", "fitted", "residuals", "std_residuals", "cooks_d"]
+        description: "Diagnostic data for residual plots and outlier detection"
+      - path: "data/step06_robust_results.csv"
+        columns: ["model", "predictor", "beta", "se_robust", "p_robust"]
+        description: "HC3 robust standard errors if heteroscedasticity detected"
+    
+    parameters:
+      assumption_tests: ["normality", "homoscedasticity", "multicollinearity", "independence", "outliers"]
+      alpha: 0.05
+      vif_threshold: 5.0
+      cooks_d_threshold: 0.04  # 4/N where N=100
+      robust_se: "HC3"
+      
+    description: "Comprehensive assumption checking with remedial actions for violations"
+    source_reference: "tools_inventory.md section 'Data Tools' - validate_regression_assumptions"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["Total_z", "Learning_z", "LearningSlope_z", "Recognition_z", "theta_all"]
+        source: "analysis tool output (step03_prepare_dataset)"
+    
+    output_files:
+      - path: "data/step07_cv_results.csv"
+        columns: ["fold", "model", "train_R2", "test_R2", "RMSE", "MAE"]
+        description: "Cross-validation results per fold and model"
+      - path: "data/step07_cv_summary.csv"
+        columns: ["model", "mean_test_R2", "sd_test_R2", "mean_RMSE", "train_test_gap", "shrinkage", "overfitting_flag"]
+        description: "Cross-validation performance summary with overfitting detection"
+    
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["r2", "rmse", "mae"]
+      overfitting_threshold: 0.10  # train-test R² gap
+      
+    description: "5-fold cross-validation to assess model generalizability and overfitting"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - cross_validate_regression"
+
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step04_model_results.csv"
+        required_columns: ["model", "R2"]
+        source: "analysis tool output (step04_fit_models)"
+      - path: "data/step05_effect_sizes.csv"
+        required_columns: ["model", "f2"]
+        source: "analysis tool output (step05_effect_sizes)"
+    
+    output_files:
+      - path: "data/step08_power_analysis.csv"
+        columns: ["model", "observed_f2", "alpha", "achieved_power", "interpretation", "adequate_power_flag"]
+        description: "Post-hoc power analysis for observed effects"
+      - path: "data/step08_sensitivity.csv"
+        columns: ["effect_size", "f2_threshold", "required_N_80pct", "current_N_power"]
+        description: "Sensitivity analysis (minimum detectable effects and required sample sizes)"
+    
+    parameters:
+      n: 100
+      alpha: 0.000358  # Bonferroni-corrected alpha
+      power_target: 0.80
+      effect_sizes_tested: [0.02, 0.15, 0.35]  # small, medium, large per Cohen (1988)
+      
+    description: "Post-hoc power analysis and sensitivity testing for observed and minimal detectable effects"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_post_hoc_power"
+
+validation_tools:
+  
+  validate_dependency_check:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "analysis tool output (step00_validate_dependencies)"
+    
+    parameters:
+      required_checks: ["Ch5 5.1.1 status: success", "Theta scores file found", "RAVLT columns verified"]
+      min_file_size: 500
+      
+    criteria:
+      - "All required dependencies documented"
+      - "Pass/fail status clear for each requirement" 
+      - "No missing dependency errors"
+      - "File validation log complete"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all dependencies verified, False otherwise)"
+        message: "str (human-readable summary)"
+        missing_dependencies: "List[str] (any failed checks)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate dependency validation report completeness and pass status"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_dataframe_structure"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_ravlt_scores.csv"
+        required_columns: ["T1Sc", "T2Sc", "T3Sc", "T4Sc", "T5Sc", "DRSc", "FRSc"]
+        source: "analysis tool output (extract_ravlt_scores)"
+      - path: "data/step02_theta_scores.csv"
+        required_columns: ["theta_all"]
+        source: "analysis tool output (extract_theta_scores)"
+    
+    parameters:
+      ranges:
+        RAVLT_trials: [0, 15]  # T1Sc-T5Sc, DRSc
+        RAVLT_recognition: [0, 50]  # FRSc
+        theta_scores: [-4, 4]  # IRT ability scale
+        standardized_scores: [-3, 3]  # z-scores
+    
+    criteria:
+      - "All RAVLT trial scores in [0, 15] range"
+      - "RAVLT recognition scores in [0, 50] range"
+      - "Theta scores in valid IRT range [-4, 4]"
+      - "Standardized scores approximately in [-3, 3]"
+      - "No missing or infinite values"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range, False otherwise)"
+        message: "str (human-readable explanation)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_ravlt.log or logs/step02_extract_theta.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate extracted scores are within expected ranges, no missing data"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "Total_z", "Learning_z", "LearningSlope_z", "Recognition_z", "theta_all"]
+        source: "analysis tool output (step03_prepare_dataset)"
+      - path: "data/step03_correlation_matrix.csv"
+        required_columns: ["Total_z", "Learning_z", "LearningSlope_z", "Recognition_z"]
+        source: "analysis tool output (step03_prepare_dataset)"
+    
+    parameters:
+      expected_participants: [95, 100]  # allowing minimal exclusions
+      required_columns: ["UID", "Total_z", "Learning_z", "LearningSlope_z", "Recognition_z", "theta_all"]
+      correlation_threshold: 0.9  # multicollinearity check
+    
+    criteria:
+      - "Final N >= 95 participants (allowing minimal exclusions)"
+      - "All required columns present"
+      - "No missing values in final dataset"
+      - "All predictors properly standardized (mean ~0, SD ~1)"
+      - "Correlation matrix symmetric, all |r| < 0.9"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if structure valid, False otherwise)"
+        message: "str (human-readable summary)"
+        checks: "Dict[str, bool] (individual check results)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_prepare_dataset.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate merged dataset structure, completeness, and quality"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_dataframe_structure"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels.MixedLMResults) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_model_results.csv"
+        required_columns: ["model", "R2", "F_stat", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step04_fit_models)"
+    
+    parameters:
+      required_models: 5
+      bonferroni_alpha: 0.000358
+      bootstrap_iterations: 1000
+      
+    criteria:
+      - "All 5 regression models fitted successfully"
+      - "Bootstrap completed 1000 iterations for all CIs"
+      - "Dual p-values computed per Decision D068"
+      - "Bonferroni correction properly applied (alpha = 0.000358)"
+      - "All confidence intervals valid (lower < estimate < upper)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all models converged, False otherwise)"
+        message: "str (convergence status summary)"
+        converged: "bool (convergence flag)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_fit_models.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate regression models fitted successfully with complete results"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_model_convergence"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_effect_sizes.csv"
+        required_columns: ["model", "f2", "AIC_weight"]
+        source: "analysis tool output (step05_effect_sizes)"
+      - path: "data/step05_incremental_validity.csv"
+        required_columns: ["delta_R2", "F_stat"]
+        source: "analysis tool output (step05_effect_sizes)"
+      - path: "data/step08_power_analysis.csv"
+        required_columns: ["model", "observed_f2", "achieved_power"]
+        source: "analysis tool output (step08_power_analysis)"
+    
+    parameters:
+      f2_bounds: [0, 5.0]  # reasonable effect size range
+      aic_weight_sum: 1.0  # must sum to 1.0
+      power_range: [0, 1.0]  # valid power range
+      
+    criteria:
+      - "All Cohen's f² values >= 0 and finite"
+      - "AIC weights sum to 1.0 across models"
+      - "Bootstrap effect size CIs valid"
+      - "Power values in [0, 1] range"
+      - "Incremental validity test completed"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if effect sizes valid, False otherwise)"
+        message: "str (validation summary)"
+        warnings: "List[str] (any flagged issues)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_effect_sizes.log or logs/step08_power_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate effect sizes, AIC weights, and power analysis results"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: pd.DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+    
+    input_files:
+      - path: "data/step06_assumption_tests.csv"
+        required_columns: ["model", "shapiro_stat", "bp_stat", "dw_stat", "max_vif"]
+        source: "analysis tool output (step06_model_diagnostics)"
+      - path: "data/step06_diagnostic_data.csv"
+        required_columns: ["model", "fitted", "residuals", "cooks_d"]
+        source: "analysis tool output (step06_model_diagnostics)"
+    
+    parameters:
+      alpha: 0.05
+      vif_threshold: 5.0
+      outlier_threshold: 0.04  # 4/N Cook's D
+      assumption_tests: ["normality", "homoscedasticity", "independence", "outliers", "multicollinearity"]
+      
+    criteria:
+      - "All 5 models have complete diagnostic results"
+      - "Assumption tests completed (normality, homoscedasticity, independence)"
+      - "Multicollinearity assessed via VIF"
+      - "Outlier detection via Cook's distance"
+      - "Remedial actions documented for violations"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if diagnostics complete, False otherwise)"
+        diagnostics: "Dict (test results by assumption)"
+        plot_paths: "List[Path] (diagnostic plot locations)"
+        message: "str (diagnostic summary)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_model_diagnostics.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate assumption checking completed with diagnostics for all models"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_lmm_assumptions_comprehensive"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 6
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  rq_type: "Clinical Utility / Alternative RAVLT Scoring"
+  analysis_approach: "Multiple regression with 5 models comparing RAVLT scoring methods"
+  primary_output: "Comprehensive comparison of traditional vs learning-based RAVLT metrics"

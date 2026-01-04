@@ -39,8 +39,13 @@ rq_planner:
     Validation: 4-layer validation embedded in all 9 steps
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    9 analysis + 5 validation tools cataloged for nested multiple regression
+    Tools: regression fitting, cross-validation, bootstrap CIs, diagnostics, sensitivity
+    Key features: 4 nested models, 5-fold CV, assumption checking, outlier sensitivity
+    Dependencies: Ch5 5.1.1 theta + master.xlsx cognitive tests verified
+    Decision D068: Dual p-value reporting embedded throughout
 
 rq_analysis:
   status: pending

@@ -1,0 +1,551 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.5.4: Per-Test Sleep Effects on Same-Test Performance
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Dependencies: Ch5 5.1.1 (theta scores) + master.xlsx (sleep data)
+
+analysis_tools:
+  validate_cross_rq_dependencies:
+    module: "tools.validation"
+    function: "validate_cross_rq_dependencies"
+    signature: "validate_cross_rq_dependencies(required_files: List[str], output_file: str) -> Dict[str, Any]"
+    validation_tool: "validate_dependency_check_results"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "status file"
+        data_types:
+          status: "YAML status indicators"
+      - path: "data/cache/master.xlsx"
+        required_columns: []
+        expected_rows: "master spreadsheet"
+        data_types:
+          tags: "UID-based tag patterns"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: ["validation_results"]
+        description: "Cross-RQ dependency validation results"
+    
+    parameters:
+      required_files: ["results/ch5/5.1.1/data/step03_theta_scores.csv", "data/cache/master.xlsx"]
+      check_patterns: ["SLP-X-HOUR-", "SLP-X-QUAL-"]
+      expected_theta_rows: 400
+      
+    description: "Validate Ch5 5.1.1 completion and master.xlsx accessibility before analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  extract_sleep_per_test:
+    module: "tools.data"
+    function: "extract_sleep_per_test"
+    signature: "extract_sleep_per_test(df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_sleep_data_format"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["tag patterns"]
+        expected_rows: "master data"
+        data_types:
+          tags: "UID-RVR-TX-SLP-X patterns"
+    
+    output_files:
+      - path: "data/step01_per_test_sleep.csv"
+        columns: ["UID", "Test", "Sleep_Hours", "Sleep_Quality"]
+        description: "Sleep data per test session (4 tests x 100 UIDs)"
+    
+    parameters:
+      hour_pattern: "SLP-X-HOUR-"
+      quality_pattern: "SLP-X-QUAL-"
+      tests: [1, 2, 3, 4]
+      completeness_threshold: 0.75
+      
+    description: "Extract sleep hours and quality from master.xlsx per test session"
+    source_reference: "tools_inventory.md section 'Data Extraction Tools'"
+
+  merge_theta_sleep_data:
+    module: "tools.analysis_lmm"
+    function: "merge_theta_sleep_data"
+    signature: "merge_theta_sleep_data(theta_df: pd.DataFrame, sleep_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_merged_data_format"
+    
+    input_files:
+      - path: "data/step01_per_test_sleep.csv"
+        required_columns: ["UID", "Test", "Sleep_Hours", "Sleep_Quality"]
+        expected_rows: "~400"
+        data_types:
+          UID: "string participant ID"
+          Test: "int (1-4)"
+          Sleep_Hours: "float (0-24)"
+          Sleep_Quality: "int (1-10)"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "Test", "theta_all", "SE"]
+        expected_rows: "~400"
+        data_types:
+          UID: "string participant ID"
+          Test: "int (1-4)"
+          theta_all: "float (-3 to 3)"
+          SE: "float (>0)"
+    
+    output_files:
+      - path: "data/step02_theta_sleep_merged.csv"
+        columns: ["UID", "Test", "theta_all", "SE", "Sleep_Hours", "Sleep_Quality", "Sleep_Hours_PM", "Sleep_Quality_PM", "Sleep_Hours_WP", "Sleep_Quality_WP"]
+        description: "Merged sleep and theta data with person-mean variables"
+    
+    parameters:
+      merge_keys: ["UID", "Test"]
+      min_tests_per_uid: 3
+      center_within_person: true
+      
+    description: "Merge sleep and theta data with within-person centering for multilevel analysis"
+    source_reference: "tools_inventory.md section 'LMM Analysis Tools'"
+
+  compute_descriptive_statistics:
+    module: "tools.analysis_regression"
+    function: "compute_descriptive_statistics"
+    signature: "compute_descriptive_statistics(df: pd.DataFrame, group_vars: List[str]) -> pd.DataFrame"
+    validation_tool: "validate_descriptive_output"
+    
+    input_files:
+      - path: "data/step02_theta_sleep_merged.csv"
+        required_columns: ["UID", "Test", "theta_all", "Sleep_Hours", "Sleep_Quality", "Sleep_Hours_WP", "Sleep_Quality_WP"]
+        expected_rows: "~400"
+        data_types:
+          theta_all: "float"
+          Sleep_Hours: "float"
+          Sleep_Quality: "float"
+    
+    output_files:
+      - path: "data/step03_descriptive_stats.csv"
+        columns: ["variable", "mean", "sd", "min", "max", "within_person_sd", "range"]
+        description: "Descriptive statistics and within-person variability"
+    
+    parameters:
+      group_var: "UID"
+      variables: ["theta_all", "Sleep_Hours", "Sleep_Quality", "Sleep_Hours_WP", "Sleep_Quality_WP"]
+      compute_within_person: true
+      outlier_threshold: 3.0
+      
+    description: "Examine within-person sleep variability and data quality"
+    source_reference: "tools_inventory.md section 'Analysis Tools'"
+
+  fit_multilevel_models:
+    module: "tools.analysis_lmm"
+    function: "fit_lmm_trajectory_tsvr"
+    signature: "fit_lmm_trajectory_tsvr(theta_scores: pd.DataFrame, tsvr_data: pd.DataFrame, formula: str, groups: str = 'UID', re_formula: str = '~1', reml: bool = False) -> MixedLMResults"
+    validation_tool: "validate_lmm_convergence"
+    
+    input_files:
+      - path: "data/step02_theta_sleep_merged.csv"
+        required_columns: ["UID", "Test", "theta_all", "Sleep_Hours_WP", "Sleep_Quality_WP", "Sleep_Hours_PM", "Sleep_Quality_PM"]
+        expected_rows: "~400"
+        data_types:
+          UID: "string"
+          Test: "int"
+          theta_all: "float"
+    
+    output_files:
+      - path: "data/step04_multilevel_model_results.csv"
+        columns: ["model", "term", "estimate", "std_error", "z_value", "p_uncorrected", "p_bonferroni"]
+        description: "Fixed effects from multilevel models with dual p-values"
+    
+    parameters:
+      model_1_formula: "theta_all ~ Sleep_Hours_WP + Sleep_Quality_WP + Test + (1|UID)"
+      model_2_formula: "theta_all ~ Sleep_Hours_WP + Sleep_Quality_WP + Sleep_Hours_PM + Sleep_Quality_PM + Test + (1|UID)"
+      bonferroni_n: 4
+      reml: false
+      
+    description: "Fit multilevel models to test within-person sleep effects with Bonferroni correction"
+    source_reference: "tools_inventory.md section 'LMM Analysis Tools'"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: pd.DataFrame, output_dir: Path, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_assumption_test_completion"
+    
+    input_files:
+      - path: "data/step04_multilevel_model_results.csv"
+        required_columns: ["model", "term", "estimate"]
+        expected_rows: "model results"
+        data_types:
+          estimate: "float"
+      - path: "data/step02_theta_sleep_merged.csv"
+        required_columns: ["UID", "Test", "theta_all"]
+        expected_rows: "~400"
+        data_types:
+          theta_all: "float"
+    
+    output_files:
+      - path: "data/step05_model_diagnostics.csv"
+        columns: ["diagnostic_test", "statistic", "p_value", "passed", "interpretation"]
+        description: "LMM assumption validation results with remedial actions"
+    
+    parameters:
+      alpha: 0.05
+      vif_threshold: 10.0
+      cooks_d_threshold: 0.04
+      shapiro_threshold: 0.05
+      
+    description: "Validate LMM assumptions with comprehensive diagnostics and remedial actions"
+    source_reference: "tools_inventory.md section 'LMM Validation Tools'"
+
+  cross_validate_multilevel_models:
+    module: "tools.model_selection"
+    function: "cross_validate_multilevel_models"
+    signature: "cross_validate_multilevel_models(data: pd.DataFrame, formula: str, groups_var: str, n_folds: int = 5, random_state: int = 42) -> Dict[str, Any]"
+    validation_tool: "validate_cv_results"
+    
+    input_files:
+      - path: "data/step02_theta_sleep_merged.csv"
+        required_columns: ["UID", "Test", "theta_all", "Sleep_Hours_WP", "Sleep_Quality_WP"]
+        expected_rows: "~400"
+        data_types:
+          UID: "string"
+    
+    output_files:
+      - path: "data/step06_cross_validation.csv"
+        columns: ["fold", "r2_marginal", "r2_conditional", "rmse"]
+        description: "Cross-validation performance metrics"
+      - path: "data/step06_bootstrap_CIs.csv"
+        columns: ["parameter", "estimate", "ci_lower", "ci_upper", "se_bootstrap"]
+        description: "Bootstrap confidence intervals for fixed effects"
+    
+    parameters:
+      n_folds: 5
+      bootstrap_iterations: 1000
+      random_state: 42
+      groups_var: "UID"
+      
+    description: "Cross-validation and bootstrap confidence intervals for model generalizability"
+    source_reference: "tools_inventory.md section 'Model Selection Tools'"
+
+  compute_power_effect_sizes:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_power_analysis_output"
+    
+    input_files:
+      - path: "data/step04_multilevel_model_results.csv"
+        required_columns: ["term", "estimate", "std_error", "p_uncorrected"]
+        expected_rows: "fixed effects"
+        data_types:
+          estimate: "float"
+          p_uncorrected: "float"
+      - path: "data/step06_bootstrap_CIs.csv"
+        required_columns: ["parameter", "estimate", "ci_lower", "ci_upper"]
+        expected_rows: "parameter estimates"
+        data_types:
+          estimate: "float"
+    
+    output_files:
+      - path: "data/step07_power_effect_sizes.csv"
+        columns: ["parameter", "effect_size", "power", "practical_interpretation", "cohen_d"]
+        description: "Power analysis and effect size interpretations"
+    
+    parameters:
+      n: 400
+      n_level2: 100
+      alpha_bonferroni: 0.0125
+      effect_size_thresholds: [0.05, 0.10, 0.20]
+      
+    description: "Post-hoc power analysis and effect size interpretation for sleep interventions"
+    source_reference: "tools_inventory.md section 'Power Analysis Tools'"
+
+validation_tools:
+  validate_dependency_check_results:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    signature: "validate_file_exists(file_path: str, min_size_bytes: int = 1000) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "analysis tool output (validate_cross_rq_dependencies)"
+    
+    parameters:
+      min_size_bytes: 100
+      required_patterns: ["Ch5 validation: PASS", "Master.xlsx access: PASS"]
+      
+    criteria:
+      - "Dependency validation file exists and not empty"
+      - "Ch5 5.1.1 completion verified"
+      - "Master.xlsx accessibility confirmed"
+      - "No critical dependency failures"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        dependency_status: "str"
+    
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "QUIT - resolve dependencies before proceeding"
+    
+    description: "Validate dependency check completed successfully"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  validate_sleep_data_format:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_per_test_sleep.csv"
+        required_columns: ["UID", "Test", "Sleep_Hours", "Sleep_Quality"]
+        source: "analysis tool output (extract_sleep_per_test)"
+    
+    parameters:
+      sleep_hours_range: [0, 24]
+      sleep_quality_range: [1, 10]
+      min_rows: 300
+      max_missing_percent: 0.25
+      
+    criteria:
+      - "Sleep_Hours in [0, 24] range"
+      - "Sleep_Quality in [1, 10] range"
+      - "At least 300 observations (75% completeness)"
+      - "Missing data <25% per variable"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        missing_percent: "float"
+    
+    behavior_on_failure:
+      action: "log warning, proceed"
+      log_to: "logs/step01_extract_sleep.log"
+      invoke: "g_debug if >50% missing"
+    
+    description: "Validate sleep data extraction format and ranges"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  validate_merged_data_format:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_theta_sleep_merged.csv"
+        required_columns: ["UID", "Test", "theta_all", "Sleep_Hours_WP", "Sleep_Quality_WP"]
+        source: "analysis tool output (merge_theta_sleep_data)"
+    
+    parameters:
+      required_columns: ["UID", "Test", "theta_all", "SE", "Sleep_Hours", "Sleep_Quality", "Sleep_Hours_PM", "Sleep_Quality_PM", "Sleep_Hours_WP", "Sleep_Quality_WP"]
+      expected_rows: 400
+      centering_tolerance: 0.01
+      
+    criteria:
+      - "All required columns present"
+      - "Person-mean centering: mean(WP variables) ≈ 0 per UID"
+      - "Complete data: no missing theta or sleep values"
+      - "All 100 UIDs present"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        centering_check: "bool"
+        n_complete: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_merge_data.log"
+      invoke: "g_debug for merge issues"
+    
+    description: "Validate merged data format and person-mean centering"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_descriptive_output:
+    module: "tools.validation"
+    function: "validate_descriptive_statistics"
+    signature: "validate_descriptive_statistics(stats_df: pd.DataFrame) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_descriptive_stats.csv"
+        required_columns: ["variable", "mean", "sd", "within_person_sd"]
+        source: "analysis tool output (compute_descriptive_statistics)"
+    
+    parameters:
+      min_within_person_sd: 0.01
+      max_outlier_percent: 0.10
+      
+    criteria:
+      - "Within-person SD > 0 for sleep variables"
+      - "Sleep variability present (not all identical values)"
+      - "Outlier rate <10% of sample"
+      - "Theta scores follow reasonable distribution"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        variability_check: "bool"
+        outlier_rate: "float"
+    
+    behavior_on_failure:
+      action: "log warning, proceed"
+      log_to: "logs/step03_descriptive_analysis.log"
+      invoke: "continue unless critical variability issues"
+    
+    description: "Validate descriptive statistics and within-person variability"
+    source_reference: "tools_inventory.md section 'Statistical Validation Tools'"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: pd.DataFrame, output_dir: Path, alpha: float = 0.05) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_multilevel_model_results.csv"
+        required_columns: ["model", "term", "estimate", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (fit_multilevel_models)"
+    
+    parameters:
+      convergence_required: true
+      p_value_range: [0, 1]
+      estimate_reasonable_range: [-2, 2]
+      
+    criteria:
+      - "Both models converged successfully"
+      - "Dual p-values present (uncorrected + Bonferroni)"
+      - "Fixed effects have finite estimates"
+      - "Random effects variance > 0"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        convergence_status: "str"
+        d068_compliant: "bool"
+    
+    behavior_on_failure:
+      action: "try alternative optimizers"
+      log_to: "logs/step04_fit_models.log"
+      invoke: "g_debug for convergence issues"
+    
+    description: "Validate LMM convergence and Decision D068 compliance"
+    source_reference: "tools_inventory.md section 'LMM Validation Tools'"
+
+  validate_assumption_test_completion:
+    module: "tools.validation"
+    function: "validate_diagnostic_completion"
+    signature: "validate_diagnostic_completion(diagnostics_df: pd.DataFrame) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_model_diagnostics.csv"
+        required_columns: ["diagnostic_test", "statistic", "p_value", "passed"]
+        source: "analysis tool output (validate_lmm_assumptions_comprehensive)"
+    
+    parameters:
+      required_tests: ["normality", "homoscedasticity", "random_effects_normality", "multicollinearity"]
+      
+    criteria:
+      - "All diagnostic tests completed"
+      - "p-values in valid range [0, 1]"
+      - "Pass/fail status determined"
+      - "Remedial actions documented if needed"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        tests_completed: "List[str]"
+        overall_pass: "bool"
+    
+    behavior_on_failure:
+      action: "document violations, proceed with robust methods"
+      log_to: "logs/step05_model_diagnostics.log"
+      invoke: "continue with assumption violations noted"
+    
+    description: "Validate assumption testing completion and remedial action documentation"
+    source_reference: "tools_inventory.md section 'Diagnostic Validation Tools'"
+
+  validate_cv_results:
+    module: "tools.validation"
+    function: "validate_cross_validation_output"
+    signature: "validate_cross_validation_output(cv_df: pd.DataFrame, bootstrap_df: pd.DataFrame) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_cross_validation.csv"
+        required_columns: ["fold", "r2_marginal", "r2_conditional"]
+        source: "analysis tool output (cross_validate_multilevel_models)"
+      - path: "data/step06_bootstrap_CIs.csv"
+        required_columns: ["parameter", "ci_lower", "ci_upper"]
+        source: "analysis tool output (cross_validate_multilevel_models)"
+    
+    parameters:
+      expected_folds: 5
+      expected_bootstrap_iterations: 1000
+      r2_range: [0, 1]
+      
+    criteria:
+      - "All 5 CV folds completed"
+      - "R² values in [0, 1] range"
+      - "Bootstrap CIs properly ordered (lower < upper)"
+      - "CV standard deviation <0.20 (stable performance)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        cv_stability: "float"
+        bootstrap_completion: "bool"
+    
+    behavior_on_failure:
+      action: "retry with simpler model"
+      log_to: "logs/step06_cross_validation.log"
+      invoke: "g_debug if convergence failures"
+    
+    description: "Validate cross-validation completion and bootstrap CI ordering"
+    source_reference: "tools_inventory.md section 'Model Validation Tools'"
+
+  validate_power_analysis_output:
+    module: "tools.validation"
+    function: "validate_power_estimates"
+    signature: "validate_power_estimates(power_df: pd.DataFrame) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step07_power_effect_sizes.csv"
+        required_columns: ["parameter", "effect_size", "power"]
+        source: "analysis tool output (compute_power_effect_sizes)"
+    
+    parameters:
+      power_range: [0, 1]
+      effect_size_range: [0, 2]
+      
+    criteria:
+      - "Power estimates in [0, 1] range"
+      - "Effect sizes have practical interpretations"
+      - "Power analysis completed for all sleep predictors"
+      - "Effect size thresholds applied correctly"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        power_adequate: "bool"
+        effect_interpretations: "List[str]"
+    
+    behavior_on_failure:
+      action: "use alternative power calculation"
+      log_to: "logs/step07_power_analysis.log"
+      invoke: "document limitations if power cannot be computed"
+    
+    description: "Validate power analysis completion and effect size interpretations"
+    source_reference: "tools_inventory.md section 'Power Analysis Validation Tools'"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 8
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D068"]
+  rq_type: "within_person_multilevel"
+  data_sources: ["ch5_5.1.1_theta", "master_xlsx_sleep"]
+  validation_architecture: "4_layer_mandatory"

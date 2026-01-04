@@ -1,0 +1,465 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ 7.7.4: Clinical Profiles - False Negatives
+
+analysis_tools:
+  validate_dependencies:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "~10-15"
+        data_types:
+          yaml_structure: "agent status tracking"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          theta: "float64 (IRT ability estimates)"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_Total"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          RAVLT_Total: "int64 (cognitive score)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Validation log documenting file accessibility and participant counts"
+    
+    parameters:
+      min_size_bytes: 100
+      
+    description: "Validate Ch5 theta outputs and master.xlsx accessibility before analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  extract_cognitive_data:
+    module: "tools.data"
+    function: "load_participant_data"
+    signature: "load_participant_data(path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string"
+          theta: "float64"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_Total", "Age", "Education", "VR_Experience", "NART_FSIQ"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string"
+          RAVLT_Total: "int64"
+          Age: "float64"
+          Education: "float64"
+          VR_Experience: "int64"
+          NART_FSIQ: "float64"
+    
+    output_files:
+      - path: "data/step01_cognitive_scores.csv"
+        columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "Age", "Education", "VR_Experience", "NART_FSIQ"]
+        description: "Merged cognitive dataset with REMEMVR and RAVLT scores plus demographics"
+    
+    parameters:
+      merge_column: "UID"
+      join_type: "inner"
+      
+    description: "Load and merge REMEMVR theta scores with RAVLT and demographic data"
+    source_reference: "tools_inventory.md section 'Data Tools' - load_participant_data"
+
+  standardize_scores:
+    module: "scipy.stats"
+    function: "zscore"
+    signature: "zscore(a: ArrayLike, axis: int = 0, ddof: int = 0, nan_policy: str = 'propagate') -> np.ndarray"
+    validation_tool: "validate_standardization"
+    
+    input_files:
+      - path: "data/step01_cognitive_scores.csv"
+        required_columns: ["UID", "REMEMVR_theta", "RAVLT_Total"]
+        expected_rows: "100"
+        data_types:
+          REMEMVR_theta: "float64"
+          RAVLT_Total: "int64"
+    
+    output_files:
+      - path: "data/step02_standardized_scores.csv"
+        columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "RAVLT_z", "REMEMVR_z", "Age", "Education", "VR_Experience", "NART_FSIQ"]
+        description: "Cognitive scores with z-score standardization for classification"
+    
+    parameters:
+      nan_policy: "omit"
+      axis: 0
+      
+    description: "Convert RAVLT and REMEMVR scores to z-scores for fair comparison"
+    source_reference: "scipy.stats documentation - zscore function"
+
+  create_classification:
+    module: "pandas"
+    function: "crosstab"
+    signature: "crosstab(index: ArrayLike, columns: ArrayLike, values: ArrayLike = None, rownames: Sequence[Hashable] = None, colnames: Sequence[Hashable] = None, aggfunc: str = None, margins: bool = False, margins_name: str = 'All', dropna: bool = True, normalize: Union[bool, str] = False) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step02_standardized_scores.csv"
+        required_columns: ["UID", "RAVLT_z", "REMEMVR_z"]
+        expected_rows: "100"
+        data_types:
+          RAVLT_z: "float64"
+          REMEMVR_z: "float64"
+    
+    output_files:
+      - path: "data/step03_classification_matrix.csv"
+        columns: ["RAVLT_low_0", "RAVLT_low_1", "row_totals"]
+        description: "2x2 contingency table for false negative classification"
+      - path: "data/step03_false_negatives.csv"
+        columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "RAVLT_z", "REMEMVR_z", "RAVLT_low", "REMEMVR_normal", "Age", "Education", "VR_Experience", "NART_FSIQ"]
+        description: "Identified false negative cases with full demographic data"
+    
+    parameters:
+      ravlt_threshold: -1.0
+      rememvr_threshold: -0.5
+      margins: True
+      
+    description: "Apply classification criteria to identify false negatives (low RAVLT + normal REMEMVR)"
+    source_reference: "pandas documentation - crosstab function"
+
+  characterize_demographics:
+    module: "pandas"
+    function: "describe"
+    signature: "describe(percentiles: Optional[ListLike] = None, include: Optional[str] = None, exclude: Optional[str] = None, datetime_is_numeric: bool = False) -> DataFrame"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step03_false_negatives.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_FSIQ", "RAVLT_Total", "REMEMVR_theta"]
+        expected_rows: "~6-10"
+        data_types:
+          Age: "float64"
+          Education: "float64"
+          VR_Experience: "int64"
+          NART_FSIQ: "float64"
+      - path: "data/step02_standardized_scores.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_FSIQ"]
+        expected_rows: "100"
+        data_types:
+          Age: "float64"
+          Education: "float64"
+    
+    output_files:
+      - path: "data/step04_demographic_summary.csv"
+        columns: ["Variable", "False_Neg_N", "False_Neg_Mean", "False_Neg_SD", "Other_N", "Other_Mean", "Other_SD"]
+        description: "Descriptive statistics comparing false negatives to other participants"
+    
+    parameters:
+      include: "all"
+      percentiles: [0.25, 0.5, 0.75]
+      
+    description: "Compute descriptive statistics for false negative demographic characterization"
+    source_reference: "pandas documentation - describe function"
+
+  compare_groups:
+    module: "scipy.stats"
+    function: "ttest_ind"
+    signature: "ttest_ind(a: ArrayLike, b: ArrayLike, axis: int = 0, equal_var: bool = True, nan_policy: str = 'propagate', permutations: int = None, random_state: Union[int, Generator] = None, alternative: str = 'two-sided', trim: float = 0) -> TtestResult"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+    
+    input_files:
+      - path: "data/step03_false_negatives.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_FSIQ"]
+        expected_rows: "~6-10"
+        data_types:
+          Age: "float64"
+          Education: "float64"
+      - path: "data/step02_standardized_scores.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_FSIQ"]
+        expected_rows: "100"
+        data_types:
+          Age: "float64"
+          Education: "float64"
+    
+    output_files:
+      - path: "data/step05_group_comparisons.csv"
+        columns: ["Variable", "Test_Type", "N1", "N2", "Statistic", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+        description: "Statistical group comparisons with dual p-value reporting (D068)"
+    
+    parameters:
+      equal_var: False
+      alternative: "two-sided"
+      bootstrap_iterations: 1000
+      random_state: 42
+      bonferroni_n_tests: 6
+      
+    description: "Test statistical differences between false negatives and other participants"
+    source_reference: "scipy.stats documentation - ttest_ind function"
+
+  compute_clinical_metrics:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_probability_range"
+    
+    input_files:
+      - path: "data/step03_classification_matrix.csv"
+        required_columns: ["RAVLT_low_0", "RAVLT_low_1"]
+        expected_rows: "2"
+        data_types:
+          values: "int64"
+      - path: "data/step02_standardized_scores.csv"
+        required_columns: ["RAVLT_z", "REMEMVR_z"]
+        expected_rows: "100"
+        data_types:
+          RAVLT_z: "float64"
+          REMEMVR_z: "float64"
+    
+    output_files:
+      - path: "data/step06_clinical_metrics.csv"
+        columns: ["Metric", "Value", "CI_Lower", "CI_Upper", "Interpretation"]
+        description: "Diagnostic performance metrics for clinical interpretation"
+    
+    parameters:
+      confidence_level: 0.95
+      ci_method: "wilson"
+      
+    description: "Calculate diagnostic performance metrics (sensitivity, specificity, PPV, NPV)"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_post_hoc_power"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "analysis tool output (validate_dependencies)"
+    
+    parameters:
+      required_patterns: ["Ch5 5.1.1 status: success", "Theta file found:", "master.xlsx accessible"]
+      forbidden_patterns: ["ERROR", "FAIL", "file not found"]
+    
+    criteria:
+      - "Validation log contains success patterns"
+      - "Validation log contains no error patterns"
+      - "Dependencies confirmed accessible"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all dependencies accessible)"
+        message: "str (human-readable explanation)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate dependency validation text file format and content"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_cognitive_scores.csv"
+        required_columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "Age", "Education", "VR_Experience", "NART_FSIQ"]
+        source: "analysis tool output (extract_cognitive_data)"
+    
+    parameters:
+      expected_rows: 100
+      value_ranges:
+        REMEMVR_theta: [-3, 3]
+        RAVLT_Total: [15, 75]
+        Age: [18, 89]
+        Education: [8, 25]
+        VR_Experience: [1, 5]
+        NART_FSIQ: [70, 130]
+    
+    criteria:
+      - "All required columns present"
+      - "Exactly 100 participants after merge"
+      - "No duplicate UIDs"
+      - "All values within expected ranges"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+        n_required: "int"
+        n_missing: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_cognitive_data.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate merged cognitive dataset has required columns and data quality"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_standardized_scores.csv"
+        required_columns: ["RAVLT_z", "REMEMVR_z"]
+        source: "analysis tool output (standardize_scores)"
+    
+    parameters:
+      tolerance: 0.01
+      check_columns: ["RAVLT_z", "REMEMVR_z"]
+    
+    criteria:
+      - "Z-score means within 0.01 of 0.0"
+      - "Z-score SDs within 0.01 of 1.0"
+      - "No NaN values introduced during standardization"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        mean_values: "Dict[str, float]"
+        sd_values: "Dict[str, float]"
+        message: "str"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_standardize_scores.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate z-score standardization (meanH0, SDH1) for classification variables"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_standardization"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_classification_matrix.csv"
+        source: "analysis tool output (create_classification)"
+      - path: "data/step03_false_negatives.csv"
+        source: "analysis tool output (create_classification)"
+      - path: "data/step04_demographic_summary.csv"
+        source: "analysis tool output (characterize_demographics)"
+    
+    parameters:
+      classification_matrix_rows: 2
+      false_negatives_rows: [3, 15]
+      demographics_rows: 6
+    
+    criteria:
+      - "Classification matrix has 2 rows (2x2 contingency table)"
+      - "False negatives count in expected range [3-15]"
+      - "Demographics summary has 6 variables"
+      - "All row counts sum to 100 participants"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_create_classification.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate classification outputs have expected structure and cell counts"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_dataframe_structure"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_group_comparisons.csv"
+        required_columns: ["Variable", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (compare_groups)"
+    
+    parameters:
+      required_variables: ["Age", "Education", "VR_Experience", "NART_FSIQ", "RAVLT_Total", "REMEMVR_theta"]
+      alpha_bonferroni: 0.0083
+    
+    criteria:
+      - "All 6 demographic variables tested"
+      - "Both p_uncorrected and p_bonferroni columns present (D068)"
+      - "P-values in valid range [0, 1]"
+      - "Bootstrap CIs computed for all comparisons"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_terms: "List[str]"
+        missing_cols: "List[str]"
+        message: "str"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_compare_groups.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate group comparisons include all variables and dual p-values (D068)"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_hypothesis_test_dual_pvalues"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_clinical_metrics.csv"
+        required_columns: ["Metric", "Value", "CI_Lower", "CI_Upper"]
+        source: "analysis tool output (compute_clinical_metrics)"
+    
+    parameters:
+      prob_columns: ["Value", "CI_Lower", "CI_Upper"]
+      expected_metrics: ["Sensitivity", "Specificity", "PPV", "NPV", "RAVLT_Impairment_Rate", "REMEMVR_Normal_Rate", "False_Negative_Rate"]
+    
+    criteria:
+      - "All metric values in [0, 1] range (valid proportions)"
+      - "CI_Lower <= Value <= CI_Upper for all metrics"
+      - "All 7 clinical metrics computed"
+      - "No NaN or infinite values"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violations: "List[Dict]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_compute_clinical_metrics.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate clinical metrics are valid proportions with proper confidence intervals"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_probability_range"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 6
+  total_unique_tools: 13
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "cross_sectional_classification"
+  false_negative_focus: true
+  bootstrap_confidence_intervals: true
+  dual_pvalue_reporting: true

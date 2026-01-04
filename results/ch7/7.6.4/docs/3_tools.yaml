@@ -1,0 +1,475 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.6.4
+# Created by: rq_tools agent
+# Purpose: Analysis + validation tool pairs for purification & slope predictors analysis
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  validate_cross_rq_dependencies:
+    module: "tools.validation"
+    function: "validate_paths_exist"
+    signature: "validate_paths_exist(paths: List[str]) -> Dict[str, Any]"
+    validation_tool: "validate_dependency_check"
+    
+    input_files:
+      - path: "status.yaml"
+        required_columns: []
+        expected_rows: "N/A (YAML file)"
+        data_types:
+          rq_results: "string (status value)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: []
+        description: "Dependency validation results (text format)"
+    
+    parameters:
+      paths: ["results/ch5/5.2.5/status.yaml", "data/cache/master.xlsx"]
+    
+    description: "Validate Ch5 slope analysis outputs and master data exist before proceeding"
+    source_reference: "tools_inventory.md section 'Configuration Tools' - validate_paths_exist"
+
+  load_participant_data:
+    module: "tools.data"
+    function: "load_participant_data"
+    signature: "load_participant_data(path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_Total", "BVMT_Total", "RPM_Total", "Age", "Sex", "Education"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string"
+          RAVLT_Total: "float"
+          BVMT_Total: "float"
+          RPM_Total: "float"
+          Age: "int"
+          Sex: "string"
+          Education: "int"
+    
+    output_files:
+      - path: "data/step03_cognitive_predictors.csv"
+        columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        description: "T-score standardized cognitive predictors"
+    
+    parameters:
+      path: "data/cache/master.xlsx"
+    
+    description: "Extract cognitive test scores and demographics from master dataset"
+    source_reference: "tools_inventory.md section 'Data Loading Tools'"
+
+  standardize_scores:
+    module: "tools.analysis_extensions"
+    function: "standardize_scores"
+    signature: "standardize_scores(scores: Union[pd.Series, pd.DataFrame], reference_mean: float = None, reference_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_standardization"
+    
+    input_files:
+      - path: "results/ch5/5.2.5/data/step03_pass1_slopes.csv"
+        required_columns: ["UID", "slope_estimate"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string"
+          slope_estimate: "float"
+      - path: "results/ch5/5.2.5/data/step06_pass2_slopes.csv"
+        required_columns: ["UID", "slope_estimate"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string"
+          slope_estimate: "float"
+    
+    output_files:
+      - path: "data/step01_pass1_slopes.csv"
+        columns: ["UID", "slope_raw", "slope_tscore", "slope_se"]
+        description: "T-score standardized pre-purification slopes"
+      - path: "data/step02_pass2_slopes.csv"
+        columns: ["UID", "slope_raw", "slope_tscore", "slope_se"]
+        description: "T-score standardized post-purification slopes"
+    
+    parameters:
+      reference_mean: 50.0
+      reference_sd: 10.0
+    
+    description: "Standardize slope estimates to T-scores (M=50, SD=10)"
+    source_reference: "tools_inventory.md section 'Analysis Extensions' - standardize_scores"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step04_analysis_dataset.csv"
+        required_columns: ["UID", "Slope_Pass1_T", "Slope_Pass2_T", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex_coded", "Education"]
+        expected_rows: "~85-100 participants"
+        data_types:
+          UID: "string"
+          Slope_Pass1_T: "float"
+          Slope_Pass2_T: "float"
+          RAVLT_T: "float"
+          BVMT_T: "float"
+          RPM_T: "float"
+          Age: "int"
+          Sex_coded: "int"
+          Education: "int"
+    
+    output_files:
+      - path: "data/step05_pass1_regression.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr", "vif", "sr_squared"]
+        description: "Pre-purification regression model results with bootstrap CIs"
+      - path: "data/step06_pass2_regression.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr", "vif", "sr_squared"]
+        description: "Post-purification regression model results with bootstrap CIs"
+    
+    parameters:
+      add_constant: true
+      return_diagnostics: true
+    
+    description: "Fit multiple regression predicting slopes from cognitive tests"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - fit_multiple_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_results"
+    
+    input_files:
+      - path: "data/step04_analysis_dataset.csv"
+        required_columns: ["Slope_Pass1_T", "Slope_Pass2_T", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex_coded", "Education"]
+        expected_rows: "~85-100 participants"
+        data_types:
+          all_predictors: "float or int"
+    
+    output_files:
+      - path: "data/step05_pass1_regression.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni"]
+        description: "Bootstrap confidence intervals for regression coefficients"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+    
+    description: "Compute bootstrap 95% CIs for regression coefficients"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - bootstrap_regression_ci"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_cv_results"
+    
+    input_files:
+      - path: "data/step04_analysis_dataset.csv"
+        required_columns: ["Slope_Pass1_T", "Slope_Pass2_T", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex_coded", "Education"]
+        expected_rows: "~85-100 participants"
+        data_types:
+          all_variables: "numeric"
+    
+    output_files:
+      - path: "data/step07_cross_validation.csv"
+        columns: ["Pass", "mean_r2", "std_r2", "mean_mse", "std_mse"]
+        description: "Cross-validation results for model stability assessment"
+    
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2"]
+    
+    description: "5-fold cross-validation to assess model stability"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - cross_validate_regression"
+
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_power_analysis"
+    
+    input_files:
+      - path: "data/step05_pass1_regression.csv"
+        required_columns: ["predictor", "beta", "se"]
+        expected_rows: "~6 predictors"
+        data_types:
+          beta: "float"
+          se: "float"
+      - path: "data/step06_pass2_regression.csv"
+        required_columns: ["predictor", "beta", "se"]
+        expected_rows: "~6 predictors"
+        data_types:
+          beta: "float"
+          se: "float"
+    
+    output_files:
+      - path: "data/step07_power_analysis.csv"
+        columns: ["test", "power", "f2", "non_centrality", "critical_f"]
+        description: "Post-hoc power analysis for coefficient differences"
+    
+    parameters:
+      alpha: 0.0125  # Bonferroni corrected for 4 tests
+    
+    description: "Post-hoc power analysis for observed coefficient differences"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_post_hoc_power"
+
+validation_tools:
+  validate_dependency_check:
+    module: "tools.validation"
+    function: "validate_paths_exist"
+    signature: "validate_paths_exist(paths: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: []
+        source: "analysis tool output (validate_cross_rq_dependencies)"
+    
+    parameters:
+      paths: ["results/ch5/5.2.5/status.yaml", "data/cache/master.xlsx"]
+    
+    criteria:
+      - "All required Ch5 files exist and are accessible"
+      - "Master.xlsx contains expected participant data"
+      - "No file corruption or access errors"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        all_exist: "bool"
+        missing_paths: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_dependency_validation.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate all required dependency files exist and are accessible"
+    source_reference: "tools_inventory.md section 'Configuration Tools' - validate_paths_exist"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    
+    input_files:
+      - path: "data/step03_cognitive_predictors.csv"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "analysis tool output (load_participant_data)"
+    
+    parameters:
+      return_plots: false
+    
+    criteria:
+      - "All required columns present"
+      - "N >= 85 participants for adequate power"
+      - "T-score means approximately 50, SDs approximately 10"
+      - "No impossible values (negative raw scores converted to T-scores)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        n_participants: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_extract_cognitive_predictors.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate cognitive predictor dataset structure and sample size"
+    source_reference: "tools_inventory.md section 'Analysis Extensions' - validate_regression_assumptions"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    
+    input_files:
+      - path: "data/step01_pass1_slopes.csv"
+        required_columns: ["UID", "slope_raw", "slope_tscore", "slope_se"]
+        source: "analysis tool output (standardize_scores)"
+      - path: "data/step02_pass2_slopes.csv"
+        required_columns: ["UID", "slope_raw", "slope_tscore", "slope_se"]
+        source: "analysis tool output (standardize_scores)"
+    
+    parameters:
+      expected_mean: 50.0
+      expected_sd: 10.0
+      tolerance: 1.0
+    
+    criteria:
+      - "T-score means within 1.0 of target (50.0)"
+      - "T-score SDs within 1.0 of target (10.0)"
+      - "All values finite (no inf, -inf, NaN)"
+      - "N >= 90 participants for each pass"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        mean_pass1: "float"
+        mean_pass2: "float"
+        sd_pass1: "float"
+        sd_pass2: "float"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_pass1_slopes.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate T-score standardization achieved target M=50, SD=10"
+    source_reference: "tools_inventory.md section 'Analysis Extensions' - validate_regression_assumptions"
+
+  validate_regression_assumptions:
+    module: "tools.analysis_extensions"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    
+    input_files:
+      - path: "data/step05_pass1_regression.csv"
+        required_columns: ["predictor", "beta", "se", "p_uncorrected", "vif"]
+        source: "analysis tool output (fit_multiple_regression)"
+      - path: "data/step06_pass2_regression.csv"
+        required_columns: ["predictor", "beta", "se", "p_uncorrected", "vif"]
+        source: "analysis tool output (fit_multiple_regression)"
+    
+    parameters:
+      return_plots: false
+    
+    criteria:
+      - "VIF < 5 for all predictors (acceptable multicollinearity)"
+      - "Normality: Shapiro-Wilk p > 0.05 OR bootstrap CIs available"
+      - "Homoscedasticity: Breusch-Pagan test results documented"
+      - "No extreme outliers: Cook's D < 4/N threshold"
+      - "All coefficients have finite estimates"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        all_assumptions_met: "bool"
+        normality: "Dict"
+        homoscedasticity: "Dict"
+        multicollinearity: "Dict"
+        outliers: "Dict"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_pass1_regression.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate regression assumptions for both pre- and post-purification models"
+    source_reference: "tools_inventory.md section 'Analysis Extensions' - validate_regression_assumptions"
+
+  validate_bootstrap_results:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict"
+    
+    input_files:
+      - path: "data/step05_pass1_regression.csv"
+        required_columns: ["predictor", "ci_lower", "ci_upper", "beta"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+    
+    parameters:
+      min_jaccard_threshold: 0.75
+    
+    criteria:
+      - "Bootstrap completed 1000 iterations with seed=42"
+      - "All CIs valid: ci_lower < beta < ci_upper for most coefficients"
+      - "CI width reasonable (not too narrow or wide)"
+      - "Convergence: bootstrap distribution appears normal"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        n_iterations: "int"
+        convergence_status: "str"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_pass1_regression.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate bootstrap confidence intervals are valid and reliable"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_bootstrap_stability"
+
+  validate_cv_results:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str = 'min', mean_col: str = 'mean', max_col: str = 'max', sd_col: str = 'sd', n_col: str = 'N') -> Dict"
+    
+    input_files:
+      - path: "data/step07_cross_validation.csv"
+        required_columns: ["Pass", "mean_r2", "std_r2"]
+        source: "analysis tool output (cross_validate_regression)"
+    
+    parameters:
+      min_col: "mean_r2"
+      sd_col: "std_r2"
+    
+    criteria:
+      - "R² values in [0, 1] for both passes"
+      - "Standard deviations >= 0"
+      - "Train-test R² gap < 0.10 (no severe overfitting)"
+      - "Both passes show reasonable cross-validation performance"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        failed_checks: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_model_comparison.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate cross-validation results show acceptable model stability"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_cluster_summary_stats"
+
+  validate_power_analysis:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str = 'min', mean_col: str = 'mean', max_col: str = 'max', sd_col: str = 'sd', n_col: str = 'N') -> Dict"
+    
+    input_files:
+      - path: "data/step07_power_analysis.csv"
+        required_columns: ["test", "power", "f2"]
+        source: "analysis tool output (compute_post_hoc_power)"
+    
+    parameters:
+      min_col: "power"
+    
+    criteria:
+      - "Power values in [0, 1]"
+      - "Effect sizes (f²) >= 0"
+      - "Power calculations consistent with sample size and observed effects"
+      - "Interpretable results for coefficient difference detection"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        adequate_power: "bool"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_model_comparison.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate power analysis results are reasonable and interpretable"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_cluster_summary_stats"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 7
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni) implemented in regression outputs"
+    - "Bootstrap confidence intervals (seed=42) provide robustness against non-normality"
+    - "Cross-validation assesses model stability and overfitting detection"
+    - "Power analysis provides context for coefficient difference interpretation"
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"

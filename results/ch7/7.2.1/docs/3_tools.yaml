@@ -1,0 +1,306 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.2.1
+# Created by: rq_tools agent 
+# Purpose: Analysis and validation tool pairs for hierarchical regression with mediation analysis
+# Architecture: Tool Catalog (each tool listed once, deduplication across steps)
+
+analysis_tools:
+  
+  # Data extraction and dependency checking
+  extract_domain_theta_scores:
+    module: "tools.data"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "UID", "theta_all", "SE"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+    output_files:
+      - path: "data/step01_theta_scores.csv"
+        columns: ["composite_ID", "UID", "test", "domain_name", "theta"]
+        description: "Theta scores extracted from Ch5 5.1.1"
+    description: "Extract theta_all scores from Ch5 5.1.1 outputs for RQ 7.2.1 analysis"
+
+  extract_cognitive_tests:
+    module: "tools.data"  
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age"]
+        expected_rows: "~100 (participants)"
+    output_files:
+      - path: "data/step01_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age"]
+        description: "Cognitive test scores and demographics"
+    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) and age from master.xlsx"
+
+  merge_theta_cognitive:
+    module: "tools.data"
+    function: "merge_theta_cognitive"  
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+    input_files:
+      - path: "data/step01_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age"]
+    output_files:
+      - path: "data/step01_analysis_dataset.csv"
+        columns: ["UID", "theta_all", "SE", "Age", "RAVLT_T", "BVMT_T", "RPM_T", "Age_std", "RAVLT_T_std", "BVMT_T_std", "RPM_T_std"]
+        description: "Merged analysis dataset with standardized predictors"
+    description: "Merge theta scores with cognitive tests, create standardized versions"
+
+  # Correlation analysis
+  bootstrap_correlation_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_correlation_ci"
+    signature: "bootstrap_correlation_ci(x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'pearson', random_state: int = None) -> Dict"
+    validation_tool: "validate_d068_dual_p_values"
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["Age", "theta_all", "RAVLT_T", "BVMT_T", "RPM_T"]
+    output_files:
+      - path: "data/step02_correlations.csv"
+        columns: ["Variable1", "Variable2", "r", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        description: "Correlation matrix with bootstrap CIs and dual p-values"
+    description: "Compute correlations with bootstrap CIs and multiple comparison correction"
+
+  # Regression analysis  
+  fit_hierarchical_regression:
+    module: "tools.analysis_regression"
+    function: "fit_hierarchical_regression"
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions" 
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["theta_all", "Age_std", "RAVLT_T_std", "BVMT_T_std", "RPM_T_std"]
+    output_files:
+      - path: "data/step03_hierarchical_models.csv"
+        columns: ["model", "R2", "R2_adj", "F_stat", "delta_R2", "F_change", "p_change", "AIC"]
+        description: "Hierarchical regression model comparison results"
+      - path: "data/step03_model_diagnostics.csv"
+        columns: ["test", "statistic", "p_value", "threshold", "violated", "remedial_action"]
+        description: "Assumption tests and diagnostic results"
+    description: "Fit hierarchical regression models (Age only vs Age + cognitive tests)"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"  
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+    input_files:
+      - path: "data/step03_hierarchical_models.csv"
+        required_columns: ["model", "beta_Age", "beta_RAVLT_T", "beta_BVMT_T", "beta_RPM_T"]
+    output_files:
+      - path: "data/step04_mediation_analysis.csv"
+        columns: ["beta_total", "beta_direct", "mediation_effect", "proportion_mediated", "ci_lower", "ci_upper", "p_mediation", "effect_size_category"]
+        description: "Mediation analysis with bootstrap CIs"
+    description: "Bootstrap mediation analysis (proportion mediated with confidence intervals)"
+
+  # Cross-validation
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_numeric_range"
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["theta_all", "Age_std", "RAVLT_T_std", "BVMT_T_std", "RPM_T_std"]
+    output_files:
+      - path: "data/step05_cross_validation.csv"
+        columns: ["model", "cv_R2_mean", "cv_R2_sd", "cv_RMSE_mean", "cv_RMSE_sd", "cv_MAE_mean", "cv_MAE_sd", "train_R2", "test_R2", "overfitting_gap", "overfitting_flag", "ci_R2_lower", "ci_R2_upper"]
+        description: "Cross-validation performance metrics"
+    description: "5-fold cross-validation assessment with overfitting detection"
+
+  # Effect sizes and power
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+    input_files:
+      - path: "data/step03_hierarchical_models.csv"
+        required_columns: ["R2"]
+    output_files:
+      - path: "data/step06_effect_sizes.csv"  
+        columns: ["predictor", "beta", "beta_ci_lower", "beta_ci_upper", "sr2", "sr2_ci_lower", "sr2_ci_upper", "importance_rank"]
+        description: "Comprehensive effect size analysis"
+    description: "Compute Cohen's f² and semi-partial correlations for predictors"
+
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_numeric_range"
+    input_files:
+      - path: "data/step06_effect_sizes.csv"
+        required_columns: ["predictor", "sr2"]
+    output_files:
+      - path: "data/step07_power_analysis.csv"
+        columns: ["test_type", "effect_size", "power_achieved", "power_adequate", "min_detectable_effect", "limitation_flag"]
+        description: "Post-hoc power analysis results"
+    description: "Post-hoc power analysis for regression with sensitivity analysis"
+
+validation_tools:
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    input_files:
+      - path: "varies by analysis step"
+        source: "analysis tool output"
+    criteria:
+      - "All required columns present"
+      - "DataFrame not empty"
+      - "Column names case-sensitive match"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (missing columns, empty if valid=True)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes after error)"
+    description: "Validate DataFrame has all required columns present"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    input_files:
+      - path: "varies by analysis step"
+        source: "analysis tool output"
+    criteria:
+      - "Row count in expected range (100 for complete data)"
+      - "All required columns present" 
+      - "Column types match expected (if specified)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool] (per check result)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes)"
+    description: "Generic DataFrame validation for rows, columns, types"
+
+  validate_d068_dual_p_values:
+    module: "tools.validation"
+    function: "validate_d068_dual_p_values"
+    signature: "validate_d068_dual_p_values(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+    input_files:
+      - path: "varies by analysis step"
+        source: "correlation analysis output"
+    criteria:
+      - "p_uncorrected column present"
+      - "At least one corrected p-value column (p_bonferroni, p_holm, p_fdr)"
+      - "Decision D068 compliance"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes)"
+    description: "Validate correlation results include Decision D068 dual p-value reporting"
+
+  validate_regression_assumptions:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict[str, Any]"
+    input_files:
+      - path: "varies by analysis step"
+        source: "regression model output"
+    criteria:
+      - "Normality check (Shapiro-Wilk test)"
+      - "Homoscedasticity check (Breusch-Pagan test)"
+      - "Multicollinearity check (VIF < 5)"
+      - "Outlier detection (Cook's D > 4/n)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        normality: "Dict (test results)"
+        homoscedasticity: "Dict (test results)"
+        multicollinearity: "Dict (VIF values)"
+        outliers: "Dict (outlier flags)"
+        all_assumptions_met: "bool"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log" 
+      invoke: "g_debug (master invokes)"
+    description: "Comprehensive validation of regression assumptions with diagnostic tests"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    input_files:
+      - path: "varies by analysis step"
+        source: "numeric analysis output"
+    criteria:
+      - "Values within specified range [min_val, max_val]"
+      - "No NaN or infinite values"
+      - "No values below minimum or above maximum"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list (first 10 violations)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes)"
+    description: "Validate numeric values fall within specified range"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    input_files:
+      - path: "varies by analysis step"
+        source: "effect size analysis output"
+    criteria:
+      - "No negative effect sizes (invalid)"
+      - "No NaN or infinite values"
+      - "Very large values f²>1.0 flagged (warning but valid)"
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str] (warnings for large values)"
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_name.log"
+      invoke: "g_debug (master invokes)"
+    description: "Validate Cohen's f² effect sizes are within reasonable bounds"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 6
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  analysis_pipeline: "Hierarchical Multiple Regression with Bootstrap Mediation Analysis"
+  rq_type: "Ch7 Theme 2 - Age moderation after controlling for cognitive tests"
+  key_hypothesis: "Age should NOT predict REMEMVR after controlling for cognitive tests (VR scaffolding)"
+
+# Notes:
+# - Each analysis tool paired with appropriate validation tool
+# - Decision D068 dual p-value reporting enforced via validate_d068_dual_p_values
+# - Bootstrap methods use seed=42 for reproducibility  
+# - Cross-validation uses 5-fold with stratification
+# - All tools verified to exist in tools_inventory.md
+# - Naming conventions follow names.md patterns where applicable

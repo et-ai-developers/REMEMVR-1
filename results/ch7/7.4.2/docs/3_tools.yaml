@@ -1,0 +1,476 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.4.2
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+# Analysis: BVMT predicts Where more than What (Domain-specific prediction)
+# Method: Bivariate correlations + Steiger's Z-test with bootstrap validation
+# Steps: 7 total (Step 0: validation + Steps 1-6: analysis)
+
+analysis_tools:
+  # Step 0: Validate cross-RQ dependencies (Ch5 domain outputs + master.xlsx BVMT)
+  validate_file_paths:
+    module: "tools.validation"
+    function: "validate_file_paths"
+    signature: "validate_file_paths(file_paths: List[str], required_existence: bool = True, min_size_bytes: int = 100) -> Dict[str, Any]"
+    validation_tool: "validate_dependency_check"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_Where", "theta_What"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P### with leading zeros)"
+          theta_Where: "float64 (IRT theta scale [-3, 3])"
+          theta_What: "float64 (IRT theta scale [-3, 3])"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "BVMT_TotR"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          BVMT_TotR: "int64 or float64 (BVMT Total Recall scores 0-36)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Validation summary of required Ch5 domain files and BVMT data"
+    
+    parameters:
+      file_paths: ["results/ch5/5.2.1/data/step03_theta_scores.csv", "data/cache/master.xlsx"]
+      required_existence: true
+      min_size_bytes: 1000
+    
+    description: "Validate Ch5 domain outputs and master.xlsx BVMT data exist before proceeding"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  # Step 1: Extract domain-specific theta scores from Ch5 analysis outputs
+  extract_domain_theta_scores:
+    module: "tools.data_processing"
+    function: "extract_domain_scores_from_ch5"
+    signature: "extract_domain_scores_from_ch5(theta_file_path: str, domains: List[str] = ['Where', 'What'], uid_col: str = 'UID') -> pd.DataFrame"
+    validation_tool: "validate_domain_extraction"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_Where", "theta_What"]
+        source: "Ch5 domain-specific IRT analysis outputs"
+    
+    output_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        columns: ["UID", "Where_mean", "What_mean"]
+        description: "Domain-specific theta scores per participant (Where and What domains)"
+    
+    parameters:
+      theta_file_path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+      domains: ["Where", "What"]
+      uid_col: "UID"
+    
+    description: "Extract Where and What domain-specific theta scores from Ch5 analyses"
+    source_reference: "tools_inventory.md section 'Data Processing Tools'"
+
+  # Step 2: Extract BVMT cognitive test scores from master.xlsx
+  extract_bvmt_scores:
+    module: "tools.data_processing"
+    function: "extract_cognitive_test_scores"
+    signature: "extract_cognitive_test_scores(excel_path: str, test_cols: List[str], uid_col: str = 'UID', sheet_name: str = 'Sheet1') -> pd.DataFrame"
+    validation_tool: "validate_bvmt_extraction"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "BVMT_TotR"]
+        source: "Master cognitive test data file"
+    
+    output_files:
+      - path: "data/step02_bvmt_scores.csv"
+        columns: ["UID", "BVMT_TotR"]
+        description: "BVMT Total Recall scores per participant"
+    
+    parameters:
+      excel_path: "data/cache/master.xlsx"
+      test_cols: ["BVMT_TotR"]
+      uid_col: "UID"
+      sheet_name: "Sheet1"
+    
+    description: "Extract BVMT Total Recall scores from master.xlsx cognitive test data"
+    source_reference: "tools_inventory.md section 'Data Processing Tools'"
+
+  # Step 3: Merge domain theta scores with BVMT scores
+  merge_analysis_dataset:
+    module: "tools.data_processing"
+    function: "merge_datasets_on_uid"
+    signature: "merge_datasets_on_uid(left_df: pd.DataFrame, right_df: pd.DataFrame, uid_col: str = 'UID', how: str = 'inner') -> pd.DataFrame"
+    validation_tool: "validate_dataset_merge"
+    
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "Where_mean", "What_mean"]
+        source: "output from step01_extract_domain_theta_scores"
+      - path: "data/step02_bvmt_scores.csv"
+        required_columns: ["UID", "BVMT_TotR"]
+        source: "output from step02_extract_bvmt_scores"
+    
+    output_files:
+      - path: "data/step03_analysis_dataset.csv"
+        columns: ["UID", "BVMT_TotR", "Where_mean", "What_mean"]
+        description: "Merged analysis dataset with BVMT scores and domain theta scores"
+    
+    parameters:
+      uid_col: "UID"
+      how: "inner"
+    
+    description: "Merge domain theta scores with BVMT scores to create analysis-ready dataset"
+    source_reference: "tools_inventory.md section 'Data Processing Tools'"
+
+  # Step 4: Compute bivariate correlations with bootstrap confidence intervals
+  bootstrap_correlation_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_correlation_ci"
+    signature: "bootstrap_correlation_ci(x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'pearson', random_state: int = None) -> Dict[str, Any]"
+    validation_tool: "validate_correlation_computation"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "BVMT_TotR", "Where_mean", "What_mean"]
+        source: "output from step03_merge_analysis_dataset"
+    
+    output_files:
+      - path: "data/step04_correlations.csv"
+        columns: ["correlation", "r", "ci_lower", "ci_upper", "n", "p_uncorrected", "assumption_check", "effect_size"]
+        description: "Bootstrap correlation results with confidence intervals"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "pearson"
+      random_state: 42
+    
+    description: "Compute r(BVMT, Where) and r(BVMT, What) with bootstrap 95% confidence intervals"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools'"
+
+  # Step 5: Steiger's Z-test for dependent correlations comparison
+  compare_correlations_dependent:
+    module: "tools.statistics"
+    function: "compare_correlations_dependent"
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+    validation_tool: "validate_steiger_test"
+    
+    input_files:
+      - path: "data/step04_correlations.csv"
+        required_columns: ["correlation", "r"]
+        source: "output from step04_bootstrap_correlation_ci"
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["Where_mean", "What_mean"]
+        source: "raw data for Where-What correlation computation"
+    
+    output_files:
+      - path: "data/step05_steiger_test.csv"
+        columns: ["z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr", "cohens_q", "ci_lower", "ci_upper", "direction", "n"]
+        description: "Steiger's Z-test results with dual p-value reporting"
+    
+    parameters:
+      n: 100
+    
+    description: "Test domain-specificity hypothesis: r(BVMT, Where) > r(BVMT, What) using Steiger's Z-test"
+    source_reference: "tools_inventory.md section 'Statistical Tests'"
+
+  # Step 6: Sensitivity analysis and diagnostics
+  run_correlation_sensitivity_analysis:
+    module: "tools.sensitivity"
+    function: "run_correlation_sensitivity_analysis"
+    signature: "run_correlation_sensitivity_analysis(data: pd.DataFrame, correlations: List[Tuple[str, str]], outlier_threshold: float = 3.29, bootstrap_iterations: int = 1000, random_seed: int = 42) -> Dict[str, Any]"
+    validation_tool: "validate_sensitivity_analysis"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "BVMT_TotR", "Where_mean", "What_mean"]
+        source: "complete analysis dataset"
+      - path: "data/step05_steiger_test.csv"
+        required_columns: ["z_statistic", "p_uncorrected"]
+        source: "primary test results for comparison"
+    
+    output_files:
+      - path: "data/step06_sensitivity_analysis.csv"
+        columns: ["analysis_type", "method", "result", "confidence_interval", "n_used", "notes"]
+        description: "Sensitivity analyses for outliers, alternative methods, and robustness checks"
+    
+    parameters:
+      correlations: [["BVMT_TotR", "Where_mean"], ["BVMT_TotR", "What_mean"]]
+      outlier_threshold: 3.29
+      bootstrap_iterations: 1000
+      random_seed: 42
+    
+    description: "Conduct sensitivity analyses to assess robustness of domain-specificity findings"
+    source_reference: "tools_inventory.md section 'Sensitivity Analysis Tools'"
+
+validation_tools:
+  # Validation for Step 0: Cross-RQ dependency check
+  validate_dependency_check:
+    module: "tools.validation"
+    function: "validate_file_existence_and_structure"
+    signature: "validate_file_existence_and_structure(validation_results: Dict[str, Any], required_files: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "dependency validation output"
+    
+    parameters:
+      required_files: ["results/ch5/5.2.1/data/step03_theta_scores.csv", "data/cache/master.xlsx"]
+    
+    criteria:
+      - "All Ch5 domain files located and accessible"
+      - "BVMT_TotR column found in master.xlsx"
+      - "Minimum 100 participants present in both sources"
+      - "Required columns present and non-empty"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_files: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate all required dependency files exist and contain expected data structure"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  # Validation for Step 1: Domain extraction
+  validate_domain_extraction:
+    module: "tools.validation"
+    function: "validate_theta_score_range"
+    signature: "validate_theta_score_range(df: pd.DataFrame, theta_cols: List[str], valid_range: Tuple[float, float] = (-3.0, 3.0), min_variance: float = 0.1) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "Where_mean", "What_mean"]
+        source: "domain extraction output"
+    
+    parameters:
+      theta_cols: ["Where_mean", "What_mean"]
+      valid_range: [-3.0, 3.0]
+      min_variance: 0.1
+    
+    criteria:
+      - "All theta scores in valid IRT range [-3, 3]"
+      - "100 participants present with no missing UIDs"
+      - "Both domains have adequate variance (SD > 0.1)"
+      - "No duplicate UIDs in dataset"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        variance_check: "Dict[str, float]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_domains.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate domain theta scores are in acceptable range with adequate variance"
+    source_reference: "tools_inventory.md section 'IRT Validation Tools'"
+
+  # Validation for Step 2: BVMT extraction
+  validate_bvmt_extraction:
+    module: "tools.validation"
+    function: "validate_cognitive_test_scores"
+    signature: "validate_cognitive_test_scores(df: pd.DataFrame, score_col: str, valid_range: Tuple[float, float], max_missing_pct: float = 0.05) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_bvmt_scores.csv"
+        required_columns: ["UID", "BVMT_TotR"]
+        source: "BVMT extraction output"
+    
+    parameters:
+      score_col: "BVMT_TotR"
+      valid_range: [0, 36]
+      max_missing_pct: 0.05
+    
+    criteria:
+      - "All BVMT scores in valid range [0, 36]"
+      - "Missing data < 5% of participants"
+      - "100 participants present"
+      - "Standard deviation > 2.0 (adequate variance, no ceiling/floor)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_count: "int"
+        range_violations: "int"
+        variance_check: "float"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_extract_bvmt.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate BVMT scores are in acceptable range with adequate variance and minimal missing data"
+    source_reference: "tools_inventory.md section 'Cognitive Test Validation Tools'"
+
+  # Validation for Step 3: Dataset merge
+  validate_dataset_merge:
+    module: "tools.validation"
+    function: "validate_merge_completeness"
+    signature: "validate_merge_completeness(merged_df: pd.DataFrame, expected_n: int, required_cols: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "BVMT_TotR", "Where_mean", "What_mean"]
+        source: "merged analysis dataset"
+    
+    parameters:
+      expected_n: 100
+      required_cols: ["UID", "BVMT_TotR", "Where_mean", "What_mean"]
+    
+    criteria:
+      - "Exactly 100 participants retained (no data loss in merge)"
+      - "No duplicate UIDs"
+      - "No missing values in any analysis variable"
+      - "All variables within expected ranges"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        participants_lost: "int"
+        missing_values: "Dict[str, int]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_merge_dataset.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate merge completed successfully with no participant loss or missing data"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  # Validation for Step 4: Correlation computation
+  validate_correlation_computation:
+    module: "tools.validation"
+    function: "validate_correlation_results"
+    signature: "validate_correlation_results(correlations: Dict[str, Any], n_correlations: int = 2) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_correlations.csv"
+        required_columns: ["correlation", "r", "ci_lower", "ci_upper"]
+        source: "bootstrap correlation results"
+    
+    parameters:
+      n_correlations: 2
+    
+    criteria:
+      - "Both correlations computed (BVMT-Where and BVMT-What)"
+      - "All correlation coefficients in valid range [-1, 1]"
+      - "Bootstrap confidence intervals contain point estimates"
+      - "Confidence intervals are non-degenerate (ci_lower < ci_upper)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        invalid_correlations: "List[str]"
+        ci_violations: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_compute_correlations.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate correlation computation and bootstrap confidence intervals"
+    source_reference: "tools_inventory.md section 'Statistical Validation Tools'"
+
+  # Validation for Step 5: Steiger's test
+  validate_steiger_test:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: pd.DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_steiger_test.csv"
+        required_columns: ["z_statistic", "p_uncorrected", "p_bonferroni"]
+        source: "Steiger's test results"
+    
+    parameters:
+      required_cols: ["z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr"]
+    
+    criteria:
+      - "Single test result row (1 observation)"
+      - "Z-statistic is finite (not NaN or Inf)"
+      - "Dual p-values computed (uncorrected + Bonferroni)"
+      - "All p-values in valid range [0, 1]"
+      - "Effect size (Cohen's q) computed"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_pvalues: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_steiger_test.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate Steiger's Z-test results include Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Statistical Validation Tools'"
+
+  # Validation for Step 6: Sensitivity analysis
+  validate_sensitivity_analysis:
+    module: "tools.validation"
+    function: "validate_sensitivity_completeness"
+    signature: "validate_sensitivity_completeness(sensitivity_results: Dict[str, Any], required_analyses: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_sensitivity_analysis.csv"
+        required_columns: ["analysis_type", "method", "result"]
+        source: "sensitivity analysis results"
+    
+    parameters:
+      required_analyses: ["outlier_analysis", "alternative_methods", "range_restriction", "cv_results", "power_analysis"]
+    
+    criteria:
+      - "All planned sensitivity analyses completed"
+      - "Outlier analysis documents effect on conclusions"
+      - "Alternative correlation methods compared (Spearman, Kendall's tau)"
+      - "Cross-validation robustness assessed"
+      - "Post-hoc power analysis included"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_analyses: "List[str]"
+        completed_analyses: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_sensitivity_analysis.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate all sensitivity analyses completed with documented conclusions"
+    source_reference: "tools_inventory.md section 'Sensitivity Analysis Validation Tools'"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  methodology: "Bivariate correlations + Steiger's Z-test with bootstrap validation"
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni corrected)"
+    - "Bootstrap validation with 1000 iterations, seed=42 for reproducibility"
+    - "Steiger's Z-test tests domain-specificity: r(BVMT, Where) > r(BVMT, What)"

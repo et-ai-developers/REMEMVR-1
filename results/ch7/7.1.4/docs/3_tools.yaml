@@ -1,50 +1,436 @@
-QUIT: FAIL - Missing Analysis Tools
+# 3_tools.yaml - Tool Catalog for RQ 7.1.4 Incremental Validity Analysis
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (analysis + validation tool pairs)
+# RQ: 7.1.4 - Unique REMEMVR variance unexplained by all predictors?
 
-Required Analysis Tools (from 2_plan.md):
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          theta: "float64 (IRT ability estimate)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Validation results for cross-RQ dependencies and master.xlsx accessibility"
+    
+    parameters:
+      ch5_theta_path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+      master_xlsx_path: "data/cache/master.xlsx"
+      min_theta_file_size: 1024
+      min_master_file_size: 10485760
+    
+    description: "Validate cross-RQ dependencies (Ch5 theta scores) and master.xlsx accessibility before analysis"
+    source_reference: "tools_inventory.md section 'File Validation Tools' - check_file_exists"
 
-**Step 0-3: Data Extraction Tools**
-- extract_cognitive_tests_from_master (tools.data_extraction.extract_cognitive_tests_from_master)
-- extract_demographics_from_master (tools.data_extraction.extract_demographics_from_master) 
-- extract_self_report_from_master (tools.data_extraction.extract_self_report_from_master)
-- extract_theta_scores_from_rq_results (tools.data_extraction.extract_theta_scores_from_rq_results)
+  extract_cognitive_tests:
+    module: "tools.data_extraction"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_T1Sc", "RAVLT_T2Sc", "RAVLT_T3Sc", "RAVLT_T4Sc", "RAVLT_T5Sc", "RAVLT_DRSc", "BVMT_TotR", "NART_Scor", "RPM_Scor"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          RAVLT_T1Sc: "float64 (RAVLT Trial 1 score)"
+          RAVLT_T2Sc: "float64 (RAVLT Trial 2 score)"
+          RAVLT_T3Sc: "float64 (RAVLT Trial 3 score)"
+          RAVLT_T4Sc: "float64 (RAVLT Trial 4 score)"
+          RAVLT_T5Sc: "float64 (RAVLT Trial 5 score)"
+          RAVLT_DRSc: "float64 (RAVLT Delayed Recall score)"
+          BVMT_TotR: "float64 (BVMT Total Recall score)"
+          NART_Scor: "float64 (NART score)"
+          RPM_Scor: "float64 (Raven's Progressive Matrices score)"
+    
+    output_files:
+      - path: "data/step01_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_T", "RAVLT_DR_T", "BVMT_T", "NART_T", "RPM_T"]
+        description: "T-scored cognitive test measures (M=50, SD=10)"
+      - path: "data/step01_cognitive_correlation_matrix.csv"
+        columns: ["RAVLT_T", "RAVLT_DR_T", "BVMT_T", "NART_T", "RPM_T"]
+        description: "Correlation matrix of cognitive test T-scores"
+    
+    parameters:
+      tests: ["RAVLT", "BVMT", "NART", "RPM"]
+      t_score_mean: 50
+      t_score_sd: 10
+      compute_total: true
+      compute_correlations: true
+    
+    description: "Extract cognitive test scores from master.xlsx and convert to standardized T-scores"
+    source_reference: "tools_inventory.md section 'Data Extraction Tools' - extract_cognitive_tests"
 
-**Step 4: Data Merging Tools**
-- merge_predictors_complete_case (tools.data_manipulation.merge_predictors_complete_case)
+  extract_dass_scores:
+    module: "tools.data_extraction"
+    function: "extract_dass_scores"
+    signature: "extract_dass_scores(df: pd.DataFrame, subscales: List[str] = ['anxiety', 'stress']) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str", "VR_Exp", "SLEEP"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          DASS_Dep: "float64 (DASS Depression subscale)"
+          DASS_Anx: "float64 (DASS Anxiety subscale)"
+          DASS_Str: "float64 (DASS Stress subscale)"
+          VR_Exp: "float64 (VR Experience rating 1-7)"
+          SLEEP: "float64 (Sleep quality rating 1-7)"
+    
+    output_files:
+      - path: "data/step03_self_report.csv"
+        columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str", "VR_Exp", "Sleep"]
+        description: "Self-report measures for regression analysis"
+    
+    parameters:
+      subscales: ["depression", "anxiety", "stress"]
+      include_vr_exp: true
+      include_sleep: true
+      handle_missing: "exclude"
+    
+    description: "Extract DASS subscales and self-report measures (VR experience, sleep quality)"
+    source_reference: "tools_inventory.md section 'Data Extraction Tools' - extract_dass_scores"
 
-**Step 5: Hierarchical Regression Tools**
-- fit_hierarchical_regression_with_cv (tools.analysis_regression.fit_hierarchical_regression_with_cv)
-- validate_regression_assumptions (tools.validation.validate_regression_assumptions)
+  extract_domain_theta_scores:
+    module: "tools.data_extraction" 
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          theta: "float64 (overall REMEMVR theta score)"
+    
+    output_files:
+      - path: "data/step04_theta_scores.csv"
+        columns: ["UID", "theta_overall"]
+        description: "Overall REMEMVR theta scores for regression analysis"
+    
+    parameters:
+      theta_source: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+      compute_mean: true
+      domains: ["overall"]
+    
+    description: "Extract overall REMEMVR theta scores from Ch5 5.1.1 calibration results"
+    source_reference: "tools_inventory.md section 'Data Extraction Tools' - extract_domain_theta_scores"
 
-**Step 6: Effect Size and Variance Decomposition Tools**
-- compute_cohens_f2_with_bootstrap_ci (tools.analysis_regression.compute_cohens_f2_with_bootstrap_ci)
-- compute_variance_decomposition (tools.analysis_regression.compute_variance_decomposition)
+  merge_theta_cognitive:
+    module: "tools.data_extraction"
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_T", "RAVLT_DR_T", "BVMT_T", "NART_T", "RPM_T"]
+        source: "analysis tool output (extract_cognitive_tests)"
+      - path: "data/step02_demographics.csv"
+        required_columns: ["UID", "Age", "Sex", "Education"]
+        source: "demographics extraction"
+      - path: "data/step03_self_report.csv"
+        required_columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str", "VR_Exp", "Sleep"]
+        source: "analysis tool output (extract_dass_scores)"
+      - path: "data/step04_theta_scores.csv"
+        required_columns: ["UID", "theta_overall"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+    
+    output_files:
+      - path: "data/step04_merged_predictors.csv"
+        columns: ["UID", "theta", "Age_z", "Sex", "Education_z", "RAVLT_T_z", "RAVLT_DR_T_z", "BVMT_T_z", "NART_T_z", "RPM_T_z", "DASS_Dep_z", "DASS_Anx_z", "DASS_Str_z", "VR_Exp_z", "Sleep_z"]
+        description: "Complete hierarchical regression dataset with standardized predictors"
+      - path: "data/step04_descriptive_stats.csv"
+        columns: ["variable", "mean", "sd", "min", "max", "n"]
+        description: "Descriptive statistics for all variables"
+    
+    parameters:
+      standardize_predictors: true
+      exclude_incomplete: true
+      merge_method: "inner"
+      compute_descriptives: true
+    
+    description: "Merge all predictor sets with theta scores and standardize continuous predictors"
+    source_reference: "tools_inventory.md section 'Data Extraction Tools' - merge_theta_cognitive"
 
-**Step 7: Domain-Specific Analysis Tools**
-- fit_domain_specific_hierarchical_regression (tools.analysis_regression.fit_domain_specific_hierarchical_regression)
+  fit_hierarchical_regression:
+    module: "tools.analysis_regression"
+    function: "fit_hierarchical_regression"
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict"
+    validation_tool: "compute_regression_diagnostics"
+    
+    input_files:
+      - path: "data/step04_merged_predictors.csv"
+        required_columns: ["UID", "theta", "Age_z", "Sex", "Education_z", "RAVLT_T_z", "RAVLT_DR_T_z", "BVMT_T_z", "NART_T_z", "RPM_T_z", "DASS_Dep_z", "DASS_Anx_z", "DASS_Str_z", "VR_Exp_z", "Sleep_z"]
+        source: "analysis tool output (merge_theta_cognitive)"
+    
+    output_files:
+      - path: "data/step05_hierarchical_models.csv"
+        columns: ["model", "predictors", "R2", "adj_R2", "F_stat", "p_uncorrected", "p_bonferroni", "train_R2_mean", "test_R2_mean", "cv_gap"]
+        description: "Hierarchical regression results with cross-validation metrics"
+      - path: "data/step05_cross_validation_results.csv"
+        columns: ["model", "fold", "train_R2", "test_R2"]
+        description: "Cross-validation performance by fold and model"
+      - path: "data/step05_assumption_diagnostics.txt"
+        description: "Assumption test results (normality, homoscedasticity, VIF)"
+    
+    parameters:
+      block_1: ["Age_z", "Sex", "Education_z"]
+      block_2: ["RAVLT_T_z", "RAVLT_DR_T_z", "BVMT_T_z", "NART_T_z", "RPM_T_z"]
+      block_3: ["DASS_Dep_z", "DASS_Anx_z", "DASS_Str_z", "VR_Exp_z", "Sleep_z"]
+      cv_folds: 5
+      random_seed: 42
+      alpha_bonferroni: 0.00060
+      check_assumptions: true
+    
+    description: "Fit 3-block hierarchical regression with cross-validation and assumption checking"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - fit_hierarchical_regression"
 
-**Step 8: Plot Data Preparation Tools**
-- prepare_incremental_validity_plot_data (tools.plotting.prepare_incremental_validity_plot_data)
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step05_hierarchical_models.csv"
+        required_columns: ["model", "R2"]
+        source: "analysis tool output (fit_hierarchical_regression)"
+    
+    output_files:
+      - path: "data/step06_incremental_validity.csv"
+        columns: ["block", "delta_R2", "delta_R2_ci_lower", "delta_R2_ci_upper", "f2", "f2_ci_lower", "f2_ci_upper", "F_stat", "p_uncorrected", "p_bonferroni", "power", "min_detectable_f2"]
+        description: "Cohen's f² effect sizes with bootstrap confidence intervals"
+      - path: "data/step06_effect_size_interpretation.csv"
+        columns: ["block", "f2_observed", "effect_size_category", "interpretation"]
+        description: "Effect size interpretations (negligible/small/medium/large)"
+    
+    parameters:
+      bootstrap_iterations: 1000
+      random_seed: 42
+      confidence_level: 0.95
+      power_analysis: true
+      alpha_level: 0.00179
+    
+    description: "Calculate incremental R² and Cohen's f² effect sizes with bootstrap confidence intervals"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_cohens_f2"
 
-Missing from tool_inventory.md:
-- extract_cognitive_tests_from_master (NOT FOUND)
-- extract_demographics_from_master (NOT FOUND)
-- extract_self_report_from_master (NOT FOUND)
-- extract_theta_scores_from_rq_results (NOT FOUND)
-- merge_predictors_complete_case (NOT FOUND)
-- fit_hierarchical_regression_with_cv (NOT FOUND)
-- validate_regression_assumptions (NOT FOUND)
-- compute_cohens_f2_with_bootstrap_ci (NOT FOUND)
-- compute_variance_decomposition (NOT FOUND)
-- fit_domain_specific_hierarchical_regression (NOT FOUND)
-- prepare_incremental_validity_plot_data (NOT FOUND)
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step05_hierarchical_models.csv"
+        required_columns: ["model", "R2"]
+        source: "analysis tool output (fit_hierarchical_regression)"
+      - path: "data/step04_merged_predictors.csv"
+        required_columns: ["UID", "theta", "Age_z", "Sex", "Education_z", "RAVLT_T_z", "RAVLT_DR_T_z", "BVMT_T_z", "NART_T_z", "RPM_T_z", "DASS_Dep_z", "DASS_Anx_z", "DASS_Str_z", "VR_Exp_z", "Sleep_z"]
+        source: "original dataset for bootstrap"
+    
+    output_files:
+      - path: "data/step07_residual_variance.csv"
+        columns: ["residual_observed", "residual_ci_lower", "residual_ci_upper", "residual_true", "reliability_theta", "p_greater_50pct", "interpretation", "sample_size"]
+        description: "Residual variance estimates with measurement error correction"
+      - path: "data/step07_measurement_error_correction.csv"
+        columns: ["var_theta", "mean_se_squared", "reliability", "attenuation_factor", "residual_corrected", "residual_observed"]
+        description: "Measurement error correction calculations"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      participant_resampling: true
+      residual_threshold: 0.50
+    
+    description: "Quantify unexplained variance with measurement error correction and bootstrap CIs"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - bootstrap_regression_ci"
 
-Action Required:
-1. User + Claude migrate missing tools from v3.0 with TDD or develop new tools
-2. Update tool_inventory.md with function signatures for ALL missing tools
-3. Re-run rq_tools agent
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "varies by analysis tool"
+        required_columns: "varies by analysis step"
+        source: "analysis tool outputs"
+    
+    parameters:
+      case_sensitive: true
+      allow_extra_columns: true
+    
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names match exactly (case-sensitive)"
+      - "DataFrame not empty"
+      - "No completely null columns"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all required columns present)"
+        missing_columns: "List[str] (column names not found)"
+        existing_columns: "List[str] (column names found)"
+        n_required: "int (total required columns)"
+        n_missing: "int (missing column count)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate required columns exist in analysis outputs"
+    source_reference: "tools_inventory.md section 'Data Validation Tools' - validate_data_columns"
 
-This is the TDD detection point. DO NOT IMPROVISE. DO NOT GUESS SIGNATURES.
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
+    
+    input_files:
+      - path: "data/step05_hierarchical_models.csv"
+        required_columns: ["model", "R2", "F_stat"]
+        source: "analysis tool output (fit_hierarchical_regression)"
+    
+    parameters:
+      alpha: 0.05
+      vif_threshold: 10.0
+      leverage_threshold: 0.2
+      cooks_d_threshold: 0.5
+    
+    criteria:
+      - "Residuals normally distributed (Shapiro-Wilk p > 0.05)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "No extreme multicollinearity (all VIF < 10)"
+      - "No high leverage points (leverage < 0.2)"
+      - "No influential outliers (Cook's D < 0.5)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        vif: "Dict (variance inflation factors per predictor)"
+        cooks_d: "np.ndarray (Cook's distance per observation)"
+        leverage: "np.ndarray (leverage values per observation)"
+        studentized_residuals: "np.ndarray (studentized residuals)"
+        condition_number: "float (multicollinearity measure)"
+        breusch_pagan: "Dict (heteroscedasticity test results)"
+        durbin_watson: "float (autocorrelation test statistic)"
+    
+    behavior_on_failure:
+      action: "log warnings, proceed with robust methods"
+      log_to: "logs/step05_hierarchical_regression.log"
+      invoke: "continue with bootstrap inference"
+    
+    description: "Comprehensive regression diagnostics including VIF, Cook's D, leverage, and assumption tests"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_regression_diagnostics"
 
-RQ 7.1.4 requires hierarchical regression and incremental validity analysis tools that are not 
-currently documented in tools_inventory.md. The existing tools are primarily focused on IRT/LMM
-analysis, whereas this RQ requires classical regression analysis tools.
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_incremental_validity.csv"
+        required_columns: ["block", "f2"]
+        source: "analysis tool output (compute_cohens_f2)"
+    
+    parameters:
+      f2_column: "f2"
+      small_threshold: 0.02
+      medium_threshold: 0.15
+      large_threshold: 0.35
+      max_reasonable: 2.0
+    
+    criteria:
+      - "All f² values non-negative"
+      - "No NaN or infinite f² values"
+      - "f² values within reasonable bounds (< 2.0)"
+      - "Effect size interpretations assigned correctly"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all f² values valid)"
+        message: "str (validation summary)"
+        warnings: "List[str] (issues found)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_effect_sizes.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate Cohen's f² effect sizes are within reasonable bounds"
+    source_reference: "tools_inventory.md section 'Effect Size Validation Tools' - validate_effect_sizes"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step07_residual_variance.csv"
+        required_columns: ["residual_observed", "residual_ci_lower", "residual_ci_upper"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+    
+    parameters:
+      min_threshold: 0.75
+      ci_coverage_check: true
+      bootstrap_distribution_checks: true
+    
+    criteria:
+      - "Bootstrap confidence intervals non-degenerate (ci_lower < ci_upper)"
+      - "Bootstrap distribution stable across iterations"
+      - "Confidence interval coverage appropriate"
+      - "No extreme bootstrap outliers"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if bootstrap stable)"
+        message: "str (stability assessment)"
+        mean_jaccard: "float (stability metric)"
+        ci_lower: "float (CI bound)"
+        ci_upper: "float (CI bound)"
+        above_threshold: "bool (meets stability threshold)"
+    
+    behavior_on_failure:
+      action: "increase bootstrap iterations or flag instability"
+      log_to: "logs/step07_residual_analysis.log"
+      invoke: "retry with more iterations if needed"
+    
+    description: "Validate bootstrap confidence intervals are stable and non-degenerate"
+    source_reference: "tools_inventory.md section 'Bootstrap Validation Tools' - validate_bootstrap_stability"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 4
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Hierarchical regression: 3 blocks (demographics, cognitive, self-report)"
+    - "Cross-validation with 5 folds, seed=42 for reproducibility"
+    - "Bootstrap confidence intervals: 1000 iterations, percentile method"
+    - "Conservative alpha correction: 0.00179 (Chapter 7 level)"
+    - "Measurement error correction for residual variance interpretation"

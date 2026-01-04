@@ -1,0 +1,478 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.2.2
+# Created by: rq_tools agent (Step 11)
+# RQ: 7.2.2 - Do cognitive tests attenuate age effects on REMEMVR?
+# Analysis: Attenuation analysis with bootstrap confidence intervals
+
+analysis_tools:
+  # Step 0: Dependency validation
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch7/7.2.1/data/step04_regression_results.csv"
+        required_columns: ["beta_age_bivariate", "beta_age_controlled"]
+        expected_rows: "1-10 (regression coefficients by domain)"
+        data_types:
+          domain: "string"
+          beta_age_bivariate: "float"
+          beta_age_controlled: "float"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_all"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          composite_ID: "string"
+          theta_all: "float"
+          
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Text file documenting which dependencies were found and validated"
+        
+    parameters:
+      min_size_bytes: 100  # Ensure files are not empty
+      
+    description: "Validate that required dependency files from RQ 7.2.1 and Ch5 exist and are accessible"
+    source_reference: "tools_inventory.md section 'tools.validation' - check_file_exists"
+
+  # Step 1: Extract and merge data
+  extract_domain_theta_scores:
+    module: "tools.analysis_chl7"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_all"]
+        source: "Ch5 overall domain analysis"
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_what"]
+        source: "Ch5 What domain analysis"
+      - path: "results/ch5/5.2.2/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_where"]
+        source: "Ch5 Where domain analysis"
+      - path: "results/ch5/5.2.3/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_when"]
+        source: "Ch5 When domain analysis"
+      - path: "results/ch7/7.2.1/data/step04_regression_results.csv"
+        required_columns: ["domain", "beta_age_bivariate", "beta_age_controlled"]
+        source: "RQ 7.2.1 regression coefficients"
+        
+    output_files:
+      - path: "data/step01_merged_coefficients.csv"
+        columns: ["UID", "theta_all", "theta_what", "theta_where", "theta_when", "beta_age_bivariate_all", "beta_age_controlled_all", "beta_age_bivariate_domain"]
+        description: "Merged dataset with theta scores and age coefficients for attenuation analysis"
+      - path: "data/step01_data_summary.txt"
+        description: "Summary statistics and data quality report for merged dataset"
+        
+    parameters:
+      domains: ["What", "Where", "When"]
+      
+    description: "Extract theta scores from Ch5 analyses and merge with age coefficients from RQ 7.2.1"
+    source_reference: "tools_inventory.md section 'tools.analysis_chl7' - extract_domain_theta_scores"
+
+  # Step 2: Compute attenuation ratios
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression" 
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step01_merged_coefficients.csv"
+        required_columns: ["UID", "theta_all", "theta_what", "theta_where", "theta_when", "beta_age_bivariate_all", "beta_age_controlled_all"]
+        source: "Step 1 merged data"
+        
+    output_files:
+      - path: "data/step02_attenuation_ratios.csv"
+        columns: ["domain", "beta_bivariate", "beta_controlled", "attenuation_ratio", "attenuation_percent", "classification"]
+        description: "Attenuation ratios by domain with classification (minimal/partial/substantial)"
+      - path: "data/step02_effect_classification.txt"
+        description: "Interpretive text classifying attenuation effect sizes by domain"
+        
+    parameters:
+      add_constant: true
+      return_diagnostics: true
+      
+    description: "Calculate attenuation ratios as percentage reduction in age coefficients when controlling for cognitive tests"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - fit_multiple_regression"
+
+  # Step 3: Bootstrap confidence intervals
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step01_merged_coefficients.csv"
+        required_columns: ["UID", "theta_all", "theta_what", "theta_where", "theta_when"]
+        source: "Step 1 merged data for bootstrap resampling"
+      - path: "data/step02_attenuation_ratios.csv"
+        required_columns: ["domain", "attenuation_ratio"]
+        source: "Step 2 point estimates"
+        
+    output_files:
+      - path: "data/step03_bootstrap_distributions.csv"
+        columns: ["overall", "what", "where", "when"]
+        description: "Bootstrap distribution (1000 iterations) of attenuation ratios by domain"
+      - path: "data/step03_confidence_intervals.csv"
+        columns: ["domain", "point_estimate", "ci_lower", "ci_upper", "ci_width", "ci_width_percent", "bootstrap_p"]
+        description: "95% confidence intervals for attenuation ratios with bootstrap p-values"
+      - path: "data/step03_bootstrap_diagnostics.txt"
+        description: "Bootstrap convergence and stability diagnostic report"
+        
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      
+    description: "Generate bootstrap confidence intervals for attenuation ratios using participant-level resampling"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - bootstrap_regression_ci"
+
+  # Step 4: Domain comparisons
+  compute_post_hoc_contrasts:
+    module: "tools.analysis_lmm"
+    function: "compute_post_hoc_contrasts"
+    signature: "compute_post_hoc_contrasts(lmm_result: MixedLMResults, contrasts: List[Tuple[str, List[float]]], alpha: float = 0.05, method: str = 'bonferroni') -> Tuple[pd.DataFrame, pd.DataFrame]"
+    validation_tool: "validate_contrasts_d068"
+    
+    input_files:
+      - path: "data/step03_bootstrap_distributions.csv"
+        required_columns: ["overall", "what", "where", "when"]
+        source: "Step 3 bootstrap distributions for pairwise testing"
+      - path: "data/step03_confidence_intervals.csv"
+        required_columns: ["domain", "point_estimate"]
+        source: "Step 3 confidence intervals"
+        
+    output_files:
+      - path: "data/step04_domain_comparisons.csv"
+        columns: ["comparison", "difference", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr", "cohens_d"]
+        description: "Pairwise domain comparisons with dual p-value reporting (Decision D068)"
+      - path: "data/step04_multiple_corrections.csv"
+        columns: ["comparison", "p_uncorrected", "p_bonferroni", "p_fdr", "significant_corrected"]
+        description: "Multiple comparison corrections summary"
+      - path: "data/step04_pattern_analysis.txt"
+        description: "VR scaffolding hypothesis pattern analysis (What > Where > When)"
+        
+    parameters:
+      alpha: 0.0167  # Bonferroni corrected for 3 pairwise comparisons (0.05/3)
+      method: "bonferroni"
+      corrections: ["bonferroni", "fdr"]  # Decision D068 dual reporting
+      
+    description: "Test differential attenuation patterns across domains using bootstrap hypothesis tests"
+    source_reference: "tools_inventory.md section 'tools.analysis_lmm' - compute_post_hoc_contrasts"
+
+  # Step 5: Effect sizes and power
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step02_attenuation_ratios.csv"
+        required_columns: ["domain", "attenuation_ratio"]
+        source: "Step 2 attenuation estimates"
+      - path: "data/step03_confidence_intervals.csv"
+        required_columns: ["domain", "point_estimate", "ci_lower", "ci_upper"]
+        source: "Step 3 confidence intervals"
+      - path: "results/ch7/7.2.1/data/step04_regression_results.csv"
+        required_columns: ["r2_bivariate", "r2_controlled"]
+        source: "RQ 7.2.1 R-squared values"
+        
+    output_files:
+      - path: "data/step05_effect_sizes.csv"
+        columns: ["domain", "f_squared", "f_squared_ci_lower", "f_squared_ci_upper", "effect_classification", "r_squared_change"]
+        description: "Cohen's f� effect sizes with bootstrap CIs by domain"
+      - path: "data/step05_power_analysis.csv"
+        columns: ["domain", "observed_attenuation", "effect_size_d", "power", "minimum_detectable_effect"]
+        description: "Post-hoc power analysis for attenuation detection"
+      - path: "data/step05_practical_significance.txt"
+        description: "Practical significance assessment using Cohen's guidelines"
+        
+    parameters:
+      alpha: 0.0125  # Ch7 Bonferroni correction (0.05/4 domains)
+      power_target: 0.80
+      n_participants: 100
+      
+    description: "Compute comprehensive effect sizes and post-hoc power analysis for attenuation effects"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - compute_cohens_f2"
+
+  # Step 6: Diagnostics and sensitivity
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step01_merged_coefficients.csv"
+        required_columns: ["UID", "theta_all", "theta_what", "theta_where", "theta_when"]
+        source: "Step 1 original data for cross-validation"
+      - path: "data/step02_attenuation_ratios.csv"
+        required_columns: ["domain", "attenuation_ratio"]
+        source: "Step 2 main results"
+      - path: "data/step03_bootstrap_distributions.csv"
+        required_columns: ["overall", "what", "where", "when"]
+        source: "Step 3 bootstrap samples"
+        
+    output_files:
+      - path: "data/step06_assumption_checks.csv"
+        columns: ["domain", "normality_p", "homoscedasticity_p", "max_vif", "outlier_count", "assumptions_met"]
+        description: "Regression assumption validation results"
+      - path: "data/step06_sensitivity_analysis.csv"
+        columns: ["domain", "attenuation_original", "attenuation_no_outliers", "percent_change"]
+        description: "Sensitivity analysis excluding potential outliers"
+      - path: "data/step06_bootstrap_stability.txt"
+        description: "Bootstrap convergence diagnostics and stability assessment"
+      - path: "data/step06_crossvalidation_results.csv"
+        columns: ["fold", "mae", "rmse", "r2"]
+        description: "Cross-validation results for generalizability assessment"
+        
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mae", "rmse", "r2"]
+      outlier_threshold: 4  # Cook's distance threshold (4/n)
+      
+    description: "Comprehensive diagnostic checks and sensitivity analysis for robustness assessment"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - cross_validate_regression"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_merged_coefficients.csv"
+        required_columns: ["UID", "theta_all", "theta_what", "theta_where", "theta_when"]
+        source: "analysis tool output"
+        
+    parameters:
+      case_sensitive: true
+      
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names match exactly (case-sensitive)"
+      - "No missing required columns"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        missing_columns: "List[str]"
+        existing_columns: "List[str]"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_merge_coefficients.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate that required columns exist in merged dataset"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_data_columns"
+
+  validate_regression_assumptions:
+    module: "tools.analysis_chl7"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    
+    input_files:
+      - path: "data/step02_attenuation_ratios.csv"
+        required_columns: ["domain", "attenuation_ratio"]
+        source: "analysis tool output"
+        
+    parameters:
+      alpha: 0.05
+      return_plots: false
+      
+    criteria:
+      - "Residuals normally distributed (Shapiro-Wilk test)"
+      - "Homoscedasticity assumption met (Breusch-Pagan test)"
+      - "No severe multicollinearity (VIF < 5)"
+      - "No excessive outliers (Cook's D > 4/n)"
+      
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool"
+        normality: "Dict"
+        homoscedasticity: "Dict"
+        multicollinearity: "Dict"
+        outliers: "Dict"
+        all_assumptions_met: "bool"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_attenuation.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate regression assumptions for attenuation ratio calculation"
+    source_reference: "tools_inventory.md section 'tools.analysis_chl7' - validate_regression_assumptions"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict"
+    
+    input_files:
+      - path: "data/step03_bootstrap_distributions.csv"
+        required_columns: ["overall", "what", "where", "when"]
+        source: "analysis tool output"
+      - path: "data/step03_confidence_intervals.csv"
+        required_columns: ["domain", "ci_width_percent"]
+        source: "analysis tool output"
+        
+    parameters:
+      min_jaccard_threshold: 0.75
+      max_ci_width_percent: 40  # Flag if CI width > 40% of point estimate
+      
+    criteria:
+      - "Bootstrap iterations converged (1000 completed)"
+      - "Confidence interval widths reasonable (< 40% of estimate)"
+      - "Bootstrap stability adequate"
+      - "No convergence issues reported"
+      
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool"
+        mean_jaccard: "float"
+        ci_lower: "float"
+        ci_upper: "float"
+        above_threshold: "bool"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_bootstrap_confidence_intervals.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate bootstrap stability and confidence interval quality"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_bootstrap_stability"
+
+  validate_contrasts_d068:
+    module: "tools.validation"
+    function: "validate_contrasts_d068"
+    signature: "validate_contrasts_d068(contrasts_df: DataFrame) -> Dict"
+    
+    input_files:
+      - path: "data/step04_domain_comparisons.csv"
+        required_columns: ["comparison", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        source: "analysis tool output"
+        
+    parameters:
+      required_correction_methods: ["bonferroni", "fdr"]
+      
+    criteria:
+      - "p_uncorrected column present (Decision D068)"
+      - "At least one correction method present (p_bonferroni or p_fdr)"
+      - "All p-values in valid range [0, 1]"
+      - "Dual p-value reporting complete"
+      
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_domain_comparisons.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate Decision D068 compliance in domain comparison results"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_contrasts_d068"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict"
+    
+    input_files:
+      - path: "data/step05_effect_sizes.csv"
+        required_columns: ["domain", "f_squared", "effect_classification"]
+        source: "analysis tool output"
+        
+    parameters:
+      f2_column: "f_squared"
+      small_threshold: 0.02
+      medium_threshold: 0.15
+      large_threshold: 0.35
+      
+    criteria:
+      - "All f� values >= 0 (Cohen's f� definition)"
+      - "Effect size classifications match thresholds"
+      - "No extreme outliers (f� > 2.0 triggers warning)"
+      - "All domains have valid effect sizes"
+      
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_effect_sizes_power.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate effect size calculations using Cohen's guidelines"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_effect_sizes"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict"
+    
+    input_files:
+      - path: "data/step06_assumption_checks.csv"
+        required_columns: ["domain", "assumptions_met"]
+        source: "analysis tool output"
+      - path: "data/step06_crossvalidation_results.csv"
+        required_columns: ["fold", "mae", "rmse", "r2"]
+        source: "analysis tool output"
+        
+    parameters:
+      expected_rows: [4, 6]  # Range for 4 domains + summary rows
+      expected_columns: ["domain", "assumptions_met"]
+      column_types: {"assumptions_met": "bool"}
+      
+    criteria:
+      - "Row count in expected range"
+      - "All required columns present"
+      - "Column types match specifications"
+      - "DataFrame structure valid for downstream use"
+      
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_diagnostics_sensitivity.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate comprehensive diagnostic and cross-validation output structure"
+    source_reference: "tools_inventory.md section 'tools.validation' - validate_dataframe_structure"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 6
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068"]
+  bootstrap_iterations: 1000
+  random_seed: 42
+  bonferroni_alpha: 0.0125
+  cross_validation_folds: 5

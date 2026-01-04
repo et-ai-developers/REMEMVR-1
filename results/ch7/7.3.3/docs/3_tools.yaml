@@ -1,0 +1,374 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.3.3
+# Created by: rq_tools agent
+# RQ: 7.3.3 - Cognitive Predictors of High-Confidence Errors
+# Analysis: Hierarchical multiple regression with cross-validation
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+
+  # Step 1: Extract cognitive test data
+  extract_cognitive_tests:
+    module: "tools.extraction"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(master_file: str, output_path: str, participants: Optional[List[str]] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_sheets: ["cognitive_tests", "demographics"]
+        expected_variables: ["UID", "RAVLT_total", "BVMT_total", "RPM_total", "Age", "Sex", "Education"]
+        data_types:
+          UID: "string (format: P###)"
+          RAVLT_total: "int (raw score)"
+          BVMT_total: "int (raw score)" 
+          RPM_total: "int (raw score)"
+          Age: "int (years)"
+          Sex: "int (0=Male, 1=Female)"
+          Education: "int (years)"
+    
+    output_files:
+      - path: "data/step01_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        description: "T-scored cognitive tests (M=50, SD=10) with demographics"
+    
+    parameters:
+      master_file: "data/cache/master.xlsx"
+      output_path: "data/step01_cognitive_tests.csv"
+      t_score_conversion: true
+      population_norms: 
+        RAVLT: {mean: 47.1, sd: 10.4}
+        BVMT: {mean: 24.8, sd: 6.1}
+        RPM: {mean: 52.3, sd: 8.7}
+    
+    description: "Extract cognitive test scores from master.xlsx and convert to T-scores using population norms"
+    source_reference: "tools_inventory.md section 'Extraction Tools' - extract_cognitive_tests"
+
+  # Step 3: Merge datasets  
+  merge_theta_cognitive:
+    module: "tools.extraction"
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education"]
+        source: "extract_cognitive_tests output"
+      - path: "data/step02_hce_rates.csv"
+        required_columns: ["UID", "hce_rate"]
+        source: "Ch6 HCE analysis outputs"
+    
+    output_files:
+      - path: "data/step03_analysis_dataset.csv"
+        columns: ["UID", "hce_rate", "RAVLT_T", "BVMT_T", "RPM_T", "Age", "Sex", "Education", "RAVLT_T_c", "BVMT_T_c", "RPM_T_c", "Age_c"]
+        description: "Merged analysis dataset with centered predictors"
+    
+    parameters:
+      merge_on: "UID"
+      merge_type: "inner"
+      center_predictors: true
+      center_values:
+        Age: "sample_mean"
+        RAVLT_T: 50
+        BVMT_T: 50
+        RPM_T: 50
+    
+    description: "Merge cognitive tests and HCE rates into analysis dataset with centered predictors"
+    source_reference: "tools_inventory.md section 'Extraction Tools' - merge_theta_cognitive"
+
+  # Step 4: Hierarchical regression
+  fit_hierarchical_regression:
+    module: "tools.analysis_regression"
+    function: "fit_hierarchical_regression"
+    signature: "fit_hierarchical_regression(data: pd.DataFrame, model_specs: List[Dict[str, Any]], outcome: str, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "hce_rate", "RAVLT_T_c", "BVMT_T_c", "RPM_T_c", "Age_c", "Sex", "Education"]
+        expected_rows: "~100"
+        data_types:
+          hce_rate: "float (0-1 proportions)"
+          cognitive_predictors: "float (centered T-scores)"
+          demographics: "int"
+    
+    output_files:
+      - path: "data/step04_regression_results.csv"
+        columns: ["model", "predictor", "beta", "se", "t_stat", "p_uncorrected", "p_bonferroni", "p_fdr", "ci_lower", "ci_upper"]
+        description: "Hierarchical regression results with dual p-value reporting (Decision D068)"
+      - path: "data/step04_bootstrap_cis.csv"
+        columns: ["predictor", "beta", "ci_lower", "ci_upper", "iterations"]
+        description: "Bootstrap confidence intervals for regression coefficients"
+    
+    parameters:
+      outcome: "hce_rate"
+      model_specs:
+        - name: "Demographics"
+          predictors: ["Age_c", "Sex", "Education"]
+        - name: "Cognitive"
+          predictors: ["Age_c", "Sex", "Education", "RAVLT_T_c", "BVMT_T_c", "RPM_T_c"]
+      alpha_bonferroni: 0.000448  # 0.00179/4 per within-RQ correction
+      bootstrap_iterations: 1000
+      bootstrap_seed: 42
+      robust_se: "HC3"
+    
+    description: "Fit hierarchical regression testing incremental validity of cognitive predictors over demographics"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - fit_hierarchical_regression"
+
+  # Step 5: Model diagnostics
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict[str, Any]"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step04_regression_results.csv"
+        required_columns: ["model", "predictor", "beta"]
+        source: "fit_hierarchical_regression output"
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["hce_rate", "RAVLT_T_c", "BVMT_T_c", "RPM_T_c", "Age_c", "Sex", "Education"]
+        source: "merge_theta_cognitive output"
+    
+    output_files:
+      - path: "data/step05_model_diagnostics.csv"
+        columns: ["assumption", "test_statistic", "p_value", "interpretation"]
+        description: "Regression assumption test results"
+      - path: "data/step05_diagnostic_plot_data.csv"
+        columns: ["observation", "fitted", "residuals", "standardized_residuals", "cooks_distance"]
+        description: "Plot coordinates for diagnostic visualizations"
+    
+    parameters:
+      assumptions_to_check: ["multicollinearity", "normality", "homoscedasticity", "linearity", "outliers"]
+      vif_threshold: 5.0
+      cooks_threshold: 0.04  # 4/n for N=100
+      shapiro_alpha: 0.05
+      breusch_pagan_alpha: 0.05
+    
+    description: "Check regression assumptions and identify potential violations with remedial actions"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_regression_diagnostics"
+
+  # Step 6: Effect sizes
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step04_regression_results.csv"
+        required_columns: ["model", "R2", "R2_adj"]
+        source: "fit_hierarchical_regression output"
+    
+    output_files:
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["effect_type", "value", "interpretation", "relative_importance"]
+        description: "Cohen's f² and relative weights for predictors"
+      - path: "data/step06_effect_size_cis.csv"
+        columns: ["effect", "f2", "ci_lower", "ci_upper", "bootstrap_iterations"]
+        description: "Bootstrap confidence intervals for effect sizes"
+    
+    parameters:
+      bootstrap_iterations: 1000
+      bootstrap_seed: 42
+      effect_size_thresholds:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+      domain_context: "metacognitive_monitoring"
+      minimum_meaningful: 0.02  # Context-appropriate for individual differences
+    
+    description: "Compute Cohen's f² effect sizes with bootstrap confidence intervals and practical significance interpretation"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_cohens_f2"
+
+  # Step 7: Cross-validation
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], cv_folds: int = 5, random_state: int = 42) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["hce_rate", "Age_c", "Sex", "Education", "RAVLT_T_c", "BVMT_T_c", "RPM_T_c"]
+        expected_rows: "~100"
+        source: "merge_theta_cognitive output"
+    
+    output_files:
+      - path: "data/step07_cross_validation.csv"
+        columns: ["fold", "train_r2", "test_r2", "rmse", "mae", "generalization_gap"]
+        description: "Cross-validation performance per fold"
+      - path: "data/step07_cv_summary.csv"
+        columns: ["metric", "mean", "std", "overfitting_flag"]
+        description: "Aggregated cross-validation metrics"
+    
+    parameters:
+      cv_folds: 5
+      random_state: 42
+      shuffle: true
+      overfitting_threshold: 0.10  # Generalization gap
+      stratify: false  # Regression (use quantile-based if needed)
+    
+    description: "5-fold cross-validation to assess model generalizability and check for overfitting"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - cross_validate_regression"
+
+  # Step 8: Power analysis
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, n_predictors: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step04_regression_results.csv"
+        required_columns: ["model", "R2", "F_stat", "p_value"]
+        source: "fit_hierarchical_regression output"
+      - path: "data/step06_effect_sizes.csv"
+        required_columns: ["effect_type", "value"]
+        source: "compute_cohens_f2 output"
+    
+    output_files:
+      - path: "data/step08_power_analysis.csv"
+        columns: ["test_type", "effect_size", "alpha", "power", "interpretation"]
+        description: "Post-hoc power calculations for observed effects"
+      - path: "data/step08_sensitivity.csv"
+        columns: ["test", "min_detectable_f2", "min_detectable_beta", "power_threshold"]
+        description: "Minimum detectable effects with 80% power"
+    
+    parameters:
+      n: 100
+      n_predictors: 6  # Full model predictors
+      alpha_corrected: 0.000448  # Bonferroni within-RQ correction
+      power_threshold: 0.80
+      sensitivity_analysis: true
+    
+    description: "Post-hoc power analysis and sensitivity testing for observed effects"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_post_hoc_power"
+
+validation_tools:
+
+  # File/data validation
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - description: "Validates output from extraction and merging steps"
+    
+    parameters:
+      required_columns: "varies by analysis step"
+      case_sensitive: true
+    
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing column names"
+      - "DataFrame not empty"
+      - "Column data types reasonable"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        missing_columns: "List[str] (columns not found)"
+        existing_columns: "List[str] (columns found)"
+        n_required: "int"
+        n_missing: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate that required columns exist in DataFrame after extraction/merging"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  # Regression validation  
+  validate_regression_assumptions:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict[str, Any]"
+    
+    input_files:
+      - description: "Validates fitted regression models"
+    
+    parameters:
+      assumptions: ["multicollinearity", "normality", "homoscedasticity", "linearity", "independence", "outliers"]
+      vif_threshold: 5.0
+      alpha: 0.05
+      outlier_threshold: 0.04
+    
+    criteria:
+      - "VIF < 5.0 for all predictors (multicollinearity)"
+      - "Shapiro-Wilk p > 0.05 for residuals (normality)"
+      - "Breusch-Pagan p > 0.05 (homoscedasticity)"  
+      - "Linearity assessed via partial residual plots"
+      - "Cook's D < 4/n for all observations (outliers)"
+      - "Independence assumed for cross-sectional design"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all assumptions met)"
+        violations: "List[str] (failed assumptions)"
+        remedial_actions: "List[str] (recommended fixes)"
+        diagnostics: "Dict (test statistics and p-values)"
+    
+    behavior_on_failure:
+      action: "log warnings and continue with remedial actions"
+      log_to: "logs/stepNN_*.log"
+      invoke: "apply robust standard errors or bootstrap CIs"
+    
+    description: "Validate regression assumptions and recommend remedial actions for violations"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_regression_assumptions"
+
+  # Numeric range validation
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(values: Union[pd.Series, np.ndarray, List], min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+    
+    input_files:
+      - description: "Validates numeric outputs from analysis steps"
+    
+    parameters:
+      min_val: "depends on context (e.g., 0.0 for R², -5.0 for effect sizes)"
+      max_val: "depends on context (e.g., 1.0 for R², 5.0 for effect sizes)"
+      allow_none: false
+      inclusive_bounds: true
+    
+    criteria:
+      - "All values within specified range [min_val, max_val]"
+      - "No NaN values (unless allow_none=True)"
+      - "No infinite values"
+      - "Reasonable distribution of values"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        violations: "List (out-of-range values)"
+        n_violations: "int"
+        range_description: "str"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log" 
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate numeric values are within expected ranges (R², effect sizes, probabilities)"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 3
+  total_unique_tools: 11
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "hierarchical_multiple_regression"
+  primary_hypothesis: "RPM negatively predicts HCE rates; RAVLT/BVMT show no significant prediction"
+  statistical_specifications:
+    - "seed=42 for all randomized procedures"
+    - "1000 bootstrap iterations with percentile CIs"
+    - "5-fold cross-validation with shuffle=True"
+    - "Bonferroni within-RQ correction: α = 0.000448 per test"
+    - "HC3 robust standard errors for assumption violations"

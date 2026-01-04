@@ -29,17 +29,18 @@ rq_stats:
 rq_planner:
   status: success
   context_dump: |
-    Analysis plan created: 9 steps (Step 0: validation + Steps 1-8: analysis)
-    Pipeline: Correlation Analysis (Bivariate + Partial with Cross-Validation)  
-    Dependencies: Ch5 5.1.1 omnibus slopes + master.xlsx RAVLT scores
-    Key features: Bootstrap CIs (1000 iter, seed=42), Decision D068 dual p-values
-    Statistical specs: CV, bootstrap, power, corrections, remedial actions all specified
-    Validation: 4-layer validation for ALL steps, cross-RQ fallback paths included
-    Next: rq_tools specify exact tools from tool_inventory.md
+    Analysis plan created: 9 steps planned (Step 0: data loading + Steps 1-8: analysis).
+    Tool requirements: Cognitive test extraction, slope extraction from Ch5 5.1.1, bootstrap correlations with dual p-values (D068), diagnostics, power analysis.
+    Expected outputs: 9 data files (participant data, RAVLT scores, slopes, merged dataset, correlations, diagnostics, bootstrap results, power analysis). Validation required at every step.
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Tool catalog created: 9 analysis + 9 validation tools for RAVLT-REMEMVR correlation analysis
+    Tools: load_participant_data, extract_cognitive_tests, extract_random_effects_from_lmm, bootstrap_correlation_ci, compute_pearson_correlations_with_correction
+    Cross-RQ dependency: Ch5 5.1.1 LMM random slopes required
+    Decision D068: Dual p-value reporting (uncorrected + Bonferroni) embedded in correlation tools
+    All tools verified exist in tools_inventory.md with complete type signatures
 
 rq_analysis:
   status: pending

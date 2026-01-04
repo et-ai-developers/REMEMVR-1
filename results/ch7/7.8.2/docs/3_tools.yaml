@@ -1,0 +1,480 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent (Step 11)
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: str) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "results/ch7/7.8.1/status.yaml"
+        required_columns: ["N/A"]
+        expected_rows: "YAML structure"
+        data_types:
+          status: "string (success/pending/failed)"
+      - path: "results/ch7/7.8.1/data/step03_rememvr_profile_classifications.csv"
+        required_columns: ["UID", "profile", "probability"]
+        expected_rows: "~100 (N participants)"
+        data_types:
+          UID: "string (participant ID)"
+          profile: "int (profile assignment)"
+          probability: "float (max posterior probability)"
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: ["N/A"]
+        description: "Text file with dependency validation results"
+
+    parameters:
+      file_path: "string (path to check)"
+
+    description: "Validate cross-RQ dependencies exist before proceeding with external validation"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  extract_cognitive_data:
+    module: "tools.data_io"
+    function: "load_excel_data"
+    signature: "load_excel_data(file_path: str, sheet_name: str = 'Sheet1', columns: Optional[List[str]] = None) -> pd.DataFrame"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["participant_id", "RAVLT_total", "BVMT_total", "RPM_total"]
+        expected_rows: "~100"
+        data_types:
+          participant_id: "string (participant identifier)"
+          RAVLT_total: "int (raw RAVLT score)"
+          BVMT_total: "int (raw BVMT score)"
+          RPM_total: "int (raw RPM score)"
+
+    output_files:
+      - path: "data/step01_cognitive_lpa_input.csv"
+        columns: ["participant_id", "RAVLT_T", "BVMT_T", "RPM_T"]
+        description: "T-score standardized cognitive test data for LPA"
+      - path: "data/step01_cognitive_descriptives.csv"
+        columns: ["test", "raw_mean", "raw_sd", "t_mean", "t_sd", "correlation_matrix"]
+        description: "Descriptive statistics for cognitive tests"
+
+    parameters:
+      file_path: "data/cache/master.xlsx"
+      sheet_name: "Sheet1"
+      columns: ["participant_id", "RAVLT_total", "BVMT_total", "RPM_total"]
+      standardization_method: "t_scores"
+      target_mean: 50
+      target_sd: 10
+
+    description: "Extract cognitive test scores from master.xlsx and standardize to T-scores"
+    source_reference: "tools_inventory.md section 'Data I/O Tools' - load_excel_data"
+
+  fit_lpa_models:
+    module: "tools.analysis_lpa"
+    function: "fit_lpa_models"
+    signature: "fit_lpa_models(data: Union[np.ndarray, pd.DataFrame], n_components_range: Union[List[int], range] = range(2, 6), covariance_type: str = 'full', n_init: int = 10, random_state: int = 42) -> Dict[int, GaussianMixture]"
+    validation_tool: "validate_lpa_solution"
+
+    input_files:
+      - path: "data/step01_cognitive_lpa_input.csv"
+        required_columns: ["RAVLT_T", "BVMT_T", "RPM_T"]
+        expected_rows: "95-100"
+        data_types:
+          RAVLT_T: "float (T-score ~50±10)"
+          BVMT_T: "float (T-score ~50±10)"
+          RPM_T: "float (T-score ~50±10)"
+
+    output_files:
+      - path: "data/step02_lpa_model_comparison.csv"
+        columns: ["n_components", "BIC", "AIC", "log_likelihood", "entropy", "n_parameters", "converged"]
+        description: "Model comparison results for K=2,3,4 profiles"
+      - path: "data/step02_cognitive_profile_classifications.csv"
+        columns: ["participant_id", "profile", "probability_0", "probability_1", "probability_2", "entropy"]
+        description: "Optimal profile assignments with posterior probabilities"
+      - path: "data/step02_profile_descriptives.csv"
+        columns: ["profile", "RAVLT_mean", "BVMT_mean", "RPM_mean", "size", "proportion"]
+        description: "Profile characteristics and interpretation"
+      - path: "data/step02_split_sample_validation.csv"
+        columns: ["validation_metric", "training_sample", "test_sample", "agreement"]
+        description: "Split-sample stability assessment"
+
+    parameters:
+      n_components_range: [2, 3, 4]
+      covariance_type: "full"
+      n_init: 500
+      random_state: 42
+      max_iter: 5000
+      convergence_threshold: 0.01
+      split_validation: true
+      split_ratio: 0.7
+
+    description: "Fit cognitive test LPA models with comprehensive model selection and split-sample validation"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - fit_lpa_models"
+
+  merge_profile_data:
+    module: "tools.data_processing"
+    function: "merge_dataframes_inner"
+    signature: "merge_dataframes_inner(left_df: pd.DataFrame, right_df: pd.DataFrame, on: Union[str, List[str]], suffixes: Tuple[str, str] = ('_x', '_y')) -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step02_cognitive_profile_classifications.csv"
+        required_columns: ["participant_id", "profile"]
+        source: "cognitive LPA output"
+      - path: "results/ch7/7.8.1/data/step03_rememvr_profile_classifications.csv"
+        required_columns: ["participant_id", "profile"]
+        source: "REMEMVR LPA output from RQ 7.8.1"
+
+    output_files:
+      - path: "data/step03_merged_profile_data.csv"
+        columns: ["participant_id", "cognitive_profile", "rememvr_profile"]
+        description: "Combined profile assignments for correspondence analysis"
+      - path: "data/step03_profile_crosstab.csv"
+        columns: ["cognitive_profile", "rememvr_profile", "observed_freq", "expected_freq", "std_residual"]
+        description: "Contingency table with frequencies and residuals"
+      - path: "data/step03_conditional_probabilities.csv"
+        columns: ["cognitive_profile", "rememvr_profile", "conditional_prob"]
+        description: "P(REMEMVR profile | cognitive profile) prediction patterns"
+
+    parameters:
+      on: "participant_id"
+      suffixes: ["_cognitive", "_rememvr"]
+      how: "inner"
+      validate: "one_to_one"
+
+    description: "Merge cognitive and REMEMVR profile classifications for correspondence analysis"
+    source_reference: "tools_inventory.md section 'Data Processing Tools' - merge_dataframes_inner"
+
+  chi_square_test_d068:
+    module: "tools.analysis_stats"
+    function: "chi_square_test_d068"
+    signature: "chi_square_test_d068(contingency_table: Union[pd.DataFrame, np.ndarray], correction: bool = False, n_comparisons: int = None) -> Dict"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    input_files:
+      - path: "data/step03_profile_crosstab.csv"
+        required_columns: ["cognitive_profile", "rememvr_profile", "observed_freq"]
+        source: "contingency table from profile merge"
+
+    output_files:
+      - path: "data/step04_association_test.csv"
+        columns: ["chi2_statistic", "p_uncorrected", "p_bonferroni", "df", "cramers_v", "ci_lower", "ci_upper", "sparse_test"]
+        description: "Chi-square test results with dual p-values and effect size"
+      - path: "data/step04_effect_size_bootstrap.csv"
+        columns: ["bootstrap_iteration", "cramers_v_sample", "chi2_sample"]
+        description: "Bootstrap distribution for Cramer's V confidence interval"
+
+    parameters:
+      correction: false
+      n_comparisons: 28
+      alpha_bonferroni: 0.00179
+      bootstrap_iterations: 1000
+      random_state: 42
+      sparse_threshold: 5
+
+    description: "Test association between cognitive and REMEMVR profiles with Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - chi_square_test_d068"
+
+  compute_cramers_v:
+    module: "tools.analysis_stats"
+    function: "compute_cramers_v"
+    signature: "compute_cramers_v(chi2: float, n: int, k: int) -> float"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step04_association_test.csv"
+        required_columns: ["chi2_statistic"]
+        source: "chi-square test output"
+
+    output_files:
+      - path: "data/step04_effect_size_bootstrap.csv"
+        columns: ["cramers_v", "ci_lower", "ci_upper", "interpretation"]
+        description: "Cramer's V effect size with bootstrap confidence interval"
+
+    parameters:
+      chi2: "float (chi-square statistic)"
+      n: "int (total sample size)"
+      k: "int (min(rows-1, cols-1))"
+      bootstrap_iterations: 1000
+      confidence_level: 0.95
+
+    description: "Compute Cramer's V effect size for profile correspondence strength"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - compute_cramers_v"
+
+  analyze_correspondence_patterns:
+    module: "tools.analysis_stats"
+    function: "analyze_categorical_association"
+    signature: "analyze_categorical_association(crosstab: pd.DataFrame, standardized_residuals: bool = True) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/step03_profile_crosstab.csv"
+        required_columns: ["cognitive_profile", "rememvr_profile", "std_residual"]
+        source: "contingency table with residuals"
+      - path: "data/step03_conditional_probabilities.csv"
+        required_columns: ["cognitive_profile", "rememvr_profile", "conditional_prob"]
+        source: "prediction patterns"
+      - path: "data/step04_association_test.csv"
+        required_columns: ["cramers_v", "p_uncorrected", "p_bonferroni"]
+        source: "association test results"
+
+    output_files:
+      - path: "data/step05_correspondence_interpretation.csv"
+        columns: ["cognitive_profile", "rememvr_profile", "association_strength", "above_chance", "theoretical_match"]
+        description: "Pattern analysis with theoretical comparisons"
+      - path: "data/step05_theoretical_assessment.txt"
+        columns: ["N/A"]
+        description: "Narrative interpretation of correspondence patterns"
+
+    parameters:
+      residual_threshold: 2.0
+      chance_threshold: 0.33
+      theoretical_predictions:
+        verbal_dominant: "What"
+        spatial_dominant: "Where"
+        balanced: "When"
+
+    description: "Interpret correspondence patterns and assess theoretical coherence"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - analyze_categorical_association"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: ["N/A"]
+        source: "dependency check output"
+
+    parameters:
+      required_cols: ["varies by step"]
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "DataFrame not empty"
+      - "Column names case-sensitive match"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        message: "str (validation summary)"
+        missing_cols: "List[str] (any missing columns)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_dependency_validation.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrame has required columns for dependency checks"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_cognitive_lpa_input.csv"
+        required_columns: ["RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "cognitive T-score standardization output"
+
+    parameters:
+      column_names: ["RAVLT_T", "BVMT_T", "RPM_T"]
+      tolerance: 0.01
+      target_mean: 50
+      target_sd: 10
+
+    criteria:
+      - "T-score means approximately 50 (within tolerance)"
+      - "T-score SDs approximately 10 (within tolerance)"
+      - "No extreme standardization outliers (T < 10 or T > 90)"
+      - "Sample size ≥95 after standardization"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if standardization successful)"
+        message: "str (validation summary)"
+        mean_values: "Dict[str, float] (actual means per test)"
+        sd_values: "Dict[str, float] (actual SDs per test)"
+
+    behavior_on_failure:
+      action: "log warning, continue if N≥90"
+      log_to: "logs/step01_extract_cognitive.log"
+      invoke: "quit if N<90 with sample size error"
+
+    description: "Validate T-score standardization successful (M~50, SD~10)"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_standardization"
+
+  validate_lpa_solution:
+    module: "tools.analysis_lpa"
+    function: "validate_lpa_solution"
+    signature: "validate_lpa_solution(data: Union[np.ndarray, pd.DataFrame], labels: Union[np.ndarray, pd.Series], metric: str = 'euclidean') -> Dict"
+
+    input_files:
+      - path: "data/step02_lpa_model_comparison.csv"
+        required_columns: ["entropy", "converged", "BIC", "AIC"]
+        source: "LPA model comparison output"
+      - path: "data/step02_cognitive_profile_classifications.csv"
+        required_columns: ["profile", "entropy"]
+        source: "LPA profile assignments"
+
+    parameters:
+      entropy_threshold: 0.70
+      convergence_required: true
+      min_profile_size: 10
+      silhouette_threshold: 0.5
+
+    criteria:
+      - "All models converged successfully"
+      - "Optimal solution entropy >0.70"
+      - "Profile means interpretable and differentiated"
+      - "Split-sample validation agreement >0.70"
+      - "Silhouette score indicates good separation"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if LPA solution acceptable)"
+        message: "str (validation summary)"
+        silhouette_score: "float (solution quality metric)"
+        davies_bouldin_score: "float (cluster validation)"
+
+    behavior_on_failure:
+      action: "retry with increased iterations, reduce K if persistent"
+      log_to: "logs/step02_cognitive_lpa.log"
+      invoke: "document convergence issues in validation log"
+
+    description: "Validate LPA solution quality using internal validity metrics"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - validate_lpa_solution"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_merged_profile_data.csv"
+        required_columns: ["participant_id", "cognitive_profile", "rememvr_profile"]
+        source: "profile merge output"
+
+    parameters:
+      expected_rows: [80, 100]
+      expected_columns: ["participant_id", "cognitive_profile", "rememvr_profile"]
+      column_types:
+        participant_id: str
+        cognitive_profile: int
+        rememvr_profile: int
+
+    criteria:
+      - "Merged sample size 80-100 participants"
+      - "No missing profile assignments"
+      - "All cognitive profiles represented (2-3 categories)"
+      - "All REMEMVR profiles represented (typically 3-4 categories)"
+      - "Contingency table internally consistent"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if merge successful)"
+        message: "str (validation summary)"
+        checks: "Dict[str, bool] (individual validation checks)"
+
+    behavior_on_failure:
+      action: "document merge issues, check sample adequacy"
+      log_to: "logs/step03_merge_profiles.log"
+      invoke: "quit if <80% successful merge rate"
+
+    description: "Validate profile merge structure and completeness"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_dataframe_structure"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_association_test.csv"
+        required_columns: ["p_uncorrected", "p_bonferroni", "chi2_statistic", "cramers_v"]
+        source: "chi-square test results"
+
+    parameters:
+      required_terms: ["chi_square_association"]
+      alpha_bonferroni: 0.00179
+      dual_pvalue_required: true
+
+    criteria:
+      - "Both uncorrected and Bonferroni p-values present (Decision D068)"
+      - "Chi-square statistic >0 (valid test statistic)"
+      - "Cramer's V in range [0,1] (valid effect size)"
+      - "Bootstrap CI valid (ci_lower < cramers_v < ci_upper)"
+      - "Sparse cell handling documented if applicable"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-value check)"
+        missing_terms: "List[str] (any missing test components)"
+        missing_cols: "List[str] (any missing p-value columns)"
+        message: "str (validation summary)"
+
+    behavior_on_failure:
+      action: "document test failures, check data integrity"
+      log_to: "logs/step04_test_association.log"
+      invoke: "quit if fundamental statistical computation fails"
+
+    description: "Validate association test includes Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_hypothesis_test_dual_pvalues"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_effect_size_bootstrap.csv"
+        required_columns: ["cramers_v", "ci_lower", "ci_upper"]
+        source: "Cramer's V effect size with CI"
+
+    parameters:
+      effect_size_column: "cramers_v"
+      valid_range: [0.0, 1.0]
+      interpretation_thresholds:
+        small: 0.10
+        medium: 0.30
+        large: 0.50
+
+    criteria:
+      - "Cramer's V values in range [0,1]"
+      - "No negative effect sizes (invalid)"
+      - "No NaN/infinite values (computation error)"
+      - "Confidence interval sensible (ci_lower < cramers_v < ci_upper)"
+      - "Bootstrap completed successfully (1000 iterations)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if effect sizes valid)"
+        message: "str (validation summary with interpretation)"
+        warnings: "List[str] (any warnings about large effects)"
+
+    behavior_on_failure:
+      action: "document effect size computation errors"
+      log_to: "logs/step04_test_association.log"
+      invoke: "check bootstrap procedure if CI invalid"
+
+    description: "Validate Cramer's V effect size bounds and bootstrap CI"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 6
+  total_unique_tools: 13
+  mandatory_decisions_embedded: ["D068"]
+  pipeline_type: "LPA + Chi-square + Effect Size Analysis"
+  cross_rq_dependencies: ["RQ 7.8.1"]

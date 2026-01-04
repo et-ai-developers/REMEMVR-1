@@ -39,8 +39,8 @@ rq_planner:
     Dependencies: Ch5 5.1.1 theta + master.xlsx RAVLT with circuit breakers
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "8 analysis + 6 validation tools cataloged for Alternative RAVLT Scoring regression analysis"
 
 rq_analysis:
   status: pending

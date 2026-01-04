@@ -1,0 +1,307 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent
+# RQ: 7.2.4 - VR Scaffolding Validation
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "status file"
+        data_types:
+          status: "string (success/pending/failed)"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_all"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          composite_ID: "string"
+          theta_all: "float64"
+      - path: "data/cache/master.xlsx"
+        required_columns: []
+        expected_rows: "participant data"
+        data_types:
+          UID: "string"
+          Age: "float64"
+          RAVLT_Total: "float64"
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: []
+        description: "Validation results with file paths and data dimensions"
+
+    parameters:
+      min_size_bytes: 0
+      validation_type: "dependency_check"
+
+    description: "Validate Ch5 5.1.1 completion and data accessibility for VR scaffolding analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  compute_pearson_correlations_with_correction:
+    module: "tools.analysis_ctt"
+    function: "compute_pearson_correlations_with_correction"
+    signature: "compute_pearson_correlations_with_correction(df: DataFrame, irt_col: str = 'IRT_score', ctt_col: str = 'CTT_score', factor_col: str = 'factor', thresholds: Optional[List[float]] = [0.70, 0.90]) -> DataFrame"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step03_merged_data.csv"
+        required_columns: ["UID", "Age", "RAVLT_Total", "theta_all"]
+        expected_rows: "100"
+        data_types:
+          Age: "float64"
+          RAVLT_Total: "float64"
+          theta_all: "float64"
+
+    output_files:
+      - path: "data/step03_correlations.csv"
+        columns: ["variable_pair", "r", "p_uncorrected", "p_bonferroni", "ci_lower", "ci_upper", "n_bootstrap", "interpretation"]
+        description: "Age correlations with bootstrap CIs and dual p-values per Decision D068"
+
+    parameters:
+      bootstrap_iterations: 1000
+      random_seed: 42
+      alpha: 0.05
+      bonferroni_n_tests: 2
+
+    description: "Compute age correlations for RAVLT and REMEMVR with bootstrap confidence intervals"
+    source_reference: "tools_inventory.md section 'CTT Analysis Tools'"
+
+  compare_correlations_dependent:
+    module: "tools.analysis_ctt"
+    function: "compare_correlations_dependent"
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Any]"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step03_correlations.csv"
+        required_columns: ["r", "variable_pair"]
+        expected_rows: "2"
+        data_types:
+          r: "float64"
+      - path: "data/step03_merged_data.csv"
+        required_columns: ["RAVLT_Total", "theta_all"]
+        expected_rows: "100"
+        data_types:
+          RAVLT_Total: "float64"
+          theta_all: "float64"
+
+    output_files:
+      - path: "data/step04_steiger_test.csv"
+        columns: ["z_statistic", "p_value_one_tailed", "r_ravlt", "r_rememvr", "r_correlation", "n_participants", "interpretation"]
+        description: "Steiger's Z-test results for dependent correlation comparison"
+      - path: "data/step04_effect_sizes.csv"
+        columns: ["correlation_difference", "ci_lower", "ci_upper", "power_achieved", "minimum_detectable", "effect_size_category"]
+        description: "Effect size calculations with bootstrap confidence intervals"
+
+    parameters:
+      one_tailed: true
+      bootstrap_iterations: 1000
+      random_seed: 42
+      alpha: 0.05
+
+    description: "Test whether age-related decline differs significantly between RAVLT and REMEMVR using Steiger's Z-test"
+    source_reference: "tools_inventory.md section 'CTT Analysis Tools'"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: Any, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/step03_merged_data.csv"
+        required_columns: ["Age", "RAVLT_Total", "theta_all"]
+        expected_rows: "100"
+        data_types:
+          Age: "float64"
+          RAVLT_Total: "float64"
+          theta_all: "float64"
+
+    output_files:
+      - path: "data/step05_diagnostics.csv"
+        columns: ["assumption", "test_statistic", "p_value", "threshold", "status"]
+        description: "Assumption test results for correlation relationships"
+      - path: "data/step05_outliers.csv"
+        columns: ["UID", "outlier_type", "distance_value", "threshold"]
+        description: "Flagged outliers with standardized distances"
+
+    parameters:
+      alpha: 0.05
+      outlier_threshold: 3.0
+      cook_d_threshold: 0.04
+
+    description: "Check linearity assumptions, identify outliers, and test normality for correlation relationships"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  compute_cronbachs_alpha:
+    module: "tools.analysis_ctt"
+    function: "compute_cronbachs_alpha"
+    signature: "compute_cronbachs_alpha(data: DataFrame, n_bootstrap: int = 1000) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step03_merged_data.csv"
+        required_columns: ["RAVLT_Total", "theta_all"]
+        expected_rows: "100"
+        data_types:
+          RAVLT_Total: "float64"
+          theta_all: "float64"
+      - path: "data/step05_outliers.csv"
+        required_columns: ["UID", "outlier_type"]
+        expected_rows: "variable"
+        data_types:
+          UID: "string"
+
+    output_files:
+      - path: "data/step06_sensitivity_outliers.csv"
+        columns: ["variable_pair", "r", "ci_lower", "ci_upper", "n_participants", "method"]
+        description: "Correlation results with outliers excluded"
+      - path: "data/step06_sensitivity_spearman.csv"
+        columns: ["variable_pair", "rs", "ci_lower", "ci_upper", "n_participants", "method"]
+        description: "Spearman rank correlations as non-parametric alternative"
+      - path: "data/step06_sensitivity_age_groups.csv"
+        columns: ["age_group", "variable_pair", "r", "ci_lower", "ci_upper", "n_participants", "median_split"]
+        description: "Age-stratified correlation results"
+
+    parameters:
+      bootstrap_iterations: 1000
+      random_seed: 42
+      trim_percentage: 0.05
+
+    description: "Test robustness through outlier exclusion, non-parametric alternatives, and age stratification"
+    source_reference: "tools_inventory.md section 'CTT Analysis Tools'"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: []
+        source: "analysis tool output (check_file_exists)"
+
+    parameters:
+      check_missing_values: true
+      check_data_types: true
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No critical missing values (complete data for analysis)"
+      - "Data types appropriate for analysis (numeric variables as float64)"
+      - "Sample size adequate for correlation analysis (N >= 90)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        missing_columns: "List[str] (empty if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate data format and completeness for correlation analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_correlations.csv"
+        required_columns: ["r", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (compute_pearson_correlations_with_correction)"
+      - path: "data/step04_steiger_test.csv"
+        required_columns: ["z_statistic", "p_value_one_tailed"]
+        source: "analysis tool output (compare_correlations_dependent)"
+
+    parameters:
+      check_d068_compliance: true
+      required_p_columns: ["p_uncorrected", "p_bonferroni"]
+
+    criteria:
+      - "Correlation coefficients in valid range [-1, 1]"
+      - "P-values in valid range [0, 1]"
+      - "Both uncorrected and corrected p-values present (Decision D068)"
+      - "Bootstrap confidence intervals properly computed"
+      - "All statistical results finite (no NaN/Inf values)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        missing_cols: "List[str]"
+        message: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_compute_correlations.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate correlation results include Decision D068 dual p-value reporting and are statistically valid"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_sensitivity_outliers.csv"
+        required_columns: ["r", "n_participants"]
+        source: "analysis tool output (compute_cronbachs_alpha)"
+      - path: "data/step06_sensitivity_spearman.csv"
+        required_columns: ["rs", "n_participants"]
+        source: "analysis tool output (compute_cronbachs_alpha)"
+
+    parameters:
+      correlation_range: [-1, 1]
+      sample_size_min: 90
+      check_finite: true
+
+    criteria:
+      - "All correlation values in range [-1, 1]"
+      - "Sample sizes reasonable after exclusions (N >= 90 expected)"
+      - "Sensitivity analyses support main conclusion"
+      - "No infinite or NaN values in results"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_sensitivity.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate sensitivity analysis results are within expected ranges and support main findings"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 3
+  total_unique_tools: 8
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "VR Scaffolding Validation"
+  primary_method: "Steiger's Z-test for dependent correlations"
+  key_features:
+    - "Bootstrap confidence intervals for robust effect sizes"
+    - "Multiple sensitivity analyses for robustness testing"
+    - "Decision D068 dual p-value reporting throughout"
+    - "Cross-RQ dependency validation from Ch5 5.1.1"
+    - "Within-subjects design controlling individual differences"

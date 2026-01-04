@@ -37,8 +37,14 @@ rq_planner:
     All steps have 4-layer validation requirements embedded
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  completed: 2026-01-04 19:45
+  context_dump: |
+    12 analysis + 8 validation tools cataloged for multiple regression analysis
+    Tools: regression (hierarchical/multiple), bootstrap CIs, cross-validation, power analysis
+    Dependencies: Ch6 6.1.1 confidence theta (required), Ch7 7.1.1 accuracy (optional)
+    Decision D068: Dual p-value reporting (uncorrected + bonferroni + FDR)
+    Enhanced specifications: Complete parameter lists, validation pairings, bootstrap seeds
 
 rq_analysis:
   status: pending

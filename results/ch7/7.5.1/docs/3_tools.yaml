@@ -1,0 +1,444 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.5.1
+# Created by: rq_tools agent
+# RQ: 7.5.1 - Self-Report Predictors of REMEMVR Performance
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  prepare_regression_data:
+    module: "tools.data"
+    function: "prepare_regression_data"
+    signature: "prepare_regression_data(participant_path: str = None, test_path: str = None, theta_path: str = None, include_interactions: bool = False) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "Education", "Typical_Sleep", "VR_Experience", "Age"]
+        expected_rows: "100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          Education: "float64 (years, 8-25)"
+          Typical_Sleep: "float64 (hours, 4-12)"
+          VR_Experience: "int64 (scale 0-5)"
+          Age: "float64 (years, 18-35)"
+      
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "UID", "theta_all"]
+        expected_rows: "100 participants"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          UID: "string (participant identifier)"
+          theta_all: "float64 (IRT ability, -3 to 3)"
+    
+    output_files:
+      - path: "data/step01_self_report_data.csv"
+        columns: ["UID", "Education", "Typical_Sleep", "VR_Experience", "Age"]
+        description: "Self-report measures extracted from master.xlsx"
+      
+      - path: "data/step02_theta_scores.csv"
+        columns: ["UID", "theta_all", "theta_SE"]
+        description: "Mean theta scores from Ch5 5.1.1 IRT calibration"
+      
+      - path: "data/step03_analysis_dataset.csv"
+        columns: ["UID", "theta_all", "Education_z", "Typical_Sleep_z", "VR_Experience_z", "Age_z"]
+        description: "Analysis-ready dataset with standardized predictors"
+    
+    parameters:
+      participant_path: "data/cache/master.xlsx"
+      test_path: "data/cache/dfData.csv"
+      theta_path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+      include_interactions: false
+    
+    description: "Extract and merge self-report measures with theta scores for regression analysis"
+    source_reference: "tools_inventory.md section 'Module: tools.data' - prepare_regression_data"
+
+  fit_hierarchical_regression:
+    module: "tools.analysis_regression"
+    function: "fit_hierarchical_regression"
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "theta_all", "Education_z", "Typical_Sleep_z", "VR_Experience_z", "Age_z"]
+        expected_rows: ">=95 complete cases"
+        source: "prepare_regression_data output"
+    
+    output_files:
+      - path: "data/step04_regression_models.csv"
+        columns: ["model", "R2", "adj_R2", "F_stat", "F_p", "AIC", "BIC", "N"]
+        description: "Model comparison between control (Age) and full model"
+      
+      - path: "data/step04_coefficients_ci.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        description: "Regression coefficients with bootstrap CIs and dual p-values"
+    
+    parameters:
+      X_blocks: 
+        - block1: ["Age_z"]
+        - block2: ["Age_z", "Education_z", "Typical_Sleep_z", "VR_Experience_z"]
+      block_names: ["Control", "Full"]
+      add_constant: true
+    
+    description: "Fit hierarchical regression testing self-report predictors while controlling for age"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - fit_hierarchical_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_probability_range"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["theta_all", "Education_z", "Typical_Sleep_z", "VR_Experience_z", "Age_z"]
+        source: "prepare_regression_data output"
+    
+    output_files:
+      - path: "data/step04_coefficients_ci.csv"
+        columns: ["coefficient", "mean", "std", "ci_lower", "ci_upper"]
+        description: "Bootstrap confidence intervals for regression coefficients"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+    
+    description: "Compute bootstrap 95% CIs for robust estimation with 1000 iterations"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - bootstrap_regression_ci"
+
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
+    validation_tool: "validate_variance_positivity"
+    
+    input_files:
+      - path: "data/step04_regression_models.csv"
+        required_columns: ["model", "R2", "adj_R2"]
+        source: "fit_hierarchical_regression output"
+      
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["theta_all", "Education_z", "Typical_Sleep_z", "VR_Experience_z", "Age_z"]
+        source: "prepare_regression_data output"
+    
+    output_files:
+      - path: "data/step05_diagnostics_summary.csv"
+        columns: ["test", "statistic", "p_value", "interpretation"]
+        description: "Model assumption test results (normality, homoscedasticity)"
+      
+      - path: "data/step05_residuals_data.csv"
+        columns: ["UID", "residual", "fitted", "leverage", "cooks_d"]
+        description: "Residual analysis data for outlier detection"
+      
+      - path: "data/step05_outlier_analysis.csv"
+        columns: ["UID", "cooks_d", "outlier_flag"]
+        description: "Outlier analysis with Cook's D > 0.04 flagged"
+    
+    parameters:
+      return_dataframe: true
+      vif_threshold: 5.0
+      cooks_d_threshold: 0.04
+    
+    description: "Comprehensive regression diagnostics including VIF, Cook's D, leverage, normality tests"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_regression_diagnostics"
+
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step04_regression_models.csv"
+        required_columns: ["model", "R2"]
+        source: "fit_hierarchical_regression output"
+    
+    output_files:
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["measure", "value", "ci_lower", "ci_upper", "interpretation", "bootstrap_se"]
+        description: "Comprehensive effect size measures with confidence intervals"
+      
+      - path: "data/step06_relative_importance.csv"
+        columns: ["predictor", "sr2", "rank", "percent_of_r2"]
+        description: "Predictor relative importance rankings"
+    
+    parameters:
+      f2_interpretation:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+    
+    description: "Compute Cohen's f� effect size for model and predictor-level comparisons"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_cohens_f2"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_probability_range"
+    
+    input_files:
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["theta_all", "Education_z", "Typical_Sleep_z", "VR_Experience_z", "Age_z"]
+        source: "prepare_regression_data output"
+    
+    output_files:
+      - path: "data/step07_cv_results.csv"
+        columns: ["fold", "train_r2", "test_r2", "rmse", "mae", "gap"]
+        description: "5-fold cross-validation results per fold"
+      
+      - path: "data/step07_cv_stability.csv"
+        columns: ["predictor", "mean_beta", "sd_beta", "sig_consistency"]
+        description: "Coefficient stability across folds"
+    
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2"]
+      overfitting_threshold: 0.10
+    
+    description: "5-fold cross-validation to assess generalizability and detect overfitting"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - cross_validate_regression"
+
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_probability_range"
+    
+    input_files:
+      - path: "data/step04_regression_models.csv"
+        required_columns: ["model", "R2", "N"]
+        source: "fit_hierarchical_regression output"
+    
+    output_files:
+      - path: "data/step08_power_analysis.csv"
+        columns: ["test", "observed_effect", "alpha", "power", "interpretation"]
+        description: "Post-hoc power analysis for observed effects"
+      
+      - path: "data/step08_sensitivity_analysis.csv"
+        columns: ["alpha_level", "min_f2", "min_r2", "min_effect_label"]
+        description: "Minimum detectable effect sizes at 80% power"
+    
+    parameters:
+      alpha_uncorrected: 0.05
+      alpha_corrected: 0.0167
+      power_threshold: 0.80
+      effect_interpretation:
+        adequate: ">=0.80"
+        marginal: "0.60-0.80"
+        inadequate: "<0.60"
+    
+    description: "Post-hoc power analysis and sensitivity testing for adequacy assessment"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_post_hoc_power"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_self_report_data.csv"
+        required_columns: ["UID", "Education", "Typical_Sleep", "VR_Experience", "Age"]
+        source: "prepare_regression_data output"
+      
+      - path: "data/step02_theta_scores.csv"
+        required_columns: ["UID", "theta_all", "theta_SE"]
+        source: "prepare_regression_data output"
+      
+      - path: "data/step03_analysis_dataset.csv"
+        required_columns: ["UID", "theta_all", "Education_z", "Typical_Sleep_z", "VR_Experience_z", "Age_z"]
+        source: "prepare_regression_data output"
+    
+    parameters:
+      required_cols: ["UID", "Education", "Typical_Sleep", "VR_Experience", "Age", "theta_all"]
+    
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing critical columns for analysis"
+      - "Column names match specification exactly (case-sensitive)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        message: "str (human-readable explanation)"
+        missing_cols: "List[str] (missing columns, empty if valid=True)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_self_report.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate required columns exist in extracted data files"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_columns"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels.regression.linear_model.RegressionResultsWrapper) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_regression_models.csv"
+        required_columns: ["model", "R2", "F_stat"]
+        source: "fit_hierarchical_regression output"
+    
+    parameters:
+      check_convergence: true
+      check_finite_estimates: true
+    
+    criteria:
+      - "Model optimization converged successfully"
+      - "All coefficient estimates are finite (no NaN/Inf)"
+      - "F-statistic and p-values computed successfully"
+      - "R� values in valid range [0, 1]"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if model converged)"
+        message: "str (convergence status)"
+        converged: "bool (optimization status)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_hierarchical_regression.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate regression model converged successfully with finite estimates"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_model_convergence"
+
+  validate_probability_range:
+    module: "tools.validation"
+    function: "validate_probability_range"
+    signature: "validate_probability_range(probability_df: pd.DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_coefficients_ci.csv"
+        required_columns: ["p_uncorrected", "p_bonferroni", "p_fdr"]
+        source: "bootstrap_regression_ci output"
+      
+      - path: "data/step07_cv_results.csv"
+        required_columns: ["train_r2", "test_r2"]
+        source: "cross_validate_regression output"
+      
+      - path: "data/step08_power_analysis.csv"
+        required_columns: ["power"]
+        source: "compute_post_hoc_power output"
+    
+    parameters:
+      prob_columns: ["p_uncorrected", "p_bonferroni", "p_fdr", "train_r2", "test_r2", "power"]
+      inclusive_bounds: true
+    
+    criteria:
+      - "All p-values in [0, 1] range (inclusive)"
+      - "All R� values in [0, 1] range (inclusive)"
+      - "All power values in [0, 1] range (inclusive)"
+      - "No NaN or infinite values in probability columns"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in valid range)"
+        message: "str (validation summary)"
+        violations: "List[Dict] (detailed violation info per column)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_hierarchical_regression.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate probability values (p-values, R�, power) are in [0, 1] range"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_probability_range"
+
+  validate_variance_positivity:
+    module: "tools.validation"
+    function: "validate_variance_positivity"
+    signature: "validate_variance_positivity(variance_df: pd.DataFrame, component_col: str = 'component', value_col: str = 'variance') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_diagnostics_summary.csv"
+        required_columns: ["test", "statistic"]
+        source: "compute_regression_diagnostics output"
+    
+    parameters:
+      component_col: "test"
+      value_col: "statistic"
+      allow_zero: false
+    
+    criteria:
+      - "All variance components > 0 (positive definite)"
+      - "No negative variance estimates (estimation failure indicator)"
+      - "All diagnostic statistics are finite"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all variances positive)"
+        message: "str (variance validation summary)"
+        negative_components: "List[str] (problematic components)"
+        variance_range: "Tuple[float, float] (min, max values)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_model_diagnostics.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate all variance components are positive (no estimation failures)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_variance_positivity"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_effect_sizes.csv"
+        required_columns: ["measure", "value"]
+        source: "compute_cohens_f2 output"
+    
+    parameters:
+      f2_column: "value"
+      allow_large_effects: true
+      warn_threshold: 1.0
+    
+    criteria:
+      - "All Cohen's f� values >= 0 (non-negative by definition)"
+      - "No NaN or infinite effect size values"
+      - "Effect sizes within reasonable bounds (warn if f� > 1.0)"
+      - "Effect size confidence intervals are non-degenerate"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all effect sizes valid)"
+        message: "str (effect size validation summary)"
+        warnings: "List[str] (warnings for very large effects)"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_effect_sizes.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate Cohen's f� effect sizes are within reasonable bounds"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_effect_sizes"
+
+summary:
+  analysis_tools_count: 7
+  validation_tools_count: 5
+  total_unique_tools: 12
+  mandatory_decisions_embedded: ["D068"]
+  
+  key_decisions:
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni correction for 3 main predictors)"
+  
+  analysis_approach: "Hierarchical multiple regression with comprehensive diagnostics"
+  dependencies: 
+    - "Ch5 5.1.1 theta_all scores (DERIVED data)"
+    - "master.xlsx self-report measures (RAW data)"
+  
+  validation_coverage: "100% (all 9 steps have validation requirements)"
+  bootstrap_iterations: 1000
+  cross_validation_folds: 5
+  power_analysis: "Post-hoc with sensitivity testing"

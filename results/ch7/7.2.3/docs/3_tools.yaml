@@ -1,0 +1,541 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.2.3: Age x Cognitive Test Interaction
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ Analysis: Multiple regression with Age x Test interactions, bootstrap CIs, cross-validation
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "check_file_exists"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_content: "rq_results status success"
+        expected_size: ">100 bytes"
+        description: "Chapter 5 completion status verification"
+      - path: "data/cache/master.xlsx"
+        required_content: "cognitive test columns"
+        expected_size: ">50KB"
+        description: "Master dataset with cognitive tests"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Dependency validation results and file access confirmation"
+    
+    parameters:
+      min_size_bytes: 0
+      check_access: true
+      
+    description: "Validate cross-RQ dependencies exist and are accessible before proceeding"
+    source_reference: "tools_inventory.md section 'validation tools' - check_file_exists"
+
+  extract_domain_theta_scores:
+    module: "tools.data"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          theta_all: "float (range: [-3, 3])"
+        alternative_paths:
+          - "results/ch5/5.1.1/data/*theta*.csv"
+          - "results/ch5/5.1.1/data/analysis_results.csv"
+    
+    output_files:
+      - path: "data/step01_theta_extracted.csv"
+        columns: ["UID", "theta_all"]
+        description: "Mean theta_all scores from Ch5 5.1.1"
+        
+    parameters:
+      path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+      domains: ["What", "Where", "When"]
+      use_mean_theta: true
+      
+    description: "Extract mean theta_all scores from Ch5 5.1.1 IRT calibration results"
+    source_reference: "tools_inventory.md section 'tools.data' - extract_domain_theta_scores"
+
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "Age", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          Age: "float (range: [18, 80])"
+          RAVLT_T: "float (T-score range: [20, 80])"
+          BVMT_T: "float (T-score range: [20, 80])"
+          NART_T: "float (T-score range: [20, 80])"
+          RPM_T: "float (T-score range: [20, 80])"
+    
+    output_files:
+      - path: "data/step01_cognitive_extracted.csv"
+        columns: ["UID", "Age", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+        description: "Cognitive test data from master.xlsx"
+        
+    parameters:
+      tests: ["RAVLT", "BVMT", "NART", "RPM"]
+      include_age: true
+      
+    description: "Extract cognitive test T-scores and age from master.xlsx"
+    source_reference: "tools_inventory.md section 'tools.data' - extract_cognitive_tests"
+
+  merge_theta_cognitive:
+    module: "tools.data"
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/step01_theta_extracted.csv"
+        required_columns: ["UID", "theta_all"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+      - path: "data/step01_cognitive_extracted.csv"
+        required_columns: ["UID", "Age", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+        source: "analysis tool output (extract_cognitive_tests)"
+    
+    output_files:
+      - path: "data/step01_merged_data.csv"
+        columns: ["UID", "Age", "theta_all", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+        description: "Complete dataset for analysis with 100 participants"
+      - path: "data/step01_descriptives.csv"
+        columns: ["variable", "mean", "sd", "min", "max", "n"]
+        description: "Descriptive statistics for all variables"
+        
+    parameters:
+      merge_on: "UID"
+      compute_descriptives: true
+      
+    description: "Merge theta scores with cognitive test data and compute descriptive statistics"
+    source_reference: "tools_inventory.md section 'tools.data' - merge_theta_cognitive"
+
+  standardize_scores:
+    module: "tools.analysis_extensions"
+    function: "standardize_scores"
+    signature: "standardize_scores(scores: Union[pd.Series, pd.DataFrame], reference_mean: float = None, reference_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_standardization"
+    
+    input_files:
+      - path: "data/step01_merged_data.csv"
+        required_columns: ["Age", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+        source: "analysis tool output (merge_theta_cognitive)"
+    
+    output_files:
+      - path: "data/step02_centered_predictors.csv"
+        columns: ["UID", "theta_all", "Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c", "Age_c_x_RAVLT_c", "Age_c_x_BVMT_c", "Age_c_x_NART_c", "Age_c_x_RPM_c"]
+        description: "Centered predictors and interaction terms"
+      - path: "data/step02_correlation_matrix.csv"
+        columns: ["variable1", "variable2", "correlation", "p_value"]
+        description: "Predictor correlation matrix for multicollinearity check"
+        
+    parameters:
+      center_age: true
+      center_cognitive_at: 50.0  # T-score mean
+      create_interactions: true
+      check_multicollinearity: true
+      
+    description: "Center predictors and create Age x Test interaction terms"
+    source_reference: "tools_inventory.md section 'tools.analysis_extensions' - standardize_scores"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step02_centered_predictors.csv"
+        required_columns: ["theta_all", "Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c", "Age_c_x_RAVLT_c", "Age_c_x_BVMT_c", "Age_c_x_NART_c", "Age_c_x_RPM_c"]
+        source: "analysis tool output (standardize_scores)"
+    
+    output_files:
+      - path: "data/step03_interaction_models.csv"
+        columns: ["model", "R2", "adj_R2", "F_stat", "F_p", "interaction_coef", "interaction_se", "interaction_p_uncorr", "interaction_p_bonf", "VIF_age", "VIF_test", "VIF_interaction"]
+        description: "4 interaction models with dual p-values (Decision D068)"
+      - path: "data/step03_interaction_coefficients.csv"
+        columns: ["test_name", "interaction_coef", "se", "t_value", "p_uncorrected", "p_bonferroni", "significant_bonf"]
+        description: "Interaction coefficients with Bonferroni correction (alpha=0.0125)"
+        
+    parameters:
+      models:
+        - formula: "theta_all ~ Age_c + RAVLT_c + Age_c_x_RAVLT_c"
+          name: "RAVLT_interaction"
+        - formula: "theta_all ~ Age_c + BVMT_c + Age_c_x_BVMT_c"
+          name: "BVMT_interaction"
+        - formula: "theta_all ~ Age_c + NART_c + Age_c_x_NART_c"
+          name: "NART_interaction"
+        - formula: "theta_all ~ Age_c + RPM_c + Age_c_x_RPM_c"
+          name: "RPM_interaction"
+      family_alpha: 0.05
+      bonferroni_n: 4  # 4 interaction tests
+      compute_vif: true
+      
+    description: "Fit 4 Age x Test interaction models with dual p-value reporting"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - fit_multiple_regression"
+
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step03_interaction_models.csv"
+        required_columns: ["model", "R2", "F_stat"]
+        source: "analysis tool output (fit_multiple_regression)"
+      - path: "data/step02_centered_predictors.csv"
+        required_columns: ["theta_all", "Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c"]
+        source: "analysis tool output for diagnostics"
+    
+    output_files:
+      - path: "data/step05_effect_sizes.csv"
+        columns: ["test_name", "R2_full", "R2_reduced", "cohens_f2", "interpretation"]
+        description: "Cohen's f² effect sizes for each interaction"
+      - path: "data/step05_diagnostics.csv"
+        columns: ["model", "shapiro_p", "breusch_pagan_p", "max_vif", "n_outliers", "normality_ok", "homosced_ok", "multicollin_ok"]
+        description: "Assumption test results for all models"
+      - path: "data/step05_diagnostics_summary.txt"
+        description: "Interpretation of assumption violations and remedial actions"
+        
+    parameters:
+      effect_size_method: "cohens_f2"
+      outlier_threshold: 0.04  # Cook's D > 4/n for n=100
+      vif_threshold: 5.0
+      normality_alpha: 0.05
+      heteroscedasticity_alpha: 0.05
+      
+    description: "Compute effect sizes and check regression assumptions"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - compute_regression_diagnostics"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step02_centered_predictors.csv"
+        required_columns: ["theta_all", "Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c", "Age_c_x_RAVLT_c", "Age_c_x_BVMT_c", "Age_c_x_NART_c", "Age_c_x_RPM_c"]
+        source: "analysis tool input for bootstrap"
+    
+    output_files:
+      - path: "data/step06_bootstrap_coefficients.csv"
+        columns: ["iteration", "RAVLT_interaction", "BVMT_interaction", "NART_interaction", "RPM_interaction"]
+        description: "2000 bootstrap iteration coefficients"
+      - path: "data/step06_bootstrap_CIs.csv"
+        columns: ["test_name", "bootstrap_coef_mean", "CI_2.5", "CI_97.5", "excludes_zero", "robust_significant"]
+        description: "95% bootstrap confidence intervals for interaction coefficients"
+      - path: "data/step06_bootstrap_summary.txt"
+        description: "Bootstrap distribution characteristics and stability"
+        
+    parameters:
+      n_bootstrap: 2000  # Enhanced v5.1 spec
+      confidence_level: 0.95
+      random_state: 42
+      method: "percentile"
+      resample_participants: true  # Block bootstrap preserving within-participant structure
+      
+    description: "Generate robust bootstrap confidence intervals for interaction coefficients"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - bootstrap_regression_ci"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step02_centered_predictors.csv"
+        required_columns: ["theta_all", "Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c", "Age_c_x_RAVLT_c", "Age_c_x_BVMT_c", "Age_c_x_NART_c", "Age_c_x_RPM_c"]
+        source: "analysis tool input for cross-validation"
+    
+    output_files:
+      - path: "data/step07_cv_results.csv"
+        columns: ["fold", "test_name", "train_R2", "test_R2", "interaction_coef", "interaction_p", "overfitting_flag"]
+        description: "Cross-validation metrics per fold and interaction test (20 rows: 5 folds x 4 tests)"
+      - path: "data/step07_cv_summary.csv"
+        columns: ["test_name", "mean_interaction_coef", "std_interaction_coef", "mean_test_R2", "overfitting_flag", "stability_assessment"]
+        description: "Summary of cross-validation performance and stability"
+        
+    parameters:
+      n_folds: 5
+      random_state: 42
+      shuffle: true
+      scoring_metrics: ["r2", "mse"]
+      overfitting_threshold: 0.10  # Train-test R² gap
+      stability_threshold: 1.0  # 1 SE of full-sample coefficient
+      
+    description: "Assess generalizability of Age x Test interaction effects using cross-validation"
+    source_reference: "tools_inventory.md section 'tools.analysis_regression' - cross_validate_regression"
+
+validation_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_content: "rq_results = success"
+        source: "cross-RQ dependency check"
+      - path: "data/cache/master.xlsx"
+        required_content: "cognitive test columns"
+        source: "primary data source check"
+    
+    parameters:
+      min_size_bytes: 0
+      
+    criteria:
+      - "All required dependency files exist and are accessible"
+      - "Ch5 5.1.1 status shows successful completion"
+      - "Master.xlsx exists with expected size >50KB"
+      - "No critical file access errors"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all files accessible)"
+        file_path: "str (path checked)"
+        size_bytes: "int (file size)"
+        message: "str (detailed validation result)"
+        
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_dependency_validation.log"
+      invoke: "QUIT with clear message about missing dependencies"
+      
+    description: "Validate all dependency files exist and are accessible"
+    source_reference: "tools_inventory.md section 'validation tools' - check_file_exists"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_merged_data.csv"
+        required_columns: ["UID", "Age", "theta_all", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+        source: "analysis tool output validation"
+    
+    parameters:
+      required_columns: ["UID", "Age", "theta_all", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
+      check_dtypes: true
+      check_missing: true
+      
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Exactly 100 participants (complete data)"
+      - "No duplicate UIDs"
+      - "Age in range [18, 80]"
+      - "theta_all in range [-3, 3]"
+      - "Cognitive T-scores in range [20, 80]"
+      - "Missing cognitive tests <5% threshold"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present and valid)"
+        missing_columns: "List[str] (any missing required columns)"
+        existing_columns: "List[str] (columns found)"
+        message: "str (validation summary)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_data.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate merged dataset has required columns and valid data ranges"
+    source_reference: "tools_inventory.md section 'validation tools' - validate_data_columns"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_centered_predictors.csv"
+        required_columns: ["Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c"]
+        source: "analysis tool output (standardize_scores)"
+    
+    parameters:
+      column_names: ["Age_c", "RAVLT_c", "BVMT_c", "NART_c", "RPM_c"]
+      tolerance: 0.01  # Allow small sampling variation
+      
+    criteria:
+      - "All centered variables have mean approximately 0 (+/- 0.01)"
+      - "Age_c range approximately [-30, +30] for age span"
+      - "Test_c variables centered at T-score mean (50)"
+      - "All interaction terms show appropriate variance"
+      - "No computational errors in centering"
+      - "No extreme correlations (|r| > 0.95) indicating multicollinearity"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if standardization successful)"
+        mean_values: "Dict[str, float] (actual means per variable)"
+        sd_values: "Dict[str, float] (actual SDs per variable)"
+        message: "str (validation summary)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_center_predictors.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate predictor centering and interaction term creation"
+    source_reference: "tools_inventory.md section 'validation tools' - validate_standardization"
+
+  validate_regression_assumptions:
+    module: "tools.analysis_extensions"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    
+    input_files:
+      - path: "data/step03_interaction_models.csv"
+        required_columns: ["model", "R2", "F_stat", "interaction_p_uncorr", "interaction_p_bonf"]
+        source: "analysis tool output (fit_multiple_regression)"
+    
+    parameters:
+      check_normality: true
+      check_homoscedasticity: true
+      check_multicollinearity: true
+      check_autocorrelation: false  # Not relevant for cross-sectional data
+      check_outliers: true
+      alpha: 0.05
+      vif_threshold: 5.0
+      cooks_d_threshold: 0.04  # 4/n for n=100
+      
+    criteria:
+      - "All 4 interaction models fitted successfully"
+      - "No convergence failures or numerical issues"
+      - "Dual p-values present for all interactions (Decision D068)"
+      - "VIF < 5 for all predictors (no problematic multicollinearity)"
+      - "Bonferroni correction properly applied (p_bonf = p_uncorr * 4)"
+      - "R² values in valid range [0, 1]"
+      - "F-statistics > 0 (positive test statistics)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        all_assumptions_met: "bool (True if all 4 models valid)"
+        normality: "Dict (Shapiro-Wilk results per model)"
+        homoscedasticity: "Dict (Breusch-Pagan results per model)"
+        multicollinearity: "Dict (VIF values per model)"
+        outliers: "Dict (Cook's D results per model)"
+        message: "str (assumption summary)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_interactions.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate regression models meet statistical assumptions and dual p-value reporting"
+    source_reference: "tools_inventory.md section 'tools.analysis_extensions' - validate_regression_assumptions"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_bootstrap_coefficients.csv"
+        required_columns: ["iteration", "RAVLT_interaction", "BVMT_interaction", "NART_interaction", "RPM_interaction"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+    
+    parameters:
+      min_jaccard_threshold: 0.75  # Stability threshold
+      n_expected_iterations: 2000
+      
+    criteria:
+      - "Exactly 2000 bootstrap iterations completed"
+      - "All bootstrap samples yielded valid coefficient estimates"
+      - "No convergence failures across bootstrap iterations"
+      - "Bootstrap distributions show reasonable properties (finite values)"
+      - "Bootstrap means approximately equal to original coefficients (+/- 0.05)"
+      - "95% CI bounds properly ordered (CI_2.5 < CI_97.5)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if bootstrap stable)"
+        mean_jaccard: "float (average stability)"
+        ci_lower: "float (2.5th percentile)"
+        ci_upper: "float (97.5th percentile)"
+        above_threshold: "bool (stability >= 0.75)"
+        message: "str (stability assessment)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_bootstrap.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate bootstrap confidence intervals are stable and well-formed"
+    source_reference: "tools_inventory.md section 'validation tools' - validate_bootstrap_stability"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step07_cv_results.csv"
+        required_columns: ["fold", "test_name", "train_R2", "test_R2", "interaction_coef", "interaction_p"]
+        source: "analysis tool output (cross_validate_regression)"
+    
+    parameters:
+      expected_rows: 20  # 5 folds × 4 tests
+      expected_columns: ["fold", "test_name", "train_R2", "test_R2", "interaction_coef", "interaction_p", "overfitting_flag"]
+      column_types:
+        fold: int
+        test_name: str
+        train_R2: float
+        test_R2: float
+        interaction_coef: float
+        interaction_p: float
+        overfitting_flag: bool
+        
+    criteria:
+      - "All 5 folds completed successfully for all 4 tests"
+      - "No fold shows extreme overfitting (train-test gap > 0.20)"
+      - "CV coefficients within reasonable range of full-sample estimates"
+      - "No systematic convergence failures across folds"
+      - "R² values in valid range [0, 1]"
+      - "Train R² ≥ test R² (expected pattern)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if structure correct)"
+        checks: "Dict[str, bool] (individual validation results)"
+        message: "str (structure validation summary)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_cross_validation.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate cross-validation results have expected structure and reasonable values"
+    source_reference: "tools_inventory.md section 'validation tools' - validate_dataframe_structure"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 6
+  total_unique_tools: 14
+  mandatory_decisions_embedded:
+    - "D068: Dual p-value reporting (uncorrected + Bonferroni) for all interaction tests"
+  analysis_type: "Multiple regression with Age x Cognitive Test interactions"
+  validation_coverage: "100% (all 8 analysis steps have validation requirements)"
+  bootstrap_iterations: 2000
+  cross_validation_folds: 5
+  family_correction: "Within-RQ Bonferroni (alpha = 0.05/4 = 0.0125 per interaction)"

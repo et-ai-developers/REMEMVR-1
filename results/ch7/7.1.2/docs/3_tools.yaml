@@ -1,0 +1,336 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.1.2
+# Created by: rq_tools agent 
+# Purpose: Catalog analysis + validation tool pairs for intercept vs slope prediction
+# Architecture: Tool Catalog (each tool listed once, deduplication)
+
+analysis_tools:
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict[str, Any]"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "results/ch5/5.1.1/data/step05_lmm_model_summary.txt"
+        source: "Ch5 5.1.1 LMM fitted model"
+        required_format: "MixedLMResults object or summary text"
+        expected_content: "Fixed effects, random effects, variance components"
+
+    output_files:
+      - path: "data/step00_random_effects.csv"
+        columns: ["UID", "intercept", "slope", "se_intercept", "se_slope"]
+        description: "Participant-level random effects from Ch5 LMM"
+
+    parameters:
+      result: "MixedLMResults object from Ch5 5.1.1 LMM"
+
+    description: "Extract random intercepts and slopes from Ch5 5.1.1 LMM for regression analysis"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm'"
+
+  extract_cognitive_tests:
+    module: "tools.data_extraction"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/master.xlsx"
+        required_columns: ["RAVLT_Total", "BVMT_Total_Recognition", "RPM_Total"]
+        expected_rows: "~100 participants"
+        data_types:
+          RAVLT_Total: "int (raw score)"
+          BVMT_Total_Recognition: "int (raw score)"
+          RPM_Total: "int (raw score)"
+
+    output_files:
+      - path: "data/step01_cognitive_tests_raw.csv"
+        columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total"]
+        description: "Raw cognitive test scores extracted from master data"
+
+    parameters:
+      df: "pd.DataFrame (master participant data)"
+      tests: "['RAVLT', 'BVMT', 'RPM'] (exclude NART per concept)"
+
+    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) excluding NART per language validity concerns"
+    source_reference: "tools_inventory.md section 'Module: tools.data_extraction'"
+
+  standardize_to_t_scores:
+    module: "tools.data_extraction"  
+    function: "standardize_to_t_scores"
+    signature: "standardize_to_t_scores(scores: Union[pd.Series, pd.DataFrame], population_mean: float = None, population_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_standardization"
+
+    input_files:
+      - path: "data/step01_cognitive_tests_raw.csv"
+        required_columns: ["RAVLT_total", "BVMT_total", "RPM_total"]
+        source: "output from extract_cognitive_tests"
+
+    output_files:
+      - path: "data/step01_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T"]
+        description: "T-score standardized cognitive tests (M=50, SD=10)"
+
+    parameters:
+      scores: "pd.DataFrame with raw cognitive test scores"
+      population_mean: "None (use sample mean)"
+      population_sd: "None (use sample SD)"
+
+    description: "Convert raw cognitive scores to T-scores (M=50, SD=10) for regression analysis"
+    source_reference: "tools_inventory.md section 'Module: tools.data_extraction'"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict[str, Any]"
+    validation_tool: "validate_lmm_convergence"
+
+    input_files:
+      - path: "data/step02_regression_input.csv"
+        required_columns: ["UID", "intercept", "slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+        expected_rows: "100"
+        data_types:
+          intercept: "float64 (random intercept estimates)"
+          slope: "float64 (random slope estimates)"
+          RAVLT_T: "float64 (T-scores)"
+          BVMT_T: "float64 (T-scores)"
+          RPM_T: "float64 (T-scores)"
+
+    output_files:
+      - path: "data/step03_intercept_predictions.csv"
+        columns: ["predictor", "beta", "se", "t", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper", "VIF"]
+        description: "Regression results predicting LMM intercepts from cognitive tests"
+      - path: "data/step04_slope_predictions.csv"
+        columns: ["predictor", "beta", "se", "t", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper", "VIF"]
+        description: "Regression results predicting LMM slopes from cognitive tests"
+
+    parameters:
+      X: "pd.DataFrame with cognitive predictors (RAVLT_T, BVMT_T, RPM_T)"
+      y: "pd.Series with outcome (intercept or slope)"
+      add_constant: "True (include intercept term)"
+      return_diagnostics: "True (compute VIF and diagnostics)"
+
+    description: "Fit multiple regression models for intercept and slope prediction with diagnostics"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression'"
+
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict[str, Any]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step02_regression_input.csv"
+        required_columns: ["intercept", "slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "regression input data for diagnostics"
+
+    output_files:
+      - path: "data/step07_model_diagnostics.csv"
+        columns: ["model", "test", "statistic", "p_value", "assumption_met", "remedial_action"]
+        description: "Comprehensive regression diagnostics and assumption tests"
+
+    parameters:
+      model: "fitted regression model from fit_multiple_regression"
+      X: "predictor matrix"
+      return_dataframe: "True (return structured output)"
+
+    description: "Compute VIF, Cook's D, residual tests, and assumption checking for regression models"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression'"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step02_regression_input.csv"
+        required_columns: ["intercept", "slope", "RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "raw data for bootstrap resampling"
+
+    output_files:
+      - path: "data/step05_r_squared_comparison.csv"
+        columns: ["model", "r_squared", "adj_r_squared", "bootstrap_ci_lower", "bootstrap_ci_upper", "difference", "difference_ci_lower", "difference_ci_upper", "p_value"]
+        description: "Bootstrap comparison of R² values between intercept and slope models"
+      - path: "data/step06_predictor_significance.csv"
+        columns: ["predictor", "outcome", "beta", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni", "effect_interpretation"]
+        description: "Individual predictor significance with dual p-value reporting per Decision D068"
+
+    parameters:
+      X: "predictor matrix"
+      y: "outcome vector"
+      n_bootstrap: "1000 (bootstrap iterations)"
+      confidence_level: "0.95 (95% CI)"
+      random_state: "42 (reproducibility seed)"
+
+    description: "Bootstrap confidence intervals for regression coefficients and R² comparison"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression'"
+
+validation_tools:
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_random_effects.csv"
+        required_columns: ["UID", "intercept", "slope", "se_intercept", "se_slope"]
+        source: "random effects extraction output"
+      - path: "data/step01_cognitive_tests_raw.csv"
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total"]
+        source: "cognitive test extraction output"
+
+    parameters:
+      df: "DataFrame to validate"
+      required_columns: "List of expected column names"
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "Column names match exactly (case-sensitive)"
+      - "No extra unexpected columns (data integrity)"
+      - "DataFrame not empty (has data rows)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        missing_columns: "List[str] (missing column names)"
+        existing_columns: "List[str] (actual column names)"
+        message: "str (human-readable explanation)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate expected columns exist in extracted data files"
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(scores: Union[pd.Series, pd.DataFrame], target_mean: float = 50.0, target_sd: float = 10.0, tolerance: float = 0.1) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "T-score standardization output"
+
+    parameters:
+      scores: "T-score DataFrame"
+      target_mean: "50.0 (T-score mean)"
+      target_sd: "10.0 (T-score SD)"
+      tolerance: "0.1 (acceptable deviation)"
+
+    criteria:
+      - "All T-scores approximately M=50, SD=10 (within tolerance)"
+      - "T-scores in reasonable range [10, 90] (4 SD from mean)"
+      - "No NaN values in standardized scores"
+      - "Sample size sufficient (N=100)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if standardization successful)"
+        actual_mean: "float (observed mean)"
+        actual_sd: "float (observed SD)"
+        message: "str (validation result)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_cognitive_tests.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate T-score standardization achieved target M=50, SD=10"
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+
+    input_files:
+      - path: "fitted regression models"
+        source: "fit_multiple_regression output"
+        required_format: "OLS regression results object"
+
+    parameters:
+      lmm_result: "fitted regression model (adapted for OLS validation)"
+
+    criteria:
+      - "Model converged successfully (no estimation failures)"
+      - "All coefficients finite (no NaN/Inf estimates)"
+      - "Standard errors positive and reasonable"
+      - "R² in valid range [0, 1]"
+      - "VIF values < 10 (multicollinearity check)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if model valid)"
+        converged: "bool (convergence status)"
+        warnings: "List[str] (any convergence warnings)"
+        message: "str (validation summary)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_intercept_model.log OR logs/step04_fit_slope_model.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate regression model convergence and parameter validity"
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_intercept_predictions.csv"
+        required_columns: ["beta", "se", "p_uncorrected", "p_bonferroni", "VIF"]
+        source: "regression coefficients from intercept model"
+      - path: "data/step04_slope_predictions.csv"
+        required_columns: ["beta", "se", "p_uncorrected", "p_bonferroni", "VIF"]
+        source: "regression coefficients from slope model"
+
+    parameters:
+      df: "DataFrame with numeric columns to validate"
+      column: "specific column name to check"
+      min_val: "minimum acceptable value"
+      max_val: "maximum acceptable value"
+      allow_none: "False (no missing values tolerated)"
+
+    criteria:
+      - "All standard errors positive (se > 0)"
+      - "All p-values in range [0, 1]"
+      - "Bonferroni correction applied correctly (p_bonferroni = p_uncorrected * 3)"
+      - "VIF values reasonable (warn if > 5, error if > 10)"
+      - "Confidence intervals well-formed (CI_lower < CI_upper)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values in range)"
+        out_of_range_count: "int (number of violations)"
+        failed_rows: "List[int] (row indices with violations)"
+        message: "str (validation details)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/stepNN_*.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate regression output values are in acceptable ranges"
+    source_reference: "tools_inventory.md section 'Module: tools.validation'"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 4
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Each analysis tool paired with appropriate validation tool"
+    - "Dual p-value reporting per Decision D068 (uncorrected + Bonferroni)"
+    - "Bootstrap confidence intervals with 1000 iterations, seed=42"
+    - "T-score standardization for cognitive predictors (M=50, SD=10)"
+    - "Dependencies on Ch5 5.1.1 LMM random effects extraction"
+    - "Standard library functions (pandas merge) exempted from catalog"

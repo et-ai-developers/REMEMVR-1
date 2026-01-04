@@ -1,599 +1,639 @@
-# Analysis Plan: RQ 7.4.1 - RAVLT Process-Specific Transfer Validation
+# Analysis Plan: RQ 7.4.1 - RAVLT Free Recall vs Recognition Process-Specific Prediction
 
 **Research Question:** 7.4.1
-**Created:** 2026-01-03
+**Created:** 2026-01-04
 **Status:** Planning complete, ready for tool specification (rq_tools)
 
 ---
 
 ## Overview
 
-**Analysis Type:** Bivariate correlation analysis with dependent correlation comparison using Steiger's Z-test
+This RQ examines process-specific transfer between RAVLT (standardized verbal free recall) and REMEMVR paradigm-specific theta scores across N=100 participants. The analysis tests Transfer-Appropriate Processing (TAP) theory by comparing bivariate correlations: r(RAVLT, REMEMVR_FreeRecall) vs r(RAVLT, REMEMVR_Recognition). 
 
-**Pipeline:** Process-Specific Transfer Validation
-**Steps:** 6 total analysis steps (Step 0: dependency validation + Steps 1-5: analysis)
-**Estimated Runtime:** ~25 minutes
-
-**Research Question:**
-Does RAVLT (verbal free recall task) show stronger prediction for REMEMVR Free Recall than Recognition, consistent with transfer-appropriate processing theory?
+**Pipeline:** Correlation analysis with dependent correlation comparison
+**Steps:** 6 total analysis steps (Step 0: data extraction + Steps 1-5: analysis)
+**Estimated Runtime:** Low (approximately 10-15 minutes total - primarily data manipulation and correlation computation)
 
 **Key Decisions Applied:**
-- Decision D068: Dual p-value reporting (uncorrected + corrected)
-- Chapter-level Bonferroni correction: alpha = 0.00179 (0.05/28 tests)
-- Bootstrap sensitivity analysis for robustness
+- Decision D068: Dual p-value reporting (uncorrected + Bonferroni correction)
+- Bootstrap confidence intervals with 1000 iterations and seed=42 for reproducibility
 - Steiger's Z-test for dependent correlation comparison
-
-**Theoretical Framework:**
-Transfer-Appropriate Processing (TAP) theory predicts stronger correlations between tasks sharing similar cognitive processes. Both RAVLT and REMEMVR Free Recall require generative retrieval, while Recognition relies more on familiarity-based processes.
-
-**Expected Pattern:**
-r(RAVLT, FreeRecall) > r(RAVLT, Recognition) with significant Steiger's Z-test supporting process-specificity hypothesis.
+- Alpha = 0.00179 (chapter-level correction per concept)
 
 ---
 
 ## Analysis Plan
 
-### Step 0: Validate Cross-RQ Dependencies
-**Dependencies:** None (prerequisite validation step)
-**Complexity:** Low (<5 minutes)
+This RQ requires 6 steps:
 
-**Purpose:** Verify required Ch5 paradigm outputs exist before proceeding
+### Step 0: Extract RAVLT Cognitive Test Data
+
+**Dependencies:** None (first step)
+**Complexity:** Low (data extraction only, <2 minutes)
+
+**Purpose:** Extract RAVLT Total scores from master.xlsx cognitive assessments
 
 **Input:**
-- Primary: results/ch5/5.3.1/data/step03_theta_scores.csv
-- Alternative: results/ch5/5.3.2/data/paradigm_theta_estimates.csv
-- Fallback pattern: results/ch5/5.3.*/data/*theta*.csv
-- Expected: Paradigm-separated theta scores for Free Recall (IFR) and Recognition (IRE)
-- Also verify: data/cache/master.xlsx accessible (RAVLT scores)
+- File: data/cache/master.xlsx (project-level data source)
+- Required Sheet: Data or cognitive assessment sheet
+- Expected Variables: RAVLT_T1, RAVLT_T2, RAVLT_T3, RAVLT_T4, RAVLT_T5 (trial scores)
+- Filter: All 100 participants with complete RAVLT data
 
 **Processing:**
-- Check Ch5 5.3.x completed successfully (any RQ in series)
-- Locate paradigm-specific theta file using search patterns
-- Verify file contains columns: UID, paradigm, theta, se
-- Verify paradigms include 'IFR' (Free Recall) and 'IRE' (Recognition)
-- Check master.xlsx contains RAVLT_Total column
-- Log validation results with specific files found
+- Use extract_cognitive_tests function to extract RAVLT scores
+- Compute RAVLT_Total = T1 + T2 + T3 + T4 + T5 (total learning across 5 trials)
+- Retain raw scores (NOT T-scored) per concept requirement
+- Validate no missing RAVLT data
 
 **Output:**
-- data/step00_dependency_validation.txt
+- File: data/step00_cognitive_tests.csv
+- Format: CSV with columns: UID, RAVLT_T1, RAVLT_T2, RAVLT_T3, RAVLT_T4, RAVLT_T5, RAVLT_Total
+- Expected Rows: 100 participants
+- Expected Columns: 7 total (UID + 6 RAVLT variables)
 
 **Validation Requirement:**
-Validation tools MUST be used after dependency check execution.
+Validation tools MUST be used after analysis tool execution. Specific validation tools will be determined by rq_tools based on data extraction requirements. The rq_analysis agent will embed validation tool calls after the analysis tool call for this step.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step00_dependency_validation.txt: text file with dependency status
-- Content: File paths found, paradigm counts, RAVLT availability
+- data/step00_cognitive_tests.csv: 100 rows x 7 columns (UID: object, RAVLT_T1-T5: int64, RAVLT_Total: int64)
 
 *Value Ranges:*
-- Paradigm count >= 2 (must include IFR and IRE)
-- RAVLT_Total present in master.xlsx
-- File sizes > 0 bytes (non-empty files)
+- RAVLT_T1-T5 each in [0, 15] (maximum 15 words per trial)
+- RAVLT_Total in [0, 75] (sum of 5 trials)
+- RAVLT_Total typically 25-65 for healthy adults
 
 *Data Quality:*
-- Ch5 dependency file exists and readable
-- master.xlsx accessible and contains required columns
-- No critical missing dependencies
+- All 100 participants present (no missing UIDs)
+- No NaN values in RAVLT columns (complete cognitive data required)
+- No duplicate UIDs
+- RAVLT_Total = sum(T1 + T2 + T3 + T4 + T5) for all rows
 
 *Log Validation:*
-- Required patterns: "Dependencies validated successfully"
-- Required patterns: "Found paradigm file:", "RAVLT column verified"
-- Forbidden patterns: "ERROR", "MISSING", "dependency not found"
+- Required: "RAVLT extraction complete: 100 participants"
+- Required: "RAVLT_Total computed: min=X, max=Y, mean=Z"
+- Forbidden: "ERROR", "NaN detected in RAVLT", "Missing participants"
 
-**Expected Behavior on Validation Failure:**
-Quit with specific error message indicating missing dependency and suggested actions.
+**Expected Behavior:** Extract cognitive test scores, compute total score, validate completeness
 
 ---
 
-### Step 1: Extract and Prepare Cognitive Test Data
-**Dependencies:** Step 0 (dependency validation)
-**Complexity:** Low (~5 minutes)
+### Step 1: Extract Paradigm-Specific Theta Scores
 
-**Purpose:** Extract RAVLT Total scores from master.xlsx and prepare for analysis
+**Dependencies:** None (independent extraction)
+**Complexity:** Low (data loading from Ch5 results, <2 minutes)
+
+**Purpose:** Load theta scores from Ch5 5.3.x paradigm analyses (Free Recall vs Recognition)
 
 **Input:**
-- data/cache/master.xlsx (RAVLT cognitive test battery)
-- Expected column: RAVLT_Total (raw total score across trials 1-5)
+- Source: Ch5 5.3.x results (paradigm-specific theta scores)
+- Required Files: Results from paradigm analyses with IFR (Free Recall) and IRE (Recognition) theta estimates
+- Expected Format: Composite_ID, paradigm, theta scores aggregated across domains (What/Where/When)
 
 **Processing:**
-- Load master.xlsx using pandas.read_excel()
-- Extract columns: UID, RAVLT_Total
-- Check for missing data: document patterns and counts
-- Apply quality checks:
-  - RAVLT_Total in expected range [0, 75] (15 words x 5 trials max)
-  - No negative values
-  - Reasonable distribution (check for floor/ceiling effects)
-- Test normality using Shapiro-Wilk test (p>0.05 for normality)
-- Document descriptive statistics: mean, SD, min, max, skewness
-- Flag outliers using z-score threshold (|z| > 3.0)
-- Missing data strategy: Complete case analysis, document exclusions
+- Use extract_domain_theta_scores function to load Ch5 paradigm results
+- Filter to IFR (Image-First Recall = Free Recall) and IRE (Image-Recognition = Recognition) paradigms only
+- Aggregate theta scores across all memory domains (What/Where/When) per paradigm per participant
+- Compute mean theta per participant per paradigm across all 4 tests (T1-T4)
 
 **Output:**
-- data/step01_ravlt_scores.csv (UID, RAVLT_Total, z_score, outlier_flag)
-- data/step01_ravlt_diagnostics.txt (descriptives, normality test, missing data summary)
+- File: data/step01_paradigm_theta.csv
+- Format: CSV with columns: UID, Theta_FreeRecall, Theta_Recognition
+- Expected Rows: 100 participants
+- Expected Columns: 3 (UID + 2 theta columns)
 
 **Validation Requirement:**
-Validation tools MUST be used after cognitive test extraction.
+Validation tools MUST be used after analysis tool execution. Specific validation tools will be determined by rq_tools based on theta score extraction requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step01_ravlt_scores.csv: 100 rows x 4 columns (UID, RAVLT_Total, z_score, outlier_flag)
-- data/step01_ravlt_diagnostics.txt: text file with descriptive statistics
+- data/step01_paradigm_theta.csv: 100 rows x 3 columns (UID: object, Theta_FreeRecall: float64, Theta_Recognition: float64)
 
 *Value Ranges:*
-- RAVLT_Total in [0, 75] (valid RAVLT score range)
-- z_score in [-4, 4] (reasonable standardized range)
-- outlier_flag: 0 or 1 (binary indicator)
+- Theta_FreeRecall in [-3, 3] (typical IRT ability range)
+- Theta_Recognition in [-3, 3] (typical IRT ability range)
+- Both theta variables should be roughly normal distribution
 
 *Data Quality:*
-- All 100 UIDs present with no duplicates
-- Missing RAVLT data < 5% of sample
-- Mean RAVLT_Total in [35, 55] (expected healthy adult range)
-- Standard deviation in [8, 15] (reasonable variability)
+- All 100 participants present (no missing UIDs)
+- No NaN values in theta columns (complete paradigm data required)
+- No duplicate UIDs
+- Mean theta values near 0 (IRT calibration centers at 0)
 
 *Log Validation:*
-- Required patterns: "RAVLT extraction complete"
-- Required patterns: "Normality test: W=", "Missing data: N="
-- Forbidden patterns: "ERROR", "invalid scores", "extraction failed"
+- Required: "Paradigm theta extraction complete: 100 participants"
+- Required: "Free Recall theta: mean=X, sd=Y"
+- Required: "Recognition theta: mean=X, sd=Y"
+- Forbidden: "ERROR", "NaN detected in theta", "Missing paradigm data"
 
-**Expected Behavior on Validation Failure:**
-Log specific validation failure, document in diagnostics file, proceed with available data if >95% complete.
+**Expected Behavior:** Load paradigm-specific theta scores, aggregate across domains and tests
 
 ---
 
-### Step 2: Extract and Prepare Paradigm Theta Scores
-**Dependencies:** Step 0 (dependency validation)
-**Complexity:** Medium (~8 minutes including aggregation)
+### Step 2: Merge RAVLT and Theta Data
 
-**Purpose:** Extract and aggregate paradigm-specific theta scores for Free Recall and Recognition
+**Dependencies:** Steps 0, 1 (requires both cognitive tests and theta scores)
+**Complexity:** Low (data merging, <1 minute)
+
+**Purpose:** Create unified analysis dataset merging RAVLT scores with paradigm theta scores
 
 **Input:**
-- Ch5 paradigm theta file (identified in Step 0)
-- Expected format: UID, test, paradigm, item_id, theta, se
+- File 1: data/step00_cognitive_tests.csv (RAVLT scores)
+- File 2: data/step01_paradigm_theta.csv (paradigm theta scores)
+- Merge Key: UID (participant identifier)
 
 **Processing:**
-- Load paradigm theta file using pandas.read_csv()
-- Filter to required paradigms:
-  - IFR: Free Recall paradigm
-  - IRE: Recognition paradigm
-- Aggregate theta scores by participant and paradigm:
-  - Method: Mean theta across all items within paradigm
-  - Weighted by inverse standard error if SE column available
-  - Handle multiple tests: average across T1-T4 test sessions
-- Quality checks:
-  - Theta scores in expected range [-3, 3] (IRT ability scale)
-  - Standard errors in (0, 1] (positive and bounded)
-  - Sufficient data per participant (>=5 items per paradigm)
-- Test normality of aggregated theta scores using Shapiro-Wilk
-- Flag participants with extreme theta scores (|z| > 3.0)
-- Document missing paradigm data patterns
+- Use merge_theta_cognitive function to merge datasets on UID
+- Inner join to ensure only participants with both RAVLT and theta data
+- Validate no missing values after merge
+- Add correlation input variables for analysis
 
 **Output:**
-- data/step02_paradigm_theta.csv (UID, theta_FreeRecall, theta_Recognition, n_items_FR, n_items_RE)
-- data/step02_theta_diagnostics.txt (descriptives by paradigm, normality tests, aggregation summary)
+- File: data/step02_correlation_input.csv
+- Format: CSV with columns: UID, RAVLT_Total, Theta_FreeRecall, Theta_Recognition
+- Expected Rows: 100 participants (or fewer if missing data)
+- Expected Columns: 4 total
 
 **Validation Requirement:**
-Validation tools MUST be used after paradigm theta extraction and aggregation.
+Validation tools MUST be used after analysis tool execution. Specific validation tools will be determined by rq_tools based on data merging requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step02_paradigm_theta.csv: 100 rows x 5 columns
-- Columns: UID, theta_FreeRecall, theta_Recognition, n_items_FR, n_items_RE
-- data/step02_theta_diagnostics.txt: aggregation summary and diagnostics
+- data/step02_correlation_input.csv: 100 rows x 4 columns (UID: object, RAVLT_Total: int64, Theta_FreeRecall: float64, Theta_Recognition: float64)
 
 *Value Ranges:*
-- theta_FreeRecall in [-3, 3] (IRT ability scale bounds)
-- theta_Recognition in [-3, 3] (IRT ability scale bounds)
-- n_items_FR >= 5, n_items_RE >= 5 (minimum items per paradigm)
+- RAVLT_Total in [0, 75] (sum of 5 trials)
+- Theta_FreeRecall in [-3, 3] (IRT ability range)
+- Theta_Recognition in [-3, 3] (IRT ability range)
 
 *Data Quality:*
-- All 100 participants have both paradigm theta scores
-- No missing theta values (NaN not allowed)
-- Theta correlation between paradigms in [0.3, 0.8] (related but distinct)
-- Item counts reasonable (typically 20-40 per paradigm)
+- Expected N: 100 participants (no data loss from merge)
+- No NaN values (complete cases only)
+- No duplicate UIDs
+- All variables numeric and within expected ranges
 
 *Log Validation:*
-- Required patterns: "Paradigm aggregation complete"
-- Required patterns: "Free Recall: N=100", "Recognition: N=100"
-- Required patterns: "Normality test - FR:", "Normality test - RE:"
-- Forbidden patterns: "ERROR", "aggregation failed", "insufficient data"
+- Required: "Merge complete: 100 participants with complete data"
+- Required: "All variables validated: RAVLT, Theta_FreeRecall, Theta_Recognition"
+- Forbidden: "ERROR", "NaN values detected", "Merge failed", "Data loss detected"
 
-**Expected Behavior on Validation Failure:**
-Report specific aggregation issues, document participants with insufficient data, proceed if >95% have complete paradigm data.
+**Expected Behavior:** Merge cognitive and theta data, validate completeness
 
 ---
 
-### Step 3: Merge Datasets and Compute Correlations
-**Dependencies:** Steps 1-2 (RAVLT and paradigm theta data)
-**Complexity:** Medium (~8 minutes including assumption testing)
+### Step 3: Compute Bivariate Correlations with Bootstrap CIs
 
-**Purpose:** Merge RAVLT and theta data, compute bivariate correlations with assumption testing
+**Dependencies:** Step 2 (requires merged correlation input data)
+**Complexity:** Medium (bootstrap computation, ~5 minutes for 1000 iterations)
+
+**Purpose:** Compute r(RAVLT, FreeRecall) and r(RAVLT, Recognition) with confidence intervals
 
 **Input:**
-- data/step01_ravlt_scores.csv (RAVLT Total scores)
-- data/step02_paradigm_theta.csv (paradigm-specific theta scores)
+- File: data/step02_correlation_input.csv
+- Required Columns: RAVLT_Total, Theta_FreeRecall, Theta_Recognition
+- Expected N: 100 participants
 
 **Processing:**
-- Merge datasets on UID using inner join (complete cases only)
-- Document final sample size and any exclusions
-- Check correlation assumptions:
-  - Normality: Shapiro-Wilk test for RAVLT_Total, theta_FreeRecall, theta_Recognition
-  - Linearity: Visual inspection via scatter plots (logged for diagnostics)
-  - Independence: Verified by study design (between-participant analysis)
-  - Outliers: Mahalanobis distance > chi-square critical value
-- Compute primary correlations:
-  - r1 = pearson(RAVLT_Total, theta_FreeRecall)
-  - r2 = pearson(RAVLT_Total, theta_Recognition)
-  - Also compute Spearman correlations as robustness check
-- Bootstrap 95% confidence intervals:
-  - Iterations: 1000
-  - Random seed: 42 for reproducibility
-  - Method: Participant-level resampling with replacement
-  - CI: Percentile method (2.5th, 97.5th percentiles)
-- Apply multiple comparison correction:
-  - Family: Within-RQ (2 correlations)
-  - Bonferroni: alpha = 0.00179/2 = 0.000895 per test
-  - Report BOTH uncorrected AND corrected p-values (Decision D068)
+- Use bootstrap_correlation_ci function with following parameters:
+  - n_bootstrap = 1000 (per v5.1 specification)
+  - random_state = 42 (reproducibility)
+  - confidence_level = 0.95 (95% CIs)
+  - method = 'pearson' (Pearson product-moment correlations)
+- Compute r1 = cor(RAVLT_Total, Theta_FreeRecall)
+- Compute r2 = cor(RAVLT_Total, Theta_Recognition)
+- Bootstrap confidence intervals for both correlations
+- Compute both uncorrected and Bonferroni-corrected p-values (Decision D068)
 
 **Output:**
-- data/step03_merged_data.csv (UID, RAVLT_Total, theta_FreeRecall, theta_Recognition, outlier_flag)
-- data/step03_correlation_results.csv (correlation_type, r_value, ci_lower, ci_upper, p_uncorrected, p_bonferroni, method)
-- data/step03_assumption_diagnostics.txt (normality tests, linearity assessment, outlier detection)
+- File: data/step03_correlation_results.csv
+- Format: CSV with columns: correlation_pair, r_value, CI_lower, CI_upper, p_uncorrected, p_bonferroni, n_obs
+- Expected Rows: 2 (one for each correlation)
+- Expected Columns: 7 total
 
 **Validation Requirement:**
-Validation tools MUST be used after correlation analysis execution.
+Validation tools MUST be used after analysis tool execution. Specific validation tools will be determined by rq_tools based on correlation computation requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step03_merged_data.csv: N rows x 5 columns (where N>=95)
-- data/step03_correlation_results.csv: 4 rows x 7 columns (Pearson + Spearman for both correlations)
-- data/step03_assumption_diagnostics.txt: assumption test results
+- data/step03_correlation_results.csv: 2 rows x 7 columns (correlation_pair: object, r_value: float64, CI_lower: float64, CI_upper: float64, p_uncorrected: float64, p_bonferroni: float64, n_obs: int64)
 
 *Value Ranges:*
-- r_value in [-1, 1] (valid correlation range)
-- ci_lower, ci_upper in [-1, 1] with ci_lower < r_value < ci_upper
-- p_uncorrected, p_bonferroni in [0, 1]
-- Sample size N >= 95 (allow up to 5% missing data)
+- r_value in [-1, 1] (correlation bounds)
+- CI_lower in [-1, 1], CI_upper in [-1, 1]
+- CI_lower < r_value < CI_upper for all rows
+- p_uncorrected in [0, 1], p_bonferroni in [0, 1]
+- p_bonferroni >= p_uncorrected (correction increases p-values)
+- n_obs = 100 for both correlations
 
 *Data Quality:*
-- Both correlations computed successfully
-- Bootstrap CIs do not include impossible values (outside [-1,1])
-- Bonferroni p-values = uncorrected p-values x 2
-- Assumption tests completed without errors
+- Exactly 2 rows (Free Recall and Recognition correlations)
+- No NaN values in any column
+- Bootstrap CIs properly computed (CI_upper > CI_lower)
+- Expected correlation direction: both positive (memory abilities correlated)
 
 *Log Validation:*
-- Required patterns: "Correlations computed successfully"
-- Required patterns: "Bootstrap CIs: 1000 iterations"
-- Required patterns: "Assumption testing complete"
-- Forbidden patterns: "ERROR", "correlation failed", "bootstrap error"
+- Required: "Bootstrap correlations computed: 1000 iterations with seed=42"
+- Required: "RAVLT-FreeRecall: r=X.XX [CI_lower, CI_upper]"
+- Required: "RAVLT-Recognition: r=X.XX [CI_lower, CI_upper]"
+- Required: "Dual p-values computed: uncorrected and Bonferroni"
+- Forbidden: "ERROR", "Bootstrap failed", "NaN in correlations"
 
-**Expected Behavior on Validation Failure:**
-Report specific correlation computation failures, use alternative methods if assumption violations detected, document all remedial actions taken.
+**Expected Behavior:** Compute correlations with bootstrap confidence intervals and dual p-values
 
 ---
 
-### Step 4: Steiger's Z-test for Dependent Correlations
-**Dependencies:** Step 3 (correlation results)
-**Complexity:** Medium (~5 minutes)
+### Step 4: Test Process-Specificity with Steiger's Z-Test
 
-**Purpose:** Test process-specificity hypothesis using Steiger's Z-test for dependent correlations
+**Dependencies:** Step 3 (requires correlation results)
+**Complexity:** Low (dependent correlation test, <2 minutes)
+
+**Purpose:** Test H1: r(RAVLT, FreeRecall) > r(RAVLT, Recognition) using Steiger's Z-test
 
 **Input:**
-- data/step03_correlation_results.csv (correlation coefficients and CIs)
-- data/step03_merged_data.csv (raw data for Steiger test computation)
+- File: data/step03_correlation_results.csv (correlation results)
+- File: data/step02_correlation_input.csv (raw data for r23 computation)
+- Required: r12, r13, r23 correlations and sample size
 
 **Processing:**
-- Extract correlations:
-  - r12 = cor(RAVLT, theta_FreeRecall)
-  - r13 = cor(RAVLT, theta_Recognition)  
-  - r23 = cor(theta_FreeRecall, theta_Recognition)
-- Implement Steiger's Z-test for dependent correlations:
-  - H0: r12 = r13 (no difference in correlations)
-  - H1: r12 > r13 (Free Recall shows stronger correlation)
-  - Formula: Z = (r12 - r13) * sqrt((n-1)(1+r23)) / sqrt(2(1-r12Â²-r13Â²-r23Â²+2*r12*r13*r23))
-- Bootstrap the correlation difference:
-  - Iterations: 1000
-  - Random seed: 42 for reproducibility
-  - Resample participants with replacement
-  - Compute r12-r13 for each iteration
-  - 95% CI for difference using percentile method
-- Effect size calculation:
-  - Correlation difference: r12 - r13
-  - Cohen's q transformation for effect size interpretation
-- Statistical decisions:
-  - Primary alpha: 0.05 for Steiger test (standard for difference test)
-  - Effect size threshold: |difference| > 0.10 for meaningful difference
-  - Bootstrap CI exclusion of zero as confirmation
+- Use compare_correlations_dependent function with:
+  - r12 = cor(RAVLT, FreeRecall) from Step 3 results
+  - r13 = cor(RAVLT, Recognition) from Step 3 results
+  - r23 = cor(FreeRecall, Recognition) computed from raw data
+  - n = 100 (sample size)
+- Perform Steiger's Z-test for dependent correlations
+- Test against chapter-level alpha = 0.00179 (Bonferroni correction)
+- Compute effect size: difference in correlation coefficients (r1 - r2)
 
 **Output:**
-- data/step04_steiger_test.csv (Z_statistic, p_value, correlation_difference, effect_size_q)
-- data/step04_bootstrap_difference.csv (iteration, correlation_difference)
-- data/step04_process_specificity_summary.txt (interpretation and statistical decision)
+- File: data/step04_steiger_test.csv
+- Format: CSV with columns: z_statistic, p_value, r_difference, significant, interpretation, alpha_threshold
+- Expected Rows: 1 (single test result)
+- Expected Columns: 6 total
 
 **Validation Requirement:**
-Validation tools MUST be used after Steiger's Z-test execution.
+Validation tools MUST be used after analysis tool execution. Specific validation tools will be determined by rq_tools based on dependent correlation testing requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step04_steiger_test.csv: 1 row x 4 columns (test results)
-- data/step04_bootstrap_difference.csv: 1000 rows x 2 columns (bootstrap results)
-- data/step04_process_specificity_summary.txt: text summary of findings
+- data/step04_steiger_test.csv: 1 row x 6 columns (z_statistic: float64, p_value: float64, r_difference: float64, significant: bool, interpretation: object, alpha_threshold: float64)
 
 *Value Ranges:*
-- Z_statistic: reasonable range [-5, 5] for correlation difference test
-- p_value in [0, 1] (valid probability)
-- correlation_difference in [-2, 2] (difference of correlations)
-- Bootstrap difference 95% CI computed correctly
+- z_statistic unrestricted (can be positive/negative)
+- p_value in [0, 1]
+- r_difference in [-2, 2] (difference of correlations)
+- alpha_threshold = 0.00179 (chapter-level correction)
+- significant: True/False based on p_value < alpha_threshold
 
 *Data Quality:*
-- Steiger test computed without numerical errors
-- Bootstrap completed all 1000 iterations
-- Effect size interpretation included in summary
-- Statistical decision clearly stated (reject/fail to reject H0)
+- Exactly 1 row (single test)
+- No NaN values
+- Expected r_difference > 0 (Free Recall > Recognition correlation per hypothesis)
+- Consistent significance determination (significant = p_value < alpha_threshold)
 
 *Log Validation:*
-- Required patterns: "Steiger test completed"
-- Required patterns: "Bootstrap difference: 1000 iterations"
-- Required patterns: "Statistical decision:"
-- Forbidden patterns: "ERROR", "numerical instability", "test failed"
+- Required: "Steiger's Z-test computed: Z=X.XX, p=Y.YYY"
+- Required: "Correlation difference: r_diff=X.XX (FreeRecall - Recognition)"
+- Required: "Alpha threshold: 0.00179 (chapter-level correction)"
+- Required: "Result: significant=True/False"
+- Forbidden: "ERROR", "Steiger test failed", "NaN in test results"
 
-**Expected Behavior on Validation Failure:**
-Report Steiger test computation issues, use alternative approaches (permutation test) if numerical problems, document all computational decisions.
+**Expected Behavior:** Test dependent correlations using Steiger's Z-test with chapter-corrected alpha
 
 ---
 
-### Step 5: Visualization and Sensitivity Analysis
-**Dependencies:** Steps 3-4 (correlations and Steiger test)
-**Complexity:** Low (~5 minutes)
+### Step 5: Bootstrap Sensitivity Analysis for Correlation Difference
 
-**Purpose:** Create visualizations and conduct sensitivity analyses for robustness
+**Dependencies:** Step 4 (requires Steiger test results and raw data)
+**Complexity:** Medium (bootstrap analysis, ~5 minutes for 1000 iterations)
+
+**Purpose:** Bootstrap confidence intervals for correlation difference (r1 - r2) as sensitivity analysis
 
 **Input:**
-- data/step03_merged_data.csv (analysis dataset)
-- data/step03_correlation_results.csv (correlation results)
-- data/step04_steiger_test.csv (process-specificity test results)
+- File: data/step02_correlation_input.csv (raw data)
+- Required Columns: RAVLT_Total, Theta_FreeRecall, Theta_Recognition
+- Parameters: 1000 bootstrap iterations, seed=42
 
 **Processing:**
-- Create scatter plots for visualization:
-  - Plot 1: RAVLT vs theta_FreeRecall with regression line and 95% CI
-  - Plot 2: RAVLT vs theta_Recognition with regression line and 95% CI
-  - Save plot data CSVs for rq_plots agent
-- Sensitivity analyses:
-  - Outlier exclusion: Remove outliers (|z|>3) and recompute correlations
-  - Spearman alternative: Use rank correlations if normality violated
-  - Restriction of range check: Document RAVLT score range and variance
-- Generate summary statistics:
-  - Descriptive statistics for all variables
-  - Sample characteristics for results interpretation
-  - Missing data summary and handling decisions
-- Create interpretation summary:
-  - Process-specificity hypothesis support/rejection
-  - Effect size interpretation using Cohen's conventions
-  - Clinical/practical significance assessment
-  - Limitations and future directions
+- Bootstrap sampling with replacement (1000 iterations, seed=42)
+- For each bootstrap sample:
+  - Compute r1_boot = cor(RAVLT, FreeRecall)
+  - Compute r2_boot = cor(RAVLT, Recognition)  
+  - Compute diff_boot = r1_boot - r2_boot
+- Compute 95% confidence interval for correlation difference
+- Validate significance by checking if CI excludes zero
+- Compare with Steiger's Z-test results for consistency
 
 **Output:**
-- data/step05_scatter_plot_data_FR.csv (plot data for RAVLT vs Free Recall)
-- data/step05_scatter_plot_data_RE.csv (plot data for RAVLT vs Recognition)
-- data/step05_sensitivity_analysis.csv (alternative correlation results)
-- data/step05_descriptive_summary.csv (sample characteristics)
-- data/step05_interpretation_summary.txt (findings interpretation)
+- File: data/step05_bootstrap_sensitivity.csv
+- Format: CSV with columns: statistic, value, CI_lower, CI_upper, excludes_zero, n_bootstrap, seed
+- Expected Rows: 1 (correlation difference result)
+- Expected Columns: 7 total
 
 **Validation Requirement:**
-Validation tools MUST be used after visualization and sensitivity analysis execution.
+Validation tools MUST be used after analysis tool execution. Specific validation tools will be determined by rq_tools based on bootstrap sensitivity analysis requirements.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
 *Output Files:*
-- data/step05_scatter_plot_data_FR.csv: N rows x 3 columns (x, y, fitted_y)
-- data/step05_scatter_plot_data_RE.csv: N rows x 3 columns (x, y, fitted_y)
-- data/step05_sensitivity_analysis.csv: M rows x 6 columns (sensitivity results)
-- data/step05_descriptive_summary.csv: 3 rows x 8 columns (variable summaries)
-- data/step05_interpretation_summary.txt: text interpretation
+- data/step05_bootstrap_sensitivity.csv: 1 row x 7 columns (statistic: object, value: float64, CI_lower: float64, CI_upper: float64, excludes_zero: bool, n_bootstrap: int64, seed: int64)
 
 *Value Ranges:*
-- Plot data x-values (RAVLT) in observed range
-- Plot data y-values (theta) in [-3, 3] range
-- fitted_y values within reasonable regression bounds
-- Sensitivity correlations in [-1, 1] range
+- value in [-2, 2] (correlation difference)
+- CI_lower in [-2, 2], CI_upper in [-2, 2]
+- CI_lower < value < CI_upper
+- n_bootstrap = 1000 (fixed parameter)
+- seed = 42 (fixed parameter)
+- excludes_zero: True/False based on confidence interval bounds
 
 *Data Quality:*
-- Plot data contains all analysis participants
-- Sensitivity analyses completed without errors
-- Interpretation summary addresses key findings
-- All output files properly formatted and complete
+- Exactly 1 row (single bootstrap result)
+- No NaN values
+- statistic = "correlation_difference"
+- Proper CI computation (CI_upper > CI_lower)
+- Expected positive value (Free Recall > Recognition per hypothesis)
 
 *Log Validation:*
-- Required patterns: "Visualization data prepared"
-- Required patterns: "Sensitivity analysis complete"
-- Required patterns: "Interpretation summary generated"
-- Forbidden patterns: "ERROR", "plotting failed", "analysis incomplete"
+- Required: "Bootstrap sensitivity analysis: 1000 iterations with seed=42"
+- Required: "Correlation difference: X.XX [CI_lower, CI_upper]"
+- Required: "CI excludes zero: True/False"
+- Required: "Bootstrap distribution computed successfully"
+- Forbidden: "ERROR", "Bootstrap failed", "NaN in sensitivity results"
 
-**Expected Behavior on Validation Failure:**
-Report specific visualization or sensitivity analysis failures, generate alternative plot formats if needed, ensure interpretation summary always created.
-
----
-
-## Expected Outputs
-
-### Data Files (ALL analysis inputs and outputs)
-- data/step00_dependency_validation.txt (dependency check results)
-- data/step01_ravlt_scores.csv (extracted RAVLT data with diagnostics)
-- data/step01_ravlt_diagnostics.txt (RAVLT descriptives and quality checks)
-- data/step02_paradigm_theta.csv (aggregated paradigm-specific theta scores)
-- data/step02_theta_diagnostics.txt (theta aggregation summary)
-- data/step03_merged_data.csv (final analysis dataset)
-- data/step03_correlation_results.csv (primary correlation analysis)
-- data/step03_assumption_diagnostics.txt (assumption testing results)
-- data/step04_steiger_test.csv (dependent correlation comparison)
-- data/step04_bootstrap_difference.csv (bootstrap sensitivity for difference)
-- data/step04_process_specificity_summary.txt (Steiger test interpretation)
-- data/step05_scatter_plot_data_FR.csv (Free Recall visualization data)
-- data/step05_scatter_plot_data_RE.csv (Recognition visualization data)
-- data/step05_sensitivity_analysis.csv (outlier and alternative method results)
-- data/step05_descriptive_summary.csv (sample characteristics)
-- data/step05_interpretation_summary.txt (overall findings interpretation)
-
-### Logs (ONLY execution logs)
-- logs/step00_validate_dependencies.log
-- logs/step01_extract_ravlt.log
-- logs/step02_extract_paradigm_theta.log
-- logs/step03_compute_correlations.log
-- logs/step04_steiger_test.log
-- logs/step05_visualization_sensitivity.log
-
-### Plots (EMPTY until rq_plots runs)
-- Plot source CSVs created in data/ folder for:
-  - RAVLT vs Free Recall scatter plot with regression line
-  - RAVLT vs Recognition scatter plot with regression line
-  - Correlation comparison visualization
-
-### Results (EMPTY until rq_results runs)
-- summary.md will be created by rq_results agent
+**Expected Behavior:** Bootstrap confidence intervals for correlation difference, validate against zero
 
 ---
 
 ## Expected Data Formats
 
 ### Step-to-Step Transformations
-1. **Step 0 -> Step 1:** Dependency validation enables RAVLT extraction from master.xlsx
-2. **Step 0 -> Step 2:** Ch5 file location enables paradigm theta extraction and aggregation
-3. **Steps 1,2 -> Step 3:** RAVLT and theta data merge for correlation analysis
-4. **Step 3 -> Step 4:** Correlation coefficients feed into Steiger's dependent correlation test
-5. **Steps 3,4 -> Step 5:** All results combine for visualization and sensitivity analysis
+
+**Step 0 ’ Step 1:** Independent extractions (no transformation)
+- Step 0: RAVLT cognitive scores (wide format: 1 row per participant)
+- Step 1: Paradigm theta scores (wide format: 1 row per participant)
+
+**Step 1 ’ Step 2:** Inner join merge
+- Input: Two separate DataFrames (RAVLT, theta)
+- Merge key: UID (participant identifier)
+- Output: Combined DataFrame with all analysis variables
+
+**Step 2 ’ Step 3:** Correlation computation
+- Input: Analysis dataset (100 rows x 4 columns)
+- Processing: Bootstrap correlations between variable pairs
+- Output: Correlation results (2 rows x 7 columns)
+
+**Step 3 ’ Step 4:** Dependent correlation test
+- Input: Correlation coefficients + raw data
+- Processing: Steiger's Z-test for dependent correlations
+- Output: Single test result (1 row x 6 columns)
+
+**Step 4 ’ Step 5:** Bootstrap sensitivity analysis
+- Input: Raw analysis dataset
+- Processing: Bootstrap correlation differences
+- Output: Sensitivity results (1 row x 7 columns)
 
 ### Column Naming Conventions
-- **UID:** Participant identifier (consistent across all files)
-- **RAVLT_Total:** Raw total score across RAVLT trials 1-5
-- **theta_FreeRecall:** Mean IRT theta for Free Recall paradigm items
-- **theta_Recognition:** Mean IRT theta for Recognition paradigm items
-- **r_value:** Pearson correlation coefficient
-- **p_uncorrected:** Raw p-value before multiple comparison correction
-- **p_bonferroni:** Bonferroni-corrected p-value (Decision D068)
+
+**Core Variables:**
+- UID: Participant identifier (object)
+- RAVLT_Total: Sum of 5 RAVLT trials (int64)
+- Theta_FreeRecall: IRT ability for Free Recall paradigm (float64)
+- Theta_Recognition: IRT ability for Recognition paradigm (float64)
+
+**Correlation Results:**
+- correlation_pair: Description of correlation (object)
+- r_value: Pearson correlation coefficient (float64)
+- CI_lower, CI_upper: Bootstrap 95% confidence bounds (float64)
+- p_uncorrected, p_bonferroni: Dual p-values per D068 (float64)
+
+**Statistical Test Results:**
+- z_statistic: Steiger's Z test statistic (float64)
+- p_value: Two-tailed p-value (float64)
+- r_difference: Correlation difference (r1 - r2) (float64)
+- significant: Boolean significance result (bool)
 
 ### Data Type Constraints
-- **UID:** object (string identifier)
-- **RAVLT_Total:** int64, non-negative, range [0, 75]
-- **theta_*:** float64, nullable=False, range [-3, 3]
-- **r_value:** float64, range [-1, 1]
-- **p_*:** float64, range [0, 1]
-- **outlier_flag:** int64, binary {0, 1}
+
+**Identifiers:** UID as object (string), no missing values allowed
+**Scores:** RAVLT as int64 [0, 75], theta as float64 [-3, 3]
+**Statistics:** Correlations as float64 [-1, 1], p-values as float64 [0, 1]
+**Flags:** Significance as bool (True/False), no NaN values
 
 ---
 
 ## Cross-RQ Dependencies
 
-**Primary Dependency:** Ch5 5.3.x (Paradigm-specific IRT analyses)
-- **Required Output:** Paradigm-separated theta estimates for Free Recall (IFR) and Recognition (IRE)
-- **File Pattern:** results/ch5/5.3.*/data/*theta*.csv
-- **Expected Format:** UID, test, paradigm, item_id, theta, se
-- **Fallback Strategy:** Try multiple Ch5 5.3.x RQs (5.3.1, 5.3.2, 5.3.3) in sequence
-- **Critical Requirements:** Must contain both 'IFR' and 'IRE' paradigm codes
+**Dependency Type:** DERIVED Data from Ch5 Paradigm Analyses
 
-**Secondary Dependency:** Master cognitive test data
-- **Required File:** data/cache/master.xlsx
-- **Expected Content:** RAVLT_Total column with raw scores
-- **No Fallback:** This is primary data source, must be accessible
+**This RQ requires outputs from:**
+- **Ch5 5.3.x** (Paradigm-Specific Analyses - Free Recall vs Recognition)
+  - Source: Paradigm-separated theta scores from IFR (Free Recall) and IRE (Recognition)
+  - Used in: Step 1 (extract paradigm-specific theta scores)
+  - Rationale: This RQ compares RAVLT prediction across REMEMVR paradigms. Requires paradigm-specific (not domain-specific) theta estimates.
 
-**Dependency Validation Strategy:**
-- Step 0 explicitly validates all dependencies before proceeding
-- Flexible file discovery using pattern matching
-- Clear error messages if dependencies unavailable
-- No execution proceeds without confirmed dependencies
+**Expected Source Files:**
+- Results from Ch5 paradigm analyses with theta scores separated by retrieval paradigm
+- Format: Composite_ID or UID-based theta scores for IFR and IRE paradigms
+- Coverage: All memory domains (What/Where/When) aggregated within paradigm
+
+**Data Source Boundaries:**
+- **RAW data:** master.xlsx RAVLT cognitive scores (no RQ dependencies)
+- **DERIVED data:** Ch5 5.3.x paradigm-specific theta scores (RQ dependency)
+- **Scope:** This RQ analyzes correlations between standardized cognitive test and VR paradigm abilities
+
+**Validation:**
+- Step 1: Check availability of Ch5 paradigm results with IFR and IRE theta scores
+- If paradigm data missing ’ STEP ERROR with message to complete Ch5 5.3.x first
+- Expected paradigm coverage: Free Recall (IFR) and Recognition (IRE) with complete theta estimates
 
 ---
 
 ## Validation Requirements
 
 **CRITICAL MANDATE:**
+
 Every analysis step in this plan MUST use validation tools after analysis tool execution.
+
+This is not optional. This is the core architectural principle preventing cascading failures observed in v3.0 (where analysis errors propagated undetected through 5+ downstream steps before discovery).
+
+**Exact Specification Requirement:**
+
+> "Validation tools MUST be used after analysis tool execution"
+
+**Implementation:**
+- rq_tools (Step 11 workflow) will read tools_inventory.md validation tools section
+- rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
+- rq_analysis (Step 12 workflow) will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
+- g_code (Step 14 workflow) will generate stepN_name.py scripts with validation function calls
+- bash execution (Step 14 workflow) will run analysis ’ validation ’ error on validation failure
+
+**Downstream Agent Requirements:**
+- **rq_tools:** MUST specify validation tool for EVERY analysis step (no exceptions)
+- **rq_analysis:** MUST embed validation tool call for EVERY analysis step (no exceptions)
+- **g_code:** MUST generate code with validation function calls (no exceptions)
+- **rq_inspect:** MUST verify validation ran successfully (checks logs/stepN_name.log for validation output)
 
 ### Validation Requirements By Step
 
-#### Step 0: Validate Dependencies
-**4-Layer Validation Structure:**
-- Output Files: dependency_validation.txt with file paths and status
-- Value Ranges: File sizes > 0, required columns present
-- Data Quality: All critical dependencies available and readable
-- Log Validation: Success patterns required, error patterns forbidden
+#### Step 0: Extract RAVLT Cognitive Test Data
 
-#### Step 1: Extract RAVLT Data
-**4-Layer Validation Structure:**
-- Output Files: ravlt_scores.csv (100x4) + diagnostics.txt
-- Value Ranges: RAVLT_Total [0,75], z_score [-4,4]
-- Data Quality: All UIDs present, <5% missing, mean in [35,55]
-- Log Validation: Extraction success, normality test results, missing data counts
+**Analysis Tool:** (determined by rq_tools - likely tools.data.extract_cognitive_tests)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_data_format)
 
-#### Step 2: Extract Paradigm Theta
-**4-Layer Validation Structure:**
-- Output Files: paradigm_theta.csv (100x5) + diagnostics.txt
-- Value Ranges: theta_* [-3,3], n_items >= 5
-- Data Quality: All paradigm theta scores present, reasonable correlation between paradigms
-- Log Validation: Aggregation success, normality tests, item counts
+**What Validation Checks:**
+- Output file exists (data/step00_cognitive_tests.csv)
+- Expected column count (7 columns: UID + 6 RAVLT variables)
+- Expected row count (100 participants)
+- RAVLT value ranges valid (T1-T5 in [0,15], Total in [0,75])
+- No NaN values (complete cognitive data required)
+- RAVLT_Total = sum(T1+T2+T3+T4+T5) for all participants
 
-#### Step 3: Compute Correlations
-**4-Layer Validation Structure:**
-- Output Files: merged_data.csv (95+x5), correlation_results.csv (4x7), diagnostics.txt
-- Value Ranges: r_value [-1,1], CIs valid, p_values [0,1]
-- Data Quality: Bootstrap CIs exclude impossible values, dual p-value reporting
-- Log Validation: Correlation success, bootstrap completion, assumption testing
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure message (e.g., "Expected 100 participants, found 95")
+- Log failure to logs/step00_extract_cognitive_tests.log
+- Quit script immediately (do NOT proceed to Step 1)
+- g_debug invoked by master to diagnose root cause
 
-#### Step 4: Steiger's Z-test
-**4-Layer Validation Structure:**
-- Output Files: steiger_test.csv (1x4), bootstrap_difference.csv (1000x2), summary.txt
-- Value Ranges: Z_statistic reasonable, correlation_difference [-2,2]
-- Data Quality: Test computed successfully, bootstrap completed, decision stated
-- Log Validation: Test completion, bootstrap iterations, statistical decision
+---
 
-#### Step 5: Visualization and Sensitivity
-**4-Layer Validation Structure:**
-- Output Files: Multiple plot data CSVs, sensitivity_analysis.csv, summaries
-- Value Ranges: Plot coordinates within observed ranges, sensitivity results valid
-- Data Quality: All visualizations prepared, sensitivity analyses complete
-- Log Validation: Visualization success, sensitivity completion, interpretation generated
+#### Step 1: Extract Paradigm-Specific Theta Scores
+
+**Analysis Tool:** (determined by rq_tools - likely tools.data.extract_domain_theta_scores)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_numeric_range)
+
+**What Validation Checks:**
+- Output file exists (data/step01_paradigm_theta.csv)
+- Expected row count (100 participants)
+- Expected column count (3: UID + 2 theta columns)
+- Theta values in valid IRT range ([-3, 3])
+- No NaN values (complete paradigm data required)
+- Both paradigms represented (Free Recall and Recognition theta available)
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Theta values outside range [-3,3]")
+- Log failure to logs/step01_extract_paradigm_theta.log
+- Quit script immediately
+- g_debug invoked to diagnose (common causes: missing Ch5 results, paradigm mismatch)
+
+---
+
+#### Step 2: Merge RAVLT and Theta Data
+
+**Analysis Tool:** (determined by rq_tools - likely tools.data.merge_theta_cognitive)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_dataframe_structure)
+
+**What Validation Checks:**
+- Output file exists (data/step02_correlation_input.csv)
+- No data loss from merge (100 participants maintained)
+- All required columns present (UID, RAVLT_Total, Theta_FreeRecall, Theta_Recognition)
+- No NaN values after merge (complete cases only)
+- Variable ranges maintained post-merge
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Data loss detected: 95 rows after merge")
+- Log failure to logs/step02_merge_ravlt_theta.log
+- Quit script immediately
+- g_debug invoked to investigate merge issues
+
+---
+
+#### Step 3: Compute Bivariate Correlations with Bootstrap CIs
+
+**Analysis Tool:** (determined by rq_tools - likely tools.bootstrap.bootstrap_correlation_ci)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_correlation_test_d068)
+
+**What Validation Checks:**
+- Output file exists (data/step03_correlation_results.csv)
+- Expected number of correlations (2: Free Recall and Recognition)
+- Correlation values in valid range ([-1, 1])
+- Bootstrap CIs properly computed (CI_lower < r_value < CI_upper)
+- Dual p-values present (uncorrected and Bonferroni per D068)
+- Bootstrap parameters correct (n=1000, seed=42)
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Bootstrap CI validation failed")
+- Log failure to logs/step03_compute_correlations.log
+- Quit script immediately
+- g_debug invoked to diagnose correlation/bootstrap issues
+
+---
+
+#### Step 4: Test Process-Specificity with Steiger's Z-Test
+
+**Analysis Tool:** (determined by rq_tools - likely tools.analysis_ctt.compare_correlations_dependent)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_hypothesis_test_dual_pvalues)
+
+**What Validation Checks:**
+- Output file exists (data/step04_steiger_test.csv)
+- Single test result (1 row)
+- Z-statistic and p-value computed
+- Alpha threshold correct (0.00179 chapter-level correction)
+- Significance determination consistent (p < alpha)
+- Effect size (correlation difference) computed
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Steiger test computation failed")
+- Log failure to logs/step04_steiger_test.log
+- Quit script immediately
+- g_debug invoked to diagnose dependent correlation test issues
+
+---
+
+#### Step 5: Bootstrap Sensitivity Analysis for Correlation Difference
+
+**Analysis Tool:** (determined by rq_tools - likely tools.bootstrap.bootstrap_statistic)
+**Validation Tool:** (determined by rq_tools - likely tools.validation.validate_bootstrap_stability)
+
+**What Validation Checks:**
+- Output file exists (data/step05_bootstrap_sensitivity.csv)
+- Bootstrap parameters correct (n=1000, seed=42)
+- Confidence interval properly computed
+- Zero exclusion determination correct
+- Consistency with Steiger test results
+- Single sensitivity result (1 row)
+
+**Expected Behavior on Validation Failure:**
+- Raise error with specific failure (e.g., "Bootstrap sensitivity analysis failed")
+- Log failure to logs/step05_bootstrap_sensitivity.log
+- Quit script immediately
+- g_debug invoked to diagnose bootstrap sensitivity issues
 
 ---
 
 ## Summary
 
-**Total Steps:** 6 (Step 0: validation + Steps 1-5: analysis)
-**Estimated Runtime:** ~25 minutes
-**Cross-RQ Dependencies:** Ch5 5.3.x paradigm theta estimates + master.xlsx RAVLT data
-**Primary Outputs:** Correlation analysis with process-specificity test, visualization data, interpretation summary
-**Validation Coverage:** 100% (all 6 steps have 4-layer validation requirements)
+**Total Steps:** 6 (Step 0: extraction + Steps 1-5: analysis)
+**Estimated Runtime:** Low (10-15 minutes total - primarily bootstrap computation time)
+**Cross-RQ Dependencies:** Ch5 5.3.x paradigm analyses (Free Recall and Recognition theta scores)
+**Primary Outputs:** 
+- Bivariate correlations with bootstrap confidence intervals
+- Steiger's Z-test for process-specificity hypothesis
+- Bootstrap sensitivity analysis for correlation difference
+- Complete correlation analysis dataset
 
-**Key Hypothesis:** r(RAVLT, FreeRecall) > r(RAVLT, Recognition) supporting transfer-appropriate processing theory
+**Validation Coverage:** 100% (all 6 steps have validation requirements)
 
-**Critical Methodological Notes:**
-- Uses Steiger's Z-test for dependent correlations (gold standard method)
-- Chapter-level Bonferroni correction (alpha=0.00179) for multiple testing control
-- Bootstrap sensitivity analysis with 1000 iterations for robustness
-- Decision D068: Dual p-value reporting (uncorrected + corrected)
-- Complete assumption testing with remedial actions for violations
-- Flexible dependency resolution with fallback patterns
-
-**Statistical Specifications Compliance:**
-- Random seed: 42 for all bootstrap procedures
-- Cross-validation: Not applicable (correlation analysis)
-- Bootstrap: 1000 iterations, participant-level resampling, percentile CIs
-- Power analysis: Post-hoc power adequate with N=100 for correlation differences
-- Multiple comparisons: Within-RQ Bonferroni correction applied
-- Remedial actions: Spearman correlations if normality violated, outlier sensitivity
+**Key Analysis Features:**
+- Process-specific transfer hypothesis testing (TAP theory)
+- Dependent correlation comparison using Steiger's Z-test
+- Bootstrap confidence intervals for robustness (1000 iterations, seed=42)
+- Dual p-value reporting per Decision D068
+- Chapter-level alpha correction (± = 0.00179)
+- Complete sensitivity analysis for correlation difference
 
 ---
 
 **Next Steps (Workflow):**
-1. User reviews and approves this plan
-2. rq_tools reads this plan -> creates 3_tools.yaml
-3. rq_analysis reads plan + tools -> creates 4_analysis.yaml
-4. g_code reads analysis -> generates executable code
+1. User reviews and approves this plan (Step 7 user gate)
+2. Workflow continues to Step 11: rq_tools reads this plan ’ creates 3_tools.yaml
+3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml ’ creates 4_analysis.yaml
+4. Workflow continues to Step 14: g_code reads 4_analysis.yaml ’ generates stepN_name.py scripts
 
 ---
 
 **Version History:**
-- v1.0 (2026-01-03): Initial plan created by rq_planner agent v5.1 with enhanced statistical specifications
+- v1.0 (2026-01-04): Initial plan created by rq_planner agent for process-specific transfer analysis

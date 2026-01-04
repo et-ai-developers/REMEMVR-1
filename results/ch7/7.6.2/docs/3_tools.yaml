@@ -1,0 +1,568 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.6.2
+# Created by: rq_tools agent
+# Purpose: Analysis + validation tool specifications for RAVLT-REMEMVR correlation analysis
+# Architecture: Tool Catalog (each tool listed once, deduplication across steps)
+
+analysis_tools:
+  load_participant_data:
+    module: "tools.data"
+    function: "load_participant_data" 
+    signature: "load_participant_data(path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+    validation_tool: "validate_data_loading"
+
+    input_files:
+      - path: "./data/dfnonvr.csv"
+        description: "Prepared participant dataset with cognitive test scores"
+        required_columns: ["UID", "RAV_T5Sc", "RAV_DRSc"]
+        expected_rows: "100 participants"
+        data_types:
+          UID: "string (participant identifier)"
+          RAV_T5Sc: "float (RAVLT Trial 5 score 0-15)"
+          RAV_DRSc: "float (RAVLT Delayed Recall score 0-15)"
+
+    output_files:
+      - path: "data/step00_participant_data.csv"
+        columns: ["UID", "RAV_T5Sc", "RAV_DRSc", "plus other demographics"]
+        description: "Loaded participant data with required RAVLT scores"
+
+    parameters:
+      path: "./data/dfnonvr.csv"
+
+    description: "Load participant demographic and cognitive test data from prepared dataset"
+    source_reference: "tools_inventory.md section 'Module: tools.data' - load_participant_data"
+
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_cognitive_extraction"
+
+    input_files:
+      - path: "data/step00_participant_data.csv"
+        required_columns: ["UID", "RAV_T5Sc", "RAV_DRSc"]
+        source: "analysis tool output (step00_load_participant_data)"
+
+    output_files:
+      - path: "data/step01_ravlt_scores.csv"
+        columns: ["UID", "RAV_T5Sc", "RAV_DRSc", "RAVLT_Forgetting", "RAVLT_Forgetting_z"]
+        description: "RAVLT scores with computed forgetting index (standardized)"
+
+    parameters:
+      df: "pd.DataFrame"
+      tests: "List[str] = None (extract RAVLT by default)"
+
+    description: "Extract RAVLT scores and compute forgetting index (T5 - Delayed)"
+    source_reference: "tools_inventory.md section 'Module: tools.data' - extract_cognitive_tests"
+
+  extract_random_effects_from_lmm:
+    module: "tools.analysis_lmm"
+    function: "extract_random_effects_from_lmm"
+    signature: "extract_random_effects_from_lmm(result: MixedLMResults) -> Dict"
+    validation_tool: "validate_slope_extraction"
+
+    input_files:
+      - path: "results/ch5/5.1.1/data/step05_lmm_model_summary.txt"
+        description: "LMM results from Ch5 5.1.1 omnibus analysis"
+        source: "Cross-RQ dependency (Ch5 5.1.1 LMM random slopes)"
+
+    output_files:
+      - path: "data/step02_rememvr_slopes.csv"
+        columns: ["UID", "REMEMVR_Slope", "REMEMVR_Intercept"]
+        description: "Participant-specific slopes from LMM random effects"
+
+    parameters:
+      result: "MixedLMResults (fitted LMM model object)"
+
+    description: "Extract participant-specific forgetting slopes from Ch5 5.1.1 LMM"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_lmm' - extract_random_effects_from_lmm"
+
+  merge_analysis_datasets:
+    module: "pandas"
+    function: "merge"
+    signature: "pd.merge(left: pd.DataFrame, right: pd.DataFrame, on: str, how: str = 'inner') -> pd.DataFrame"
+    validation_tool: "validate_data_merge"
+
+    input_files:
+      - path: "data/step01_ravlt_scores.csv"
+        required_columns: ["UID", "RAVLT_Forgetting", "RAVLT_Forgetting_z"]
+        source: "analysis tool output (step01_extract_cognitive_tests)"
+      - path: "data/step02_rememvr_slopes.csv"  
+        required_columns: ["UID", "REMEMVR_Slope", "REMEMVR_Intercept"]
+        source: "analysis tool output (step02_extract_random_effects_from_lmm)"
+
+    output_files:
+      - path: "data/step03_analysis_input.csv"
+        columns: ["UID", "RAV_T5Sc", "RAV_DRSc", "RAVLT_Forgetting", "RAVLT_Forgetting_z", "REMEMVR_Slope", "REMEMVR_Intercept"]
+        description: "Complete merged dataset for correlation analysis"
+
+    parameters:
+      left: "pd.DataFrame (RAVLT data)"
+      right: "pd.DataFrame (slope data)"
+      on: "UID"
+      how: "inner"
+
+    description: "Merge RAVLT and REMEMVR slope datasets on participant UID"
+    source_reference: "Standard pandas merge operation"
+
+  bootstrap_correlation_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_correlation_ci"
+    signature: "bootstrap_correlation_ci(x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'pearson', random_state: int = None) -> Dict"
+    validation_tool: "validate_correlation_bootstrap"
+
+    input_files:
+      - path: "data/step03_analysis_input.csv"
+        required_columns: ["RAVLT_Forgetting", "REMEMVR_Slope"]
+        source: "analysis tool output (step03_merge_analysis_datasets)"
+
+    output_files:
+      - path: "data/step04_bivariate_correlation.csv"
+        columns: ["correlation", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni", "N"]
+        description: "Bootstrap correlation with dual p-values (Decision D068)"
+
+    parameters:
+      x: "pd.Series (RAVLT_Forgetting)"
+      y: "pd.Series (REMEMVR_Slope)"
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "pearson"
+      random_state: 42
+
+    description: "Compute bivariate correlation with bootstrap CI and dual p-values"
+    source_reference: "tools_inventory.md section 'Module: tools.bootstrap' - bootstrap_correlation_ci"
+
+  compute_pearson_correlations_with_correction:
+    module: "tools.analysis_stats"
+    function: "compute_pearson_correlations_with_correction"
+    signature: "compute_pearson_correlations_with_correction(df: pd.DataFrame, irt_col: str = 'IRT_score', ctt_col: str = 'CTT_score', factor_col: str = 'factor', thresholds: Optional[List[float]] = [0.70, 0.90]) -> pd.DataFrame"
+    validation_tool: "validate_partial_correlation"
+
+    input_files:
+      - path: "data/step03_analysis_input.csv"
+        required_columns: ["RAVLT_Forgetting", "REMEMVR_Slope", "RAV_T5Sc", "REMEMVR_Intercept"]
+        source: "analysis tool output (step03_merge_analysis_datasets)"
+
+    output_files:
+      - path: "data/step05_partial_correlation.csv"
+        columns: ["partial_r", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni", "N"]
+        description: "Partial correlation controlling for encoding levels"
+
+    parameters:
+      df: "pd.DataFrame"
+      variables: "RAVLT_Forgetting, REMEMVR_Slope (primary)"
+      controls: "RAV_T5Sc, REMEMVR_Intercept (encoding levels)"
+      correction: "bonferroni"
+
+    description: "Compute partial correlation controlling for initial encoding levels"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_stats' - compute_pearson_correlations_with_correction"
+
+  run_diagnostic_tests:
+    module: "scipy.stats"
+    function: "multiple_functions"
+    signature: "kstest(data: np.ndarray, cdf: str) -> KstestResult, plus linearity and outlier tests"
+    validation_tool: "validate_diagnostic_results"
+
+    input_files:
+      - path: "data/step03_analysis_input.csv"
+        required_columns: ["RAVLT_Forgetting", "REMEMVR_Slope"]
+        source: "analysis tool output (step03_merge_analysis_datasets)"
+
+    output_files:
+      - path: "data/step06_diagnostics.csv"
+        columns: ["test_type", "statistic", "p_value", "conclusion"]
+        description: "Correlation assumption tests and outlier identification"
+
+    parameters:
+      normality_test: "kolmogorov_smirnov"
+      linearity_check: "scatterplot_inspection"  
+      outlier_threshold: "Cook's D < 4/N = 0.04"
+      homoscedasticity: "Levene test"
+
+    description: "Test correlation assumptions: normality, linearity, outliers, homoscedasticity"
+    source_reference: "Standard scipy.stats diagnostic functions"
+
+  bootstrap_stability_analysis:
+    module: "tools.bootstrap"
+    function: "bootstrap_statistic"
+    signature: "bootstrap_statistic(data: Union[np.ndarray, pd.DataFrame], statistic_func: Callable, n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'percentile', random_state: int = None) -> Dict"
+    validation_tool: "validate_bootstrap_stability"
+
+    input_files:
+      - path: "data/step03_analysis_input.csv"
+        required_columns: ["RAVLT_Forgetting", "REMEMVR_Slope"]
+        source: "analysis tool output (step03_merge_analysis_datasets)"
+
+    output_files:
+      - path: "data/step07_bootstrap_results.csv"
+        columns: ["metric", "mean_estimate", "CI_lower", "CI_upper", "stability_index"]
+        description: "Bootstrap stability analysis and sensitivity tests"
+
+    parameters:
+      data: "pd.DataFrame"
+      statistic_func: "correlation function"
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      method: "percentile"
+      random_state: 42
+
+    description: "Cross-validation via bootstrap resampling, sensitivity analysis"
+    source_reference: "tools_inventory.md section 'Module: tools.bootstrap' - bootstrap_statistic"
+
+  compute_effect_size_and_power:
+    module: "tools.statistics" 
+    function: "compute_power_analysis"
+    signature: "compute_power_analysis(effect_size: float, sample_size: int, alpha: float = 0.05, power: float = 0.80, test_type: str = 'correlation') -> Dict"
+    validation_tool: "validate_power_analysis"
+
+    input_files:
+      - path: "data/step04_bivariate_correlation.csv"
+        required_columns: ["correlation"]
+        source: "analysis tool output (step04_bootstrap_correlation_ci)"
+      - path: "data/step05_partial_correlation.csv"
+        required_columns: ["partial_r"]
+        source: "analysis tool output (step05_compute_pearson_correlations_with_correction)"
+
+    output_files:
+      - path: "data/step08_power_analysis.csv"
+        columns: ["analysis_type", "effect_size", "power", "min_detectable_r", "interpretation"]
+        description: "Effect size interpretation and statistical power assessment"
+
+    parameters:
+      effect_sizes: "observed correlations from steps 4-5"
+      sample_size: 100
+      alpha: 0.05
+      power_target: 0.80
+      cohen_guidelines: "r = 0.10 small, 0.30 medium, 0.50 large"
+
+    description: "Interpret effect sizes and assess statistical power for observed correlations"
+    source_reference: "Standard power analysis functions"
+
+validation_tools:
+  validate_data_loading:
+    module: "tools.validation"
+    function: "validate_data_completeness"
+    signature: "validate_data_completeness(df: pd.DataFrame, required_columns: List[str], min_rows: int) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_participant_data.csv"
+        required_columns: ["UID", "RAV_T5Sc", "RAV_DRSc"]
+        source: "analysis tool output (step00_load_participant_data)"
+
+    parameters:
+      required_columns: ["UID", "RAV_T5Sc", "RAV_DRSc"]
+      min_rows: 100
+      max_missing: 0
+
+    criteria:
+      - "All 100 participants present (no data loss)"
+      - "No NaN values in RAV_T5Sc or RAV_DRSc columns"
+      - "No duplicate UIDs"
+      - "RAVLT scores in valid range [0, 15]"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_data: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_load_participant_data.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate participant data loading completeness and RAVLT score ranges"
+
+  validate_cognitive_extraction:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_ravlt_scores.csv"
+        required_columns: ["UID", "RAVLT_Forgetting", "RAVLT_Forgetting_z"]
+        source: "analysis tool output (step01_extract_cognitive_tests)"
+
+    parameters:
+      range_checks:
+        - column: "RAVLT_Forgetting"
+          min_val: -15.0
+          max_val: 15.0
+        - column: "RAVLT_Forgetting_z"
+          min_val: -3.0
+          max_val: 3.0
+
+    criteria:
+      - "RAVLT_Forgetting in range [-15, 15]"
+      - "RAVLT_Forgetting_z approximately standardized (mean~0, SD~1)"
+      - "No NaN values in computed scores"
+      - "All 100 participants present"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        failed_checks: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_cognitive_tests.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate RAVLT extraction and forgetting index computation"
+
+  validate_slope_extraction:
+    module: "tools.validation"
+    function: "validate_slope_ranges"
+    signature: "validate_slope_ranges(df: pd.DataFrame, slope_col: str, min_slope: float, max_slope: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_rememvr_slopes.csv"
+        required_columns: ["UID", "REMEMVR_Slope", "REMEMVR_Intercept"]
+        source: "analysis tool output (step02_extract_random_effects_from_lmm)"
+
+    parameters:
+      slope_col: "REMEMVR_Slope"
+      min_slope: -2.0
+      max_slope: 0.0
+      intercept_range: [-2.0, 2.0]
+
+    criteria:
+      - "REMEMVR_Slope in range [-2, 0] (negative slopes expected)"
+      - "REMEMVR_Intercept in range [-2, 2] (IRT ability scale)"
+      - "All 100 participants present"
+      - "No NaN values in slope estimates"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_extract_random_effects_from_lmm.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate REMEMVR slope extraction from LMM random effects"
+
+  validate_data_merge:
+    module: "tools.validation"
+    function: "validate_merge_completeness"
+    signature: "validate_merge_completeness(df: pd.DataFrame, left_key: str, right_key: str, expected_rows: int) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_analysis_input.csv"
+        required_columns: ["UID", "RAVLT_Forgetting", "REMEMVR_Slope"]
+        source: "analysis tool output (step03_merge_analysis_datasets)"
+
+    parameters:
+      expected_rows: 100
+      required_columns: ["UID", "RAVLT_Forgetting", "REMEMVR_Slope"]
+      merge_key: "UID"
+
+    criteria:
+      - "All 100 participants present (no data loss in merge)"
+      - "No NaN values in any analysis columns"
+      - "UIDs unique (no duplicates)"
+      - "Both RAVLT and slope data present for all participants"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_data: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_merge_analysis_datasets.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate data merge completeness with no participant data loss"
+
+  validate_correlation_bootstrap:
+    module: "tools.validation"
+    function: "validate_correlation_results"
+    signature: "validate_correlation_results(correlation: float, ci_lower: float, ci_upper: float, p_values: List[float]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_bivariate_correlation.csv"
+        required_columns: ["correlation", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step04_bootstrap_correlation_ci)"
+
+    parameters:
+      correlation_bounds: [-1.0, 1.0]
+      ci_validity_check: true
+      dual_p_values: true
+      bonferroni_factor: 28
+
+    criteria:
+      - "Correlation in range [-1, 1]"
+      - "CI_lower <= correlation <= CI_upper"
+      - "p_bonferroni = p_uncorrected × 28 (Decision D068)"
+      - "Bootstrap completed with 1000 iterations"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        bootstrap_status: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_bootstrap_correlation_ci.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate bootstrap correlation with dual p-values (Decision D068)"
+
+  validate_partial_correlation:
+    module: "tools.validation"
+    function: "validate_partial_correlation"
+    signature: "validate_partial_correlation(partial_r: float, controls: List[str], n_obs: int) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_partial_correlation.csv"
+        required_columns: ["partial_r", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (step05_compute_pearson_correlations_with_correction)"
+
+    parameters:
+      partial_r_bounds: [-1.0, 1.0]
+      control_variables: ["RAV_T5Sc", "REMEMVR_Intercept"]
+      min_observations: 100
+
+    criteria:
+      - "Partial correlation in range [-1, 1]"
+      - "CI bounds valid and well-formed"
+      - "Dual p-values present (Decision D068)"
+      - "Control variables accounted for"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        control_status: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_compute_pearson_correlations_with_correction.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate partial correlation controlling for encoding levels"
+
+  validate_diagnostic_results:
+    module: "tools.validation"
+    function: "validate_assumption_tests"
+    signature: "validate_assumption_tests(diagnostics_df: pd.DataFrame, required_tests: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step06_diagnostics.csv"
+        required_columns: ["test_type", "statistic", "p_value", "conclusion"]
+        source: "analysis tool output (step06_run_diagnostic_tests)"
+
+    parameters:
+      required_tests: ["normality", "linearity", "outliers", "homoscedasticity"]
+      alpha: 0.05
+
+    criteria:
+      - "All diagnostic tests completed"
+      - "No NaN values in test statistics"
+      - "Clear Pass/Fail conclusions"
+      - "Outliers identified using Cook's D < 0.04 threshold"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        failed_tests: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_run_diagnostic_tests.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate completion of correlation assumption tests"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_convergence"
+    signature: "validate_bootstrap_convergence(bootstrap_results: pd.DataFrame, stability_threshold: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step07_bootstrap_results.csv"
+        required_columns: ["metric", "mean_estimate", "CI_lower", "CI_upper", "stability_index"]
+        source: "analysis tool output (step07_bootstrap_stability_analysis)"
+
+    parameters:
+      n_bootstrap: 1000
+      stability_threshold: 0.95
+      convergence_check: true
+
+    criteria:
+      - "Bootstrap completed with 1000 iterations"
+      - "No NaN values in stability estimates"
+      - "Confidence intervals well-formed"
+      - "Stability index > 0.95 for convergence"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        stability_status: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_bootstrap_stability_analysis.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate bootstrap stability and convergence"
+
+  validate_power_analysis:
+    module: "tools.validation"
+    function: "validate_power_calculations"
+    signature: "validate_power_calculations(power_df: pd.DataFrame, sample_size: int, alpha: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step08_power_analysis.csv"
+        required_columns: ["analysis_type", "effect_size", "power", "min_detectable_r", "interpretation"]
+        source: "analysis tool output (step08_compute_effect_size_and_power)"
+
+    parameters:
+      sample_size: 100
+      alpha: 0.05
+      cohen_thresholds: [0.10, 0.30, 0.50]
+
+    criteria:
+      - "Power analysis completed for both correlations"
+      - "No NaN values in power estimates"
+      - "Interpretations consistent with Cohen's guidelines"
+      - "Minimum detectable effect sizes realistic"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        power_adequacy: "str"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step08_compute_effect_size_and_power.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate power analysis calculations and effect size interpretations"
+
+summary:
+  analysis_tools_count: 9
+  validation_tools_count: 9
+  total_unique_tools: 18
+  mandatory_decisions_embedded: ["D068"]
+  architecture: "Tool Catalog (each tool listed once, deduplication)"
+  rq_type: "Correlation analysis (bivariate + partial)"
+  cross_rq_dependencies: ["Ch5 5.1.1 LMM random slopes"]

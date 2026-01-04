@@ -1,0 +1,410 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.1.3: Domain-Specific Prediction Patterns
+# Created by: rq_tools agent 
+# Architecture: Tool Catalog (deduplication - each tool listed once)
+# Date: 2026-01-04
+
+# ============================================================================= 
+# ANALYSIS TOOLS
+# =============================================================================
+analysis_tools:
+
+  # Data extraction and preparation tools
+  extract_domain_theta_scores:
+    module: "tools.data"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_what.csv"
+        required_columns: ["composite_ID", "UID", "test", "theta_What"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          UID: "string (format: P###)"
+          test: "int (values: 0, 1, 3, 6)"
+          theta_What: "float64 (theta scores)"
+
+      - path: "results/ch5/5.2.2/data/step03_theta_where.csv"  
+        required_columns: ["composite_ID", "UID", "test", "theta_Where"]
+        expected_rows: "~400"
+        data_types:
+          theta_Where: "float64 (theta scores)"
+
+      - path: "results/ch5/5.2.3/data/step03_theta_when.csv"
+        required_columns: ["composite_ID", "UID", "test", "theta_When"] 
+        expected_rows: "~400"
+        data_types:
+          theta_When: "float64 (theta scores)"
+
+    output_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        columns: ["UID", "domain", "theta_mean", "theta_se"]
+        description: "Aggregated theta scores by UID and domain (300 rows: 100 UIDs x 3 domains)"
+
+    parameters:
+      domains: ["What", "Where", "When"]
+      aggregation_method: "mean"  # Mean theta across tests per domain
+      
+    description: "Extract and aggregate domain-specific theta scores from Ch5 IRT calibration results"
+    source_reference: "tools_inventory.md section 'Module: tools.data' - extract_domain_theta_scores"
+
+  merge_theta_cognitive:
+    module: "tools.data" 
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "domain", "theta_mean", "theta_se"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T"]
+        expected_rows: "100 participants"
+        data_types:
+          RAVLT_T: "float64 (T-scores 20-80)"
+          BVMT_T: "float64 (T-scores 20-80)" 
+          RPM_T: "float64 (T-scores 20-80)"
+
+    output_files:
+      - path: "data/step01_merged_dataset.csv"
+        columns: ["UID", "domain", "theta_mean", "theta_se", "RAVLT_T", "BVMT_T", "RPM_T"]
+        description: "Complete analysis dataset merging domain theta scores with cognitive test T-scores"
+
+    parameters:
+      merge_key: "UID"
+      how: "inner"  # Only participants with both theta and cognitive data
+
+    description: "Merge domain theta scores with cognitive test T-scores for regression analysis"
+    source_reference: "tools_inventory.md section 'Module: tools.data' - merge_theta_cognitive"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"  
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+
+    input_files:
+      - path: "data/step01_merged_dataset.csv"
+        required_columns: ["UID", "domain", "theta_mean", "RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    output_files:
+      - path: "data/step02_what_model_results.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_value", "vif"]
+        description: "What domain regression results (theta_What ~ RAVLT + BVMT + RPM)"
+
+      - path: "data/step02_where_model_results.csv"  
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_value", "vif"]
+        description: "Where domain regression results (theta_Where ~ RAVLT + BVMT + RPM)"
+
+      - path: "data/step02_when_model_results.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_value", "vif"] 
+        description: "When domain regression results (theta_When ~ RAVLT + BVMT + RPM)"
+
+      - path: "data/step02_model_diagnostics.csv"
+        columns: ["domain", "r_squared", "adj_r_squared", "f_statistic", "aic", "bic"]
+        description: "Model fit statistics and diagnostics for all three domain models"
+
+    parameters:
+      add_constant: true
+      return_diagnostics: true
+      standardize_predictors: true  # Z-score predictors for comparable betas
+      
+    description: "Fit separate multiple regression models for each memory domain with standardized predictors"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - fit_multiple_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step01_merged_dataset.csv"
+        required_columns: ["theta_mean", "RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    output_files:
+      - path: "data/step02_bootstrap_coefficients.csv"
+        columns: ["domain", "predictor", "coefficient", "mean", "std", "ci_lower", "ci_upper"]
+        description: "Bootstrap 95% confidence intervals for all regression coefficients"
+
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      
+    description: "Compute bootstrap confidence intervals for regression coefficients with 1000 iterations"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - bootstrap_regression_ci"
+
+  compare_correlations_dependent:
+    module: "tools.analysis_ctt"
+    function: "compare_correlations_dependent" 
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, Union[float, bool, str]]"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step01_merged_dataset.csv"
+        required_columns: ["theta_mean", "RAVLT_T", "BVMT_T", "RPM_T", "domain"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    output_files:
+      - path: "data/step04_steiger_z_tests.csv"
+        columns: ["comparison", "z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr", "ci_lower", "ci_upper", "significance"]
+        description: "Steiger Z-test results for cross-domain beta coefficient comparisons"
+
+      - path: "data/step04_correlation_matrix.csv"
+        columns: ["variable", "What_theta", "Where_theta", "When_theta", "RAVLT_T", "BVMT_T", "RPM_T"]
+        description: "Full correlation matrix among all variables for Steiger tests"
+
+    parameters:
+      n_sample: 100  # Sample size for Steiger tests
+      alpha: 0.05
+      bonferroni_n_tests: 3  # 3 primary cross-domain comparisons
+
+    description: "Test statistical significance of cross-domain correlation differences using Steiger's Z-tests"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_ctt' - compare_correlations_dependent"
+
+  compute_model_r_squared_comparison:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step02_model_diagnostics.csv" 
+        required_columns: ["domain", "r_squared", "adj_r_squared"]
+        source: "analysis tool output (fit_multiple_regression)"
+
+    output_files:
+      - path: "data/step05_model_comparison.csv"
+        columns: ["domain", "r_squared", "adj_r_squared", "r2_ci_lower", "r2_ci_upper", "effect_size"]
+        description: "R² comparisons across domains with bootstrap confidence intervals"
+
+      - path: "data/step05_r_squared_differences.csv"  
+        columns: ["comparison", "r2_difference", "ci_lower", "ci_upper", "effect_size"]
+        description: "Pairwise R² difference comparisons (What vs Where, What vs When, Where vs When)"
+
+    parameters:
+      bootstrap_iterations: 1000
+      confidence_level: 0.95
+      random_state: 42
+
+    description: "Compare model performance (R²) across domains and compute effect sizes for differences"
+    source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_cohens_f2"
+
+# =============================================================================
+# VALIDATION TOOLS  
+# =============================================================================
+validation_tools:
+
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "domain", "theta_mean", "theta_se"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+
+      - path: "data/step01_merged_dataset.csv"
+        required_columns: ["UID", "domain", "theta_mean", "RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    parameters:
+      required_columns_domain: ["UID", "domain", "theta_mean", "theta_se"]
+      required_columns_merged: ["UID", "domain", "theta_mean", "RAVLT_T", "BVMT_T", "RPM_T"] 
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing column names (case-sensitive matching)"
+      - "DataFrame not empty if required columns specified"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all columns present)"
+        message: "str (human-readable validation result)"
+        missing_cols: "List[str] (missing column names, empty if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_data.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DataFrames contain all required columns for domain analysis"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_data_format"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: Any) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_model_diagnostics.csv"
+        required_columns: ["domain", "r_squared", "f_statistic"]
+        source: "analysis tool output (fit_multiple_regression)"
+
+    parameters:
+      min_r_squared: 0.0
+      max_vif_threshold: 10.0  # Detect severe multicollinearity
+      min_sample_size: 95  # Allow up to 5 missing participants
+
+    criteria:
+      - "All three domain models converged successfully"
+      - "R² values within valid range [0, 1]"
+      - "F-statistics positive and finite"
+      - "VIF values below multicollinearity threshold (VIF < 10)"
+      - "Sufficient sample size per domain"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all models converged properly)"
+        message: "str (convergence status description)"
+        converged: "bool (technical convergence flag)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_models.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate all domain regression models converged and meet statistical assumptions"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_model_convergence"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range" 
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_bootstrap_coefficients.csv"
+        required_columns: ["coefficient", "mean", "std", "ci_lower", "ci_upper"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+
+    parameters:
+      beta_range: [-3.0, 3.0]  # Standardized betas should be reasonable
+      ci_tolerance: 0.001  # CI bounds should differ
+      
+    criteria:
+      - "Bootstrap coefficients within reasonable range [-3, 3]"
+      - "Standard errors positive and finite"
+      - "Confidence intervals non-degenerate (ci_lower < ci_upper)"
+      - "No NaN or infinite values in bootstrap distributions"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all values within range)"
+        message: "str (range validation result)"
+        out_of_range_count: "int (number of violations)"
+        violations: "list (first 10 out-of-range values)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_models.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate bootstrap coefficient values are within reasonable statistical bounds"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(results_df: pd.DataFrame, uncorrected_col: str = 'p_uncorrected', corrected_col: str = 'p_corrected') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_steiger_z_tests.csv"
+        required_columns: ["z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        source: "analysis tool output (compare_correlations_dependent)"
+
+    parameters:
+      p_value_range: [0.0, 1.0]
+      z_statistic_range: [-10.0, 10.0]  # Reasonable Z-test bounds
+      required_comparisons: 3  # 3 primary cross-domain tests
+
+    criteria:
+      - "All p-values in valid range [0, 1]"
+      - "Z-statistics finite and reasonable ([-10, 10])"
+      - "Bonferroni p-values >= uncorrected p-values (correction property)"
+      - "All 3 primary comparisons completed successfully" 
+      - "Dual p-value reporting per Decision D068"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all tests valid)"
+        message: "str (test validation summary)"
+        d068_compliant: "bool (dual p-value reporting confirmed)"
+
+    behavior_on_failure:
+      action: "raise ValueError"  
+      log_to: "logs/step04_steiger_tests.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Steiger Z-tests completed successfully with dual p-value reporting (Decision D068)"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_hypothesis_test_dual_pvalues"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_model_comparison.csv"
+        required_columns: ["r_squared", "effect_size"]
+        source: "analysis tool output (compute_model_r_squared_comparison)"
+
+    parameters:
+      r_squared_range: [0.0, 1.0] 
+      effect_size_categories: ["negligible", "small", "medium", "large"]
+      
+    criteria:
+      - "R² values within valid bounds [0, 1]"  
+      - "Effect sizes properly classified using Cohen's conventions"
+      - "No negative R² values (invalid)"
+      - "Effect size labels match computed values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if effect sizes valid)"
+        message: "str (effect size validation summary)"
+        warnings: "List[str] (any unusual but valid effect sizes)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_compare_models.log"  
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate R² effect sizes are within valid bounds and properly classified"
+    source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_effect_sizes"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 5  
+  total_unique_tools: 11
+  mandatory_decisions_embedded: ["D068"]
+  architecture_notes:
+    - "Tool catalog approach: each tool listed once, deduplication across steps"
+    - "rq_analysis will map tools to steps via 2_plan.md workflow"
+    - "Full type hints enable g_code signature validation"  
+    - "Sequential validation: all analysis outputs validated before next step"
+    - "Ch7 focus: Multiple regression, correlation comparisons, domain specificity"
+
+# =============================================================================
+# TOOL-TO-STEP MAPPING (Reference for rq_analysis)
+# =============================================================================  
+# Step 0: Cross-RQ dependency validation -> validate_data_format
+# Step 1: Domain data extraction -> extract_domain_theta_scores + merge_theta_cognitive + validate_data_format  
+# Step 2: Regression modeling -> fit_multiple_regression + bootstrap_regression_ci + validate_model_convergence + validate_numeric_range
+# Step 3: Beta coefficient extraction -> [handled within Step 2 tools]
+# Step 4: Steiger Z-tests -> compare_correlations_dependent + validate_correlation_test_d068
+# Step 5: Model comparison -> compute_model_r_squared_comparison + validate_effect_sizes

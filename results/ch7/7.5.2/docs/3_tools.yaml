@@ -1,0 +1,628 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.5.2
+# Created by: rq_tools agent
+# Purpose: DASS predict memory performance - Multiple regression analysis
+# Architecture: Tool Catalog (each tool listed once, deduplication)
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation" 
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "status file"
+        data_types:
+          status: "YAML structure with agent statuses"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"  
+        required_columns: ["composite_ID", "theta_all"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          theta_all: "float (IRT ability estimates)"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["DASS_Dep", "DASS_Anx", "DASS_Str", "Age", "RAVLT_Total"]
+        expected_rows: "~100 participants"
+        data_types:
+          DASS_Dep: "int (0-42 depression subscale)"
+          DASS_Anx: "int (0-42 anxiety subscale)"
+          DASS_Str: "int (0-42 stress subscale)"
+    
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: []
+        description: "Dependency validation log with PASS/FAIL status per file"
+    
+    parameters:
+      required_files:
+        - "results/ch5/5.1.1/status.yaml"
+        - "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        - "data/cache/master.xlsx"
+      min_size_bytes: 100
+    
+    description: "Validate cross-RQ dependencies and master data availability before analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  load_test_data:
+    module: "tools.data"
+    function: "load_test_data"  
+    signature: "load_test_data(path: str = './data/dfdata.csv') -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "theta_all"]
+        expected_rows: "~400"
+        data_types:
+          composite_ID: "string (UID_test format)"
+          theta_all: "float (IRT ability -3 to +3)"
+      - path: "data/cache/master.xlsx" 
+        required_columns: ["DASS_Dep", "DASS_Anx", "DASS_Str", "Age", "RAVLT_Total"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (participant ID)"
+          DASS_Dep: "int (0-42)"
+          DASS_Anx: "int (0-42)" 
+          DASS_Str: "int (0-42)"
+          Age: "int (18-85)"
+          RAVLT_Total: "int (15-75)"
+    
+    output_files:
+      - path: "data/step01_analysis_dataset.csv"
+        columns: ["UID", "theta_all", "DASS_Dep", "DASS_Anx", "DASS_Str", "Age", "RAVLT_Total"] 
+        description: "Merged analysis dataset with complete cases only"
+      - path: "data/step01_extraction_log.txt"
+        columns: []
+        description: "Data extraction and merging log with sample size documentation"
+    
+    parameters:
+      merge_on: "UID"
+      join_type: "inner"
+      required_dass_columns: ["DASS_Dep", "DASS_Anx", "DASS_Str"]
+      required_control_columns: ["Age", "RAVLT_Total"]
+      complete_cases_only: true
+    
+    description: "Extract theta scores from Ch5 5.1.1 and merge with DASS/demographic data from master.xlsx"
+    source_reference: "tools_inventory.md section 'Data Loading Tools' - load_test_data"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+    
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["UID", "theta_all", "DASS_Dep", "DASS_Anx", "DASS_Str", "Age", "RAVLT_Total"]
+        expected_rows: "95-100"
+        data_types:
+          theta_all: "float (outcome variable)"
+          DASS_Dep: "float (standardized predictor)"
+          DASS_Anx: "float (standardized predictor)" 
+          DASS_Str: "float (standardized predictor)"
+          Age: "float (standardized control)"
+          RAVLT_Total: "float (standardized control)"
+    
+    output_files:
+      - path: "data/step02_descriptives.csv"
+        columns: ["variable", "mean", "sd", "min", "max", "median", "q1", "q3"]
+        description: "Descriptive statistics for all variables"
+      - path: "data/step02_correlations.csv" 
+        columns: ["variable1", "variable2", "correlation", "p_value"]
+        description: "Correlation matrix between all variables"
+      - path: "data/step02_normality_tests.txt"
+        columns: []
+        description: "Shapiro-Wilk normality test results for outcome variable"
+    
+    parameters:
+      outcome_var: "theta_all"
+      standardize_predictors: true
+      compute_correlations: true
+      test_normality: true
+      alpha_level: 0.05
+    
+    description: "Compute descriptive statistics, correlations, and normality tests for all analysis variables"
+    source_reference: "tools_inventory.md section 'Analysis Regression Tools' - fit_multiple_regression"
+
+  fit_hierarchical_regression:
+    module: "tools.analysis_regression"
+    function: "fit_hierarchical_regression" 
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict"
+    validation_tool: "validate_lmm_convergence"
+    
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["theta_all", "Age", "RAVLT_Total", "DASS_Dep", "DASS_Anx", "DASS_Str"]
+        expected_rows: "95-100"
+        data_types:
+          theta_all: "float (outcome)"
+          Age: "float (control block)"
+          RAVLT_Total: "float (control block)"
+          DASS_Dep: "float (DASS block)"
+          DASS_Anx: "float (DASS block)"
+          DASS_Str: "float (DASS block)"
+    
+    output_files:
+      - path: "data/step03_hierarchical_models.csv"
+        columns: ["model", "R2", "adj_R2", "F_stat", "df1", "df2", "p_value", "delta_R2"]
+        description: "Model comparison results for hierarchical regression"
+      - path: "data/step03_model_bootstrap.csv"
+        columns: ["delta_R2", "ci_lower", "ci_upper", "point_estimate", "iterations"]  
+        description: "Bootstrap confidence intervals for ΔR²"
+    
+    parameters:
+      blocks: 
+        - name: "controls"
+          variables: ["Age", "RAVLT_Total"]
+        - name: "dass_predictors" 
+          variables: ["DASS_Dep", "DASS_Anx", "DASS_Str"]
+      bootstrap_iterations: 1000
+      bootstrap_seed: 42
+      confidence_level: 0.95
+    
+    description: "Fit hierarchical regression testing incremental variance explained by DASS subscales above demographic/cognitive controls"
+    source_reference: "tools_inventory.md section 'Analysis Regression Tools' - fit_hierarchical_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_contrasts_dual_pvalues"
+    
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["theta_all", "Age", "RAVLT_Total", "DASS_Dep", "DASS_Anx", "DASS_Str"]
+        expected_rows: "95-100" 
+        data_types:
+          all_variables: "float (standardized)"
+    
+    output_files:
+      - path: "data/step04_individual_predictors.csv"
+        columns: ["predictor", "beta", "se", "t_stat", "sr2", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        description: "Individual DASS predictor effects with dual p-values per Decision D068"
+      - path: "data/step04_multiple_corrections.txt"
+        columns: []
+        description: "Multiple comparison corrections calculation details"
+    
+    parameters:
+      target_predictors: ["DASS_Dep", "DASS_Anx", "DASS_Str"]
+      family_size: 3
+      bonferroni_alpha: 0.00179  # Chapter 7 alpha / 3 DASS predictors = 0.00060 per test
+      bootstrap_iterations: 1000
+      bootstrap_seed: 42
+      correction_methods: ["bonferroni", "fdr"]
+    
+    description: "Extract individual DASS predictor effects with corrected and uncorrected p-values per Decision D068"
+    source_reference: "tools_inventory.md section 'Analysis Regression Tools' - bootstrap_regression_ci"
+
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression" 
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
+    validation_tool: "validate_lmm_assumptions_comprehensive"
+    
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["theta_all", "Age", "RAVLT_Total", "DASS_Dep", "DASS_Anx", "DASS_Str"]
+        expected_rows: "95-100"
+        data_types:
+          all_variables: "float (analysis ready)"
+    
+    output_files:
+      - path: "data/step05_model_diagnostics.csv"
+        columns: ["predictor", "VIF", "condition_number", "breusch_pagan_p", "durbin_watson"]
+        description: "VIF, homoscedasticity, and autocorrelation diagnostics" 
+      - path: "data/step05_residual_analysis.csv"
+        columns: ["observation", "fitted", "residual", "standardized_residual", "leverage", "cooks_d"]
+        description: "Participant-level diagnostic values"
+      - path: "data/step05_assumption_checks.txt"
+        columns: []
+        description: "Assumption test results and remedial action recommendations"
+    
+    parameters:
+      vif_threshold: 5.0
+      high_vif_threshold: 10.0
+      cooks_d_threshold: 0.04  # 4/N where N=100
+      alpha_level: 0.05
+      remedial_actions: true
+    
+    description: "Check regression assumptions: multicollinearity, homoscedasticity, normality, influential observations"
+    source_reference: "tools_inventory.md section 'Analysis Regression Tools' - compute_regression_diagnostics"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["theta_all", "Age", "RAVLT_Total", "DASS_Dep", "DASS_Anx", "DASS_Str"]
+        expected_rows: "95-100"
+        data_types:
+          all_variables: "float (standardized)"
+    
+    output_files:
+      - path: "data/step06_cross_validation.csv"
+        columns: ["fold", "train_R2", "test_R2", "train_RMSE", "test_RMSE", "test_MAE"]
+        description: "Cross-validation results per fold"
+      - path: "data/step06_cv_summary.csv"
+        columns: ["metric", "mean", "std", "ci_lower", "ci_upper"]
+        description: "Aggregated cross-validation metrics"
+      - path: "data/step06_generalization_assessment.txt"
+        columns: []
+        description: "Overfitting evaluation and generalization gap assessment"
+    
+    parameters:
+      n_folds: 5
+      random_seed: 42
+      shuffle: true
+      scoring_metrics: ["r2", "mse", "mae"]
+      overfitting_threshold: 0.10  # train_R2 - test_R2 > 0.10 flags overfitting
+    
+    description: "Assess model generalizability and overfitting using 5-fold cross-validation"
+    source_reference: "tools_inventory.md section 'Analysis Regression Tools' - cross_validate_regression"
+
+  compute_post_hoc_power:
+    module: "tools.analysis_regression"
+    function: "compute_post_hoc_power"
+    signature: "compute_post_hoc_power(n: int, k: int, r2: float, alpha: float = 0.05) -> Dict"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step03_hierarchical_models.csv"
+        required_columns: ["model", "R2", "delta_R2"]
+        expected_rows: "2 models"
+        data_types:
+          R2: "float (0-1 range)"
+          delta_R2: "float (0-1 range)"
+    
+    output_files:
+      - path: "data/step07_power_analysis.csv"
+        columns: ["analysis", "observed_effect", "power", "f2", "critical_f", "interpretation"]
+        description: "Post-hoc power analysis for hierarchical regression and individual predictors"
+      - path: "data/step07_effect_sizes.csv"  
+        columns: ["predictor", "cohens_f2", "interpretation", "power_at_80"]
+        description: "Cohen's f² effect sizes for individual DASS predictors"
+      - path: "data/step07_power_summary.txt"
+        columns: []
+        description: "Power analysis interpretation and sample size recommendations"
+    
+    parameters:
+      sample_size: 97  # Expected N after exclusions
+      n_dass_predictors: 3
+      alpha_bonferroni: 0.00060  # 0.00179 / 3 predictors
+      alpha_uncorrected: 0.05
+      target_power: 0.80
+      effect_size_benchmarks: [0.02, 0.15, 0.35]  # Cohen small/medium/large
+    
+    description: "Post-hoc power analysis for ΔR² and individual predictors with sensitivity analysis"
+    source_reference: "tools_inventory.md section 'Analysis Regression Tools' - compute_post_hoc_power"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: []
+        source: "analysis tool output (check_file_exists)"
+    
+    parameters:
+      required_patterns: ["Ch5 5.1.1 status: success", "master.xlsx accessible", "theta file found"]
+      forbidden_patterns: ["ERROR", "not found", "missing"]
+    
+    criteria:
+      - "All required dependency files exist and accessible"
+      - "Ch5 5.1.1 analysis completed successfully"  
+      - "DASS columns verified in master.xlsx"
+      - "No critical missing files or access errors"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_dependencies: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+    
+    description: "Validate dependency files exist before proceeding with analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_analysis_dataset.csv"
+        required_columns: ["UID", "theta_all", "DASS_Dep", "DASS_Anx", "DASS_Str", "Age", "RAVLT_Total"]
+        source: "analysis tool output (load_test_data)"
+    
+    parameters:
+      required_columns: ["UID", "theta_all", "DASS_Dep", "DASS_Anx", "DASS_Str", "Age", "RAVLT_Total"]
+      expected_sample_size: [90, 100]  # Allow for some DASS missing data
+      theta_range: [-3.0, 3.0]
+      dass_range: [0, 42]
+      age_range: [18, 85]
+      ravlt_range: [15, 75]
+    
+    criteria:
+      - "All 7 required columns present in merged dataset"
+      - "Sample size 90-100 participants (complete cases)"
+      - "No duplicate UIDs in final dataset"
+      - "All variables within expected ranges"
+      - "Theta scores from valid IRT calibration range"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+        sample_size: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_merge_data.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate merged analysis dataset has all required columns and adequate sample size"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: statsmodels MixedLMResults) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_descriptives.csv"
+        required_columns: ["variable", "mean", "sd", "min", "max"]
+        source: "analysis tool output (fit_multiple_regression)"
+    
+    parameters:
+      check_normality: true
+      normality_alpha: 0.05  
+      correlation_threshold: 0.9  # Flag high correlations
+      outlier_threshold: 3.0  # Standard deviations
+    
+    criteria:
+      - "All 7 variables have descriptive statistics computed"
+      - "Standard deviations > 0 for all variables" 
+      - "No extreme outliers beyond ±3 SD"
+      - "Correlation matrix computed successfully"
+      - "Normality test completed for outcome variable"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str" 
+        warnings: "List[str]"
+        n_variables: "int"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_descriptives.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate descriptive statistics computation and data quality checks"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_model_convergence"
+
+  validate_lmm_convergence:
+    module: "tools.validation"
+    function: "validate_lmm_convergence"
+    signature: "validate_lmm_convergence(lmm_result: MixedLMResults) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_hierarchical_models.csv"
+        required_columns: ["model", "R2", "adj_R2", "F_stat", "p_value", "delta_R2"]
+        source: "analysis tool output (fit_hierarchical_regression)"
+    
+    parameters:
+      expected_models: 2  # Model 1 (controls) + Model 2 (controls + DASS)
+      r2_range: [0.0, 1.0]
+      f_stat_min: 0.0
+      delta_r2_range: [0.0, 0.5]
+    
+    criteria:
+      - "Both hierarchical models converged successfully"
+      - "R² values in valid range [0, 1]"
+      - "Model 2 R² >= Model 1 R² (nested models)" 
+      - "ΔR² computed for model comparison"
+      - "F-statistics and p-values finite"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        convergence_status: "str" 
+        warnings: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_hierarchical_regression.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate hierarchical regression models converged and produced valid results"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_lmm_convergence"
+
+  validate_contrasts_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_contrasts_dual_pvalues"
+    signature: "validate_contrasts_dual_pvalues(contrasts_df: DataFrame, required_comparisons: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_individual_predictors.csv"
+        required_columns: ["predictor", "beta", "se", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+    
+    parameters:
+      required_predictors: ["DASS_Dep", "DASS_Anx", "DASS_Str"]
+      required_p_columns: ["p_uncorrected", "p_bonferroni", "p_fdr"]
+      d068_compliance: true
+    
+    criteria:
+      - "All 3 DASS predictors present in results"
+      - "Bootstrap confidence intervals computed successfully"
+      - "Decision D068: Both uncorrected AND corrected p-values present"
+      - "Bonferroni correction = uncorrected × 3 (family size)"
+      - "FDR correction ≤ uncorrected p-values"
+    
+    expected_output:
+      format: "Dict[str, Any]" 
+      fields:
+        valid: "bool"
+        message: "str"
+        d068_compliant: "bool"
+        missing_predictors: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_individual_predictors.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate individual predictor analysis includes all DASS subscales with Decision D068 dual p-values"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_contrasts_dual_pvalues"
+
+  validate_lmm_assumptions_comprehensive:
+    module: "tools.validation"
+    function: "validate_lmm_assumptions_comprehensive"
+    signature: "validate_lmm_assumptions_comprehensive(lmm_result: MixedLMResults, data: DataFrame, output_dir: Path, acf_lag1_threshold: float = 0.1, alpha: float = 0.05) -> Dict"
+    
+    input_files:
+      - path: "data/step05_model_diagnostics.csv"
+        required_columns: ["predictor", "VIF", "condition_number"]
+        source: "analysis tool output (compute_regression_diagnostics)"
+    
+    parameters:
+      vif_threshold: 5.0
+      high_vif_threshold: 10.0
+      normality_alpha: 0.05
+      homoscedasticity_alpha: 0.05
+      cooks_d_threshold: 0.04
+    
+    criteria:
+      - "VIF computed for all 5 predictors (2 controls + 3 DASS)"
+      - "No severe multicollinearity (VIF < 10 for all predictors)"
+      - "Residual normality and homoscedasticity tests completed"
+      - "Influential observations identified (Cook's D > 4/N)"
+      - "All diagnostic values finite (no NaN/Inf)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        diagnostics: "Dict"
+        remedial_actions: "List[str]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_model_diagnostics.log" 
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate comprehensive regression diagnostics including multicollinearity, assumptions, and outliers"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_lmm_assumptions_comprehensive"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray or pd.Series, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_cross_validation.csv"
+        required_columns: ["fold", "train_R2", "test_R2", "train_RMSE", "test_RMSE"]
+        source: "analysis tool output (cross_validate_regression)"
+    
+    parameters:
+      expected_folds: 5
+      r2_range: [0.0, 1.0]
+      rmse_min: 0.0
+      generalization_gap_threshold: 0.10
+    
+    criteria:
+      - "All 5 folds completed successfully"
+      - "R² values in [0, 1] range for train and test"
+      - "RMSE values > 0 (positive errors)"
+      - "Generalization gap < 0.10 (minimal overfitting)"
+      - "Test R² consistent across folds (SD < 0.05)"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "list"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_cross_validation.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate cross-validation results are in expected ranges with minimal overfitting"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+  validate_effect_sizes:
+    module: "tools.validation" 
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step07_power_analysis.csv"
+        required_columns: ["analysis", "observed_effect", "power", "f2"]
+        source: "analysis tool output (compute_post_hoc_power)"
+    
+    parameters:
+      f2_range: [0.0, 2.0]  # Allow up to very large effects
+      power_range: [0.0, 1.0]
+      small_effect: 0.02
+      medium_effect: 0.15
+      large_effect: 0.35
+    
+    criteria:
+      - "Power calculations completed for all relevant tests"
+      - "Effect sizes (f²) ≥ 0 (no negative values)"
+      - "Power values in [0, 1] range"
+      - "Effect size classifications provided (small/medium/large)"
+      - "Sample size recommendations computed"
+    
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+        effect_range: "Tuple[float, float]"
+    
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_power_analysis.log"
+      invoke: "g_debug (master invokes)"
+    
+    description: "Validate power analysis and effect size calculations for hierarchical regression and individual predictors"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 8  
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "Hierarchical Multiple Regression with Bootstrap CIs and Cross-validation"
+  rq_focus: "DASS-21 subscales predicting episodic memory performance"
+  key_features:
+    - "Decision D068: Dual p-value reporting (uncorrected + Bonferroni)"
+    - "Bootstrap confidence intervals for robust effect estimates"
+    - "5-fold cross-validation to assess overfitting"
+    - "Comprehensive regression diagnostics (VIF, assumptions, outliers)"
+    - "Post-hoc power analysis for sensitivity assessment"

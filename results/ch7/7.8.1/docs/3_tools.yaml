@@ -1,0 +1,625 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.8.1: Distinct REMEMVR memory profiles?
+# Created by: rq_tools agent
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# Analysis Type: Latent Profile Analysis (LPA) with external validation
+
+# =============================================================================
+# ANALYSIS TOOLS
+# =============================================================================
+
+analysis_tools:
+  check_file_exists:
+    module: "tools.validation"
+    function: "check_file_exists"
+    signature: "check_file_exists(file_path: str, min_size_bytes: int = 0) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_What"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string (format: P###)"
+          theta_What: "float64 (theta scores)"
+      - path: "results/ch5/5.2.2/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_Where"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string (format: P###)"
+          theta_Where: "float64 (theta scores)"
+      - path: "results/ch5/5.2.3/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_When"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string (format: P###)"
+          theta_When: "float64 (theta scores)"
+          
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Text file documenting dependency validation results"
+        
+    parameters:
+      files_to_check:
+        - "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        - "results/ch5/5.2.2/data/step03_theta_scores.csv" 
+        - "results/ch5/5.2.3/data/step03_theta_scores.csv"
+        - "data/cache/master.xlsx"
+      min_size_bytes: 1000
+        
+    description: "Validate Ch5 domain-specific outputs exist before proceeding with LPA analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - check_file_exists"
+
+  merge_domain_data:
+    module: "tools.analysis_merge"
+    function: "merge_multiple_datasets"
+    signature: "merge_multiple_datasets(file_paths: List[str], merge_key: str, suffixes: List[str] = None, how: str = 'inner') -> pd.DataFrame"
+    validation_tool: "validate_standardization"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_What"]
+        source: "Ch5 5.2.1 What domain analysis"
+      - path: "results/ch5/5.2.2/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_Where"]
+        source: "Ch5 5.2.2 Where domain analysis"
+      - path: "results/ch5/5.2.3/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_When"]
+        source: "Ch5 5.2.3 When domain analysis"
+        
+    output_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        columns: ["UID", "theta_What", "theta_Where", "theta_When"]
+        description: "Standardized domain theta scores ready for LPA analysis"
+        
+    parameters:
+      file_paths:
+        - "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        - "results/ch5/5.2.2/data/step03_theta_scores.csv"
+        - "results/ch5/5.2.3/data/step03_theta_scores.csv"
+      merge_key: "UID"
+      how: "inner"
+      standardize: true
+      standardization_method: "z_score"
+        
+    description: "Extract and standardize domain theta scores into analysis-ready LPA input dataset"
+    source_reference: "tools_inventory.md section 'Merge Analysis Tools' - merge_multiple_datasets"
+
+  fit_lpa_models:
+    module: "tools.analysis_lpa"
+    function: "fit_lpa_models"
+    signature: "fit_lpa_models(data: Union[np.ndarray, pd.DataFrame], n_components_range: Union[List[int], range] = range(2, 6), covariance_type: str = 'full', n_init: int = 10, random_state: int = 42) -> Dict[int, GaussianMixture]"
+    validation_tool: "validate_lpa_solution"
+    
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["theta_What", "theta_Where", "theta_When"]
+        expected_rows: "100"
+        data_types:
+          theta_What: "float64 (standardized theta scores)"
+          theta_Where: "float64 (standardized theta scores)"
+          theta_When: "float64 (standardized theta scores)"
+          
+    output_files:
+      - path: "data/step02_lpa_fitted_models.rds"
+        description: "Fitted LPA models for K=1,2,3,4 profiles"
+      - path: "data/step02_lpa_convergence_diagnostics.txt"
+        description: "Convergence diagnostics and random start consistency"
+        
+    parameters:
+      n_components_range: [1, 2, 3, 4]
+      covariance_type: "full"
+      n_init: 100
+      random_state: 42
+      max_iter: 1000
+      tol: 1e-6
+        
+    description: "Fit Gaussian Mixture Models for K=1-4 latent profiles with multiple random starts"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - fit_lpa_models"
+
+  compare_lpa_models:
+    module: "tools.analysis_lpa"
+    function: "compare_lpa_models"
+    signature: "compare_lpa_models(models: Dict[int, GaussianMixture], data: Union[np.ndarray, pd.DataFrame]) -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+    
+    input_files:
+      - path: "data/step02_lpa_fitted_models.rds"
+        source: "fitted LPA models from step 2"
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["theta_What", "theta_Where", "theta_When"]
+        source: "standardized domain scores from step 1"
+        
+    output_files:
+      - path: "data/step02_lpa_fit_comparison.csv"
+        columns: ["K", "BIC", "AIC", "Entropy", "LMR_LRT_p", "Converged"]
+        description: "Model comparison indices for K=1-4 LPA solutions"
+        
+    parameters:
+      models: "Dict[int, GaussianMixture]"
+      data: "pd.DataFrame"
+      compute_lmr_lrt: true
+      compute_entropy: true
+        
+    description: "Compare LPA models using BIC, AIC, entropy, and LMR-LRT for model selection"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - compare_lpa_models"
+
+  extract_profile_membership:
+    module: "tools.analysis_lpa"
+    function: "extract_profile_membership"
+    signature: "extract_profile_membership(model: GaussianMixture, data: Union[np.ndarray, pd.DataFrame], uid_column: str = None) -> pd.DataFrame"
+    validation_tool: "validate_cluster_assignment"
+    
+    input_files:
+      - path: "data/step02_lpa_fit_comparison.csv"
+        required_columns: ["K", "BIC", "AIC", "Entropy"]
+        source: "model selection results from step 2"
+      - path: "data/step02_lpa_fitted_models.rds"
+        source: "fitted models for optimal K selection"
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "theta_What", "theta_Where", "theta_When"]
+        source: "original data for profile assignment"
+        
+    output_files:
+      - path: "data/step03_optimal_profiles.csv"
+        columns: ["UID", "Profile", "Max_Posterior_Prob", "Profile_Label"]
+        description: "Profile assignments for optimal K solution"
+      - path: "data/step03_model_selection_summary.txt"
+        description: "Text summary of model selection process and criteria"
+        
+    parameters:
+      model_selection_hierarchy:
+        - "BIC_minimum"
+        - "LMR_LRT_significance"
+        - "entropy_threshold_0.80"
+        - "profile_size_minimum_20"
+      uid_column: "UID"
+        
+    description: "Select optimal profile solution and extract membership assignments with interpretable labels"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - extract_profile_membership"
+
+  characterize_profiles:
+    module: "tools.analysis_lpa"
+    function: "characterize_profiles"
+    signature: "characterize_profiles(model: GaussianMixture, data: pd.DataFrame, profile_labels: pd.Series) -> Dict"
+    validation_tool: "validate_cluster_summary_stats"
+    
+    input_files:
+      - path: "data/step03_optimal_profiles.csv"
+        required_columns: ["UID", "Profile"]
+        source: "profile assignments from step 3"
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "theta_What", "theta_Where", "theta_When"]
+        source: "original domain scores for characterization"
+        
+    output_files:
+      - path: "data/step04_profile_characteristics.csv"
+        columns: ["Profile", "N", "What_Mean", "What_SD", "What_CI_Low", "What_CI_High", "Where_Mean", "Where_SD", "Where_CI_Low", "Where_CI_High", "When_Mean", "When_SD", "When_CI_Low", "When_CI_High"]
+        description: "Means, SDs, and bootstrap 95% CIs for each profile by domain"
+      - path: "data/step04_profile_interpretation.txt"
+        description: "Interpretable profile labels based on domain patterns"
+        
+    parameters:
+      bootstrap_iterations: 1000
+      random_state: 42
+      ci_method: "percentile"
+      ci_level: 0.95
+      domain_cutoffs:
+        high: 0.5
+        low: -0.5
+        
+    description: "Compute profile means, SDs, bootstrap CIs, and assign interpretable labels"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - characterize_profiles"
+
+  perform_external_validation:
+    module: "tools.analysis_lpa"
+    function: "perform_external_validation"
+    signature: "perform_external_validation(profile_labels: pd.Series, external_variables: pd.DataFrame, test_type: str = 'auto') -> pd.DataFrame"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+    
+    input_files:
+      - path: "data/step03_optimal_profiles.csv"
+        required_columns: ["UID", "Profile"]
+        source: "profile assignments from step 3"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "Age", "RAVLT_T", "BVMT_T", "RPM_T"]
+        source: "cognitive validation variables"
+        
+    output_files:
+      - path: "data/step05_external_validation.csv"
+        columns: ["Variable", "F_stat", "p_uncorrected", "p_bonferroni", "p_fdr", "eta_squared", "Test_Type", "Assumption_Met"]
+        description: "ANOVA results for external validation with dual p-value reporting"
+      - path: "data/step05_external_validation_posthoc.csv"
+        columns: ["Variable", "Comparison", "Mean_Diff", "SE", "t_stat", "p_uncorrected", "p_tukey"]
+        description: "Post-hoc pairwise comparisons for significant validators"
+        
+    parameters:
+      validation_variables:
+        - "Age"
+        - "RAVLT_T"
+        - "BVMT_T"
+        - "RPM_T"
+      test_type: "anova"
+      correction_family: "external_validation"
+      alpha_bonferroni: 0.0125
+      fdr_method: "benjamini_hochberg"
+      assumption_checks: true
+      post_hoc_method: "tukey"
+        
+    description: "Validate profile distinctions using external cognitive tests with Decision D068 dual p-values"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - perform_external_validation"
+
+  assess_classification_quality:
+    module: "tools.analysis_lpa"
+    function: "validate_lpa_solution"
+    signature: "validate_lpa_solution(data: Union[np.ndarray, pd.DataFrame], labels: Union[np.ndarray, pd.Series], metric: str = 'euclidean') -> Dict"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step02_lpa_fitted_models.rds"
+        source: "fitted models for quality assessment"
+      - path: "data/step03_optimal_profiles.csv"
+        required_columns: ["UID", "Profile"]
+        source: "optimal profile solution"
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["theta_What", "theta_Where", "theta_When"]
+        source: "original input data for quality metrics"
+        
+    output_files:
+      - path: "data/step06_classification_quality.csv"
+        columns: ["Metric", "Value", "Interpretation"]
+        description: "Classification quality metrics (entropy, silhouette, etc.)"
+      - path: "data/step06_model_diagnostics.txt"
+        description: "Comprehensive model diagnostic report"
+        
+    parameters:
+      quality_metrics:
+        - "entropy"
+        - "silhouette"
+        - "davies_bouldin"
+        - "calinski_harabasz"
+      bootstrap_stability:
+        iterations: 100
+        random_state: 42
+        jaccard_threshold: 0.75
+      local_independence_threshold: 0.2
+      entropy_threshold: 0.80
+        
+    description: "Assess LPA classification quality, bootstrap stability, and model diagnostics"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - validate_lpa_solution"
+
+# =============================================================================
+# VALIDATION TOOLS
+# =============================================================================
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_columns: []
+        source: "dependency validation output from step 0"
+        
+    parameters:
+      required_files:
+        - "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        - "results/ch5/5.2.2/data/step03_theta_scores.csv"
+        - "results/ch5/5.2.3/data/step03_theta_scores.csv"
+        - "data/cache/master.xlsx"
+        
+    criteria:
+      - "All 4 required dependency files found and accessible"
+      - "No file missing errors in validation log"
+      - "All files contain expected participant count (~100)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all dependencies satisfied)"
+        message: "str (human-readable summary)"
+        missing_files: "List[str] (any files not found)"
+        
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate all Ch5 domain dependency files exist before LPA analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["UID", "theta_What", "theta_Where", "theta_When"]
+        source: "standardized domain scores from step 1"
+        
+    parameters:
+      column_names: ["theta_What", "theta_Where", "theta_When"]
+      tolerance: 0.01
+      expected_mean: 0.0
+      expected_sd: 1.0
+      
+    criteria:
+      - "All domain theta means within 0.01 of 0.0 (standardized)"
+      - "All domain theta SDs within 0.01 of 1.0 (standardized)"
+      - "No missing values in standardized columns"
+      - "Exactly 100 participants with complete domain data"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if standardization successful)"
+        message: "str (standardization summary)"
+        mean_values: "Dict[str, float] (actual means per domain)"
+        sd_values: "Dict[str, float] (actual SDs per domain)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_prepare_theta_scores.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate z-score standardization of domain theta scores (mean~0, sd~1)"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_standardization"
+
+  validate_lpa_solution:
+    module: "tools.analysis_lpa"
+    function: "validate_lpa_solution"
+    signature: "validate_lpa_solution(data: Union[np.ndarray, pd.DataFrame], labels: Union[np.ndarray, pd.Series], metric: str = 'euclidean') -> Dict"
+    
+    input_files:
+      - path: "data/step02_lpa_fitted_models.rds"
+        required_columns: []
+        source: "fitted LPA models from step 2"
+      - path: "data/step01_domain_theta_scores.csv"
+        required_columns: ["theta_What", "theta_Where", "theta_When"]
+        source: "LPA input data for validation"
+        
+    parameters:
+      minimum_silhouette: 0.3
+      maximum_davies_bouldin: 2.0
+      metric: "euclidean"
+      validation_thresholds:
+        entropy: 0.80
+        convergence_rate: 0.95
+        
+    criteria:
+      - "All K models converged successfully (100% convergence rate)"
+      - "BIC shows clear minimum for optimal K"
+      - "Entropy > 0.80 for optimal solution"
+      - "Silhouette score > 0.3 (adequate separation)"
+      
+    expected_output:
+      format: "Dict"
+      fields:
+        valid: "bool (True if LPA solution acceptable)"
+        silhouette_score: "float (profile separation quality)"
+        davies_bouldin_score: "float (cluster validity)"
+        silhouette_by_profile: "List[float] (per-profile silhouette)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lpa_models.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate LPA model quality using silhouette and Davies-Bouldin metrics"
+    source_reference: "tools_inventory.md section 'LPA Analysis Tools' - validate_lpa_solution"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_lpa_fit_comparison.csv"
+        required_columns: ["K", "BIC", "AIC", "Entropy", "LMR_LRT_p", "Converged"]
+        source: "LPA model comparison from step 2"
+        
+    parameters:
+      expected_rows: 4
+      expected_columns: ["K", "BIC", "AIC", "Entropy", "LMR_LRT_p", "Converged"]
+      column_types:
+        K: int
+        BIC: float
+        AIC: float
+        Entropy: float
+        LMR_LRT_p: float
+        Converged: bool
+        
+    criteria:
+      - "Exactly 4 rows (K=1,2,3,4 models)"
+      - "All 6 required columns present"
+      - "Appropriate data types for each column"
+      - "BIC and AIC values positive and finite"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if structure correct)"
+        message: "str (structure summary)"
+        checks: "Dict[str, bool] (per-check results)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_fit_lpa_models.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate LPA fit comparison table has expected structure and data types"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_dataframe_structure"
+
+  validate_cluster_assignment:
+    module: "tools.validation"
+    function: "validate_cluster_assignment"
+    signature: "validate_cluster_assignment(cluster_labels: Union[np.ndarray, pd.Series], n_expected: int, min_cluster_size: int = 5) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step03_optimal_profiles.csv"
+        required_columns: ["UID", "Profile", "Max_Posterior_Prob"]
+        source: "profile assignments from step 3"
+        
+    parameters:
+      n_expected: 100
+      min_cluster_size: 20
+      cluster_id_range: [1, 4]
+      min_posterior_probability: 0.5
+      
+    criteria:
+      - "All 100 participants assigned to profiles"
+      - "Profile IDs are consecutive (1, 2, ..., K)"
+      - "Each profile has >= 20 participants (adequate sample size)"
+      - "All participants have posterior probability >= 0.5"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if assignments valid)"
+        message: "str (assignment summary)"
+        cluster_sizes: "Dict[int, int] (participants per profile)"
+        n_clusters: "int (number of profiles)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_select_optimal_profiles.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate profile assignments have adequate sizes and valid structure"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_cluster_assignment"
+
+  validate_cluster_summary_stats:
+    module: "tools.validation"
+    function: "validate_cluster_summary_stats"
+    signature: "validate_cluster_summary_stats(summary_df: pd.DataFrame, min_col: str = 'min', mean_col: str = 'mean', max_col: str = 'max', sd_col: str = 'sd', n_col: str = 'N') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_profile_characteristics.csv"
+        required_columns: ["Profile", "N", "What_Mean", "What_SD", "Where_Mean", "Where_SD", "When_Mean", "When_SD"]
+        source: "profile characteristics from step 4"
+        
+    parameters:
+      mean_cols: ["What_Mean", "Where_Mean", "When_Mean"]
+      sd_cols: ["What_SD", "Where_SD", "When_SD"]
+      n_col: "N"
+      min_n: 20
+      max_sd: 2.0
+      
+    criteria:
+      - "All profile Ns >= 20 (adequate sample sizes)"
+      - "All SDs >= 0 (mathematically valid)"
+      - "All SDs <= 2.0 (reasonable within-profile variation)"
+      - "Sum of profile Ns = 100 (all participants accounted)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if statistics consistent)"
+        message: "str (summary validation)"
+        failed_checks: "List[str] (any consistency violations)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_characterize_profiles.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate profile characteristic statistics are mathematically consistent"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_cluster_summary_stats"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_external_validation.csv"
+        required_columns: ["Variable", "F_stat", "p_uncorrected", "p_bonferroni", "p_fdr", "eta_squared"]
+        source: "external validation results from step 5"
+        
+    parameters:
+      required_variables: ["Age", "RAVLT_T", "BVMT_T", "RPM_T"]
+      alpha_bonferroni: 0.0125
+      d068_required_cols: ["p_uncorrected", "p_bonferroni", "p_fdr"]
+      
+    criteria:
+      - "All 4 validation variables tested (Age, RAVLT_T, BVMT_T, RPM_T)"
+      - "Dual p-value reporting present (Decision D068 compliance)"
+      - "Bonferroni correction applied (alpha = 0.0125)"
+      - "FDR correction computed using Benjamini-Hochberg"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-values present)"
+        missing_terms: "List[str] (any missing variables)"
+        missing_cols: "List[str] (any missing p-value columns)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_external_validation.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate external validation follows Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_hypothesis_test_dual_pvalues"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float = 0.75) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_classification_quality.csv"
+        required_columns: ["Metric", "Value"]
+        source: "classification quality metrics from step 6"
+      - path: "data/step06_model_diagnostics.txt"
+        source: "model diagnostic report from step 6"
+        
+    parameters:
+      min_jaccard_threshold: 0.75
+      bootstrap_iterations: 100
+      ci_level: 0.95
+      stability_criteria:
+        mean_jaccard: 0.75
+        ci_lower_bound: 0.60
+        
+    criteria:
+      - "Bootstrap stability Jaccard coefficient >= 0.75"
+      - "95% CI lower bound >= 0.60 (consistent stability)"
+      - "Classification entropy > 0.80 (good separation)"
+      - "Local independence satisfied (correlations < 0.2)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if stable profiles)"
+        message: "str (stability summary)"
+        mean_jaccard: "float (average bootstrap agreement)"
+        ci_lower: "float (95% CI lower bound)"
+        ci_upper: "float (95% CI upper bound)"
+        above_threshold: "bool (meets stability criteria)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_classification_quality.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate LPA solution shows bootstrap stability and classification quality"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_bootstrap_stability"
+
+# =============================================================================
+# SUMMARY
+# =============================================================================
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 8
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D068"]
+  analysis_type: "Latent Profile Analysis (LPA)"
+  cross_rq_dependencies: ["Ch5 5.2.1", "Ch5 5.2.2", "Ch5 5.2.3"]
+  validation_coverage: "100% (all 7 steps have validation requirements)"
+  bootstrap_requirements: "profile stability, domain characteristic CIs"
+  multiple_comparison_corrections: "Bonferroni (alpha=0.0125), FDR (Benjamini-Hochberg)"

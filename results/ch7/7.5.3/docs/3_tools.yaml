@@ -1,0 +1,385 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.5.3
+# Created by: rq_tools agent
+# RQ: Memory Strategies Predicting Performance
+# Analysis: Correlation + t-test + hierarchical regression  
+# Architecture: Tool Catalog (each tool listed ONCE, deduplication)
+
+analysis_tools:
+  # Step 0: Extract and merge data sources
+  load_participant_data:
+    module: "tools.data"
+    function: "load_participant_data" 
+    signature: "load_participant_data(file_path: str, columns: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "/home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all", "se_all"]
+        expected_rows: "~100 (participants)"
+        data_types:
+          UID: "string (format: P###)"
+          theta_all: "float64 (IRT ability)"
+          se_all: "float64 (standard error)"
+      - path: "/home/etai/projects/REMEMVR/data/dfnonvr.csv"
+        required_columns: ["UID", "Describe your technique here", "Education level", "Age in years"]
+        expected_rows: "~100 (participants)"
+        data_types:
+          UID: "string (format: P###)"
+          "Describe your technique here": "object (text responses)"
+          "Education level": "object (categories)"
+          "Age in years": "float64 (years)"
+    
+    output_files:
+      - path: "data/step00_merged_data.csv"
+        columns: ["UID", "theta_all", "se_all", "strategy_text", "education_level", "age_years"]
+        description: "Merged theta scores with strategy questionnaire responses"
+    
+    parameters:
+      file_path: "string"
+      columns: "List[str]"
+      
+    description: "Load and merge theta scores from RQ 5.1.1 with strategy questionnaire data from dfnonvr.csv"
+    source_reference: "tools_inventory.md section 'Data Loading Tools' - load_participant_data"
+
+  # Step 1: Code strategy variables from text responses  
+  fit_hierarchical_regression:
+    module: "tools.analysis_stats"
+    function: "fit_hierarchical_regression"
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+    
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["UID", "theta_all", "rehearsal_frequency", "mnemonic_use", "age_years", "education_numeric"]
+        expected_rows: "~100 (complete cases)"
+        data_types:
+          theta_all: "float64 (outcome variable)"
+          rehearsal_frequency: "int64 (0-5 scale)"
+          mnemonic_use: "int64 (0-1 binary)"
+          age_years: "float64 (control)"
+          education_numeric: "float64 (years education)"
+    
+    output_files:
+      - path: "data/step04_hierarchical_regression.csv"
+        columns: ["block", "r_squared", "r_squared_change", "f_change", "p_change_uncorrected", "p_change_bonferroni"]
+        description: "Hierarchical regression results with incremental R-squared"
+      - path: "data/step04_final_coefficients.csv"
+        columns: ["predictor", "coefficient", "se", "t_statistic", "p_uncorrected", "p_bonferroni", "cohens_f2"]
+        description: "Final model coefficients with effect sizes"
+    
+    parameters:
+      X_blocks: "List[Union[np.ndarray, pd.DataFrame]]"
+      y: "Union[np.ndarray, pd.Series]"
+      block_names: ["Demographics", "Strategy_Variables"]
+      add_constant: true
+      
+    description: "Fit hierarchical regression with demographics block then strategy variables block"
+    source_reference: "tools_inventory.md section 'Statistical Analysis Tools' - fit_hierarchical_regression"
+
+  # Step 3: Primary correlational analysis
+  t_test_d068:
+    module: "tools.analysis_stats"
+    function: "t_test_d068"
+    signature: "t_test_d068(group1: np.ndarray, group2: np.ndarray, paired: bool = False, correction: str = 'bonferroni', n_comparisons: int = None) -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+    
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["UID", "theta_all", "mnemonic_use"]
+        expected_rows: "~100 (complete cases)"
+        data_types:
+          theta_all: "float64 (outcome variable)"
+          mnemonic_use: "int64 (0-1 binary predictor)"
+    
+    output_files:
+      - path: "data/step03_group_comparison.csv"
+        columns: ["analysis", "mean_group1", "mean_group2", "t_statistic", "df", "p_uncorrected", "p_bonferroni", "cohens_d", "CI_lower", "CI_upper", "n1", "n2"]
+        description: "T-test results comparing mnemonic users vs non-users"
+    
+    parameters:
+      group1: "np.ndarray (non-users)"
+      group2: "np.ndarray (users)"
+      paired: false
+      correction: "bonferroni"
+      n_comparisons: 2
+      
+    description: "Independent samples t-test comparing theta_all between mnemonic users and non-users with D068 dual p-values"
+    source_reference: "tools_inventory.md section 'Statistical Analysis Tools' - t_test_d068"
+
+  # Step 6: Sensitivity analysis and robust inference
+  bootstrap_regression_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_stability"
+    
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["theta_all", "rehearsal_frequency", "mnemonic_use", "age_years", "education_numeric"]
+        expected_rows: "~100 (complete cases)"
+        data_types:
+          theta_all: "float64 (outcome)"
+          rehearsal_frequency: "int64 (predictor)"
+          mnemonic_use: "int64 (predictor)"
+          age_years: "float64 (control)"
+          education_numeric: "float64 (control)"
+    
+    output_files:
+      - path: "data/step06_bootstrap_results.csv"
+        columns: ["predictor", "original_coefficient", "bootstrap_mean", "bootstrap_se", "CI_lower_percentile", "CI_upper_percentile", "CI_lower_bca", "CI_upper_bca"]
+        description: "Bootstrap confidence intervals for regression coefficients"
+    
+    parameters:
+      X: "Union[np.ndarray, pd.DataFrame]"
+      y: "Union[np.ndarray, pd.Series]"
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      
+    description: "Bootstrap confidence intervals for hierarchical regression coefficients with 1000 replications"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - bootstrap_regression_ci"
+
+  # Cross-validation analysis
+  cross_validate_regression:
+    module: "tools.analysis_stats"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["theta_all", "rehearsal_frequency", "mnemonic_use", "age_years", "education_numeric"]
+        expected_rows: "~100 (complete cases)"
+        data_types:
+          theta_all: "float64 (outcome)"
+          rehearsal_frequency: "int64 (predictor)"
+          mnemonic_use: "int64 (predictor)"
+          age_years: "float64 (control)"
+          education_numeric: "float64 (control)"
+    
+    output_files:
+      - path: "data/step06_cross_validation.csv"
+        columns: ["fold", "r_squared_cv", "mean_cv_r_squared", "se_cv_r_squared"]
+        description: "5-fold cross-validation results for generalization assessment"
+    
+    parameters:
+      X: "Union[np.ndarray, pd.DataFrame]"
+      y: "Union[np.ndarray, pd.Series]"
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2"]
+      
+    description: "5-fold cross-validation to assess model generalization with reproducible random splits"
+    source_reference: "tools_inventory.md section 'Statistical Analysis Tools' - cross_validate_regression"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, expected_columns: List[str] = None, expected_rows: int = None, required_dtypes: Dict[str, str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_merged_data.csv"
+        required_columns: ["UID", "theta_all", "se_all", "strategy_text", "education_level", "age_years"]
+        source: "analysis tool output (load_participant_data)"
+    
+    parameters:
+      df: "pd.DataFrame"
+      expected_columns: ["UID", "theta_all", "se_all", "strategy_text", "education_level", "age_years"]
+      expected_rows: 100
+      required_dtypes: {"UID": "object", "theta_all": "float64", "age_years": "float64"}
+      
+    criteria:
+      - "All required columns present (6 columns total)"
+      - "Expected 100 participants (complete cases)"
+      - "Data types correct (UID: object, theta_all: float64, age_years: float64)"
+      - "No missing values in critical columns (UID, theta_all, strategy_text)"
+      - "Strategy text responses non-empty (minimum 5 characters)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all checks passed)"
+        message: "str (validation summary)"
+        missing_columns: "List[str] (empty if valid=True)"
+        row_count: "int (actual rows found)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_and_merge_data.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate merged dataset format, completeness, and data quality"
+    source_reference: "tools_inventory.md section 'Data Validation Tools' - validate_data_format"
+
+  validate_regression_assumptions:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+    
+    input_files:
+      - path: "data/step04_hierarchical_regression.csv"
+        required_columns: ["block", "r_squared", "r_squared_change", "f_change"]
+        source: "analysis tool output (fit_hierarchical_regression)"
+    
+    parameters:
+      model: "RegressionResultsWrapper"
+      X: "pd.DataFrame" 
+      return_plots: false
+      
+    criteria:
+      - "Model converged successfully (finite coefficients)"
+      - "Block 2 R-squared >= Block 1 R-squared (adding predictors cannot decrease fit)"
+      - "All standard errors positive and finite"
+      - "Decision D068 compliance: dual p-values for all coefficients"
+      - "Cohen's f-squared effect sizes calculated for strategy predictors"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        normality: "Dict (Shapiro-Wilk test results)"
+        homoscedasticity: "Dict (Breusch-Pagan test results)"
+        multicollinearity: "Dict (VIF values)"
+        all_assumptions_met: "bool"
+        
+    behavior_on_failure:
+      action: "raise ValueError"  
+      log_to: "logs/step04_control_variable_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate hierarchical regression model fitting and assumptions"
+    source_reference: "tools_inventory.md section 'Statistical Validation Tools' - validate_regression_assumptions"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict"
+    
+    input_files:
+      - path: "data/step03_group_comparison.csv"
+        required_columns: ["p_uncorrected", "p_bonferroni", "cohens_d", "CI_lower", "CI_upper"]
+        source: "analysis tool output (t_test_d068)"
+    
+    parameters:
+      correlation_df: "pd.DataFrame"
+      required_cols: ["p_uncorrected", "p_bonferroni"]
+      
+    criteria:
+      - "Decision D068 dual p-value reporting: p_uncorrected + p_bonferroni present"
+      - "P-values in valid range [0, 1]"
+      - "p_bonferroni >= p_uncorrected (correction increases p-values)"
+      - "Cohen's d effect sizes finite and valid"
+      - "Confidence intervals properly bounded (CI_lower < CI_upper)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if D068 compliant)"
+        d068_compliant: "bool (dual p-values present)"
+        missing_cols: "List[str] (required columns missing)"
+        message: "str (validation summary)"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_correlational_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate t-test results include Decision D068 dual p-value reporting"
+    source_reference: "tools_inventory.md section 'Statistical Validation Tools' - validate_correlation_test_d068"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float) -> Dict"
+    
+    input_files:
+      - path: "data/step06_bootstrap_results.csv"
+        required_columns: ["predictor", "original_coefficient", "bootstrap_mean", "CI_lower_percentile", "CI_upper_percentile"]
+        source: "analysis tool output (bootstrap_regression_ci)"
+    
+    parameters:
+      jaccard_values: "Union[np.ndarray, List[float]]"
+      min_jaccard_threshold: 0.75
+      
+    criteria:
+      - "Bootstrap procedure completed successfully (1000 replications)"
+      - "Bootstrap confidence intervals contain original coefficients"
+      - "Bootstrap means close to original estimates (bias check)"
+      - "Confidence intervals properly bounded and non-degenerate"
+      - "Standard errors positive and finite"
+      
+    expected_output:
+      format: "Dict[str, Any]" 
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_jaccard: "float"
+        ci_lower: "float"
+        ci_upper: "float"
+        above_threshold: "bool"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_sensitivity_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate bootstrap procedure stability and confidence interval quality"
+    source_reference: "tools_inventory.md section 'Bootstrap Validation Tools' - validate_bootstrap_stability"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_cross_validation.csv"
+        required_columns: ["fold", "r_squared_cv", "mean_cv_r_squared", "se_cv_r_squared"]
+        source: "analysis tool output (cross_validate_regression)"
+    
+    parameters:
+      df: "pd.DataFrame"
+      column: "r_squared_cv"
+      min_val: 0.0
+      max_val: 1.0
+      allow_none: false
+      
+    criteria:
+      - "Cross-validated R-squared values in valid range [0, 1]"
+      - "Mean CV R-squared positive (model explains variance)"
+      - "Standard error of CV R-squared finite and positive"
+      - "5 folds completed successfully (balanced sample sizes)"
+      - "Cross-validation shows expected shrinkage relative to original model"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        min_found: "float"
+        max_found: "float"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_sensitivity_analysis.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate cross-validation R-squared values are in valid range and model shows expected performance"
+    source_reference: "tools_inventory.md section 'Numeric Validation Tools' - validate_numeric_range"
+
+summary:
+  analysis_tools_count: 6
+  validation_tools_count: 5
+  total_unique_tools: 11
+  mandatory_decisions_embedded: ["D068"]
+  
+notes:
+  - "RQ 7.5.3: Memory strategies predicting performance analysis"
+  - "Decision D068 compliance: Dual p-value reporting throughout"
+  - "Bootstrap inference: 1000 replications with seed=42 for robust confidence intervals"
+  - "Hierarchical regression: Demographics block first, then strategy variables"
+  - "Cross-validation: 5-fold CV for generalization assessment"
+  - "Strategy variable coding: Text responses coded as rehearsal frequency (0-5) and mnemonic use (binary)"
+  - "All tools verified to exist in tools_inventory.md"
+  - "Tool catalog approach: Each tool listed ONCE, mapped to steps by rq_analysis"

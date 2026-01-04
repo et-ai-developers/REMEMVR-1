@@ -1,0 +1,471 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.3.4
+# Created by: rq_tools agent
+# RQ: 7.3.4 - Does DASS predict metacognition more than memory?
+# Analysis: Multiple regression with cross-model beta comparison
+# Dependencies: Ch5 theta + Ch6 confidence/calibration + master.xlsx DASS
+
+analysis_tools:
+  validate_file_existence:
+    module: "tools.validation"
+    function: "validate_file_existence"
+    signature: "validate_file_existence(file_paths: List[str]) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["composite_ID", "UID", "test", "theta"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+        source: "Ch5 theta scores dependency"
+      - path: "results/ch6/6.1.1/data/confidence_scores.csv" 
+        required_columns: ["UID", "mean_confidence"]
+        expected_rows: "~100 participants"
+        source: "Ch6 confidence scores dependency"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str"]
+        expected_rows: "~100 participants" 
+        source: "DASS-21 scores"
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Validation results for all required dependencies"
+
+    parameters:
+      required_files: [
+        "results/ch5/5.1.1/data/step03_theta_scores.csv",
+        "results/ch6/6.1.1/data/confidence_scores.csv", 
+        "results/ch6/6.2.1/data/calibration_scores.csv",
+        "data/cache/master.xlsx"
+      ]
+
+    description: "Validate all cross-RQ dependencies exist before proceeding with DASS analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools'"
+
+  extract_dass_scores:
+    module: "tools.data"
+    function: "extract_dass_scores"
+    signature: "extract_dass_scores(df: pd.DataFrame, subscales: List[str] = ['anxiety', 'stress']) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str"]
+        expected_rows: "~100 participants"
+        data_types:
+          UID: "string (format: P###)"
+          DASS_Dep: "int (range: 0-42)"
+          DASS_Anx: "int (range: 0-42)"
+          DASS_Str: "int (range: 0-42)"
+
+    output_files:
+      - path: "data/step01_dass_scores.csv"
+        columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str", "z_Dep", "z_Anx", "z_Str"]
+        description: "DASS-21 subscale scores with z-score standardization"
+
+    parameters:
+      subscales: ["depression", "anxiety", "stress"]
+      standardize: true
+      outlier_threshold: 3.29
+
+    description: "Extract DASS-21 subscale scores from master.xlsx and standardize via z-scores"
+    source_reference: "tools_inventory.md section 'Data Tools' - extract_dass_scores"
+
+  prepare_regression_data:
+    module: "tools.data"
+    function: "prepare_regression_data"
+    signature: "prepare_regression_data(participant_path: str = None, test_path: str = None, theta_path: str = None, include_interactions: bool = False) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/step01_dass_scores.csv"
+        required_columns: ["UID", "z_Dep", "z_Anx", "z_Str"]
+        source: "DASS predictors from step 1"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        source: "Memory accuracy outcomes from Ch5"
+      - path: "results/ch6/6.1.1/data/confidence_scores.csv"
+        required_columns: ["UID", "confidence"]
+        source: "Confidence outcomes from Ch6"
+
+    output_files:
+      - path: "data/step02_analysis_dataset.csv"
+        columns: ["UID", "z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        description: "Merged analysis dataset with all predictors and outcomes"
+
+    parameters:
+      merge_strategy: "inner"
+      outlier_method: "iqr"
+      outlier_threshold: 1.5
+
+    description: "Merge DASS predictors with Ch5 theta scores and Ch6 confidence/calibration metrics"
+    source_reference: "tools_inventory.md section 'Data Tools' - prepare_regression_data"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_model_convergence"
+
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        expected_rows: "~90-97 complete cases"
+
+    output_files:
+      - path: "data/step03_model_results.csv"
+        columns: ["model", "predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "vif", "r_squared"]
+        description: "Regression coefficients with dual p-values for all 3 models"
+      - path: "data/step03_model_diagnostics.csv"
+        columns: ["model", "shapiro_p", "bp_p", "dw_stat", "min_vif", "max_vif", "r_squared", "adj_r_squared"]
+        description: "Assumption test results for all 3 models"
+
+    parameters:
+      models: [
+        {name: "accuracy_model", outcome: "theta_accuracy", predictors: ["z_Dep", "z_Anx", "z_Str"]},
+        {name: "confidence_model", outcome: "confidence", predictors: ["z_Dep", "z_Anx", "z_Str"]},
+        {name: "calibration_model", outcome: "calibration", predictors: ["z_Dep", "z_Anx", "z_Str"]}
+      ]
+      add_constant: true
+      return_diagnostics: true
+
+    description: "Fit three separate regression models to test differential DASS prediction patterns"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - fit_multiple_regression"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        source: "Analysis dataset for bootstrap resampling"
+
+    output_files:
+      - path: "data/step04_beta_comparisons.csv"
+        columns: ["comparison", "predictor", "model1", "model2", "beta_diff", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        description: "Bootstrap-based beta coefficient comparisons across models"
+
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      comparisons: [
+        "confidence_vs_accuracy", "calibration_vs_accuracy", "confidence_vs_calibration"
+      ]
+
+    description: "Bootstrap confidence intervals for differential prediction hypothesis testing"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - bootstrap_regression_ci"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        source: "Complete dataset for cross-validation"
+
+    output_files:
+      - path: "data/step05_cross_validation.csv"
+        columns: ["model", "test_r2_mean", "test_r2_sd", "rmse_mean", "mae_mean", "train_test_gap", "shrinkage", "overfitting_flag"]
+        description: "Cross-validation results for all 3 models"
+
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2", "mae"]
+      overfitting_threshold: 0.10
+
+    description: "Assess model generalizability using 5-fold cross-validation"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - cross_validate_regression"
+
+  compute_cohens_f2:
+    module: "tools.analysis_regression"
+    function: "compute_cohens_f2"
+    signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    validation_tool: "validate_effect_sizes"
+
+    input_files:
+      - path: "data/step03_model_results.csv"
+        required_columns: ["model", "r_squared"]
+        source: "Model R² values for effect size computation"
+
+    output_files:
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["model", "cohens_f2", "f2_ci_lower", "f2_ci_upper", "power_observed", "min_detectable_f2", "power_80pct", "effect_interpretation"]
+        description: "Effect sizes and post-hoc power analysis"
+
+    parameters:
+      alpha_corrected: 0.0056
+      n_participants: 95
+      bootstrap_ci: true
+      n_bootstrap: 1000
+
+    description: "Compute Cohen's f² effect sizes and post-hoc power analysis"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_cohens_f2"
+
+  variance_decomposition:
+    module: "tools.analysis_regression" 
+    function: "variance_decomposition"
+    signature: "variance_decomposition(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], method: str = 'commonality') -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step04_beta_comparisons.csv"
+        required_columns: ["comparison", "beta_diff", "p_bonferroni"]
+        source: "Key differential prediction results for synthesis"
+      - path: "data/step03_model_results.csv"
+        required_columns: ["model", "r_squared"]
+        source: "Individual model performance metrics"
+
+    output_files:
+      - path: "data/step07_analysis_summary.csv"
+        columns: ["finding", "statistic", "p_value", "effect_size", "interpretation", "support_hypothesis"]
+        description: "Synthesized findings in tabular format"
+      - path: "results/differential_prediction_summary.txt"
+        description: "Narrative interpretation of results"
+
+    parameters:
+      primary_hypothesis: "DASS_Anxiety predicts metacognition > memory"
+      significance_threshold: 0.0056
+      effect_size_guidelines: "Cohen 1988"
+
+    description: "Synthesize results and create interpretable summary of differential prediction findings"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools' - variance_decomposition"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        source: "Dependency validation output from validate_file_existence"
+
+    parameters:
+      required_columns: ["dependency", "status", "path"]
+
+    criteria:
+      - "All required dependency files exist and accessible"
+      - "Status shows 'FOUND' for all critical dependencies"
+      - "File paths are valid and accessible"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all dependencies found)"
+        message: "str (validation results summary)"
+        missing_dependencies: "List[str] (any missing files)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate dependency validation output format and completeness"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_dass_scores.csv"
+        required_columns: ["DASS_Dep", "DASS_Anx", "DASS_Str", "z_Dep", "z_Anx", "z_Str"]
+        source: "DASS scores output from extract_dass_scores"
+
+    parameters:
+      dass_raw_range: [0, 42]
+      z_score_range: [-3.29, 3.29]
+      correlation_threshold: [0.5, 0.9]
+
+    criteria:
+      - "DASS raw scores in [0, 42] range (valid DASS-21 subscale range)"
+      - "Z-scores in [-3.29, 3.29] range (standard outlier threshold)"
+      - "No missing values in DASS columns"
+      - "DASS subscale intercorrelations in [0.5, 0.9] range"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        violations: "List"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_dass.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate DASS scores are in expected ranges and properly standardized"
+    source_reference: "tools_inventory.md section 'Data Validation Tools' - validate_numeric_range"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"  
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_analysis_dataset.csv"
+        required_columns: ["UID", "z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        source: "Merged analysis dataset from prepare_regression_data"
+
+    parameters:
+      required_columns: ["UID", "z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+      min_participants: 90
+      cv_threshold: 0.10
+
+    criteria:
+      - "All required columns present in merged dataset"
+      - "N e 90 participants after merge (sufficient power)"
+      - "Coefficient of variation > 0.10 for all outcome variables"
+      - "No extreme outliers (>3 SD) in outcome measures"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+        n_participants: "int"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_merge_datasets.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate merged analysis dataset structure and completeness"
+    source_reference: "tools_inventory.md section 'Data Validation Tools' - validate_data_columns"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence"
+    signature: "validate_model_convergence(lmm_result: Any, min_observations: int = 100) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_model_results.csv"
+        required_columns: ["model", "beta", "se", "p_uncorrected", "vif"]
+        source: "Regression model outputs from fit_multiple_regression"
+
+    parameters:
+      min_observations: 90
+      max_vif: 5.0
+      min_r_squared: 0.01
+
+    criteria:
+      - "All three models converged successfully"
+      - "No NaN values in coefficients or standard errors"
+      - "VIF < 5.0 for all predictors (no severe multicollinearity)"
+      - "Bootstrap confidence intervals computed successfully"
+
+    expected_output:
+      format: "Dict[str, Any]" 
+      fields:
+        valid: "bool"
+        message: "str"
+        converged_models: "List[str]"
+        failed_models: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_fit_models.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate all regression models fitted successfully with stable estimates"
+    source_reference: "tools_inventory.md section 'Model Validation Tools' - validate_model_convergence"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_beta_comparisons.csv"
+        required_columns: ["beta_diff", "ci_lower", "ci_upper", "p_bonferroni"]
+        source: "Bootstrap comparison results"
+      - path: "data/step06_effect_sizes.csv"
+        required_columns: ["cohens_f2", "power_observed"]
+        source: "Effect size computation results"
+
+    parameters:
+      f2_reasonable_range: [0.0, 1.0]
+      power_range: [0.0, 1.0]
+      ci_validity: true
+
+    criteria:
+      - "Cohen's f² values in [0, 1] range (reasonable for behavioral data)"
+      - "Power values in [0, 1] range"
+      - "Bootstrap CIs valid (ci_lower < estimate < ci_upper)"
+      - "Effect size interpretations match Cohen (1988) guidelines"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_compare_betas.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate effect sizes and power estimates are in reasonable ranges"
+    source_reference: "tools_inventory.md section 'Effect Size Validation Tools' - validate_effect_sizes"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step05_cross_validation.csv"
+        required_columns: ["model", "test_r2_mean", "overfitting_flag"]
+        source: "Cross-validation results from cross_validate_regression"
+      - path: "data/step07_analysis_summary.csv"
+        required_columns: ["finding", "p_value", "support_hypothesis"]
+        source: "Final analysis summary from variance_decomposition"
+
+    parameters:
+      expected_rows_cv: [3, 3]  # Exactly 3 models
+      expected_rows_summary: [5, 15]  # 5-15 key findings
+      required_columns_cv: ["model", "test_r2_mean", "test_r2_sd", "overfitting_flag"]
+      required_columns_summary: ["finding", "statistic", "p_value", "support_hypothesis"]
+
+    criteria:
+      - "Cross-validation results: exactly 3 models tested"
+      - "Analysis summary: 5-15 key findings documented"
+      - "All required columns present in both outputs"
+      - "No missing values in critical result columns"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        checks: "Dict[str, bool]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_cross_validation.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate structure of cross-validation and summary outputs"
+    source_reference: "tools_inventory.md section 'Data Structure Validation Tools' - validate_dataframe_structure"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 6  
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "D068: Dual p-value reporting implemented in bootstrap_regression_ci and fit_multiple_regression"
+    - "Cross-RQ dependencies: Ch5 theta + Ch6 confidence/calibration + master.xlsx DASS"
+    - "Pipeline: Multiple regression ’ beta comparison ’ cross-validation ’ effect sizes ’ synthesis"
+    - "Primary hypothesis: DASS-Anxiety predicts metacognition (confidence, calibration) more than memory (accuracy)"

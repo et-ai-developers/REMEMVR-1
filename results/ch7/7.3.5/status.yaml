@@ -31,8 +31,8 @@ rq_planner:
   context_dump: "7 steps planned: ANOVA + correlations pipeline. Dependencies: Ch5 5.1.1 + Ch6 confidence + master.xlsx. Enhanced v5.1 specs: bootstrap CIs (1000 iter, seed=42), Bonferroni correction (6 tests), assumption checks with remedial actions. Runtime: ~45 min."
 
 rq_tools:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "7 analysis + 7 validation tools cataloged for ANOVA + correlations pipeline. Dependencies: Ch5 5.1.1 theta + Ch6 confidence + master.xlsx. Key tools: one_way_anova_d068, bootstrap_correlation_ci, effect sizes, sensitivity analysis. All tools verified exist in tools_inventory.md. Decision D068 dual p-value reporting embedded throughout."
 
 rq_analysis:
   status: pending

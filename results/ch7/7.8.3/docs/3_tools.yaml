@@ -1,0 +1,499 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.8.3
+# Created by: rq_tools agent
+# Purpose: Analysis + Validation tool pairs for nested multiple regression with cross-validation
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 7.8.3 Parsimonious Predictive Model with Cross-Validation
+
+analysis_tools:
+  validate_file_exists:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    signature: "validate_file_exists(file_path: str, min_size_bytes: int = 1000) -> Dict[str, Any]"
+    validation_tool: "validate_file_exists"
+
+    input_files: []  # Validation tool - checks file existence
+
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        columns: []
+        description: "Dependency validation results for Ch5 5.1.1 outputs and master.xlsx"
+
+    parameters:
+      files_to_check:
+        - "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        - "data/cache/master.xlsx"
+      min_size_bytes: 1000
+
+    description: "Validate cross-RQ dependencies exist before proceeding with analysis"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "Age", "Sex", "Education", "RAVLT_Total", "BVMT_Total", "RPM_Score", "NART_Score", "DASS_Total", "Sleep"]
+        expected_rows: "~100"
+        data_types:
+          UID: "string"
+          Age: "float64"
+          RAVLT_Total: "float64"
+          BVMT_Total: "float64"
+
+    output_files:
+      - path: "data/step01_cognitive_tests.csv"
+        columns: ["UID", "Age", "Sex", "Education", "RAVLT_T", "BVMT_T", "RPM_T", "NART_T", "DASS_Total", "Sleep"]
+        description: "Extracted cognitive tests with T-score transformations"
+      - path: "data/step01_descriptive_stats.csv"
+        columns: ["variable", "mean", "sd", "min", "max", "missing_count"]
+        description: "Descriptive statistics for all extracted variables"
+
+    parameters:
+      tests: ["RAVLT", "BVMT", "RPM", "NART"]
+      t_score_transform: true
+      sex_coding: {"Male": 0, "Female": 1}
+
+    description: "Extract cognitive test scores from master.xlsx and compute T-score transformations"
+    source_reference: "tools_inventory.md section 'Data Tools'"
+
+  standardize_to_t_scores:
+    module: "tools.data"
+    function: "standardize_to_t_scores"
+    signature: "standardize_to_t_scores(scores: Union[pd.Series, pd.DataFrame], population_mean: float = None, population_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["RAVLT_Total", "BVMT_Total", "RPM_Score", "NART_Score"]
+        source: "extract_cognitive_tests output"
+
+    output_files:
+      - path: "data/step02_theta_all_scores.csv"
+        columns: ["UID", "theta_all"]
+        description: "Theta-all scores loaded from Ch5 5.1.1"
+      - path: "data/step02_analysis_input.csv"
+        columns: ["UID", "Age", "Sex", "Education", "RAVLT_T", "BVMT_T", "RPM_T", "NART_T", "DASS_Total", "Sleep", "theta_all"]
+        description: "Complete merged analysis dataset for regression modeling"
+
+    parameters:
+      target_mean: 50.0
+      target_sd: 10.0
+      rounding: 1
+
+    description: "Transform cognitive test raw scores to T-scores (M=50, SD=10)"
+    source_reference: "tools_inventory.md section 'Data Tools'"
+
+  fit_hierarchical_regression:
+    module: "tools.analysis_regression"
+    function: "fit_hierarchical_regression"
+    signature: "fit_hierarchical_regression(X_blocks: List[Union[np.ndarray, pd.DataFrame]], y: Union[np.ndarray, pd.Series], block_names: List[str] = None, add_constant: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step02_analysis_input.csv"
+        required_columns: ["UID", "Age", "Sex", "Education", "RAVLT_T", "BVMT_T", "RPM_T", "NART_T", "DASS_Total", "Sleep", "theta_all"]
+        expected_rows: "~100"
+
+    output_files:
+      - path: "data/step03_nested_models.csv"
+        columns: ["model_name", "num_predictors", "predictor_list"]
+        description: "Specifications for 4 nested regression models"
+      - path: "data/step03_model_specs.txt"
+        description: "Detailed model specifications with theoretical rationale"
+
+    parameters:
+      model_blocks:
+        - name: "Minimal"
+          predictors: ["Age", "RAVLT_T"]
+        - name: "Core" 
+          predictors: ["Age", "RAVLT_T", "BVMT_T"]
+        - name: "Extended"
+          predictors: ["Age", "RAVLT_T", "BVMT_T", "RPM_T", "Education"]
+        - name: "Full"
+          predictors: ["Age", "RAVLT_T", "BVMT_T", "RPM_T", "Education", "NART_T", "DASS_Total", "Sleep", "Sex"]
+      outcome: "theta_all"
+      add_constant: true
+
+    description: "Define and validate 4 nested regression models with increasing complexity"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  cross_validate_regression:
+    module: "tools.analysis_regression"
+    function: "cross_validate_regression"
+    signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "data/step02_analysis_input.csv"
+        required_columns: ["theta_all", "Age", "RAVLT_T", "BVMT_T", "RPM_T", "Education", "NART_T", "DASS_Total", "Sleep", "Sex"]
+        source: "merged analysis dataset"
+      - path: "data/step03_nested_models.csv"
+        required_columns: ["model_name", "predictor_list"]
+        source: "model specifications"
+
+    output_files:
+      - path: "data/step04_cv_results.csv"
+        columns: ["model", "train_r2_mean", "train_r2_sd", "cv_r2_mean", "cv_r2_sd", "shrinkage", "overfitting_flag"]
+        description: "Cross-validation results for all 4 models"
+      - path: "data/step04_cv_bootstrap_cis.csv"
+        columns: ["model", "cv_r2_mean", "ci_lower", "ci_upper"]
+        description: "Bootstrap confidence intervals for CV-R² estimates"
+      - path: "data/step04_fold_details.csv"
+        columns: ["model", "fold", "train_r2", "cv_r2", "shrinkage"]
+        description: "Individual fold results (20 rows: 4 models × 5 folds)"
+
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["r2", "mse"]
+      stratification: "age"  # QuantileStratifiedKFold
+      bootstrap_iterations: 1000
+      overfitting_threshold: 0.10
+
+    description: "Perform 5-fold cross-validation for all 4 models with bootstrap confidence intervals"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  fit_multiple_regression:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression" 
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step02_analysis_input.csv"
+        required_columns: ["theta_all"]
+        source: "analysis dataset"
+      - path: "data/step05_optimal_model.txt"
+        source: "model comparison and selection results"
+
+    output_files:
+      - path: "data/step05_model_comparison.csv"
+        columns: ["model", "cv_r2", "rank", "parsimony_selected", "shrinkage", "selected_as_optimal"]
+        description: "Model ranking and selection results"
+      - path: "data/step05_nested_comparisons.csv"
+        columns: ["comparison", "f_stat", "p_uncorrected", "p_bonferroni", "significant_corrected"]
+        description: "Nested F-tests with dual p-values (Decision D068)"
+      - path: "data/step05_optimal_model.txt"
+        description: "Selected optimal model with rationale"
+
+    parameters:
+      parsimony_threshold: 0.02
+      bonferroni_family: "within_rq"
+      comparisons: ["1vs2", "2vs3", "3vs4"]
+      alpha: 0.05
+
+    description: "Compare models using CV-R² and apply parsimony criterion for optimal model selection"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  bootstrap_regression_ci:
+    module: "tools.analysis_regression"
+    function: "bootstrap_regression_ci"
+    signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    validation_tool: "validate_bootstrap_stability"
+
+    input_files:
+      - path: "data/step02_analysis_input.csv"
+        required_columns: ["theta_all"]
+        source: "full analysis dataset"
+      - path: "data/step05_optimal_model.txt"
+        source: "optimal model specification"
+
+    output_files:
+      - path: "data/step06_final_model_summary.csv"
+        columns: ["r2", "adj_r2", "f_stat", "model_p_value"]
+        description: "Final model fit statistics"
+      - path: "data/step06_coefficients.csv"
+        columns: ["predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni"]
+        description: "Beta coefficients with bootstrap CIs and dual p-values"
+      - path: "data/step06_semipartial_correlations.csv"
+        columns: ["predictor", "sr2", "percent_unique_variance"]
+        description: "Semi-partial correlations for unique variance contribution"
+
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      method: "percentile"
+      bonferroni_correction: true
+
+    description: "Fit optimal model on full dataset and extract detailed coefficient information with bootstrap CIs"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  compute_regression_diagnostics:
+    module: "tools.analysis_regression"
+    function: "compute_regression_diagnostics"
+    signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step02_analysis_input.csv"
+        required_columns: ["theta_all"]
+        source: "analysis dataset for residual computation"
+      - path: "data/step06_coefficients.csv"
+        required_columns: ["predictor", "beta"]
+        source: "fitted model coefficients"
+
+    output_files:
+      - path: "data/step07_assumption_tests.csv"
+        columns: ["test_name", "statistic", "p_value"]
+        description: "Formal assumption tests (Shapiro-Wilk, Breusch-Pagan)"
+      - path: "data/step07_vif_results.csv"
+        columns: ["predictor", "vif"]
+        description: "Variance inflation factors for multicollinearity assessment"
+      - path: "data/step07_outlier_analysis.csv"
+        columns: ["UID", "cooks_d", "leverage", "studentized_residual"]
+        description: "Outlier diagnostics for all participants"
+      - path: "data/step07_diagnostic_data.csv"
+        columns: ["UID", "residual", "fitted"]
+        description: "Residual and fitted values for diagnostic plotting"
+
+    parameters:
+      outlier_thresholds:
+        cooks_d: 0.04  # 4/N where N=100
+        leverage: 0.20  # 2*(p+1)/N
+        studentized: 3.0  # |residual| > 3
+      assumption_tests:
+        - "shapiro_wilk"
+        - "breusch_pagan" 
+        - "vif"
+
+    description: "Validate regression assumptions and check model diagnostics for optimal model"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+  # Sensitivity analysis requires custom implementation - simplified for now
+  run_sensitivity_analysis:
+    module: "tools.analysis_regression"
+    function: "fit_multiple_regression"  # Reuse with outlier exclusion
+    signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    validation_tool: "validate_regression_assumptions"
+
+    input_files:
+      - path: "data/step02_analysis_input.csv"
+        required_columns: ["theta_all"]
+        source: "analysis dataset"
+      - path: "data/step05_optimal_model.txt" 
+        source: "optimal model specification"
+      - path: "data/step07_outlier_analysis.csv"
+        required_columns: ["UID", "cooks_d"]
+        source: "outlier identification"
+
+    output_files:
+      - path: "data/step08_outlier_sensitivity.csv"
+        columns: ["condition", "r2", "n_participants", "coefficient_stability"]
+        description: "Model comparison with/without outliers"
+      - path: "data/step08_loo_cv_results.csv"
+        columns: ["loo_cv_r2", "fold5_cv_r2", "difference", "correlation"]
+        description: "LOO-CV vs 5-fold CV comparison"
+      - path: "data/step08_alternative_cv.csv"
+        columns: ["stratification_method", "cv_r2_mean", "cv_r2_sd"]
+        description: "Age vs theta stratification comparison"
+      - path: "data/step08_bootstrap_stability.csv"
+        columns: ["predictor", "seed42_ci_width", "seed43_ci_width", "stability_ratio"]
+        description: "Bootstrap seed stability assessment"
+
+    parameters:
+      outlier_threshold: 0.04
+      alternative_seeds: [42, 43]
+      loo_cv: true
+      alternative_stratification: "theta_all"
+
+    description: "Perform sensitivity analyses including outlier exclusion and alternative CV approaches"
+    source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
+
+validation_tools:
+  validate_file_exists:
+    module: "tools.validation"
+    function: "validate_file_exists"
+    signature: "validate_file_exists(file_path: str, min_size_bytes: int = 1000) -> Dict[str, Any]"
+
+    input_files: []  # Checks file system directly
+
+    parameters:
+      min_size_bytes: 1000
+
+    criteria:
+      - "File exists at specified path"
+      - "File size > minimum threshold (not empty/corrupted)"
+      - "File is readable by analysis tools"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed)"
+        message: "str (human-readable explanation)"
+        missing_files: "List[str] (files not found)"
+
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_dependency_validation.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate required files exist and are accessible"
+    source_reference: "tools_inventory.md section 'File Validation Tools'"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "Age", "Sex", "Education", "RAVLT_T", "BVMT_T", "RPM_T", "NART_T"]
+        source: "extract_cognitive_tests output"
+
+    parameters:
+      required_columns: ["UID", "Age", "Sex", "Education", "RAVLT_T", "BVMT_T", "RPM_T", "NART_T", "DASS_Total", "Sleep"]
+
+    criteria:
+      - "All required columns present in DataFrame"
+      - "No missing column names (case-sensitive matching)"
+      - "Column order irrelevant"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_cognitive.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate all required columns exist in extracted cognitive test data"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_numeric_range:
+    module: "tools.validation" 
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_cv_results.csv"
+        required_columns: ["cv_r2_mean", "shrinkage"]
+        source: "cross_validate_regression output"
+
+    parameters:
+      range_checks:
+        - column: "cv_r2_mean"
+          min_val: 0.0
+          max_val: 1.0
+        - column: "shrinkage"
+          min_val: -0.5
+          max_val: 0.5
+        - column: "train_r2_mean"
+          min_val: 0.0
+          max_val: 1.0
+
+    criteria:
+      - "All R² values in valid range [0, 1]"
+      - "Shrinkage values in reasonable range [-0.5, 0.5]"
+      - "No NaN or infinite values"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_values: "List"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_cross_validation.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate numeric values are within scientifically reasonable ranges"
+    source_reference: "tools_inventory.md section 'Data Validation Tools'"
+
+  validate_regression_assumptions:
+    module: "tools.validation"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+
+    input_files:
+      - path: "data/step07_assumption_tests.csv"
+        required_columns: ["test_name", "statistic", "p_value"]
+        source: "compute_regression_diagnostics output"
+
+    parameters:
+      alpha: 0.05
+      assumption_thresholds:
+        shapiro_wilk_p: 0.05
+        breusch_pagan_p: 0.05
+        max_vif: 10.0
+        max_cooks_d: 0.04
+
+    criteria:
+      - "Residuals normally distributed (Shapiro-Wilk p > 0.05)"
+      - "Homoscedasticity (Breusch-Pagan p > 0.05)"
+      - "No severe multicollinearity (VIF < 10)"
+      - "No influential outliers (Cook's D < 4/n)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        violated_assumptions: "List[str]"
+        remedial_actions: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step07_diagnostics.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate all regression assumptions are met for optimal model"
+    source_reference: "tools_inventory.md section 'Regression Validation Tools'"
+
+  validate_bootstrap_stability:
+    module: "tools.validation"
+    function: "validate_bootstrap_stability"
+    signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step08_bootstrap_stability.csv"
+        required_columns: ["stability_ratio"]
+        source: "sensitivity analysis bootstrap comparison"
+
+    parameters:
+      min_stability_threshold: 0.8
+      max_ci_width_ratio: 2.0
+
+    criteria:
+      - "Bootstrap estimates stable across different random seeds"
+      - "CI width ratio between seeds < 2.0"
+      - "Coefficient estimates consistent"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        unstable_predictors: "List[str]"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step08_sensitivity.log"
+      invoke: "g_debug (master invokes)"
+
+    description: "Validate bootstrap confidence intervals are stable across random seeds"
+    source_reference: "tools_inventory.md section 'Bootstrap Validation Tools'"
+
+summary:
+  analysis_tools_count: 9
+  validation_tools_count: 5
+  total_unique_tools: 14
+  mandatory_decisions_embedded: ["D068"]
+  methodology: "Nested multiple regression with 5-fold cross-validation"
+  key_features: 
+    - "4 nested models (Minimal’Core’Extended’Full)"
+    - "Age-stratified 5-fold CV with bootstrap CIs"
+    - "Parsimony criterion (CV-R² within 0.02)"
+    - "Dual p-value reporting (Decision D068)"
+    - "Comprehensive assumption checking"
+    - "Outlier sensitivity analysis"
+    - "Multiple CV approaches for robustness"

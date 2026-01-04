@@ -1,0 +1,347 @@
+# 3_tools.yaml - Tool Catalog for RQ 7.4.1: RAVLT Free Recall vs Recognition Process-Specific Prediction
+# Created by: rq_tools agent 
+# Consumed by: rq_analysis agent (Step 12)
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+
+analysis_tools:
+  extract_cognitive_tests:
+    module: "tools.data"
+    function: "extract_cognitive_tests"
+    signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+
+    input_files:
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5"]
+        expected_rows: "~100 (complete RAVLT data)"
+        data_types:
+          UID: "string (format: P### with leading zeros)"
+          RAVLT_T1: "int (range [0, 15] words per trial)"
+          RAVLT_T2: "int (range [0, 15] words per trial)"
+          RAVLT_T3: "int (range [0, 15] words per trial)"
+          RAVLT_T4: "int (range [0, 15] words per trial)"
+          RAVLT_T5: "int (range [0, 15] words per trial)"
+
+    output_files:
+      - path: "data/step00_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "RAVLT_total"]
+        description: "Cognitive test scores with computed RAVLT total (sum of 5 trials)"
+
+    parameters:
+      df: "pd.DataFrame from master.xlsx"
+      tests: "List[str] = ['RAVLT'] (extract RAVLT only for this RQ)"
+
+    description: "Extract RAVLT cognitive test scores from master.xlsx and compute total score"
+    source_reference: "tools_inventory.md section 'Data Tools' - extract_cognitive_tests"
+
+  extract_domain_theta_scores:
+    module: "tools.data"
+    function: "extract_domain_theta_scores"
+    signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+
+    input_files:
+      - path: "Ch5 5.3.x paradigm results (dependency)"
+        required_columns: ["composite_ID", "UID", "test", "paradigm", "theta"]
+        expected_rows: "~400 (100 participants x 4 tests)"
+        data_types:
+          composite_ID: "string (format: UID_test)"
+          UID: "string (format: P###)"
+          test: "int (values: 0, 1, 3, 6 for T1-T4)"
+          paradigm: "string (IFR=Free Recall, IRE=Recognition)"
+          theta: "float (range [-3, 3] IRT ability)"
+
+    output_files:
+      - path: "data/step01_paradigm_theta.csv"
+        columns: ["UID", "Theta_FreeRecall", "Theta_Recognition"]
+        description: "Paradigm-specific theta scores aggregated across domains and tests"
+
+    parameters:
+      path: "str = Ch5 paradigm results path"
+      domains: "List[str] = ['What', 'Where', 'When'] (aggregate all domains)"
+
+    description: "Load paradigm-specific theta scores from Ch5 5.3.x and aggregate across domains"
+    source_reference: "tools_inventory.md section 'Data Tools' - extract_domain_theta_scores"
+
+  merge_theta_cognitive:
+    module: "tools.data"
+    function: "merge_theta_cognitive"
+    signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    validation_tool: "validate_dataframe_structure"
+
+    input_files:
+      - path: "data/step00_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_total"]
+        source: "analysis tool output (step00_extract_cognitive_tests)"
+      - path: "data/step01_paradigm_theta.csv"
+        required_columns: ["UID", "Theta_FreeRecall", "Theta_Recognition"]
+        source: "analysis tool output (step01_extract_paradigm_theta)"
+
+    output_files:
+      - path: "data/step02_correlation_input.csv"
+        columns: ["UID", "RAVLT_total", "Theta_FreeRecall", "Theta_Recognition"]
+        description: "Unified analysis dataset for correlation analysis"
+
+    parameters:
+      theta_df: "pd.DataFrame (paradigm theta scores)"
+      cognitive_df: "pd.DataFrame (RAVLT cognitive scores)"
+
+    description: "Merge RAVLT scores with paradigm theta scores by UID for correlation analysis"
+    source_reference: "tools_inventory.md section 'Data Tools' - merge_theta_cognitive"
+
+  bootstrap_correlation_ci:
+    module: "tools.bootstrap"
+    function: "bootstrap_correlation_ci"
+    signature: "bootstrap_correlation_ci(x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, method: str = 'pearson', random_state: int = None) -> Dict"
+    validation_tool: "validate_correlation_test_d068"
+
+    input_files:
+      - path: "data/step02_correlation_input.csv"
+        required_columns: ["RAVLT_total", "Theta_FreeRecall", "Theta_Recognition"]
+        source: "analysis tool output (step02_merge_theta_cognitive)"
+
+    output_files:
+      - path: "data/step03_correlation_results.csv"
+        columns: ["correlation_pair", "r_value", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni", "n_obs"]
+        description: "Bivariate correlations with bootstrap confidence intervals and dual p-values (D068)"
+
+    parameters:
+      x: "Union[np.ndarray, pd.Series] (RAVLT_total for both correlations)"
+      y: "Union[np.ndarray, pd.Series] (Theta_FreeRecall then Theta_Recognition)"
+      n_bootstrap: "int = 1000 (bootstrap iterations)"
+      confidence_level: "float = 0.95 (95% confidence intervals)"
+      method: "str = 'pearson' (Pearson product-moment correlations)"
+      random_state: "int = 42 (reproducibility seed)"
+
+    description: "Compute bootstrap confidence intervals for r(RAVLT, FreeRecall) and r(RAVLT, Recognition)"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - bootstrap_correlation_ci"
+
+  compare_correlations_dependent:
+    module: "tools.bootstrap"
+    function: "compare_correlations_dependent"
+    signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+
+    input_files:
+      - path: "data/step03_correlation_results.csv"
+        required_columns: ["r_value"]
+        source: "analysis tool output (step03_bootstrap_correlations)"
+      - path: "data/step02_correlation_input.csv"
+        required_columns: ["Theta_FreeRecall", "Theta_Recognition"]
+        source: "raw data for r23 computation"
+
+    output_files:
+      - path: "data/step04_steiger_test.csv"
+        columns: ["z_statistic", "p_value", "r_difference", "significant", "interpretation", "alpha_threshold"]
+        description: "Steiger's Z-test results for process-specificity hypothesis"
+
+    parameters:
+      r12: "float (correlation RAVLT-FreeRecall from Step 3)"
+      r13: "float (correlation RAVLT-Recognition from Step 3)"
+      r23: "float (correlation FreeRecall-Recognition computed from raw data)"
+      n: "int = 100 (sample size)"
+
+    description: "Test process-specificity hypothesis: r(RAVLT, FreeRecall) > r(RAVLT, Recognition) using Steiger's Z-test"
+    source_reference: "tools_inventory.md section 'Bootstrap Tools' - compare_correlations_dependent"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step00_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "RAVLT_total"]
+        source: "analysis tool output (extract_cognitive_tests)"
+
+    parameters:
+      df: "pd.DataFrame (cognitive test data)"
+      required_cols: "List[str] = ['UID', 'RAVLT_T1', 'RAVLT_T2', 'RAVLT_T3', 'RAVLT_T4', 'RAVLT_T5', 'RAVLT_total']"
+
+    criteria:
+      - "All required columns present (7 total: UID + 6 RAVLT variables)"
+      - "Expected row count (100 participants)"
+      - "RAVLT_T1-T5 values in range [0, 15]"
+      - "RAVLT_total values in range [0, 75]"
+      - "No NaN values in any column"
+      - "RAVLT_total = sum(T1 + T2 + T3 + T4 + T5) for all rows"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        missing_columns: "List[str] (any missing columns, empty if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step00_extract_cognitive_tests.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate cognitive test extraction output has correct structure and RAVLT value ranges"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(data: Union[np.ndarray, pd.Series], min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step01_paradigm_theta.csv"
+        required_columns: ["Theta_FreeRecall", "Theta_Recognition"]
+        source: "analysis tool output (extract_domain_theta_scores)"
+
+    parameters:
+      data: "Union[np.ndarray, pd.Series] (theta values)"
+      min_val: "float = -3.0 (minimum IRT ability)"
+      max_val: "float = 3.0 (maximum IRT ability)"
+      column_name: "str (column being validated)"
+
+    criteria:
+      - "All theta values in valid IRT range [-3, 3]"
+      - "No NaN values in theta columns"
+      - "No infinite values"
+      - "Expected row count (100 participants)"
+      - "Both paradigms represented (Free Recall and Recognition)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        violations: "List[str] (out-of-range values, empty if valid=True)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_extract_paradigm_theta.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate paradigm theta scores are within valid IRT ability range"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+  validate_dataframe_structure:
+    module: "tools.validation"
+    function: "validate_dataframe_structure"
+    signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step02_correlation_input.csv"
+        required_columns: ["UID", "RAVLT_total", "Theta_FreeRecall", "Theta_Recognition"]
+        source: "analysis tool output (merge_theta_cognitive)"
+
+    parameters:
+      df: "pd.DataFrame (merged analysis dataset)"
+      expected_rows: "int = 100 (expected participant count)"
+      expected_columns: "List[str] = ['UID', 'RAVLT_total', 'Theta_FreeRecall', 'Theta_Recognition']"
+      column_types: "Dict[str, type] = {'UID': object, 'RAVLT_total': int64, 'Theta_FreeRecall': float64, 'Theta_Recognition': float64}"
+
+    criteria:
+      - "Exactly 100 rows (no data loss from merge)"
+      - "All required columns present (4 total)"
+      - "Correct column data types"
+      - "No NaN values after merge (complete cases only)"
+      - "Variable ranges maintained post-merge"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        checks: "Dict[str, bool] (individual check results)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_merge_ravlt_theta.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate merge results have correct structure and no data loss"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_dataframe_structure"
+
+  validate_correlation_test_d068:
+    module: "tools.validation"
+    function: "validate_correlation_test_d068"
+    signature: "validate_correlation_test_d068(correlation_df: pd.DataFrame, required_cols: List[str] = None) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step03_correlation_results.csv"
+        required_columns: ["correlation_pair", "r_value", "CI_lower", "CI_upper", "p_uncorrected", "p_bonferroni"]
+        source: "analysis tool output (bootstrap_correlation_ci)"
+
+    parameters:
+      correlation_df: "pd.DataFrame (correlation results)"
+      required_cols: "List[str] = None (uses D068 default: p_uncorrected + correction method)"
+
+    criteria:
+      - "Expected number of correlations (2: Free Recall and Recognition)"
+      - "Correlation values in valid range [-1, 1]"
+      - "Bootstrap CIs properly computed (CI_lower < r_value < CI_upper)"
+      - "Dual p-values present (uncorrected and Bonferroni per D068)"
+      - "Bootstrap parameters correct (n=1000, seed=42)"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        dual_p_compliance: "bool (D068 compliance check)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step03_compute_correlations.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate correlation results include bootstrap CIs and dual p-values per Decision D068"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_correlation_test_d068"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(interaction_df: pd.DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+
+    input_files:
+      - path: "data/step04_steiger_test.csv"
+        required_columns: ["z_statistic", "p_value", "r_difference", "significant"]
+        source: "analysis tool output (compare_correlations_dependent)"
+
+    parameters:
+      interaction_df: "pd.DataFrame (Steiger test results)"
+      required_terms: "List[str] = ['process_specificity'] (test name)"
+      alpha_bonferroni: "float = 0.00179 (chapter-level correction)"
+
+    criteria:
+      - "Single test result (1 row)"
+      - "Z-statistic and p-value computed"
+      - "Alpha threshold correct (0.00179 chapter-level correction)"
+      - "Significance determination consistent (p < alpha)"
+      - "Effect size (correlation difference) computed"
+
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all criteria passed, False otherwise)"
+        message: "str (human-readable explanation)"
+        dual_p_compliance: "bool (D068 compliance check)"
+
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step04_steiger_test.log"
+      invoke: "g_debug (master invokes after error)"
+
+    description: "Validate Steiger's Z-test results are properly computed with correct alpha threshold"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_hypothesis_test_dual_pvalues"
+
+summary:
+  analysis_tools_count: 5
+  validation_tools_count: 5
+  total_unique_tools: 10
+  mandatory_decisions_embedded: ["D068"]
+  notes:
+    - "Each tool documented ONCE (even if used multiple times in workflow)"
+    - "rq_analysis will create step sequencing in 4_analysis.yaml"
+    - "g_code will use these signatures for pre-generation validation"
+    - "All signatures include full Python type hints"
+    - "All validation tools paired with analysis tools"
+    - "Decision D068: Dual p-value reporting enforced via validation"
+    - "Bootstrap confidence intervals with 1000 iterations and seed=42"
+    - "Chapter-level alpha correction (± = 0.00179) for significance testing"

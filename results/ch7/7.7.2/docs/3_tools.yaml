@@ -1,0 +1,554 @@
+# 3_tools.yaml - Tool Catalog (Analysis + Validation Tools)
+# Created by: rq_tools agent 
+# Consumed by: rq_analysis agent 
+# Architecture: Tool Catalog (Option A) - Each tool listed once, deduplication
+# RQ: 7.7.2 - Discrepancy Analysis - Who diverges?
+
+analysis_tools:
+  validate_cross_rq_dependencies:
+    module: "tools.data_handling"
+    function: "validate_cross_rq_dependencies" 
+    signature: "validate_cross_rq_dependencies(rq_path: str, master_xlsx_path: str) -> Dict[str, Any]"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_content: ["rq_results: success"]
+        expected_format: "YAML status file"
+        data_types:
+          status: "string (success/pending/failed)"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv" 
+        required_columns: ["UID", "theta_all"]
+        expected_rows: "~100 (one per participant)"
+        data_types:
+          UID: "string (format: P###)"
+          theta_all: "float64 (IRT ability scale -3 to +3)"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_Total", "Age", "Education", "VR_Experience"]
+        expected_format: "Excel workbook with participant data"
+        
+    output_files:
+      - path: "data/step00_dependency_validation.txt"
+        description: "Text report confirming all dependencies located and validated"
+        
+    parameters:
+      rq_path: "results/ch5/5.1.1"
+      master_xlsx_path: "data/cache/master.xlsx"
+      required_theta_participants: 100
+      
+    description: "Validate Ch5 5.1.1 theta scores and master.xlsx data exist before proceeding"
+    source_reference: "tools_inventory.md section 'Data Handling Tools'"
+
+  standardize_scores:
+    module: "tools.analysis_stats"
+    function: "standardize_scores"
+    signature: "standardize_scores(scores: Union[pd.Series, pd.DataFrame], reference_mean: float = None, reference_sd: float = None) -> Union[pd.Series, pd.DataFrame]"
+    validation_tool: "validate_standardization"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta_all"] 
+        expected_rows: "~100"
+        source: "Ch5 5.1.1 omnibus IRT output"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "RAVLT_Total"]
+        source: "Master dataset RAVLT scores"
+        
+    output_files:
+      - path: "data/step01_standardized_scores.csv"
+        columns: ["UID", "theta_raw", "RAVLT_raw", "REMEMVR_z", "RAVLT_z"]
+        description: "Raw scores and z-score standardizations for both measures"
+      - path: "data/step01_standardization_stats.csv" 
+        columns: ["measure", "mean", "sd", "ci_lower", "ci_upper"]
+        description: "Bootstrap CIs for standardization parameters"
+        
+    parameters:
+      reference_mean: null  # Use sample mean
+      reference_sd: null    # Use sample SD
+      bootstrap_iterations: 1000
+      random_seed: 42
+      confidence_level: 0.95
+      
+    description: "Standardize REMEMVR (theta) and RAVLT scores to z-scores with bootstrap CIs"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - standardize_scores"
+
+  compute_discrepancy_scores:
+    module: "tools.analysis_stats"
+    function: "compute_discrepancy_scores"
+    signature: "compute_discrepancy_scores(vr_scores: pd.Series, traditional_scores: pd.Series, standardize: bool = True) -> pd.DataFrame"
+    validation_tool: "validate_numeric_range"
+    
+    input_files:
+      - path: "data/step01_standardized_scores.csv"
+        required_columns: ["UID", "REMEMVR_z", "RAVLT_z"]
+        source: "standardized scores from step 1"
+        
+    output_files:
+      - path: "data/step02_discrepancy_scores.csv"
+        columns: ["UID", "REMEMVR_z", "RAVLT_z", "Discrepancy"]  
+        description: "Discrepancy scores (REMEMVR_z - RAVLT_z)"
+      - path: "data/step02_discrepancy_descriptives.csv"
+        columns: ["statistic", "value", "ci_lower", "ci_upper"]
+        description: "Bootstrap CIs for discrepancy distribution parameters"
+        
+    parameters:
+      standardize: true  # Input already standardized
+      bootstrap_iterations: 1000
+      random_seed: 42
+      
+    description: "Calculate discrepancy scores as difference between standardized VR and RAVLT"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - compute_discrepancy_scores"
+
+  create_discrepancy_groups:
+    module: "tools.analysis_stats"
+    function: "create_groups_by_cutoff"
+    signature: "create_groups_by_cutoff(scores: pd.Series, cutoff_sd: float = 1.0) -> pd.DataFrame"
+    validation_tool: "validate_data_format"
+    
+    input_files:
+      - path: "data/step02_discrepancy_scores.csv"
+        required_columns: ["UID", "Discrepancy"]
+        source: "discrepancy scores from step 2"
+        
+    output_files:
+      - path: "data/step03_group_assignments.csv"
+        columns: ["UID", "Discrepancy", "Group"]
+        description: "Group assignments: VR-favored, RAVLT-favored, Concordant"
+      - path: "data/step03_group_descriptives.csv"
+        columns: ["Group", "n", "mean", "sd", "min", "max"]
+        description: "Descriptive statistics by group"
+      - path: "data/step03_sensitivity_analysis.csv"
+        columns: ["cutoff_sd", "vr_favored_n", "ravlt_favored_n", "concordant_n"]
+        description: "Group sizes under alternative cutoffs"
+        
+    parameters:
+      cutoff_sd: 1.0  # ±1 SD cutoffs
+      alternative_cutoffs: [0.75, 1.25]  # Sensitivity analysis
+      min_group_size: 10  # Minimum for statistical analysis
+      
+    description: "Create tri-categorical groups based on ±1 SD discrepancy cutoffs"
+    source_reference: "tools_inventory.md section 'Statistics Tools'"
+
+  extract_demographic_data:
+    module: "tools.data_handling" 
+    function: "extract_participant_demographics"
+    signature: "extract_participant_demographics(master_path: str, participant_ids: List[str], variables: List[str]) -> pd.DataFrame"
+    validation_tool: "validate_data_columns"
+    
+    input_files:
+      - path: "data/step03_group_assignments.csv"
+        required_columns: ["UID", "Group"]
+        source: "group assignments from step 3"
+      - path: "data/cache/master.xlsx"
+        required_columns: ["UID", "Age", "Education", "VR_Experience", "NART", "BVMT"]
+        source: "master demographic data"
+        
+    output_files:
+      - path: "data/step04_demographic_data.csv"
+        columns: ["UID", "Group", "Age", "Education", "VR_Experience", "NART", "BVMT"]
+        description: "Merged group assignments with demographics"
+      - path: "data/step04_demographic_descriptives.csv" 
+        columns: ["Group", "variable", "n", "mean", "sd", "median", "iqr"]
+        description: "By-group demographic summaries"
+      - path: "data/step04_missing_data_report.csv"
+        columns: ["variable", "n_missing", "percent_missing", "pattern"]
+        description: "Missing data analysis"
+        
+    parameters:
+      variables: ["Age", "Education", "VR_Experience", "NART", "BVMT"]
+      missing_threshold: 0.15  # Exclude variables with >15% missing
+      handle_missing: "listwise"  # Deletion method
+      
+    description: "Extract demographic variables and merge with group assignments"
+    source_reference: "tools_inventory.md section 'Data Handling Tools'"
+
+  one_way_anova_d068:
+    module: "tools.analysis_stats"
+    function: "one_way_anova_d068"
+    signature: "one_way_anova_d068(data: pd.DataFrame, group_col: str, value_col: str, correction: str = 'bonferroni', n_comparisons: int = None) -> Dict[str, Any]"
+    validation_tool: "validate_hypothesis_test_dual_pvalues"
+    
+    input_files:
+      - path: "data/step04_demographic_data.csv"
+        required_columns: ["Group", "Age", "Education", "VR_Experience"]
+        source: "demographics by group from step 4"
+        
+    output_files:
+      - path: "data/step05_anova_results.csv"
+        columns: ["variable", "F_stat", "df1", "df2", "p_uncorrected", "p_bonferroni", "eta_squared", "eta_ci_lower", "eta_ci_upper"]
+        description: "ANOVA results with dual p-values per Decision D068"
+      - path: "data/step05_posthoc_comparisons.csv" 
+        columns: ["variable", "comparison", "mean_diff", "se", "t_stat", "p_uncorrected", "p_bonferroni", "cohens_d", "d_ci_lower", "d_ci_upper"]
+        description: "Tukey HSD pairwise comparisons with effect sizes"
+      - path: "data/step05_assumption_checks.csv"
+        columns: ["variable", "group", "shapiro_W", "shapiro_p", "levene_F", "levene_p"]
+        description: "Normality and homoscedasticity assumptions"
+      - path: "data/step05_power_analysis.csv"
+        columns: ["comparison", "observed_d", "achieved_power", "minimum_detectable_d"]
+        description: "Post-hoc power analysis"
+        
+    parameters:
+      correction: "bonferroni"
+      n_comparisons: 9  # 3 variables × 3 pairwise comparisons
+      bootstrap_iterations: 1000
+      random_seed: 42
+      alpha: 0.0056  # Bonferroni corrected: 0.05/9
+      effect_size_ci: true
+      
+    description: "One-way ANOVA comparing groups on demographics with comprehensive post-hoc testing"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - one_way_anova_d068"
+
+  compute_effect_sizes:
+    module: "tools.analysis_stats" 
+    function: "compute_effect_sizes"
+    signature: "compute_effect_sizes(group1: np.ndarray, group2: np.ndarray, test_type: str = 'independent') -> Dict[str, Any]"
+    validation_tool: "validate_effect_sizes"
+    
+    input_files:
+      - path: "data/step05_anova_results.csv"
+        required_columns: ["variable", "eta_squared"]
+        source: "ANOVA results from step 5"
+      - path: "data/step05_posthoc_comparisons.csv"
+        required_columns: ["comparison", "cohens_d"]
+        source: "pairwise comparisons from step 5"
+      - path: "data/step04_demographic_data.csv"
+        required_columns: ["Group", "Age", "Education", "VR_Experience"]
+        source: "raw data for additional effect sizes"
+        
+    output_files:
+      - path: "data/step06_effect_sizes.csv"
+        columns: ["comparison", "cohens_d", "hedges_g", "omega_squared", "prob_superiority", "CI_lower", "CI_upper", "clinical_significance"]
+        description: "Comprehensive effect size metrics with clinical interpretation"
+      - path: "data/step06_clinical_profiles.csv"
+        columns: ["Group", "variable", "median", "q1", "q3", "n", "extreme_cases"]
+        description: "Clinical characterization by group"
+      - path: "data/step06_clinical_interpretation.txt"
+        description: "Clinical interpretation framework with thresholds"
+        
+    parameters:
+      bootstrap_iterations: 1000
+      random_seed: 42
+      clinical_thresholds:
+        age_meaningful: 5.0  # years
+        education_meaningful: 2.0  # years
+        vr_experience_meaningful: 0.5  # effect size
+      cross_validation_folds: 5
+      
+    description: "Comprehensive effect size analysis with clinical interpretation thresholds"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - compute_effect_sizes"
+
+  validate_regression_assumptions:
+    module: "tools.analysis_stats"
+    function: "validate_regression_assumptions"
+    signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict[str, Any]"
+    validation_tool: "validate_model_convergence"
+    
+    input_files:
+      - path: "data/step05_anova_results.csv"
+        required_columns: ["variable", "F_stat", "p_uncorrected"]
+        source: "ANOVA results for assumption validation"
+      - path: "data/step04_demographic_data.csv"
+        required_columns: ["Group", "Age", "Education", "VR_Experience"]
+        source: "raw data for diagnostic checking"
+        
+    output_files:
+      - path: "data/step07_assumption_checks.csv"
+        columns: ["variable", "group", "n", "shapiro_W", "shapiro_p", "levene_F", "levene_p", "skewness", "kurtosis"]
+        description: "Detailed assumption test results"
+      - path: "data/step07_outlier_analysis.csv"
+        columns: ["UID", "variable", "group", "z_score", "outlier_type", "cooks_d"]
+        description: "Outlier identification and impact analysis"
+      - path: "data/step07_power_analysis.csv"
+        columns: ["comparison", "observed_effect", "achieved_power", "adequate_power"]
+        description: "Sample adequacy assessment"
+      - path: "data/step07_robustness_tests.csv"
+        columns: ["variable", "kruskal_H", "kruskal_p", "dunn_comparisons"]
+        description: "Non-parametric alternative results"
+      - path: "data/step07_remedial_actions.txt"
+        description: "Applied corrections and methodological notes"
+        
+    parameters:
+      normality_alpha: 0.05
+      homoscedasticity_alpha: 0.05
+      outlier_threshold: 4.0  # Cook's D threshold (4/n)
+      power_threshold: 0.80
+      cv_folds: 5
+      random_seed: 42
+      
+    description: "Comprehensive assumption checking with remedial actions and robustness testing"
+    source_reference: "tools_inventory.md section 'Statistics Tools' - validate_regression_assumptions"
+
+validation_tools:
+  validate_data_format:
+    module: "tools.validation"
+    function: "validate_data_format"
+    signature: "validate_data_format(df: pd.DataFrame, expected_columns: List[str], expected_dtypes: Dict[str, str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step00_dependency_validation.txt"
+        required_content: ["Ch5 5.1.1: SUCCESS", "master.xlsx: ACCESSIBLE"]
+        source: "dependency validation output"
+        
+    parameters:
+      required_status_patterns: ["SUCCESS", "ACCESSIBLE", "100 participants"]
+      forbidden_patterns: ["ERROR", "FAIL", "missing"]
+      
+    criteria:
+      - "All required dependencies located and accessible"
+      - "Theta scores available for exactly 100 participants"
+      - "Master data contains required demographic variables"
+      - "No critical files missing or corrupted"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool (True if all dependencies satisfied)"
+        message: "str (validation summary)"
+        missing_files: "List[str] (any missing dependencies)"
+        
+    behavior_on_failure:
+      action: "raise FileNotFoundError"
+      log_to: "logs/step00_validate_dependencies.log"
+      invoke: "g_debug (master invokes after error)"
+      
+    description: "Validate cross-RQ dependency files exist and contain required data"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_format"
+
+  validate_standardization:
+    module: "tools.validation"
+    function: "validate_standardization"
+    signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step01_standardized_scores.csv"
+        required_columns: ["REMEMVR_z", "RAVLT_z"]
+        source: "standardized scores from step 1"
+        
+    parameters:
+      column_names: ["REMEMVR_z", "RAVLT_z"]
+      tolerance: 0.01  # Allow small sampling variation
+      
+    criteria:
+      - "Z-score means within ±0.01 of 0"
+      - "Z-score SDs within ±0.01 of 1"
+      - "No extreme outliers (|z| > 4)"
+      - "All 100 participants present"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        mean_deviations: "Dict[str, float]"
+        sd_deviations: "Dict[str, float]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step01_standardize_scores.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate z-score standardization parameters within acceptable tolerance"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_standardization"
+
+  validate_numeric_range:
+    module: "tools.validation"
+    function: "validate_numeric_range"
+    signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step02_discrepancy_scores.csv"
+        required_columns: ["Discrepancy"]
+        source: "discrepancy scores from step 2"
+        
+    parameters:
+      column: "Discrepancy"
+      min_val: -4.0  # Reasonable range for z-score differences
+      max_val: 4.0
+      allow_none: false
+      
+    criteria:
+      - "All discrepancy scores in [-4, 4] range"
+      - "No missing values in discrepancy calculation"
+      - "Discrepancy = REMEMVR_z - RAVLT_z verified"
+      - "No computational errors in difference calculation"
+      
+    expected_output:
+      format: "Dict[str, Any]" 
+      fields:
+        valid: "bool"
+        message: "str"
+        out_of_range_count: "int"
+        range_violations: "List[float]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step02_compute_discrepancy.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate discrepancy scores within reasonable range for standardized differences"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_numeric_range"
+
+  validate_data_columns:
+    module: "tools.validation"
+    function: "validate_data_columns"
+    signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str], optional_columns: List[str] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step04_demographic_data.csv"
+        required_columns: ["UID", "Group", "Age", "Education", "VR_Experience"]
+        source: "merged demographics from step 4"
+        
+    parameters:
+      required_columns: ["UID", "Group", "Age", "Education", "VR_Experience"]
+      optional_columns: ["NART", "BVMT"]
+      missing_threshold: 0.15  # 15% maximum missing per variable
+      
+    criteria:
+      - "All required demographic variables present"
+      - "Group assignments preserved from step 3"
+      - "Missing data <15% per variable"
+      - "No impossible values (negative ages, extreme outliers)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        missing_columns: "List[str]"
+        high_missing_vars: "List[str]"
+        
+    behavior_on_failure:
+      action: "log warning and continue"
+      log_to: "logs/step04_extract_demographics.log"
+      invoke: "proceed with available variables"
+      
+    description: "Validate demographic data completeness and merge success"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_data_columns"
+
+  validate_hypothesis_test_dual_pvalues:
+    module: "tools.validation"
+    function: "validate_hypothesis_test_dual_pvalues"
+    signature: "validate_hypothesis_test_dual_pvalues(results_df: pd.DataFrame, uncorrected_col: str = 'p_uncorrected', corrected_col: str = 'p_corrected') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step05_anova_results.csv"
+        required_columns: ["p_uncorrected", "p_bonferroni"]
+        source: "ANOVA results from step 5"
+      - path: "data/step05_posthoc_comparisons.csv"
+        required_columns: ["p_uncorrected", "p_bonferroni"]
+        source: "post-hoc comparisons from step 5"
+        
+    parameters:
+      uncorrected_col: "p_uncorrected"
+      corrected_col: "p_bonferroni"
+      correction_method: "bonferroni"
+      n_comparisons: 9
+      
+    criteria:
+      - "Both uncorrected and Bonferroni p-values present (Decision D068)"
+      - "Corrected p-values e uncorrected p-values"
+      - "All p-values in [0, 1] range"
+      - "Correction properly applied (p_corr = p_uncorr × 9)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        d068_compliant: "bool"
+        message: "str"
+        missing_corrections: "List[str]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step05_group_comparisons.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate Decision D068 dual p-value reporting in ANOVA results"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_hypothesis_test_dual_pvalues"
+
+  validate_effect_sizes:
+    module: "tools.validation"
+    function: "validate_effect_sizes"
+    signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step06_effect_sizes.csv"
+        required_columns: ["cohens_d", "hedges_g", "omega_squared"]
+        source: "effect size calculations from step 6"
+        
+    parameters:
+      d_column: "cohens_d"
+      g_column: "hedges_g"
+      omega_column: "omega_squared"
+      reasonable_range: [-3.0, 3.0]  # For d and g
+      
+    criteria:
+      - "Cohen's d in reasonable range [-3, 3]"
+      - "Hedges' g in reasonable range [-3, 3]"  
+      - "Omega-squared in [0, 1] (proportion of variance)"
+      - "No NaN or infinite values"
+      - "CIs properly constructed (lower < point < upper)"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        message: "str"
+        warnings: "List[str]"
+        extreme_values: "List[str]"
+        
+    behavior_on_failure:
+      action: "raise ValueError"
+      log_to: "logs/step06_effect_sizes.log"
+      invoke: "g_debug (master invokes)"
+      
+    description: "Validate effect sizes are within reasonable bounds with proper CIs"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
+
+  validate_model_convergence:
+    module: "tools.validation"
+    function: "validate_model_convergence" 
+    signature: "validate_model_convergence(model: Any, convergence_attr: str = 'converged') -> Dict[str, Any]"
+    
+    input_files:
+      - path: "data/step07_assumption_checks.csv"
+        required_columns: ["shapiro_p", "levene_p"]
+        source: "assumption test results from step 7"
+        
+    parameters:
+      normality_threshold: 0.05
+      homoscedasticity_threshold: 0.05
+      power_threshold: 0.80
+      
+    criteria:
+      - "Assumption tests completed for all variables"
+      - "Outlier analysis systematic and documented"
+      - "Power analysis validates sample adequacy" 
+      - "Remedial actions applied when needed"
+      - "Non-parametric alternatives computed"
+      
+    expected_output:
+      format: "Dict[str, Any]"
+      fields:
+        valid: "bool"
+        assumptions_met: "Dict[str, bool]"
+        remedial_actions_needed: "List[str]"
+        message: "str"
+        
+    behavior_on_failure:
+      action: "apply remedial actions and continue"
+      log_to: "logs/step07_model_diagnostics.log"
+      invoke: "proceed with robust methods"
+      
+    description: "Validate comprehensive assumption checking and diagnostic analysis"
+    source_reference: "tools_inventory.md section 'Validation Tools' - validate_model_convergence"
+
+summary:
+  analysis_tools_count: 8
+  validation_tools_count: 8
+  total_unique_tools: 16
+  mandatory_decisions_embedded: ["D068"]
+  rq_type: "discrepancy_analysis"
+  analysis_steps: 8
+  estimated_runtime_minutes: 45
+  primary_dependencies: ["Ch5 5.1.1 theta scores", "master.xlsx demographics"]
