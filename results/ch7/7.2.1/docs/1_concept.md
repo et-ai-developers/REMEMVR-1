@@ -16,7 +16,7 @@ Does age explain variance in REMEMVR performance beyond what cognitive tests pre
 This RQ examines age effects on overall episodic memory performance (theta_all) after controlling for cognitive tests (RAVLT, BVMT, RPM). N=100 participants. Tests hierarchical regression to determine whether age predicts REMEMVR beyond cognitive ability.
 
 **Theoretical Framing:**
-VR scaffolding hypothesis - contextual richness in VR compensates for age-related encoding deficits. If true, age effects should be fully mediated by cognitive ability (which VR bypasses through environmental support). Connects to Ch5's age-invariant VR forgetting finding (Age×Time p=.96).
+VR scaffolding hypothesis - contextual richness in VR compensates for age-related encoding deficits. If true, age effects should be fully mediated by cognitive ability (which VR bypasses through environmental support). Connects to Ch5's age-invariant VR forgetting finding (AgeTime p=.96).
 
 ---
 
@@ -41,7 +41,7 @@ Limited research on VR's potential to compensate for age-related episodic memory
 ## Hypothesis
 
 **Primary Hypothesis:**
-Age should NOT predict REMEMVR after controlling for cognitive tests, consistent with Ch5's age-invariant VR forgetting finding (Age×Time p=.96).
+Age should NOT predict REMEMVR after controlling for cognitive tests, consistent with Ch5's age-invariant VR forgetting finding (AgeTime p=.96).
 
 **Secondary Hypotheses:**
 Complete or near-complete mediation expected - cognitive tests will fully explain age-related variance in REMEMVR performance.
@@ -91,7 +91,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 1:** Extract and prepare data
 - Load theta_all scores from Ch5 5.1.1 results
-- Extract cognitive tests from master.xlsx (RAVLT_T, BVMT_T, RPM_T)
+- Extract cognitive tests from dfnonvr.csv (RAVLT_T, BVMT_T, RPM_T)
 - Extract age as continuous variable
 - Check data quality and missingness
 
@@ -104,23 +104,23 @@ Multiple regression with hierarchical entry and cross-validation
 - Model 1: `Theta ~ Age` (bivariate age effect)
 - Model 2: `Theta ~ Age + RAVLT_T + BVMT_T + RPM_T` (controlled age effect)
 - Test whether Age remains significant in Model 2
-- Report ”R² and F-test for model improvement
+- Report R and F-test for model improvement
 
 **Step 4:** Test individual predictors
 - Extract standardized beta coefficients with 95% CIs
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (sr) for unique variance
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni (± = 0.00179/4 = 0.000448)
+- Primary: Bonferroni ( = 0.00179/4 = 0.000448)
 - Secondary: FDR for comparison
 
 **Step 5:** Mediation analysis (conceptual)
-- Path a: Age ’ Cognitive Tests (expect significant)
-- Path b: Cognitive Tests ’ REMEMVR (from prior analyses)
-- Path c': Age ’ REMEMVR controlling for tests (expect NULL)
+- Path a: Age  Cognitive Tests (expect significant)
+- Path b: Cognitive Tests  REMEMVR (from prior analyses)
+- Path c': Age  REMEMVR controlling for tests (expect NULL)
 - Compare beta_Age in Model 1 vs Model 2
 
 **Step 6:** Effect sizes and importance
-- Cohen's f² = R²/(1-R²)
+- Cohen's f = R/(1-R)
 - Compare standardized betas between models
 - Bootstrap CIs (1000 iterations)
 
@@ -132,7 +132,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 8:** Cross-validation
 - Method: 5-fold CV
-- Metrics: Test R², RMSE, MAE
+- Metrics: Test R, RMSE, MAE
 - Check for overfitting
 
 **Step 9:** Power analysis
@@ -147,7 +147,7 @@ Multiple regression with hierarchical entry and cross-validation
 - data/step05_hierarchical_models.csv (Model 1 and 2 results)
 - data/step06_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step07_model_diagnostics.csv (VIF, residuals, Cook's D)
-- data/step08_effect_sizes.csv (R², f², sr², with 95% CIs)
+- data/step08_effect_sizes.csv (R, f, sr, with 95% CIs)
 - data/step09_cross_validation.csv (k-fold CV results)
 - data/step10_power_analysis.csv (post-hoc and sensitivity)
 - results/age_mediation_summary.md (text summary for thesis)
@@ -163,8 +163,8 @@ Multiple regression with hierarchical entry and cross-validation
 - Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - Homoscedasticity confirmed (Breusch-Pagan p > 0.05)
 - No influential outliers (Cook's D < 4/N)
-- Cross-validation R² within 10% of training R²
-- Power > 0.80 for medium effect (f² = 0.15)
+- Cross-validation R within 10% of training R
+- Power > 0.80 for medium effect (f = 0.15)
 
 ---
 

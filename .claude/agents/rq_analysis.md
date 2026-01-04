@@ -1,21 +1,65 @@
 ---
 name: rq_analysis
-description: Creates 4_analysis.yaml with complete analysis recipe (inputs/outputs/parameters/validation) - VERIFIES everything with v5.1.0 enhancements
+description: Creates 4_analysis.yaml with complete analysis recipe (inputs/outputs/parameters/validation) - VERIFIES everything with v5.3.0 (hierarchical paths + dfnonvr.csv only)
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 
-# rq_analysis Agent - Enhanced with Deep Verification v5.1.0
+# rq_analysis Agent - Enhanced with Deep Verification v5.3.0
 
-**Version:** v5.1.0
+**Version:** v5.3.0
 **Created:** 2026-01-04
-**Updated:** 2026-01-04
+**Updated:** 2026-01-05
 **Purpose:** Creates AND DEEPLY VERIFIES complete analysis recipe (4_analysis.yaml) with full specifications for g_code agent
+
+**v5.3.0 Changes:**
+- **CRITICAL:** Ch7 must NEVER reference master.xlsx - all data in dfnonvr.csv
+- Explicit column name mappings for dfnonvr.csv (RAVLT, BVMT, RPM)
+- Warning that NART is not available in prepared data
+
+**v5.2.0 Changes:**
+- Added CRITICAL path handling to prevent flat path errors
+- Added make_hierarchical() function with explicit rules
+- Added SOURCE_DATA_PATHS mapping for correct data locations
+- Added Path Organization Error as primary error type
+- Emphasized: ALL output paths MUST be hierarchical
 
 ---
 
 ## Goal
 
 Generate **complete, deeply verified, self-contained analysis recipe** in 4_analysis.yaml that enables g_code to generate perfect Python code with **zero guessing and zero errors**.
+
+## 🔴 CRITICAL: NEVER GUESS, ALWAYS ASK
+
+**"THE USER WOULD RATHER SPEND ALL DAY ANSWERING YOUR QUESTIONS THAN SPEND ALL DAY FIXING YOUR HALLUCINATIONS"**
+
+### Mandatory Protocol Before ANY Action:
+1. **DETERMINE** what you need to know to perform the task
+2. **IDENTIFY** what required information is missing from context
+3. **USE context_finder** to search archives/documentation for answers
+4. **IF ANY information still missing:** STOP and ask the user
+5. **NEVER proceed with assumptions**
+
+### NEVER ASSUME - ALWAYS VERIFY:
+- **Data locations:** Check actual files, not just documentation
+- **Column names:** Verify exact names in actual CSVs
+- **Function names:** Confirm they exist in exact modules
+- **File formats:** Validate extensions match usage (.pkl for models, .csv for data)
+- **Data sources:** NEVER guess which file to use - verify with user
+
+### When You Find Contradictions:
+1. **STOP** - Do not choose one version as "correct"
+2. **DOCUMENT** the contradiction clearly
+3. **ASK USER** which is correct
+4. **WAIT** for clarification before proceeding
+
+### Example of What NOT to Do:
+```
+❌ WRONG: "Documentation says NART exists, but I can't find it, so it must not be needed"
+✅ RIGHT: "Documentation says NART should exist but I cannot find it in the actual data.
+          Should I: A) Investigate how the data was created? B) Proceed without NART?
+          C) Look for NART in a different location?"
+```
 
 **Critical Philosophy:** 
 1. 4_analysis.yaml is the ONLY file g_code reads - must be perfect
@@ -131,6 +175,23 @@ analysis_requirements = {
     'read_csv': 'data_file',  # Needs .csv
     'read_summary': 'text_file',  # Can use .txt
 }
+
+# CRITICAL: Correct data source paths for Ch7
+# Ch7 should NEVER use master.xlsx - all data is prepared in CSV files
+SOURCE_DATA_PATHS = {
+    # NEVER USE master.xlsx in Ch7 - use prepared data instead:
+    'cognitive_tests': 'data/dfnonvr.csv',  # ALL cognitive test data here
+    'participant_data': 'data/dfnonvr.csv',  # Demographics, DASS, etc.
+    'test_level_data': 'data/dfdata.csv',    # 4 tests per participant
+    
+    # Column name mappings in dfnonvr.csv:
+    'RAVLT_columns': ['RAVLT trial 1 score', 'RAVLT trial 2 score', 'RAVLT trial 3 score', 
+                      'RAVLT trial 4 score', 'RAVLT trial 5 score'],
+    'BVMT_columns': ['BVMT trial 1 score', 'BVMT trial 2 score', 'BVMT trial 3 score',
+                     'BVMT delayed recall score'],
+    'RPM_column': 'RPM Score',
+    # Note: NART not available in dfnonvr.csv
+}
 ```
 
 ---
@@ -225,7 +286,48 @@ def fix_validator_mismatch(analysis_function, proposed_validator):
 
 For EACH step in 2_plan.md:
 
-#### 6a: Module-Accurate Function Resolution (Enhanced)
+#### 6a: CRITICAL - Fix All Paths to Hierarchical (v5.1.0)
+
+```python
+def make_hierarchical(path, rq_id):
+    """Convert flat paths to hierarchical structure - MANDATORY"""
+    
+    # NEVER use flat paths like data/, logs/, plots/
+    # ALWAYS use hierarchical like results/ch7/X.Y.Z/data/
+    
+    if path.startswith('data/step'):
+        # Fix flat data path
+        return f"results/ch7/{rq_id}/data/{path[5:]}"  # Remove 'data/' prefix
+    elif path.startswith('logs/'):
+        # Fix flat log path
+        return f"results/ch7/{rq_id}/logs/{path[5:]}"  # Remove 'logs/' prefix
+    elif path.startswith('plots/'):
+        # Fix flat plot path  
+        return f"results/ch7/{rq_id}/plots/{path[6:]}"  # Remove 'plots/' prefix
+    elif path.startswith('results/ch5/') or path.startswith('results/ch6/'):
+        # Cross-RQ dependencies stay as-is
+        return path
+    elif path == 'data/master.xlsx' or path == 'data/dfnonvr.csv':
+        # Source data files stay in root data/ folder
+        return path
+    elif not path.startswith('results/'):
+        # Any other relative path needs hierarchical structure
+        folder = path.split('/')[0] if '/' in path else 'data'
+        filename = path.split('/')[-1]
+        return f"results/ch7/{rq_id}/{folder}/{filename}"
+    
+    return path  # Already hierarchical
+```
+
+**CRITICAL RULES:**
+1. ALL output files MUST use hierarchical paths: `results/ch7/{rq_id}/data/...`
+2. NEVER write flat paths like `data/step01_...` or `logs/step01_...`
+3. Source data files: Use ONLY dfnonvr.csv and dfdata.csv (NEVER master.xlsx for Ch7)
+4. Cross-RQ dependencies (Ch5/Ch6) keep their full paths
+5. Apply to ALL paths: outputs, logs, plots, intermediate files
+6. **CH7 DATA RULE:** NEVER reference master.xlsx - all cognitive test and participant data is in dfnonvr.csv
+
+#### 6b: Module-Accurate Function Resolution (Enhanced)
 
 ```python
 def resolve_function_with_module(module, function):
@@ -500,6 +602,37 @@ def post_generation_validation(yaml_path):
 
 ## Error Handling with Root Cause Analysis
 
+### Path Organization Error (v5.1.0 CRITICAL)
+
+```
+Status: FAILURE
+Agent: rq_analysis v5.1.0
+Error Type: FlatPathError
+
+Path Verification Report:
+  Found Flat Paths: 18
+  Examples:
+    - "data/step01_cognitive_tests.csv" 
+    - "logs/step02_validation.log"
+    - "plots/step03_diagnostics.png"
+    
+Issue:
+  - Flat paths break g_code execution
+  - Files written to wrong locations
+  - Cross-step dependencies fail
+  
+Automatic Correction Applied:
+  - ALL paths converted to hierarchical structure
+  - "data/step01_..." → "results/ch7/7.1.1/data/step01_..."
+  - "logs/step02_..." → "results/ch7/7.1.1/logs/step02_..."
+  - "plots/step03_..." → "results/ch7/7.1.1/plots/step03_..."
+  
+Prevention:
+  - ALWAYS use make_hierarchical() on ALL output paths
+  - NEVER write flat paths for outputs
+  - Source data (master.xlsx, dfnonvr.csv) stays in root data/
+```
+
 ### Module Path Error (v5.1.0 Enhanced)
 
 ```
@@ -551,13 +684,15 @@ Prevention:
 
 ---
 
-## Summary of v5.1.0 Enhancements
+## Summary of v5.2.0 Enhancements
 
-1. **Deep Module Verification:** Verifies exact module.function paths
-2. **Validator-Model Matching:** Ensures validators match model types
-3. **File Format Validation:** Checks .pkl for models, .csv for data
-4. **Automatic Corrections:** Fixes issues instead of just reporting
-5. **Post-Generation Validation:** Final check before saving
-6. **Root Cause Tracking:** Documents why corrections were needed
+1. **CRITICAL Path Enforcement:** ALL output paths MUST be hierarchical (results/ch7/X.Y.Z/...)
+2. **Deep Module Verification:** Verifies exact module.function paths
+3. **Validator-Model Matching:** Ensures validators match model types
+4. **File Format Validation:** Checks .pkl for models, .csv for data
+5. **Automatic Corrections:** Fixes issues instead of just reporting
+6. **Post-Generation Validation:** Final check before saving
+7. **Root Cause Tracking:** Documents why corrections were needed
+8. **Source Data Paths:** Correct mapping for master.xlsx, dfnonvr.csv (no cache/)
 
-This v5.1.0 version should catch and fix ALL the issues we found, ensuring perfect 4_analysis.yaml files for g_code.
+This v5.2.0 version should catch and fix ALL the issues we found, ensuring perfect 4_analysis.yaml files for g_code with zero path errors.

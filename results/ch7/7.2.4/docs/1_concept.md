@@ -16,7 +16,7 @@ Does REMEMVR show age-invariance while RAVLT shows age decline in the same sampl
 This RQ compares age correlations between traditional episodic memory testing (RAVLT) and VR-based episodic memory testing (REMEMVR) within the same sample of 100 participants. Uses bivariate correlations and Steiger's Z-test for dependent correlation comparison. Tests the critical prediction that VR context provides compensatory scaffolding that traditional tests lack.
 
 **Theoretical Framing:**
-Traditional cognitive tests consistently show robust age decline (r = -0.40 to -0.50 for RAVLT in literature). Chapter 5 found Age×Time interaction p = 0.96 for REMEMVR forgetting trajectories. If the same participants show age decline on RAVLT but not REMEMVR, it validates that the VR context (not sample characteristics) provides age-invariance.
+Traditional cognitive tests consistently show robust age decline (r = -0.40 to -0.50 for RAVLT in literature). Chapter 5 found AgeTime interaction p = 0.96 for REMEMVR forgetting trajectories. If the same participants show age decline on RAVLT but not REMEMVR, it validates that the VR context (not sample characteristics) provides age-invariance.
 
 ---
 
@@ -43,7 +43,7 @@ Direct comparison of age effects between traditional and VR episodic memory test
 ## Hypothesis
 
 **Primary Hypothesis:**
-RAVLT should show significant age decline (r < -0.30, consistent with literature) while REMEMVR should show minimal age decline (r H 0, consistent with Ch5 Age×Time p = 0.96). The difference between these correlations should be statistically significant via Steiger's Z-test.
+RAVLT should show significant age decline (r < -0.30, consistent with literature) while REMEMVR should show minimal age decline (r H 0, consistent with Ch5 AgeTime p = 0.96). The difference between these correlations should be statistically significant via Steiger's Z-test.
 
 **Secondary Hypotheses:**
 The magnitude of age-related decline should be significantly larger for RAVLT than REMEMVR, supporting the VR scaffolding hypothesis. Effect size difference should be medium to large (Cohen's d > 0.5).
@@ -93,7 +93,7 @@ Correlation analysis with dependent correlation comparison (Steiger's Z-test)
 
 **Step 1:** Extract and prepare data
 - Load REMEMVR theta_all means per participant from Ch5 5.1.1
-- Extract RAVLT_Total scores from master.xlsx  
+- Extract RAVLT_Total scores from dfnonvr.csv  
 - Standardize both measures for comparison
 - Check data quality and missing values
 
@@ -110,7 +110,7 @@ Correlation analysis with dependent correlation comparison (Steiger's Z-test)
 
 **Step 4:** Model diagnostics
 - Check linearity assumptions via scatterplots
-- Identify potential outliers (standardized residuals > ±3)
+- Identify potential outliers (standardized residuals > 3)
 - Test normality of residuals (Shapiro-Wilk test)
 
 **Step 5:** Sensitivity analyses

@@ -14,7 +14,7 @@ analysis_tools:
     input_files:
       - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
         required_columns: ["composite_ID", "UID", "test", "theta"]
-        expected_rows: "~400 (100 participants × 4 tests)"
+        expected_rows: "~400 (100 participants  4 tests)"
         source: "Ch5 theta scores dependency"
       - path: "results/ch6/6.1.1/data/confidence_scores.csv" 
         required_columns: ["UID", "mean_confidence"]
@@ -66,7 +66,7 @@ analysis_tools:
       standardize: true
       outlier_threshold: 3.29
 
-    description: "Extract DASS-21 subscale scores from master.xlsx and standardize via z-scores"
+    description: "Extract DASS-21 subscale scores from dfnonvr.csv and standardize via z-scores"
     source_reference: "tools_inventory.md section 'Data Tools' - extract_dass_scores"
 
   prepare_regression_data:
@@ -191,7 +191,7 @@ analysis_tools:
     input_files:
       - path: "data/step03_model_results.csv"
         required_columns: ["model", "r_squared"]
-        source: "Model R² values for effect size computation"
+        source: "Model R values for effect size computation"
 
     output_files:
       - path: "data/step06_effect_sizes.csv"
@@ -204,7 +204,7 @@ analysis_tools:
       bootstrap_ci: true
       n_bootstrap: 1000
 
-    description: "Compute Cohen's f² effect sizes and post-hoc power analysis"
+    description: "Compute Cohen's f effect sizes and post-hoc power analysis"
     source_reference: "tools_inventory.md section 'Regression Analysis Tools' - compute_cohens_f2"
 
   variance_decomposition:
@@ -399,7 +399,7 @@ validation_tools:
       ci_validity: true
 
     criteria:
-      - "Cohen's f² values in [0, 1] range (reasonable for behavioral data)"
+      - "Cohen's f values in [0, 1] range (reasonable for behavioral data)"
       - "Power values in [0, 1] range"
       - "Bootstrap CIs valid (ci_lower < estimate < ci_upper)"
       - "Effect size interpretations match Cohen (1988) guidelines"
@@ -467,5 +467,5 @@ summary:
   notes:
     - "D068: Dual p-value reporting implemented in bootstrap_regression_ci and fit_multiple_regression"
     - "Cross-RQ dependencies: Ch5 theta + Ch6 confidence/calibration + master.xlsx DASS"
-    - "Pipeline: Multiple regression ’ beta comparison ’ cross-validation ’ effect sizes ’ synthesis"
+    - "Pipeline: Multiple regression  beta comparison  cross-validation  effect sizes  synthesis"
     - "Primary hypothesis: DASS-Anxiety predicts metacognition (confidence, calibration) more than memory (accuracy)"

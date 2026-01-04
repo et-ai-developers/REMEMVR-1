@@ -48,12 +48,12 @@ analysis_tools:
         description: "Cognitive test T-scores with demographics and missing data tracking"
     
     parameters:
-      tests: ["RAVLT", "BVMT", "RPM"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
       t_score_conversion: true
       include_demographics: true
       track_missing_data: true
     
-    description: "Extract cognitive test scores from master.xlsx and convert to T-scores for analysis"
+    description: "Extract cognitive test scores from dfnonvr.csv and convert to T-scores for analysis"
     source_reference: "tools_inventory.md section 'Module: tools.analysis_demographic' - extract_cognitive_tests"
 
   standardize_scores:
@@ -238,7 +238,7 @@ analysis_tools:
     input_files:
       - path: "data/step04_regression_results.csv"
         required_columns: ["model", "r2"]
-        source: "hierarchical regression R² values"
+        source: "hierarchical regression R values"
     
     output_files:
       - path: "data/step07_effect_sizes.csv"
@@ -250,7 +250,7 @@ analysis_tools:
       full_model_r2: "from_regression_results"
       interpretation_thresholds: {"small": 0.02, "medium": 0.15, "large": 0.35}
     
-    description: "Compute Cohen's f² effect size for incremental cognitive prediction"
+    description: "Compute Cohen's f effect size for incremental cognitive prediction"
     source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_cohens_f2"
 
 validation_tools:
@@ -345,8 +345,8 @@ validation_tools:
     
     criteria:
       - "Complete merge: 100 participants retained"
-      - "Standardized variables have mean H 0 (±0.01)"
-      - "Standardized variables have SD H 1 (±0.01)"
+      - "Standardized variables have mean H 0 (0.01)"
+      - "Standardized variables have SD H 1 (0.01)"
       - "No missing values in final dataset"
     
     expected_output:
@@ -384,7 +384,7 @@ validation_tools:
     criteria:
       - "All 6 predictors present with complete results"
       - "Bootstrap CIs valid: ci_lower < beta < ci_upper"
-      - "Hierarchical model comparison included (R²_demographics, R²_full)"
+      - "Hierarchical model comparison included (R_demographics, R_full)"
       - "Dual p-values present for all tests (Decision D068)"
     
     expected_output:
@@ -494,7 +494,7 @@ validation_tools:
     
     criteria:
       - "All 5 folds completed successfully"
-      - "R² values in valid range [0,1]"
+      - "R values in valid range [0,1]"
       - "Reasonable stability across folds (CV SD < 0.10)"
       - "Overfitting assessment completed"
     
@@ -566,8 +566,8 @@ validation_tools:
       interpretation_thresholds: {"small": 0.02, "medium": 0.15, "large": 0.35}
     
     criteria:
-      - "Cohen's f² values in valid range"
-      - "R² differences computed correctly"
+      - "Cohen's f values in valid range"
+      - "R differences computed correctly"
       - "Effect size interpretations match thresholds"
       - "All hierarchical comparisons included"
     
@@ -581,7 +581,7 @@ validation_tools:
     behavior_on_failure:
       action: "raise ValueError"
       log_to: "logs/step07_effect_sizes.log"
-      invoke: "check f² calculation formulas and thresholds"
+      invoke: "check f calculation formulas and thresholds"
     
     description: "Validate effect size calculations and interpretation accuracy"
     source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_numeric_range"

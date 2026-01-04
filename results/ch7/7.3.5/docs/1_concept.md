@@ -98,7 +98,7 @@ ANOVA and correlation analysis with calibration groups and cognitive reserve ind
 **Step 1:** Extract and prepare data
 - Load theta_all scores from Ch5 5.1.1 results
 - Load confidence_theta scores from Ch6 results
-- Extract education, RPM, age from master.xlsx
+- Extract education, RPM, age from dfnonvr.csv
 - Check data quality and compute missingness
 
 **Step 2:** Create calibration groups

@@ -31,7 +31,7 @@ This RQ requires 6 steps:
 **Dependencies:** None (first step)
 **Complexity:** Low (data extraction only, <2 minutes)
 
-**Purpose:** Extract RAVLT Total scores from master.xlsx cognitive assessments
+**Purpose:** Extract RAVLT Total scores from dfnonvr.csv cognitive assessments
 
 **Input:**
 - File: data/cache/master.xlsx (project-level data source)
@@ -372,26 +372,26 @@ Validation tools MUST be used after analysis tool execution. Specific validation
 
 ### Step-to-Step Transformations
 
-**Step 0 ’ Step 1:** Independent extractions (no transformation)
+**Step 0  Step 1:** Independent extractions (no transformation)
 - Step 0: RAVLT cognitive scores (wide format: 1 row per participant)
 - Step 1: Paradigm theta scores (wide format: 1 row per participant)
 
-**Step 1 ’ Step 2:** Inner join merge
+**Step 1  Step 2:** Inner join merge
 - Input: Two separate DataFrames (RAVLT, theta)
 - Merge key: UID (participant identifier)
 - Output: Combined DataFrame with all analysis variables
 
-**Step 2 ’ Step 3:** Correlation computation
+**Step 2  Step 3:** Correlation computation
 - Input: Analysis dataset (100 rows x 4 columns)
 - Processing: Bootstrap correlations between variable pairs
 - Output: Correlation results (2 rows x 7 columns)
 
-**Step 3 ’ Step 4:** Dependent correlation test
+**Step 3  Step 4:** Dependent correlation test
 - Input: Correlation coefficients + raw data
 - Processing: Steiger's Z-test for dependent correlations
 - Output: Single test result (1 row x 6 columns)
 
-**Step 4 ’ Step 5:** Bootstrap sensitivity analysis
+**Step 4  Step 5:** Bootstrap sensitivity analysis
 - Input: Raw analysis dataset
 - Processing: Bootstrap correlation differences
 - Output: Sensitivity results (1 row x 7 columns)
@@ -447,7 +447,7 @@ Validation tools MUST be used after analysis tool execution. Specific validation
 
 **Validation:**
 - Step 1: Check availability of Ch5 paradigm results with IFR and IRE theta scores
-- If paradigm data missing ’ STEP ERROR with message to complete Ch5 5.3.x first
+- If paradigm data missing  STEP ERROR with message to complete Ch5 5.3.x first
 - Expected paradigm coverage: Free Recall (IFR) and Recognition (IRE) with complete theta estimates
 
 ---
@@ -469,7 +469,7 @@ This is not optional. This is the core architectural principle preventing cascad
 - rq_tools will specify BOTH analysis tool + validation tool per step in 3_tools.yaml
 - rq_analysis (Step 12 workflow) will embed validation tool call AFTER analysis tool call in 4_analysis.yaml
 - g_code (Step 14 workflow) will generate stepN_name.py scripts with validation function calls
-- bash execution (Step 14 workflow) will run analysis ’ validation ’ error on validation failure
+- bash execution (Step 14 workflow) will run analysis  validation  error on validation failure
 
 **Downstream Agent Requirements:**
 - **rq_tools:** MUST specify validation tool for EVERY analysis step (no exceptions)
@@ -622,16 +622,16 @@ This is not optional. This is the core architectural principle preventing cascad
 - Dependent correlation comparison using Steiger's Z-test
 - Bootstrap confidence intervals for robustness (1000 iterations, seed=42)
 - Dual p-value reporting per Decision D068
-- Chapter-level alpha correction (± = 0.00179)
+- Chapter-level alpha correction ( = 0.00179)
 - Complete sensitivity analysis for correlation difference
 
 ---
 
 **Next Steps (Workflow):**
 1. User reviews and approves this plan (Step 7 user gate)
-2. Workflow continues to Step 11: rq_tools reads this plan ’ creates 3_tools.yaml
-3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml ’ creates 4_analysis.yaml
-4. Workflow continues to Step 14: g_code reads 4_analysis.yaml ’ generates stepN_name.py scripts
+2. Workflow continues to Step 11: rq_tools reads this plan  creates 3_tools.yaml
+3. Workflow continues to Step 12: rq_analysis reads this plan + 3_tools.yaml  creates 4_analysis.yaml
+4. Workflow continues to Step 14: g_code reads 4_analysis.yaml  generates stepN_name.py scripts
 
 ---
 

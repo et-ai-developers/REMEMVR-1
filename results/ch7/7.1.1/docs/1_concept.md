@@ -98,7 +98,7 @@ Multiple Linear Regression with standardized predictors (T-scores)
 
 **High-Level Workflow:**
 
-**Step 1:** Extract and prepare cognitive test data from master.xlsx using established tag patterns
+**Step 1:** Extract and prepare cognitive test data from dfnonvr.csv using established tag patterns
 **Step 2:** Compute derived scores (RAVLT_Total = sum T1-T5) and standardize all tests to T-scores (M=50, SD=10)
 **Step 3:** Load mean theta scores from Ch5 5.1.1 (average across 4 test sessions per participant)
 **Step 4:** Check regression assumptions with remedial actions:
@@ -183,7 +183,7 @@ Ch5 5.1.1 (Functional Form Comparison) for REMEMVR theta scores
 - master.xlsx (cognitive test raw scores)
 
 **Dependencies:**
-Ch5 5.1.1 must complete Steps 1-3 (IRT calibration with omnibus "All" factor) before this RQ can run. Cognitive test data extracted independently from master.xlsx using established tag patterns.
+Ch5 5.1.1 must complete Steps 1-3 (IRT calibration with omnibus "All" factor) before this RQ can run. Cognitive test data extracted independently from dfnonvr.csv using established tag patterns.
 
 ### Inclusion/Exclusion Criteria:
 

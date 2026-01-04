@@ -1,13 +1,24 @@
 # Data Dictionary for Ch7 Analysis
 
-**Last Updated:** 2026-01-03
-**Source:** data/cache/dfData.csv split into participant-level and test-level data
+**Last Updated:** 2026-01-05
+**Source:** data/cache/dfData.csv (TEST=1) for participant-level data
 
 ---
 
 ## data/dfnonvr.csv
 **Description:** Participant-level data (single timepoint measurements)
-**Shape:** 100 participants × 100 columns
+**Shape:** 100 participants × 101 columns
+**Note:** Regenerated 2026-01-05 to include NART Score (column 2) which was missing in original extract
+
+### Column Order
+1. UID
+2. NART Score (✅ NOW INCLUDED)
+3. RPM Score 
+4-14. RPM individual answers
+15-27. BVMT scores and recognition
+28-44. RAVLT scores and recognition  
+45-92. REMEMVR task durations (4 rooms × 12 tasks)
+93-101. Demographics, DASS, STR
 
 ### Cognitive Test Columns
 
@@ -31,7 +42,7 @@
 | BVMT total recall | bvmt_total | Sum of trials 1-3 | 0-36 |
 | BVMT learning | bvmt_learning | Trial 3 - Trial 1 | -12 to 12 |
 | BVMT percent retained | bvmt_percent_retained | Delayed/Trial 3 × 100 | 0-100+ |
-| NART Score | nart_score | National Adult Reading Test | 0-50 |
+| NART Score | nart_score | National Adult Reading Test | 6-50 |
 | RPM Score | rpm_score | Raven's Progressive Matrices | 0-12 |
 
 ### Demographic Columns

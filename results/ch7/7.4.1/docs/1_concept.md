@@ -88,7 +88,7 @@ Bivariate correlation analysis with dependent correlation comparison using Steig
 
 **Step 1:** Extract and prepare data
 - Load paradigm-specific theta scores from Ch5 5.3.x results
-- Extract RAVLT_Total scores from master.xlsx (raw scores, not T-scored)
+- Extract RAVLT_Total scores from dfnonvr.csv (raw scores, not T-scored)
 - Compute mean theta scores per participant for Free Recall and Recognition paradigms
 - Check data quality and missingness
 
@@ -129,7 +129,7 @@ Bivariate correlation analysis with dependent correlation comparison using Steig
 - [ ] Steiger's Z-test significant (p < 0.05) confirming difference
 - [ ] Effect size meaningful (|r1 - r2| > 0.10)
 - [ ] Bootstrap CIs exclude zero for correlation difference
-- [ ] No extreme outliers (standardized residuals within ±3)
+- [ ] No extreme outliers (standardized residuals within 3)
 - [ ] Visual plots show clear difference in regression slopes
 
 ---

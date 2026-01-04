@@ -80,7 +80,7 @@ Raise error with specific missing dependency and quit immediately
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (~5 minutes)
 
-**Purpose:** Extract cognitive test scores from master.xlsx and standardize to T-scores (M=50, SD=10)
+**Purpose:** Extract cognitive test scores from dfnonvr.csv and standardize to T-scores (M=50, SD=10)
 
 **Input:**
 - master.xlsx (cognitive test raw scores)
@@ -594,7 +594,7 @@ If Ch5 5.1.1 outputs not available, this RQ cannot proceed (DERIVED data depende
 Must verify Ch5 status = success before execution begins.
 
 **Independent Data:**
-Cognitive test data extracted independently from master.xlsx regardless of Ch5 status.
+Cognitive test data extracted independently from dfnonvr.csv regardless of Ch5 status.
 
 ---
 

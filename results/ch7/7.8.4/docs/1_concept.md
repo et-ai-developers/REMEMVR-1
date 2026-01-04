@@ -88,7 +88,7 @@ Multiple regression with model comparison and cross-validation
 
 **Step 1:** Extract and prepare data
 - Load domain-specific theta scores from Ch5 5.2.X results
-- Extract cognitive tests from master.xlsx (RAVLT, BVMT, NART, RPM)
+- Extract cognitive tests from dfnonvr.csv (RAVLT, BVMT, NART, RPM)
 - Include Age as covariate
 - Check data quality and compute correlations
 
@@ -119,7 +119,7 @@ Multiple regression with model comparison and cross-validation
 **Step 6:** Test individual predictors
 - Extract standardized coefficients for both approaches
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni correction (± = 0.05/28 = 0.00179)
+- Primary: Bonferroni correction ( = 0.05/28 = 0.00179)
 - Secondary: FDR correction for comparison
 
 **Step 7:** Cross-validation

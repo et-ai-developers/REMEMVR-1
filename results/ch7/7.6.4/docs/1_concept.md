@@ -41,7 +41,7 @@ Limited research on how IRT purification affects predictor relationships in long
 ## Hypothesis
 
 **Primary Hypothesis:**
-Predictor relationships will weaken after purification, consistent with the Ch5 purification-trajectory paradox. Post-purification slopes will show reduced R² and weaker standardized betas for cognitive test predictors.
+Predictor relationships will weaken after purification, consistent with the Ch5 purification-trajectory paradox. Post-purification slopes will show reduced R and weaker standardized betas for cognitive test predictors.
 
 **Secondary Hypotheses:**
 The pattern will be strongest for BVMT (spatial memory) given Where domain's sensitivity to purification effects observed in Ch5.
@@ -50,7 +50,7 @@ The pattern will be strongest for BVMT (spatial memory) given Where domain's sen
 The purification paradox suggests that purification may remove items that are diagnostic of individual differences in trajectory patterns. If purification changes what items contribute to scores over time, predictors of those trajectories should also change.
 
 **Expected Effect Pattern:**
-Pre-purification R² > Post-purification R² for cognitive test prediction models. Individual predictor betas expected to be attenuated after purification, with some predictors potentially losing significance.
+Pre-purification R > Post-purification R for cognitive test prediction models. Individual predictor betas expected to be attenuated after purification, with some predictors potentially losing significance.
 
 ---
 
@@ -90,7 +90,7 @@ Multiple regression with hierarchical entry, comparing prediction models before 
 **Step 1:** Extract pre- and post-purification slopes
 - Load IRT Pass 1 slopes (pre-purification) from Ch5 analysis
 - Load IRT Pass 2 slopes (post-purification) from Ch5 analysis  
-- Extract cognitive test scores from master.xlsx
+- Extract cognitive test scores from dfnonvr.csv
 - Standardize all variables to T-scores (M=50, SD=10)
 
 **Step 2:** Fit prediction models for each purification pass
@@ -99,16 +99,16 @@ Multiple regression with hierarchical entry, comparing prediction models before 
 - Include demographics as covariates: Age, Sex, Education
 
 **Step 3:** Compare model performance
-- Extract R² and Adjusted R² for each model
-- Test difference in R² between passes using F-test
+- Extract R and Adjusted R for each model
+- Test difference in R between passes using F-test
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary correction: Bonferroni (± = 0.05/2 = 0.025 for two models)
+- Primary correction: Bonferroni ( = 0.05/2 = 0.025 for two models)
 
 **Step 4:** Compare individual predictors
 - Extract standardized betas with 95% CIs for each predictor
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (sr) for unique variance
 - Test coefficient differences using z-tests for dependent correlations
-- Report effect sizes: Cohen's f² for each model
+- Report effect sizes: Cohen's f for each model
 
 **Step 5:** Model diagnostics
 - Multicollinearity: VIF < 5 for all predictors
@@ -145,7 +145,7 @@ Multiple regression with hierarchical entry, comparing prediction models before 
 - [ ] Consistent pattern across multiple predictors (not just random variation)
 - [ ] Model diagnostics satisfied for both models (VIF < 5, normality, homoscedasticity)
 - [ ] Bootstrap CIs confirm coefficient difference significance
-- [ ] Power > 0.80 for detecting medium effect size differences (”² e 0.30)
+- [ ] Power > 0.80 for detecting medium effect size differences ( e 0.30)
 - [ ] Results interpretable in context of Ch5 purification paradox
 
 ---

@@ -90,7 +90,7 @@ Hierarchical Multiple Regression with 3-block entry + Cohen's f² effect sizes +
 
 **High-Level Workflow:**
 
-**Step 1:** Extract and merge predictor data from master.xlsx (cognitive tests, demographics, self-report)
+**Step 1:** Extract and merge predictor data from dfnonvr.csv (cognitive tests, demographics, self-report)
 **Step 2:** Extract mean REMEMVR theta per UID from Ch5 results, compute T-scores for cognitive tests
 **Step 3:** Build hierarchical regression with 3 blocks and cross-validation: Model 1 (demographics), Model 2 (+ cognitive tests), Model 3 (+ self-report)
 - CRITICAL: Implement 5-fold cross-validation to assess model stability
@@ -153,7 +153,7 @@ Hierarchical Multiple Regression with 3-block entry + Cohen's f² effect sizes +
 ## Data Source
 
 **Data Type:**
-DERIVED (from Ch5 REMEMVR results) + RAW (from master.xlsx)
+DERIVED (from Ch5 REMEMVR results) + RAW (from dfnonvr.csv)
 
 ### DERIVED Data Source:
 

@@ -32,7 +32,7 @@ steps:
         - "Check existence of Ch5 5.2.1/data/step03_theta_what.csv"
         - "Check existence of Ch5 5.2.2/data/step03_theta_where.csv"  
         - "Check existence of Ch5 5.2.3/data/step03_theta_when.csv"
-        - "Test read access to data/cache/master.xlsx"
+        - "Test read access to data/dfnonvr.csv"
         - "Verify expected columns (composite_ID, theta, domain)"
         - "Log validation results to text file"
 
@@ -49,7 +49,7 @@ steps:
         required_columns: ["composite_ID", "UID", "test", "theta_When"]
         variable_name: "theta_when_file"
         description: "When domain theta scores from Ch5 5.2.3"
-      - path: "data/cache/master.xlsx"
+      - path: "data/dfnonvr.csv"
         required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T"]
         variable_name: "master_file"
         description: "Cognitive test T-scores"
@@ -112,7 +112,7 @@ steps:
         - path: "results/ch5/5.2.3/data/step03_theta_when.csv"
           required_columns: ["composite_ID", "UID", "test", "theta_When"]
           variable_name: "theta_when_df"
-        - path: "data/cache/master.xlsx"
+        - path: "data/dfnonvr.csv"
           required_columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T"]
           variable_name: "cognitive_df"
 
@@ -213,7 +213,7 @@ steps:
       description: "Fit separate multiple regression models for each memory domain with standardized predictors"
 
     validation_call:
-      module: "tools.analysis_extensions"  
+      module: "tools.validation"  
       function: "validate_regression_assumptions"
       signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict[str, Any]"
 

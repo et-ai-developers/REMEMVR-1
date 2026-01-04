@@ -144,7 +144,7 @@ Validation tools MUST be used after confidence extraction.
 - Expected N: 100 participants
 
 **Processing:**
-- Load cognitive test data from master.xlsx
+- Load cognitive test data from dfnonvr.csv
 - Extract RAVLT Total, BVMT Total, RPM Total scores
 - Compute T-score transformations: T = 50 + 10*(raw - M_raw)/SD_raw
 - Handle missing data: exclude participants missing any cognitive test

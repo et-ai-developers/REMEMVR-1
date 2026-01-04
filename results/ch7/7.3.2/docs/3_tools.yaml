@@ -80,10 +80,10 @@ analysis_tools:
         description: "T-scored cognitive tests with demographics"
 
     parameters:
-      tests: ["RAVLT", "BVMT", "RPM"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
       t_score_conversion: true
 
-    description: "Extract and T-score cognitive test data from master.xlsx"
+    description: "Extract and T-score cognitive test data from dfnonvr.csv"
     source_reference: "tools_inventory.md section 'Cognitive Test Tools' - extract_cognitive_tests"
 
   standardize_to_t_scores:
@@ -374,14 +374,14 @@ validation_tools:
         RAVLT_T: [20, 80]  # T-score range
         BVMT_T: [20, 80]   # T-score range
         RPM_T: [20, 80]    # T-score range
-        train_r2: [0, 1]   # R² range
-        test_r2: [0, 1]    # R² range
+        train_r2: [0, 1]   # R range
+        test_r2: [0, 1]    # R range
         power: [0, 1]      # Power range
         f2: [0, 10]        # Effect size range
 
     criteria:
-      - "T-scores in acceptable range [20, 80] (approximately ±3 SD)"
-      - "R² values in valid range [0, 1]"
+      - "T-scores in acceptable range [20, 80] (approximately 3 SD)"
+      - "R values in valid range [0, 1]"
       - "Power values in valid range [0, 1]"
       - "Effect sizes in reasonable range [0, 10]"
       - "No extreme outliers beyond physiological limits"

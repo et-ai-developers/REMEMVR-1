@@ -80,7 +80,7 @@ Quit immediately with specific missing file error, log to logs/step00_validate_d
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (~5 minutes)
 
-**Purpose:** Extract DASS-21 subscale scores from master.xlsx and prepare for analysis
+**Purpose:** Extract DASS-21 subscale scores from dfnonvr.csv and prepare for analysis
 
 **Input:**
 - data/cache/master.xlsx (DASS_Dep, DASS_Anx, DASS_Str columns)

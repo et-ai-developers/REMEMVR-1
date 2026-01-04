@@ -28,7 +28,7 @@ Tests whether metacognitive monitoring (confidence) has similar or different cog
 - **Executive Function Theory**: Metacognitive accuracy may depend on reasoning and self-monitoring abilities rather than memory capacity
 
 **Key Citations:**
-Chapter 6 established confidence-accuracy dissociation (824× ICC ratio) suggesting partial independence of confidence from accuracy
+Chapter 6 established confidence-accuracy dissociation (824 ICC ratio) suggesting partial independence of confidence from accuracy
 
 **Theoretical Predictions:**
 Tests designed for memory capacity (RAVLT, BVMT) may not predict metacognitive monitoring. Fluid intelligence tests (RPM) may show stronger prediction if confidence relies on executive/reasoning processes.
@@ -41,7 +41,7 @@ Limited research on cognitive predictors of metacognitive monitoring in episodic
 ## Hypothesis
 
 **Primary Hypothesis:**
-Cognitive tests may predict confidence weakly or not at all compared to accuracy prediction. Expected R² for confidence < R² for accuracy from RQ 7.1.1.
+Cognitive tests may predict confidence weakly or not at all compared to accuracy prediction. Expected R for confidence < R for accuracy from RQ 7.1.1.
 
 **Secondary Hypotheses:**
 RPM (fluid intelligence) may predict confidence more strongly than RAVLT/BVMT if metacognitive monitoring relies on executive/reasoning processes rather than memory capacity.
@@ -50,7 +50,7 @@ RPM (fluid intelligence) may predict confidence more strongly than RAVLT/BVMT if
 Chapter 6 established confidence-accuracy dissociation - if confidence is partially independent from accuracy, it should have different cognitive predictors. Metacognitive monitoring may recruit executive control rather than memory encoding systems.
 
 **Expected Effect Pattern:**
-Overall model R² for confidence prediction < 0.35 (lower than accuracy prediction). RPM may show strongest individual prediction for confidence, while RAVLT/BVMT may be non-significant after correction.
+Overall model R for confidence prediction < 0.35 (lower than accuracy prediction). RPM may show strongest individual prediction for confidence, while RAVLT/BVMT may be non-significant after correction.
 
 ---
 
@@ -89,24 +89,24 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 1:** Extract and prepare data
 - Load confidence theta scores from Ch6 6.1.1 results  
-- Extract cognitive tests from master.xlsx
+- Extract cognitive tests from dfnonvr.csv
 - Compute derived scores and standardize to T-scores
 - Check data quality and missingness
 
 **Step 2:** Hierarchical regression
 - Model 1: Demographics only (Age, Sex, Education)
 - Model 2: + Cognitive tests (RAVLT_T, BVMT_T, RPM_T)
-- Report ”R² and F-test for model improvement
+- Report R and F-test for model improvement
 
 **Step 3:** Test individual predictors  
 - Extract standardized betas with 95% CIs
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (sr) for unique variance
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni (± = 0.00179/3 = 0.000597)
+- Primary: Bonferroni ( = 0.00179/3 = 0.000597)
 - Secondary: FDR for comparison
 
 **Step 4:** Effect sizes and importance
-- Cohen's f² = R²/(1-R²)
+- Cohen's f = R/(1-R)
 - Dominance analysis or relative weights
 - Bootstrap CIs (1000 iterations)
 
@@ -118,8 +118,8 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 6:** Cross-validation
 - Method: 5-fold CV
-- Metrics: Test R², RMSE, MAE  
-- Check for overfitting if test R² << training R²
+- Metrics: Test R, RMSE, MAE  
+- Check for overfitting if test R << training R
 
 **Step 7:** Power analysis
 - Post-hoc power for observed effect sizes
@@ -127,7 +127,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 8:** Compare with accuracy prediction
 - Load results from RQ 7.1.1
-- Compare R² values, predictor patterns
+- Compare R values, predictor patterns
 - Test which predictors differ between accuracy and confidence
 
 **Expected Outputs:**
@@ -137,7 +137,7 @@ Multiple regression with hierarchical entry and cross-validation
 - data/step04_hierarchical_regression.csv (model comparison results)
 - data/step05_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step06_model_diagnostics.csv (VIF, residuals, Cook's D)
-- data/step07_effect_sizes.csv (R², f², sr², with 95% CIs)
+- data/step07_effect_sizes.csv (R, f, sr, with 95% CIs)
 - data/step08_cross_validation.csv (k-fold CV results)
 - data/step09_power_analysis.csv (post-hoc and sensitivity)
 - data/step10_accuracy_comparison.csv (comparison with RQ 7.1.1)
@@ -146,13 +146,13 @@ Multiple regression with hierarchical entry and cross-validation
 - plots/predictor_comparison.png (confidence vs accuracy predictors)
 
 **Success Criteria:**
-- R²_confidence documented (may be < 0.25, lower than accuracy)
+- R_confidence documented (may be < 0.25, lower than accuracy)
 - Report which tests predict confidence vs accuracy differently  
 - VIF < 5 for all predictors (no multicollinearity)
 - Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - Homoscedasticity confirmed (Breusch-Pagan p > 0.05)  
 - No influential outliers (Cook's D < 4/N)
-- Cross-validation R² within 15% of training R² (allowing for smaller effects)
+- Cross-validation R within 15% of training R (allowing for smaller effects)
 - Connects to Ch6 confidence-accuracy dissociation findings
 - Power analysis documents detectability of medium effects
 

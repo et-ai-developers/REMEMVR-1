@@ -13,7 +13,7 @@
 Do cognitive tests predict the rate of forgetting (slope), or only initial encoding (intercept)?
 
 **Scope:**
-This RQ examines whether traditional cognitive assessments (RAVLT, BVMT, RPM) predict individual differences in REMEMVR forgetting slopes estimated from model-averaged LMM results. Analysis uses per-participant slope estimates from Ch5 5.1.4 model-averaged random effects combined with cognitive test scores from master.xlsx. N=100 participants.
+This RQ examines whether traditional cognitive assessments (RAVLT, BVMT, RPM) predict individual differences in REMEMVR forgetting slopes estimated from model-averaged LMM results. Analysis uses per-participant slope estimates from Ch5 5.1.4 model-averaged random effects combined with cognitive test scores from dfnonvr.csv. N=100 participants.
 
 **Theoretical Framing:**
 Tests differential prediction hypothesis that cognitive tests predict encoding abilities (intercepts) but not consolidation/forgetting processes (slopes). Builds on Ch5 finding that ICC_slope = 21% showing substantial individual differences in forgetting rates exist.
@@ -40,16 +40,16 @@ Most research focuses on encoding prediction; few studies examine whether cognit
 ## Hypothesis
 
 **Primary Hypothesis:**
-Cognitive tests (RAVLT_T, BVMT_T, RPM_T) should NOT significantly predict REMEMVR forgetting slopes. Model R² should be low (< 0.10) and non-significant.
+Cognitive tests (RAVLT_T, BVMT_T, RPM_T) should NOT significantly predict REMEMVR forgetting slopes. Model R should be low (< 0.10) and non-significant.
 
 **Secondary Hypotheses:**
-R²_slope should be substantially lower than R²_intercept found in RQ 7.1.2, demonstrating differential prediction patterns for encoding vs. consolidation processes.
+R_slope should be substantially lower than R_intercept found in RQ 7.1.2, demonstrating differential prediction patterns for encoding vs. consolidation processes.
 
 **Theoretical Rationale:**
 Slopes reflect consolidation/forgetting processes occurring over days, which differ from encoding processes measured by traditional tests. Ch5 found ICC_slope = 21% indicating individual differences exist, but these may not be predicted by standard cognitive assessments.
 
 **Expected Effect Pattern:**
-Model: Slope ~ RAVLT_T + BVMT_T + RPM_T should show R² < 0.10, F(3,96) non-significant (p > 0.10). Individual predictors should all have p > 0.10 after multiple comparison correction.
+Model: Slope ~ RAVLT_T + BVMT_T + RPM_T should show R < 0.10, F(3,96) non-significant (p > 0.10). Individual predictors should all have p > 0.10 after multiple comparison correction.
 
 ---
 
@@ -88,24 +88,24 @@ Multiple regression with hierarchical entry, cross-validation, and extensive dia
 
 **Step 1:** Extract and prepare data
 - Load model-averaged slopes from Ch5 5.1.4 results
-- Extract cognitive test scores from master.xlsx (RAVLT_T, BVMT_T, RPM_T)
+- Extract cognitive test scores from dfnonvr.csv (RAVLT_T, BVMT_T, RPM_T)
 - Standardize predictors to T-scores for interpretability
 - Check data quality and missingness patterns
 
 **Step 2:** Hierarchical regression
 - Model 1: Demographics only (Age, Sex, Education)  
 - Model 2: + Cognitive tests (RAVLT_T, BVMT_T, RPM_T)
-- Report ”R² and F-test for model improvement
+- Report R and F-test for model improvement
 
 **Step 3:** Test individual predictors
 - Extract standardized betas with 95% confidence intervals
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (sr) for unique variance
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary correction: Bonferroni (± = 0.00179/4 = 0.000448)
+- Primary correction: Bonferroni ( = 0.00179/4 = 0.000448)
 - Secondary: FDR correction for comparison
 
 **Step 4:** Effect sizes and importance
-- Cohen's f² = R²/(1-R²) for overall model
+- Cohen's f = R/(1-R) for overall model
 - Dominance analysis for predictor importance ranking
 - Bootstrap confidence intervals (1000 iterations)
 
@@ -117,8 +117,8 @@ Multiple regression with hierarchical entry, cross-validation, and extensive dia
 
 **Step 6:** Cross-validation
 - Method: 5-fold cross-validation
-- Metrics: Test R², RMSE, MAE
-- Check for overfitting (test R² << training R²)
+- Metrics: Test R, RMSE, MAE
+- Check for overfitting (test R << training R)
 
 **Step 7:** Power analysis
 - Post-hoc power for observed effect sizes
@@ -136,7 +136,7 @@ Multiple regression with hierarchical entry, cross-validation, and extensive dia
 - data/step03_analysis_input.csv (merged analysis dataset)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step05_model_diagnostics.csv (VIF, residuals, Cook's D)
-- data/step06_effect_sizes.csv (R², f², sr², with 95% CIs)
+- data/step06_effect_sizes.csv (R, f, sr, with 95% CIs)
 - data/step07_cross_validation.csv (5-fold CV results)
 - data/step08_power_analysis.csv (post-hoc and sensitivity)
 - results/slope_prediction_summary.md (text summary for thesis)
@@ -144,14 +144,14 @@ Multiple regression with hierarchical entry, cross-validation, and extensive dia
 - plots/slope_prediction.png (predictor importance visualization)
 
 **Success Criteria:**
-- [ ] Model R² < 0.10 and non-significant (p > 0.00179)
+- [ ] Model R < 0.10 and non-significant (p > 0.00179)
 - [ ] No individual predictor significant after Bonferroni correction
-- [ ] R²_slope substantially < R²_intercept (from RQ 7.1.2)
+- [ ] R_slope substantially < R_intercept (from RQ 7.1.2)
 - [ ] VIF < 5 for all predictors (no multicollinearity)
 - [ ] Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - [ ] Homoscedasticity confirmed (Breusch-Pagan p > 0.05)
 - [ ] No influential outliers (Cook's D < 4/N)
-- [ ] Cross-validation R² within 10% of training R²
+- [ ] Cross-validation R within 10% of training R
 - [ ] Power analysis confirms adequate sample size
 
 ---

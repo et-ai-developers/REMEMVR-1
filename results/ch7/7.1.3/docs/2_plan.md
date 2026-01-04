@@ -94,7 +94,7 @@ Quit immediately with specific missing dependency error message.
 **Processing:**
 - Read domain-specific theta files from Ch5 5.2.x results
 - Aggregate theta scores by UID per domain (mean across items within domain)
-- Extract cognitive test T-scores from master.xlsx for N=100 participants
+- Extract cognitive test T-scores from dfnonvr.csv for N=100 participants
 - Merge datasets on UID to create complete analysis dataset
 - Verify complete data: all participants have theta scores for all 3 domains
 - Calculate descriptive statistics by domain
@@ -522,7 +522,7 @@ Note: summary.md will be created by rq_results summarizing domain-specific predi
 
 **Data Integration:**
 - Domain theta scores merged on composite_ID -> UID mapping
-- Cognitive test scores from master.xlsx merged on UID
+- Cognitive test scores from dfnonvr.csv merged on UID
 - Complete case analysis (participants with all domain scores + cognitive tests)
 
 ---

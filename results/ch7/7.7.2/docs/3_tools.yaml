@@ -122,11 +122,11 @@ analysis_tools:
         description: "Group sizes under alternative cutoffs"
         
     parameters:
-      cutoff_sd: 1.0  # ±1 SD cutoffs
+      cutoff_sd: 1.0  # 1 SD cutoffs
       alternative_cutoffs: [0.75, 1.25]  # Sensitivity analysis
       min_group_size: 10  # Minimum for statistical analysis
       
-    description: "Create tri-categorical groups based on ±1 SD discrepancy cutoffs"
+    description: "Create tri-categorical groups based on 1 SD discrepancy cutoffs"
     source_reference: "tools_inventory.md section 'Statistics Tools'"
 
   extract_demographic_data:
@@ -140,12 +140,12 @@ analysis_tools:
         required_columns: ["UID", "Group"]
         source: "group assignments from step 3"
       - path: "data/cache/master.xlsx"
-        required_columns: ["UID", "Age", "Education", "VR_Experience", "NART", "BVMT"]
+        required_columns: ["UID", "Age", "Education", "VR_Experience", "BVMT"]
         source: "master demographic data"
         
     output_files:
       - path: "data/step04_demographic_data.csv"
-        columns: ["UID", "Group", "Age", "Education", "VR_Experience", "NART", "BVMT"]
+        columns: ["UID", "Group", "Age", "Education", "VR_Experience", "BVMT"]
         description: "Merged group assignments with demographics"
       - path: "data/step04_demographic_descriptives.csv" 
         columns: ["Group", "variable", "n", "mean", "sd", "median", "iqr"]
@@ -155,7 +155,7 @@ analysis_tools:
         description: "Missing data analysis"
         
     parameters:
-      variables: ["Age", "Education", "VR_Experience", "NART", "BVMT"]
+      variables: ["Age", "Education", "VR_Experience", "BVMT"]
       missing_threshold: 0.15  # Exclude variables with >15% missing
       handle_missing: "listwise"  # Deletion method
       
@@ -189,7 +189,7 @@ analysis_tools:
         
     parameters:
       correction: "bonferroni"
-      n_comparisons: 9  # 3 variables × 3 pairwise comparisons
+      n_comparisons: 9  # 3 variables  3 pairwise comparisons
       bootstrap_iterations: 1000
       random_seed: 42
       alpha: 0.0056  # Bonferroni corrected: 0.05/9
@@ -329,8 +329,8 @@ validation_tools:
       tolerance: 0.01  # Allow small sampling variation
       
     criteria:
-      - "Z-score means within ±0.01 of 0"
-      - "Z-score SDs within ±0.01 of 1"
+      - "Z-score means within 0.01 of 0"
+      - "Z-score SDs within 0.01 of 1"
       - "No extreme outliers (|z| > 4)"
       - "All 100 participants present"
       
@@ -400,7 +400,7 @@ validation_tools:
         
     parameters:
       required_columns: ["UID", "Group", "Age", "Education", "VR_Experience"]
-      optional_columns: ["NART", "BVMT"]
+      optional_columns: ["BVMT"]
       missing_threshold: 0.15  # 15% maximum missing per variable
       
     criteria:
@@ -448,7 +448,7 @@ validation_tools:
       - "Both uncorrected and Bonferroni p-values present (Decision D068)"
       - "Corrected p-values e uncorrected p-values"
       - "All p-values in [0, 1] range"
-      - "Correction properly applied (p_corr = p_uncorr × 9)"
+      - "Correction properly applied (p_corr = p_uncorr  9)"
       
     expected_output:
       format: "Dict[str, Any]"

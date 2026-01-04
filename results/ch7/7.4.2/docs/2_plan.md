@@ -130,7 +130,7 @@ Validation tools MUST be used after domain extraction execution.
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Medium (~5 minutes)
 
-**Purpose:** Extract BVMT Total Recall scores from master.xlsx cognitive test data
+**Purpose:** Extract BVMT Total Recall scores from dfnonvr.csv cognitive test data
 
 **Input:**
 - data/cache/master.xlsx (BVMT_TotR column)

@@ -78,7 +78,7 @@ Validation tools MUST be used after dependency check execution.
 **Dependencies:** Step 0 (dependency validation complete)
 **Complexity:** Medium (~5 minutes)
 
-**Purpose:** Load REMEMVR theta scores from Ch5 and RAVLT data from master.xlsx
+**Purpose:** Load REMEMVR theta scores from Ch5 and RAVLT data from dfnonvr.csv
 
 **Input:**
 - Primary: results/ch5/5.1.1/data/step03_theta_scores.csv

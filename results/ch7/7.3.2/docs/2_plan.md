@@ -143,7 +143,7 @@ Validation tools MUST be used after calibration data extraction.
 **Dependencies:** Step 1 (calibration metrics)
 **Complexity:** Medium (~8 minutes including T-score computation)
 
-**Purpose:** Extract and standardize cognitive test scores from master.xlsx
+**Purpose:** Extract and standardize cognitive test scores from dfnonvr.csv
 
 **Input:**
 - data/cache/master.xlsx (RAVLT, BVMT, RPM raw scores)

@@ -39,23 +39,23 @@ steps:
           required_columns: ["composite_ID", "UID", "test", "theta_*"]
           variable_name: "theta_file_path"
           description: "Ch5 5.1.1 IRT theta estimates for omnibus All factor"
-        - path: "data/cache/master.xlsx"
-          required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "BVMT_T1", "BVMT_T2", "BVMT_T3", "BVMT_delayed", "NART", "RPM"]
+        - path: "data/dfnonvr.csv"
+          required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "BVMT trial 1 score", "BVMT trial 2 score", "BVMT trial 3 score", "BVMT delayed recall score", "RPM Score"]
           variable_name: "master_file_path"
-          description: "Master data file with cognitive test raw scores"
+          description: "Prepared participant data file with cognitive test raw scores"
 
       # Parameter values (COMPLETE - from 2_plan.md)
       parameters:
         file_paths_to_check:
           - "results/ch5/5.1.1/data/step03_theta_scores.csv"
           - "data/cache/dfData.csv"
-          - "data/cache/master.xlsx"
+          - "data/dfnonvr.csv"
         min_size_bytes: 1000
 
       # Output specifications (COMPLETE)
       outputs:
         dependency_validation:
-          path: "data/step00_dependency_validation.txt"
+          path: "results/ch7/7.1.1/data/step00_dependency_validation.txt"
           variable_name: "validation_result"
           description: "Dependency validation results and file paths"
 
@@ -72,14 +72,14 @@ steps:
       signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step00_dependency_validation.txt"
+        - path: "results/ch7/7.1.1/data/step00_dependency_validation.txt"
           variable_name: "validation_result"
           source: "analysis call output (check_file_exists return value)"
 
       parameters:
         expected_files:
           - "results/ch5/5.1.1/data/step03_theta_scores.csv"
-          - "data/cache/master.xlsx"
+          - "data/dfnonvr.csv"
         min_size_threshold: 1000
 
       returns:
@@ -93,19 +93,19 @@ steps:
 
       on_failure:
         action: "raise FileNotFoundError(dependency_validation['message'])"
-        log_to: "logs/step00_validate_dependencies.log"
+        log_to: "results/ch7/7.1.1/logs/step00_validate_dependencies.log"
         message: "Cross-RQ dependencies missing - cannot proceed without Ch5 5.1.1 theta scores"
 
       description: "Validate all cross-RQ dependencies are available before proceeding"
 
-    log_file: "logs/step00_validate_dependencies.log"
+    log_file: "results/ch7/7.1.1/logs/step00_validate_dependencies.log"
 
   # --------------------------------------------------------------------------
   # STEP 1: Extract and Prepare Cognitive Test Data
   # --------------------------------------------------------------------------
   - name: "step01_extract_cognitive_tests"
     step_number: "01"
-    description: "Extract cognitive test scores from master.xlsx and standardize to T-scores (M=50, SD=10)"
+    description: "Extract cognitive test scores from dfnonvr.csv and standardize to T-scores (M=50, SD=10)"
 
     analysis_call:
       type: "catalogued"
@@ -114,19 +114,19 @@ steps:
       signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
 
       input_files:
-        - path: "data/cache/master.xlsx"
-          required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "BVMT_T1", "BVMT_T2", "BVMT_T3", "BVMT_delayed", "NART", "RPM"]
+        - path: "data/dfnonvr.csv"
+          required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "BVMT trial 1 score", "BVMT trial 2 score", "BVMT trial 3 score", "BVMT delayed recall score", "RPM Score"]
           variable_name: "master_data"
           description: "Master file with cognitive test raw scores"
 
       parameters:
-        tests: ["RAVLT", "BVMT", "NART", "RPM"]
+        tests: ["RAVLT", "BVMT", "RPM Score"]
         t_score_target_mean: 50.0
         t_score_target_sd: 10.0
 
       outputs:
         cognitive_tests:
-          path: "data/step01_cognitive_tests.csv"
+          path: "results/ch7/7.1.1/data/step01_cognitive_tests.csv"
           variable_name: "cognitive_tests"
           description: "T-scored cognitive test data (M=50, SD=10)"
           columns: ["UID", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
@@ -142,7 +142,7 @@ steps:
       signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step01_cognitive_tests.csv"
+        - path: "results/ch7/7.1.1/data/step01_cognitive_tests.csv"
           variable_name: "cognitive_tests"
           source: "analysis call output (extract_cognitive_tests return value)"
 
@@ -165,12 +165,12 @@ steps:
 
       on_failure:
         action: "raise ValueError(cognitive_validation['message'])"
-        log_to: "logs/step01_extract_cognitive_tests.log"
+        log_to: "results/ch7/7.1.1/logs/step01_extract_cognitive_tests.log"
         message: "Cognitive test extraction failed - invoke g_debug for investigation"
 
       description: "Validate cognitive test extraction and T-score standardization"
 
-    log_file: "logs/step01_extract_cognitive_tests.log"
+    log_file: "results/ch7/7.1.1/logs/step01_extract_cognitive_tests.log"
 
   # --------------------------------------------------------------------------
   # STEP 2: Load Mean Theta Scores from Ch5
@@ -198,7 +198,7 @@ steps:
 
       outputs:
         theta_means:
-          path: "data/step02_theta_means.csv"
+          path: "results/ch7/7.1.1/data/step02_theta_means.csv"
           variable_name: "theta_means"
           description: "Mean theta per participant across test sessions"
           columns: ["UID", "theta_mean"]
@@ -214,7 +214,7 @@ steps:
       signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step02_theta_means.csv"
+        - path: "results/ch7/7.1.1/data/step02_theta_means.csv"
           variable_name: "theta_means"
           source: "analysis call output (extract_domain_theta_scores return value)"
 
@@ -236,12 +236,12 @@ steps:
 
       on_failure:
         action: "raise ValueError(theta_validation['message'])"
-        log_to: "logs/step02_load_theta_means.log"
+        log_to: "results/ch7/7.1.1/logs/step02_load_theta_means.log"
         message: "Theta extraction failed - check if >10% participants missing"
 
       description: "Validate theta score extraction and participant-level averaging"
 
-    log_file: "logs/step02_load_theta_means.log"
+    log_file: "results/ch7/7.1.1/logs/step02_load_theta_means.log"
 
   # --------------------------------------------------------------------------
   # STEP 3: Merge Datasets and Create Analysis File
@@ -257,11 +257,11 @@ steps:
       signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
 
       input_files:
-        - path: "data/step01_cognitive_tests.csv"
+        - path: "results/ch7/7.1.1/data/step01_cognitive_tests.csv"
           required_columns: ["UID", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
           variable_name: "cognitive_tests"
           source: "step01 output"
-        - path: "data/step02_theta_means.csv"
+        - path: "results/ch7/7.1.1/data/step02_theta_means.csv"
           required_columns: ["UID", "theta_mean"]
           variable_name: "theta_means"
           source: "step02 output"
@@ -273,7 +273,7 @@ steps:
 
       outputs:
         analysis_dataset:
-          path: "data/step03_analysis_dataset.csv"
+          path: "results/ch7/7.1.1/data/step03_analysis_dataset.csv"
           variable_name: "analysis_dataset"
           description: "Merged cognitive tests and theta scores for regression analysis"
           columns: ["UID", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T", "theta_mean"]
@@ -289,7 +289,7 @@ steps:
       signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step03_analysis_dataset.csv"
+        - path: "results/ch7/7.1.1/data/step03_analysis_dataset.csv"
           variable_name: "analysis_dataset"
           source: "analysis call output (merge_theta_cognitive return value)"
 
@@ -310,12 +310,12 @@ steps:
 
       on_failure:
         action: "raise ValueError(merge_validation['message']) if merge_validation.get('final_n', 0) < 80 else None"
-        log_to: "logs/step03_merge_datasets.log"
+        log_to: "results/ch7/7.1.1/logs/step03_merge_datasets.log"
         message: "Dataset merge failed - check for systematic exclusions"
 
       description: "Validate dataset merge maintains adequate sample size with complete data"
 
-    log_file: "logs/step03_merge_datasets.log"
+    log_file: "results/ch7/7.1.1/logs/step03_merge_datasets.log"
 
   # --------------------------------------------------------------------------
   # STEP 4: Comprehensive Regression Assumption Checking
@@ -331,7 +331,7 @@ steps:
       signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict"
 
       input_files:
-        - path: "data/step03_analysis_dataset.csv"
+        - path: "results/ch7/7.1.1/data/step03_analysis_dataset.csv"
           required_columns: ["RAVLT_T", "BVMT_T", "NART_T", "RPM_T", "theta_mean"]
           variable_name: "analysis_dataset"
           source: "step03 output"
@@ -349,12 +349,12 @@ steps:
 
       outputs:
         assumption_diagnostics:
-          path: "data/step04_assumption_diagnostics.csv"
+          path: "results/ch7/7.1.1/data/step04_assumption_diagnostics.csv"
           variable_name: "assumption_diagnostics"
           description: "Comprehensive regression assumption test results"
           columns: ["assumption", "test_statistic", "p_value", "remedial_action"]
         diagnostic_plots_data:
-          path: "data/step04_diagnostic_plots_data.csv"
+          path: "results/ch7/7.1.1/data/step04_diagnostic_plots_data.csv"
           variable_name: "diagnostic_plots_data"
           description: "Diagnostic plot source data for rq_plots"
           columns: ["observation", "fitted_values", "residuals", "studentized_residuals", "cooks_d", "leverage"]
@@ -370,7 +370,7 @@ steps:
       signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
 
       input_files:
-        - path: "data/step04_assumption_diagnostics.csv"
+        - path: "results/ch7/7.1.1/data/step04_assumption_diagnostics.csv"
           variable_name: "assumption_diagnostics"
           source: "analysis call output (compute_regression_diagnostics return value)"
 
@@ -391,12 +391,12 @@ steps:
 
       on_failure:
         action: "continue with remedial actions"
-        log_to: "logs/step04_check_assumptions.log"
+        log_to: "results/ch7/7.1.1/logs/step04_check_assumptions.log"
         message: "Apply remedial actions (bootstrap, HC3, sensitivity)"
 
       description: "Validate comprehensive regression assumption checking completed"
 
-    log_file: "logs/step04_check_assumptions.log"
+    log_file: "results/ch7/7.1.1/logs/step04_check_assumptions.log"
 
   # --------------------------------------------------------------------------
   # STEP 5: Fit Multiple Regression with Bootstrap Confidence Intervals
@@ -412,7 +412,7 @@ steps:
       signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
 
       input_files:
-        - path: "data/step03_analysis_dataset.csv"
+        - path: "results/ch7/7.1.1/data/step03_analysis_dataset.csv"
           required_columns: ["UID", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T", "theta_mean"]
           variable_name: "analysis_dataset"
           source: "step03 output"
@@ -425,7 +425,7 @@ steps:
 
       outputs:
         regression_results:
-          path: "data/step05_regression_results.csv"
+          path: "results/ch7/7.1.1/data/step05_regression_results.csv"
           variable_name: "regression_results"
           description: "Multiple regression coefficients and statistics"
           columns: ["predictor", "beta", "se", "t_stat", "p_value", "ci_lower", "ci_upper"]
@@ -441,7 +441,7 @@ steps:
       signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step05_regression_results.csv"
+        - path: "results/ch7/7.1.1/data/step05_regression_results.csv"
           variable_name: "regression_results"
           source: "analysis call output (fit_multiple_regression return value)"
 
@@ -463,12 +463,12 @@ steps:
 
       on_failure:
         action: "raise ValueError(regression_validation['message'])"
-        log_to: "logs/step05_fit_regression.log"
+        log_to: "results/ch7/7.1.1/logs/step05_fit_regression.log"
         message: "Regression fitting failed - invoke g_debug for convergence investigation"
 
       description: "Validate regression model fitted successfully with reasonable estimates"
 
-    log_file: "logs/step05_fit_regression.log"
+    log_file: "results/ch7/7.1.1/logs/step05_fit_regression.log"
 
   # --------------------------------------------------------------------------
   # STEP 6: Multiple Comparison Corrections and Significance Testing
@@ -489,7 +489,7 @@ steps:
         - "Format results with dual p-value reporting"
 
       input_files:
-        - path: "data/step05_regression_results.csv"
+        - path: "results/ch7/7.1.1/data/step05_regression_results.csv"
           required_columns: ["predictor", "beta", "se", "t_stat", "p_value", "ci_lower", "ci_upper"]
           variable_name: "regression_results"
           source: "step05 output"
@@ -502,12 +502,12 @@ steps:
 
       outputs:
         corrected_results:
-          path: "data/step06_corrected_results.csv"
+          path: "results/ch7/7.1.1/data/step06_corrected_results.csv"
           variable_name: "corrected_results"
           description: "P-values with multiple comparison corrections"
           columns: ["predictor", "p_uncorrected", "p_bonferroni", "p_fdr", "significant_uncorrected", "significant_corrected"]
         hypothesis_tests:
-          path: "data/step06_hypothesis_tests.csv"
+          path: "results/ch7/7.1.1/data/step06_hypothesis_tests.csv"
           variable_name: "hypothesis_tests"
           description: "Specific hypothesis test results"
           columns: ["hypothesis", "test_statistic", "p_value", "significant"]
@@ -525,7 +525,7 @@ steps:
         - "Confirm significance flags consistent with alpha thresholds"
 
       input_files:
-        - path: "data/step06_corrected_results.csv"
+        - path: "results/ch7/7.1.1/data/step06_corrected_results.csv"
           variable_name: "corrected_results"
           source: "analysis output"
 
@@ -538,12 +538,12 @@ steps:
 
       on_failure:
         action: "continue with uncorrected if corrections fail"
-        log_to: "logs/step06_multiple_comparisons.log"
+        log_to: "results/ch7/7.1.1/logs/step06_multiple_comparisons.log"
         message: "Multiple comparison correction failed - check p-value validity"
 
       description: "Validate multiple comparison corrections applied correctly"
 
-    log_file: "logs/step06_multiple_comparisons.log"
+    log_file: "results/ch7/7.1.1/logs/step06_multiple_comparisons.log"
 
   # --------------------------------------------------------------------------
   # STEP 7: Cross-Validation and Model Stability Assessment
@@ -559,7 +559,7 @@ steps:
       signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
 
       input_files:
-        - path: "data/step03_analysis_dataset.csv"
+        - path: "results/ch7/7.1.1/data/step03_analysis_dataset.csv"
           required_columns: ["RAVLT_T", "BVMT_T", "NART_T", "RPM_T", "theta_mean"]
           variable_name: "analysis_dataset"
           source: "step03 output"
@@ -573,12 +573,12 @@ steps:
 
       outputs:
         cross_validation:
-          path: "data/step07_cross_validation.csv"
+          path: "results/ch7/7.1.1/data/step07_cross_validation.csv"
           variable_name: "cross_validation"
           description: "Cross-validation results per fold"
           columns: ["fold", "train_r2", "test_r2", "train_n", "test_n", "generalization_gap"]
         stability_assessment:
-          path: "data/step07_stability_assessment.csv"
+          path: "results/ch7/7.1.1/data/step07_stability_assessment.csv"
           variable_name: "stability_assessment"
           description: "Coefficient stability across folds"
           columns: ["predictor", "mean_beta", "std_beta", "min_beta", "max_beta"]
@@ -594,7 +594,7 @@ steps:
       signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
 
       input_files:
-        - path: "data/step07_cross_validation.csv"
+        - path: "results/ch7/7.1.1/data/step07_cross_validation.csv"
           variable_name: "cross_validation"
           source: "analysis call output (cross_validate_regression return value)"
 
@@ -615,12 +615,12 @@ steps:
 
       on_failure:
         action: "continue with main model if CV fails"
-        log_to: "logs/step07_cross_validation.log"
+        log_to: "results/ch7/7.1.1/logs/step07_cross_validation.log"
         message: "Cross-validation failed - invoke g_debug for CV failure investigation"
 
       description: "Validate cross-validation completed and model shows adequate generalizability"
 
-    log_file: "logs/step07_cross_validation.log"
+    log_file: "results/ch7/7.1.1/logs/step07_cross_validation.log"
 
   # --------------------------------------------------------------------------
   # STEP 8: Sensitivity Analysis and Effect Size Computation
@@ -641,11 +641,11 @@ steps:
         - "Compute post-hoc power analysis using statsmodels.stats.power"
 
       input_files:
-        - path: "data/step03_analysis_dataset.csv"
+        - path: "results/ch7/7.1.1/data/step03_analysis_dataset.csv"
           required_columns: ["RAVLT_T", "BVMT_T", "NART_T", "RPM_T", "theta_mean"]
           variable_name: "analysis_dataset"
           source: "step03 output"
-        - path: "data/step05_regression_results.csv"
+        - path: "results/ch7/7.1.1/data/step05_regression_results.csv"
           required_columns: ["predictor", "beta", "se", "t_stat", "p_value", "ci_lower", "ci_upper"]
           variable_name: "regression_results"
           source: "step05 output"
@@ -664,17 +664,17 @@ steps:
 
       outputs:
         sensitivity_analysis:
-          path: "data/step08_sensitivity_analysis.csv"
+          path: "results/ch7/7.1.1/data/step08_sensitivity_analysis.csv"
           variable_name: "sensitivity_analysis"
           description: "Model comparison with/without NART"
           columns: ["model", "r2", "adj_r2", "f_statistic", "p_value", "delta_r2"]
         effect_sizes:
-          path: "data/step08_effect_sizes.csv"
+          path: "results/ch7/7.1.1/data/step08_effect_sizes.csv"
           variable_name: "effect_sizes"
           description: "Comprehensive effect size metrics"
           columns: ["effect_type", "value", "interpretation", "reference"]
         power_analysis:
-          path: "data/step08_power_analysis.csv"
+          path: "results/ch7/7.1.1/data/step08_power_analysis.csv"
           variable_name: "power_analysis"
           description: "Post-hoc power calculations"
           columns: ["analysis_type", "power", "n", "k", "r2", "alpha", "interpretation"]
@@ -693,10 +693,10 @@ steps:
         - "Check effect size interpretations against Cohen's conventions"
 
       input_files:
-        - path: "data/step08_effect_sizes.csv"
+        - path: "results/ch7/7.1.1/data/step08_effect_sizes.csv"
           variable_name: "effect_sizes"
           source: "analysis output"
-        - path: "data/step08_power_analysis.csv"
+        - path: "results/ch7/7.1.1/data/step08_power_analysis.csv"
           variable_name: "power_analysis"
           source: "analysis output"
 
@@ -710,12 +710,12 @@ steps:
 
       on_failure:
         action: "continue with available results"
-        log_to: "logs/step08_sensitivity_analysis.log"
+        log_to: "results/ch7/7.1.1/logs/step08_sensitivity_analysis.log"
         message: "Document limitations in interpretation"
 
       description: "Validate sensitivity analysis and effect size calculations completed"
 
-    log_file: "logs/step08_sensitivity_analysis.log"
+    log_file: "results/ch7/7.1.1/logs/step08_sensitivity_analysis.log"
 
 # ============================================================================
 # END OF ANALYSIS RECIPE

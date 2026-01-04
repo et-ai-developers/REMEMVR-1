@@ -62,13 +62,13 @@ analysis_tools:
         description: "Correlation matrix of cognitive test T-scores"
     
     parameters:
-      tests: ["RAVLT", "BVMT", "NART", "RPM"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
       t_score_mean: 50
       t_score_sd: 10
       compute_total: true
       compute_correlations: true
     
-    description: "Extract cognitive test scores from master.xlsx and convert to standardized T-scores"
+    description: "Extract cognitive test scores from dfnonvr.csv and convert to standardized T-scores"
     source_reference: "tools_inventory.md section 'Data Extraction Tools' - extract_cognitive_tests"
 
   extract_dass_scores:

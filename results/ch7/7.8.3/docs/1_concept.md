@@ -13,7 +13,7 @@
 What is the most parsimonious model to predict REMEMVR episodic memory performance, and how well does it generalize to unseen data?
 
 **Scope:**
-This RQ compares 4 nested regression models with varying complexity: (1) Minimal: Age + RAVLT, (2) Core: Age + RAVLT + BVMT, (3) Extended: + RPM + Education, (4) Full: all predictors. Uses 5-fold cross-validation to assess generalization. N=100 participants, comparing training R² vs cross-validation R² to quantify overfitting.
+This RQ compares 4 nested regression models with varying complexity: (1) Minimal: Age + RAVLT, (2) Core: Age + RAVLT + BVMT, (3) Extended: + RPM + Education, (4) Full: all predictors. Uses 5-fold cross-validation to assess generalization. N=100 participants, comparing training R vs cross-validation R to quantify overfitting.
 
 **Theoretical Framing:**
 Model parsimony balances predictive power with generalizability. Overfitting occurs when complex models perform well on training data but poorly on new data. This RQ identifies the optimal complexity for REMEMVR prediction while ensuring practical utility for future applications.
@@ -40,10 +40,10 @@ Limited research on optimal predictor sets for VR-based episodic memory assessme
 ## Hypothesis
 
 **Primary Hypothesis:**
-Age + RAVLT + BVMT should achieve cross-validation R² H 0.30-0.35 with minimal overfitting (shrinkage < 0.10). Adding more predictors may not improve cross-validated R².
+Age + RAVLT + BVMT should achieve cross-validation R H 0.30-0.35 with minimal overfitting (shrinkage < 0.10). Adding more predictors may not improve cross-validated R.
 
 **Secondary Hypotheses:**
-- Minimal model (Age + RAVLT) should achieve CV-R² H 0.20-0.25
+- Minimal model (Age + RAVLT) should achieve CV-R H 0.20-0.25
 - Full model should show substantial overfitting (shrinkage > 0.15)
 - Core 3-predictor model should be optimal balance
 
@@ -51,7 +51,7 @@ Age + RAVLT + BVMT should achieve cross-validation R² H 0.30-0.35 with minimal o
 Age and established episodic tests capture core variance in REMEMVR. Additional predictors likely contribute noise rather than signal, degrading generalization.
 
 **Expected Effect Pattern:**
-Best cross-validation R² with fewest predictors. Acceptable shrinkage (< 0.10) from training to CV performance. Core model should outperform minimal and full models in CV-R².
+Best cross-validation R with fewest predictors. Acceptable shrinkage (< 0.10) from training to CV performance. Core model should outperform minimal and full models in CV-R.
 
 ---
 
@@ -90,7 +90,7 @@ Nested multiple regression with 5-fold cross-validation and model comparison
 
 **Step 1:** Extract and prepare data
 - Load theta_all scores from Ch5 5.1.1 results
-- Extract cognitive tests from master.xlsx
+- Extract cognitive tests from dfnonvr.csv
 - Compute derived scores and standardize to T-scores
 - Check data quality and missingness
 
@@ -102,23 +102,23 @@ Nested multiple regression with 5-fold cross-validation and model comparison
 
 **Step 3:** Cross-validation
 - 5-fold stratified CV (maintain age distribution)
-- Compute training R² and CV-R² for each model
-- Calculate shrinkage = Training R² - CV-R²
-- Report mean ± SE across folds
+- Compute training R and CV-R for each model
+- Calculate shrinkage = Training R - CV-R
+- Report mean  SE across folds
 
 **Step 4:** Model selection
-- Identify model with best CV-R² given complexity
-- Apply parsimony criterion: prefer simpler if CV-R² within 0.02
-- Test significance of R² improvements between nested models
+- Identify model with best CV-R given complexity
+- Apply parsimony criterion: prefer simpler if CV-R within 0.02
+- Test significance of R improvements between nested models
 
 **Step 5:** Effect sizes and diagnostics
 - Standardized betas with 95% CIs for optimal model
-- Semi-partial correlations (sr²) for unique variance
+- Semi-partial correlations (sr) for unique variance
 - VIF < 5 for multicollinearity check
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
 
 **Step 6:** Sensitivity analyses
-- Bootstrap CIs (1000 iterations) for CV-R² estimates
+- Bootstrap CIs (1000 iterations) for CV-R estimates
 - Leave-one-out CV for comparison with 5-fold
 - Exclude outliers and rerun analysis
 
@@ -127,18 +127,18 @@ Nested multiple regression with 5-fold cross-validation and model comparison
 - data/step02_theta_all_scores.csv (mean theta per participant)
 - data/step03_analysis_input.csv (merged analysis dataset)
 - data/step04_nested_models.csv (4 model specifications)
-- data/step05_cv_results.csv (training vs CV R² by model)
+- data/step05_cv_results.csv (training vs CV R by model)
 - data/step06_optimal_model.csv (coefficients, CIs, dual p-values)
 - data/step07_model_diagnostics.csv (VIF, residuals, Cook's D)
 - data/step08_sensitivity_analysis.csv (bootstrap CIs, LOO-CV)
 - results/parsimony_analysis.md (text summary for thesis)
-- plots/cv_performance.png (training vs CV R² by model)
+- plots/cv_performance.png (training vs CV R by model)
 - plots/shrinkage_comparison.png (overfitting visualization)
 
 **Success Criteria:**
 - [ ] Fit 4 nested models successfully
 - [ ] Complete 5-fold CV for all models
-- [ ] Core model achieves CV-R² > 0.25
+- [ ] Core model achieves CV-R > 0.25
 - [ ] Core model shrinkage < 0.10
 - [ ] Full model shows greater shrinkage than core
 - [ ] VIF < 5 for all predictors in optimal model

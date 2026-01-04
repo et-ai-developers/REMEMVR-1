@@ -91,7 +91,7 @@ Cross-sectional classification analysis with demographic characterization
 
 **Step 1:** Extract and prepare data
 - Load REMEMVR theta scores from Ch5 results
-- Extract RAVLT total scores from master.xlsx
+- Extract RAVLT total scores from dfnonvr.csv
 - Standardize both measures to z-scores for classification
 
 **Step 2:** Define classification criteria

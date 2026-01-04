@@ -13,7 +13,7 @@
 Do cognitive tests predict who makes more high-confidence errors (HCE)? Ch6 found 15-20% stable HCE rate - do individual differences have cognitive predictors?
 
 **Scope:**
-This RQ examines predictors of high-confidence error rates using HCE data from Ch6 and cognitive test scores from master.xlsx. Tests individual differences in metacognitive monitoring failure across N=100 participants. HCE rate defined as proportion of errors that are high-confidence (from Ch6 6.6.x analyses).
+This RQ examines predictors of high-confidence error rates using HCE data from Ch6 and cognitive test scores from dfnonvr.csv. Tests individual differences in metacognitive monitoring failure across N=100 participants. HCE rate defined as proportion of errors that are high-confidence (from Ch6 6.6.x analyses).
 
 **Theoretical Framing:**
 Tests whether executive functions (measured by RPM) predict better metacognitive monitoring, while memory capacity tests (RAVLT/BVMT) may not predict monitoring accuracy. HCE represents a specific monitoring failure where confidence exceeds accuracy.
@@ -48,7 +48,7 @@ RAVLT and BVMT scores will not significantly predict HCE rates. Memory capacity 
 HCE represents monitoring failure - being confident when wrong. This requires executive control to detect errors before expressing confidence. If RPM measures executive capacity, lower RPM should predict more HCEs. Memory tests measure encoding capacity, not monitoring accuracy.
 
 **Expected Effect Pattern:**
-Significant negative correlation between RPM and HCE rate (² = -0.28, p < 0.01). RAVLT and BVMT effects should be non-significant (p > 0.05). Model R² expected around 0.15, indicating individual differences in monitoring failure are partially predictable.
+Significant negative correlation between RPM and HCE rate ( = -0.28, p < 0.01). RAVLT and BVMT effects should be non-significant (p > 0.05). Model R expected around 0.15, indicating individual differences in monitoring failure are partially predictable.
 
 ---
 
@@ -87,24 +87,24 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 1:** Extract and prepare data
 - Load HCE rates from Ch6 6.6.x results
-- Extract cognitive tests from master.xlsx (RAVLT_T, BVMT_T, RPM_T, Age)
+- Extract cognitive tests from dfnonvr.csv (RAVLT_T, BVMT_T, RPM_T, Age)
 - Compute derived scores and standardize to T-scores
 - Check data quality and missingness
 
 **Step 2:** Hierarchical regression
 - Model 1: Demographics only (Age, Sex, Education)
 - Model 2: + Cognitive tests (RAVLT_T, BVMT_T, RPM_T)
-- Report ”R² and F-test for model improvement
+- Report R and F-test for model improvement
 
 **Step 3:** Test individual predictors
 - Extract standardized betas with 95% CIs
-- Compute semi-partial correlations (sr²)
+- Compute semi-partial correlations (sr)
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni (± = 0.00179/4 = 0.000448)
+- Primary: Bonferroni ( = 0.00179/4 = 0.000448)
 - Secondary: FDR for comparison
 
 **Step 4:** Effect sizes and importance
-- Cohen's f² = R²/(1-R²)
+- Cohen's f = R/(1-R)
 - Dominance analysis or relative weights
 - Bootstrap CIs (1000 iterations)
 
@@ -116,7 +116,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 6:** Cross-validation
 - Method: 5-fold CV
-- Metrics: Test R², RMSE, MAE
+- Metrics: Test R, RMSE, MAE
 - Check for overfitting
 
 **Step 7:** Power analysis
@@ -134,7 +134,7 @@ Multiple regression with hierarchical entry and cross-validation
 - data/step03_analysis_input.csv (merged analysis dataset)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step05_model_diagnostics.csv (VIF, residuals, Cook's D)
-- data/step06_effect_sizes.csv (R², f², sr², with 95% CIs)
+- data/step06_effect_sizes.csv (R, f, sr, with 95% CIs)
 - data/step07_cross_validation.csv (k-fold CV results)
 - data/step08_power_analysis.csv (post-hoc and sensitivity)
 - results/hce_prediction_summary.md (text summary for thesis)
@@ -142,14 +142,14 @@ Multiple regression with hierarchical entry and cross-validation
 - plots/hce_predictor_effects.png (visualization of effects)
 
 **Success Criteria:**
-- [ ] HCE rate has identifiable predictors (Model R² > 0.10)
-- [ ] RPM significantly predicts HCE rate (² < 0, p < 0.000448)
+- [ ] HCE rate has identifiable predictors (Model R > 0.10)
+- [ ] RPM significantly predicts HCE rate ( < 0, p < 0.000448)
 - [ ] Effect direction matches hypothesis (negative RPM-HCE correlation)
 - [ ] VIF < 5 for all predictors (no multicollinearity)
 - [ ] Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - [ ] Homoscedasticity confirmed (Breusch-Pagan p > 0.05)
 - [ ] No influential outliers (Cook's D < 4/N)
-- [ ] Cross-validation R² within 10% of training R²
+- [ ] Cross-validation R within 10% of training R
 - [ ] Connect findings to Ch6 HCE mechanism interpretation
 
 ---

@@ -13,7 +13,7 @@
 Do self-reported factors (typical sleep, education level, VR experience) predict REMEMVR performance?
 
 **Scope:**
-This RQ examines individual difference predictors using mean theta scores aggregated across all memory domains from Ch5. Analysis includes 100 participants with self-report measures from master.xlsx. Model includes age as covariate to control for developmental confounding.
+This RQ examines individual difference predictors using mean theta scores aggregated across all memory domains from Ch5. Analysis includes 100 participants with self-report measures from dfnonvr.csv. Model includes age as covariate to control for developmental confounding.
 
 **Theoretical Framing:**
 Tests whether lifestyle and experiential factors contribute unique variance to episodic memory performance beyond chronological age. Key question for ecological validity of REMEMVR assessment.
@@ -95,7 +95,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 1:** Extract and prepare data
 - Load mean theta_all scores from Ch5 5.1.1 results
-- Extract self-report measures from master.xlsx (Education, Sleep, VR_Experience)
+- Extract self-report measures from dfnonvr.csv (Education, Sleep, VR_Experience)
 - Extract Age covariate for statistical control
 - Check data quality and missingness patterns
 
@@ -137,7 +137,7 @@ Multiple regression with hierarchical entry and cross-validation
 - bootstrap (1000 replications, seed=42) CIs for non-normal distributions if needed
 
 **Expected Outputs:**
-- data/step01_self_report_data.csv (extracted measures from master.xlsx)
+- data/step01_self_report_data.csv (extracted measures from dfnonvr.csv)
 - data/step02_theta_means.csv (mean theta per participant from Ch5)
 - data/step03_analysis_input.csv (merged analysis dataset)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values)

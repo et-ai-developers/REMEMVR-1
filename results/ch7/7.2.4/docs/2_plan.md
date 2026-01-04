@@ -139,7 +139,7 @@ Raise error with specific data issue, log to logs/step01_extract_rememvr.log, in
 **Dependencies:** Step 1 (REMEMVR data prepared)
 **Complexity:** Low (~5 minutes)
 
-**Purpose:** Extract RAVLT total scores and age data from master.xlsx for correlation analysis
+**Purpose:** Extract RAVLT total scores and age data from dfnonvr.csv for correlation analysis
 
 **Input:**
 - data/cache/master.xlsx
@@ -600,7 +600,7 @@ Document power calculation limitations, provide qualitative interpretation, log 
 - UID: Unique participant identifier (consistent across all files)
 - theta_all: Raw REMEMVR theta scores from Ch5
 - theta_all_z: Standardized theta scores (z-score)
-- RAVLT_Total: Raw RAVLT total score from master.xlsx
+- RAVLT_Total: Raw RAVLT total score from dfnonvr.csv
 - RAVLT_Total_z: Standardized RAVLT scores (z-score)
 - Age: Participant age in years
 - r: Pearson correlation coefficient

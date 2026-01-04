@@ -76,7 +76,7 @@ Raise error with specific dependency issue, log to logs/step00_validate_dependen
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (~5 minutes)
 
-**Purpose:** Extract sleep hours and quality data from master.xlsx for each test session
+**Purpose:** Extract sleep hours and quality data from dfnonvr.csv for each test session
 
 **Input:**
 - data/cache/master.xlsx (SLP tag patterns)

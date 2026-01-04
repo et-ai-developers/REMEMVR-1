@@ -34,7 +34,7 @@ analysis_tools:
       - path: "data/step01_cognitive_tests.csv"
         columns: ["UID", "RAVLT_T", "BVMT_T", "RPM_T", "Age"]
         description: "Cognitive test scores and demographics"
-    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) and age from master.xlsx"
+    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) and age from dfnonvr.csv"
 
   merge_theta_cognitive:
     module: "tools.data"

@@ -86,7 +86,7 @@ Quit immediately with specific dependency error message, log to logs/step00_depe
 **Dependencies:** Step 0 (validated dependencies)
 **Complexity:** Low (<10 minutes)
 
-**Purpose:** Extract cognitive test scores from master.xlsx and standardize to T-scores for LPA analysis
+**Purpose:** Extract cognitive test scores from dfnonvr.csv and standardize to T-scores for LPA analysis
 
 **Input:**
 - data/cache/master.xlsx (RAVLT, BVMT, RPM raw scores)

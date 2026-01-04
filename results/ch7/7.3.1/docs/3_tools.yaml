@@ -55,7 +55,7 @@ analysis_tools:
         description: "T-scored cognitive tests with demographics"
 
     parameters:
-      tests: ["RAVLT", "BVMT", "RPM"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
 
     description: "Extract cognitive test raw scores and convert to T-scores (M=50, SD=10)"
     source_reference: "tools_inventory.md section 'Data Extraction Tools'"
@@ -417,7 +417,7 @@ validation_tools:
 
     criteria:
       - "Model convergence successful"
-      - "R² values in valid range [0, 1]"
+      - "R values in valid range [0, 1]"
       - "VIF values < 5 (multicollinearity check)"
       - "Residuals approximately normal"
       - "Homoscedasticity assumption met"
@@ -450,12 +450,12 @@ validation_tools:
 
     parameters:
       min_folds: 5
-      overfitting_threshold: 0.15  # Max train-test R² gap
+      overfitting_threshold: 0.15  # Max train-test R gap
       min_cv_r2: 0.0
 
     criteria:
       - "All 5 folds completed successfully"
-      - "Cross-validated R² reasonable compared to training"
+      - "Cross-validated R reasonable compared to training"
       - "No extreme overfitting (train-test gap < 0.15)"
       - "Error metrics positive and finite"
 
@@ -493,9 +493,9 @@ validation_tools:
 
     criteria:
       - "Effect sizes in valid ranges"
-      - "Semi-partial r² sum <= total R²"
+      - "Semi-partial r sum <= total R"
       - "Bootstrap CIs reasonable width"
-      - "Cohen's f² values non-negative"
+      - "Cohen's f values non-negative"
 
     expected_output:
       format: "Dict[str, Any]"

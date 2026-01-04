@@ -40,7 +40,7 @@ analysis_tools:
         BVMT: {mean: 24.8, sd: 6.1}
         RPM: {mean: 52.3, sd: 8.7}
     
-    description: "Extract cognitive test scores from master.xlsx and convert to T-scores using population norms"
+    description: "Extract cognitive test scores from dfnonvr.csv and convert to T-scores using population norms"
     source_reference: "tools_inventory.md section 'Extraction Tools' - extract_cognitive_tests"
 
   # Step 3: Merge datasets  

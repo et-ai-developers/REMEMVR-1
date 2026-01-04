@@ -82,7 +82,7 @@ Raise error with specific dependency missing, log to logs/step00_validate_depend
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (<5 minutes)
 
-**Purpose:** Load theta_all scores from Ch5 5.1.1 and cognitive test scores from master.xlsx, merge and prepare analysis dataset
+**Purpose:** Load theta_all scores from Ch5 5.1.1 and cognitive test scores from dfnonvr.csv, merge and prepare analysis dataset
 
 **Input:**
 - Primary: results/ch5/5.1.1/data/step03_theta_scores.csv (theta_all estimates)
@@ -92,7 +92,7 @@ Raise error with specific dependency missing, log to logs/step00_validate_depend
 
 **Processing:**
 - Load theta_all scores by participant UID
-- Extract RAVLT_Total and BVMT_TotR from master.xlsx
+- Extract RAVLT_Total and BVMT_TotR from dfnonvr.csv
 - Merge datasets on UID (inner join)
 - Check for missing data patterns and document exclusions
 - Verify N>=95 participants with complete data (allow 5% missingness)

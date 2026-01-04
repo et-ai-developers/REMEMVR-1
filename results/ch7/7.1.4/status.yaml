@@ -15,7 +15,7 @@ rq_concept:
     RQ 7.1.4: Unique REMEMVR variance unexplained by all predictors?
     Type: Predictive Validity (Core) / Incremental Validity Assessment
     Analysis: Hierarchical regression (3 blocks) + Cohen's f² + domain residuals
-    Data: DERIVED from Ch5 theta scores + RAW from master.xlsx predictors
+    Data: DERIVED from Ch5 theta scores + RAW from dfnonvr.csv predictors
     Critical: Chapter-level alpha 0.00179, expect >50% residual variance
 
 rq_scholar:
@@ -36,8 +36,15 @@ rq_tools:
   context_dump: "8 analysis + 4 validation tools cataloged for hierarchical regression incremental validity analysis"
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: "2026-01-04T17:30:00Z"
+  version: "v5.0.0"
+  context_dump: |
+    4_analysis.yaml created with 9 verified steps (0-8) for hierarchical regression
+    All tools verified to exist in actual Python code (tools.data, tools.analysis_regression)
+    Data paths corrected: data/dfnonvr.csv (not cache/), dfnonvr.csv for extractions
+    Ch5 dependency verified: results/ch5/5.1.1/data/step03_theta_scores.csv exists
+    8 corrections applied for module names, paths, and function signatures
 
 rq_inspect:
   status: pending

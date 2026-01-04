@@ -84,7 +84,7 @@ analysis_tools:
 
     input_files:
       - path: "data/cache/master.xlsx"
-        required_columns: ["UID", "RAVLT_total", "BVMT_total", "NART", "RPM", "Age"]
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM Score", "Age"]
         expected_rows: "~100 participants"
         data_types:
           UID: "string (format: P###)"
@@ -103,7 +103,7 @@ analysis_tools:
         description: "Predictor correlation matrix for multicollinearity assessment"
 
     parameters:
-      tests: ["RAVLT_total", "BVMT_total", "NART", "RPM", "Age"]
+      tests: ["RAVLT_total", "BVMT_total", "RPM Score", "Age"]
       standardize: true
       correlation_threshold: 0.80
 
@@ -261,7 +261,7 @@ analysis_tools:
         description: "Predictor effects in univariate vs multivariate contexts"
       - path: "data/step07_predictor_effect_sizes.csv"
         columns: ["predictor", "context", "cohens_f2", "ci_lower", "ci_upper"]
-        description: "Cohen's f² effect sizes with bootstrap confidence intervals"
+        description: "Cohen's f effect sizes with bootstrap confidence intervals"
       - path: "data/step07_predictor_rankings.csv"
         columns: ["context", "rank", "predictor", "importance_score"]
         description: "Predictor importance rankings by context"
@@ -472,7 +472,7 @@ validation_tools:
     criteria:
       - "All effect sizes non-negative"
       - "No NaN or infinite values"
-      - "Very large effects (f² > 1.0) flagged but valid"
+      - "Very large effects (f > 1.0) flagged but valid"
 
     expected_output:
       format: "Dict[str, Any]"
@@ -487,7 +487,7 @@ validation_tools:
       log_to: "logs/stepNN_<step_name>.log"
       invoke: "g_debug (master invokes after error)"
 
-    description: "Validate Cohen's f² effect sizes are within reasonable bounds"
+    description: "Validate Cohen's f effect sizes are within reasonable bounds"
     source_reference: "tools_inventory.md section 'Validation Tools' - validate_effect_sizes"
 
 summary:

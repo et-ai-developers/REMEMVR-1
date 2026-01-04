@@ -96,7 +96,7 @@ Multiple regression with interaction terms and simple slopes analysis
 
 **Step 1:** Extract and prepare data
 - Load mean theta_all scores from Ch5 5.1.1 results
-- Extract cognitive tests from master.xlsx (RAVLT, BVMT, NART, RPM)
+- Extract cognitive tests from dfnonvr.csv (RAVLT, BVMT, NART, RPM)
 - Center predictors: Age_c = Age - mean(Age), Test_c = Test - 50
 - Check data quality and compute descriptive statistics
 

@@ -82,7 +82,7 @@ Quit immediately with specific error message indicating which dependency failed.
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Medium (~8 minutes)
 
-**Purpose:** Extract cognitive test raw scores from master.xlsx and convert to standardized T-scores for regression analysis
+**Purpose:** Extract cognitive test raw scores from dfnonvr.csv and convert to standardized T-scores for regression analysis
 
 **Input:**
 - data/cache/master.xlsx (verified accessible from Step 0)

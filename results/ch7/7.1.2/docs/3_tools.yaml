@@ -34,7 +34,7 @@ analysis_tools:
     validation_tool: "validate_data_columns"
 
     input_files:
-      - path: "data/master.xlsx"
+      - path: "data/dfnonvr.csv"
         required_columns: ["RAVLT_Total", "BVMT_Total_Recognition", "RPM_Total"]
         expected_rows: "~100 participants"
         data_types:
@@ -150,7 +150,7 @@ analysis_tools:
     output_files:
       - path: "data/step05_r_squared_comparison.csv"
         columns: ["model", "r_squared", "adj_r_squared", "bootstrap_ci_lower", "bootstrap_ci_upper", "difference", "difference_ci_lower", "difference_ci_upper", "p_value"]
-        description: "Bootstrap comparison of R² values between intercept and slope models"
+        description: "Bootstrap comparison of R values between intercept and slope models"
       - path: "data/step06_predictor_significance.csv"
         columns: ["predictor", "outcome", "beta", "p_uncorrected", "p_bonferroni", "sig_uncorrected", "sig_bonferroni", "effect_interpretation"]
         description: "Individual predictor significance with dual p-value reporting per Decision D068"
@@ -162,7 +162,7 @@ analysis_tools:
       confidence_level: "0.95 (95% CI)"
       random_state: "42 (reproducibility seed)"
 
-    description: "Bootstrap confidence intervals for regression coefficients and R² comparison"
+    description: "Bootstrap confidence intervals for regression coefficients and R comparison"
     source_reference: "tools_inventory.md section 'Module: tools.analysis_regression'"
 
 validation_tools:
@@ -260,7 +260,7 @@ validation_tools:
       - "Model converged successfully (no estimation failures)"
       - "All coefficients finite (no NaN/Inf estimates)"
       - "Standard errors positive and reasonable"
-      - "R² in valid range [0, 1]"
+      - "R in valid range [0, 1]"
       - "VIF values < 10 (multicollinearity check)"
 
     expected_output:

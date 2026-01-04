@@ -32,7 +32,7 @@ analysis_tools:
     output_files:
       - path: "data/step01_self_report_data.csv"
         columns: ["UID", "Education", "Typical_Sleep", "VR_Experience", "Age"]
-        description: "Self-report measures extracted from master.xlsx"
+        description: "Self-report measures extracted from dfnonvr.csv"
       
       - path: "data/step02_theta_scores.csv"
         columns: ["UID", "theta_all", "theta_SE"]
@@ -168,7 +168,7 @@ analysis_tools:
         medium: 0.15
         large: 0.35
     
-    description: "Compute Cohen's f² effect size for model and predictor-level comparisons"
+    description: "Compute Cohen's f effect size for model and predictor-level comparisons"
     source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_cohens_f2"
 
   cross_validate_regression:
@@ -292,7 +292,7 @@ validation_tools:
       - "Model optimization converged successfully"
       - "All coefficient estimates are finite (no NaN/Inf)"
       - "F-statistic and p-values computed successfully"
-      - "R² values in valid range [0, 1]"
+      - "R values in valid range [0, 1]"
     
     expected_output:
       format: "Dict[str, Any]"
@@ -333,7 +333,7 @@ validation_tools:
     
     criteria:
       - "All p-values in [0, 1] range (inclusive)"
-      - "All R² values in [0, 1] range (inclusive)"
+      - "All R values in [0, 1] range (inclusive)"
       - "All power values in [0, 1] range (inclusive)"
       - "No NaN or infinite values in probability columns"
     
@@ -349,7 +349,7 @@ validation_tools:
       log_to: "logs/step04_hierarchical_regression.log"
       invoke: "g_debug (master invokes after error)"
     
-    description: "Validate probability values (p-values, R², power) are in [0, 1] range"
+    description: "Validate probability values (p-values, R, power) are in [0, 1] range"
     source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_probability_range"
 
   validate_variance_positivity:
@@ -404,9 +404,9 @@ validation_tools:
       warn_threshold: 1.0
     
     criteria:
-      - "All Cohen's f² values >= 0 (non-negative by definition)"
+      - "All Cohen's f values >= 0 (non-negative by definition)"
       - "No NaN or infinite effect size values"
-      - "Effect sizes within reasonable bounds (warn if f² > 1.0)"
+      - "Effect sizes within reasonable bounds (warn if f > 1.0)"
       - "Effect size confidence intervals are non-degenerate"
     
     expected_output:
@@ -421,7 +421,7 @@ validation_tools:
       log_to: "logs/step06_effect_sizes.log"
       invoke: "g_debug (master invokes after error)"
     
-    description: "Validate Cohen's f² effect sizes are within reasonable bounds"
+    description: "Validate Cohen's f effect sizes are within reasonable bounds"
     source_reference: "tools_inventory.md section 'Module: tools.validation' - validate_effect_sizes"
 
 summary:

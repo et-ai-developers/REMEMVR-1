@@ -92,7 +92,7 @@ Multiple regression with hierarchical entry and cross-validation
 **Step 1:** Extract and prepare data
 - Load theta scores from Ch5 results (overall memory accuracy)
 - Load confidence and calibration scores from Ch6 results
-- Extract DASS-21 scores from master.xlsx
+- Extract DASS-21 scores from dfnonvr.csv
 - Check data quality and missingness patterns
 
 **Step 2:** Fit models for each dependent variable
@@ -119,7 +119,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 6:** Cross-validation
 - Method: 5-fold CV for each model
-- Metrics: Test R², RMSE, MAE
+- Metrics: Test R, RMSE, MAE
 - Check for overfitting across all three models
 
 **Step 7:** Power analysis
@@ -132,7 +132,7 @@ Multiple regression with hierarchical entry and cross-validation
 - data/step03_analysis_input.csv (merged analysis dataset)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values for all 3 models)
 - data/step05_model_diagnostics.csv (VIF, residuals, Cook's D for each model)
-- data/step06_effect_sizes.csv (R², f², sr² with 95% CIs)
+- data/step06_effect_sizes.csv (R, f, sr with 95% CIs)
 - data/step07_cross_validation.csv (k-fold CV results)
 - data/step08_power_analysis.csv (post-hoc and sensitivity)
 - data/step09_covariate_models.csv (results with RAVLT/RPM controls)
@@ -147,8 +147,8 @@ Multiple regression with hierarchical entry and cross-validation
 - [ ] Control for cognitive ability to rule out confound
 - [ ] VIF < 5 for all predictors (no multicollinearity)
 - [ ] Residuals normally distributed (Shapiro-Wilk p > 0.05)
-- [ ] Cross-validation R² within 10% of training R²
-- [ ] Power > 0.80 for medium effect (f² = 0.15)
+- [ ] Cross-validation R within 10% of training R
+- [ ] Power > 0.80 for medium effect (f = 0.15)
 
 ---
 

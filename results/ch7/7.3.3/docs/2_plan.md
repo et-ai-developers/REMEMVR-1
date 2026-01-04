@@ -84,7 +84,7 @@ If Ch6 HCE data not found, QUIT with specific missing file error. If master.xlsx
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (~5 minutes)
 
-**Purpose:** Extract cognitive test scores from master.xlsx and prepare for analysis
+**Purpose:** Extract cognitive test scores from dfnonvr.csv and prepare for analysis
 
 **Input:**
 - data/cache/master.xlsx (cognitive test raw scores)

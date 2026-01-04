@@ -52,7 +52,7 @@ Effects will remain significant after controlling for age and cognitive ability 
 Depression may impair encoding motivation and effortful processing. Anxiety may impair working memory during retrieval. Stress may interfere with hippocampal consolidation processes. All three mechanisms predict negative relationships with episodic memory performance.
 
 **Expected Effect Pattern:**
-Model: Theta ~ DASS_Dep + DASS_Anx + DASS_Str, Expected R² = 0.06 (small effect). No DASS subscale significantly predicts accuracy (all p > 0.10) due to subclinical levels in healthy sample.
+Model: Theta ~ DASS_Dep + DASS_Anx + DASS_Str, Expected R = 0.06 (small effect). No DASS subscale significantly predicts accuracy (all p > 0.10) due to subclinical levels in healthy sample.
 
 ---
 
@@ -91,7 +91,7 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 1:** Extract and prepare data
 - Load mean theta_all scores from Ch5 5.1.1 results
-- Extract DASS-21 subscale scores from master.xlsx: DASS_Dep, DASS_Anx, DASS_Str
+- Extract DASS-21 subscale scores from dfnonvr.csv: DASS_Dep, DASS_Anx, DASS_Str
 - Extract control variables: Age, RAVLT total score
 - Check for missing data (expected N H 97)
 
@@ -103,13 +103,13 @@ Multiple regression with hierarchical entry and cross-validation
 **Step 3:** Hierarchical regression
 - Model 1: Theta ~ Age + RAVLT (control model)
 - Model 2: Theta ~ Age + RAVLT + DASS_Dep + DASS_Anx + DASS_Str
-- Test ”R² significance between models
+- Test R significance between models
 
 **Step 4:** Test individual predictors
 - Extract standardized beta coefficients with 95% CIs
-- Compute semi-partial correlations (sr²) for unique variance
+- Compute semi-partial correlations (sr) for unique variance
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
-- Primary: Bonferroni correction (± = 0.00179/3 = 0.00060 for 3 DASS predictors)
+- Primary: Bonferroni correction ( = 0.00179/3 = 0.00060 for 3 DASS predictors)
 - Secondary: FDR correction for comparison
 
 **Step 5:** Model diagnostics
@@ -120,8 +120,8 @@ Multiple regression with hierarchical entry and cross-validation
 
 **Step 6:** Cross-validation
 - Method: 5-fold CV
-- Metrics: Test R², RMSE, MAE
-- Check for overfitting (test R² vs training R²)
+- Metrics: Test R, RMSE, MAE
+- Check for overfitting (test R vs training R)
 
 **Step 7:** Power analysis
 - Post-hoc power for observed effect sizes
@@ -132,7 +132,7 @@ Multiple regression with hierarchical entry and cross-validation
 - Include model diagnostics step (VIF, residuals, homoscedasticity)
 - Include cross-validation for predictive models
 - Include power analysis for null findings
-- Include effect sizes with 95% CIs (R², f², sr², ²)
+- Include effect sizes with 95% CIs (R, f, sr, )
 
 **Expected Outputs:**
 - data/step01_dass_scores.csv (DASS subscale scores extracted)
@@ -156,7 +156,7 @@ Multiple regression with hierarchical entry and cross-validation
 - Residuals normally distributed (Shapiro-Wilk p > 0.05)
 - Homoscedasticity confirmed (Breusch-Pagan p > 0.05)
 - No influential outliers (Cook's D < 4/N)
-- Cross-validation R² within 10% of training R²
+- Cross-validation R within 10% of training R
 - Power analysis for null findings
 - DASS descriptives: M, SD, range for all subscales
 
@@ -179,7 +179,7 @@ Ch5 5.1.1 (General omnibus analysis providing theta_all scores)
 **Dependencies:**
 Ch5 5.1.1 must complete Steps 1-3 (IRT calibration and theta estimation) before this RQ can run
 
-### Predictor Variables from master.xlsx:
+### Predictor Variables from dfnonvr.csv:
 
 **DASS-21 Subscales:**
 - Depression: {UID}-DEM-X-DASS_Dep

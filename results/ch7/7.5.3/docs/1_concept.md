@@ -96,7 +96,7 @@ Correlational analysis and independent samples t-test with multiple regression c
 
 **Step 1:** Extract and prepare data
 - Load theta scores from Ch5 5.1.1 outputs (theta_all per participant)
-- Extract STR questionnaire data from master.xlsx
+- Extract STR questionnaire data from dfnonvr.csv
 - Code strategy variables from text responses
 
 **Step 2:** Code strategy variables

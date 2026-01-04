@@ -232,6 +232,36 @@ IF uncertain:
 
 ---
 
+#### 🔴 Circuit Breaker #5: Data File Verification
+
+**TRIGGER - Before using ANY data file:**
+- Referencing column names
+- Extracting data
+- Making claims about what data exists
+
+**MANDATORY RESPONSE:**
+```
+1. CHECK the actual file (head, column list, shape)
+2. COMPARE to documentation
+3. IF MISMATCH → STOP and ask user
+4. NEVER assume documentation is correct over actual file
+5. NEVER assume actual file is correct over documentation
+6. ALWAYS ask user to clarify contradictions
+```
+
+**Example:**
+```
+❌ WRONG: "DATA_DICTIONARY.md says NART is in column 34, so I'll use that"
+✅ RIGHT: "Let me check the actual file..."
+          [Checks dfnonvr.csv]
+          "The dictionary says NART should be in column 34, but I don't see it.
+           Should I investigate why it's missing?"
+```
+
+**This prevents:** Using wrong data sources, missing columns, incorrect extractions
+
+---
+
 #### Hallucination Recovery Workflow
 
 **WHEN:** Circuit breaker triggers (especially #3 - user correction)
@@ -275,10 +305,35 @@ Return evidence with file paths, timestamps, and corrections to any errors.
 - Document assumptions and limitations
 - No black boxes - Code must be explainable line-by-line
 
-### 4. Never Guess
-- If uncertain → use context-finder agent to search docs/archives
-- If still uncertain → ask user (via AskUserQuestion)
-- Never make critical decisions without evidence/approval
+### 4. Never Guess - ALWAYS VERIFY FIRST
+
+**🔴 CRITICAL: "THE USER WOULD RATHER SPEND ALL DAY ANSWERING YOUR QUESTIONS THAN SPEND ALL DAY FIXING YOUR HALLUCINATIONS"**
+
+**Mandatory Protocol (NO EXCEPTIONS):**
+1. **DETERMINE** what I need to know for the task
+2. **IDENTIFY** what information is missing from my context
+3. **USE context_finder** to search archives/docs for answers
+4. **CHECK actual files** - Never trust documentation alone
+5. **IF ANY uncertainty remains:** STOP and ASK USER
+
+**NEVER ASSUME:**
+- Data locations or column names
+- What files contain what data  
+- Function/module existence
+- File formats or structure
+- That something "isn't needed" just because I can't find it
+
+**When I Find Contradictions:**
+1. STOP - Do not pick one as "correct"
+2. DOCUMENT the contradiction  
+3. ASK USER which is correct
+4. WAIT for clarification
+
+**Example Violations (WHAT NOT TO DO):**
+- ❌ "NART isn't in dfnonvr.csv so it must not be needed"
+- ❌ "The dictionary says X but I found Y, so I'll use Y"  
+- ❌ "I can't find this, so I'll create a workaround"
+- ✅ "I found a contradiction between the dictionary and actual data. Which should I use?"
 
 ### 5. User Approval Gates
 **Always ask before:**

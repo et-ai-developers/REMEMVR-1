@@ -67,7 +67,7 @@ analysis_tools:
       target_mean: 50
       target_sd: 10
 
-    description: "Extract cognitive test scores from master.xlsx and standardize to T-scores"
+    description: "Extract cognitive test scores from dfnonvr.csv and standardize to T-scores"
     source_reference: "tools_inventory.md section 'Data I/O Tools' - load_excel_data"
 
   fit_lpa_models:

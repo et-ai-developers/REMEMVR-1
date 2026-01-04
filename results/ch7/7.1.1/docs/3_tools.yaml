@@ -13,7 +13,7 @@ analysis_tools:
     input_files:
       - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
         required_columns: ["composite_ID", "UID", "test", "theta_*"]
-        expected_rows: "~400 (100 participants × 4 sessions)"
+        expected_rows: "~400 (100 participants  4 sessions)"
         data_types:
           composite_ID: "string (format: UID_test)"
           UID: "string (format: P###)"
@@ -41,7 +41,7 @@ analysis_tools:
     
     input_files:
       - path: "data/cache/master.xlsx"
-        required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "BVMT_T1", "BVMT_T2", "BVMT_T3", "BVMT_delayed", "NART", "RPM"]
+        required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "BVMT trial 1 score", "BVMT trial 2 score", "BVMT trial 3 score", "BVMT delayed recall score", "RPM Score"]
         expected_rows: "~100 (participants)"
         data_types:
           UID: "string (format: P###)"
@@ -56,7 +56,7 @@ analysis_tools:
         description: "T-scored cognitive test data (M=50, SD=10)"
         
     parameters:
-      tests: ["RAVLT", "BVMT", "NART", "RPM"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
       t_score_target_mean: 50.0
       t_score_target_sd: 10.0
       
@@ -96,7 +96,7 @@ analysis_tools:
     input_files:
       - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
         required_columns: ["composite_ID", "UID", "test", "theta_*"]
-        expected_rows: "~400 (100 participants × 4 sessions)"
+        expected_rows: "~400 (100 participants  4 sessions)"
         source: "Ch5 5.1.1 IRT calibration output"
         
     output_files:
@@ -276,7 +276,7 @@ analysis_tools:
         medium: 0.15
         large: 0.35
         
-    description: "Compute Cohen's f² and other effect sizes for model comparison"
+    description: "Compute Cohen's f and other effect sizes for model comparison"
     source_reference: "tools_inventory.md section 'Module: tools.analysis_regression' - compute_cohens_f2"
 
   compute_post_hoc_power:
@@ -360,8 +360,8 @@ validation_tools:
     criteria:
       - "All required cognitive test columns present"
       - "T-scores in reasonable range [25, 75]"
-      - "Sample means approximately 50 ± 2.0"
-      - "Sample standard deviations approximately 10 ± 1.5"
+      - "Sample means approximately 50  2.0"
+      - "Sample standard deviations approximately 10  1.5"
       - "90-100 participants with complete data"
       
     expected_output:
@@ -396,8 +396,8 @@ validation_tools:
       tolerance_sd: 1.5
       
     criteria:
-      - "All T-scored columns have mean within 50 ± 2.0"
-      - "All T-scored columns have SD within 10 ± 1.5"
+      - "All T-scored columns have mean within 50  2.0"
+      - "All T-scored columns have SD within 10  1.5"
       - "No negative T-scores or extreme outliers (T > 100)"
       - "No missing values in T-score columns"
       
@@ -549,7 +549,7 @@ validation_tools:
       - "Beta coefficients in reasonable range [-2, 2]"
       - "Standard errors > 0 (positive values)"
       - "Confidence intervals valid (lower < beta < upper)"
-      - "R² in expected range [0.15, 0.45]"
+      - "R in expected range [0.15, 0.45]"
       
     expected_output:
       format: "Dict[str, Any]"
@@ -659,10 +659,10 @@ validation_tools:
       r2_range: [0.0, 1.0]
       
     criteria:
-      - "Cohen's f² calculated for overall model"
-      - "Effect sizes in valid ranges (f² e 0, R² in [0,1])"
+      - "Cohen's f calculated for overall model"
+      - "Effect sizes in valid ranges (f e 0, R in [0,1])"
       - "Interpretations provided for all effect sizes"
-      - "Semi-partial correlations sum approximately to R²"
+      - "Semi-partial correlations sum approximately to R"
       
     expected_output:
       format: "Dict[str, Any]"

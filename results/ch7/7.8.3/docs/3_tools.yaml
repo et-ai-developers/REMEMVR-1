@@ -52,11 +52,11 @@ analysis_tools:
         description: "Descriptive statistics for all extracted variables"
 
     parameters:
-      tests: ["RAVLT", "BVMT", "RPM", "NART"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
       t_score_transform: true
       sex_coding: {"Male": 0, "Female": 1}
 
-    description: "Extract cognitive test scores from master.xlsx and compute T-score transformations"
+    description: "Extract cognitive test scores from dfnonvr.csv and compute T-score transformations"
     source_reference: "tools_inventory.md section 'Data Tools'"
 
   standardize_to_t_scores:
@@ -140,10 +140,10 @@ analysis_tools:
         description: "Cross-validation results for all 4 models"
       - path: "data/step04_cv_bootstrap_cis.csv"
         columns: ["model", "cv_r2_mean", "ci_lower", "ci_upper"]
-        description: "Bootstrap confidence intervals for CV-R² estimates"
+        description: "Bootstrap confidence intervals for CV-R estimates"
       - path: "data/step04_fold_details.csv"
         columns: ["model", "fold", "train_r2", "cv_r2", "shrinkage"]
-        description: "Individual fold results (20 rows: 4 models × 5 folds)"
+        description: "Individual fold results (20 rows: 4 models  5 folds)"
 
     parameters:
       n_folds: 5
@@ -185,7 +185,7 @@ analysis_tools:
       comparisons: ["1vs2", "2vs3", "3vs4"]
       alpha: 0.05
 
-    description: "Compare models using CV-R² and apply parsimony criterion for optimal model selection"
+    description: "Compare models using CV-R and apply parsimony criterion for optimal model selection"
     source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
 
   bootstrap_regression_ci:
@@ -390,7 +390,7 @@ validation_tools:
           max_val: 1.0
 
     criteria:
-      - "All R² values in valid range [0, 1]"
+      - "All R values in valid range [0, 1]"
       - "Shrinkage values in reasonable range [-0.5, 0.5]"
       - "No NaN or infinite values"
 
@@ -490,9 +490,9 @@ summary:
   mandatory_decisions_embedded: ["D068"]
   methodology: "Nested multiple regression with 5-fold cross-validation"
   key_features: 
-    - "4 nested models (Minimal’Core’Extended’Full)"
+    - "4 nested models (MinimalCoreExtendedFull)"
     - "Age-stratified 5-fold CV with bootstrap CIs"
-    - "Parsimony criterion (CV-R² within 0.02)"
+    - "Parsimony criterion (CV-R within 0.02)"
     - "Dual p-value reporting (Decision D068)"
     - "Comprehensive assumption checking"
     - "Outlier sensitivity analysis"

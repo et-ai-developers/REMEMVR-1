@@ -59,7 +59,7 @@ analysis_tools:
       tests: [1, 2, 3, 4]
       completeness_threshold: 0.75
       
-    description: "Extract sleep hours and quality from master.xlsx per test session"
+    description: "Extract sleep hours and quality from dfnonvr.csv per test session"
     source_reference: "tools_inventory.md section 'Data Extraction Tools'"
 
   merge_theta_sleep_data:

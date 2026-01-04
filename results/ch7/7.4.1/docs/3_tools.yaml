@@ -12,7 +12,7 @@ analysis_tools:
 
     input_files:
       - path: "data/cache/master.xlsx"
-        required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5"]
+        required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score"]
         expected_rows: "~100 (complete RAVLT data)"
         data_types:
           UID: "string (format: P### with leading zeros)"
@@ -24,14 +24,14 @@ analysis_tools:
 
     output_files:
       - path: "data/step00_cognitive_tests.csv"
-        columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "RAVLT_total"]
+        columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "RAVLT_total"]
         description: "Cognitive test scores with computed RAVLT total (sum of 5 trials)"
 
     parameters:
-      df: "pd.DataFrame from master.xlsx"
+      df: "pd.DataFrame from dfnonvr.csv"
       tests: "List[str] = ['RAVLT'] (extract RAVLT only for this RQ)"
 
-    description: "Extract RAVLT cognitive test scores from master.xlsx and compute total score"
+    description: "Extract RAVLT cognitive test scores from dfnonvr.csv and compute total score"
     source_reference: "tools_inventory.md section 'Data Tools' - extract_cognitive_tests"
 
   extract_domain_theta_scores:
@@ -152,7 +152,7 @@ validation_tools:
 
     input_files:
       - path: "data/step00_cognitive_tests.csv"
-        required_columns: ["UID", "RAVLT_T1", "RAVLT_T2", "RAVLT_T3", "RAVLT_T4", "RAVLT_T5", "RAVLT_total"]
+        required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "RAVLT_total"]
         source: "analysis tool output (extract_cognitive_tests)"
 
     parameters:
@@ -344,4 +344,4 @@ summary:
     - "All validation tools paired with analysis tools"
     - "Decision D068: Dual p-value reporting enforced via validation"
     - "Bootstrap confidence intervals with 1000 iterations and seed=42"
-    - "Chapter-level alpha correction (± = 0.00179) for significance testing"
+    - "Chapter-level alpha correction ( = 0.00179) for significance testing"

@@ -84,7 +84,7 @@ analysis_tools:
       required_control_columns: ["Age", "RAVLT_Total"]
       complete_cases_only: true
     
-    description: "Extract theta scores from Ch5 5.1.1 and merge with DASS/demographic data from master.xlsx"
+    description: "Extract theta scores from Ch5 5.1.1 and merge with DASS/demographic data from dfnonvr.csv"
     source_reference: "tools_inventory.md section 'Data Loading Tools' - load_test_data"
 
   fit_multiple_regression:

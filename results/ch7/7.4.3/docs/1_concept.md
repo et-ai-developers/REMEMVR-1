@@ -13,7 +13,7 @@
 Does RPM (fluid intelligence) predict performance on items requiring integration of What+Where+When information?
 
 **Scope:**
-This RQ examines whether fluid intelligence (measured by Raven's Progressive Matrices) differentially predicts performance on complex integration items versus simple single-domain items. Uses N=100 participants with theta scores from Ch5 analyses and RPM scores from master.xlsx.
+This RQ examines whether fluid intelligence (measured by Raven's Progressive Matrices) differentially predicts performance on complex integration items versus simple single-domain items. Uses N=100 participants with theta scores from Ch5 analyses and RPM scores from dfnonvr.csv.
 
 **Theoretical Framing:**
 Process-specific prediction analysis examining whether fluid intelligence supports relational binding and complex integration across episodic memory domains. Tests whether temporal integration (When domain) requires more fluid reasoning capacity than simple object identification.
@@ -91,7 +91,7 @@ Multiple correlation analysis with Steiger's Z-test for dependent correlations
 **Step 1:** Extract and prepare data
 - Load overall theta scores from Ch5 analyses
 - Extract What-only and When-only theta scores 
-- Load RPM scores from master.xlsx
+- Load RPM scores from dfnonvr.csv
 - Check data quality and handle missing values
 
 **Step 2:** Define integration complexity
@@ -130,7 +130,7 @@ Multiple correlation analysis with Steiger's Z-test for dependent correlations
 - Sensitivity analysis for smallest detectable difference
 
 **Expected Outputs:**
-- data/step01_rpm_extraction.csv (RPM scores from master.xlsx)
+- data/step01_rpm_extraction.csv (RPM scores from dfnonvr.csv)
 - data/step02_theta_integration.csv (integration complexity scores)
 - data/step03_theta_single_domain.csv (simple domain scores)
 - data/step04_correlation_analysis.csv (correlations with CIs, dual p-values)

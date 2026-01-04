@@ -67,7 +67,7 @@ analysis_tools:
     description: "Extract Where and What domain-specific theta scores from Ch5 analyses"
     source_reference: "tools_inventory.md section 'Data Processing Tools'"
 
-  # Step 2: Extract BVMT cognitive test scores from master.xlsx
+  # Step 2: Extract BVMT cognitive test scores from dfnonvr.csv
   extract_bvmt_scores:
     module: "tools.data_processing"
     function: "extract_cognitive_test_scores"
@@ -90,7 +90,7 @@ analysis_tools:
       uid_col: "UID"
       sheet_name: "Sheet1"
     
-    description: "Extract BVMT Total Recall scores from master.xlsx cognitive test data"
+    description: "Extract BVMT Total Recall scores from dfnonvr.csv cognitive test data"
     source_reference: "tools_inventory.md section 'Data Processing Tools'"
 
   # Step 3: Merge domain theta scores with BVMT scores

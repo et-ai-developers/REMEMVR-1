@@ -92,7 +92,7 @@ Validation tools MUST be used after random effects extraction. Specific validati
 **Purpose:** Extract and standardize cognitive test scores as predictors
 
 **Input:**
-- File: data/master.xlsx
+- File: data/dfnonvr.csv
 - Required columns: RAVLT_Total, BVMT_Total_Recognition, RPM_Total
 - Note: NART excluded per concept due to language validity concerns
 
@@ -218,7 +218,7 @@ Validation tools MUST be used after data merging to verify complete dataset.
 - Function: `compute_regression_diagnostics()` for VIF, assumptions
 - Function: `bootstrap_regression_ci()` for 95% CIs (1000 iterations, seed=42)
 - Checks linearity assumptions via partial regression plots
-- Reports R², individual coefficients, VIF values
+- Reports R, individual coefficients, VIF values
 
 **Output:**
 - File: data/step03_intercept_predictions.csv
@@ -253,7 +253,7 @@ Validation tools MUST be used after regression model fitting and diagnostics.
 - CI intervals include beta values
 
 *Log Validation:*
-- Required pattern: "Regression model fitted: R² = [value]"
+- Required pattern: "Regression model fitted: R = [value]"
 - Required pattern: "VIF computed: all values < 5"
 - Required pattern: "Bootstrap CIs computed: 1000 iterations"
 - Forbidden patterns: "ERROR", "Convergence failed", "VIF > 10"
@@ -284,7 +284,7 @@ Validation tools MUST be used after regression model fitting and diagnostics.
 - Function: `compute_regression_diagnostics()` for VIF, assumptions
 - Function: `bootstrap_regression_ci()` for 95% CIs (1000 iterations, seed=42)
 - Same analysis as Step 3 but with slope as outcome
-- Critical limitation: BLUP shrinkage may bias slope R² estimates
+- Critical limitation: BLUP shrinkage may bias slope R estimates
 
 **Output:**
 - File: data/step04_slope_predictions.csv
@@ -319,12 +319,12 @@ Validation tools MUST be used after slope regression model fitting and diagnosti
 - CI intervals include beta values
 
 *Log Validation:*
-- Required pattern: "Regression model fitted: R² = [value]"
+- Required pattern: "Regression model fitted: R = [value]"
 - Required pattern: "VIF computed: all values < 5"
 - Required pattern: "Bootstrap CIs computed: 1000 iterations"
 - Required pattern: "BLUP shrinkage bias acknowledged"
 - Forbidden patterns: "ERROR", "Convergence failed", "VIF > 10"
-- Acceptable warnings: "VIF between 5-10", "Low R² may reflect BLUP bias"
+- Acceptable warnings: "VIF between 5-10", "Low R may reflect BLUP bias"
 
 **Expected Behavior on Validation Failure:**
 - Raise error with specific failure message
@@ -334,12 +334,12 @@ Validation tools MUST be used after slope regression model fitting and diagnosti
 
 ---
 
-### Step 5: Compare R² Values with Bootstrap
+### Step 5: Compare R Values with Bootstrap
 
 **Dependencies:** Step 3 (intercept model), Step 4 (slope model)
 **Complexity:** Medium (10 minutes)
 
-**Purpose:** Test hypothesis that R²_intercept > R²_slope with statistical inference
+**Purpose:** Test hypothesis that R_intercept > R_slope with statistical inference
 
 **Input:**
 - File 1: data/step03_intercept_predictions.csv (intercept model results)
@@ -347,11 +347,11 @@ Validation tools MUST be used after slope regression model fitting and diagnosti
 - File 3: data/step02_regression_input.csv (raw data for bootstrap)
 
 **Processing:**
-- Extract R² values from both models
-- Function: `bootstrap_regression_ci()` for R² difference (1000 iterations, seed=42)
+- Extract R values from both models
+- Function: `bootstrap_regression_ci()` for R difference (1000 iterations, seed=42)
 - Participant-level block bootstrap preserving correlation structure
-- Compute 95% CI for R²_intercept - R²_slope difference
-- Test hypothesis: R²_intercept > R²_slope (one-tailed)
+- Compute 95% CI for R_intercept - R_slope difference
+- Test hypothesis: R_intercept > R_slope (one-tailed)
 
 **Output:**
 - File: data/step05_r_squared_comparison.csv
@@ -360,7 +360,7 @@ Validation tools MUST be used after slope regression model fitting and diagnosti
 - Expected Columns: 9
 
 **Validation Requirement:**
-Validation tools MUST be used after R² comparison and bootstrap inference.
+Validation tools MUST be used after R comparison and bootstrap inference.
 
 **Substance Validation Criteria (for rq_inspect post-execution validation):**
 
@@ -372,23 +372,23 @@ Validation tools MUST be used after R² comparison and bootstrap inference.
 
 *Value Ranges:*
 - r_squared in [0, 1] (coefficient of determination bounds)
-- adj_r_squared in [0, 1] (adjusted R² bounds)
+- adj_r_squared in [0, 1] (adjusted R bounds)
 - bootstrap_ci_lower < bootstrap_ci_upper (CI bounds)
 - difference unrestricted (can be positive/negative)
 - p_value in [0, 1] (one-tailed test p-value)
 
 *Data Quality:*
 - All 3 model rows present (intercept, slope, difference)
-- No NaN values in R² or CI columns
+- No NaN values in R or CI columns
 - Difference row: difference = r_squared_intercept - r_squared_slope
 - Bootstrap CIs based on 1000 iterations
 
 *Log Validation:*
 - Required pattern: "Bootstrap comparison: 1000 iterations complete"
-- Required pattern: "R² difference computed: [value]"
+- Required pattern: "R difference computed: [value]"
 - Required pattern: "Bootstrap CI: [lower, upper]"
-- Required pattern: "Hypothesis test: R²_intercept > R²_slope"
-- Forbidden patterns: "ERROR", "Bootstrap failed", "Invalid R² values"
+- Required pattern: "Hypothesis test: R_intercept > R_slope"
+- Forbidden patterns: "ERROR", "Bootstrap failed", "Invalid R values"
 - Acceptable warnings: "Wide CI suggests uncertain difference"
 
 **Expected Behavior on Validation Failure:**
@@ -413,13 +413,13 @@ Validation tools MUST be used after R² comparison and bootstrap inference.
 **Processing:**
 - Extract individual predictor p-values from both models
 - Apply Decision D068: Report BOTH uncorrected AND Bonferroni-corrected p-values
-- Bonferroni correction: alpha = 0.05/6 = 0.0083 (3 predictors × 2 models)
+- Bonferroni correction: alpha = 0.05/6 = 0.0083 (3 predictors  2 models)
 - Test secondary hypothesis: No predictor significantly predicts slope after correction
 
 **Output:**
 - File: data/step06_predictor_significance.csv
 - Format: CSV with columns: predictor, outcome, beta, p_uncorrected, p_bonferroni, sig_uncorrected, sig_bonferroni, effect_interpretation
-- Expected Rows: 6 (3 predictors × 2 outcomes)
+- Expected Rows: 6 (3 predictors  2 outcomes)
 - Expected Columns: 8
 
 **Validation Requirement:**
@@ -429,7 +429,7 @@ Validation tools MUST be used after predictor significance testing with dual p-v
 
 *Output Files:*
 - data/step06_predictor_significance.csv exists (exact path)
-- Expected rows: 6 (RAVLT/BVMT/RPM × intercept/slope)
+- Expected rows: 6 (RAVLT/BVMT/RPM  intercept/slope)
 - Expected columns: 8 (predictor through effect_interpretation)
 - Data types: predictor (object), outcome (object), effect_interpretation (object), all numeric columns (float64)
 
@@ -448,7 +448,7 @@ Validation tools MUST be used after predictor significance testing with dual p-v
 - effect_interpretation describes beta direction and magnitude
 
 *Log Validation:*
-- Required pattern: "Predictor significance tested: 3 predictors × 2 outcomes"
+- Required pattern: "Predictor significance tested: 3 predictors  2 outcomes"
 - Required pattern: "Bonferroni correction applied: alpha = 0.0083"
 - Required pattern: "Dual p-values reported per Decision D068"
 - Forbidden patterns: "ERROR", "Missing predictors", "Incorrect alpha"
@@ -485,7 +485,7 @@ Validation tools MUST be used after predictor significance testing with dual p-v
 **Output:**
 - File: data/step07_model_diagnostics.csv
 - Format: CSV with columns: model, test, statistic, p_value, assumption_met, remedial_action
-- Expected Rows: ~12 (6 tests × 2 models)
+- Expected Rows: ~12 (6 tests  2 models)
 - Expected Columns: 6
 
 **Validation Requirement:**
@@ -533,7 +533,7 @@ Validation tools MUST be used after diagnostic testing and assumption evaluation
 - data/step02_regression_input.csv (merged dataset for analysis)
 - data/step03_intercept_predictions.csv (intercept regression results)
 - data/step04_slope_predictions.csv (slope regression results)
-- data/step05_r_squared_comparison.csv (bootstrap comparison of R² values)
+- data/step05_r_squared_comparison.csv (bootstrap comparison of R values)
 - data/step06_predictor_significance.csv (individual predictor tests with dual p-values)
 - data/step07_model_diagnostics.csv (assumption testing and diagnostics)
 
@@ -580,7 +580,7 @@ Validation tools MUST be used after diagnostic testing and assumption evaluation
 - Expected: 4 rows x 9 columns per model
 - Terms: (Intercept), RAVLT_T, BVMT_T, RPM_T
 
-### R² Comparison Format (Step 5 Output)
+### R Comparison Format (Step 5 Output)
 - File: data/step05_r_squared_comparison.csv
 - Format: Summary format (one row per comparison)
 - Columns: model, r_squared, adj_r_squared, bootstrap_ci_lower, bootstrap_ci_upper, difference, difference_ci_lower, difference_ci_upper, p_value
@@ -697,7 +697,7 @@ This is not optional. This is the core architectural principle preventing cascad
 **What Validation Checks:**
 - Model convergence achieved
 - VIF values < 10 (multicollinearity check)
-- R² in valid range [0, 1]
+- R in valid range [0, 1]
 - Standard errors positive and reasonable
 - Bootstrap CIs computed successfully (1000 iterations)
 - All model terms present in output
@@ -708,14 +708,14 @@ This is not optional. This is the core architectural principle preventing cascad
 - Quit script immediately  
 - g_debug invoked to diagnose regression issues
 
-#### Step 5: R² Bootstrap Comparison
+#### Step 5: R Bootstrap Comparison
 
-**Analysis Tool:** `bootstrap_regression_ci` for R² difference
+**Analysis Tool:** `bootstrap_regression_ci` for R difference
 **Validation Tool:** (determined by rq_tools - likely `validate_numeric_range`)
 
 **What Validation Checks:**
 - Bootstrap completed 1000 iterations successfully
-- R² values in [0, 1] range
+- R values in [0, 1] range
 - Confidence intervals well-formed (lower < upper)
 - P-value in [0, 1] range
 - Difference calculation correct
@@ -751,12 +751,12 @@ This is not optional. This is the core architectural principle preventing cascad
 **Total Steps:** 8 (Step 0: extractions + Steps 1-7: analysis)
 **Estimated Runtime:** Medium complexity (~45 minutes total)
 **Cross-RQ Dependencies:** Ch5 5.1.1 (LMM random effects)
-**Primary Outputs:** Random effects extraction, regression results, R² comparison, predictor significance, diagnostics
+**Primary Outputs:** Random effects extraction, regression results, R comparison, predictor significance, diagnostics
 **Validation Coverage:** 100% (all 8 steps have validation requirements)
 
 **Key Hypotheses Tested:**
-- H1: R²_intercept > R²_slope (cognitive tests predict encoding > consolidation)
-- H2: R²_intercept significantly > R²_slope (bootstrap CI excludes 0)
+- H1: R_intercept > R_slope (cognitive tests predict encoding > consolidation)
+- H2: R_intercept significantly > R_slope (bootstrap CI excludes 0)
 - H3: No predictor significantly predicts slope after Bonferroni correction
 
 **Critical Methods:**

@@ -79,7 +79,7 @@ Validation tools MUST be used after dependency check execution.
 **Dependencies:** Step 0 (dependencies validated)
 **Complexity:** Medium (~10 minutes)
 
-**Purpose:** Extract theta_all scores from Ch5 5.1.1 and merge with DASS subscales from master.xlsx
+**Purpose:** Extract theta_all scores from Ch5 5.1.1 and merge with DASS subscales from dfnonvr.csv
 
 **Input:**
 - Primary: results/ch5/5.1.1/data/step03_theta_scores.csv
@@ -94,7 +94,7 @@ Validation tools MUST be used after dependency check execution.
 
 **Processing:**
 - Extract mean theta_all scores per participant from Ch5 5.1.1 output
-- Load DASS subscales, Age, and RAVLT from master.xlsx using tag patterns
+- Load DASS subscales, Age, and RAVLT from dfnonvr.csv using tag patterns
 - Merge datasets on UID (inner join to keep only complete cases)
 - Check for missing DASS data (expected N approximately 97)
 - Compute completeness statistics per variable

@@ -345,7 +345,7 @@ validation_tools:
         source: "analysis tool output (step03_anova_comparisons)"
         
     parameters:
-      required_terms: ["Education", "RPM", "Age"]
+      required_terms: ["Education", "RPM Score", "Age"]
       alpha_bonferroni: 0.0083
       
     criteria:

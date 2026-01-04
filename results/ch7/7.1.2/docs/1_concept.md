@@ -99,7 +99,7 @@ Linear regression predicting LMM random effects (intercepts and slopes) using co
 - Document shrinkage magnitude: Compare BLUP variance to empirical variance
 
 **Step 2:** Extract and standardize cognitive tests
-- Load RAVLT, BVMT, RPM scores from master.xlsx
+- Load RAVLT, BVMT, RPM scores from dfnonvr.csv
 - Convert to T-scores (M=50, SD=10)
 - Exclude NART due to language validity concerns
 
@@ -188,7 +188,7 @@ Ch5 5.1.1 (Functional Form Comparison - provides LMM with random intercepts/slop
 - master.xlsx (cognitive test scores via tag patterns)
 
 **Dependencies:**
-Ch5 5.1.1 must complete through Step 6 (LMM fitting with random intercepts/slopes) before this RQ can extract random effects. Cognitive tests are independent data from master.xlsx.
+Ch5 5.1.1 must complete through Step 6 (LMM fitting with random intercepts/slopes) before this RQ can extract random effects. Cognitive tests are independent data from dfnonvr.csv.
 
 ### Inclusion/Exclusion Criteria:
 

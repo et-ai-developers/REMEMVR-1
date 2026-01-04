@@ -81,7 +81,7 @@ Validation tools MUST be used after dependency check execution.
 **Dependencies:** Step 0 complete
 **Complexity:** Low (<5 minutes)
 
-**Purpose:** Extract self-report and demographic variables from master.xlsx for regression analysis
+**Purpose:** Extract self-report and demographic variables from dfnonvr.csv for regression analysis
 
 **Input:**
 - data/cache/master.xlsx (verified in Step 0)

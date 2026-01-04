@@ -86,7 +86,7 @@ Latent Profile Analysis (LPA) for cognitive tests + Chi-square test of associati
 
 **Step 1:** Extract and prepare data
 - Load REMEMVR profile classifications from RQ 7.8.1 results
-- Extract cognitive test scores (RAVLT, BVMT, RPM) from master.xlsx
+- Extract cognitive test scores (RAVLT, BVMT, RPM) from dfnonvr.csv
 - Standardize cognitive test scores to T-scores (M=50, SD=10)
 - Merge datasets by participant ID
 

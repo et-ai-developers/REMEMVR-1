@@ -94,7 +94,7 @@ QUIT immediately with specific error about missing dependency. Log to logs/step0
 **Processing:**
 - Load theta_all scores from Ch5 output (expected columns: UID, theta_all, theta_se)
 - Load confidence_theta scores from Ch6 output (expected: UID, confidence_theta)
-- Load cognitive reserve data from master.xlsx:
+- Load cognitive reserve data from dfnonvr.csv:
   - Education years (EDUC_YEARS column)
   - RPM total score (RPM_TOTAL column) 
   - Age (AGE column)

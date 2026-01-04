@@ -99,7 +99,7 @@ steps:
   # --------------------------------------------------------------------------
   - name: "step01_extract_cognitive_tests"
     step_number: "01"
-    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) from master.xlsx"
+    description: "Extract cognitive test scores (RAVLT, BVMT, RPM) from dfnonvr.csv"
 
     analysis_call:
       type: "catalogued"
@@ -108,7 +108,7 @@ steps:
       signature: "extract_cognitive_tests(df: pd.DataFrame, tests: List[str] = None) -> pd.DataFrame"
 
       input_files:
-        - path: "data/master.xlsx"
+        - path: "data/dfnonvr.csv"
           format: "Excel file with participant data"
           required_columns: ["RAVLT_Total", "BVMT_Total_Recognition", "RPM_Total"]
           variable_name: "master_data"
@@ -128,7 +128,7 @@ steps:
 
       parameters:
         df: "master_data"
-        tests: ["RAVLT", "BVMT", "RPM"]
+        tests: ["RAVLT", "BVMT", "RPM Score"]
 
     validation_call:
       type: "catalogued"

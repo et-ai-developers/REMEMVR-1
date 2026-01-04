@@ -46,7 +46,7 @@ This analysis examines discrepancy patterns between REMEMVR (VR-based memory ass
 - Check for required demographic variables (Age, Education, VR_Experience)
 - Log validation results with file paths found
 - If Ch5 incomplete: QUIT with "Ch5 5.1.1 theta estimation not complete"
-- If master.xlsx missing: QUIT with "Master data file not accessible"
+- If master.xlsx missing: QUIT with "Prepared participant data file not accessible"
 
 **Output:**
 - data/step00_dependency_validation.txt
@@ -85,7 +85,7 @@ Quit immediately with specific missing dependency, log to logs/step00_validate_d
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Medium (~8 minutes including bootstrap)
 
-**Purpose:** Load theta scores from Ch5 omnibus analysis and RAVLT scores from master.xlsx, standardize both to z-scores
+**Purpose:** Load theta scores from Ch5 omnibus analysis and RAVLT scores from dfnonvr.csv, standardize both to z-scores
 
 **Input:**
 - results/ch5/5.1.1/data/step03_theta_scores.csv (or located file from Step 0)
@@ -94,7 +94,7 @@ Quit immediately with specific missing dependency, log to logs/step00_validate_d
 
 **Processing:**
 - Load omnibus theta scores (theta_all column) from Ch5 output
-- Extract RAVLT Total scores from master.xlsx
+- Extract RAVLT Total scores from dfnonvr.csv
 - Merge datasets on UID (participant identifier)
 - Standardize REMEMVR scores: REMEMVR_z = (theta - mean(theta)) / sd(theta)
 - Standardize RAVLT scores: RAVLT_z = (RAVLT_Total - mean(RAVLT_Total)) / sd(RAVLT_Total)
@@ -282,7 +282,7 @@ If any group n < 10: log warning, continue with reduced power acknowledgment
 **Dependencies:** Steps 0, 3 (group assignments + master.xlsx)
 **Complexity:** Low (<5 minutes)
 
-**Purpose:** Extract demographic variables from master.xlsx and merge with group assignments
+**Purpose:** Extract demographic variables from dfnonvr.csv and merge with group assignments
 
 **Input:**
 - data/step03_group_assignments.csv (group classifications)

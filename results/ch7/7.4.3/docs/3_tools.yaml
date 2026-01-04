@@ -46,14 +46,14 @@ analysis_tools:
     output_files:
       - path: "data/step01_rpm_scores.csv"
         columns: ["UID", "RPM_Scor", "RPM_standardized"]
-        description: "RPM scores extracted from master.xlsx with standardization"
+        description: "RPM scores extracted from dfnonvr.csv with standardization"
     
     parameters:
       io: "data/cache/master.xlsx"
       sheet_name: 0
       usecols: ["UID", "RPM_Scor"]
     
-    description: "Extract Raven's Progressive Matrices scores from master.xlsx for all participants"
+    description: "Extract Raven's Progressive Matrices scores from dfnonvr.csv for all participants"
     source_reference: "pandas documentation"
 
   extract_data_from_csv:

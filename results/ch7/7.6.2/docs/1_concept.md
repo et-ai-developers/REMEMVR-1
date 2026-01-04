@@ -90,7 +90,7 @@ Correlation analysis (bivariate and partial) with cross-validation and multiple 
 
 **Step 1:** Extract and prepare data
 - Load REMEMVR slopes from Ch5 omnibus analysis
-- Extract RAVLT scores from master.xlsx (T5Sc, DRSc)
+- Extract RAVLT scores from dfnonvr.csv (T5Sc, DRSc)
 - Compute RAVLT_Forgetting = RAV_T5Sc - RAV_DRSc
 - Check data quality and missingness
 

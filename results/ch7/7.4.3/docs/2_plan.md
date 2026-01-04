@@ -36,7 +36,7 @@ This analysis examines whether fluid intelligence (RPM) differentially predicts 
 - Primary: results/ch5/5.1.1/data/step03_theta_scores.csv (Overall omnibus theta)  
 - Alternative: results/ch5/5.1.1/data/*theta*.csv (search pattern)
 - Primary: data/cache/master.xlsx (RPM_Scor column)
-- Fallback: data/master.xlsx (alternative location)
+- Fallback: data/dfnonvr.csv (alternative location)
 - Expected: Ch5 analyses completed (status = success)
 
 **Processing:**
@@ -78,10 +78,10 @@ Raise error with specific missing dependency, log to logs/step00_dependency_vali
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (~3 minutes)
 
-**Purpose:** Extract Raven's Progressive Matrices scores from master.xlsx for all 100 participants
+**Purpose:** Extract Raven's Progressive Matrices scores from dfnonvr.csv for all 100 participants
 
 **Input:**
-- data/cache/master.xlsx (primary) or data/master.xlsx (fallback)
+- data/cache/master.xlsx (primary) or data/dfnonvr.csv (fallback)
 - Target column: RPM_Scor 
 - Expected format: Participant ID + RPM score
 
@@ -498,7 +498,7 @@ Raise error with sensitivity analysis issue, log to logs/step07_sensitivity.log,
 
 ### Data Files (ALL analysis inputs and outputs)
 - data/step00_dependency_validation.txt (dependency check results)
-- data/step01_rpm_scores.csv (RPM extracted from master.xlsx)
+- data/step01_rpm_scores.csv (RPM extracted from dfnonvr.csv)
 - data/step02_overall_theta.csv (complex integration theta scores)
 - data/step03_what_theta.csv (simple single-domain theta scores) 
 - data/step04_correlation_results.csv (correlations with bootstrap CIs and dual p-values)
@@ -563,7 +563,7 @@ Note: summary.md will be created by rq_results agent
 - **Circuit breaker:** If Ch5 analyses not complete, QUIT with dependency error
 
 **Master Data Dependencies:**
-- **File:** data/cache/master.xlsx or data/master.xlsx
+- **File:** data/cache/master.xlsx or data/dfnonvr.csv
 - **Column:** RPM_Scor (Raven's Progressive Matrices scores)
 - **Format:** Numeric scores in reasonable range (0-60)
 - **Requirement:** Must be accessible and contain RPM data for >90 participants

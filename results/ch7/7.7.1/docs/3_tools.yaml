@@ -63,7 +63,7 @@ analysis_tools:
       tests: ["RAVLT", "BVMT"]
       include_derived: false
 
-    description: "Extract RAVLT and BVMT cognitive test scores from master.xlsx (Step 1a)"
+    description: "Extract RAVLT and BVMT cognitive test scores from dfnonvr.csv (Step 1a)"
     source_reference: "tools_inventory.md section 'Data Analysis and Cleaning Tools'"
 
   extract_domain_theta_scores:
@@ -211,7 +211,7 @@ analysis_tools:
     output_files:
       - path: "data/step05_effect_sizes.csv"
         columns: ["model", "cohens_f2", "f2_ci_lower", "f2_ci_upper", "effect_interpretation"]
-        description: "Cohen's f² effect sizes with bootstrap CIs and interpretations"
+        description: "Cohen's f effect sizes with bootstrap CIs and interpretations"
 
     parameters:
       r2_reduced: 0.0
@@ -220,7 +220,7 @@ analysis_tools:
         medium: 0.15
         large: 0.35
 
-    description: "Compute Cohen's f² effect sizes for reverse prediction models (Step 5)"
+    description: "Compute Cohen's f effect sizes for reverse prediction models (Step 5)"
     source_reference: "tools_inventory.md section 'Regression Analysis Tools'"
 
   compute_regression_diagnostics:
@@ -359,8 +359,8 @@ validation_tools:
       tolerance: 0.1
 
     criteria:
-      - "All T-scores have M=50.0 ± 0.1"
-      - "All T-scores have SD=10.0 ± 0.1"
+      - "All T-scores have M=50.0  0.1"
+      - "All T-scores have SD=10.0  0.1"
       - "T-scores in reasonable range [20, 80]"
       - "No missing values introduced"
 
@@ -437,7 +437,7 @@ validation_tools:
         generalization_gap: [-0.5, 1.0]
 
     criteria:
-      - "R² values in [0, 1] range"
+      - "R values in [0, 1] range"
       - "CI bounds finite and ordered (lower < upper)"
       - "Bootstrap iterations completed successfully"
       - "CV metrics in reasonable ranges"
@@ -472,7 +472,7 @@ validation_tools:
       f2_column: "cohens_f2"
 
     criteria:
-      - "All f² values non-negative (f² >= 0)"
+      - "All f values non-negative (f >= 0)"
       - "No NaN or infinite effect sizes"
       - "Effect interpretations match Cohen guidelines"
       - "Bootstrap CIs valid (lower < estimate < upper)"
@@ -489,7 +489,7 @@ validation_tools:
       log_to: "logs/step05_effect_sizes.log"
       invoke: "g_debug (master invokes)"
 
-    description: "Validate Cohen's f² effect sizes within reasonable bounds"
+    description: "Validate Cohen's f effect sizes within reasonable bounds"
     source_reference: "tools_inventory.md section 'Data Validation Tools'"
 
   validate_model_convergence:

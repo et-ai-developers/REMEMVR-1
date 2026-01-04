@@ -13,7 +13,7 @@
 Do cognitive tests predict who is well-calibrated (confidence matches accuracy) vs overconfident (confidence exceeds accuracy)?
 
 **Scope:**
-This RQ examines individual differences in calibration quality using cognitive test scores as predictors. Calibration metrics are derived from Ch6 per-participant measures. Analysis includes 100 participants with standardized cognitive test scores from master.xlsx. Compares predictive validity of memory tests (RAVLT, BVMT) vs fluid intelligence (RPM).
+This RQ examines individual differences in calibration quality using cognitive test scores as predictors. Calibration metrics are derived from Ch6 per-participant measures. Analysis includes 100 participants with standardized cognitive test scores from dfnonvr.csv. Compares predictive validity of memory tests (RAVLT, BVMT) vs fluid intelligence (RPM).
 
 **Theoretical Framing:**
 Calibration quality represents metacognitive accuracy - the ability to match confidence judgments to actual performance. This requires executive control processes to monitor internal confidence signals and compare them to objective performance, which may be better predicted by reasoning ability than memory capacity.
@@ -87,7 +87,7 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 
 **Step 1:** Extract and prepare data
 - Load calibration metrics from Ch6 6.2.x results (resolution, calibration slope, or Brier reliability)
-- Extract cognitive tests from master.xlsx (RAVLT_T, BVMT_T, RPM_T)
+- Extract cognitive tests from dfnonvr.csv (RAVLT_T, BVMT_T, RPM_T)
 - Compute per-participant calibration quality scores
 - Check data quality and missingness patterns
 
@@ -140,7 +140,7 @@ Multiple regression with hierarchical entry, cross-validation, and comprehensive
 
 **Expected Outputs:**
 - data/step01_calibration_metrics.csv (per-participant calibration scores)
-- data/step02_cognitive_tests.csv (extracted test scores from master.xlsx)
+- data/step02_cognitive_tests.csv (extracted test scores from dfnonvr.csv)
 - data/step03_analysis_input.csv (merged dataset for regression)
 - data/step04_regression_results.csv (coefficients, CIs, dual p-values)
 - data/step05_model_diagnostics.csv (VIF, residuals, Cook's D)

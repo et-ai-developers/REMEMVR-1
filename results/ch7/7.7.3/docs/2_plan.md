@@ -79,7 +79,7 @@ Validation tools MUST be used after dependency check execution.
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Low (<5 minutes)
 
-**Purpose:** Extract RAVLT test scores from master.xlsx and compute alternative scoring metrics
+**Purpose:** Extract RAVLT test scores from dfnonvr.csv and compute alternative scoring metrics
 
 **Input:**
 - data/cache/master.xlsx (RAVLT columns: T1Sc, T2Sc, T3Sc, T4Sc, T5Sc, DRSc, FRSc)

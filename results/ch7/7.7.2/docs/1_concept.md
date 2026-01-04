@@ -90,7 +90,7 @@ Discrepancy analysis with one-way ANOVA and post-hoc comparisons, plus descripti
 
 **Step 1:** Extract and standardize scores
 - Load theta_all scores from Ch5 omnibus analysis
-- Extract RAVLT Total scores from master.xlsx
+- Extract RAVLT Total scores from dfnonvr.csv
 - Standardize both measures to z-scores (M=0, SD=1)
 
 **Step 2:** Compute discrepancy scores
@@ -104,7 +104,7 @@ Discrepancy analysis with one-way ANOVA and post-hoc comparisons, plus descripti
 - Concordant: |Discrepancy| d 1 SD (expected n H 68)
 
 **Step 4:** Extract demographic predictors
-- Age, Education, VR_Experience from master.xlsx
+- Age, Education, VR_Experience from dfnonvr.csv
 - Additional cognitive tests for validation
 
 **Step 5:** Compare groups on characteristics
@@ -184,11 +184,11 @@ Ch5 5.1.1 must complete IRT calibration and theta estimation before this RQ can 
 
 **Tests:**
 - [x] REMEMVR: Mean theta across all 4 test sessions (T1-T4)
-- [x] RAVLT: Total score (T1+T2+T3+T4+T5) from master.xlsx
+- [x] RAVLT: Total score (T1+T2+T3+T4+T5) from dfnonvr.csv
 
 **Variables Required:**
 - REMEMVR: theta_all (omnibus factor from Ch5)
-- RAVLT: RAVLT_Total from master.xlsx
+- RAVLT: RAVLT_Total from dfnonvr.csv
 - Demographics: Age, Education, VR_Experience
 - Validation: NART, BVMT for characterization
 

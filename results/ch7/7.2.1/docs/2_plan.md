@@ -86,7 +86,7 @@ Raise error with specific missing dependency, log to logs/step00_validate_depend
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Medium (~10 minutes)
 
-**Purpose:** Extract theta_all scores from Ch5 and cognitive test scores from master.xlsx, merge into analysis dataset
+**Purpose:** Extract theta_all scores from Ch5 and cognitive test scores from dfnonvr.csv, merge into analysis dataset
 
 **Input:**
 - data/step00_dependency_validation.txt (file paths from Step 0)
@@ -95,8 +95,8 @@ Raise error with specific missing dependency, log to logs/step00_validate_depend
 
 **Processing:**
 - Load theta_all scores from Ch5 output file (columns: UID, theta_all, SE)
-- Load cognitive tests from master.xlsx: RAVLT_T, BVMT_T, RPM_T (T-scores)
-- Load demographics from master.xlsx: Age (continuous years)
+- Load cognitive tests from dfnonvr.csv: RAVLT_T, BVMT_T, RPM_T (T-scores)
+- Load demographics from dfnonvr.csv: Age (continuous years)
 - Verify 100 participants in both datasets
 - Merge on UID with inner join (require complete data)
 - Check for missing data: <5% missing allowed per variable

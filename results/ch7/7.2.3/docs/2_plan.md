@@ -87,11 +87,11 @@ Quit immediately with specific error message, log to step00_dependency_validatio
 - Primary: results/ch5/5.1.1/data/step03_theta_scores.csv
 - Alternative: results/ch5/5.1.1/data/*theta*.csv (first match)
 - Cognitive tests: data/cache/master.xlsx
-- Expected: UID, theta_all columns from Ch5; UID, Age, RAVLT_T, BVMT_T, NART_T, RPM_T from master.xlsx
+- Expected: UID, theta_all columns from Ch5; UID, Age, RAVLT_T, BVMT_T, NART_T, RPM_T from dfnonvr.csv
 
 **Processing:**
 - Load theta_all scores from Ch5 output (use mean values)
-- Extract cognitive test data from master.xlsx sheets
+- Extract cognitive test data from dfnonvr.csv sheets
 - Variables needed: UID, Age, RAVLT_T, BVMT_T, NART_T, RPM_T
 - Merge datasets on UID
 - Check for missing data: exclude participants missing cognitive tests

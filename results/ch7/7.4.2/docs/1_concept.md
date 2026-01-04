@@ -95,7 +95,7 @@ Bivariate correlation analysis with dependent correlations comparison (Steiger's
 
 **Step 1:** Extract and prepare data
 - Load Where and What theta scores from Ch5 5.2.x domain analyses
-- Extract BVMT_TotR scores from master.xlsx
+- Extract BVMT_TotR scores from dfnonvr.csv
 - Compute mean theta scores per participant per domain
 - Check data quality and missing values
 

@@ -82,13 +82,13 @@ analysis_tools:
     output_files:
       - path: "data/step01_cognitive_extracted.csv"
         columns: ["UID", "Age", "RAVLT_T", "BVMT_T", "NART_T", "RPM_T"]
-        description: "Cognitive test data from master.xlsx"
+        description: "Cognitive test data from dfnonvr.csv"
         
     parameters:
-      tests: ["RAVLT", "BVMT", "NART", "RPM"]
+      tests: ["RAVLT", "BVMT", "RPM Score"]
       include_age: true
       
-    description: "Extract cognitive test T-scores and age from master.xlsx"
+    description: "Extract cognitive test T-scores and age from dfnonvr.csv"
     source_reference: "tools_inventory.md section 'tools.data' - extract_cognitive_tests"
 
   merge_theta_cognitive:

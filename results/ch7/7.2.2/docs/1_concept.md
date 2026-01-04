@@ -123,14 +123,14 @@ Attenuation analysis using regression coefficients from hierarchical models with
 - Report BOTH uncorrected AND corrected p-values (Decision D068)
 - Include bootstrap CIs for non-normal attenuation distributions
 - Include power analysis for detecting meaningful attenuation (>30%)
-- Include effect sizes: Cohen's f² for overall model improvement
+- Include effect sizes: Cohen's f for overall model improvement
 
 **Expected Outputs:**
 - data/step01_attenuation_ratios.csv (primary analysis results)
 - data/step02_bootstrap_cis.csv (confidence intervals)
 - data/step03_domain_comparisons.csv (between-domain tests)
 - data/step04_sensitivity_analysis.csv (robustness checks)
-- data/step05_effect_sizes.csv (f², R² change, with 95% CIs)
+- data/step05_effect_sizes.csv (f, R change, with 95% CIs)
 - results/attenuation_summary.md (text summary for thesis)
 - plots/attenuation_visualization.png (domain comparison plot)
 
@@ -139,7 +139,7 @@ Attenuation analysis using regression coefficients from hierarchical models with
 - No domain shows significant residual age effect after control (p > 0.05)
 - Bootstrap CIs stable (width < 40% of point estimate)
 - Pattern consistent with VR scaffolding hypothesis (What > Where > When)
-- Sensitivity analysis shows robust findings (±5% with outlier exclusion)
+- Sensitivity analysis shows robust findings (5% with outlier exclusion)
 
 ---
 
@@ -177,7 +177,7 @@ RQ 7.2.1 must complete hierarchical regression analysis before this RQ can run. 
 - [x] All 4 tests aggregated into theta scores (inherited from Ch5)
 
 **Additional Requirements:**
-- Complete RAVLT, BVMT, and RPM test scores from master.xlsx
+- Complete RAVLT, BVMT, and RPM test scores from dfnonvr.csv
 - No participants with missing demographic data that would affect Model 2 results
 - Requires both uncorrected and controlled age effects from 7.2.1 for attenuation calculation
 

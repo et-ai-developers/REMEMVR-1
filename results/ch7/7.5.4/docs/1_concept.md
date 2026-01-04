@@ -13,7 +13,7 @@
 Does sleep quality BEFORE each test predict THAT test's performance, demonstrating within-person state-dependent sleep effects?
 
 **Scope:**
-This RQ examines within-person sleep variability across the four REMEMVR test sessions. Uses 400 observations (100 participants × 4 tests) where each participant provides sleep data before each test (T1, T2, T3, T4). Tests state-dependent effects of sleep hours and sleep quality on same-test episodic memory performance.
+This RQ examines within-person sleep variability across the four REMEMVR test sessions. Uses 400 observations (100 participants  4 tests) where each participant provides sleep data before each test (T1, T2, T3, T4). Tests state-dependent effects of sleep hours and sleep quality on same-test episodic memory performance.
 
 **Theoretical Framing:**
 Novel longitudinal approach to sleep-memory relationships by decomposing within-person (state) vs between-person (trait) sleep effects. Most research examines between-person correlations; this design allows causal inference about acute sleep impacts on memory retrieval.
@@ -86,10 +86,10 @@ Multilevel modeling (mixed effects regression) with within-person sleep predicto
 **High-Level Workflow:**
 
 **Step 1:** Extract and prepare per-test sleep data
-- Load sleep hours and quality data from master.xlsx (SLP tags)
+- Load sleep hours and quality data from dfnonvr.csv (SLP tags)
 - Extract per-test sleep: `{UID}-RVR-T{N}-SLP-X-HOUR-` and `{UID}-RVR-T{N}-SLP-X-QUAL-`
 - Merge with per-test theta scores from Ch5
-- Create 400-row dataset (100 UIDs × 4 tests)
+- Create 400-row dataset (100 UIDs  4 tests)
 
 **Step 2:** Descriptive analysis and data quality
 - Check within-person sleep variability (SD within each UID)
@@ -127,11 +127,11 @@ Multilevel modeling (mixed effects regression) with within-person sleep predicto
 - Include model diagnostics step (VIF, residuals, homoscedasticity)
 - Include cross-validation for predictive models
 - Include power analysis for null findings
-- Include effect sizes with 95% CIs (R², f², sr², ²)
+- Include effect sizes with 95% CIs (R, f, sr, )
 
 **Expected Outputs:**
 - data/step01_per_test_sleep.csv (extracted sleep data per test)
-- data/step02_theta_sleep_merged.csv (400 rows: UID × Test × Sleep × Theta)
+- data/step02_theta_sleep_merged.csv (400 rows: UID  Test  Sleep  Theta)
 - data/step03_descriptive_stats.csv (within-person sleep variability)
 - data/step04_multilevel_model_results.csv (fixed effects, random effects)
 - data/step05_effect_decomposition.csv (within vs between person effects)
@@ -148,7 +148,7 @@ Multilevel modeling (mixed effects regression) with within-person sleep predicto
 - Significant within-person sleep effect (p < 0.05 uncorrected, assess after Bonferroni)
 - Effect size beta > 0.03 (small but meaningful for intervention)
 - Model diagnostics pass (residual normality, homoscedasticity, VIF < 5)
-- Cross-validation R² within 10% of training model
+- Cross-validation R within 10% of training model
 - Within-person effects stronger than between-person effects
 
 ---
@@ -180,7 +180,7 @@ data/cache/master.xlsx
 - Sleep Quality: `{UID}-RVR-T{N}-SLP-X-QUAL-` (per test N=1,2,3,4)
 
 **Extraction Method:**
-Step 1 extracts sleep data from master.xlsx and creates per-test sleep variables, then merges with theta scores by UID and Test to create 400-row longitudinal dataset
+Step 1 extracts sleep data from dfnonvr.csv and creates per-test sleep variables, then merges with theta scores by UID and Test to create 400-row longitudinal dataset
 
 ### Inclusion/Exclusion Criteria:
 

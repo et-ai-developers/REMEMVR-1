@@ -75,7 +75,7 @@ Raise error with specific missing dependency, quit immediately, log to logs/step
 **Dependencies:** Step 0 (dependency validation)
 **Complexity:** Medium (~10 minutes)
 
-**Purpose:** Extract cognitive test scores from master.xlsx and compute T-score transformations
+**Purpose:** Extract cognitive test scores from dfnonvr.csv and compute T-score transformations
 
 **Input:**
 - data/cache/master.xlsx (cognitive test raw scores)
