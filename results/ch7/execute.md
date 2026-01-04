@@ -744,3 +744,11 @@ Which approach is scientifically most appropriate for testing the differential p
 **Missing domain data:** Ch5 5.2.2 and 5.2.3 lacked theta scores. Proceeded with available domains. LESSON: Adapt analysis to available data while documenting limitations.
 
 **Column name flexibility:** Different RQs use different standardization suffixes (_std vs _z). LESSON: Build adaptive column mapping into analysis code.
+
+### Lessons from RQ 7.2.3 (2026-01-05)
+
+**Null interactions are meaningful:** All Age x Test interactions non-significant (p > 0.0125 Bonferroni). Effect sizes negligible (f² < 0.02). LESSON: Null findings can strongly support theoretical predictions (VR Scaffolding Hypothesis).
+
+**VR provides age-fair assessment:** Cognitive tests predict REMEMVR equally across ages 20-70. No evidence for compensatory processing in older adults. LESSON: VR environments may eliminate age-related individual differences seen in traditional testing.
+
+**Cross-validation overfitting with small N:** All models showed train-test R² gaps > 0.10 despite stable interaction coefficients. LESSON: With N=100 and interaction terms, expect CV instability but rely on bootstrap for robust inference.

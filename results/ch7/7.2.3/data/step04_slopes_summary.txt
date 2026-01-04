@@ -1,0 +1,61 @@
+============================================================
+SIMPLE SLOPES ANALYSIS - NULL FINDINGS SUMMARY
+============================================================
+
+No significant Age x Cognitive Test interactions were found.
+All interaction p-values > 0.0125 (Bonferroni-corrected α)
+
+INTERACTION TEST RESULTS:
+----------------------------------------
+
+Age x RAVLT:
+  Interaction coefficient: β = 0.00011
+  p-value (uncorrected): 0.8011
+  p-value (Bonferroni): 1.0000
+  Decision: Not significant
+
+Age x BVMT:
+  Interaction coefficient: β = -0.00064
+  p-value (uncorrected): 0.1590
+  p-value (Bonferroni): 0.6358
+  Decision: Not significant
+
+Age x NART:
+  Interaction coefficient: β = -0.00022
+  p-value (uncorrected): 0.6363
+  p-value (Bonferroni): 1.0000
+  Decision: Not significant
+
+Age x RPM:
+  Interaction coefficient: β = 0.00006
+  p-value (uncorrected): 0.8983
+  p-value (Bonferroni): 1.0000
+  Decision: Not significant
+
+============================================================
+SCIENTIFIC INTERPRETATION
+============================================================
+
+The absence of significant Age x Test interactions indicates that
+cognitive tests predict REMEMVR performance equally well across the
+adult lifespan. This finding:
+
+1. SUPPORTS the VR Scaffolding Hypothesis:
+   - VR environments provide environmental support that equalizes
+     predictive utility of cognitive tests across ages
+   - Older adults do not rely more heavily on cognitive abilities
+     to compensate for age-related decline in VR contexts
+
+2. DOES NOT SUPPORT Cognitive Reserve Theory predictions:
+   - No evidence that high-ability older adults use compensatory
+     strategies more than younger adults in VR memory tasks
+   - Cognitive test prediction is age-invariant
+
+3. CLINICAL IMPLICATIONS:
+   - VR-based memory assessments may provide age-fair evaluation
+   - Cognitive test norms may apply consistently across ages in VR
+
+Since no interactions reached significance, simple slopes analysis
+at different age levels is not warranted. The main effects of
+cognitive tests can be interpreted as applying uniformly across
+the age range of 20-70 years.

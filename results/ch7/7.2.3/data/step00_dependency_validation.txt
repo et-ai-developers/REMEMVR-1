@@ -1,0 +1,20 @@
+============================================================
+DEPENDENCY VALIDATION FOR RQ 7.2.3
+============================================================
+
+✓ Ch5 5.1.1 theta scores found: /home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv
+  - Rows: 400 (expecting 400 for 100 participants x 4 tests)
+  - Columns: ['UID', 'test', 'Theta_All']
+  - Unique participants: 100
+
+✓ Cognitive test data found: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+  - Shape: (100, 101)
+  ✓ Age found: column 'Age in years'
+  ✓ NART found: column 'NART Score'
+  ✓ RPM found: column 'RPM Score'
+  ✓ BVMT found: column 'BVMT total recall'
+  ✓ RAVLT columns found (will sum trials 1-5)
+
+VALIDATION STATUS: PASS ✓
+Ch5 5.1.1 validation PASS
+Files accessible

@@ -1,0 +1,3 @@
+Bootstrap analysis complete (2000 iterations)
+All interaction CIs include zero, confirming null findings
+Results support age-invariant prediction

@@ -1,0 +1,5 @@
+DIAGNOSTICS SUMMARY
+----------------------------------------
+Normality satisfied: 4/4 models
+Homoscedasticity satisfied: 4/4 models
+Max outliers in any model: 7
