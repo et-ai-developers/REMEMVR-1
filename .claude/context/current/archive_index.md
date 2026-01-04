@@ -1,12 +1,18 @@
 # Archive Index
 
-**Last Updated:** 2026-01-05 11:00 (context-manager curation - Session 2026-01-04 19:30 archived to tdd_41_tests_passing)
+**Last Updated:** 2026-01-04 21:00 (context-manager curation - 3 sessions archived: ch7_preparation_93pct_completion, ch7_rq_tools_100pct_complete)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### ch7_preparation_93pct_completion
+**Description:** Complete Ch7 preparation session achieving 30/32 RQs APPROVED (93.75%). Documents RQ fixing campaign (7.3.2, 7.4.3, 7.8.2), comprehensive status table creation, rq_planner batch execution for all 32 RQs with v5.1 specifications, and tool documentation completion (166 inventory, 151+ catalog entries). Session 2026-01-05 01:45.
+
+### ch7_rq_tools_100pct_complete
+**Description:** Complete rq_tools phase execution for all 32 Ch7 RQs achieving 100% success rate. Documents batch processing strategy by type (7.1.x through 7.8.x), tool name mismatch resolution (re-planning with actual names), data clarification (dfnonvr.csv confirmed ready), file organization cleanup (uniform docs/ structure), and status tracking system creation. Key learning: rq_planner was inventing function names instead of using actual tools from inventory. Session 2026-01-05 11:00.
 
 ### ch7_rq_stats_reassessment_campaign
 **Description:** Complete history of Ch7 RQ stats re-assessment campaign achieving 33% improvement rate (4/12 RQs moved to APPROVED). Documents tool availability as primary blocker resolution, parallel re-assessment strategy, and scoring improvements from 62.5% to 75% approval rate. Session 2026-01-04 Afternoon.
