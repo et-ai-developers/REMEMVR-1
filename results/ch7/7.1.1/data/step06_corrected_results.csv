@@ -1,0 +1,5 @@
+predictor,p_uncorrected,p_bonferroni_within,p_bonferroni_chapter,p_fdr,significant_uncorrected,significant_bonferroni_within,significant_bonferroni_chapter,significant_fdr
+RAVLT_T,0.1554104403660933,0.6216417614643732,1.0,0.3108208807321866,False,False,False,False
+BVMT_T,0.2605627173933434,1.0,1.0,0.34741695652445787,False,False,False,False
+NART_T,0.6422017988202574,1.0,1.0,0.6422017988202574,False,False,False,False
+RPM_T,0.0026783604333946,0.0107134417335784,0.0749940921350488,0.0107134417335784,True,True,False,True

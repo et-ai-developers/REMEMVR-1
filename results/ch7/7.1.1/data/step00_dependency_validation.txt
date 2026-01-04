@@ -1,0 +1,15 @@
+DEPENDENCY VALIDATION RESULTS
+========================================
+Validation timestamp: 2026-01-04 18:29:43.326335
+RQ: /home/etai/projects/REMEMVR/results/ch7/7.1.1
+
+FILE EXISTENCE CHECKS:
+  PASS: results/ch5/5.1.1/data/step03_theta_scores.csv (7186 bytes)
+  PASS: data/cache/dfData.csv (931100 bytes)
+  PASS: data/dfnonvr.csv (50700 bytes)
+
+STATUS CHECKS:
+  PASS: Ch5 5.1.1 completion status
+
+OVERALL VALIDATION: PASS
+All cross-RQ dependencies satisfied. Ch7 analysis can proceed.

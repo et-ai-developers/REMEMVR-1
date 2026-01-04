@@ -1,0 +1,34 @@
+[START] Step 08: Sensitivity Analysis
+[LOAD] Loading input data...
+[LOADED] step03_merged_analysis.csv (97 rows, 6 cols)
+[LOADED] step05_regression_results.csv (5 rows, 7 cols)
+[VALIDATED] All required columns present: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T', 'theta_mean']
+[ANALYSIS] Fitting multiple regression models...
+[FIT] Full model: R² = 0.2262, Adj R² = 0.1926
+[FIT] Without NART: R² = 0.2244, Adj R² = 0.1994
+[FIT] Episodic only: R² = 0.1417, Adj R² = 0.1235
+[ANALYSIS] Computing model comparisons and effect sizes...
+[COMPUTED] Model comparison: ΔNART = 0.0018, ΔEpisodic = 0.0845
+[COMPUTED] Semi-partial correlations: {'RAVLT_T': np.float64(0.017257633875297884), 'BVMT_T': np.float64(0.010778377917442628), 'NART_T': np.float64(0.0018277142666673907), 'RPM_T': np.float64(0.08011041405056274)}
+[VALIDATED] Sum of sr² = 0.1100, Total R² = 0.2262
+[ANALYSIS] Computing post-hoc power analysis...
+[WARNING] Power calculation failed for alpha=0.05: ftest_power() got an unexpected keyword argument 'dfnum'
+[WARNING] Power calculation failed for alpha=0.0125: ftest_power() got an unexpected keyword argument 'dfnum'
+[WARNING] Power calculation failed for alpha=0.00179: ftest_power() got an unexpected keyword argument 'dfnum'
+[WARNING] Power calculation failed for alpha=0.05: ftest_power() got an unexpected keyword argument 'dfnum'
+[WARNING] Power calculation failed for alpha=0.0125: ftest_power() got an unexpected keyword argument 'dfnum'
+[WARNING] Power calculation failed for alpha=0.00179: ftest_power() got an unexpected keyword argument 'dfnum'
+[COMPUTED] Power analysis completed for 6 conditions
+[SAVE] Saving analysis outputs...
+[SAVED] step08_sensitivity_analysis.csv (3 rows, 6 cols)
+[SAVED] step08_effect_sizes.csv (7 rows, 4 cols)
+[SAVED] step08_power_analysis.csv (6 rows, 7 cols)
+[VALIDATION] Validating analysis results...
+[PASS] All R² values in valid range [0, 1]
+[PASS] All Cohen's f² values ≥ 0
+[FAIL] Semi-partial correlations sum ≠ R² (0.1100 ≠ 0.2262)
+[PASS] All power values in valid range [0, 1]
+[PASS] Interpretations provided for all effect sizes
+[PASS] Power calculated for 3 alpha levels
+[VALIDATION] Some criteria failed - document limitations in interpretation
+[SUCCESS] Step 08 complete

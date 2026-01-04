@@ -1,0 +1,40 @@
+[START] Step 00: validate_dependencies
+[SETUP] Defining dependency files to check...
+[SETUP] Will check 3 dependency files
+[SETUP] Minimum size threshold: 1000 bytes
+[ANALYSIS] Checking file: results/ch5/5.1.1/data/step03_theta_scores.csv
+[FAIL] results/ch5/5.1.1/data/step03_theta_scores.csv - File exists and meets minimum size: 7186 bytes (>= 1000 bytes)
+[ANALYSIS] Checking file: data/cache/dfData.csv
+[FAIL] data/cache/dfData.csv - File exists and meets minimum size: 931100 bytes (>= 1000 bytes)
+[ANALYSIS] Checking file: data/dfnonvr.csv
+[FAIL] data/dfnonvr.csv - File exists and meets minimum size: 50700 bytes (>= 1000 bytes)
+[VALIDATION] Checking Ch5 5.1.1 completion status...
+[FAIL] Ch5 5.1.1 status shows rq_results = {'status': 'success', 'timestamp': '2025-12-08T00:01:01Z', 'context_dump': 'Extended model comparison (66 models) reveals POWER-LAW DOMINANCE (α=0.4)\nOriginal Log model demoted Rank #1→#33 (ΔAIC=+3.10, evidence ratio 4.7:1 vs PowerLaw_04)\n16 competitive models (ΔAIC<2), best weight=5.6% (extreme uncertainty, model averaging critical)\nSummary documents paradigm shift: Ebbinghaus→Wixted, continuous TSVR_hours essential for fractional exponents\n'} (expected: success)
+[SAVE] Saving dependency validation results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step00_dependency_validation.txt (19 lines)
+[VALIDATION] Verifying dependency validation output...
+[VALIDATION] Output file validation failed: File exists and meets minimum size: 660 bytes (>= 100 bytes)
+[FAILURE] Step 00 complete - Dependency validation failed
+[ERROR] Cross-RQ dependencies missing - cannot proceed without Ch5 5.1.1 theta scores
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.1.1/code/step00_validate_dependencies.py", line 275, in <module>
+    raise FileNotFoundError("Cross-RQ dependencies missing - cannot proceed without Ch5 5.1.1 theta scores")
+FileNotFoundError: Cross-RQ dependencies missing - cannot proceed without Ch5 5.1.1 theta scores
+[START] Step 00: validate_dependencies
+[SETUP] Defining dependency files to check...
+[SETUP] Will check 3 dependency files
+[SETUP] Minimum size threshold: 1000 bytes
+[ANALYSIS] Checking file: results/ch5/5.1.1/data/step03_theta_scores.csv
+[PASS] results/ch5/5.1.1/data/step03_theta_scores.csv - File exists and meets minimum size: 7186 bytes (>= 1000 bytes)
+[ANALYSIS] Checking file: data/cache/dfData.csv
+[PASS] data/cache/dfData.csv - File exists and meets minimum size: 931100 bytes (>= 1000 bytes)
+[ANALYSIS] Checking file: data/dfnonvr.csv
+[PASS] data/dfnonvr.csv - File exists and meets minimum size: 50700 bytes (>= 1000 bytes)
+[VALIDATION] Checking Ch5 5.1.1 completion status...
+[PASS] Ch5 5.1.1 status shows rq_results = success
+[SAVE] Saving dependency validation results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step00_dependency_validation.txt (15 lines)
+[VALIDATION] Verifying dependency validation output...
+[VALIDATION] Output file created successfully (486 bytes)
+[SUCCESS] Step 00 complete - All dependencies validated

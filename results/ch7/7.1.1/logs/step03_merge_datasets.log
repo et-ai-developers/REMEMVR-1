@@ -1,0 +1,31 @@
+[START] Step 03: Merge Datasets
+[LOAD] Loading cognitive test data from step01...
+[LOADED] Cognitive tests (100 rows, 5 cols)
+[INFO] Cognitive test columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T']
+[LOAD] Loading theta means data from step02...
+[LOADED] Theta means (100 rows, 2 cols)
+[INFO] Theta means columns: ['UID', 'theta_mean']
+[CHECK] Checking for missing data in cognitive tests...
+[INFO] Participants missing NART: 3
+[INFO] Participants missing any cognitive test: 3
+[HANDLE] Found 3 participants with missing NART
+[HANDLE] After removing missing NART: 97 participants remain
+[MERGE] Merging cognitive tests with theta means on UID...
+[MERGED] Successfully merged datasets: 97 participants
+[INFO] Merge retention: 97/97 cognitive, 97/100 theta
+[PASS] Good merge retention: 97/97 = 100.00%
+[VALIDATE] Validating merged dataset...
+[SUMMARY] Final analysis dataset: 97 participants
+[SUMMARY] Columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T', 'theta_mean']
+[SUMMARY] Theta range: [-1.326, 1.559]
+[SAVE] Saving merged analysis dataset to /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step03_merged_analysis.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step03_merged_analysis.csv (97 rows, 6 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['RPM_T', 'UID', 'NART_T', 'RAVLT_T', 'BVMT_T', 'theta_mean']
+[VALIDATION] n_required: 6
+[VALIDATION] n_missing: 0
+[VALIDATION] Sample size adequate (N >= 90)
+[VALIDATION] Complete cases only - no missing data
+[SUCCESS] Step 03 complete

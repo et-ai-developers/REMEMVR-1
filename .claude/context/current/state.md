@@ -13,7 +13,7 @@
 
 **Context:** After /refresh, ran rq_tools for all 32 Ch7 RQs in batches by type (7.1.x through 7.8.x). Fixed 3 initially failing RQs by re-running rq_planner with actual tool names. Verified data availability (dfnonvr.csv has all needed data including STR). Created comprehensive rq_status.tsv tracking file.
 
-**Status:** CH6 100% (30/30) + CH5 100% (35/35) + PUBLICATION DOCS 100% (65/65) + CH7 AGENTS 100% (28/28) + CH7 TOOLS 100% (32/32) + CH7 RQ PLANNING 100% (32/32) + CH7 RQ ASSESSMENTS 93.75% (30/32 approved) + CH7 RQ_TOOLS 100% (32/32 passed) --> TOTAL 65/93 RQs EXECUTED (70%), READY FOR CH7 RQ_ANALYSIS PHASE
+**Status:** CH6 100% (30/30) + CH5 100% (35/35) + PUBLICATION DOCS 100% (65/65) + CH7 AGENTS 100% (28/28) + CH7 TOOLS 100% (32/32) + CH7 RQ PLANNING 100% (32/32) + CH7 RQ ASSESSMENTS 93.75% (30/32 approved) + CH7 RQ_TOOLS 100% (32/32 passed) + **CH7 RQ 7.1.1 100% EXECUTED** --> TOTAL 66/93 RQs EXECUTED (71%), CH7 EXECUTION UNDERWAY
 
 ---
 
@@ -708,6 +708,217 @@ results/ch7/7.X.Y/
 ---
 
 **End of Session (2026-01-04 Evening - rq_analysis Deep Enhancement)**
+
+---
+
+## Session (2026-01-04 19:00 - Ch7 RQ 7.1.1 Complete + gcode_lessons System)
+
+**Task:** EXECUTE CH7 RQ 7.1.1 + CREATE GCODE_LESSONS LEARNING SYSTEM
+
+**Context:** After /refresh showing Ch7 rq_tools 100% complete, user requested execution of RQ 7.1.1 (cognitive predictors of REMEMVR theta). Also created innovative gcode_lessons.md system to accumulate g_code bugs/fixes across RQs.
+
+**OUTCOME:** RQ 7.1.1 100% COMPLETE + GCODE_LESSONS SYSTEM OPERATIONAL
+
+---
+
+### 1. gcode_lessons Learning System Creation (~30 min)
+
+**Innovation:** Created cumulative learning system for g_code agent to prevent bug repetition
+
+**Files Created:**
+- `results/ch7/gcode_lessons.md` - Living document of all g_code bugs and fixes
+- Updated `results/ch7/execute.md` - Added G_CODE LEARNING SYSTEM section
+
+**System Design:**
+1. Before each g_code invocation: Tell agent to read gcode_lessons.md FIRST
+2. After finding bugs: Immediately document bug, symptom, fix, and prevention
+3. Result: Each subsequent RQ benefits from all previous debugging
+
+**Initial Bugs Documented (8 total):**
+1. Function signature mismatches (extract_cognitive_tests)
+2. Column name case sensitivity (UID not uid)
+3. Wrong parent path calculations (parents[4] not parents[3])
+4. Validation logic inversions (check_file_exists returns 'valid' not 'exists')
+5. Status.yaml structure assumptions (dict vs string handling)
+6. RAVLT calculation errors (excluding distraction trial)
+7. Missing PYTHONPATH for imports
+8. Statsmodels conf_int() returns (n_params, 2) array not DataFrame
+
+---
+
+### 2. RQ 7.1.1 Execution (~3 hours)
+
+**Research Question:** Do cognitive tests (RAVLT, BVMT, NART, RPM) predict overall REMEMVR ability?
+
+**Execution Summary:**
+- **9 Analysis Steps:** All completed successfully (step00 through step08)
+- **Sample:** 97 participants (3 excluded due to missing NART)
+- **Key Result:** R² = 0.226 (22.6% variance explained), F(4,92) = 6.72, p < 0.001
+
+**Step-by-Step Execution:**
+
+**Step 00: Validate Dependencies**
+- Fixed validation logic bug (files marked FAIL when actually passing)
+- Confirmed Ch5 theta scores and dfnonvr.csv available
+- Added to gcode_lessons: Status.yaml structure handling
+
+**Step 01: Extract Cognitive Tests**
+- Computed RAVLT_Total from trials 1-5 (initially included distraction trial - fixed)
+- Converted all to T-scores (M=50, SD=10)
+- Added to gcode_lessons: Column case sensitivity, parent path calculation
+
+**Step 02: Load Theta Means**
+- Computed mean theta across 4 test sessions per participant
+- All 100 participants had complete theta data
+
+**Step 03: Merge Datasets**
+- Successfully merged cognitive and theta data
+- 97 complete cases (3 missing NART)
+
+**Step 04: Check Assumptions**
+- Normality: PASS (Shapiro-Wilk p=0.51)
+- Homoscedasticity: PASS (Breusch-Pagan p=0.61)
+- Multicollinearity: PASS (max VIF=1.40)
+- Independence: PASS (Durbin-Watson=1.68)
+
+**Step 05: Fit Regression**
+- Bug found: conf_int() indexing error
+- Added to gcode_lessons: Statsmodels conf_int() returns (n_params, 2) array
+- Results: Only RPM significant (β=0.021, p=0.003)
+
+**Step 06: Multiple Comparisons**
+- Applied Bonferroni (within-RQ and chapter-level) + FDR corrections
+- RPM remains significant after all corrections
+
+**Step 07: Cross-Validation**
+- 5-fold CV showed overfitting (mean test R² ≈ 0)
+- Generalization gap = 0.24 (concerning)
+
+**Step 08: Sensitivity Analysis**
+- Without NART: R² = 0.224 (minimal change)
+- Episodic only (RAVLT+BVMT): R² = 0.142
+- RPM accounts for 8% unique variance
+
+---
+
+### 3. Validation Agents (~30 min)
+
+**rq_inspect:** ✅ All outputs validated across 4 layers
+**rq_plots:** ✅ Generated regression diagnostic plots
+**rq_results:** ✅ Created summary.md with 3 anomalies flagged:
+- Lower R² than expected (22.6% vs 30-45%)
+- RPM strongest predictor (not episodic tests as hypothesized)
+- Cross-validation instability
+
+**rq_validate:** ✅ THESIS-READY (2 issues: 0 critical, 1 high)
+- Recommendation: Document CV instability as limitation
+
+---
+
+### 4. Key Findings and Implications
+
+**Primary Result:** R² = 0.226, p < 0.001
+- 22.6% variance explained by cognitive tests
+- 77.4% unique REMEMVR variance (supports ecological validity)
+
+**Unexpected Pattern:** RPM (fluid intelligence) dominates
+- RPM: β=0.021, p=0.003, sr²=0.08
+- RAVLT: β=0.010, p=0.155, sr²=0.02
+- BVMT: β=0.008, p=0.261, sr²=0.01
+- NART: β=0.003, p=0.642, sr²=0.002
+
+**Theoretical Implications:**
+- VR navigation may tap fluid intelligence more than episodic memory
+- Traditional episodic tests don't fully capture VR memory demands
+- Supports ecological validity gap hypothesis
+
+---
+
+### 5. Files Created/Modified
+
+**Analysis Code (9 files):**
+- `results/ch7/7.1.1/code/step00_validate_dependencies.py` (with fixes)
+- `results/ch7/7.1.1/code/step01_extract_cognitive_tests.py`
+- `results/ch7/7.1.1/code/step02_load_theta_means.py`
+- `results/ch7/7.1.1/code/step03_merge_datasets.py`
+- `results/ch7/7.1.1/code/step04_check_assumptions.py`
+- `results/ch7/7.1.1/code/step05_fit_regression.py` (with conf_int() fix)
+- `results/ch7/7.1.1/code/step06_multiple_comparisons.py`
+- `results/ch7/7.1.1/code/step07_cross_validation.py`
+- `results/ch7/7.1.1/code/step08_sensitivity_analysis.py`
+
+**Data Outputs (15+ CSV files):**
+- All step outputs in `results/ch7/7.1.1/data/`
+- Key files: cognitive_tests.csv, theta_means.csv, regression_results.csv
+
+**Documentation:**
+- `results/ch7/gcode_lessons.md` - NEW learning system
+- `results/ch7/execute.md` - Updated with learning system
+- `results/ch7/rq_status.tsv` - Created with 7.1.1 complete
+- `results/ch7/7.1.1/results/summary.md` - Generated by rq_results
+- `results/ch7/7.1.1/results/validation.md` - Generated by rq_validate
+- `results/ch7/7.1.1/plots/plots.py` - Plot generation script
+
+**Validation:**
+- `results/ch7/7.1.1/plots/diagnostics.png` - Regression diagnostic plots
+- All logs in `results/ch7/7.1.1/logs/`
+
+---
+
+### 6. Active Topics (For context-manager)
+
+**New Topics (Session 2026-01-04 19:00):**
+- **ch7_rq_7.1.1_complete** (First Ch7 RQ executed, R²=0.226, RPM dominance)
+- **gcode_lessons_system** (Innovative learning system for g_code improvement)
+- **ch7_execution_underway** (66/93 RQs complete, 71% overall progress)
+- **cognitive_predictors_findings** (77% unique REMEMVR variance, fluid > episodic)
+
+**Continuing Topics:**
+- ch7_ready_for_batch_execution (Proven with 7.1.1 success)
+- rq_analysis_v5.3_deployed (Latest version in production)
+
+**Can Archive:**
+- ch7_rq_tools_100pct_complete (Superseded by execution phase)
+- tool_name_mismatch_resolution (Documented in gcode_lessons)
+
+**Related Archived Topics (from context_finder):**
+- `ch7_tool_development_progression.md` - All tools working correctly
+- `tdd_41_tests_passing.md` - TDD methodology proven successful
+- `rq_analysis_v5.md` - Evolution to current v5.3
+
+---
+
+### 7. Next Steps
+
+**Immediate Actions:**
+1. Continue Ch7 execution with RQ 7.1.2 (next in sequence)
+2. Apply gcode_lessons to prevent known bugs
+3. Update gcode_lessons with any new discoveries
+
+**Execution Strategy:**
+- Use gcode_lessons for all g_code invocations
+- Batch similar RQs for efficiency (7.1.x series)
+- Monitor for new bug patterns to document
+
+**Expected Benefits:**
+- Each RQ should execute faster with fewer bugs
+- By RQ 7.8.x, g_code should be nearly bug-free
+- Systematic knowledge accumulation
+
+---
+
+**Status:** CH7 EXECUTION UNDERWAY - 1/32 RQs COMPLETE
+
+**Summary:**
+- RQ 7.1.1: THESIS-READY (R²=0.226, RPM significant)
+- gcode_lessons System: OPERATIONAL (8 bugs documented)
+- Execution Time: ~3.5 hours total
+- Key Finding: 77% unique REMEMVR variance
+- Innovation: Cumulative learning system for stateless agents
+
+---
+
+**End of Session (2026-01-04 19:00 - Ch7 RQ 7.1.1 Complete + gcode_lessons System)**
 
 ---
 

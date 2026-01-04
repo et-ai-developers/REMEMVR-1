@@ -1,0 +1,7 @@
+analysis_type,power,n,k,r2,alpha,interpretation
+Multiple_Regression_Alpha_0.05,,97,5,0.22620945011254778,0.05,calculation_failed
+Multiple_Regression_Alpha_0.0125,,97,5,0.22620945011254778,0.0125,calculation_failed
+Multiple_Regression_Alpha_0.00179,,97,5,0.22620945011254778,0.00179,calculation_failed
+Without_NART_Alpha_0.05,,97,4,0.2243817358458804,0.05,calculation_failed
+Without_NART_Alpha_0.0125,,97,4,0.2243817358458804,0.0125,calculation_failed
+Without_NART_Alpha_0.00179,,97,4,0.2243817358458804,0.00179,calculation_failed

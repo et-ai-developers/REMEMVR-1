@@ -1,0 +1,6 @@
+hypothesis,test_statistic,p_value,significant_uncorrected,significant_bonferroni_within,significant_bonferroni_chapter
+RAVLT_T_beta_nonzero,1.4324280883901874,0.1554104403660933,False,False,False
+BVMT_T_beta_nonzero,1.132032528814111,0.2605627173933434,False,False,False
+NART_T_beta_nonzero,0.4661614477336628,0.6422017988202574,False,False,False
+RPM_T_beta_nonzero,3.0862186482496323,0.0026783604333946,True,True,False
+overall_model_significance,F_approximate,0.0026783604333946,True,True,False

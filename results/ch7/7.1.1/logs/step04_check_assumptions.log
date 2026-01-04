@@ -1,0 +1,32 @@
+[START] Step 04: Check Regression Assumptions
+[LOAD] Loading merged analysis dataset...
+[LOADED] step03_merged_analysis.csv (97 rows, 6 cols)
+[VERIFY] Expected columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T', 'theta_mean']
+[VERIFY] Actual columns: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T', 'theta_mean']
+[PREPARE] Preparing regression variables...
+[PREPARED] Predictors: ['RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T'] (97 observations)
+[PREPARED] Outcome: theta_mean (range: -1.326 to 1.559)
+[CHECK] Missing data - Predictors: 0, Outcome: 0
+[REGRESSION] Fitting multiple regression model...
+[FITTED] Regression model - R² = 0.000
+[EXTRACTED] Fitted values and residuals for 97 observations
+[DIAGNOSTICS] Running comprehensive assumption tests...
+[COMPUTED] Basic diagnostics from tools.analysis_regression
+[TEST] Normality (Shapiro-Wilk): W = 0.9877, p = 0.5109
+[TEST] Homoscedasticity (Breusch-Pagan): LM = 2.6902, p = 0.6109
+[TEST] Multicollinearity (VIF): Max = 1.40, Mean = 1.25
+[TEST] Independence (Durbin-Watson): DW = 1.677
+[TEST] Outliers (Cook's D): 5 outliers, max = 0.1314
+[TEST] Linearity: R² = 0.000, Max |Spearman| = 0.382
+[SAVE] Saving regression diagnostics...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step04_regression_diagnostics.csv (6 assumption tests)
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step04_diagnostic_plots_data.csv (97 observations for plotting)
+[VALIDATION] Checking assumption test completeness...
+[VALIDATION] Assumption test summary:
+  Total tests: 6
+  PASS: 4
+  FAIL: 0
+  WARNING: 2
+  ERROR: 0
+[VALIDATION] All assumption tests completed successfully
+[SUCCESS] Step 04: Regression assumptions checked

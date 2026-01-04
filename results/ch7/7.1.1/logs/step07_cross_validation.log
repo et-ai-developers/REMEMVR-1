@@ -1,0 +1,27 @@
+[START] Step 07: Cross Validation
+[LOAD] Loading merged analysis dataset...
+[LOADED] step03_merged_analysis.csv (97 rows, 6 cols)
+[VERIFIED] All required columns present: ['UID', 'RAVLT_T', 'BVMT_T', 'NART_T', 'RPM_T', 'theta_mean']
+[PREPARE] Setting up predictor and outcome variables...
+[PREPARED] X: 97 rows x 4 predictors
+[PREPARED] y: 97 outcome values
+[VERIFIED] No missing data in predictor or outcome variables
+[ANALYSIS] Running 5-fold cross-validation...
+[CV] Fold 1: train_r2=0.2613, test_r2=-0.0213, gap=0.2826
+[CV] Fold 2: train_r2=0.2389, test_r2=0.1395, gap=0.0994
+[CV] Fold 3: train_r2=0.2210, test_r2=0.1927, gap=0.0283
+[CV] Fold 4: train_r2=0.2726, test_r2=-0.6860, gap=0.9586
+[CV] Fold 5: train_r2=0.1887, test_r2=0.3675, gap=-0.1788
+[DONE] Cross-validation complete
+[SUMMARY] Mean train R²: 0.2365
+[SUMMARY] Mean test R²: -0.0015
+[SUMMARY] Mean generalization gap: 0.2380 ± 0.4354
+[SAVE] Saving cross-validation results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step07_cross_validation.csv (5 rows, 6 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] All 5 folds completed successfully
+[VALIDATION] Reasonable train/test splits: train_n ~77, test_n ~19
+[VALIDATION] Train R² >= Test R² in 4/5 folds (expected pattern)
+[WARNING] Maximum generalization gap = 0.9586 > 0.10 (potential overfitting)
+[VALIDATION] All validation criteria passed
+[SUCCESS] Step 07 complete
