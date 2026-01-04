@@ -1,0 +1,18 @@
+Ch5 5.1.1 theta file: FOUND
+  Path: results/ch5/5.1.1/data/step03_theta_scores.csv
+  Rows: 400
+  Columns: ['UID', 'test', 'Theta_All']
+  Unique UIDs: 100
+  Theta_All column: PRESENT
+
+dfnonvr.csv: FOUND
+  Path: data/dfnonvr.csv
+  Rows: 100
+  Columns: 101
+  RAVLT trial columns: PRESENT
+  Age column: PRESENT
+
+Dependency validation: PASS
+Ch5 5.1.1: SUCCESS
+Files found: results/ch5/5.1.1/data/step03_theta_scores.csv, data/dfnonvr.csv
+N participants: 100 in theta, 100 in dfnonvr

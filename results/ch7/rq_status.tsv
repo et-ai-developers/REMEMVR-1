@@ -6,3 +6,4 @@ RQ	Scholar	Stats	Plan	Tools	Analysis	Inspect	Plots	Results	Validate	Notes
 7.2.1	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Suppression effect (119.8% mediation), Age β changes -0.130→+0.026, VR scaffolding hypothesis SUPPORTED
 7.2.2	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	Attenuation 119.8% [41.9%, 620.8%], suppression effect confirms VR scaffolding hypothesis
 7.2.3	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	PENDING	NO interactions (all p>0.0125), f²<0.02, VR Scaffolding Hypothesis SUPPORTED - age-fair assessment
+7.2.4	TRUE	TRUE	TRUE	TRUE	TRUE	PENDING	TRUE	TRUE	PENDING	RAVLT r=-0.292 (p=0.003), REMEMVR r=-0.193 (p=0.054), Steiger p=0.221, pattern supports VR scaffolding

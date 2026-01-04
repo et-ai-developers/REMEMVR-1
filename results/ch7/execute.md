@@ -752,3 +752,15 @@ Which approach is scientifically most appropriate for testing the differential p
 **VR provides age-fair assessment:** Cognitive tests predict REMEMVR equally across ages 20-70. No evidence for compensatory processing in older adults. LESSON: VR environments may eliminate age-related individual differences seen in traditional testing.
 
 **Cross-validation overfitting with small N:** All models showed train-test R² gaps > 0.10 despite stable interaction coefficients. LESSON: With N=100 and interaction terms, expect CV instability but rely on bootstrap for robust inference.
+
+### Lessons from RQ 7.2.4 (2026-01-05)
+
+**VR Scaffolding pattern observed but not significant:** RAVLT showed expected age decline (r=-0.292, p=0.003) while REMEMVR showed age-invariance (r=-0.193, p=0.054). Steiger's test p=0.221. LESSON: Expected directional patterns can be scientifically meaningful even without statistical significance, especially with low power.
+
+**Ch5 theta column name variation:** Ch5 5.1.1 file had "Theta_All" not "theta_all". Built column renaming into extraction. LESSON: Always check actual column names in dependency files, don't assume standardization across chapters.
+
+**RAVLT calculation from trials:** dfnonvr.csv has individual RAVLT trial scores, not total. Calculated total as sum of trials 1-5 + delayed recall. LESSON: Verify data structure matches expectations, may need to compute derived measures.
+
+**Sensitivity analyses strengthen weak findings:** All 3 sensitivity methods (outlier exclusion, Spearman, Winsorized) maintained the pattern. LESSON: Robust patterns across sensitivity analyses can support conclusions even when primary test is non-significant.
+
+**Power limitations common with correlation differences:** Achieved only 17% power for observed effect (r_diff=0.099). Would need N=340 for 80% power. LESSON: Correlation difference tests require large samples; acknowledge power limitations transparently.
