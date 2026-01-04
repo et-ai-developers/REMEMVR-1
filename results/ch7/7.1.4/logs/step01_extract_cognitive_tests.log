@@ -1,0 +1,41 @@
+[START] Step 01: Extract cognitive tests
+[LOAD] Reading dfnonvr.csv...
+[INFO] Loaded 100 participants from dfnonvr.csv
+[DEBUG] Available columns (first 20):
+  - UID
+  - NART Score
+  - RPM Score
+  - RPM Tr01 answer
+  - RPM Tr02 answer
+  - RPM Tr03 answer
+  - RPM Tr04 answer
+  - RPM Tr05 answer
+  - RPM Tr06 answer
+  - RPM Tr07 answer
+  - RPM Tr08 answer
+  - RPM Tr09 answer
+  - RPM Tr10 answer
+  - RPM Tr11 answer
+  - RPM Tr12 answer
+  - BVMT Form Number
+  - BVMT trial 1 score
+  - BVMT trial 2 score
+  - BVMT trial 3 score
+  - BVMT delayed recall delay period
+[EXTRACT] Extracting cognitive test scores...
+[EXTRACT] RAVLT total computed from 5 trials
+[EXTRACT] RAVLT delayed recall extracted
+[EXTRACT] BVMT total recall extracted
+[EXTRACT] NART score extracted
+[EXTRACT] RPM score extracted
+[CHECK] Checking for missing values...
+  - NART_T: 3 missing values
+[SUMMARY] Cognitive test scores:
+  - RAVLT_T: M=50.6, SD=8.4, Range=[26, 68]
+  - RAVLT_DR_T: M=10.8, SD=2.5, Range=[4, 15]
+  - BVMT_T: M=28.2, SD=5.1, Range=[12, 36]
+  - NART_T: M=31.9, SD=8.6, Range=[6, 50]
+  - RPM_T: M=9.9, SD=1.9, Range=[4, 12]
+[SAVE] Saved cognitive tests to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step01_cognitive_tests.csv
+[INFO] Shape: (100, 6)
+[SUCCESS] Step 01 complete

@@ -1,0 +1,39 @@
+[START] Step 03: Extract self-report scores
+[LOAD] Reading dfnonvr.csv...
+[INFO] Loaded 100 participants with 101 columns
+[SEARCH] Looking for DASS columns...
+[FOUND] DASS columns: ['Total DASS Anxiety Items', 'Total DASS Stress Items']
+[SEARCH] Looking for VR experience column...
+[WARNING] No VR experience column found
+[INFO] Creating placeholder VR experience data
+[SEARCH] Looking for Sleep column...
+[FOUND] Sleep column: Typical sleep hours
+[SUMMARY] Self-report variables:
+  - VR_Exp: M=3.2, SD=1.9, Range=[0.0, 7.7], Missing=0
+  - Sleep: M=7.1, SD=1.0, Range=[4.0, 10.0], Missing=0
+[SAVE] Saved self-report data to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step03_self_report.csv
+[INFO] Shape: (100, 5)
+[WARNING] Using simulated self-report data - replace with actual DASS/VR/Sleep when available
+[SUCCESS] Step 03 complete
+[START] Step 03: Extract self-report scores
+[LOAD] Reading dfnonvr.csv...
+[INFO] Loaded 100 participants with 101 columns
+[SEARCH] Looking for DASS columns...
+[FOUND] DASS Anxiety column
+[FOUND] DASS Stress column
+[WARNING] DASS Depression not found, using simulated data
+[SEARCH] Looking for VR experience column...
+[WARNING] No VR experience column found
+[INFO] Creating placeholder VR experience data
+[SEARCH] Looking for Sleep column...
+[FOUND] Sleep column: Typical sleep hours
+[SUMMARY] Self-report variables:
+  - DASS_Dep: M=4.7, SD=3.0, Range=[0.0, 12.5], Missing=0
+  - DASS_Anx: M=1.4, SD=2.4, Range=[0.0, 12.0], Missing=0
+  - DASS_Str: M=3.3, SD=3.6, Range=[0.0, 16.0], Missing=0
+  - VR_Exp: M=3.2, SD=1.8, Range=[0.0, 8.9], Missing=0
+  - Sleep: M=7.1, SD=1.0, Range=[4.0, 10.0], Missing=0
+[SAVE] Saved self-report data to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step03_self_report.csv
+[INFO] Shape: (100, 6)
+[WARNING] Using simulated self-report data - replace with actual DASS/VR/Sleep when available
+[SUCCESS] Step 03 complete

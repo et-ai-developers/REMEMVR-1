@@ -1,0 +1,29 @@
+[START] Step 01b: Standardize cognitive scores to T-scores
+[LOAD] Reading /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step01_cognitive_tests.csv...
+[INFO] Loaded 100 participants
+[STANDARDIZE] Converting to T-scores (M=50, SD=10)...
+  - RAVLT_T:
+    Raw: M=50.6, SD=8.4
+    T-score: M=50.0, SD=10.0, Range=[20.8, 70.7]
+  - RAVLT_DR_T:
+    Raw: M=10.8, SD=2.5
+    T-score: M=50.0, SD=10.0, Range=[23.0, 66.3]
+  - BVMT_T:
+    Raw: M=28.2, SD=5.1
+    T-score: M=50.0, SD=10.0, Range=[17.9, 65.4]
+  - NART_T:
+    Raw: M=31.9, SD=8.6
+    T-score: M=50.0, SD=10.0, Range=[19.8, 71.1]
+    Missing: 3 values
+  - RPM_T:
+    Raw: M=9.9, SD=1.9
+    T-score: M=50.0, SD=10.0, Range=[19.5, 61.1]
+[VERIFY] Checking T-score properties...
+  - RAVLT_T: M=50.00, SD=10.00 [PASS]
+  - RAVLT_DR_T: M=50.00, SD=10.00 [PASS]
+  - BVMT_T: M=50.00, SD=10.00 [PASS]
+  - NART_T: M=50.00, SD=10.00 [PASS]
+  - RPM_T: M=50.00, SD=10.00 [PASS]
+[SAVE] Saved T-scores to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step01b_cognitive_t_scores.csv
+[INFO] Shape: (100, 6)
+[SUCCESS] Step 01b complete

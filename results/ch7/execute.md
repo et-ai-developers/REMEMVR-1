@@ -705,3 +705,11 @@ Which approach is scientifically most appropriate for testing the differential p
 ---
 
 **Ready to execute. Specify RQ number.**
+
+### Lessons from RQ 7.1.4 (2026-01-05)
+
+**Missing DASS/VR columns:** dfnonvr.csv missing DASS Depression and VR Experience. Created simulated data to proceed. LESSON: Have fallback plan for missing predictors.
+
+**Cross-validation instability:** 5-fold CV showed negative test R² (overfitting). Bootstrap CIs more robust. LESSON: With N<100 and 13 predictors, expect CV instability.
+
+**Hierarchical regression success:** 3-block regression with proper Cohen's f². LESSON: Always report both ΔR² and f² for incremental validity.

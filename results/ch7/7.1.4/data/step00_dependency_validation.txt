@@ -1,0 +1,33 @@
+DEPENDENCY VALIDATION REPORT
+RQ: Ch7 7.1.4 - Incremental Validity of VR Assessment
+Generated: 2026-01-04 22:46:01.264366
+============================================================
+
+OVERALL STATUS: PASS - All dependencies validated successfully
+
+DEPENDENCY DETAILS:
+----------------------------------------
+
+CH5_THETA_SCORES: Ch5 VR ability theta scores
+Path: /home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv
+File exists: YES
+File size: 7186 bytes
+Participants: 400
+Has UID column: YES
+Sample columns: UID, test, Theta_All
+Status: PASS
+
+DFNONVR_DATA: Cognitive and demographic data
+Path: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+File exists: YES
+File size: 50700 bytes
+Participants: 100
+Has UID column: YES
+Sample columns: UID, NART Score, RPM Score, RPM Tr01 answer, RPM Tr02 answer, RPM Tr03 answer, RPM Tr04 answer, RPM Tr05 answer, RPM Tr06 answer, RPM Tr07 answer
+Status: PASS
+
+============================================================
+NEXT STEPS:
+- All dependencies validated
+- Ready to proceed with RQ 7.1.4 analysis steps
+- Expected ~100 participants from Ch5 + cognitive/demographic data
