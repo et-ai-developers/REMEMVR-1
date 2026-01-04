@@ -1,9 +1,9 @@
 # Current State
 
-**Last Updated:** 2026-01-05 09:30 (context-manager curation - 1 session archived)
+**Last Updated:** 2026-01-05 11:35 (context-manager curation - resolved topics cleaned)
 **Last /clear:** 2025-11-27 20:50
 **Last /save:** 2026-01-05 09:00 (RQ 7.2.2 Complete + Suppression Effect Confirmed)
-**Token Count:** ~7k tokens (2 sessions post-curation)
+**Token Count:** ~9k tokens (6 sessions, conservative curation)
 
 ---
 
@@ -56,13 +56,6 @@
 
 ---
 
-**Archived Session:** 2026-01-05 17:50 (Ch7 Data Issues and System Prompt Fix) → `ch7_data_source_correction_and_system_prompt_strengthening.md`
-- Data source corrected: master.xlsx → dfnonvr.csv (78 files fixed)
-- NART data recovered: Now in column 2 of dfnonvr.csv  
-- System prompt strengthened: Better circuit breakers, "Never Guess" rules
-- All 7.1.x files verified letter-perfect for g_code execution
-
----
 
 ## Session (2026-01-04 22:00 - RQ 7.1.2 Complete + Scientific Integrity Protocols)
 
@@ -207,7 +200,6 @@ ALTERNATIVE REJECTED: 5.1.1 (no slopes), 5.2.1 (different paradigms)
 - ch7_execution_underway (67/93 RQs complete, 72% overall progress - 7.1.2 added)
 - gcode_lessons_system (Bug #9 added: regression function signature mismatch)
 - rq_analysis_v5.3_deployed (Production version)
-- ch7_data_source_correction (dfnonvr.csv migration complete)
 
 ---
 
@@ -420,7 +412,6 @@ ALTERNATIVE REJECTED: 5.1.1 (no slopes), 5.2.1 (different paradigms)
 - scientific_integrity_protocols_v2 (Applied throughout session)
 - cross_chapter_dependency_protocols (Properly verified Ch5 5.2.1)
 - rq_analysis_v5.3_deployed (Used for validation)
-- ch7_data_source_correction (Using dfnonvr.csv properly)
 
 ---
 
@@ -1281,8 +1272,6 @@ The absence of significant interactions strongly supports the VR Scaffolding Hyp
 - vr_scaffolding_paradigm (Now supported by 7.2.1, 7.2.2, AND 7.2.3)
 - cross_validation_overfitting (Expected with N=100 and interactions)
 
-**Topics to Archive (no longer active):**
-- ch7_data_source_correction (Resolved - all RQs now using dfnonvr.csv correctly)
 
 ---
 
