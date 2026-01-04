@@ -1,12 +1,15 @@
 # Archive Index
 
-**Last Updated:** 2026-01-04 23:00 (context-manager curation - 1 session archived: rq_analysis_v5_enhancement_history)
+**Last Updated:** 2026-01-05 09:30 (context-manager curation - 1 session archived: ch7_data_source_correction_and_system_prompt_strengthening)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### ch7_data_source_correction_and_system_prompt_strengthening
+**Description:** Complete history of fixing critical Ch7 data source issues (master.xlsx → dfnonvr.csv migration) and strengthening hallucination prevention protocols. Includes deep verification of 7.1.x analysis files, NART data recovery, and CLAUDE.md protocol enhancements. Session 2026-01-05 17:50.
 
 ### rq_analysis_v5_enhancement_history
 **Description:** Documents the evolution of rq_analysis agent from v4.1.0 through v5.1.0. Covers issues discovered during RQ 7.1.1 testing (flat paths, wrong validators, file format issues, module errors), v5.0.0 verification framework creation, v5.1.0 deep enhancement with automatic corrections, and successful testing on RQs 7.1.1, 7.1.2, 7.1.3. Created tools/rq_analysis_verifier.py (300 functions cataloged) and fix_analysis_yaml.py. Session 2026-01-04 Evening. Note: superseded by v5.3.0.
