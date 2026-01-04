@@ -1,0 +1,4 @@
+comparison,beta_difference,hypothesis,observed
+RAVLT_What - RAVLT_Where,0.018292478711353505,positive,positive
+BVMT_Where - BVMT_What,-0.012322084408927791,positive,negative
+RPM_range,0.1851155150654736,small (<0.1),large

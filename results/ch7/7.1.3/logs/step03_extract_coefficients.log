@@ -1,0 +1,63 @@
+[START] Step 03: Extract and Compare Beta Coefficients
+[SETUP] RQ Directory: /home/etai/projects/REMEMVR/results/ch7/7.1.3
+
+[STEP 1] Loading model results for all domains...
+[INFO] Loaded What model: 4 coefficients
+[INFO] Loaded Where model: 4 coefficients
+[INFO] Loaded When model: 4 coefficients
+
+[STEP 2] Creating beta coefficient matrix...
+[OUTPUT] Beta coefficient matrix saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step03_beta_coefficient_matrix.csv
+
+[INFO] Beta Coefficient Matrix:
+Domain     RAVLT      BVMT       RPM       
+----------------------------------------
+What           0.095     0.105     0.204
+Where          0.077     0.093     0.233
+When           0.030     0.031     0.048
+
+[STEP 3] Calculating cross-domain comparisons...
+[OUTPUT] Cross-domain comparisons saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step03_cross_domain_comparisons.csv
+
+[HYPOTHESIS TESTS] Cross-domain predictions:
+  RAVLT_What - RAVLT_Where: diff=0.018 (expected positive, observed positive) ✓
+  BVMT_Where - BVMT_What: diff=-0.012 (expected positive, observed negative) ✗
+  RPM_range: diff=0.185 (expected small (<0.1), observed large) ✗
+
+[STEP 4] Classifying effect sizes using Cohen's conventions...
+[OUTPUT] Effect sizes saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step03_effect_sizes.csv
+
+[SUMMARY] Effect Size Classification:
+
+  What domain:
+    RAVLT_T: negligible (β=0.095)
+    BVMT_T: small (β=0.105)
+    RPM_T: small (β=0.204)*
+
+  Where domain:
+    RAVLT_T: negligible (β=0.077)
+    BVMT_T: negligible (β=0.093)
+    RPM_T: small (β=0.233)*
+
+  When domain:
+    RAVLT_T: negligible (β=0.030)
+    BVMT_T: negligible (β=0.031)
+    RPM_T: negligible (β=0.048)
+
+[STEP 5] Preparing heatmap data for visualization...
+[OUTPUT] Heatmap plot data saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step03_heatmap_plot_data.csv
+
+[STEP 6] Computing summary statistics...
+
+[SUMMARY] Strongest predictor by domain:
+  What: RPM_T (β=0.204, p=0.002)
+  Where: RPM_T (β=0.233, p=0.001)
+  When: RPM_T (β=0.048, p=0.137)
+
+[SUMMARY] Best predicted domain by test:
+  RAVLT_T: What (β=0.095, p=0.117)
+  BVMT_T: What (β=0.105, p=0.114)
+  RPM_T: Where (β=0.233, p=0.001)
+
+[COMPLETE] Step 03 completed successfully
+[SUMMARY] Extracted 9 beta coefficients (3 predictors × 3 domains)

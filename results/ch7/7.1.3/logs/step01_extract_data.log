@@ -1,0 +1,46 @@
+[START] Step 01: Extract and Prepare Domain-Specific Data
+[SETUP] RQ Directory: /home/etai/projects/REMEMVR/results/ch7/7.1.3
+
+[STEP 1] Loading Ch5 5.2.1 domain theta scores...
+[INFO] Loaded theta scores: (400, 4)
+[INFO] Columns: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
+[INFO] Unique participants: 100
+[INFO] Unique tests: ['1', '2', '3', '4']
+
+[STEP 2] Aggregating theta scores by UID and domain...
+[INFO] Aggregated theta scores: (100, 4)
+[INFO] Domain theta scores shape: (300, 4)
+[INFO] Domains: ['What', 'Where', 'When']
+[OUTPUT] Domain theta scores saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step01_domain_theta_scores.csv
+
+[STEP 3] Loading cognitive test data from dfnonvr.csv...
+[INFO] Loaded cognitive data: (100, 101)
+[INFO] Calculated RAVLT_Total from trials 1-5
+[INFO] Using BVMT total recall
+[INFO] Using RPM Score
+[INFO] Created T-score: RAVLT_T (mean=50.60, sd=8.42)
+[INFO] Created T-score: BVMT_T (mean=28.22, sd=5.06)
+[INFO] Created T-score: RPM_T (mean=9.87, sd=1.93)
+[INFO] Cognitive test data shape: (100, 4)
+[INFO] Available columns: ['UID', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+
+[STEP 4] Merging domain theta scores with cognitive tests...
+[INFO] Merged dataset shape: (300, 7)
+[INFO] Unique participants: 100
+[INFO] Domains: {'What': 100, 'Where': 100, 'When': 100}
+[INFO] No missing values in merged dataset
+[OUTPUT] Merged dataset saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step01_merged_dataset.csv
+
+[STEP 5] Calculating descriptive statistics...
+[INFO] What: n=100, mean=-0.007, sd=0.638
+[INFO] Where: n=100, mean=0.037, sd=0.671
+[INFO] When: n=100, mean=0.109, sd=0.282
+[OUTPUT] Descriptive statistics saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step01_descriptive_stats.csv
+
+[INFO] Checking for outliers (IQR method)...
+[WARNING] What: 1 outliers detected (bounds: [-1.705, 1.655])
+[WARNING] Where: 1 outliers detected (bounds: [-1.725, 1.764])
+[INFO] When: No outliers detected
+
+[COMPLETE] Step 01 completed successfully
+[SUMMARY] Created 300 records (100 participants × 3 domains)

@@ -1,0 +1,85 @@
+[START] Step 02: Fit Domain-Specific Regression Models
+[SETUP] RQ Directory: /home/etai/projects/REMEMVR/results/ch7/7.1.3
+
+[STEP 1] Loading merged dataset...
+[INFO] Loaded data: (300, 7)
+[INFO] Domains: {'What': 100, 'Where': 100, 'When': 100}
+
+[STEP 2] Fitting domain-specific regression models...
+
+[FITTING] What domain model...
+[INFO] What domain: 100 observations
+[INFO] What R²: 0.2498
+[INFO] What Adj R²: 0.2263
+[INFO] What F-statistic: 10.65 (p=0.0000)
+[INFO] What Max Cook's D: 0.1424
+[INFO] What Influential points (Cook's D > 4/n): 7
+[INFO] What Normality: Shapiro-Wilk p=0.6820 (OK)
+[INFO] What Homoscedasticity: Breusch-Pagan p=0.2859 (OK)
+[OUTPUT] What model results saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step02_what_model_results.csv
+
+[FITTING] Where domain model...
+[INFO] Where domain: 100 observations
+[INFO] Where R²: 0.2354
+[INFO] Where Adj R²: 0.2115
+[INFO] Where F-statistic: 9.85 (p=0.0000)
+[INFO] Where Max Cook's D: 0.1432
+[INFO] Where Influential points (Cook's D > 4/n): 6
+[INFO] Where Normality: Shapiro-Wilk p=0.8156 (OK)
+[INFO] Where Homoscedasticity: Breusch-Pagan p=0.2431 (OK)
+[OUTPUT] Where model results saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step02_where_model_results.csv
+
+[FITTING] When domain model...
+[INFO] When domain: 100 observations
+[INFO] When R²: 0.0882
+[INFO] When Adj R²: 0.0597
+[INFO] When F-statistic: 3.10 (p=0.0305)
+[INFO] When Max Cook's D: 0.0677
+[INFO] When Influential points (Cook's D > 4/n): 7
+[INFO] When Normality: Shapiro-Wilk p=0.8037 (OK)
+[INFO] When Homoscedasticity: Breusch-Pagan p=0.7334 (OK)
+[OUTPUT] When model results saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step02_when_model_results.csv
+[OUTPUT] Model diagnostics saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step02_model_diagnostics.csv
+
+[STEP 3] Computing bootstrap confidence intervals...
+
+[BOOTSTRAP] What domain (1000 iterations)...
+[INFO] What bootstrap complete
+
+[BOOTSTRAP] Where domain (1000 iterations)...
+[INFO] Where bootstrap complete
+
+[BOOTSTRAP] When domain (1000 iterations)...
+[INFO] When bootstrap complete
+[OUTPUT] Bootstrap results saved to: /home/etai/projects/REMEMVR/results/ch7/7.1.3/data/step02_bootstrap_coefficients.csv
+
+[STEP 4] Summary of findings...
+
+[SUMMARY] Model R² values:
+  What: R²=0.2498, Adj R²=0.2263
+  Where: R²=0.2354, Adj R²=0.2115
+  When: R²=0.0882, Adj R²=0.0597
+
+[SUMMARY] Key beta coefficients:
+
+  What domain:
+    RAVLT_T: β=0.095 (p=0.117) ns
+    BVMT_T: β=0.105 (p=0.114) ns
+    RPM_T: β=0.204 (p=0.002) **
+
+  Where domain:
+    RAVLT_T: β=0.077 (p=0.232) ns
+    BVMT_T: β=0.093 (p=0.188) ns
+    RPM_T: β=0.233 (p=0.001) **
+
+  When domain:
+    RAVLT_T: β=0.030 (p=0.317) ns
+    BVMT_T: β=0.031 (p=0.337) ns
+    RPM_T: β=0.048 (p=0.137) ns
+
+[HYPOTHESIS CHECK] Domain-specific predictions:
+  RAVLT: What β=0.095 vs Where β=0.077 ✓
+  BVMT: Where β=0.093 vs What β=0.105 ✗
+  R² When (0.088) < What (0.250) & Where (0.235)? ✓
+
+[COMPLETE] Step 02 completed successfully

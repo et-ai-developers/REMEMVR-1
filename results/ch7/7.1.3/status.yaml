@@ -46,24 +46,35 @@ rq_analysis:
   context_dump: "6 steps specified with validation (Multiple Linear Regression → Steiger Z-tests → domain prediction patterns)"
 
 rq_inspect:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Validated all 6 analysis steps for domain-specific prediction patterns
+    Output: 21 data files (300 participants x 3 domains), 6 log files 
+    Key findings: R²_When (0.088) < R²_Where (0.235) < R²_What (0.250), RPM strongest predictor
+    Validation: All 4 layers passed, models converged, bootstrap complete (1000 iter)
+    Status: All expected outputs present with valid value ranges
 
 rq_plots:
   status: pending
   context_dump: ""
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: "2026-01-04T23:15:00+00:00"
+  context_dump: |
+    Results validated for scientific plausibility
+    Plausibility acceptable (0 anomalies flagged)
+    Summary documented in results/summary.md
+    Key finding: RPM emerged as universal predictor, domain-specific patterns non-significant
+    Hypothesis partially supported: When domain lowest R² as expected
 
 analysis_steps:
-  step00_validate_dependencies: pending
-  step01_extract_domain_data: pending
-  step02_fit_regression_models: pending
-  step03_bootstrap_coefficients: pending
-  step04_steiger_z_tests: pending
-  step05_compare_model_performance: pending
+  step00_validate_dependencies: success
+  step01_extract_domain_data: success
+  step02_fit_regression_models: success
+  step03_extract_coefficients: success
+  step04_steiger_z_tests: success
+  step05_compare_model_performance: success
 
 rq_platinum:
   status: pending

@@ -554,7 +554,9 @@ Run in sequence. Don't skip. Each catches different issues.
 **STEP 1: READ REPORTS FIRST (MANDATORY)**
 ```bash
 # Always read the source RQ report before using its data
-./reports/X.Y.Z/report.md
+# Reports are saved as: ./reports/X.Y.Z/report.md
+# Example: ./reports/5.1.4/report.md for Ch5 RQ 5.1.4
+cat ./reports/X.Y.Z/report.md
 ```
 
 **STEP 2: SCIENTIFIC COMPATIBILITY CHECK**
@@ -689,6 +691,7 @@ Which approach is scientifically most appropriate for testing the differential p
 
 **Cross-Chapter RQ Information:**
 - For ANY information about Ch5/Ch6 RQs: Read `./reports/X.Y.Z/report.md` FIRST
+- Reports location: `./reports/X.Y.Z/report.md` (e.g., `./reports/5.2.1/report.md`)
 - Use context-finder to understand what analyses were done (not just find files)  
 - Report files contain: research questions, selected models, results, interpretations
 - NEVER use cross-chapter data without understanding the source RQ's purpose

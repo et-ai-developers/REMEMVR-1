@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated:** 2026-01-03 (v4 tool documentation updated with Ch7 tools)
+**Last Updated:** 2026-01-04 (lmm_methodology.md updated with model completeness check)
 
 ---
 
@@ -81,10 +81,10 @@
 **Key Topics:** Graded Response Model (GRM), multidimensional IRT, deepirtools IWAVE implementation, theta estimation, composite_ID stacking, downstream usage in LMM pipeline (theta scores + TSVR)
 
 ### lmm_methodology.md
-**Purpose:** LMM deep dive including MODEL AVERAGING procedure (Burnham & Anderson 2002) for handling functional form uncertainty
+**Purpose:** LMM deep dive including MODEL AVERAGING procedure (Burnham & Anderson 2002) and MANDATORY model completeness check
 **Audience:** Analysis-executor agent, main claude when building LMM tools, statistics-expert agent, all agents working on ROOT RQs
-**Status:** Current (2025-12-13, major update with model averaging documentation)
-**Key Topics:** Linear Mixed Models, model averaging (ΔAIC < 7 threshold, Akaike weights, effective N models), kitchen sink model comparison (65+ functional forms), uncertainty classification (LOW/MODERATE/HIGH/EXTREME), random effects for ICC decomposition, tools/model_averaging.py API, Ch5/Ch6 ROOT RQ uncertainty levels
+**Status:** Current (2026-01-04, added model completeness check)
+**Key Topics:** Linear Mixed Models, model averaging (ΔAIC < 7 threshold, Akaike weights, effective N models), kitchen sink model comparison (65+ functional forms), **MODEL COMPLETENESS CHECK** (17+ models required, power law variants mandatory), uncertainty classification (LOW/MODERATE/HIGH/EXTREME), random effects for ICC decomposition, tools/model_averaging.py API
 
 ### cognitive_tests.md
 **Purpose:** RAVLT, BVMT, NART, RPM scoring procedures with exact tag names

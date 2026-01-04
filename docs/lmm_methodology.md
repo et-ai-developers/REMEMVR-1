@@ -186,9 +186,53 @@ results = run_model_averaging_pipeline(
 
 ---
 
+## Model Completeness Check (MANDATORY)
+
+**Discovery (2025-12-08):** RQ 5.1.1 originally tested only 5 basic models and selected Logarithmic as best. Extended testing (17+ models) revealed power law models dominate (ΔAIC=2.97, evidence ratio 4.4:1 favoring power law over log).
+
+### When Starting LMM Trajectory Analysis
+
+**ALWAYS verify the model suite includes power law variants:**
+
+| Model | Formula | Required |
+|-------|---------|----------|
+| PowerLaw_Alpha03 | `(t+1)^(-0.3)` | YES |
+| PowerLaw_Alpha05 | `(t+1)^(-0.5)` | YES |
+| PowerLaw_Alpha07 | `(t+1)^(-0.7)` | YES |
+| PowerLaw_LogLog | `log(log(t+1)+1)` | YES |
+| SquareRoot | `sqrt(t)` | YES |
+| CubeRoot | `t^(1/3)` | YES |
+
+**Minimum requirement:** 17 models including all power law variants above.
+
+**Current standard:** 65+ models (kitchen sink approach) - see Step 05 procedure.
+
+### Time Transformations
+
+```python
+lmm_input['log_log_Days'] = np.log(lmm_input['log_Days'] + 1)
+lmm_input['sqrt_Days'] = np.sqrt(lmm_input['Days'])
+lmm_input['cbrt_Days'] = np.cbrt(lmm_input['Days'])
+lmm_input['recip_Days'] = 1.0 / (lmm_input['Days'] + 1)
+lmm_input['Days_pow_neg05'] = (lmm_input['Days'] + 1) ** (-0.5)
+lmm_input['Days_pow_neg03'] = (lmm_input['Days'] + 1) ** (-0.3)
+lmm_input['Days_pow_neg07'] = (lmm_input['Days'] + 1) ** (-0.7)
+```
+
+### If Only Basic Models Were Tested
+
+If you find an RQ only tested 5-7 basic models (Linear, Quadratic, Log, combinations):
+
+1. **STOP** - Do not proceed with interpretation
+2. **ALERT** user that power law variants are missing
+3. Run extended model comparison before finalizing
+
+---
+
 ## Version History
 
 | Date | Changes |
 |------|---------|
 | 2025-12-13 | Initial documentation of model averaging procedure |
 | 2025-12-13 | Added Ch5 5.1.1 and Ch6 ROOT RQ results |
+| 2026-01-04 | Added Model Completeness Check section (from CLAUDE.md consolidation) |
