@@ -1,0 +1,29 @@
+[START] Step 02: create_calibration_groups
+[LOAD] Loading input data...
+[LOADED] step01_merged_data.csv (100 rows, 6 cols)
+[VERIFY] All required columns present: ['UID', 'theta_all', 'confidence_theta', 'education', 'rpm', 'age']
+[INFO] Data shape: (100, 6)
+[ANALYSIS] Running regression: confidence_theta ~ theta_all
+[INFO] Using 100 complete cases for regression
+[DONE] Regression analysis complete
+[RESULTS] R² = 0.3674, p = 0.0000
+[GROUPING] Creating calibration groups from residuals...
+[INFO] Residual statistics - Mean: -0.0000, SD: 0.2594
+[GROUPS] Group sizes:
+  Well-calibrated: n = 41
+  Overconfident: n = 33
+  Underconfident: n = 26
+[PASS] All groups meet minimum size requirement (n >= 15)
+[DESCRIPTIVES] Computing group descriptive statistics...
+[SAVE] Saving calibration groups...
+[SAVED] step02_calibration_groups.csv (100 rows, 9 cols)
+[SAVE] Saving group descriptives...
+[SAVED] step02_group_descriptives.csv (3 rows, 9 cols)
+[VALIDATION] Running validate_model_convergence...
+[VALIDATION] valid: True
+[VALIDATION] message: Model converged successfully.
+[VALIDATION] converged: True
+[VALIDATION] Regression R²: 0.3674
+[VALIDATION] Regression p-value: 0.0000
+[VALIDATION] Regression significant (p < 0.05)
+[SUCCESS] Step 02 complete

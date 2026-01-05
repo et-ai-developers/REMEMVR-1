@@ -47,8 +47,12 @@ rq_plots:
   context_dump: ""
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: "2026-01-05T21:30:00Z"
+  context_dump: |
+    Results validated for scientific plausibility
+    3 anomalies flagged: 1 missing ANOVA statistics, 1 extreme power limitation, 1 education range restriction
+    Summary documented in results/summary.md
 
 analysis_steps:
   # To be populated during execution
