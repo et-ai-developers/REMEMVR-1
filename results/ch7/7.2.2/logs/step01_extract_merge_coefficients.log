@@ -1,30 +1,41 @@
-======================================================================
-STEP 01: EXTRACT AND MERGE REGRESSION COEFFICIENTS
-======================================================================
+============================================================
+Step 01: Extract and Merge Coefficients - FIXED VERSION
+Using REAL domain-specific theta scores from Ch5 5.2.1
+============================================================
 
-1. Loading age coefficients from RQ 7.2.1...
-Loaded mediation analysis: 1 rows
-Columns: ['beta_total', 'beta_direct', 'mediation_effect', 'proportion_mediated', 'ci_lower', 'ci_upper', 'p_mediation', 'effect_size_category']
-Age coefficient (bivariate): -0.1302
-Age coefficient (controlled): 0.0258
+1. Extracting age coefficients from RQ 7.2.1...
+Loaded hierarchical models: (2, 8)
+  Beta (age only): -0.1930
+  Beta (age + cognitive): 0.0260
 
-2. Loading theta scores from Ch5 analyses...
-Loaded overall theta: 400 rows
-Overall theta columns: ['UID', 'test', 'Theta_All']
-Using theta column: Theta_All
-Aggregated to 100 participants
-Loaded What domain theta: 400 rows
-Aggregated What domain to 100 participants
+2. Extracting theta scores from Ch5...
+Loaded overall theta from 5.1.1: (400, 3)
+Loaded domain theta from 5.2.1: (400, 4)
+Domain columns available: ['composite_ID', 'theta_what', 'theta_where', 'theta_when']
+  What domain: 100 participants
+  Where domain: 100 participants
+  When domain: 100 participants
 
-3. Merging datasets...
+  When domain stats: M=0.109, SD=0.282
+
+3. Merging coefficient and theta data...
 
 Merged dataset summary:
   Rows: 100
-  Columns: ['UID', 'theta_all', 'theta_what', 'beta_age_bivariate_all', 'beta_age_controlled_all', 'beta_age_bivariate_what', 'beta_age_controlled_what']
-  Missing values: 0
+  Columns: ['UID', 'theta_all', 'theta_what', 'theta_where', 'theta_when', 'beta_age_bivariate_all', 'beta_age_controlled_all', 'beta_age_bivariate_what', 'beta_age_controlled_what', 'beta_age_bivariate_where', 'beta_age_controlled_where', 'beta_age_bivariate_when', 'beta_age_controlled_when']
+  Missing values: 600
+
+Domain coverage:
+  What domain: 100/100 participants
+  Where domain: 100/100 participants
+  When domain: 100/100 participants
 
 4. Saving outputs...
 Saved merged coefficients to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step01_merged_coefficients.csv
 Saved data summary to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step01_data_summary.txt
+Saved domain availability to: /home/etai/projects/REMEMVR/results/ch7/7.2.2/data/step01_domain_availability.csv
 
-Step 01 complete: Coefficients extracted and merged
+============================================================
+Step 01 COMPLETE - All domain data successfully extracted
+FIXED: Now uses REAL domain-specific theta from Ch5 5.2.1
+============================================================

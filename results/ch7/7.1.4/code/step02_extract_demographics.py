@@ -40,68 +40,37 @@ def main():
     demographics = pd.DataFrame()
     demographics['uid'] = df['UID'].astype(str)
     
-    # Extract age
-    if 'Age in years' in df.columns:
-        demographics['age'] = df['Age in years']
-        log(f"[EXTRACT] Age: M={demographics['age'].mean():.1f}, SD={demographics['age'].std():.1f}, Range=[{demographics['age'].min():.0f}, {demographics['age'].max():.0f}]")
+    # Extract age - correct column name: age
+    if 'age' in df.columns:
+        demographics['age'] = df['age']
+        log(f"[SUCCESS] Age extracted: M={demographics['age'].mean():.1f}, SD={demographics['age'].std():.1f}, Range=[{demographics['age'].min():.0f}, {demographics['age'].max():.0f}]")
     else:
-        log("[WARNING] Age column not found")
+        log("[ERROR] Column 'age' not found")
         demographics['age'] = np.nan
     
-    # Extract sex (already coded as 0=female, 1=male)
-    if 'Sex 0=female 1=male' in df.columns:
-        demographics['sex'] = df['Sex 0=female 1=male']
+    # Extract sex - correct column name: sex (already coded as 0=female, 1=male)
+    if 'sex' in df.columns:
+        demographics['sex'] = df['sex']
         demographics['sex_binary'] = demographics['sex']  # Already binary
         n_female = (demographics['sex'] == 0).sum()
         n_male = (demographics['sex'] == 1).sum()
-        log(f"[EXTRACT] Sex: {n_female} female, {n_male} male")
+        log(f"[SUCCESS] Sex extracted: {n_female} female, {n_male} male")
     else:
-        log("[WARNING] Sex column not found")
+        log("[ERROR] Column 'sex' not found")
         demographics['sex'] = np.nan
         demographics['sex_binary'] = np.nan
     
-    # Extract education - need to find the right column
-    education_cols = [col for col in df.columns if 'education' in col.lower() or 'educ' in col.lower()]
-    if education_cols:
-        # Use the first education column found
-        edu_col = education_cols[0]
-        log(f"[INFO] Found education column: {edu_col}")
+    # Extract education - correct column name: education (1-10 ordinal scale)
+    if 'education' in df.columns:
+        demographics['education'] = df['education']
+        demographics['education_years'] = df['education']  # Already on ordinal scale
+        log(f"[SUCCESS] Education extracted (1-10 ordinal scale)")
         
-        # Map education levels to numeric scale if needed
-        # Common mapping: High school=12, Some college=14, Bachelor's=16, Graduate=18
-        demographics['education'] = df[edu_col]
-        
-        # If education is categorical, try to convert to years
-        if demographics['education'].dtype == 'object':
-            log("[INFO] Converting categorical education to years of education...")
-            edu_mapping = {
-                'high school': 12,
-                'some college': 14,
-                'associate': 14,
-                'bachelor': 16,
-                'master': 18,
-                'doctorate': 20,
-                'phd': 20
-            }
-            
-            # Try to map values
-            demographics['education_years'] = demographics['education'].apply(
-                lambda x: next((v for k, v in edu_mapping.items() if k in str(x).lower()), np.nan) if pd.notna(x) else np.nan
-            )
-            
-            # If mapping didn't work well, use ordinal encoding
-            if demographics['education_years'].isna().sum() > len(demographics) * 0.5:
-                log("[INFO] Categorical mapping failed, using ordinal encoding")
-                demographics['education_years'] = pd.Categorical(demographics['education']).codes
-                demographics['education_years'] = demographics['education_years'].replace(-1, np.nan)
-        else:
-            demographics['education_years'] = demographics['education']
-        
-        valid_edu = demographics['education_years'].dropna()
+        valid_edu = demographics['education'].dropna()
         if len(valid_edu) > 0:
-            log(f"[EXTRACT] Education: M={valid_edu.mean():.1f}, SD={valid_edu.std():.1f}, Range=[{valid_edu.min():.0f}, {valid_edu.max():.0f}]")
+            log(f"[INFO] Education: M={valid_edu.mean():.1f}, SD={valid_edu.std():.1f}, Range=[{valid_edu.min():.0f}, {valid_edu.max():.0f}]")
     else:
-        log("[WARNING] Education column not found")
+        log("[ERROR] Column 'education' not found")
         demographics['education'] = np.nan
         demographics['education_years'] = np.nan
     

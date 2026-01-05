@@ -16,6 +16,15 @@ from scipy import stats
 PROJECT_ROOT = Path(__file__).resolve().parents[4]  # Go up 4 levels from code file
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Import missing data utilities
+try:
+    sys.path.insert(0, str(PROJECT_ROOT / "results" / "ch7"))
+    from missing_data_handler import analyze_missing_pattern, create_missing_data_report
+except ImportError:
+    # Utilities not available - continue without
+    pass
+
+
 # =============================================================================
 # Configuration
 # =============================================================================
@@ -135,9 +144,9 @@ if __name__ == "__main__":
         
         # Extract cognitive test scores
         # RAVLT: Calculate total from trials 1-5
-        ravlt_trials = ['RAVLT trial 1 score', 'RAVLT trial 2 score', 
-                       'RAVLT trial 3 score', 'RAVLT trial 4 score', 
-                       'RAVLT trial 5 score']
+        ravlt_trials = ['ravlt-trial-1-score', 'ravlt-trial-2-score', 
+                       'ravlt-trial-3-score', 'ravlt-trial-4-score', 
+                       'ravlt-trial-5-score']
         
         if all(col in df_cog.columns for col in ravlt_trials):
             df_cog['RAVLT_Total'] = df_cog[ravlt_trials].sum(axis=1)
@@ -146,15 +155,15 @@ if __name__ == "__main__":
             log(f"[WARNING] RAVLT trials not found, checking for total score column")
             
         # BVMT: Use total recall
-        if 'BVMT total recall' in df_cog.columns:
-            df_cog['BVMT_Total'] = df_cog['BVMT total recall']
+        if 'bvmt-total-recall' in df_cog.columns:
+            df_cog['BVMT_Total'] = df_cog['bvmt-total-recall']
             log(f"[INFO] Using BVMT total recall")
         else:
             log(f"[WARNING] BVMT total recall not found")
             
         # RPM: Use RPM Score
-        if 'RPM Score' in df_cog.columns:
-            df_cog['RPM_Total'] = df_cog['RPM Score']
+        if 'rpm-score' in df_cog.columns:
+            df_cog['RPM_Total'] = df_cog['rpm-score']
             log(f"[INFO] Using RPM Score")
         else:
             log(f"[WARNING] RPM Score not found")

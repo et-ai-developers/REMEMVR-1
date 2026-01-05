@@ -18,6 +18,15 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Import missing data utilities
+try:
+    sys.path.insert(0, str(PROJECT_ROOT / "results" / "ch7"))
+    from missing_data_handler import analyze_missing_pattern, create_missing_data_report
+except ImportError:
+    # Utilities not available - continue without
+    pass
+
+
 # Define paths
 RQ_DIR = Path(__file__).resolve().parents[1]  # results/ch7/7.2.3
 CH5_DIR = PROJECT_ROOT / "results" / "ch5" / "5.1.1"
@@ -58,17 +67,17 @@ def extract_cognitive_tests():
     cognitive_df['UID'] = df['UID']
     
     # Age
-    cognitive_df['Age'] = df['Age in years']
+    cognitive_df['Age'] = df['age']
     
     # Cognitive tests - raw scores
-    cognitive_df['NART_raw'] = df['NART Score']
-    cognitive_df['RPM_raw'] = df['RPM Score']
-    cognitive_df['BVMT_raw'] = df['BVMT total recall']
+    cognitive_df['NART_raw'] = df['nart-score']
+    cognitive_df['RPM_raw'] = df['rpm-score']
+    cognitive_df['BVMT_raw'] = df['bvmt-total-recall']
     
     # RAVLT total = sum of trials 1-5
-    ravlt_cols = ['RAVLT trial 1 score', 'RAVLT trial 2 score', 
-                  'RAVLT trial 3 score', 'RAVLT trial 4 score', 
-                  'RAVLT trial 5 score']
+    ravlt_cols = ['ravlt-trial-1-score', 'ravlt-trial-2-score', 
+                  'ravlt-trial-3-score', 'ravlt-trial-4-score', 
+                  'ravlt-trial-5-score']
     cognitive_df['RAVLT_raw'] = df[ravlt_cols].sum(axis=1)
     
     # Convert to T-scores (M=50, SD=10)

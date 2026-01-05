@@ -35,9 +35,9 @@ def main():
     log(f"Loaded {len(df_master)} rows with {len(df_master.columns)} columns")
     
     # Define RAVLT trial columns and age column
-    ravlt_cols = ['RAVLT trial 1 score', 'RAVLT trial 2 score', 'RAVLT trial 3 score', 
-                  'RAVLT trial 4 score', 'RAVLT trial 5 score', 'RAVLT delayed recall score']
-    age_col = 'Age in years'
+    ravlt_cols = ['ravlt-trial-1-score', 'ravlt-trial-2-score', 'ravlt-trial-3-score', 
+                  'ravlt-trial-4-score', 'ravlt-trial-5-score', 'ravlt-delayed-recall-score']
+    age_col = 'age'
     
     # Verify columns exist
     missing_cols = [col for col in ravlt_cols + [age_col] if col not in df_master.columns]
@@ -58,7 +58,7 @@ def main():
     df_ravlt['RAVLT_Total'] = df_ravlt[ravlt_cols].sum(axis=1)
     
     # Rename Age column for consistency
-    df_ravlt = df_ravlt.rename(columns={'Age in years': 'Age'})
+    df_ravlt = df_ravlt.rename(columns={'age': 'Age'})
     
     # Check for missing data
     n_before = len(df_ravlt)

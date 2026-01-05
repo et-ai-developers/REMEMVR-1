@@ -1,6 +1,6 @@
 DEPENDENCY VALIDATION REPORT
 RQ: Ch7 7.1.4 - Incremental Validity of VR Assessment
-Generated: 2026-01-04 22:46:01.264366
+Generated: 2026-01-05 14:23:11.684277
 ============================================================
 
 OVERALL STATUS: PASS - All dependencies validated successfully
@@ -20,10 +20,10 @@ Status: PASS
 DFNONVR_DATA: Cognitive and demographic data
 Path: /home/etai/projects/REMEMVR/data/dfnonvr.csv
 File exists: YES
-File size: 50700 bytes
+File size: 60164 bytes
 Participants: 100
 Has UID column: YES
-Sample columns: UID, NART Score, RPM Score, RPM Tr01 answer, RPM Tr02 answer, RPM Tr03 answer, RPM Tr04 answer, RPM Tr05 answer, RPM Tr06 answer, RPM Tr07 answer
+Sample columns: UID, nart-time, nart-score, rpm-time, rpm-score, rpm-tr01-answer, rpm-tr02-answer, rpm-tr03-answer, rpm-tr04-answer, rpm-tr05-answer
 Status: PASS
 
 ============================================================

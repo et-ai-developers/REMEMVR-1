@@ -1,0 +1,28 @@
+============================================================
+MISSING DATA ANALYSIS REPORT
+============================================================
+
+OVERALL SUMMARY
+----------------------------------------
+Total participants: 100
+Complete cases: 97 (97.0%)
+Incomplete cases: 3 (3.0%)
+
+MISSING DATA BY VARIABLE
+----------------------------------------
+NART_Score                       3 missing (3.0%)
+
+MISSING COMPLETELY AT RANDOM (MCAR) TEST
+----------------------------------------
+Test statistic: 1.25
+p-value: 0.9961
+Result: Data appears to be MCAR
+
+Note: This is a simplified test. For publication, use
+      specialized packages for full Little's MCAR test.
+
+RECOMMENDATIONS
+----------------------------------------
+• Complete case analysis is reasonable (>95% complete)
+
+============================================================

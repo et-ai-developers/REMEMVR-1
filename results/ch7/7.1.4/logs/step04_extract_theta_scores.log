@@ -5,13 +5,6 @@
   - Columns: ['UID', 'test', 'Theta_All']
   - Shape: (400, 3)
 [AGGREGATE] Computing mean theta per participant...
-[START] Step 04: Extract Ch5 theta scores
-[LOAD] Reading Ch5 5.1.1 theta scores from /home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv...
-[INFO] Loaded 400 theta scores
-[CHECK] Ch5 theta data structure:
-  - Columns: ['UID', 'test', 'Theta_All']
-  - Shape: (400, 3)
-[AGGREGATE] Computing mean theta per participant...
 [INFO] Aggregated to 100 participants
 [SUMMARY] Theta scores (mean across 4 tests):
   - Mean: 0.006

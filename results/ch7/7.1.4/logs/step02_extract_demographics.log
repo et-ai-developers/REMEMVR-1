@@ -1,19 +1,10 @@
 [START] Step 02: Extract demographics
 [LOAD] Reading dfnonvr.csv...
 [INFO] Loaded 100 participants
-[EXTRACT] Age: M=44.6, SD=14.6, Range=[20, 70]
-[EXTRACT] Sex: 70 female, 30 male
-[INFO] Found education column: Education level ( High school (Year 9 or lower)
- High school (Year 10)
- High school (Year 12)
- Certificate 1 & 2
- Certificate 3 & 4
- Diploma / Advanced Diploma
- Bachelors Degree
- Graduate Certificate / Diploma
- Masters Degree
- Doctoral Degree)
-[EXTRACT] Education: M=6.1, SD=1.6, Range=[1, 9]
+[SUCCESS] Age extracted: M=44.6, SD=14.6, Range=[20, 70]
+[SUCCESS] Sex extracted: 70 female, 30 male
+[SUCCESS] Education extracted (1-10 ordinal scale)
+[INFO] Education: M=6.1, SD=1.6, Range=[1, 9]
 [CHECK] Missing values:
 [SAVE] Saved demographics to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step02_demographics.csv
 [INFO] Shape: (100, 5)

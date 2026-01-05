@@ -49,49 +49,51 @@ def main():
     cognitive_df['uid'] = df['UID'].astype(str)
     
     # RAVLT: Need to sum trials 1-5 for total, and get delayed recall
+    # According to DATA_DICTIONARY.md: ravlt-trial-1-score through ravlt-trial-5-score
     ravlt_cols = []
     for i in range(1, 6):
-        col = f'RAVLT trial {i} score'
+        col = f'ravlt-trial-{i}-score'  # Correct column name format
         if col in df.columns:
             ravlt_cols.append(col)
     
-    if ravlt_cols:
+    if len(ravlt_cols) == 5:
         cognitive_df['RAVLT_T'] = df[ravlt_cols].sum(axis=1)
-        log(f"[EXTRACT] RAVLT total computed from {len(ravlt_cols)} trials")
+        log(f"[SUCCESS] RAVLT total computed from {len(ravlt_cols)} trials")
     else:
-        log("[WARNING] RAVLT trial columns not found")
+        log(f"[ERROR] Expected 5 RAVLT trial columns, found {len(ravlt_cols)}")
+        log("[INFO] Available RAVLT columns: " + str(ravlt_cols))
         cognitive_df['RAVLT_T'] = np.nan
     
-    # RAVLT Delayed Recall
-    if 'RAVLT delayed recall score' in df.columns:
-        cognitive_df['RAVLT_DR_T'] = df['RAVLT delayed recall score']
-        log("[EXTRACT] RAVLT delayed recall extracted")
+    # RAVLT Delayed Recall - correct column: ravlt-delayed-recall-score
+    if 'ravlt-delayed-recall-score' in df.columns:
+        cognitive_df['RAVLT_DR_T'] = df['ravlt-delayed-recall-score']
+        log("[SUCCESS] RAVLT delayed recall extracted")
     else:
-        log("[WARNING] RAVLT delayed recall not found")
+        log("[ERROR] Column 'ravlt-delayed-recall-score' not found")
         cognitive_df['RAVLT_DR_T'] = np.nan
     
-    # BVMT: Use total recall
-    if 'BVMT total recall' in df.columns:
-        cognitive_df['BVMT_T'] = df['BVMT total recall']
-        log("[EXTRACT] BVMT total recall extracted")
+    # BVMT: Use total recall - correct column: bvmt-total-recall
+    if 'bvmt-total-recall' in df.columns:
+        cognitive_df['BVMT_T'] = df['bvmt-total-recall']
+        log("[SUCCESS] BVMT total recall extracted")
     else:
-        log("[WARNING] BVMT total recall not found")
+        log("[ERROR] Column 'bvmt-total-recall' not found")
         cognitive_df['BVMT_T'] = np.nan
     
-    # NART: Use NART Score column
-    if 'NART Score' in df.columns:
-        cognitive_df['NART_T'] = df['NART Score']
-        log("[EXTRACT] NART score extracted")
+    # NART: Use correct column name - nart-score
+    if 'nart-score' in df.columns:
+        cognitive_df['NART_T'] = df['nart-score']
+        log("[SUCCESS] NART score extracted")
     else:
-        log("[WARNING] NART Score not found")
+        log("[ERROR] Column 'nart-score' not found")
         cognitive_df['NART_T'] = np.nan
     
-    # RPM: Use RPM Score column  
-    if 'RPM Score' in df.columns:
-        cognitive_df['RPM_T'] = df['RPM Score']
-        log("[EXTRACT] RPM score extracted")
+    # RPM: Use correct column name - rpm-score
+    if 'rpm-score' in df.columns:
+        cognitive_df['RPM_T'] = df['rpm-score']
+        log("[SUCCESS] RPM score extracted")
     else:
-        log("[WARNING] RPM Score not found")
+        log("[ERROR] Column 'rpm-score' not found")
         cognitive_df['RPM_T'] = np.nan
     
     # Check for missing values

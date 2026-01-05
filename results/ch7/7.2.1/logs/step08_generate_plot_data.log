@@ -1,24 +1,65 @@
-[START] Step 8: Generate Plot Data
-[LOAD] Loading analysis results from previous steps...
-[LOADED] step01_analysis_dataset.csv (100 rows, 10 cols)
-[LOADED] step03_hierarchical_models.csv (2 rows, 8 cols)
-[LOADED] step04_mediation_analysis.csv (1 rows, 8 cols)
-[LOADED] step05_cross_validation.csv (2 rows, 13 cols)
-[ANALYSIS] Creating correlation heatmap data...
-[ANALYSIS] Creating regression diagnostic plot data...
-[ANALYSIS] Creating mediation path diagram data...
-[ANALYSIS] Creating cross-validation plot data...
-[ANALYSIS] Creating age effect visualization data...
+================================================================================
+[START] Step 08: Generate plot data - FIXED VERSION (No fake data)
+================================================================================
+
+[DATA LOADING] Loading real analysis results...
+  - Loaded analysis dataset: (100, 10)
+  - Loaded hierarchical models: (2, 8)
+  - Loaded mediation results: (1, 8)
+  - Loaded cross-validation results: (2, 13)
+
+[ANALYSIS] Creating correlation plot data from real correlations...
+
+[SKIP] Diagnostic plot data requires actual model residuals
+  - Cannot generate without re-fitting regression models
+  - Recommend generating these during model fitting in step03
+
+[ANALYSIS] Creating mediation path diagram data from real results...
+
+[ERROR] Script failed: '<' not supported between instances of 'str' and 'float'
+[TRACEBACK]
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.2.1/code/step08_generate_plot_data.py", line 166, in main
+    'significance_flag': 'significant' if p_mediation < 0.05 else 'non_significant'
+                                          ^^^^^^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'str' and 'float'
+
+================================================================================
+[START] Step 08: Generate plot data - FIXED VERSION (No fake data)
+================================================================================
+
+[DATA LOADING] Loading real analysis results...
+  - Loaded analysis dataset: (100, 10)
+  - Loaded hierarchical models: (2, 8)
+  - Loaded mediation results: (1, 8)
+  - Loaded cross-validation results: (2, 13)
+
+[ANALYSIS] Creating correlation plot data from real correlations...
+
+[SKIP] Diagnostic plot data requires actual model residuals
+  - Cannot generate without re-fitting regression models
+  - Recommend generating these during model fitting in step03
+
+[ANALYSIS] Creating mediation path diagram data from real results...
+
+[ANALYSIS] Creating cross-validation plot data from real CV results...
+
+[ANALYSIS] Creating age effect plot data from real analysis...
+
 [SAVE] Saving plot data files...
-[SAVED] step08_correlation_plot_data.csv (25 rows, 5 cols)
-[SAVED] step08_diagnostic_plot_data.csv (200 rows, 5 cols)
-[SAVED] step08_mediation_plot_data.csv (3 rows, 6 cols)
-[SAVED] step08_cv_plot_data.csv (10 rows, 6 cols)
-[SAVED] step08_age_effect_plot_data.csv (100 rows, 6 cols)
-[ANALYSIS] Generating plot data summary statistics...
-[SUMMARY] correlation_data: {'n_correlations': 25, 'correlation_range': [np.float64(-0.5454815482953167), np.float64(1.0)], 'significant_correlations': 15}
-[SUMMARY] diagnostic_data: {'n_observations': 100, 'residuals_range': [np.float64(-2.6143600943838985), np.float64(2.4842747048975693)], 'cooks_d_max': np.float64(0.6032985684709002)}
-[SUMMARY] mediation_data: {'n_paths': 3, 'significant_paths': 2, 'effect_range': [np.float64(-0.156), np.float64(0.0258)]}
-[SUMMARY] cv_data: {'n_folds': 5, 'r2_range': [np.float64(-0.22343703827327116), np.float64(0.12776018577530956)], 'rmse_range': [np.float64(0.21806172234498677), np.float64(0.8627963675863284)]}
-[SUMMARY] age_effect_data: {'n_participants': 100, 'age_range': [np.float64(20.0), np.float64(70.0)], 'theta_range': [np.float64(-1.953673875), np.float64(1.559498015)]}
-[SUCCESS] Step 8 complete - All plot data generated
+  - Saved correlation plot data: /home/etai/projects/REMEMVR/results/ch7/7.2.1/data/step08_correlation_plot_data.csv
+  - Saved diagnostic note: /home/etai/projects/REMEMVR/results/ch7/7.2.1/data/step08_diagnostic_plot_note.csv
+  - Saved mediation plot data: /home/etai/projects/REMEMVR/results/ch7/7.2.1/data/step08_mediation_plot_data.csv
+  - Saved CV plot data: /home/etai/projects/REMEMVR/results/ch7/7.2.1/data/step08_cv_plot_data.csv
+  - Saved age effect plot data: /home/etai/projects/REMEMVR/results/ch7/7.2.1/data/step08_age_effect_plot_data.csv
+
+================================================================================
+[SUMMARY] Plot data generation complete - NO FAKE DATA USED
+  - Correlation plot: 25 pairs
+  - Diagnostic plots: Skipped (requires model residuals)
+  - Mediation paths: 3 paths
+  - CV performance: 10 fold results
+  - Age effects: 100 participants
+
+[SUCCESS] Step 08 complete - All data is REAL
+================================================================================

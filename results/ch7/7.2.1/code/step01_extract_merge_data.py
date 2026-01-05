@@ -20,7 +20,7 @@ EXPECTED INPUTS:
     Expected rows: 400
 
   - data/dfnonvr.csv  
-    Columns: ['UID', 'Age in years', 'RPM Score', 'BVMT total recall', 'RAVLT trial 1 score', ...]
+    Columns: ['UID', 'age', 'rpm-score', 'bvmt-total-recall', 'ravlt-trial-1-score', ...]
     Format: Wide format participant data (NOTE: Adapted column names from spec)
     Expected rows: 100
 
@@ -50,7 +50,7 @@ IMPLEMENTATION NOTES:
 
 CRITICAL COLUMN ADAPTATIONS (from Step 0 validation):
 - Ch5 theta file: 'Theta_All' not 'theta_all', no 'SE' column available
-- dfnonvr.csv: 'Age in years' not 'Age', 'RPM Score' not 'RPM_T', 'BVMT total recall' not 'BVMT_T'
+- dfnonvr.csv: 'age' not 'Age', 'rpm-score' not 'RPM_T', 'bvmt-total-recall' not 'BVMT_T'
 - RAVLT: Sum trials 1-5, then convert to T-score (no pre-existing RAVLT_T)
 - Must calculate T-scores from raw scores (mean=50, SD=10 transformation)
 """
@@ -74,6 +74,15 @@ import traceback
 #   parents[4] = REMEMVR/ (project root - THIS is what we need for imports)
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import missing data utilities
+try:
+    sys.path.insert(0, str(PROJECT_ROOT / "results" / "ch7"))
+    from missing_data_handler import analyze_missing_pattern, create_missing_data_report
+except ImportError:
+    # Utilities not available - continue without
+    pass
+
 
 # Import validation tool
 from tools.validation import validate_dataframe_structure
@@ -197,29 +206,29 @@ if __name__ == "__main__":
         # Extract required columns with adaptations
         log("[PROCESS] Extracting cognitive measures with column adaptations...")
         
-        # Age adaptation: 'Age in years' not 'Age'
-        if 'Age in years' not in cognitive_df.columns:
-            raise ValueError("Expected 'Age in years' column in dfnonvr.csv")
-        age_data = cognitive_df[['UID', 'Age in years']].copy()
+        # Age adaptation: 'age' not 'Age'
+        if 'age' not in cognitive_df.columns:
+            raise ValueError("Expected 'age' column in dfnonvr.csv")
+        age_data = cognitive_df[['UID', 'age']].copy()
         age_data.columns = ['UID', 'Age']  # Rename for consistency
         
-        # RPM adaptation: 'RPM Score' is raw score, need T-score conversion
-        if 'RPM Score' not in cognitive_df.columns:
-            raise ValueError("Expected 'RPM Score' column in dfnonvr.csv")
-        rpm_raw = cognitive_df['RPM Score'].values
+        # RPM adaptation: 'rpm-score' is raw score, need T-score conversion
+        if 'rpm-score' not in cognitive_df.columns:
+            raise ValueError("Expected 'rpm-score' column in dfnonvr.csv")
+        rpm_raw = cognitive_df['rpm-score'].values
         rpm_t_scores = calculate_t_score(rpm_raw)
         
-        # BVMT adaptation: 'BVMT total recall' is raw score, need T-score conversion
-        if 'BVMT total recall' not in cognitive_df.columns:
-            raise ValueError("Expected 'BVMT total recall' column in dfnonvr.csv")
-        bvmt_raw = cognitive_df['BVMT total recall'].values
+        # BVMT adaptation: 'bvmt-total-recall' is raw score, need T-score conversion
+        if 'bvmt-total-recall' not in cognitive_df.columns:
+            raise ValueError("Expected 'bvmt-total-recall' column in dfnonvr.csv")
+        bvmt_raw = cognitive_df['bvmt-total-recall'].values
         bvmt_t_scores = calculate_t_score(bvmt_raw)
         
         # RAVLT adaptation: Sum trials 1-5, then convert to T-score
         log("[PROCESS] Calculating RAVLT total from trials 1-5...")
         ravlt_trial_cols = []
         for i in range(1, 6):  # Trials 1-5 only (exclude distraction trial)
-            col = f'RAVLT trial {i} score'
+            col = f'ravlt-trial-{i}-score'
             if col not in cognitive_df.columns:
                 raise ValueError(f"Expected '{col}' column in dfnonvr.csv")
             ravlt_trial_cols.append(col)

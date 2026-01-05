@@ -3,31 +3,31 @@
 [INFO] Loaded 100 participants from dfnonvr.csv
 [DEBUG] Available columns (first 20):
   - UID
-  - NART Score
-  - RPM Score
-  - RPM Tr01 answer
-  - RPM Tr02 answer
-  - RPM Tr03 answer
-  - RPM Tr04 answer
-  - RPM Tr05 answer
-  - RPM Tr06 answer
-  - RPM Tr07 answer
-  - RPM Tr08 answer
-  - RPM Tr09 answer
-  - RPM Tr10 answer
-  - RPM Tr11 answer
-  - RPM Tr12 answer
-  - BVMT Form Number
-  - BVMT trial 1 score
-  - BVMT trial 2 score
-  - BVMT trial 3 score
-  - BVMT delayed recall delay period
+  - nart-time
+  - nart-score
+  - rpm-time
+  - rpm-score
+  - rpm-tr01-answer
+  - rpm-tr02-answer
+  - rpm-tr03-answer
+  - rpm-tr04-answer
+  - rpm-tr05-answer
+  - rpm-tr06-answer
+  - rpm-tr07-answer
+  - rpm-tr08-answer
+  - rpm-tr09-answer
+  - rpm-tr10-answer
+  - rpm-tr11-answer
+  - rpm-tr12-answer
+  - bvmt-form-number
+  - bvmt-trial-1-time
+  - bvmt-trial-1-score
 [EXTRACT] Extracting cognitive test scores...
-[EXTRACT] RAVLT total computed from 5 trials
-[EXTRACT] RAVLT delayed recall extracted
-[EXTRACT] BVMT total recall extracted
-[EXTRACT] NART score extracted
-[EXTRACT] RPM score extracted
+[SUCCESS] RAVLT total computed from 5 trials
+[SUCCESS] RAVLT delayed recall extracted
+[SUCCESS] BVMT total recall extracted
+[SUCCESS] NART score extracted
+[SUCCESS] RPM score extracted
 [CHECK] Checking for missing values...
   - NART_T: 3 missing values
 [SUMMARY] Cognitive test scores:

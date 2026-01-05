@@ -18,10 +18,10 @@
   - RPM_T: M=50.00, SD=10.00
   - age: M=44.57, SD=14.58
   - education: M=6.10, SD=1.64
-  - DASS_Dep: M=4.66, SD=3.04
+  - DASS_Dep: M=2.32, SD=3.27
   - DASS_Anx: M=1.44, SD=2.38
   - DASS_Str: M=3.34, SD=3.60
-  - VR_Exp: M=3.18, SD=1.81
+  - VR_Exp: M=1.18, SD=1.08
   - Sleep: M=7.07, SD=0.99
 [CORRELATIONS] Predictor correlations with theta:
   - RAVLT_T_z: r=0.266
@@ -31,10 +31,10 @@
   - RPM_T_z: r=0.457
   - age_z: r=-0.193
   - education_z: r=0.092
-  - DASS_Dep_z: r=-0.063
+  - DASS_Dep_z: r=0.047
   - DASS_Anx_z: r=0.208
   - DASS_Str_z: r=0.176
-  - VR_Exp_z: r=-0.052
+  - VR_Exp_z: r=0.184
   - Sleep_z: r=-0.073
 [SUMMARY] Final merged dataset:
   - N participants: 100

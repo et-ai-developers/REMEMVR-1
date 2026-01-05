@@ -15,6 +15,15 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[4]  # Go up 4 levels from code file
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Import missing data utilities
+try:
+    sys.path.insert(0, str(PROJECT_ROOT / "results" / "ch7"))
+    from missing_data_handler import analyze_missing_pattern, create_missing_data_report
+except ImportError:
+    # Utilities not available - continue without
+    pass
+
+
 # =============================================================================
 # Configuration
 # =============================================================================
@@ -69,7 +78,7 @@ if __name__ == "__main__":
             # Look for RAVLT trial 1-5 columns specifically (not distraction trial)
             ravlt_trial_cols = []
             for i in range(1, 6):
-                col = f'RAVLT trial {i} score'
+                col = f'ravlt-trial-{i}-score'
                 if col in cognitive_df.columns:
                     ravlt_trial_cols.append(col)
             

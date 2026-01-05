@@ -91,13 +91,13 @@ def validate_dependencies():
             
             # Check for required columns
             required_vars = {
-                'Age': 'Age in years',
-                'NART': 'NART Score',
-                'RPM': 'RPM Score', 
-                'BVMT': 'BVMT total recall',
-                'RAVLT': ['RAVLT trial 1 score', 'RAVLT trial 2 score', 
-                          'RAVLT trial 3 score', 'RAVLT trial 4 score', 
-                          'RAVLT trial 5 score']
+                'Age': 'age',
+                'NART': 'nart-score',
+                'RPM': 'rpm-score', 
+                'BVMT': 'bvmt-total-recall',
+                'RAVLT': ['ravlt-trial-1-score', 'ravlt-trial-2-score', 
+                          'ravlt-trial-3-score', 'ravlt-trial-4-score', 
+                          'ravlt-trial-5-score']
             }
             
             for var_name, col_names in required_vars.items():

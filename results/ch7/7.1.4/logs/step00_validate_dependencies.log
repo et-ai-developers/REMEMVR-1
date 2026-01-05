@@ -5,12 +5,12 @@
 [VALIDATION] Checking ch5_theta_scores: /home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv
 [PASS] ch5_theta_scores: File exists (7186 bytes)
 [VALIDATION] Checking dfnonvr_data: /home/etai/projects/REMEMVR/data/dfnonvr.csv
-[PASS] dfnonvr_data: File exists (50700 bytes)
+[PASS] dfnonvr_data: File exists (60164 bytes)
 [VALIDATION] Performing additional data quality checks...
 [PASS] ch5_theta_scores: 400 participants, UID column present
 [PASS] dfnonvr_data: 100 participants, UID column present
 [SAVE] Generating dependency validation report...
-[SAVED] step00_dependency_validation.txt (1131 bytes)
+[SAVED] step00_dependency_validation.txt (1118 bytes)
 [VALIDATION] Running manual validation...
 [VALIDATION] Overall status: PASS
 [VALIDATION] Dependencies validated: 2

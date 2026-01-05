@@ -13,27 +13,27 @@
 [RESULTS] Full-sample R² values:
   Model 1 (Demographics): R²=0.0421, Adj R²=0.0112
   Model 2 (+ Cognitive): R²=0.2471, Adj R²=0.1786
-  Model 3 (+ Self-report): R²=0.3037, Adj R²=0.1946
+  Model 3 (+ Self-report): R²=0.3049, Adj R²=0.1961
 
 [INCREMENTAL] R² change:
   Block 2 (Cognitive): ΔR²=0.2050
-  Block 3 (Self-report): ΔR²=0.0566
+  Block 3 (Self-report): ΔR²=0.0578
 
 [F-TESTS] Incremental validity:
   Block 2: F(5,88)=4.792, p=0.0006
-  Block 3: F(5,83)=1.349, p=0.2519
+  Block 3: F(5,83)=1.382, p=0.2396
 
 [CROSS-VALIDATION] 5-fold CV...
-  Fold 1: M1 test R²=-0.141, M2 test R²=-0.041, M3 test R²=0.018
-  Fold 2: M1 test R²=-0.209, M2 test R²=-0.092, M3 test R²=-0.011
-  Fold 3: M1 test R²=-0.393, M2 test R²=-0.100, M3 test R²=-0.186
-  Fold 4: M1 test R²=-0.400, M2 test R²=-1.010, M3 test R²=-2.248
-  Fold 5: M1 test R²=0.058, M2 test R²=0.404, M3 test R²=0.240
+  Fold 1: M1 test R²=-0.141, M2 test R²=-0.041, M3 test R²=-0.004
+  Fold 2: M1 test R²=-0.209, M2 test R²=-0.092, M3 test R²=-0.101
+  Fold 3: M1 test R²=-0.393, M2 test R²=-0.100, M3 test R²=-0.405
+  Fold 4: M1 test R²=-0.400, M2 test R²=-1.010, M3 test R²=-1.893
+  Fold 5: M1 test R²=0.058, M2 test R²=0.404, M3 test R²=0.412
 
 [CV SUMMARY] Mean test R² across folds:
   Model 1: -0.2170 (SD=0.1708)
   Model 2: -0.1678 (SD=0.4609)
-  Model 3: -0.4376 (SD=0.9155)
+  Model 3: -0.3982 (SD=0.7917)
 [SAVE] Saved hierarchical results to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step07_hierarchical_models.csv
 [SAVE] Saved CV results to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step07_cross_validation_results.csv
 
@@ -42,21 +42,21 @@
 [EFFECT SIZES] Cohen's f²:
   Block 1 (Demographics): f²=0.0440 (small)
   Block 2 (Cognitive): f²=0.2723 (medium)
-  Block 3 (Self-report): f²=0.0813 (small)
-  Total model: f²=0.4362 (large)
+  Block 3 (Self-report): f²=0.0832 (small)
+  Total model: f²=0.4387 (large)
 
 [BOOTSTRAP] Computing 95% CIs (1000 iterations)...
   Model 1 R²: 0.0730 [95% CI: 0.0081, 0.1833]
   Model 2 R²: 0.3093 [95% CI: 0.1683, 0.4602]
-  Model 3 R²: 0.3923 [95% CI: 0.2375, 0.5425]
+  Model 3 R²: 0.3909 [95% CI: 0.2384, 0.5530]
 [SAVE] Saved effect sizes to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step08_incremental_validity.csv
 
 [STEP 09] Residual variance analysis...
 
 [RESIDUAL VARIANCE] Unexplained by all predictors:
-  Residual variance: 0.6963 (69.6%)
-  95% CI: [0.4575, 0.7625]
-  Interpretation: 69.6% of REMEMVR variance remains unexplained
+  Residual variance: 0.6951 (69.5%)
+  95% CI: [0.4470, 0.7616]
+  Interpretation: 69.5% of REMEMVR variance remains unexplained
   [HYPOTHESIS SUPPORTED] Substantial residual variance (>50%) confirms incremental validity
 
 [POWER ANALYSIS]:
@@ -64,12 +64,12 @@
   Minimum detectable f² with 80% power: 2.264
 
 [DIAGNOSTICS] Model 3 assumptions:
-  Normality (Shapiro-Wilk): p=0.8324 (PASS)
-  Homoscedasticity (Breusch-Pagan): p=0.2534 (PASS)
-  Multicollinearity (Max VIF): 2.27 (PASS)
+  Normality (Shapiro-Wilk): p=0.9159 (PASS)
+  Homoscedasticity (Breusch-Pagan): p=0.5366 (PASS)
+  Multicollinearity (Max VIF): 3.10 (PASS)
 [SAVE] Saved residual analysis to /home/etai/projects/REMEMVR/results/ch7/7.1.4/data/step09_residual_variance.csv
 
 [SUCCESS] Steps 06-09 complete
 
-[KEY FINDING] 69.6% of REMEMVR variance unexplained by all predictors
+[KEY FINDING] 69.5% of REMEMVR variance unexplained by all predictors
 [INTERPRETATION] REMEMVR captures unique variance beyond traditional measures
