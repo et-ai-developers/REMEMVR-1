@@ -209,235 +209,235 @@ TC_IRE-O-i3,TC_IRE-O-i3,sum,vr,IRE-O-i3.*CON
 TC_IRE-O-i4,TC_IRE-O-i4,sum,vr,IRE-O-i4.*CON
 TC_IRE-O-i5,TC_IRE-O-i5,sum,vr,IRE-O-i5.*CON
 TC_IRE-O-i6,TC_IRE-O-i6,sum,vr,IRE-O-i6.*CON
-NART Time,nart-time,sum,cog,COG-X-NAR-Time
-NART Score,nart-score,sum,cog,COG-X-NAR-Scor
-RPM Time,rpm-time,sum,cog,COG-X-RPM-Time
-RPM Score,rpm-score,sum,cog,COG-X-RPM-Scor
-RPM Tr01 answer,rpm-tr01-answer,sum,cog,COG-X-RPM-Tr01
-RPM Tr02 answer,rpm-tr02-answer,sum,cog,COG-X-RPM-Tr02
-RPM Tr03 answer,rpm-tr03-answer,sum,cog,COG-X-RPM-Tr03
-RPM Tr04 answer,rpm-tr04-answer,sum,cog,COG-X-RPM-Tr04
-RPM Tr05 answer,rpm-tr05-answer,sum,cog,COG-X-RPM-Tr05
-RPM Tr06 answer,rpm-tr06-answer,sum,cog,COG-X-RPM-Tr06
-RPM Tr07 answer,rpm-tr07-answer,sum,cog,COG-X-RPM-Tr07
-RPM Tr08 answer,rpm-tr08-answer,sum,cog,COG-X-RPM-Tr08
-RPM Tr09 answer,rpm-tr09-answer,sum,cog,COG-X-RPM-Tr09
-RPM Tr10 answer,rpm-tr10-answer,sum,cog,COG-X-RPM-Tr10
-RPM Tr11 answer,rpm-tr11-answer,sum,cog,COG-X-RPM-Tr11
-RPM Tr12 answer,rpm-tr12-answer,sum,cog,COG-X-RPM-Tr12
-BVMT Form Number,bvmt-form-number,sum,cog,COG-X-BVM-Form
-BVMT trial 1 time,bvmt-trial-1-time,sum,cog,COG-X-BVM-T1Ti
-BVMT trial 1 score,bvmt-trial-1-score,sum,cog,COG-X-BVM-T1Sc
-BVMT trial 2 time,bvmt-trial-2-time,sum,cog,COG-X-BVM-T2Ti
-BVMT trial 2 score,bvmt-trial-2-score,sum,cog,COG-X-BVM-T2Sc
-BVMT trial 3 time,bvmt-trial-3-time,sum,cog,COG-X-BVM-T3Ti
-BVMT trial 3 score,bvmt-trial-3-score,sum,cog,COG-X-BVM-T3Sc
-BVMT delayed recall delay period,bvmt-delayed-recall-delay-period,sum,cog,COG-X-BVM-TDTD
-BVMT delayed recall time,bvmt-delayed-recall-time,sum,cog,COG-X-BVM-TDTi
-BVMT delayed recall score,bvmt-delayed-recall-score,sum,cog,COG-X-BVM-TDSc
-BVMT total recall,bvmt-total-recall,sum,cog,COG-X-BVM-TotR
-BVMT learning,bvmt-learning,sum,cog,COG-X-BVM-Lear
-BVMT percent retained,bvmt-percent-retained,sum,cog,COG-X-BVM-PerR
-BVMT recognition hits,bvmt-recognition-hits,sum,cog,COG-X-BVM-ReHi
-BVMT recognition falsealarms,bvmt-recognition-falsealarms,sum,cog,COG-X-BVM-ReFA
-BVMT recognition discrimination index,bvmt-recognition-discrimination-index,sum,cog,COG-X-BVM-ReDI
-BVMT recognition response bias,bvmt-recognition-response-bias,sum,cog,COG-X-BVM-ReRB
-RAVLT trial 1 time,ravlt-trial-1-time,sum,cog,COG-X-RAV-T1Ti
-RAVLT trial 1 score,ravlt-trial-1-score,sum,cog,COG-X-RAV-T1Sc
-RAVLT trial 2 time,ravlt-trial-2-time,sum,cog,COG-X-RAV-T2Ti
-RAVLT trial 2 score,ravlt-trial-2-score,sum,cog,COG-X-RAV-T2Sc
-RAVLT trial 3 time,ravlt-trial-3-time,sum,cog,COG-X-RAV-T3Ti
-RAVLT trial 3 score,ravlt-trial-3-score,sum,cog,COG-X-RAV-T3Sc
-RAVLT trial 4 time,ravlt-trial-4-time,sum,cog,COG-X-RAV-T4Ti
-RAVLT trial 4 score,ravlt-trial-4-score,sum,cog,COG-X-RAV-T4Sc
-RAVLT trial 5 time,ravlt-trial-5-time,sum,cog,COG-X-RAV-T5Ti
-RAVLT trial 5 score,ravlt-trial-5-score,sum,cog,COG-X-RAV-T5Sc
-RAVLT distraction trial time,ravlt-distraction-trial-time,sum,cog,COG-X-RAV-TDTi
-RAVLT distraction trial score,ravlt-distraction-trial-score,sum,cog,COG-X-RAV-TDSc
-RAVLT free recall time,ravlt-free-recall-time,sum,cog,COG-X-RAV-FRTi
-RAVLT free recall score,ravlt-free-recall-score,sum,cog,COG-X-RAV-FRSc
-RAVLT delayed recall delay period,ravlt-delayed-recall-delay-period,sum,cog,COG-X-RAV-DRDe
-RAVLT delayed recall time,ravlt-delayed-recall-time,sum,cog,COG-X-RAV-DRTi
-RAVLT delayed recall score,ravlt-delayed-recall-score,sum,cog,COG-X-RAV-DRSc
-RAVLT recognition hits ,ravlt-recognition-hits-,sum,cog,COG-X-RAV-RXXA
-RAVLT recognition semantic misses,ravlt-recognition-semantic-misses,sum,cog,COG-X-RAV-RXSA
-RAVLT recognition phonetic misses,ravlt-recognition-phonetic-misses,sum,cog,COG-X-RAV-RXPA
-RAVLT recognition semantic phonetic misses,ravlt-recognition-semantic-phonetic-misses,sum,cog,COG-X-RAV-RSPA
-RAVLT recognition distraction misses,ravlt-recognition-distraction-misses,sum,cog,COG-X-RAV-RXXB
-RAVLT recognition distract phonetic misses,ravlt-recognition-distract-phonetic-misses,sum,cog,COG-X-RAV-RXPB
-RAVLT recognition distract semantic misses,ravlt-recognition-distract-semantic-misses,sum,cog,COG-X-RAV-RXSB
-RAVLT recognition distract smenaitc and pohonetic misses,ravlt-recognition-distract-smenaitc-and-pohonetic-misses,sum,cog,COG-X-RAV-RSPB
-REMEMVR bathroom task 01 duration,rememvr-bathroom-task-01-duration,sum,cog,COG-X-REM-BA01
-REMEMVR bathroom task 02 duration,rememvr-bathroom-task-02-duration,sum,cog,COG-X-REM-BA02
-REMEMVR bathroom task 03 duration,rememvr-bathroom-task-03-duration,sum,cog,COG-X-REM-BA03
-REMEMVR bathroom task 04 duration,rememvr-bathroom-task-04-duration,sum,cog,COG-X-REM-BA04
-REMEMVR bathroom task 05 duration,rememvr-bathroom-task-05-duration,sum,cog,COG-X-REM-BA05
-REMEMVR bathroom task 06 duration,rememvr-bathroom-task-06-duration,sum,cog,COG-X-REM-BA06
-REMEMVR bathroom task 07 duration,rememvr-bathroom-task-07-duration,sum,cog,COG-X-REM-BA07
-REMEMVR bathroom task 08 duration,rememvr-bathroom-task-08-duration,sum,cog,COG-X-REM-BA08
-REMEMVR bathroom task 09 duration,rememvr-bathroom-task-09-duration,sum,cog,COG-X-REM-BA09
-REMEMVR bathroom task 10 duration,rememvr-bathroom-task-10-duration,sum,cog,COG-X-REM-BA10
-REMEMVR bathroom task 11 duration,rememvr-bathroom-task-11-duration,sum,cog,COG-X-REM-BA11
-REMEMVR bathroom task 12 duration,rememvr-bathroom-task-12-duration,sum,cog,COG-X-REM-BA12
-REMEMVR bedroom task 01 duration,rememvr-bedroom-task-01-duration,sum,cog,COG-X-REM-BE01
-REMEMVR bedroom task 02 duration,rememvr-bedroom-task-02-duration,sum,cog,COG-X-REM-BE02
-REMEMVR bedroom task 03 duration,rememvr-bedroom-task-03-duration,sum,cog,COG-X-REM-BE03
-REMEMVR bedroom task 04 duration,rememvr-bedroom-task-04-duration,sum,cog,COG-X-REM-BE04
-REMEMVR bedroom task 05 duration,rememvr-bedroom-task-05-duration,sum,cog,COG-X-REM-BE05
-REMEMVR bedroom task 06 duration,rememvr-bedroom-task-06-duration,sum,cog,COG-X-REM-BE06
-REMEMVR bedroom task 07 duration,rememvr-bedroom-task-07-duration,sum,cog,COG-X-REM-BE07
-REMEMVR bedroom task 08 duration,rememvr-bedroom-task-08-duration,sum,cog,COG-X-REM-BE08
-REMEMVR bedroom task 09 duration,rememvr-bedroom-task-09-duration,sum,cog,COG-X-REM-BE09
-REMEMVR bedroom task 10 duration,rememvr-bedroom-task-10-duration,sum,cog,COG-X-REM-BE10
-REMEMVR bedroom task 11 duration,rememvr-bedroom-task-11-duration,sum,cog,COG-X-REM-BE11
-REMEMVR bedroom task 12 duration,rememvr-bedroom-task-12-duration,sum,cog,COG-X-REM-BE12
-REMEMVR kitchen task 01 duration,rememvr-kitchen-task-01-duration,sum,cog,COG-X-REM-KI01
-REMEMVR kitchen task 02 duration,rememvr-kitchen-task-02-duration,sum,cog,COG-X-REM-KI02
-REMEMVR kitchen task 03 duration,rememvr-kitchen-task-03-duration,sum,cog,COG-X-REM-KI03
-REMEMVR kitchen task 04 duration,rememvr-kitchen-task-04-duration,sum,cog,COG-X-REM-KI04
-REMEMVR kitchen task 05 duration,rememvr-kitchen-task-05-duration,sum,cog,COG-X-REM-KI05
-REMEMVR kitchen task 06 duration,rememvr-kitchen-task-06-duration,sum,cog,COG-X-REM-KI06
-REMEMVR kitchen task 07 duration,rememvr-kitchen-task-07-duration,sum,cog,COG-X-REM-KI07
-REMEMVR kitchen task 08 duration,rememvr-kitchen-task-08-duration,sum,cog,COG-X-REM-KI08
-REMEMVR kitchen task 09 duration,rememvr-kitchen-task-09-duration,sum,cog,COG-X-REM-KI09
-REMEMVR kitchen task 10 duration,rememvr-kitchen-task-10-duration,sum,cog,COG-X-REM-KI10
-REMEMVR kitchen task 11 duration,rememvr-kitchen-task-11-duration,sum,cog,COG-X-REM-KI11
-REMEMVR kitchen task 12 duration,rememvr-kitchen-task-12-duration,sum,cog,COG-X-REM-KI12
-REMEMVR livingroom task 01 duration,rememvr-livingroom-task-01-duration,sum,cog,COG-X-REM-LI01
-REMEMVR livingroom task 02 duration,rememvr-livingroom-task-02-duration,sum,cog,COG-X-REM-LI02
-REMEMVR livingroom task 03 duration,rememvr-livingroom-task-03-duration,sum,cog,COG-X-REM-LI03
-REMEMVR livingroom task 04 duration,rememvr-livingroom-task-04-duration,sum,cog,COG-X-REM-LI04
-REMEMVR livingroom task 05 duration,rememvr-livingroom-task-05-duration,sum,cog,COG-X-REM-LI05
-REMEMVR livingroom task 06 duration,rememvr-livingroom-task-06-duration,sum,cog,COG-X-REM-LI06
-REMEMVR livingroom task 07 duration,rememvr-livingroom-task-07-duration,sum,cog,COG-X-REM-LI07
-REMEMVR livingroom task 08 duration,rememvr-livingroom-task-08-duration,sum,cog,COG-X-REM-LI08
-REMEMVR livingroom task 09 duration,rememvr-livingroom-task-09-duration,sum,cog,COG-X-REM-LI09
-REMEMVR livingroom task 10 duration,rememvr-livingroom-task-10-duration,sum,cog,COG-X-REM-LI10
-REMEMVR livingroom task 11 duration,rememvr-livingroom-task-11-duration,sum,cog,COG-X-REM-LI11
-REMEMVR livingroom task 12 duration,rememvr-livingroom-task-12-duration,sum,cog,COG-X-REM-LI12
-RAVLT trial 1 word 1 (Drum) order,ravlt-trial-1-word-1-(drum)-order,sum,cog,COG-X-RAV-T101
-RAVLT trial 1 word 2 (Curtain) order,ravlt-trial-1-word-2-(curtain)-order,sum,cog,COG-X-RAV-T102
-RAVLT trial 1 word 3 (Bell) order,ravlt-trial-1-word-3-(bell)-order,sum,cog,COG-X-RAV-T103
-RAVLT trial 1 word 4 (Coffee) order,ravlt-trial-1-word-4-(coffee)-order,sum,cog,COG-X-RAV-T104
-RAVLT trial 1 word 5 (School) order,ravlt-trial-1-word-5-(school)-order,sum,cog,COG-X-RAV-T105
-RAVLT trial 1 word 6 (Parent) order,ravlt-trial-1-word-6-(parent)-order,sum,cog,COG-X-RAV-T106
-RAVLT trial 1 word 7 (Moon) order,ravlt-trial-1-word-7-(moon)-order,sum,cog,COG-X-RAV-T107
-RAVLT trial 1 word 8 (Garden) order,ravlt-trial-1-word-8-(garden)-order,sum,cog,COG-X-RAV-T108
-RAVLT trial 1 word 9 (Hat) order,ravlt-trial-1-word-9-(hat)-order,sum,cog,COG-X-RAV-T109
-RAVLT trial 1 word 10 (Farmer) order,ravlt-trial-1-word-10-(farmer)-order,sum,cog,COG-X-RAV-T110
-RAVLT trial 1 word 11 (Nose) order,ravlt-trial-1-word-11-(nose)-order,sum,cog,COG-X-RAV-T111
-RAVLT trial 1 word 12 (Turkey) order,ravlt-trial-1-word-12-(turkey)-order,sum,cog,COG-X-RAV-T112
-RAVLT trial 1 word 13 (Color) order,ravlt-trial-1-word-13-(color)-order,sum,cog,COG-X-RAV-T113
-RAVLT trial 1 word 14 (House) order,ravlt-trial-1-word-14-(house)-order,sum,cog,COG-X-RAV-T114
-RAVLT trial 1 word 15 (River) order,ravlt-trial-1-word-15-(river)-order,sum,cog,COG-X-RAV-T115
-RAVLT trial 2 word 1 (Drum) order,ravlt-trial-2-word-1-(drum)-order,sum,cog,COG-X-RAV-T201
-RAVLT trial 2 word 2 (Curtain) order,ravlt-trial-2-word-2-(curtain)-order,sum,cog,COG-X-RAV-T202
-RAVLT trial 2 word 3 (Bell) order,ravlt-trial-2-word-3-(bell)-order,sum,cog,COG-X-RAV-T203
-RAVLT trial 2 word 4 (Coffee) order,ravlt-trial-2-word-4-(coffee)-order,sum,cog,COG-X-RAV-T204
-RAVLT trial 2 word 5 (School) order,ravlt-trial-2-word-5-(school)-order,sum,cog,COG-X-RAV-T205
-RAVLT trial 2 word 6 (Parent) order,ravlt-trial-2-word-6-(parent)-order,sum,cog,COG-X-RAV-T206
-RAVLT trial 2 word 7 (Moon) order,ravlt-trial-2-word-7-(moon)-order,sum,cog,COG-X-RAV-T207
-RAVLT trial 2 word 8 (Garden) order,ravlt-trial-2-word-8-(garden)-order,sum,cog,COG-X-RAV-T208
-RAVLT trial 2 word 9 (Hat) order,ravlt-trial-2-word-9-(hat)-order,sum,cog,COG-X-RAV-T209
-RAVLT trial 2 word 10 (Farmer) order,ravlt-trial-2-word-10-(farmer)-order,sum,cog,COG-X-RAV-T210
-RAVLT trial 2 word 11 (Nose) order,ravlt-trial-2-word-11-(nose)-order,sum,cog,COG-X-RAV-T211
-RAVLT trial 2 word 12 (Turkey) order,ravlt-trial-2-word-12-(turkey)-order,sum,cog,COG-X-RAV-T212
-RAVLT trial 2 word 13 (Color) order,ravlt-trial-2-word-13-(color)-order,sum,cog,COG-X-RAV-T213
-RAVLT trial 2 word 14 (House) order,ravlt-trial-2-word-14-(house)-order,sum,cog,COG-X-RAV-T214
-RAVLT trial 2 word 15 (River) order,ravlt-trial-2-word-15-(river)-order,sum,cog,COG-X-RAV-T215
-RAVLT trial 3 word 1 (Drum) order,ravlt-trial-3-word-1-(drum)-order,sum,cog,COG-X-RAV-T301
-RAVLT trial 3 word 2 (Curtain) order,ravlt-trial-3-word-2-(curtain)-order,sum,cog,COG-X-RAV-T302
-RAVLT trial 3 word 3 (Bell) order,ravlt-trial-3-word-3-(bell)-order,sum,cog,COG-X-RAV-T303
-RAVLT trial 3 word 4 (Coffee) order,ravlt-trial-3-word-4-(coffee)-order,sum,cog,COG-X-RAV-T304
-RAVLT trial 3 word 5 (School) order,ravlt-trial-3-word-5-(school)-order,sum,cog,COG-X-RAV-T305
-RAVLT trial 3 word 6 (Parent) order,ravlt-trial-3-word-6-(parent)-order,sum,cog,COG-X-RAV-T306
-RAVLT trial 3 word 7 (Moon) order,ravlt-trial-3-word-7-(moon)-order,sum,cog,COG-X-RAV-T307
-RAVLT trial 3 word 8 (Garden) order,ravlt-trial-3-word-8-(garden)-order,sum,cog,COG-X-RAV-T308
-RAVLT trial 3 word 9 (Hat) order,ravlt-trial-3-word-9-(hat)-order,sum,cog,COG-X-RAV-T309
-RAVLT trial 3 word 10 (Farmer) order,ravlt-trial-3-word-10-(farmer)-order,sum,cog,COG-X-RAV-T310
-RAVLT trial 3 word 11 (Nose) order,ravlt-trial-3-word-11-(nose)-order,sum,cog,COG-X-RAV-T311
-RAVLT trial 3 word 12 (Turkey) order,ravlt-trial-3-word-12-(turkey)-order,sum,cog,COG-X-RAV-T312
-RAVLT trial 3 word 13 (Color) order,ravlt-trial-3-word-13-(color)-order,sum,cog,COG-X-RAV-T313
-RAVLT trial 3 word 14 (House) order,ravlt-trial-3-word-14-(house)-order,sum,cog,COG-X-RAV-T314
-RAVLT trial 3 word 15 (River) order,ravlt-trial-3-word-15-(river)-order,sum,cog,COG-X-RAV-T315
-RAVLT trial 4 word 1 (Drum) order,ravlt-trial-4-word-1-(drum)-order,sum,cog,COG-X-RAV-T401
-RAVLT trial 4 word 2 (Curtain) order,ravlt-trial-4-word-2-(curtain)-order,sum,cog,COG-X-RAV-T402
-RAVLT trial 4 word 3 (Bell) order,ravlt-trial-4-word-3-(bell)-order,sum,cog,COG-X-RAV-T403
-RAVLT trial 4 word 4 (Coffee) order,ravlt-trial-4-word-4-(coffee)-order,sum,cog,COG-X-RAV-T404
-RAVLT trial 4 word 5 (School) order,ravlt-trial-4-word-5-(school)-order,sum,cog,COG-X-RAV-T405
-RAVLT trial 4 word 6 (Parent) order,ravlt-trial-4-word-6-(parent)-order,sum,cog,COG-X-RAV-T406
-RAVLT trial 4 word 7 (Moon) order,ravlt-trial-4-word-7-(moon)-order,sum,cog,COG-X-RAV-T407
-RAVLT trial 4 word 8 (Garden) order,ravlt-trial-4-word-8-(garden)-order,sum,cog,COG-X-RAV-T408
-RAVLT trial 4 word 9 (Hat) order,ravlt-trial-4-word-9-(hat)-order,sum,cog,COG-X-RAV-T409
-RAVLT trial 4 word 10 (Farmer) order,ravlt-trial-4-word-10-(farmer)-order,sum,cog,COG-X-RAV-T410
-RAVLT trial 4 word 11 (Nose) order,ravlt-trial-4-word-11-(nose)-order,sum,cog,COG-X-RAV-T411
-RAVLT trial 4 word 12 (Turkey) order,ravlt-trial-4-word-12-(turkey)-order,sum,cog,COG-X-RAV-T412
-RAVLT trial 4 word 13 (Color) order,ravlt-trial-4-word-13-(color)-order,sum,cog,COG-X-RAV-T413
-RAVLT trial 4 word 14 (House) order,ravlt-trial-4-word-14-(house)-order,sum,cog,COG-X-RAV-T414
-RAVLT trial 4 word 15 (River) order,ravlt-trial-4-word-15-(river)-order,sum,cog,COG-X-RAV-T415
-RAVLT trial 5 word 1 (Drum) order,ravlt-trial-5-word-1-(drum)-order,sum,cog,COG-X-RAV-T501
-RAVLT trial 5 word 2 (Curtain) order,ravlt-trial-5-word-2-(curtain)-order,sum,cog,COG-X-RAV-T502
-RAVLT trial 5 word 3 (Bell) order,ravlt-trial-5-word-3-(bell)-order,sum,cog,COG-X-RAV-T503
-RAVLT trial 5 word 4 (Coffee) order,ravlt-trial-5-word-4-(coffee)-order,sum,cog,COG-X-RAV-T504
-RAVLT trial 5 word 5 (School) order,ravlt-trial-5-word-5-(school)-order,sum,cog,COG-X-RAV-T505
-RAVLT trial 5 word 6 (Parent) order,ravlt-trial-5-word-6-(parent)-order,sum,cog,COG-X-RAV-T506
-RAVLT trial 5 word 7 (Moon) order,ravlt-trial-5-word-7-(moon)-order,sum,cog,COG-X-RAV-T507
-RAVLT trial 5 word 8 (Garden) order,ravlt-trial-5-word-8-(garden)-order,sum,cog,COG-X-RAV-T508
-RAVLT trial 5 word 9 (Hat) order,ravlt-trial-5-word-9-(hat)-order,sum,cog,COG-X-RAV-T509
-RAVLT trial 5 word 10 (Farmer) order,ravlt-trial-5-word-10-(farmer)-order,sum,cog,COG-X-RAV-T510
-RAVLT trial 5 word 11 (Nose) order,ravlt-trial-5-word-11-(nose)-order,sum,cog,COG-X-RAV-T511
-RAVLT trial 5 word 12 (Turkey) order,ravlt-trial-5-word-12-(turkey)-order,sum,cog,COG-X-RAV-T512
-RAVLT trial 5 word 13 (Color) order,ravlt-trial-5-word-13-(color)-order,sum,cog,COG-X-RAV-T513
-RAVLT trial 5 word 14 (House) order,ravlt-trial-5-word-14-(house)-order,sum,cog,COG-X-RAV-T514
-RAVLT trial 5 word 15 (River) order,ravlt-trial-5-word-15-(river)-order,sum,cog,COG-X-RAV-T515
-RAVLT trial 6 word 1 (Drum) order,ravlt-trial-6-word-1-(drum)-order,sum,cog,COG-X-RAV-T601
-RAVLT trial 6 word 2 (Curtain) order,ravlt-trial-6-word-2-(curtain)-order,sum,cog,COG-X-RAV-T602
-RAVLT trial 6 word 3 (Bell) order,ravlt-trial-6-word-3-(bell)-order,sum,cog,COG-X-RAV-T603
-RAVLT trial 6 word 4 (Coffee) order,ravlt-trial-6-word-4-(coffee)-order,sum,cog,COG-X-RAV-T604
-RAVLT trial 6 word 5 (School) order,ravlt-trial-6-word-5-(school)-order,sum,cog,COG-X-RAV-T605
-RAVLT trial 6 word 6 (Parent) order,ravlt-trial-6-word-6-(parent)-order,sum,cog,COG-X-RAV-T606
-RAVLT trial 6 word 7 (Moon) order,ravlt-trial-6-word-7-(moon)-order,sum,cog,COG-X-RAV-T607
-RAVLT trial 6 word 8 (Garden) order,ravlt-trial-6-word-8-(garden)-order,sum,cog,COG-X-RAV-T608
-RAVLT trial 6 word 9 (Hat) order,ravlt-trial-6-word-9-(hat)-order,sum,cog,COG-X-RAV-T609
-RAVLT trial 6 word 10 (Farmer) order,ravlt-trial-6-word-10-(farmer)-order,sum,cog,COG-X-RAV-T610
-RAVLT trial 6 word 11 (Nose) order,ravlt-trial-6-word-11-(nose)-order,sum,cog,COG-X-RAV-T611
-RAVLT trial 6 word 12 (Turkey) order,ravlt-trial-6-word-12-(turkey)-order,sum,cog,COG-X-RAV-T612
-RAVLT trial 6 word 13 (Color) order,ravlt-trial-6-word-13-(color)-order,sum,cog,COG-X-RAV-T613
-RAVLT trial 6 word 14 (House) order,ravlt-trial-6-word-14-(house)-order,sum,cog,COG-X-RAV-T614
-RAVLT trial 6 word 15 (River) order,ravlt-trial-6-word-15-(river)-order,sum,cog,COG-X-RAV-T615
-RAVLT trial 7 word 1 (Drum) order,ravlt-trial-7-word-1-(drum)-order,sum,cog,COG-X-RAV-T701
-RAVLT trial 7 word 2 (Curtain) order,ravlt-trial-7-word-2-(curtain)-order,sum,cog,COG-X-RAV-T702
-RAVLT trial 7 word 3 (Bell) order,ravlt-trial-7-word-3-(bell)-order,sum,cog,COG-X-RAV-T703
-RAVLT trial 7 word 4 (Coffee) order,ravlt-trial-7-word-4-(coffee)-order,sum,cog,COG-X-RAV-T704
-RAVLT trial 7 word 5 (School) order,ravlt-trial-7-word-5-(school)-order,sum,cog,COG-X-RAV-T705
-RAVLT trial 7 word 6 (Parent) order,ravlt-trial-7-word-6-(parent)-order,sum,cog,COG-X-RAV-T706
-RAVLT trial 7 word 7 (Moon) order,ravlt-trial-7-word-7-(moon)-order,sum,cog,COG-X-RAV-T707
-RAVLT trial 7 word 8 (Garden) order,ravlt-trial-7-word-8-(garden)-order,sum,cog,COG-X-RAV-T708
-RAVLT trial 7 word 9 (Hat) order,ravlt-trial-7-word-9-(hat)-order,sum,cog,COG-X-RAV-T709
-RAVLT trial 7 word 10 (Farmer) order,ravlt-trial-7-word-10-(farmer)-order,sum,cog,COG-X-RAV-T710
-RAVLT trial 7 word 11 (Nose) order,ravlt-trial-7-word-11-(nose)-order,sum,cog,COG-X-RAV-T711
-RAVLT trial 7 word 12 (Turkey) order,ravlt-trial-7-word-12-(turkey)-order,sum,cog,COG-X-RAV-T712
-RAVLT trial 7 word 13 (Color) order,ravlt-trial-7-word-13-(color)-order,sum,cog,COG-X-RAV-T713
-RAVLT trial 7 word 14 (House) order,ravlt-trial-7-word-14-(house)-order,sum,cog,COG-X-RAV-T714
-RAVLT trial 7 word 15 (River) order,ravlt-trial-7-word-15-(river)-order,sum,cog,COG-X-RAV-T715
-RAVLT trial 8 word 1 (Drum) order,ravlt-trial-8-word-1-(drum)-order,sum,cog,COG-X-RAV-T801
-RAVLT trial 8 word 2 (Curtain) order,ravlt-trial-8-word-2-(curtain)-order,sum,cog,COG-X-RAV-T802
-RAVLT trial 8 word 3 (Bell) order,ravlt-trial-8-word-3-(bell)-order,sum,cog,COG-X-RAV-T803
-RAVLT trial 8 word 4 (Coffee) order,ravlt-trial-8-word-4-(coffee)-order,sum,cog,COG-X-RAV-T804
-RAVLT trial 8 word 5 (School) order,ravlt-trial-8-word-5-(school)-order,sum,cog,COG-X-RAV-T805
-RAVLT trial 8 word 6 (Parent) order,ravlt-trial-8-word-6-(parent)-order,sum,cog,COG-X-RAV-T806
-RAVLT trial 8 word 7 (Moon) order,ravlt-trial-8-word-7-(moon)-order,sum,cog,COG-X-RAV-T807
-RAVLT trial 8 word 8 (Garden) order,ravlt-trial-8-word-8-(garden)-order,sum,cog,COG-X-RAV-T808
-RAVLT trial 8 word 9 (Hat) order,ravlt-trial-8-word-9-(hat)-order,sum,cog,COG-X-RAV-T809
-RAVLT trial 8 word 10 (Farmer) order,ravlt-trial-8-word-10-(farmer)-order,sum,cog,COG-X-RAV-T810
-RAVLT trial 8 word 11 (Nose) order,ravlt-trial-8-word-11-(nose)-order,sum,cog,COG-X-RAV-T811
-RAVLT trial 8 word 12 (Turkey) order,ravlt-trial-8-word-12-(turkey)-order,sum,cog,COG-X-RAV-T812
-RAVLT trial 8 word 13 (Color) order,ravlt-trial-8-word-13-(color)-order,sum,cog,COG-X-RAV-T813
-RAVLT trial 8 word 14 (House) order,ravlt-trial-8-word-14-(house)-order,sum,cog,COG-X-RAV-T814
-RAVLT trial 8 word 15 (River) order,ravlt-trial-8-word-15-(river)-order,sum,cog,COG-X-RAV-T815
-Age in years,age,sum,dem,DEM-X-Age
-Sex 0=female 1=male,sex,sum,dem,DEM-X-Sex
-"Education level ( High school (Year 9 or lower)
+nart-time,NART Time,sum,cog,COG-X-NAR-Time
+nart-score,NART Score,sum,cog,COG-X-NAR-Scor
+rpm-time,RPM Time,sum,cog,COG-X-RPM-Time
+rpm-score,RPM Score,sum,cog,COG-X-RPM-Scor
+rpm-tr01-answer,RPM Tr01 answer,sum,cog,COG-X-RPM-Tr01
+rpm-tr02-answer,RPM Tr02 answer,sum,cog,COG-X-RPM-Tr02
+rpm-tr03-answer,RPM Tr03 answer,sum,cog,COG-X-RPM-Tr03
+rpm-tr04-answer,RPM Tr04 answer,sum,cog,COG-X-RPM-Tr04
+rpm-tr05-answer,RPM Tr05 answer,sum,cog,COG-X-RPM-Tr05
+rpm-tr06-answer,RPM Tr06 answer,sum,cog,COG-X-RPM-Tr06
+rpm-tr07-answer,RPM Tr07 answer,sum,cog,COG-X-RPM-Tr07
+rpm-tr08-answer,RPM Tr08 answer,sum,cog,COG-X-RPM-Tr08
+rpm-tr09-answer,RPM Tr09 answer,sum,cog,COG-X-RPM-Tr09
+rpm-tr10-answer,RPM Tr10 answer,sum,cog,COG-X-RPM-Tr10
+rpm-tr11-answer,RPM Tr11 answer,sum,cog,COG-X-RPM-Tr11
+rpm-tr12-answer,RPM Tr12 answer,sum,cog,COG-X-RPM-Tr12
+bvmt-form-number,BVMT Form Number,sum,cog,COG-X-BVM-Form
+bvmt-trial-1-time,BVMT trial 1 time,sum,cog,COG-X-BVM-T1Ti
+bvmt-trial-1-score,BVMT trial 1 score,sum,cog,COG-X-BVM-T1Sc
+bvmt-trial-2-time,BVMT trial 2 time,sum,cog,COG-X-BVM-T2Ti
+bvmt-trial-2-score,BVMT trial 2 score,sum,cog,COG-X-BVM-T2Sc
+bvmt-trial-3-time,BVMT trial 3 time,sum,cog,COG-X-BVM-T3Ti
+bvmt-trial-3-score,BVMT trial 3 score,sum,cog,COG-X-BVM-T3Sc
+bvmt-delayed-recall-delay-period,BVMT delayed recall delay period,sum,cog,COG-X-BVM-TDTD
+bvmt-delayed-recall-time,BVMT delayed recall time,sum,cog,COG-X-BVM-TDTi
+bvmt-delayed-recall-score,BVMT delayed recall score,sum,cog,COG-X-BVM-TDSc
+bvmt-total-recall,BVMT total recall,sum,cog,COG-X-BVM-TotR
+bvmt-learning,BVMT learning,sum,cog,COG-X-BVM-Lear
+bvmt-percent-retained,BVMT percent retained,sum,cog,COG-X-BVM-PerR
+bvmt-recognition-hits,BVMT recognition hits,sum,cog,COG-X-BVM-ReHi
+bvmt-recognition-falsealarms,BVMT recognition falsealarms,sum,cog,COG-X-BVM-ReFA
+bvmt-recognition-discrimination-index,BVMT recognition discrimination index,sum,cog,COG-X-BVM-ReDI
+bvmt-recognition-response-bias,BVMT recognition response bias,sum,cog,COG-X-BVM-ReRB
+ravlt-trial-1-time,RAVLT trial 1 time,sum,cog,COG-X-RAV-T1Ti
+ravlt-trial-1-score,RAVLT trial 1 score,sum,cog,COG-X-RAV-T1Sc
+ravlt-trial-2-time,RAVLT trial 2 time,sum,cog,COG-X-RAV-T2Ti
+ravlt-trial-2-score,RAVLT trial 2 score,sum,cog,COG-X-RAV-T2Sc
+ravlt-trial-3-time,RAVLT trial 3 time,sum,cog,COG-X-RAV-T3Ti
+ravlt-trial-3-score,RAVLT trial 3 score,sum,cog,COG-X-RAV-T3Sc
+ravlt-trial-4-time,RAVLT trial 4 time,sum,cog,COG-X-RAV-T4Ti
+ravlt-trial-4-score,RAVLT trial 4 score,sum,cog,COG-X-RAV-T4Sc
+ravlt-trial-5-time,RAVLT trial 5 time,sum,cog,COG-X-RAV-T5Ti
+ravlt-trial-5-score,RAVLT trial 5 score,sum,cog,COG-X-RAV-T5Sc
+ravlt-distraction-trial-time,RAVLT distraction trial time,sum,cog,COG-X-RAV-TDTi
+ravlt-distraction-trial-score,RAVLT distraction trial score,sum,cog,COG-X-RAV-TDSc
+ravlt-free-recall-time,RAVLT free recall time,sum,cog,COG-X-RAV-FRTi
+ravlt-free-recall-score,RAVLT free recall score,sum,cog,COG-X-RAV-FRSc
+ravlt-delayed-recall-delay-period,RAVLT delayed recall delay period,sum,cog,COG-X-RAV-DRDe
+ravlt-delayed-recall-time,RAVLT delayed recall time,sum,cog,COG-X-RAV-DRTi
+ravlt-delayed-recall-score,RAVLT delayed recall score,sum,cog,COG-X-RAV-DRSc
+ravlt-recognition-hits-,RAVLT recognition hits ,sum,cog,COG-X-RAV-RXXA
+ravlt-recognition-semantic-misses,RAVLT recognition semantic misses,sum,cog,COG-X-RAV-RXSA
+ravlt-recognition-phonetic-misses,RAVLT recognition phonetic misses,sum,cog,COG-X-RAV-RXPA
+ravlt-recognition-semantic-phonetic-misses,RAVLT recognition semantic phonetic misses,sum,cog,COG-X-RAV-RSPA
+ravlt-recognition-distraction-misses,RAVLT recognition distraction misses,sum,cog,COG-X-RAV-RXXB
+ravlt-recognition-distract-phonetic-misses,RAVLT recognition distract phonetic misses,sum,cog,COG-X-RAV-RXPB
+ravlt-recognition-distract-semantic-misses,RAVLT recognition distract semantic misses,sum,cog,COG-X-RAV-RXSB
+ravlt-recognition-distract-smenaitc-and-pohonetic-misses,RAVLT recognition distract smenaitc and pohonetic misses,sum,cog,COG-X-RAV-RSPB
+rememvr-bathroom-task-01-duration,REMEMVR bathroom task 01 duration,sum,cog,COG-X-REM-BA01
+rememvr-bathroom-task-02-duration,REMEMVR bathroom task 02 duration,sum,cog,COG-X-REM-BA02
+rememvr-bathroom-task-03-duration,REMEMVR bathroom task 03 duration,sum,cog,COG-X-REM-BA03
+rememvr-bathroom-task-04-duration,REMEMVR bathroom task 04 duration,sum,cog,COG-X-REM-BA04
+rememvr-bathroom-task-05-duration,REMEMVR bathroom task 05 duration,sum,cog,COG-X-REM-BA05
+rememvr-bathroom-task-06-duration,REMEMVR bathroom task 06 duration,sum,cog,COG-X-REM-BA06
+rememvr-bathroom-task-07-duration,REMEMVR bathroom task 07 duration,sum,cog,COG-X-REM-BA07
+rememvr-bathroom-task-08-duration,REMEMVR bathroom task 08 duration,sum,cog,COG-X-REM-BA08
+rememvr-bathroom-task-09-duration,REMEMVR bathroom task 09 duration,sum,cog,COG-X-REM-BA09
+rememvr-bathroom-task-10-duration,REMEMVR bathroom task 10 duration,sum,cog,COG-X-REM-BA10
+rememvr-bathroom-task-11-duration,REMEMVR bathroom task 11 duration,sum,cog,COG-X-REM-BA11
+rememvr-bathroom-task-12-duration,REMEMVR bathroom task 12 duration,sum,cog,COG-X-REM-BA12
+rememvr-bedroom-task-01-duration,REMEMVR bedroom task 01 duration,sum,cog,COG-X-REM-BE01
+rememvr-bedroom-task-02-duration,REMEMVR bedroom task 02 duration,sum,cog,COG-X-REM-BE02
+rememvr-bedroom-task-03-duration,REMEMVR bedroom task 03 duration,sum,cog,COG-X-REM-BE03
+rememvr-bedroom-task-04-duration,REMEMVR bedroom task 04 duration,sum,cog,COG-X-REM-BE04
+rememvr-bedroom-task-05-duration,REMEMVR bedroom task 05 duration,sum,cog,COG-X-REM-BE05
+rememvr-bedroom-task-06-duration,REMEMVR bedroom task 06 duration,sum,cog,COG-X-REM-BE06
+rememvr-bedroom-task-07-duration,REMEMVR bedroom task 07 duration,sum,cog,COG-X-REM-BE07
+rememvr-bedroom-task-08-duration,REMEMVR bedroom task 08 duration,sum,cog,COG-X-REM-BE08
+rememvr-bedroom-task-09-duration,REMEMVR bedroom task 09 duration,sum,cog,COG-X-REM-BE09
+rememvr-bedroom-task-10-duration,REMEMVR bedroom task 10 duration,sum,cog,COG-X-REM-BE10
+rememvr-bedroom-task-11-duration,REMEMVR bedroom task 11 duration,sum,cog,COG-X-REM-BE11
+rememvr-bedroom-task-12-duration,REMEMVR bedroom task 12 duration,sum,cog,COG-X-REM-BE12
+rememvr-kitchen-task-01-duration,REMEMVR kitchen task 01 duration,sum,cog,COG-X-REM-KI01
+rememvr-kitchen-task-02-duration,REMEMVR kitchen task 02 duration,sum,cog,COG-X-REM-KI02
+rememvr-kitchen-task-03-duration,REMEMVR kitchen task 03 duration,sum,cog,COG-X-REM-KI03
+rememvr-kitchen-task-04-duration,REMEMVR kitchen task 04 duration,sum,cog,COG-X-REM-KI04
+rememvr-kitchen-task-05-duration,REMEMVR kitchen task 05 duration,sum,cog,COG-X-REM-KI05
+rememvr-kitchen-task-06-duration,REMEMVR kitchen task 06 duration,sum,cog,COG-X-REM-KI06
+rememvr-kitchen-task-07-duration,REMEMVR kitchen task 07 duration,sum,cog,COG-X-REM-KI07
+rememvr-kitchen-task-08-duration,REMEMVR kitchen task 08 duration,sum,cog,COG-X-REM-KI08
+rememvr-kitchen-task-09-duration,REMEMVR kitchen task 09 duration,sum,cog,COG-X-REM-KI09
+rememvr-kitchen-task-10-duration,REMEMVR kitchen task 10 duration,sum,cog,COG-X-REM-KI10
+rememvr-kitchen-task-11-duration,REMEMVR kitchen task 11 duration,sum,cog,COG-X-REM-KI11
+rememvr-kitchen-task-12-duration,REMEMVR kitchen task 12 duration,sum,cog,COG-X-REM-KI12
+rememvr-livingroom-task-01-duration,REMEMVR livingroom task 01 duration,sum,cog,COG-X-REM-LI01
+rememvr-livingroom-task-02-duration,REMEMVR livingroom task 02 duration,sum,cog,COG-X-REM-LI02
+rememvr-livingroom-task-03-duration,REMEMVR livingroom task 03 duration,sum,cog,COG-X-REM-LI03
+rememvr-livingroom-task-04-duration,REMEMVR livingroom task 04 duration,sum,cog,COG-X-REM-LI04
+rememvr-livingroom-task-05-duration,REMEMVR livingroom task 05 duration,sum,cog,COG-X-REM-LI05
+rememvr-livingroom-task-06-duration,REMEMVR livingroom task 06 duration,sum,cog,COG-X-REM-LI06
+rememvr-livingroom-task-07-duration,REMEMVR livingroom task 07 duration,sum,cog,COG-X-REM-LI07
+rememvr-livingroom-task-08-duration,REMEMVR livingroom task 08 duration,sum,cog,COG-X-REM-LI08
+rememvr-livingroom-task-09-duration,REMEMVR livingroom task 09 duration,sum,cog,COG-X-REM-LI09
+rememvr-livingroom-task-10-duration,REMEMVR livingroom task 10 duration,sum,cog,COG-X-REM-LI10
+rememvr-livingroom-task-11-duration,REMEMVR livingroom task 11 duration,sum,cog,COG-X-REM-LI11
+rememvr-livingroom-task-12-duration,REMEMVR livingroom task 12 duration,sum,cog,COG-X-REM-LI12
+ravlt-trial-1-word-1-(drum)-order,RAVLT trial 1 word 1 (Drum) order,sum,cog,COG-X-RAV-T101
+ravlt-trial-1-word-2-(curtain)-order,RAVLT trial 1 word 2 (Curtain) order,sum,cog,COG-X-RAV-T102
+ravlt-trial-1-word-3-(bell)-order,RAVLT trial 1 word 3 (Bell) order,sum,cog,COG-X-RAV-T103
+ravlt-trial-1-word-4-(coffee)-order,RAVLT trial 1 word 4 (Coffee) order,sum,cog,COG-X-RAV-T104
+ravlt-trial-1-word-5-(school)-order,RAVLT trial 1 word 5 (School) order,sum,cog,COG-X-RAV-T105
+ravlt-trial-1-word-6-(parent)-order,RAVLT trial 1 word 6 (Parent) order,sum,cog,COG-X-RAV-T106
+ravlt-trial-1-word-7-(moon)-order,RAVLT trial 1 word 7 (Moon) order,sum,cog,COG-X-RAV-T107
+ravlt-trial-1-word-8-(garden)-order,RAVLT trial 1 word 8 (Garden) order,sum,cog,COG-X-RAV-T108
+ravlt-trial-1-word-9-(hat)-order,RAVLT trial 1 word 9 (Hat) order,sum,cog,COG-X-RAV-T109
+ravlt-trial-1-word-10-(farmer)-order,RAVLT trial 1 word 10 (Farmer) order,sum,cog,COG-X-RAV-T110
+ravlt-trial-1-word-11-(nose)-order,RAVLT trial 1 word 11 (Nose) order,sum,cog,COG-X-RAV-T111
+ravlt-trial-1-word-12-(turkey)-order,RAVLT trial 1 word 12 (Turkey) order,sum,cog,COG-X-RAV-T112
+ravlt-trial-1-word-13-(color)-order,RAVLT trial 1 word 13 (Color) order,sum,cog,COG-X-RAV-T113
+ravlt-trial-1-word-14-(house)-order,RAVLT trial 1 word 14 (House) order,sum,cog,COG-X-RAV-T114
+ravlt-trial-1-word-15-(river)-order,RAVLT trial 1 word 15 (River) order,sum,cog,COG-X-RAV-T115
+ravlt-trial-2-word-1-(drum)-order,RAVLT trial 2 word 1 (Drum) order,sum,cog,COG-X-RAV-T201
+ravlt-trial-2-word-2-(curtain)-order,RAVLT trial 2 word 2 (Curtain) order,sum,cog,COG-X-RAV-T202
+ravlt-trial-2-word-3-(bell)-order,RAVLT trial 2 word 3 (Bell) order,sum,cog,COG-X-RAV-T203
+ravlt-trial-2-word-4-(coffee)-order,RAVLT trial 2 word 4 (Coffee) order,sum,cog,COG-X-RAV-T204
+ravlt-trial-2-word-5-(school)-order,RAVLT trial 2 word 5 (School) order,sum,cog,COG-X-RAV-T205
+ravlt-trial-2-word-6-(parent)-order,RAVLT trial 2 word 6 (Parent) order,sum,cog,COG-X-RAV-T206
+ravlt-trial-2-word-7-(moon)-order,RAVLT trial 2 word 7 (Moon) order,sum,cog,COG-X-RAV-T207
+ravlt-trial-2-word-8-(garden)-order,RAVLT trial 2 word 8 (Garden) order,sum,cog,COG-X-RAV-T208
+ravlt-trial-2-word-9-(hat)-order,RAVLT trial 2 word 9 (Hat) order,sum,cog,COG-X-RAV-T209
+ravlt-trial-2-word-10-(farmer)-order,RAVLT trial 2 word 10 (Farmer) order,sum,cog,COG-X-RAV-T210
+ravlt-trial-2-word-11-(nose)-order,RAVLT trial 2 word 11 (Nose) order,sum,cog,COG-X-RAV-T211
+ravlt-trial-2-word-12-(turkey)-order,RAVLT trial 2 word 12 (Turkey) order,sum,cog,COG-X-RAV-T212
+ravlt-trial-2-word-13-(color)-order,RAVLT trial 2 word 13 (Color) order,sum,cog,COG-X-RAV-T213
+ravlt-trial-2-word-14-(house)-order,RAVLT trial 2 word 14 (House) order,sum,cog,COG-X-RAV-T214
+ravlt-trial-2-word-15-(river)-order,RAVLT trial 2 word 15 (River) order,sum,cog,COG-X-RAV-T215
+ravlt-trial-3-word-1-(drum)-order,RAVLT trial 3 word 1 (Drum) order,sum,cog,COG-X-RAV-T301
+ravlt-trial-3-word-2-(curtain)-order,RAVLT trial 3 word 2 (Curtain) order,sum,cog,COG-X-RAV-T302
+ravlt-trial-3-word-3-(bell)-order,RAVLT trial 3 word 3 (Bell) order,sum,cog,COG-X-RAV-T303
+ravlt-trial-3-word-4-(coffee)-order,RAVLT trial 3 word 4 (Coffee) order,sum,cog,COG-X-RAV-T304
+ravlt-trial-3-word-5-(school)-order,RAVLT trial 3 word 5 (School) order,sum,cog,COG-X-RAV-T305
+ravlt-trial-3-word-6-(parent)-order,RAVLT trial 3 word 6 (Parent) order,sum,cog,COG-X-RAV-T306
+ravlt-trial-3-word-7-(moon)-order,RAVLT trial 3 word 7 (Moon) order,sum,cog,COG-X-RAV-T307
+ravlt-trial-3-word-8-(garden)-order,RAVLT trial 3 word 8 (Garden) order,sum,cog,COG-X-RAV-T308
+ravlt-trial-3-word-9-(hat)-order,RAVLT trial 3 word 9 (Hat) order,sum,cog,COG-X-RAV-T309
+ravlt-trial-3-word-10-(farmer)-order,RAVLT trial 3 word 10 (Farmer) order,sum,cog,COG-X-RAV-T310
+ravlt-trial-3-word-11-(nose)-order,RAVLT trial 3 word 11 (Nose) order,sum,cog,COG-X-RAV-T311
+ravlt-trial-3-word-12-(turkey)-order,RAVLT trial 3 word 12 (Turkey) order,sum,cog,COG-X-RAV-T312
+ravlt-trial-3-word-13-(color)-order,RAVLT trial 3 word 13 (Color) order,sum,cog,COG-X-RAV-T313
+ravlt-trial-3-word-14-(house)-order,RAVLT trial 3 word 14 (House) order,sum,cog,COG-X-RAV-T314
+ravlt-trial-3-word-15-(river)-order,RAVLT trial 3 word 15 (River) order,sum,cog,COG-X-RAV-T315
+ravlt-trial-4-word-1-(drum)-order,RAVLT trial 4 word 1 (Drum) order,sum,cog,COG-X-RAV-T401
+ravlt-trial-4-word-2-(curtain)-order,RAVLT trial 4 word 2 (Curtain) order,sum,cog,COG-X-RAV-T402
+ravlt-trial-4-word-3-(bell)-order,RAVLT trial 4 word 3 (Bell) order,sum,cog,COG-X-RAV-T403
+ravlt-trial-4-word-4-(coffee)-order,RAVLT trial 4 word 4 (Coffee) order,sum,cog,COG-X-RAV-T404
+ravlt-trial-4-word-5-(school)-order,RAVLT trial 4 word 5 (School) order,sum,cog,COG-X-RAV-T405
+ravlt-trial-4-word-6-(parent)-order,RAVLT trial 4 word 6 (Parent) order,sum,cog,COG-X-RAV-T406
+ravlt-trial-4-word-7-(moon)-order,RAVLT trial 4 word 7 (Moon) order,sum,cog,COG-X-RAV-T407
+ravlt-trial-4-word-8-(garden)-order,RAVLT trial 4 word 8 (Garden) order,sum,cog,COG-X-RAV-T408
+ravlt-trial-4-word-9-(hat)-order,RAVLT trial 4 word 9 (Hat) order,sum,cog,COG-X-RAV-T409
+ravlt-trial-4-word-10-(farmer)-order,RAVLT trial 4 word 10 (Farmer) order,sum,cog,COG-X-RAV-T410
+ravlt-trial-4-word-11-(nose)-order,RAVLT trial 4 word 11 (Nose) order,sum,cog,COG-X-RAV-T411
+ravlt-trial-4-word-12-(turkey)-order,RAVLT trial 4 word 12 (Turkey) order,sum,cog,COG-X-RAV-T412
+ravlt-trial-4-word-13-(color)-order,RAVLT trial 4 word 13 (Color) order,sum,cog,COG-X-RAV-T413
+ravlt-trial-4-word-14-(house)-order,RAVLT trial 4 word 14 (House) order,sum,cog,COG-X-RAV-T414
+ravlt-trial-4-word-15-(river)-order,RAVLT trial 4 word 15 (River) order,sum,cog,COG-X-RAV-T415
+ravlt-trial-5-word-1-(drum)-order,RAVLT trial 5 word 1 (Drum) order,sum,cog,COG-X-RAV-T501
+ravlt-trial-5-word-2-(curtain)-order,RAVLT trial 5 word 2 (Curtain) order,sum,cog,COG-X-RAV-T502
+ravlt-trial-5-word-3-(bell)-order,RAVLT trial 5 word 3 (Bell) order,sum,cog,COG-X-RAV-T503
+ravlt-trial-5-word-4-(coffee)-order,RAVLT trial 5 word 4 (Coffee) order,sum,cog,COG-X-RAV-T504
+ravlt-trial-5-word-5-(school)-order,RAVLT trial 5 word 5 (School) order,sum,cog,COG-X-RAV-T505
+ravlt-trial-5-word-6-(parent)-order,RAVLT trial 5 word 6 (Parent) order,sum,cog,COG-X-RAV-T506
+ravlt-trial-5-word-7-(moon)-order,RAVLT trial 5 word 7 (Moon) order,sum,cog,COG-X-RAV-T507
+ravlt-trial-5-word-8-(garden)-order,RAVLT trial 5 word 8 (Garden) order,sum,cog,COG-X-RAV-T508
+ravlt-trial-5-word-9-(hat)-order,RAVLT trial 5 word 9 (Hat) order,sum,cog,COG-X-RAV-T509
+ravlt-trial-5-word-10-(farmer)-order,RAVLT trial 5 word 10 (Farmer) order,sum,cog,COG-X-RAV-T510
+ravlt-trial-5-word-11-(nose)-order,RAVLT trial 5 word 11 (Nose) order,sum,cog,COG-X-RAV-T511
+ravlt-trial-5-word-12-(turkey)-order,RAVLT trial 5 word 12 (Turkey) order,sum,cog,COG-X-RAV-T512
+ravlt-trial-5-word-13-(color)-order,RAVLT trial 5 word 13 (Color) order,sum,cog,COG-X-RAV-T513
+ravlt-trial-5-word-14-(house)-order,RAVLT trial 5 word 14 (House) order,sum,cog,COG-X-RAV-T514
+ravlt-trial-5-word-15-(river)-order,RAVLT trial 5 word 15 (River) order,sum,cog,COG-X-RAV-T515
+ravlt-trial-6-word-1-(drum)-order,RAVLT trial 6 word 1 (Drum) order,sum,cog,COG-X-RAV-T601
+ravlt-trial-6-word-2-(curtain)-order,RAVLT trial 6 word 2 (Curtain) order,sum,cog,COG-X-RAV-T602
+ravlt-trial-6-word-3-(bell)-order,RAVLT trial 6 word 3 (Bell) order,sum,cog,COG-X-RAV-T603
+ravlt-trial-6-word-4-(coffee)-order,RAVLT trial 6 word 4 (Coffee) order,sum,cog,COG-X-RAV-T604
+ravlt-trial-6-word-5-(school)-order,RAVLT trial 6 word 5 (School) order,sum,cog,COG-X-RAV-T605
+ravlt-trial-6-word-6-(parent)-order,RAVLT trial 6 word 6 (Parent) order,sum,cog,COG-X-RAV-T606
+ravlt-trial-6-word-7-(moon)-order,RAVLT trial 6 word 7 (Moon) order,sum,cog,COG-X-RAV-T607
+ravlt-trial-6-word-8-(garden)-order,RAVLT trial 6 word 8 (Garden) order,sum,cog,COG-X-RAV-T608
+ravlt-trial-6-word-9-(hat)-order,RAVLT trial 6 word 9 (Hat) order,sum,cog,COG-X-RAV-T609
+ravlt-trial-6-word-10-(farmer)-order,RAVLT trial 6 word 10 (Farmer) order,sum,cog,COG-X-RAV-T610
+ravlt-trial-6-word-11-(nose)-order,RAVLT trial 6 word 11 (Nose) order,sum,cog,COG-X-RAV-T611
+ravlt-trial-6-word-12-(turkey)-order,RAVLT trial 6 word 12 (Turkey) order,sum,cog,COG-X-RAV-T612
+ravlt-trial-6-word-13-(color)-order,RAVLT trial 6 word 13 (Color) order,sum,cog,COG-X-RAV-T613
+ravlt-trial-6-word-14-(house)-order,RAVLT trial 6 word 14 (House) order,sum,cog,COG-X-RAV-T614
+ravlt-trial-6-word-15-(river)-order,RAVLT trial 6 word 15 (River) order,sum,cog,COG-X-RAV-T615
+ravlt-trial-7-word-1-(drum)-order,RAVLT trial 7 word 1 (Drum) order,sum,cog,COG-X-RAV-T701
+ravlt-trial-7-word-2-(curtain)-order,RAVLT trial 7 word 2 (Curtain) order,sum,cog,COG-X-RAV-T702
+ravlt-trial-7-word-3-(bell)-order,RAVLT trial 7 word 3 (Bell) order,sum,cog,COG-X-RAV-T703
+ravlt-trial-7-word-4-(coffee)-order,RAVLT trial 7 word 4 (Coffee) order,sum,cog,COG-X-RAV-T704
+ravlt-trial-7-word-5-(school)-order,RAVLT trial 7 word 5 (School) order,sum,cog,COG-X-RAV-T705
+ravlt-trial-7-word-6-(parent)-order,RAVLT trial 7 word 6 (Parent) order,sum,cog,COG-X-RAV-T706
+ravlt-trial-7-word-7-(moon)-order,RAVLT trial 7 word 7 (Moon) order,sum,cog,COG-X-RAV-T707
+ravlt-trial-7-word-8-(garden)-order,RAVLT trial 7 word 8 (Garden) order,sum,cog,COG-X-RAV-T708
+ravlt-trial-7-word-9-(hat)-order,RAVLT trial 7 word 9 (Hat) order,sum,cog,COG-X-RAV-T709
+ravlt-trial-7-word-10-(farmer)-order,RAVLT trial 7 word 10 (Farmer) order,sum,cog,COG-X-RAV-T710
+ravlt-trial-7-word-11-(nose)-order,RAVLT trial 7 word 11 (Nose) order,sum,cog,COG-X-RAV-T711
+ravlt-trial-7-word-12-(turkey)-order,RAVLT trial 7 word 12 (Turkey) order,sum,cog,COG-X-RAV-T712
+ravlt-trial-7-word-13-(color)-order,RAVLT trial 7 word 13 (Color) order,sum,cog,COG-X-RAV-T713
+ravlt-trial-7-word-14-(house)-order,RAVLT trial 7 word 14 (House) order,sum,cog,COG-X-RAV-T714
+ravlt-trial-7-word-15-(river)-order,RAVLT trial 7 word 15 (River) order,sum,cog,COG-X-RAV-T715
+ravlt-trial-8-word-1-(drum)-order,RAVLT trial 8 word 1 (Drum) order,sum,cog,COG-X-RAV-T801
+ravlt-trial-8-word-2-(curtain)-order,RAVLT trial 8 word 2 (Curtain) order,sum,cog,COG-X-RAV-T802
+ravlt-trial-8-word-3-(bell)-order,RAVLT trial 8 word 3 (Bell) order,sum,cog,COG-X-RAV-T803
+ravlt-trial-8-word-4-(coffee)-order,RAVLT trial 8 word 4 (Coffee) order,sum,cog,COG-X-RAV-T804
+ravlt-trial-8-word-5-(school)-order,RAVLT trial 8 word 5 (School) order,sum,cog,COG-X-RAV-T805
+ravlt-trial-8-word-6-(parent)-order,RAVLT trial 8 word 6 (Parent) order,sum,cog,COG-X-RAV-T806
+ravlt-trial-8-word-7-(moon)-order,RAVLT trial 8 word 7 (Moon) order,sum,cog,COG-X-RAV-T807
+ravlt-trial-8-word-8-(garden)-order,RAVLT trial 8 word 8 (Garden) order,sum,cog,COG-X-RAV-T808
+ravlt-trial-8-word-9-(hat)-order,RAVLT trial 8 word 9 (Hat) order,sum,cog,COG-X-RAV-T809
+ravlt-trial-8-word-10-(farmer)-order,RAVLT trial 8 word 10 (Farmer) order,sum,cog,COG-X-RAV-T810
+ravlt-trial-8-word-11-(nose)-order,RAVLT trial 8 word 11 (Nose) order,sum,cog,COG-X-RAV-T811
+ravlt-trial-8-word-12-(turkey)-order,RAVLT trial 8 word 12 (Turkey) order,sum,cog,COG-X-RAV-T812
+ravlt-trial-8-word-13-(color)-order,RAVLT trial 8 word 13 (Color) order,sum,cog,COG-X-RAV-T813
+ravlt-trial-8-word-14-(house)-order,RAVLT trial 8 word 14 (House) order,sum,cog,COG-X-RAV-T814
+ravlt-trial-8-word-15-(river)-order,RAVLT trial 8 word 15 (River) order,sum,cog,COG-X-RAV-T815
+age,Age in years,sum,dem,DEM-X-Age
+sex,Sex 0=female 1=male,sum,dem,DEM-X-Sex
+education,"Education level ( High school (Year 9 or lower)
  High school (Year 10)
  High school (Year 12)
  Certificate 1 & 2
@@ -446,44 +446,45 @@ Sex 0=female 1=male,sex,sum,dem,DEM-X-Sex
  Bachelors Degree
  Graduate Certificate / Diploma
  Masters Degree
- Doctoral Degree)",education,sum,dem,DEM-X-Education
-"VR Usage (Never
+ Doctoral Degree)",sum,dem,DEM-X-Education
+vr-exposure,"VR Usage (Never
  Less than 1 hour
  1 - 10 hours
  10 - 50 hours
- More than 50 hours)",vr-exposure,sum,dem,DEM-X-VR_Exp
-Typical sleep hours,typical-sleep-hours,sum,dem,DEM-X-SLEEP
-Total DASS Anxiety Items,total-dass-anxiety-items,sum,dem,DEM-X-DASS_Anx
-Total DASS Stress Items,total-dass-stress-items,sum,dem,DEM-X-DASS_Str
-Time since VR,TSVR,sum,vr,.*-TSVR
-Seconds taken to complete RFR,seconds-taken-to-complete-rfr,sum,vr,.*-TiPSadj-RFR
-Seconds taken to complete IFR,seconds-taken-to-complete-ifr,sum,vr,.*-TiPSadj-IFR
-Seconds taken to complete TCR,seconds-taken-to-complete-tcr,sum,vr,.*-TiPSadj-TCR
-Seconds taken to complete ICR,seconds-taken-to-complete-icr,sum,vr,.*-TiPSadj-ICR
-Seconds taken to complete RRE,seconds-taken-to-complete-rre,sum,vr,.*-TiPSadj-RRE
-Seconds taken to complete IRE,seconds-taken-to-complete-ire,sum,vr,.*-TiPSadj-IRE
-Time been awake today,time-been-awake-today,sum,vr,.*-AWAK
-Hours slept night before,hours-slept-night-before,sum,vr,.*-HOUR
-Time woke up,time-woke-up,sum,vr,.*-WAKE
-Sleep quality -1=bad 1=good,sleep-quality--1=bad-1=good,sum,vr,.*-QUAL
-Tiredness -1=tired 1=alert,tiredness--1=tired-1=alert,sum,vr,.*-TIRE
-Consumed stimulants,consumed-stimulants,list,vr,.*-CAF1
-What stimulants,what-stimulants,list,vr,.*-CAF2
-Consumed intoxicants,consumed-intoxicants,list,vr,.*-TOX1
-What intoxicants,what-intoxicants,list,vr,.*-TOX2
-Anyone helping you,anyone-helping-you,list,vr,.*-HLP1
-Who is helping,who-is-helping,list,vr,.*-HLP2
-How difficult was your REMEMVR test today?,strategy-1,list,vr,.*-DIF1
-How difficult was todays test compared to your previous REMEMVR test?,strategy-2,list,vr,.*-DIF2
-"Did completing previous REMEMVR tests help you answer questions about the [user_meta key=""c_room""]?",strategy-3,list,vr,.*-HLP1
-"Briefly describe how previous tests helped you answer questions about the [user_meta key=""c_room""]",strategy-4,list,vr,.*-HLP2
-"How often have you thought about the [user_meta key=""c_room""] since you saw it in virtual reality?",strategy-5,list,vr,.*-TNK1
-"When you thought about your virtual experience in the [user_meta key=""c_room""], what kind of elements did you think about?",strategy-6,list,vr,.*-TNK2
-"Did you use any specific strategies or techniques to remember the furniture/fixtures in the [user_meta key=""c_room""]?",strategy-7,list,vr,.*-OBJ1
-Describe your strategy here,strategy-8,list,vr,.*-OBJ2
-"Did you use any specific strategies or techniques to remember the items and their locations in the [user_meta key=""c_room""]?",strategy-9,list,vr,.*-ITM1
-Describe your strategy here,strategy-10,list,vr,.*-ITM2
-"Were you aware of any mnemonic techniques (e.g., method of loci, visual imagery) before participating in this study?",strategy-11,list,vr,.*-MNE1
-Did you consciously apply any of these mnemonic techniques during the REMEMVR test?,strategy-12,list,vr,.*-MNE2
-Describe your technique here,strategy-13,list,vr,.*-MNE3
-"(Optional) Please provide any thoughts, comments, or suggestions related to REMEMVR that you would like to share with the research team.",strategy-14,list,vr,.*-FEED
+ More than 50 hours)",sum,dem,DEM-X-VR_Exp
+typical-sleep-hours,Typical sleep hours,sum,dem,DEM-X-SLEEP
+total-dass-anxiety-items,Total DASS Anxiety Items,sum,dem,DEM-X-DASS_Anx
+total-dass-stress-items,Total DASS Stress Items,sum,dem,DEM-X-DASS_Str
+total-dass-depression-items,Total DASS Depression Items,sum,dem,DEM-X-DASS_Dep
+TSVR,Time since VR,sum,vr,.*-TSVR
+seconds-taken-to-complete-rfr,Seconds taken to complete RFR,sum,vr,.*-TiPSadj-RFR
+seconds-taken-to-complete-ifr,Seconds taken to complete IFR,sum,vr,.*-TiPSadj-IFR
+seconds-taken-to-complete-tcr,Seconds taken to complete TCR,sum,vr,.*-TiPSadj-TCR
+seconds-taken-to-complete-icr,Seconds taken to complete ICR,sum,vr,.*-TiPSadj-ICR
+seconds-taken-to-complete-rre,Seconds taken to complete RRE,sum,vr,.*-TiPSadj-RRE
+seconds-taken-to-complete-ire,Seconds taken to complete IRE,sum,vr,.*-TiPSadj-IRE
+time-been-awake-today,Time been awake today,sum,vr,.*SLP-X-AWAK
+hours-slept-night-before,Hours slept night before,sum,vr,.*SLP-X-HOUR
+time-woke-up,Time woke up,sum,vr,.*SLP-X-WAKE
+sleep-quality--1=bad-1=good,Sleep quality -1=bad 1=good,sum,vr,.*SLP-X-QUAL
+tiredness--1=tired-1=alert,Tiredness -1=tired 1=alert,sum,vr,.*SLP-X-TIRE
+consumed-stimulants,Consumed stimulants,string,vr,.*SLP-X-CAF1
+what-stimulants,What stimulants,string,vr,.*SLP-X-CAF2
+consumed-intoxicants,Consumed intoxicants,string,vr,.*SLP-X-TOX1
+what-intoxicants,What intoxicants,string,vr,.*SLP-X-TOX2
+anyone-helping-you,Anyone helping you,string,vr,.*SLP-X-HLP1
+who-is-helping,Who is helping,string,vr,.*SLP-X-HLP2
+strategy-1,How difficult was your REMEMVR test today?,string,vr,.*STR-X-DIF1
+strategy-2,How difficult was todays test compared to your previous REMEMVR test?,string,vr,.*STR-X-DIF2
+strategy-3,"Did completing previous REMEMVR tests help you answer questions about the [user_meta key=""c_room""]?",string,vr,.*STR-X-HLP1
+strategy-4,"Briefly describe how previous tests helped you answer questions about the [user_meta key=""c_room""]",string,vr,.*STR-X-HLP2
+strategy-5,"How often have you thought about the [user_meta key=""c_room""] since you saw it in virtual reality?",string,vr,.*STR-X-TNK1
+strategy-6,"When you thought about your virtual experience in the [user_meta key=""c_room""], what kind of elements did you think about?",string,vr,.*STR-X-TNK2
+strategy-7,"Did you use any specific strategies or techniques to remember the furniture/fixtures in the [user_meta key=""c_room""]?",string,vr,.*STR-X-OBJ1
+strategy-8,Describe your strategy here,string,vr,.*STR-X-OBJ2
+strategy-9,"Did you use any specific strategies or techniques to remember the items and their locations in the [user_meta key=""c_room""]?",string,vr,.*STR-X-ITM1
+strategy-10,Describe your strategy here,string,vr,.*STR-X-ITM2
+strategy-11,"Were you aware of any mnemonic techniques (e.g., method of loci, visual imagery) before participating in this study?",string,vr,.*STR-X-MNE1
+strategy-12,Did you consciously apply any of these mnemonic techniques during the REMEMVR test?,string,vr,.*STR-X-MNE2
+strategy-13,Describe your technique here,string,vr,.*STR-X-MNE3
+strategy-14,"(Optional) Please provide any thoughts, comments, or suggestions related to REMEMVR that you would like to share with the research team.",string,vr,.*STR-X-FEED

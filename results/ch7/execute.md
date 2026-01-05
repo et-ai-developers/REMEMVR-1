@@ -17,6 +17,8 @@
 - Rush to implementation without understanding the science
 - **Skip steps or cut corners due to time/token constraints**
 - **Use "running short on time" as excuse for shortcuts**
+- **CREATE SIMULATED/FAKE DATA UNDER ANY CIRCUMSTANCES**
+- **Use random.normal() or any random data generation for analysis variables**
 
 **ALWAYS:**
 - Read reports and understand the science FIRST
@@ -25,6 +27,7 @@
 - Document scientific reasoning for every choice
 - **Take time needed to do analysis properly**
 - **Use /save, /clear, /refresh if approaching token limit**
+- **STOP and ask user if data appears missing rather than simulate**
 
 **🔴 TIME/TOKEN CONSTRAINT PROTOCOL:**
 - You are NEVER running short on time - we have infinite time
@@ -32,6 +35,34 @@
 - If context window approaching 150k: Recommend /save to user
 - If analysis needs 20 steps: Do all 20 steps properly
 - Scientific integrity >> Speed (ALWAYS, NO EXCEPTIONS)
+
+---
+
+## 📚 CRITICAL DATA SOURCES (MANDATORY READING)
+
+**🔴 MISSION CRITICAL:** For ALL RQs that require importing raw data, you MUST:
+
+1. **READ data/DATA_DICTIONARY.md FIRST**
+   - Contains ALL column names for dfnonvr.csv (235 columns) and dfvr.csv (244 columns)
+   - Lists EXACT column names with hyphens (e.g., `total-dass-depression-items`)
+   - Explains what each variable measures
+   - **NEVER guess column names - always check the dictionary**
+
+2. **USE ONLY REAL DATA FROM:**
+   - `data/dfnonvr.csv` - Participant-level data (cognitive tests, demographics, DASS)
+   - `data/dfvr.csv` - VR test data in long format (TEST column with values 1-4)
+   - Previous RQ outputs from results/chX/X.Y.Z/data/
+   
+3. **AVAILABLE DATA INCLUDES:**
+   - ✅ All 3 DASS subscales (Depression, Anxiety, Stress) 
+   - ✅ VR exposure as `vr-exposure` (0-4 scale)
+   - ✅ Sleep as `typical-sleep-hours`
+   - ✅ All cognitive tests with exact column names in dictionary
+   
+4. **IF DATA APPEARS MISSING:**
+   - First check DATA_DICTIONARY.md for the exact column name
+   - Column names use lowercase with hyphens (not underscores or spaces)
+   - If still not found, STOP and ask user - NEVER simulate data
 
 ---
 
@@ -44,6 +75,7 @@
    a. Read docs/1_concept.md - What is the scientific question?
    b. Read docs/2_plan.md - What is the methodological approach? 
    c. Read docs/4_analysis.yaml - What are the exact analysis steps?
+   d. 🔴 NEW: Read data/DATA_DICTIONARY.md for ALL raw data imports
    
 2. CROSS-CHAPTER DEPENDENCY VALIDATION:
    For ANY dependency on Ch5/Ch6 RQs:
@@ -491,17 +523,25 @@ Run in sequence. Don't skip. Each catches different issues.
 
 **[2026-01-05] [7.1.x] Master.xlsx Reference Error:**
 - Ch7 should NEVER reference master.xlsx - all data is preprocessed
-- dfnonvr.csv has participant data (101 columns after fix)
-- dfdata.csv has test-level data (4 tests per participant)
+- dfnonvr.csv has participant data (235 columns with all data)
+- dfvr.csv has test-level VR data (244 columns, long format)
 - 610 incorrect references fixed across 78 files
 - rq_analysis v5.3.0 now enforces Ch7 data source rules
 
-**[2026-01-05] [7.1.x] NART Data Recovery:**
-- NART was missing from dfnonvr.csv despite documentation claiming it was there
-- Root cause: column_mapping.py excluded NART during extraction
-- Fixed by recreating dfnonvr.csv with all data
-- NART now in column 2 (was incorrectly documented as column 34)
-- Lesson: ALWAYS verify actual file contents vs documentation
+**[2026-01-05] [7.1.4] CATASTROPHIC FAKE DATA ERROR:**
+- Created SIMULATED data for DASS Depression and VR Experience using np.random.normal()
+- Used fake data in hierarchical regression Block 3
+- Validation agents completely failed to detect fake data
+- Root cause: Didn't check DATA_DICTIONARY.md, assumed data was missing
+- Reality: VR data existed as `vr-exposure`, DASS Depression as `total-dass-depression-items`
+- **CRITICAL LESSON: ALWAYS read DATA_DICTIONARY.md, NEVER create fake data**
+- **IF DATA APPEARS MISSING: Check exact column names, then ASK USER**
+
+**[2026-01-05] [7.1.x] Data Dictionary Creation:**
+- Created comprehensive DATA_DICTIONARY.md with ALL 235 + 244 column names
+- Documents EXACT column names (lowercase with hyphens)
+- Must be consulted for EVERY raw data import
+- Updated execute.md to make this mandatory reading
 
 ### Path and Module Lessons
 

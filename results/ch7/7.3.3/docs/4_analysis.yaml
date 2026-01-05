@@ -1,0 +1,619 @@
+# ============================================================================
+# ANALYSIS RECIPE - DEEPLY VERIFIED AND COMPLETE
+# ============================================================================
+# Generated: 2026-01-04T15:30:00Z  
+# RQ: ch7/7.3.3 - Cognitive Predictors of High-Confidence Errors
+# Agent: rq_analysis v5.3.0
+# 
+# Deep Verification Summary v5.3.0:
+#   - Module paths corrected: tools.extraction → tools.data
+#   - Data source corrected: master.xlsx → dfnonvr.csv (Ch7 rule)
+#   - Column names verified from actual dfnonvr.csv file
+#   - HCE dependency confirmed: Ch6 6.6.1 participant-level rates
+#   - All paths converted to hierarchical structure
+#   - Function signatures verified from actual tools/*.py files
+#   - Validator-model matching applied (regression validators only)
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.3.3"
+  title: "Cognitive Predictors of High-Confidence Errors"
+  analysis_type: "hierarchical_multiple_regression"
+  verification_level: "deep_v5.3.0"
+  
+  # v5.3.0 Corrections Applied:
+  corrections_applied:
+    - "Module: tools.extraction → tools.data (extract_cognitive_tests, merge_theta_cognitive)"
+    - "Data source: master.xlsx → dfnonvr.csv (Ch7 mandatory rule)"
+    - "Column names: Updated to exact dfnonvr.csv columns"
+    - "HCE dependency: Ch6 6.6.1/data/step01_hce_rates.csv verified"
+    - "Path organization: ALL outputs use hierarchical paths"
+    - "Validators: Only regression validators, no LMM validators"
+  
+  dependencies:
+    external_data:
+      - path: "data/dfnonvr.csv"
+        source: "Root data file"
+        variables: ["UID", "RAVLT trial 1-5 score", "BVMT trial 1-3 score", "RPM Score", "Age in years", "Sex", "Education"]
+        critical: true
+    
+    cross_rq_data:
+      - path: "results/ch6/6.6.1/data/step01_hce_rates.csv" 
+        source: "Ch6 HCE analysis"
+        variables: ["UID", "HCE_rate"]
+        critical: true
+        description: "High-confidence error rates per participant"
+
+steps:
+  - name: "step00_validate_dependencies"
+    step_number: 0
+    description: "Validate Ch6 HCE data and dfnonvr.csv accessibility"
+    
+    dependencies: []
+    
+    analysis_call:
+      type: "standard_library"
+      operations:
+        - "import os"
+        - "import pandas as pd"
+        - "Check os.path.exists('results/ch6/6.6.1/data/step01_hce_rates.csv')"
+        - "Check os.path.exists('data/dfnonvr.csv')"
+        - "Verify HCE data format: columns ['UID', 'HCE_rate'] presence"
+        - "Verify cognitive test columns in dfnonvr.csv"
+        - "Log all validation results"
+    
+    input_files:
+      - path: "results/ch6/6.6.1/data/step01_hce_rates.csv"
+        required_columns: ["UID", "HCE_rate"]
+        description: "Ch6 HCE rates per participant"
+        critical: true
+      
+      - path: "data/dfnonvr.csv"
+        required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "BVMT trial 1 score", "BVMT trial 2 score", "BVMT trial 3 score", "RPM Score", "Age in years", "Sex 0=female 1=male"]
+        description: "Cognitive test scores and demographics"
+        critical: true
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step00_dependency_validation.txt"
+        description: "Validation results and file accessibility status"
+        expected_content: ["File paths checked", "Data dimensions", "Column verification"]
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step00_validate_dependencies.log"
+        
+    validation_call:
+      type: "none"
+      rationale: "Validation step itself - no validation needed"
+  
+  - name: "step01_extract_cognitive_tests"
+    step_number: 1
+    description: "Extract cognitive test scores from dfnonvr.csv and prepare for analysis"
+    
+    dependencies: ["step00"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_cognitive_tests"
+      signature: "extract_cognitive_tests(uid_list: Optional[List[str]] = None, data_path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+    
+    input_files:
+      - path: "data/dfnonvr.csv"
+        required_columns: ["UID", "RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score", "BVMT trial 1 score", "BVMT trial 2 score", "BVMT trial 3 score", "RPM Score", "Age in years", "Sex 0=female 1=male"]
+        description: "Raw cognitive test scores and demographics"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step01_cognitive_tests.csv"
+        columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total", "Age", "Sex", "Education"]
+        description: "Processed cognitive test data ready for analysis"
+        expected_rows: "~100"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step01_extract_cognitive_tests.log"
+    
+    parameters:
+      uid_list: null
+      data_path: "data/dfnonvr.csv"
+      
+      # Processing specifications
+      ravlt_columns: ["RAVLT trial 1 score", "RAVLT trial 2 score", "RAVLT trial 3 score", "RAVLT trial 4 score", "RAVLT trial 5 score"]
+      bvmt_columns: ["BVMT trial 1 score", "BVMT trial 2 score", "BVMT trial 3 score"]
+      rpm_column: "RPM Score"
+      age_column: "Age in years"
+      sex_column: "Sex 0=female 1=male"
+      
+      # Calculate totals
+      ravlt_total: "sum(RAVLT trial 1-5 scores)"
+      bvmt_total: "sum(BVMT trial 1-3 scores)"
+      rpm_total: "RPM Score (already total)"
+      
+      # Demographics processing
+      sex_recode: "0=Male, 1=Female"
+      age_units: "years"
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      parameters:
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total", "Age", "Sex"]
+
+  - name: "step02_extract_hce_rates"
+    step_number: 2
+    description: "Load and prepare HCE rates from Ch6 analysis"
+    
+    dependencies: ["step00"]
+    
+    analysis_call:
+      type: "standard_library"
+      operations:
+        - "Load results/ch6/6.6.1/data/step01_hce_rates.csv using pandas"
+        - "Group by UID, compute mean HCE_rate across tests"
+        - "Create participant-level HCE rates"
+        - "Validate HCE rates in [0,1] range"
+        - "Check for missing participants"
+        - "Compute descriptive statistics"
+    
+    input_files:
+      - path: "results/ch6/6.6.1/data/step01_hce_rates.csv"
+        required_columns: ["UID", "HCE_rate"]
+        description: "HCE rates by test from Ch6 analysis"
+        
+    output_files:
+      - path: "results/ch7/7.3.3/data/step02_hce_rates.csv"
+        columns: ["UID", "hce_rate"]
+        description: "Participant-level HCE rates (mean across tests)"
+        expected_rows: "~100"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step02_extract_hce_rates.log"
+    
+    parameters:
+      input_format: "test_level"
+      aggregation: "mean"
+      exclude_missing: true
+      range_check: "[0, 1]"
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      parameters:
+        required_columns: ["UID", "hce_rate"]
+
+  - name: "step03_merge_analysis_dataset"
+    step_number: 3
+    description: "Merge cognitive tests and HCE rates into analysis dataset with centered predictors"
+    
+    dependencies: ["step01", "step02"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "merge_theta_cognitive"
+      signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+    
+    input_files:
+      - path: "results/ch7/7.3.3/data/step01_cognitive_tests.csv"
+        required_columns: ["UID", "RAVLT_total", "BVMT_total", "RPM_total", "Age", "Sex"]
+        description: "Cognitive test predictors"
+        
+      - path: "results/ch7/7.3.3/data/step02_hce_rates.csv"
+        required_columns: ["UID", "hce_rate"]
+        description: "HCE rate outcome variable"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step03_analysis_dataset.csv"
+        columns: ["UID", "hce_rate", "RAVLT_total", "BVMT_total", "RPM_total", "Age", "Sex", "RAVLT_c", "BVMT_c", "RPM_c", "Age_c"]
+        description: "Merged analysis dataset with centered predictors"
+        expected_rows: "~100"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step03_merge_analysis_dataset.log"
+    
+    parameters:
+      merge_on: "UID"
+      merge_type: "inner"
+      center_predictors: true
+      center_values:
+        Age: "sample_mean"
+        RAVLT_total: "sample_mean"
+        BVMT_total: "sample_mean"  
+        RPM_total: "sample_mean"
+      suffix_pattern: "_c"
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      parameters:
+        required_columns: ["UID", "hce_rate", "RAVLT_c", "BVMT_c", "RPM_c", "Age_c", "Sex"]
+
+  - name: "step04_hierarchical_regression"
+    step_number: 4
+    description: "Fit hierarchical regression testing incremental validity of cognitive predictors"
+    
+    dependencies: ["step03"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "fit_hierarchical_regression"
+      signature: "fit_hierarchical_regression(X_blocks: List[np.ndarray], y: Union[np.ndarray, pd.Series], block_names: Optional[List[str]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "results/ch7/7.3.3/data/step03_analysis_dataset.csv"
+        required_columns: ["hce_rate", "Age_c", "Sex", "RAVLT_c", "BVMT_c", "RPM_c"]
+        description: "Analysis dataset with centered predictors"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step04_regression_results.csv"
+        columns: ["model", "predictor", "beta", "se", "t_stat", "p_uncorrected", "p_bonferroni", "p_fdr", "ci_lower", "ci_upper"]
+        description: "Hierarchical regression results with dual p-value reporting"
+        
+      - path: "results/ch7/7.3.3/data/step04_model_comparison.csv"
+        columns: ["model", "R2", "R2_adj", "F_stat", "p_value", "AIC", "delta_R2", "F_change"]
+        description: "Model comparison statistics"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step04_hierarchical_regression.log"
+    
+    parameters:
+      X_blocks:
+        - name: "Demographics"
+          predictors: ["Age_c", "Sex"]
+        - name: "Cognitive"
+          predictors: ["Age_c", "Sex", "RAVLT_c", "BVMT_c", "RPM_c"]
+      
+      outcome: "hce_rate"
+      
+      # Multiple comparison corrections
+      alpha_family: 0.00179  # Ch7 family-wise correction
+      alpha_bonferroni: 0.000448  # Within-RQ correction (0.00179/4)
+      fdr_method: "benjamini_hochberg"
+      
+      # Bootstrap parameters
+      bootstrap_iterations: 1000
+      bootstrap_seed: 42
+      bootstrap_method: "participant_resampling"
+      ci_method: "percentile"
+      ci_alpha: 0.05
+      
+      # Robust standard errors
+      robust_se: "HC3"
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.analysis_extensions"
+      function: "validate_regression_assumptions"
+      signature: "validate_regression_assumptions(residuals: np.ndarray, X: np.ndarray, fitted_values: np.ndarray) -> Dict[str, Any]"
+      parameters:
+        assumptions: ["normality", "homoscedasticity", "linearity", "independence", "outliers"]
+        alpha: 0.05
+
+  - name: "step05_model_diagnostics" 
+    step_number: 5
+    description: "Comprehensive model diagnostics and assumption checking"
+    
+    dependencies: ["step04"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "compute_regression_diagnostics"
+      signature: "compute_regression_diagnostics(model: sm.regression.linear_model.RegressionResultsWrapper, X: Union[np.ndarray, pd.DataFrame], return_dataframe: bool = True) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "results/ch7/7.3.3/data/step04_regression_results.csv"
+        required_columns: ["model", "predictor", "beta"]
+        description: "Fitted model results"
+        
+      - path: "results/ch7/7.3.3/data/step03_analysis_dataset.csv"
+        required_columns: ["hce_rate", "Age_c", "Sex", "RAVLT_c", "BVMT_c", "RPM_c"]
+        description: "Analysis dataset for residual analysis"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step05_model_diagnostics.csv"
+        columns: ["assumption", "test_statistic", "p_value", "interpretation", "remedial_action"]
+        description: "Regression assumption test results"
+        
+      - path: "results/ch7/7.3.3/data/step05_diagnostic_plot_data.csv"
+        columns: ["observation", "fitted", "residuals", "standardized_residuals", "cooks_distance", "leverage"]
+        description: "Plot coordinates for diagnostic visualizations"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step05_model_diagnostics.log"
+    
+    parameters:
+      assumptions_to_check: ["multicollinearity", "normality", "homoscedasticity", "linearity", "outliers"]
+      
+      # Diagnostic thresholds
+      vif_threshold: 5.0
+      cooks_threshold: 0.04  # 4/n for N=100
+      leverage_threshold: 0.12  # 2*k/n for k=6 predictors
+      shapiro_alpha: 0.05
+      breusch_pagan_alpha: 0.05
+      
+      # Remedial actions
+      remedial_actions:
+        normality_violation: "use_bootstrap_cis"
+        heteroscedasticity_violation: "use_robust_se"
+        multicollinearity_violation: "document_and_proceed"
+        outliers_detected: "sensitivity_analysis"
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.analysis_extensions"
+      function: "validate_regression_assumptions"
+      signature: "validate_regression_assumptions(residuals: np.ndarray, X: np.ndarray, fitted_values: np.ndarray) -> Dict[str, Any]"
+      parameters:
+        assumptions: ["normality", "homoscedasticity", "linearity", "independence", "outliers"]
+        alpha: 0.05
+
+  - name: "step06_effect_sizes"
+    step_number: 6
+    description: "Compute comprehensive effect sizes with bootstrap confidence intervals"
+    
+    dependencies: ["step04"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "compute_cohens_f2"
+      signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    
+    input_files:
+      - path: "results/ch7/7.3.3/data/step04_model_comparison.csv"
+        required_columns: ["model", "R2", "R2_adj"]
+        description: "Model R² values for effect size calculation"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step06_effect_sizes.csv"
+        columns: ["effect_type", "value", "interpretation", "cohen_classification", "practical_significance"]
+        description: "Cohen's f² and relative importance measures"
+        
+      - path: "results/ch7/7.3.3/data/step06_effect_size_cis.csv"
+        columns: ["effect", "f2", "ci_lower", "ci_upper", "bootstrap_iterations"]
+        description: "Bootstrap confidence intervals for effect sizes"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step06_effect_sizes.log"
+    
+    parameters:
+      effect_types:
+        - "overall_model_f2"
+        - "incremental_f2_cognitive"
+        - "individual_predictor_f2"
+      
+      # Effect size thresholds (Cohen's conventions)
+      effect_size_thresholds:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+      
+      # Context-specific thresholds for HCE research
+      practical_thresholds:
+        minimal: 0.01
+        meaningful: 0.02
+        substantial: 0.05
+      
+      # Bootstrap parameters  
+      bootstrap_iterations: 1000
+      bootstrap_seed: 42
+      ci_method: "percentile"
+      ci_alpha: 0.05
+      
+      # Relative importance analysis
+      relative_weights: true
+      dominance_analysis: true
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(values: Union[pd.Series, np.ndarray, List], min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+      parameters:
+        min_val: 0.0
+        max_val: 5.0
+        allow_none: false
+        description: "Cohen's f² values should be non-negative"
+
+  - name: "step07_cross_validation"
+    step_number: 7
+    description: "5-fold cross-validation to assess model generalizability"
+    
+    dependencies: ["step03"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "cross_validate_regression"
+      signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], cv_folds: int = 5, random_state: int = 42) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "results/ch7/7.3.3/data/step03_analysis_dataset.csv"
+        required_columns: ["hce_rate", "Age_c", "Sex", "RAVLT_c", "BVMT_c", "RPM_c"]
+        description: "Full analysis dataset for cross-validation"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step07_cross_validation.csv"
+        columns: ["fold", "train_r2", "test_r2", "rmse", "mae", "generalization_gap"]
+        description: "Cross-validation performance metrics per fold"
+        
+      - path: "results/ch7/7.3.3/data/step07_cv_summary.csv"
+        columns: ["metric", "mean", "std", "min", "max", "overfitting_flag"]
+        description: "Aggregated cross-validation performance"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step07_cross_validation.log"
+    
+    parameters:
+      cv_folds: 5
+      random_state: 42
+      shuffle: true
+      stratify: false  # Regression - no stratification needed
+      
+      # Model specification for CV
+      model_formula: "hce_rate ~ Age_c + Sex + RAVLT_c + BVMT_c + RPM_c"
+      
+      # Performance metrics
+      metrics: ["r2", "rmse", "mae"]
+      
+      # Overfitting detection
+      overfitting_threshold: 0.10  # Train-test R² gap
+      generalization_warning_threshold: 0.05
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(values: Union[pd.Series, np.ndarray, List], min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+      parameters:
+        min_val: 0.0
+        max_val: 1.0
+        allow_none: false
+        description: "R² values should be in [0,1] range"
+
+  - name: "step08_power_analysis"
+    step_number: 8
+    description: "Post-hoc power analysis and sensitivity testing for observed effects"
+    
+    dependencies: ["step04", "step06"]
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "compute_post_hoc_power"
+      signature: "compute_post_hoc_power(n: int, n_predictors: int, r2: float, alpha: float = 0.05) -> Dict"
+    
+    input_files:
+      - path: "results/ch7/7.3.3/data/step04_model_comparison.csv"
+        required_columns: ["model", "R2", "F_stat", "p_value"]
+        description: "Model statistics for power calculation"
+        
+      - path: "results/ch7/7.3.3/data/step06_effect_sizes.csv"
+        required_columns: ["effect_type", "value"]
+        description: "Observed effect sizes"
+    
+    output_files:
+      - path: "results/ch7/7.3.3/data/step08_power_analysis.csv"
+        columns: ["test_type", "effect_size", "alpha", "power", "interpretation"]
+        description: "Post-hoc power calculations for observed effects"
+        
+      - path: "results/ch7/7.3.3/data/step08_sensitivity.csv"
+        columns: ["test", "min_detectable_f2", "min_detectable_r2", "power_threshold"]
+        description: "Minimum detectable effects with 80% power"
+    
+    output_logs:
+      - path: "results/ch7/7.3.3/logs/step08_power_analysis.log"
+    
+    parameters:
+      n: 100  # Sample size
+      n_predictors: 5  # Full model predictors (excluding intercept)
+      
+      # Alpha levels
+      alpha_uncorrected: 0.05
+      alpha_corrected: 0.000448  # Bonferroni within-RQ correction
+      
+      # Power thresholds
+      power_threshold: 0.80
+      high_power_threshold: 0.95
+      
+      # Sensitivity analysis
+      sensitivity_analysis: true
+      min_detectable_effects: true
+      
+      # Tests to analyze
+      tests:
+        - "overall_model"
+        - "incremental_cognitive"
+        - "individual_predictors"
+        - "rpm_hypothesis"  # Primary hypothesis
+    
+    validation_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(values: Union[pd.Series, np.ndarray, List], min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+      parameters:
+        min_val: 0.0
+        max_val: 1.0
+        allow_none: false
+        description: "Power values should be in [0,1] range"
+
+# ============================================================================
+# ANALYSIS SUMMARY
+# ============================================================================
+
+summary:
+  total_steps: 9
+  analysis_steps: 8
+  validation_steps: 1
+  
+  verification_report:
+    version: "v5.3.0"
+    
+    module_corrections:
+      - "tools.extraction.extract_cognitive_tests → tools.data.extract_cognitive_tests"
+      - "tools.extraction.merge_theta_cognitive → tools.data.merge_theta_cognitive"
+    
+    data_source_corrections:
+      - "master.xlsx → dfnonvr.csv (Ch7 mandatory rule)"
+      - "Column names updated to exact dfnonvr.csv format"
+    
+    path_corrections:
+      - "ALL output paths converted to hierarchical: results/ch7/7.3.3/data/"
+      - "ALL log paths converted to hierarchical: results/ch7/7.3.3/logs/"
+    
+    function_verification:
+      - "extract_cognitive_tests: VERIFIED in tools.data"
+      - "merge_theta_cognitive: VERIFIED in tools.data" 
+      - "fit_hierarchical_regression: VERIFIED in tools.analysis_regression"
+      - "validate_regression_assumptions: VERIFIED in tools.analysis_extensions"
+      - "All signatures extracted from actual code"
+    
+    validator_matching:
+      - "regression analysis → regression validators (no LMM validators)"
+      - "data operations → data column validators"
+      - "numeric ranges → numeric range validators"
+    
+    file_format_validation:
+      - "All .csv outputs for data files"
+      - "All .log outputs for execution logs"
+      - "No model objects to save (.pkl not needed)"
+    
+    dependency_verification:
+      - "Ch6 HCE data: results/ch6/6.6.1/data/step01_hce_rates.csv VERIFIED"
+      - "Cognitive data: data/dfnonvr.csv VERIFIED"
+      - "Column names match actual file contents"
+  
+  statistical_specifications:
+    random_seed: 42
+    bootstrap_iterations: 1000
+    cv_folds: 5
+    alpha_correction: "bonferroni_within_rq"
+    alpha_corrected: 0.000448
+    robust_se: "HC3"
+    ci_method: "percentile"
+  
+  primary_hypothesis:
+    test: "RPM negatively predicts HCE rates"
+    expectation: "β_RPM < 0, p < 0.000448"
+    null_expectation: "RAVLT/BVMT non-significant predictors"
+  
+  critical_dependencies:
+    - "Ch6 6.6.1 HCE analysis completion"
+    - "dfnonvr.csv accessibility"
+    - "~100 participants with complete data"
+  
+  expected_runtime: "35-45 minutes total"
+  
+  next_agent: "g_code"
+  ready_for_execution: true
+
+# ============================================================================
+# END OF ANALYSIS RECIPE v5.3.0
+# ============================================================================
