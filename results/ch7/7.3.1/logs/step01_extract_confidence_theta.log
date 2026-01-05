@@ -1,0 +1,18 @@
+[START] Step 01: Extract Confidence Theta
+[LOAD] Loading Ch6 confidence theta data...
+[LOADED] Ch6 theta data (400 rows, 3 cols)
+[INFO] Columns: ['composite_ID', 'theta_All', 'se_All']
+[PROCESS] Extracting UIDs from composite_ID...
+[INFO] Extracted 100 unique UIDs
+[PROCESS] Aggregating theta scores by participant...
+[PROCESSED] Aggregated to 100 participants
+[SAVE] Saving participant-level confidence data...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.3.1/data/step01_confidence_theta.csv (100 rows, 3 cols)
+[SUMMARY] Confidence theta - Mean: -0.633, SD: 0.326, Range: [-1.792, 0.089]
+[VALIDATION] Running custom validation...
+[VALIDATION] Theta range: 100/100 theta scores in range [-3.0, 3.0]
+[VALIDATION] SE range: 100/100 standard errors in range [0.01, 2.0]
+[VALIDATION] Complete cases: 100/100
+[VALIDATION] Sample size appropriate: 100 participants
+[VALIDATION] All validation criteria passed
+[SUCCESS] Step 01 complete

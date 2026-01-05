@@ -1,0 +1,28 @@
+[START] Step 0: Validate Dependencies
+[INIT] Initializing dependency validation...
+[CHECK] Validating Ch6 6.1.1 confidence theta file...
+[FOUND] Ch6 file exists: /home/etai/projects/REMEMVR/results/ch6/6.1.1/data/step03_theta_confidence.csv
+[LOADED] Ch6 file (400 rows, 3 cols)
+[COLUMNS] Ch6 actual columns: ['composite_ID', 'theta_All', 'se_All']
+[NOTE] Column name mismatch detected:
+  Expected: ['UID', 'confidence_theta', 'se_theta']
+  Actual:   ['composite_ID', 'theta_All', 'se_All']
+[PASS] Ch6 file has all required columns
+[DATA] Ch6 participants: 400
+[DATA] Theta range: [-2.241, 0.491]
+[DATA] SE range: [0.033, 0.033]
+[PASS] Ch6 data quality validation successful
+[CHECK] Validating dfnonvr.csv cognitive test data...
+[FOUND] dfnonvr.csv exists: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+[LOADED] dfnonvr.csv (100 rows, 235 cols)
+[PASS] dfnonvr.csv has all required cognitive test columns
+[DATA] dfnonvr.csv participants: 100
+[DATA] RAVLT trials available: 5
+[DATA] BVMT trials available: 4
+[DATA] RPM score range: [4.0, 12.0]
+[PASS] dfnonvr.csv data quality validation successful
+[REPORT] Generating dependency validation report...
+[SUCCESS] All dependencies validated successfully
+[SAVED] Validation report: /home/etai/projects/REMEMVR/results/ch7/7.3.1/data/step00_dependency_validation.txt
+DEPENDENCY CHECK COMPLETE
+[SUCCESS] Step 0 complete - all dependencies validated

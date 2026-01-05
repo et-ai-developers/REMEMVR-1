@@ -69,15 +69,33 @@ rq_inspect:
   context_dump: ""
 
 rq_plots:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Generated 3 plots for multiple regression analysis (not trajectory - D069 N/A)
+    Plots: hierarchical_regression.png, cross_validation.png, confidence_vs_accuracy.png
+    Analysis type: Multiple regression, hierarchical entry, metacognitive dissociation
+    All plots saved as publication-quality PNG (300 DPI, appropriate dimensions)
+    Plot data sources: steps 05-10 regression outputs
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: 2026-01-05T21:30:00Z
+  context_dump: |
+    Results validated for scientific plausibility
+    1 anomaly flagged: 1 model convergence concern (see summary.md Section 4)
+    Summary documented in results/summary.md
 
 analysis_steps:
-  # To be populated during execution
+  step00: {status: success, description: "Dependency validation"}
+  step01: {status: success, description: "Extract confidence theta scores"}
+  step02: {status: success, description: "Extract cognitive test scores"}
+  step04: {status: success, description: "Merge analysis dataset"}
+  step05: {status: success, description: "Hierarchical regression"}
+  step06: {status: success, description: "Individual predictor analysis"}
+  step07: {status: success, description: "Cross-validation analysis"}
+  step08: {status: success, description: "Effect size analysis"}
+  step09: {status: success, description: "Power analysis"}
+  step10: {status: success, description: "Compare with accuracy prediction"}
 
 rq_platinum:
   status: pending

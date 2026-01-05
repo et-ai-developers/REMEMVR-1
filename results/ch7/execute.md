@@ -36,6 +36,11 @@
 - If analysis needs 20 steps: Do all 20 steps properly
 - Scientific integrity >> Speed (ALWAYS, NO EXCEPTIONS)
 
+**🧠 ANTI-RUSH MECHANISM:**
+Between EVERY step of analysis, you MUST stop and recite the Scientific Mantra (see Step 5h in EXECUTION FLOW).
+This is MANDATORY - no exceptions. If you find yourself saying "time constraints", "let me quickly", 
+"simplified version", or "efficiently" - STOP immediately and recite the mantra.
+
 ---
 
 ## 📚 CRITICAL DATA SOURCES (MANDATORY READING)
@@ -106,7 +111,25 @@
    d. Run code, debug until output is statistically valid
    e. AFTER running: Verify output makes theoretical sense
    f. If new bug found: ADD TO gcode_lessons.md immediately
-   g. Mark step complete, proceed to next
+   g. Mark step complete in TodoWrite
+   h. **MANDATORY CHECKPOINT - State aloud:**
+      ```
+      Completed: Step [X] ([description])
+      Next: Step [X+1] ([description])
+      
+      🧠 SCIENTIFIC MANTRA:
+      "I am not rushing. I have infinite time. 
+      No guesses or assumptions.
+      I am a scientist so I must think like a scientist.
+      I will read the actual data and reports, not assume what they contain.
+      Shortcuts create more work, not less.
+      If something seems missing, I will ask, not improvise.
+      Every decision needs scientific justification.
+      Continue with full rigor."
+      
+      Proceeding with Step [X+1]...
+      ```
+   i. Only after stating the mantra, proceed to next step
    
 6. POST-EXECUTION VALIDATION: 
    rq_inspect → rq_plots → rq_results → rq_validate

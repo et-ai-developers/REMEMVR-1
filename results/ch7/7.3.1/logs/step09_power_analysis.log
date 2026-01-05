@@ -1,0 +1,33 @@
+[START] Step 09: Power Analysis
+[INFO] Purpose: Post-hoc power and sensitivity analysis
+[LOAD] Loading effect size results...
+[LOADED] Effect sizes: 4 effects
+[LOAD] Loading analysis dataset for sample size...
+[INFO] Sample size: N=100
+[INFO] Number of predictors: k=6
+[INFO] Degrees of freedom: (6, 93)
+[PARAMS] Alpha (uncorrected): 0.0500
+[PARAMS] Alpha (Bonferroni): 0.000597
+[PARAMS] Target power: 0.80
+[POWER] Computing post-hoc power for observed effects...
+[POWER] Overall model: f²=0.2308, power=0.957
+[POWER] RAVLT_T: f²=0.0030, power=0.002 (alpha=0.000597)
+[POWER] BVMT_T: f²=0.0589, power=0.140 (alpha=0.000597)
+[POWER] RPM_T: f²=0.0521, power=0.112 (alpha=0.000597)
+[SENSITIVITY] Computing minimum detectable effects at 80% power...
+[SENSITIVITY] Overall model: min f²=0.1456 at 80% power (alpha=0.0500)
+[SENSITIVITY] RAVLT_T: min f²=0.1943 at 80% power (alpha=0.000597)
+[SENSITIVITY] BVMT_T: min f²=0.1943 at 80% power (alpha=0.000597)
+[SENSITIVITY] RPM_T: min f²=0.1943 at 80% power (alpha=0.000597)
+[ADEQUACY] Checking power adequacy...
+[ADEQUATE] Overall_Model: power=0.957 ≥ 0.80
+[UNDERPOWERED] RAVLT_T: power=0.002 < 0.80
+[UNDERPOWERED] BVMT_T: power=0.140 < 0.80
+[UNDERPOWERED] RPM_T: power=0.112 < 0.80
+[SAMPLE SIZE] Computing required N for 80% power...
+[SAMPLE SIZE] Overall model: N≈63 needed for 80% power
+[SAMPLE SIZE] BVMT_T: N≈329 needed for 80% power at α=0.000597
+[SAVED] Power analysis: /home/etai/projects/REMEMVR/results/ch7/7.3.1/data/step09_power_analysis.csv
+[VALIDATION] Checking power analysis validity...
+[VALIDATION] Power analysis PASSED all checks
+[SUCCESS] Step 09 complete

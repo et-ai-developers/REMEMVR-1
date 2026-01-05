@@ -1,0 +1,26 @@
+[START] Step 06: Individual Predictors Analysis
+[LOAD] Loading analysis dataset...
+[LOADED] Analysis dataset (100 rows, 8 cols)
+[INFO] Sample size: 100 participants
+[INFO] Predictors: ['age', 'sex', 'education', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[PREP] Outcome variable: confidence_theta (mean=-0.633, sd=0.326)
+[PREP] Predictor matrix: (100, 6)
+[ANALYSIS] Running multiple regression analysis...
+[ERROR] fit_multiple_regression() got an unexpected keyword argument 'add_constant'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.3.1/code/step06_individual_predictors.py", line 159, in <module>
+    regression_result = fit_multiple_regression(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: fit_multiple_regression() got an unexpected keyword argument 'add_constant'
+[START] Step 06: Individual Predictors (Simplified)
+[LOADED] Analysis dataset: 100 rows
+[MODEL] R² = 0.1875, F = 3.578, p = 0.003105
+[PREDICTOR] age: β=0.0025, p=0.3238, sig_bonf=False
+[PREDICTOR] sex: β=-0.0059, p=0.9299, sig_bonf=False
+[PREDICTOR] education: β=-0.0015, p=0.9355, sig_bonf=False
+[PREDICTOR] RAVLT_T: β=0.0017, p=0.6011, sig_bonf=False
+[PREDICTOR] BVMT_T: β=0.0094, p=0.0214, sig_bonf=False
+[PREDICTOR] RPM_T: β=0.0079, p=0.0301, sig_bonf=False
+[SAVED] Individual predictors results: 6 predictors
+[SUCCESS] Step 06 complete

@@ -1,0 +1,22 @@
+[START] Step 04: Merge Analysis Dataset
+[LOAD] Loading confidence theta scores...
+[LOADED] step01_confidence_theta.csv (100 rows, 3 cols)
+[LOAD] Loading cognitive test scores...
+[LOADED] step02_cognitive_tests.csv (100 rows, 7 cols)
+[ANALYSIS] Running pd.merge for inner join on UID...
+[MERGE] Inner join complete: 100 participants with complete data
+[DROP] Removed se_theta column (not needed for regression)
+[CLEAN] No missing values found - dataset is complete
+[DONE] Analysis complete
+[SAVE] Saving step04_analysis_dataset.csv...
+[SAVED] step04_analysis_dataset.csv (100 rows, 8 cols)
+[SUMMARY] Final dataset columns: ['UID', 'confidence_theta', 'RAVLT_T', 'BVMT_T', 'RPM_T', 'age', 'sex', 'education']
+[SUMMARY] Sample size: 100 participants
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] Dataset structure validation PASSED
+[VALIDATION] row_count_valid: PASS
+[VALIDATION] actual_rows: PASS
+[VALIDATION] columns_valid: PASS
+[VALIDATION] missing_columns: FAIL
+[VALIDATION] types_valid: PASS
+[SUCCESS] Step 04 complete

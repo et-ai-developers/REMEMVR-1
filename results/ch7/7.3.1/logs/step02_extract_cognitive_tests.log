@@ -1,0 +1,37 @@
+[START] Step 02: Extract Cognitive Tests
+[LOAD] Loading dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 rows, 235 cols)
+[VALIDATED] All 14 required columns present
+[ANALYSIS] Extracting cognitive test raw totals...
+[EXTRACT] Starting cognitive test extraction...
+[COMPUTED] RAVLT_total from 5 trials
+[COMPUTED] BVMT_total from 3 trials
+[COMPUTED] RPM_total from rpm-score
+[EXTRACTED] Demographics: age
+[EXTRACTED] Demographics: sex
+[EXTRACTED] Demographics: education
+[COMPLETE] Extracted data for 100 participants
+[DONE] Cognitive test extraction complete
+[RAW STATS] RAVLT_total: M=50.60, SD=8.42, N=100
+[RAW STATS] BVMT_total: M=28.22, SD=5.06, N=100
+[RAW STATS] RPM_total: M=9.87, SD=1.93, N=100
+[ANALYSIS] Converting to T-scores (M=50, SD=10)...
+[T-SCORE] Converting 3 measures to T-scores...
+[T-SCORE] RAVLT: Raw M=50.60, SD=8.42
+[T-SCORE] RAVLT: T-score M=50.00, SD=10.00
+[T-SCORE] BVMT: Raw M=28.22, SD=5.06
+[T-SCORE] BVMT: T-score M=50.00, SD=10.00
+[T-SCORE] RPM: Raw M=9.87, SD=1.93
+[T-SCORE] RPM: T-score M=50.00, SD=10.00
+[DONE] T-score conversion complete
+[SAVE] Saving cognitive tests with T-scores...
+[EXCLUSION] Dropped 0 participants with missing T-scores (0.0%)
+[SAVED] step02_cognitive_tests.csv (100 rows, 7 cols)
+[VALIDATION] Running T-score validation...
+[VALIDATION] Validating T-score computation...
+[VALIDATION] T-score validation FAIL: BVMT_T: Range [17.9, 65.4] outside [20, 80]; RPM_T: Range [19.5, 61.1] outside [20, 80]
+[VALIDATION] T-score validation FAIL
+[VALIDATION] BVMT_T: Range [17.9, 65.4] outside [20, 80]
+[VALIDATION] RPM_T: Range [19.5, 61.1] outside [20, 80]
+[VALIDATION] Sample size criterion met: N=100 >= 95
+[SUCCESS] Step 02 complete

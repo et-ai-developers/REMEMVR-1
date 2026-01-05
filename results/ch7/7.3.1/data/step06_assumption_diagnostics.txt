@@ -1,0 +1,22 @@
+Regression Assumption Diagnostics
+==================================================
+
+Sample size: 100
+R-squared: 0.1875
+F-statistic: 3.578 (p=0.003105)
+
+VIF Values:
+  age: 1.453
+  sex: 1.038
+  education: 1.041
+  RAVLT_T: 1.198
+  BVMT_T: 1.754
+  RPM_T: 1.377
+
+Significance Summary:
+  age: β=0.0025, p=0.3238 
+  sex: β=-0.0059, p=0.9299 
+  education: β=-0.0015, p=0.9355 
+  RAVLT_T: β=0.0017, p=0.6011 
+  BVMT_T: β=0.0094, p=0.0214 
+  RPM_T: β=0.0079, p=0.0301 
