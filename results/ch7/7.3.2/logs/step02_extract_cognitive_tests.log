@@ -1,0 +1,38 @@
+[START] Step 02: Extract Cognitive Tests
+[LOAD] Loading dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 rows, 235 cols)
+[VERIFIED] All 13 required columns present
+[ANALYSIS] Running extract_cognitive_tests_custom...
+[EXTRACT] Starting custom cognitive test extraction...
+[RAVLT] Extracting columns: ['ravlt-trial-1-score', 'ravlt-trial-2-score', 'ravlt-trial-3-score', 'ravlt-trial-4-score', 'ravlt-trial-5-score']
+[RAVLT] Computed total scores, range: 26.0 to 68.0
+[BVMT] Extracting columns: ['bvmt-trial-1-score', 'bvmt-trial-2-score', 'bvmt-trial-3-score']
+[BVMT] Computed total scores, range: 12.0 to 36.0
+[RPM] Extracting column: rpm-score
+[RPM] Raw scores, range: 4.0 to 12.0
+[DEMOGRAPHICS] Extracting columns: ['age', 'sex', 'education']
+[EXTRACT] Complete: 100 participants, 7 variables
+[DONE] Cognitive test extraction complete
+[T-SCORE] Converting cognitive scores to T-scores (M=50, SD=10)...
+[T-SCORE] Raw: M=50.60, SD=8.42 -> T-score: M=50, SD=10
+[T-SCORE] Range: 20.8 to 70.7
+[T-SCORE] Raw: M=28.22, SD=5.06 -> T-score: M=50, SD=10
+[T-SCORE] Range: 17.9 to 65.4
+[T-SCORE] Raw: M=9.87, SD=1.93 -> T-score: M=50, SD=10
+[T-SCORE] Range: 19.5 to 61.1
+[T-SCORE] Conversion complete
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.3.2/data/step02_cognitive_tests.csv...
+[SAVED] step02_cognitive_tests.csv (100 rows, 7 cols)
+[VALIDATION] Running validate_numeric_range_custom...
+[VALIDATION] RAVLT_T: RAVLT_T: 100/100 valid, range [20.8, 70.7]
+[VALIDATION] BVMT_T: BVMT_T: 100/100 valid, range [17.9, 65.4], 1 out of range [20, 80]
+[VALIDATION] RPM_T: RPM_T: 100/100 valid, range [19.5, 61.1], 1 out of range [20, 80]
+[VALIDATION] FAIL - Issues with: ['BVMT_T', 'RPM_T']
+[VALIDATION] BVMT_T out-of-range values: [17.93456496986795]
+[VALIDATION] RPM_T out-of-range values: [19.525308178220932]
+[SUMMARY] Final dataset summary:
+[SUMMARY] Participants: 100
+[SUMMARY] RAVLT_T: M=50.0, SD=10.0
+[SUMMARY] BVMT_T: M=50.0, SD=10.0
+[SUMMARY] RPM_T: M=50.0, SD=10.0
+[SUCCESS] Step 02 complete

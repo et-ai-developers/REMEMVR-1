@@ -1,0 +1,52 @@
+[START] Step 03: merge_and_check_assumptions
+[LOAD] Loading calibration metrics from step01...
+[LOADED] step01_calibration_metrics.csv (100 rows, 2 cols)
+[INFO] Calibration metrics columns: ['UID', 'calibration_quality']
+[LOAD] Loading cognitive test data from step02...
+[LOADED] step02_cognitive_tests.csv (100 rows, 7 cols)
+[INFO] Cognitive test columns: ['UID', 'RAVLT_T', 'BVMT_T', 'RPM_T', 'age', 'sex', 'education']
+[MERGE] Merging calibration and cognitive data on UID...
+[INFO] Calibration UIDs: 100
+[INFO] Cognitive test UIDs: 100
+[INFO] Overlapping UIDs: 100
+[MERGED] Analysis dataset created (100 rows, 8 cols)
+[INFO] Final columns: ['UID', 'calibration_quality', 'RAVLT_T', 'BVMT_T', 'RPM_T', 'age', 'sex', 'education']
+[INFO] No missing data in merged dataset
+[SAVE] Saving analysis dataset to /home/etai/projects/REMEMVR/results/ch7/7.3.2/data/step03_analysis_dataset.csv...
+[SAVED] step03_analysis_dataset.csv (100 rows, 8 cols)
+[ASSUMPTIONS] Running preliminary assumption checks...
+[TEST] Checking normality of calibration_quality...
+[RESULT] Shapiro_Wilk_calibration_quality: NORMAL (p=0.0793)
+[TEST] Checking normality of RAVLT_T...
+[RESULT] Shapiro_Wilk_RAVLT_T: NORMAL (p=0.0538)
+[TEST] Checking normality of BVMT_T...
+[RESULT] Shapiro_Wilk_BVMT_T: NON_NORMAL (p=0.0001)
+[TEST] Checking normality of RPM_T...
+[RESULT] Shapiro_Wilk_RPM_T: NON_NORMAL (p=0.0000)
+[TEST] Checking normality of age...
+[RESULT] Shapiro_Wilk_age: NON_NORMAL (p=0.0019)
+[TEST] Checking linearity: RAVLT_T vs calibration_quality...
+[RESULT] Linearity_RAVLT_T_vs_calibration_quality: NON_SIGNIFICANT (r=-0.0765, p=0.4494)
+[TEST] Checking linearity: BVMT_T vs calibration_quality...
+[RESULT] Linearity_BVMT_T_vs_calibration_quality: NON_SIGNIFICANT (r=0.0203, p=0.8413)
+[TEST] Checking linearity: RPM_T vs calibration_quality...
+[RESULT] Linearity_RPM_T_vs_calibration_quality: NON_SIGNIFICANT (r=-0.0822, p=0.4164)
+[SAVE] Saving assumption check results to /home/etai/projects/REMEMVR/results/ch7/7.3.2/data/step03_assumption_checks.csv...
+[SAVED] step03_assumption_checks.csv (8 rows, 4 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] Column validation result:
+  valid: True
+  missing_columns: []
+  existing_columns: ['education', 'RAVLT_T', 'RPM_T', 'age', 'sex', 'BVMT_T', 'calibration_quality', 'UID']
+  n_required: 8
+  n_missing: 0
+[VALIDATION] PASS - All required columns present
+[VALIDATION] Additional data quality checks:
+[PASS] All UIDs are unique
+[PASS] RAVLT_T range reasonable: 20.8 to 70.7 (M=50.0, SD=10.0)
+[PASS] BVMT_T range reasonable: 17.9 to 65.4 (M=50.0, SD=10.0)
+[PASS] RPM_T range reasonable: 19.5 to 61.1 (M=50.0, SD=10.0)
+[SUCCESS] Step 03 complete
+[SUMMARY] Created analysis dataset with 100 participants
+[SUMMARY] Ran 8 assumption tests
+[NEXT] Ready for hierarchical regression analysis in step04

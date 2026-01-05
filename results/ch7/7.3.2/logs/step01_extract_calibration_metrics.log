@@ -1,0 +1,43 @@
+[START] Step 01: Extract Calibration Metrics
+[DISCOVER] Searching for Ch6 calibration data...
+[FOUND] Ch6 calibration source: /home/etai/projects/REMEMVR/results/ch6/6.2.1/data/step07_calibration_trajectory_theta_data_SEM.csv
+[LOAD] Loading Ch6 calibration data...
+[LOADED] /home/etai/projects/REMEMVR/results/ch6/6.2.1/data/step07_calibration_trajectory_theta_data_SEM.csv (4 rows, 5 cols)
+[COLUMNS] Available columns: ['time', 'calibration', 'CI_lower', 'CI_upper', 'test']
+[INFO] Required 'calibration' column not found, but found calibration metrics: ['calibration']
+[INFO] Using 'calibration' as calibration metric
+[ANALYSIS] Aggregating calibration scores by participant...
+[ERROR] 'UID'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.3.2/code/step01_extract_calibration_metrics.py", line 185, in <module>
+    df_calibration_agg = df_calibration.groupby('UID')[calibration_col].agg(['mean', 'count']).reset_index()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 9210, in groupby
+    return DataFrameGroupBy(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/groupby/groupby.py", line 1331, in __init__
+    grouper, exclusions, obj = get_grouper(
+                               ^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/groupby/grouper.py", line 1043, in get_grouper
+    raise KeyError(gpr)
+KeyError: 'UID'
+[START] Step 01: Extract Calibration Metrics
+[DISCOVER] Searching for Ch6 calibration data...
+[FOUND] Ch6 calibration source: /home/etai/projects/REMEMVR/results/ch6/6.2.1/data/step02_calibration_scores.csv
+[LOAD] Loading Ch6 calibration data...
+[LOADED] /home/etai/projects/REMEMVR/results/ch6/6.2.1/data/step02_calibration_scores.csv (400 rows, 7 cols)
+[COLUMNS] Available columns: ['UID', 'test', 'composite_ID', 'TSVR_hours', 'z_theta_accuracy', 'z_theta_confidence', 'calibration']
+[ANALYSIS] Aggregating calibration scores by participant...
+[AGGREGATED] 100 participants
+[STATS] Mean calibration quality: -0.000
+[STATS] Tests per participant - Min: 4, Max: 4
+[SAVE] Saving calibration metrics to /home/etai/projects/REMEMVR/results/ch7/7.3.2/data/step01_calibration_metrics.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.3.2/data/step01_calibration_metrics.csv (100 rows, 2 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['calibration_quality', 'UID']
+[VALIDATION] n_required: 2
+[VALIDATION] n_missing: 0
+[SUCCESS] Step 01 complete - calibration metrics extracted and validated

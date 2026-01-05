@@ -1,0 +1,4 @@
+test,statistic,p_value,threshold,result,remedial_action
+Normality (Shapiro-Wilk),0.9803652129355025,0.1419174177984635,0.05,PASS,None needed
+Independence (Durbin-Watson),2.048074045893397,,"Range [1.5, 2.5]",PASS,None needed
+Multicollinearity (VIF),1.7539013643972017,,5.0,PASS,None needed

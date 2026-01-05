@@ -1,0 +1,9 @@
+[START] Step 08: Effect Sizes
+[LOAD] Loading regression results...
+[ANALYSIS] Computing effect sizes...
+[SAVE] Saving effect size results...
+[SAVED] step08_effect_sizes.csv (6 predictors)
+[SAVED] step08_effect_summary.csv
+[INFO] Overall R² = 0.0238, f² = 0.0244
+[INFO] Predictors with at least small effect: 0/6
+[SUCCESS] Step 08 complete

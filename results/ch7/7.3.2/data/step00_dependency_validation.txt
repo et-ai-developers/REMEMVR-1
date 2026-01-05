@@ -1,0 +1,20 @@
+=== RQ 7.3.2 DEPENDENCY VALIDATION ===
+Generated: 2026-01-05 21:49:24.160249
+RQ Directory: /home/etai/projects/REMEMVR/results/ch7/7.3.2
+Project Root: /home/etai/projects/REMEMVR
+
+Ch6 calibration source: /home/etai/projects/REMEMVR/results/ch6/6.2.1/data/step07_calibration_trajectory_theta_data_SEM.csv
+dfnonvr.csv: ACCESSIBLE
+Cognitive test columns: VERIFIED
+Dependency validation: PASS
+
+=== DETAILED FINDINGS ===
+Ch6 Data Source: /home/etai/projects/REMEMVR/results/ch6/6.2.1/data/step07_calibration_trajectory_theta_data_SEM.csv
+Ch6 Status: Available for analysis
+dfnonvr.csv Path: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+dfnonvr.csv Status: Accessible
+Available cognitive columns: 176 found
+Cognitive column examples: ['rpm-time', 'rpm-score', 'rpm-tr01-answer', 'rpm-tr02-answer', 'rpm-tr03-answer']
+
+=== NEXT STEPS ===
+Dependencies validated - proceed with Step 01

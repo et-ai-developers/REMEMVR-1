@@ -1,0 +1,28 @@
+[START] Step 04: Hierarchical Regression
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 8 cols)
+[INFO] Dataset shape: (100, 8)
+[INFO] Calibration quality range: -1.969 to 1.818
+[ANALYSIS] Running hierarchical regression...
+[INFO] Analysis sample after removing missing data: 100 participants
+[DONE] Hierarchical regression complete
+[INFO] Demographics R² = 0.0062
+[INFO] Full model R² = 0.0238
+[INFO] ΔR² = 0.0176, p = 0.6478
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[DONE] Bootstrap confidence intervals computed
+[EXTRACT] Extracting regression coefficients with dual p-values...
+[DONE] Regression results extracted with dual p-values
+[SAVE] Saving regression results...
+[SAVED] step04_regression_results.csv (6 rows, 10 cols)
+[SAVED] step04_model_comparison.csv (2 rows, 8 cols)
+[VALIDATION] Running bootstrap stability validation...
+[VALIDATION] Overall bootstrap stability: False
+[VALIDATION] Stable features: 0/6
+[VALIDATION] age: Jaccard=0.193, Sign=0.783, Stable=False
+[VALIDATION] sex: Jaccard=0.000, Sign=0.622, Stable=False
+[VALIDATION] education: Jaccard=0.000, Sign=0.575, Stable=False
+[VALIDATION] RAVLT_T: Jaccard=0.000, Sign=0.705, Stable=False
+[VALIDATION] BVMT_T: Jaccard=0.374, Sign=0.865, Stable=False
+[VALIDATION] RPM_T: Jaccard=0.388, Sign=0.851, Stable=False
+[SUCCESS] Step 04 complete

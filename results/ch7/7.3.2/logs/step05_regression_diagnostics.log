@@ -1,0 +1,27 @@
+[START] Step 05: Regression Diagnostics
+[LOAD] Loading regression results and analysis dataset...
+[LOADED] step04_regression_results.csv (6 rows)
+[LOADED] step03_analysis_dataset.csv (100 rows, 8 cols)
+[INFO] Predictor variables: ['age', 'sex', 'education', 'RAVLT_T', 'BVMT_T', 'RPM_T']
+[INFO] Dependent variable: calibration_quality
+[ANALYSIS] Computing regression diagnostics...
+[DONE] Regression diagnostics computed
+[INFO] Model R² = 0.0238
+[INFO] Condition number = 1025.62
+[INFO] High VIF predictors: 0/6
+[INFO] Outlier observations: 17/100
+[VALIDATION] Validating regression assumptions...
+[WARNING] Breusch-Pagan test failed: The Breusch-Pagan test requires exog to have at least two columns where one is a constant.
+[DONE] Assumption validation complete
+[VALIDATION] Normality (Shapiro-Wilk): PASS (p = 0.1419)
+[VALIDATION] Independence (Durbin-Watson): PASS (statistic = 2.048)
+[VALIDATION] Multicollinearity (VIF): PASS (statistic = 1.754)
+[SAVE] Saving diagnostic results...
+[SAVED] step05_diagnostics.csv (3 rows, 6 cols)
+[SAVED] step05_outliers.csv (100 rows, 5 cols)
+[VALIDATION] Overall regression model assessment...
+[VALIDATION] Failed assumptions: 0/3
+[VALIDATION] Outlier observations: 17/100 (17.0%)
+[VALIDATION] Overall model quality: MODERATE
+[RECOMMENDATION] Consider minor adjustments: robust standard errors, outlier investigation
+[SUCCESS] Step 05 complete

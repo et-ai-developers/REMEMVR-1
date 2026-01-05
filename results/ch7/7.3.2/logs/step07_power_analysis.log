@@ -1,0 +1,36 @@
+[START] Step 07: Power Analysis
+[LOAD] Loading cross-validation and regression results...
+[LOADED] step06_cross_validation.csv (5 rows)
+[LOADED] step04_regression_results.csv (6 rows)
+[INFO] Mean test R² from CV: -0.1505
+[INFO] Approximate sample size: 100
+[INFO] Number of predictors: 6
+[ANALYSIS] Computing post-hoc power analysis...
+[INFO] Overall model power: 0.000
+[INFO] Overall model f²: -0.131 (negligible)
+[DONE] Power analysis complete
+[ANALYSIS] Interpreting individual predictor effect sizes...
+[INFO] age: sr²=0.0000, f²=0.0000 (negligible), practical=negligible
+[INFO] sex: sr²=0.0000, f²=0.0000 (negligible), practical=negligible
+[INFO] education: sr²=0.0000, f²=0.0000 (negligible), practical=negligible
+[INFO] RAVLT_T: sr²=0.0000, f²=0.0000 (negligible), practical=negligible
+[INFO] BVMT_T: sr²=0.0000, f²=0.0000 (negligible), practical=negligible
+[INFO] RPM_T: sr²=0.0000, f²=0.0000 (negligible), practical=negligible
+[DONE] Effect size interpretation complete
+[COMPARISON] Looking for RQ 7.1.1 comparison data...
+[INFO] Found comparison file: /home/etai/projects/REMEMVR/results/ch7/7.1.1/data/step04_regression_diagnostics.csv
+[COMPARISON] No R² data found in comparison file
+[SAVE] Saving power analysis results...
+[SAVED] step07_power_analysis.csv (1 rows, 8 cols)
+[SAVED] step07_effect_sizes.csv (6 rows, 5 cols)
+[VALIDATION] Running numeric range validation...
+[VALIDATION] All metrics in expected ranges: False
+[VALIDATION] power: PASS - 1/1 values in range [0, 1]
+[VALIDATION] f2: FAIL - 0/1 values in range [0, 10]
+[VALIDATION] r2: FAIL - 0/1 values in range [0, 1]
+[SUMMARY] Final power and effect size assessment...
+[SUMMARY] Overall model power: 0.000 (inadequate for α = 0.000597)
+[SUMMARY] Overall effect size: f² = -0.131 (negligible)
+[SUMMARY] Strong individual effects: 0/6 predictors
+[SUMMARY] Study may be underpowered - consider larger sample size for future research
+[SUCCESS] Step 07 complete
