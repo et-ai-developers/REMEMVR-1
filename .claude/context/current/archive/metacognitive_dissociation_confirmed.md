@@ -168,4 +168,61 @@
 
 ---
 
+## RQ 7.3.1 Supporting Evidence (2026-01-05 21:30)
+
+**Archived from:** state.md
+**Original Date:** 2026-01-05 21:30
+**Reason:** Supporting evidence for metacognitive dissociation hypothesis
+
+**Context:** RQ 7.3.1 tested whether cognitive tests predict confidence, providing the baseline comparison for the metacognitive dissociation hypothesis that was confirmed in 7.3.2.
+
+---
+
+### Scientific Findings from RQ 7.3.1
+
+**Core Result:** Cognitive tests predict confidence (R²=0.188) significantly MORE WEAKLY than accuracy (R²=0.226)
+
+**Hierarchical Regression:**
+- Demographics only: R² = 0.020 (non-significant, p=0.577)
+- Demographics + Cognitive: R² = 0.188 (significant, p=0.003)
+- Incremental validity: ΔR² = 0.167 (p < 0.001)
+- Cohen's f² = 0.231 (medium-large effect)
+
+**Individual Predictors (none survive Bonferroni α=0.000597):**
+- BVMT (visuospatial): β = 0.0094, p = 0.021, sr² = 0.048
+- RPM (fluid intelligence): β = 0.0079, p = 0.030, sr² = 0.042
+- RAVLT (verbal memory): β = 0.0017, p = 0.601, sr² = 0.002
+
+**Metacognitive Dissociation Evidence:**
+1. Overall R² lower for confidence vs accuracy
+2. RPM predicts confidence more weakly (sr²=0.042 vs 0.080)
+3. BVMT shows different pattern (stronger for confidence)
+4. Supports hypothesis: confidence involves distinct cognitive processes
+
+**Limitations Honestly Reported:**
+- Cross-validation reveals overfitting (test R² negative)
+- Individual tests underpowered after correction
+- Sample size adequate for overall but not individual effects
+
+---
+
+### Combined Evidence Across RQs 7.3.1 and 7.3.2
+
+**Metacognitive Hierarchy:**
+1. **Memory Accuracy** (baseline): Most predictable by cognitive tests
+2. **Confidence Levels**: Moderately predictable (R² = 0.188)
+3. **Calibration Quality**: Essentially unpredictable (R² = 0.024)
+
+**Progressive Dissociation Pattern:**
+- Accuracy → Confidence: 17% reduction in predictability
+- Confidence → Calibration: 87% reduction in predictability
+- Accuracy → Calibration: 89% total reduction in predictability
+
+**Theoretical Framework:**
+- **Level 1**: Memory encoding/retrieval (cognitive test domain)
+- **Level 2**: Confidence generation (partially cognitive)
+- **Level 3**: Metacognitive monitoring (distinct process)
+
+---
+
 **End of Metacognitive Dissociation Archive**

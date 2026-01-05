@@ -1,37 +1,49 @@
 {
   "status": "success",
-  "state_md_tokens": 19295,
-  "tokens_archived": 14353,
+  "timestamp": "2026-01-05 23:35",
+  "state_md_tokens": 5000,
+  "state_md_characters": 18568,
+  "tokens_archived": 2500,
   "topics_updated": [
-    "data_dictionary_creation", 
-    "ch7_data_integrity_complete",
-    "rq_analysis_v5_3_verified", 
+    "anti_rushing_protocols_implemented",
+    "metacognitive_dissociation_confirmed", 
+    "ch7_execution_underway"
+  ],
+  "archive_index_updated": true,
+  "entries_archived": 1,
+  "session_archived": "2026-01-05 21:30",
+  "sessions_preserved": [
+    "2026-01-05 22:45",
+    "2026-01-05 23:30"
+  ],
+  "curation_summary": {
+    "action": "Archived Session (2026-01-05 21:30) - 3rd most recent session",
+    "content_archival": {
+      "anti_rushing_protocols": "Scientific Mantra implementation details preserved",
+      "rq_731_findings": "Metacognitive dissociation evidence added to confirmed archive",
+      "execution_progress": "RQ 7.3.1 completion details added to underway archive"
+    },
+    "structure_maintained": {
+      "last_2_sessions_preserved": true,
+      "active_topics_updated": true,
+      "cross_chapter_schema_preserved": true
+    }
+  },
+  "active_topics_final": [
+    "hce_unpredictable",
+    "metacognitive_independence", 
+    "severe_overfitting_ch7",
+    "power_crisis_ch7",
+    "hce_measurement_anomaly",
+    "ch7_execution_underway",
     "anti_rushing_protocols_implemented",
     "metacognitive_dissociation_confirmed"
   ],
-  "archive_index_updated": true,
-  "entries_archived": 5,
   "errors": [],
-  "curation_details": {
-    "original_tokens": 33648,
-    "final_tokens": 19295,
-    "reduction": 14353,
-    "sessions_archived": [
-      "Session 2026-01-05 19:00 - Ch7 data integrity fixes",
-      "Session 2026-01-05 20:30 - Ch7 analysis.yaml creation"
-    ],
-    "sessions_preserved": [
-      "Session 2026-01-05 21:30 - RQ 7.3.1 + anti-rushing protocols",
-      "Session 2026-01-05 22:45 - RQ 7.3.2 + metacognitive dissociation"
-    ],
-    "new_topics_created": [
-      "ch7_data_integrity_complete",
-      "rq_analysis_v5_3_verified", 
-      "anti_rushing_protocols_implemented",
-      "metacognitive_dissociation_confirmed"
-    ],
-    "existing_topics_updated": [
-      "data_dictionary_creation"
-    ]
+  "quality_metrics": {
+    "token_reduction": "25,380 → 18,568 characters (~27% reduction)",
+    "sessions_structure": "Correct sliding window maintained",
+    "archival_completeness": "100% - all session content preserved in archives",
+    "active_topics_alignment": "100% - matches user requirements"
   }
 }
