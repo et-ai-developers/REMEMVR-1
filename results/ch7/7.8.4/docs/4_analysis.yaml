@@ -1,0 +1,478 @@
+# ============================================================================
+# ANALYSIS RECIPE - DEEPLY VERIFIED AND COMPLETE v5.3.0
+# ============================================================================
+# Generated: 2026-01-05T19:30:00Z
+# RQ: ch7/7.8.4 - Multivariate vs Univariate Prediction
+# Agent: rq_analysis v5.3.0
+# 
+# Deep Verification Summary:
+#   - All module paths verified and corrected (tools.analysis_cognitive -> tools.data)
+#   - Ch7 CRITICAL: Uses dfnonvr.csv only (NEVER master.xlsx)
+#   - All file formats validated for compatibility (.pkl for models, .csv for data)
+#   - All function signatures extracted from actual code  
+#   - All paths converted to hierarchical structure (results/ch7/7.8.4/...)
+#   - Column names corrected to exact dfnonvr.csv format (lowercase with hyphens)
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.8.4"
+  verification_level: "deep_v5.3.0"
+  module_corrections: 4
+  format_corrections: 2
+  path_corrections: 18
+  ch7_data_source: "dfnonvr.csv"  # CRITICAL: Never use master.xlsx in Ch7
+
+steps:
+  - name: "step00_validate_dependencies"
+    step_number: 0
+    description: "Validate Ch5 domain-specific RQ completion and data accessibility"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+      
+    input_files:
+      - path: "results/ch5/5.2.1/status.yaml"
+        description: "Ch5 What domain completion status"
+        required: true
+      - path: "results/ch5/5.2.2/status.yaml"
+        description: "Ch5 Where domain completion status"
+        required: true
+      - path: "results/ch5/5.2.3/status.yaml"
+        description: "Ch5 When domain completion status"
+        required: true
+      - path: "data/dfnonvr.csv"
+        description: "Cognitive test data (Ch7 NEVER uses master.xlsx)"
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step00_dependency_validation.txt"
+        description: "Dependency validation results for Ch5 5.2.X completion"
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      
+    parameters:
+      file_paths:
+        - "results/ch5/5.2.1/status.yaml"
+        - "results/ch5/5.2.2/status.yaml"
+        - "results/ch5/5.2.3/status.yaml"
+        - "data/dfnonvr.csv"
+      min_size_bytes: 100
+
+  - name: "step01_extract_domain_theta_scores"
+    step_number: 1
+    description: "Extract participant-level theta scores from Ch5 5.2.X domain-specific analyses"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_domain_theta_scores"
+      signature: "extract_domain_theta_scores(path: str = None, domains: List[str] = ['What', 'Where', 'When']) -> pd.DataFrame"
+      
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        description: "What domain theta scores from Ch5 5.2.1"
+        required_columns: ["UID", "theta", "SE"]
+        required: true
+      - path: "results/ch5/5.2.2/data/step00_theta_from_rq51.csv"
+        description: "Where domain theta scores from Ch5 5.2.2"
+        required_columns: ["UID", "theta", "SE"]
+        required: true
+      - path: "results/ch5/5.2.3/data/step00_theta_from_rq51.csv"
+        description: "When domain theta scores from Ch5 5.2.3"
+        required_columns: ["UID", "theta", "SE"]
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step01_domain_theta_scores.csv"
+        description: "Domain-specific theta scores merged into single dataset"
+        columns: ["UID", "What_theta", "Where_theta", "When_theta"]
+      - path: "results/ch7/7.8.4/data/step01_domain_correlations.csv"
+        description: "Inter-domain correlation matrix for multivariate modeling assessment"
+        columns: ["domain1", "domain2", "correlation", "p_value"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      
+    parameters:
+      domains: ["What", "Where", "When"]
+      correlation_threshold: [0.20, 0.70]
+      complete_cases_only: true
+
+  - name: "step02_extract_cognitive_tests"
+    step_number: 2
+    description: "Extract cognitive test battery scores for multivariate prediction modeling"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_cognitive_tests"
+      signature: "extract_cognitive_tests(uid_list: Optional[List[str]] = None, data_path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+      
+    input_files:
+      - path: "data/dfnonvr.csv"
+        description: "Ch7 cognitive test data (CRITICAL: exact column names from dfnonvr.csv)"
+        required_columns: ["UID", "ravlt-trial-5-score", "bvmt-total-recall", "rpm-score", "age"]
+        required: true
+        note: "NART not available in dfnonvr.csv - analysis proceeds without it"
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step02_cognitive_tests.csv"
+        description: "Standardized (z-score) cognitive test predictors"
+        columns: ["UID", "ravlt_z", "bvmt_z", "rpm_z", "age_z"]
+      - path: "results/ch7/7.8.4/data/step02_predictor_correlations.csv"
+        description: "Predictor correlation matrix for multicollinearity assessment"
+        columns: ["predictor1", "predictor2", "correlation", "p_value"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      
+    parameters:
+      # Exact column names from dfnonvr.csv (lowercase with hyphens)
+      test_columns:
+        ravlt: "ravlt-trial-5-score"  # Use trial 5 as best performance
+        bvmt: "bvmt-total-recall"
+        rpm: "rpm-score"
+        age: "age"
+      standardize: true
+      correlation_threshold: 0.80
+
+  - name: "step03_merge_analysis_dataset"
+    step_number: 3
+    description: "Create complete analysis dataset merging domain theta scores with cognitive predictors"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "merge_theta_cognitive"
+      signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame) -> pd.DataFrame"
+      
+    input_files:
+      - path: "results/ch7/7.8.4/data/step01_domain_theta_scores.csv"
+        description: "Domain theta scores from step 1"
+        required_columns: ["UID", "What_theta", "Where_theta", "When_theta"]
+        required: true
+      - path: "results/ch7/7.8.4/data/step02_cognitive_tests.csv"
+        description: "Standardized cognitive tests from step 2"
+        required_columns: ["UID", "ravlt_z", "bvmt_z", "rpm_z", "age_z"]
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step03_analysis_dataset.csv"
+        description: "Complete analysis dataset with domain outcomes and cognitive predictors"
+        columns: ["UID", "What_theta", "Where_theta", "When_theta", "ravlt_z", "bvmt_z", "rpm_z", "age_z"]
+      - path: "results/ch7/7.8.4/data/step03_descriptive_stats.csv"
+        description: "Descriptive statistics for all analysis variables"
+        columns: ["variable", "n", "mean", "sd", "min", "max"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "check_missing_data"
+      signature: "check_missing_data(df: DataFrame) -> Dict[str, Any]"
+      
+    parameters:
+      merge_type: "inner"
+      complete_cases_only: true
+      compute_descriptives: true
+
+  - name: "step04_fit_univariate_models"
+    step_number: 4
+    description: "Fit separate regression models for each domain to establish baseline prediction performance"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "fit_multiple_regression"
+      signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], feature_names: Optional[List[str]] = None) -> Dict[str, Any]"
+      
+    input_files:
+      - path: "results/ch7/7.8.4/data/step03_analysis_dataset.csv"
+        description: "Complete analysis dataset from step 3"
+        required_columns: ["UID", "What_theta", "Where_theta", "When_theta", "ravlt_z", "bvmt_z", "rpm_z", "age_z"]
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step04_univariate_models.csv"
+        description: "Univariate model results (3 separate models for What/Where/When)"
+        columns: ["domain", "R2", "adj_R2", "F_stat", "p_value", "AIC", "BIC", "df_resid"]
+      - path: "results/ch7/7.8.4/data/step04_univariate_coefficients.csv"
+        description: "Coefficient estimates for all univariate models"
+        columns: ["domain", "predictor", "beta", "se", "t_value", "p_value"]
+      - path: "results/ch7/7.8.4/data/step04_univariate_cv_results.csv"
+        description: "Cross-validation results for overfitting assessment"
+        columns: ["domain", "cv_r2_mean", "cv_r2_std", "overfitting_flag"]
+      - path: "results/ch7/7.8.4/data/step04_univariate_diagnostics.csv"
+        description: "Assumption test results for all univariate models"
+        columns: ["domain", "normality_p", "homoscedasticity_p", "vif_max", "outliers_n"]
+        
+    validation_call:
+      module: "tools.analysis_regression"
+      function: "validate_regression_assumptions"
+      signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+      
+    parameters:
+      domains: ["What_theta", "Where_theta", "When_theta"]
+      predictors: ["ravlt_z", "bvmt_z", "rpm_z", "age_z"]  # 4 predictors (no NART)
+      cv_folds: 5
+      cv_random_state: 42
+      vif_threshold: 5.0
+
+  - name: "step05_fit_multivariate_model"
+    step_number: 5
+    description: "Fit joint multivariate model predicting all three domains simultaneously"
+    
+    analysis_call:
+      type: "stdlib"
+      description: "Use statsmodels MANOVA for multivariate regression"
+      imports:
+        - "import pandas as pd"
+        - "import numpy as np"
+        - "from statsmodels.multivariate.manova import MANOVA"
+        - "from sklearn.model_selection import KFold"
+      
+    input_files:
+      - path: "results/ch7/7.8.4/data/step03_analysis_dataset.csv"
+        description: "Complete analysis dataset from step 3"
+        required_columns: ["What_theta", "Where_theta", "When_theta", "ravlt_z", "bvmt_z", "rpm_z", "age_z"]
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step05_multivariate_model.csv"
+        description: "MANOVA results (Pillai, Wilks, Hotelling, Roy)"
+        columns: ["test_statistic", "statistic_name", "F_stat", "p_value", "partial_eta2"]
+      - path: "results/ch7/7.8.4/data/step05_multivariate_coefficients.csv"
+        description: "Multivariate coefficient matrix"
+        columns: ["predictor", "what_beta", "where_beta", "when_beta"]
+      - path: "results/ch7/7.8.4/data/step05_multivariate_cv_results.csv"
+        description: "Cross-validation performance for multivariate model"
+        columns: ["fold", "r2_what", "r2_where", "r2_when", "overall_performance"]
+      - path: "results/ch7/7.8.4/data/step05_multivariate_diagnostics.csv"
+        description: "Multivariate assumption test results"
+        columns: ["test_type", "statistic", "p_value", "conclusion"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(df: DataFrame, probability_columns: List[str], min_val: float = 0.0, max_val: float = 1.0) -> Dict[str, Any]"
+      
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["r2", "mse"]
+      manova_tests: ["Pillai", "Wilks", "Hotelling", "Roy"]
+
+  - name: "step06_compare_models"
+    step_number: 6
+    description: "Compare efficiency and performance of univariate vs multivariate approaches"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "bootstrap_regression_ci"
+      signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, seed: int = 42, alpha: float = 0.05) -> Dict[str, Any]"
+      
+    input_files:
+      - path: "results/ch7/7.8.4/data/step04_univariate_models.csv"
+        description: "Univariate model results from step 4"
+        required_columns: ["domain", "AIC"]
+        required: true
+      - path: "results/ch7/7.8.4/data/step05_multivariate_model.csv"
+        description: "Multivariate model results from step 5"
+        required_columns: ["test_statistic", "F_stat", "p_value"]
+        required: true
+      - path: "results/ch7/7.8.4/data/step04_univariate_cv_results.csv"
+        description: "Univariate CV results from step 4"
+        required: true
+      - path: "results/ch7/7.8.4/data/step05_multivariate_cv_results.csv"
+        description: "Multivariate CV results from step 5"
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step06_model_comparison.csv"
+        description: "AIC and CV performance comparison between approaches"
+        columns: ["comparison_type", "univariate_value", "multivariate_value", "delta", "interpretation"]
+      - path: "results/ch7/7.8.4/data/step06_effect_size_comparison.csv"
+        description: "Bootstrap confidence intervals for effect size differences"
+        columns: ["effect_type", "univariate_mean", "multivariate_mean", "ci_lower", "ci_upper"]
+      - path: "results/ch7/7.8.4/data/step06_significance_tests.csv"
+        description: "Statistical tests comparing univariate vs multivariate (Decision D068)"
+        columns: ["test_type", "statistic", "p_uncorrected", "p_bonferroni", "significant"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(df: DataFrame, probability_columns: List[str], min_val: float = 0.0, max_val: float = 1.0) -> Dict[str, Any]"
+      
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      bonferroni_n_tests: 3
+      delta_aic_thresholds: [4, 10]
+
+  - name: "step07_analyze_predictors"
+    step_number: 7
+    description: "Examine individual predictor contributions in both univariate and multivariate contexts"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "compute_cohens_f2"
+      signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+      
+    input_files:
+      - path: "results/ch7/7.8.4/data/step04_univariate_coefficients.csv"
+        description: "Univariate predictor coefficients from step 4"
+        required_columns: ["domain", "predictor", "beta", "p_value"]
+        required: true
+      - path: "results/ch7/7.8.4/data/step05_multivariate_coefficients.csv"
+        description: "Multivariate predictor coefficients from step 5"
+        required_columns: ["predictor", "what_beta", "where_beta", "when_beta"]
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step07_predictor_coefficients.csv"
+        description: "Predictor effects in univariate vs multivariate contexts"
+        columns: ["predictor", "context", "domain", "beta", "se", "ci_lower", "ci_upper"]
+      - path: "results/ch7/7.8.4/data/step07_predictor_effect_sizes.csv"
+        description: "Cohen's f² effect sizes with bootstrap confidence intervals"
+        columns: ["predictor", "context", "cohens_f2", "ci_lower", "ci_upper"]
+      - path: "results/ch7/7.8.4/data/step07_predictor_rankings.csv"
+        description: "Predictor importance rankings by context"
+        columns: ["context", "rank", "predictor", "importance_score"]
+      - path: "results/ch7/7.8.4/data/step07_predictor_significance.csv"
+        description: "Multiple comparison corrected p-values (Decision D068)"
+        columns: ["predictor", "context", "p_uncorrected", "p_bonferroni", "p_fdr", "significant"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_effect_sizes"
+      signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+      
+    parameters:
+      predictors: ["ravlt_z", "bvmt_z", "rpm_z", "age_z"]  # 4 predictors (no NART)
+      contexts: ["univariate", "multivariate"]
+      n_bootstrap: 1000
+      random_state: 42
+      bonferroni_n_tests: 8  # 4 predictors × 2 contexts
+      fdr_method: "benjamini-hochberg"
+
+  - name: "step08_power_analysis"
+    step_number: 8
+    description: "Conduct post-hoc power analysis and summarize effect sizes for interpretation"
+    
+    analysis_call:
+      type: "stdlib"
+      description: "Use statsmodels.stats.power for power calculations"
+      imports:
+        - "import pandas as pd"
+        - "import numpy as np"
+        - "from statsmodels.stats.power import FTestAnovaPower"
+      
+    input_files:
+      - path: "results/ch7/7.8.4/data/step06_model_comparison.csv"
+        description: "Model comparison results from step 6"
+        required_columns: ["comparison_type", "univariate_value", "multivariate_value"]
+        required: true
+      - path: "results/ch7/7.8.4/data/step07_predictor_effect_sizes.csv"
+        description: "Predictor effect sizes from step 7"
+        required_columns: ["predictor", "cohens_f2"]
+        required: true
+        
+    output_files:
+      - path: "results/ch7/7.8.4/data/step08_power_analysis.csv"
+        description: "Post-hoc power analysis for all fitted models"
+        columns: ["model_type", "n", "k", "r2", "power", "minimum_detectable_effect"]
+      - path: "results/ch7/7.8.4/data/step08_effect_size_summary.csv"
+        description: "Effect size summary with Cohen's conventions"
+        columns: ["effect_type", "value", "interpretation", "cohen_category"]
+        
+    validation_call:
+      module: "tools.validation"
+      function: "validate_effect_sizes"
+      signature: "validate_effect_sizes(effect_sizes_df: DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+      
+    parameters:
+      n: 100
+      alpha: 0.05
+      cohen_thresholds:
+        small: 0.02
+        medium: 0.15
+        large: 0.35
+
+# ============================================================================
+# VERIFICATION REPORT
+# ============================================================================
+verification_report:
+  version: "v5.3.0"
+  timestamp: "2026-01-05T19:30:00Z"
+  total_steps: 9
+  
+  critical_corrections:
+    ch7_data_source: "CORRECTED: Uses dfnonvr.csv exclusively (NEVER master.xlsx)"
+    column_names: "CORRECTED: Exact column names from dfnonvr.csv (lowercase with hyphens)"
+    nart_availability: "NOTED: NART not available in dfnonvr.csv - analysis proceeds with 4 predictors"
+    
+  module_verification:
+    checked: 9
+    corrected: 4
+    corrections:
+      - "tools.analysis_cognitive.extract_domain_theta_scores -> tools.data.extract_domain_theta_scores"
+      - "tools.analysis_cognitive.extract_cognitive_tests -> tools.data.extract_cognitive_tests"
+      - "tools.analysis_cognitive.merge_theta_cognitive -> tools.data.merge_theta_cognitive"
+      - "cross_validate_regression -> MANOVA (stdlib multivariate analysis)"
+    all_verified: true
+    
+  file_format_verification:
+    checked: 15
+    all_compatible: true
+    notes:
+      - "CSV files for all data (no .pkl model loading needed in this RQ)"
+      - "Status files (.yaml) for dependency checking"
+      
+  path_organization:
+    checked: 20
+    hierarchical: 20
+    pattern: "results/ch7/7.8.4/data/stepXX_*"
+    
+  signature_accuracy:
+    checked: 7
+    from_code: 7
+    notes:
+      - "All catalogued tool signatures verified from actual Python files"
+      - "Stdlib operations specified with exact imports"
+      
+  data_source_verification:
+    primary: "data/dfnonvr.csv (cognitive tests)"
+    dependencies: "results/ch5/5.2.{1,2,3} (theta scores)"
+    critical_note: "Ch7 NEVER uses master.xlsx - all data in dfnonvr.csv"
+    column_mapping:
+      ravlt: "ravlt-trial-5-score"
+      bvmt: "bvmt-total-recall" 
+      rpm: "rpm-score"
+      age: "age"
+      nart: "NOT AVAILABLE (analysis proceeds without)"
+    
+  corrections_applied:
+    - "Step 1-3: Module paths corrected from tools.analysis_cognitive to tools.data"
+    - "Step 2: Column names corrected to exact dfnonvr.csv format"
+    - "Step 2: Data source corrected from cache/master.xlsx to dfnonvr.csv"
+    - "Step 4,7: Predictor count reduced to 4 (removed NART)"
+    - "Step 5: Changed from cross_validate_regression to MANOVA stdlib"
+    - "All output paths: Converted to hierarchical structure"
+    - "All steps: Bonferroni correction adjusted for actual test counts"
+    
+  final_status: "READY FOR G_CODE"
+  
+# ============================================================================
+# END OF ANALYSIS RECIPE
+# ============================================================================

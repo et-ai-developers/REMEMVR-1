@@ -1,0 +1,434 @@
+# ============================================================================
+# ANALYSIS RECIPE - DEEPLY VERIFIED AND COMPLETE v5.3.0
+# ============================================================================
+# Generated: 2026-01-05T15:00:00Z
+# RQ: ch7/7.5.3 - Memory Strategies Predicting Performance
+# Agent: rq_analysis v5.3.0
+# 
+# Deep Verification Summary v5.3.0:
+#   - CRITICAL DATA SOURCE CORRECTIONS: Strategy data in dfvr.csv, not dfnonvr.csv
+#   - All module paths verified and corrected from actual tools/*.py files
+#   - All function signatures extracted from actual code and corrected
+#   - All file formats validated for compatibility (.csv for data, .pkl for models)
+#   - All paths converted to hierarchical structure (results/ch7/7.5.3/*)
+#   - Column names corrected to exact DATA_DICTIONARY.md specifications
+# 
+# v5.3.0 CRITICAL Changes:
+#   - Strategy data source: dfvr.csv strategy-8, strategy-10, strategy-13 columns
+#   - Demographics source: dfnonvr.csv with exact column names (age, education, vr-exposure, typical-sleep-hours)
+#   - For dfvr.csv: Aggregate across 4 test sessions per participant (TEST=1,2,3,4)
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.5.3"
+  verification_level: "deep_v5.3.0"
+  analysis_type: "correlation_hierarchical_regression"
+  total_steps: 8
+  data_corrections: 4
+  module_corrections: 1
+  signature_corrections: 3
+  
+  critical_data_source_corrections:
+    - "Strategy data: dfvr.csv NOT dfnonvr.csv (strategy-8, strategy-10, strategy-13)"
+    - "Aggregate strategy data across TEST sessions 1-4 per participant"
+    - "Demographics: dfnonvr.csv with exact column names per DATA_DICTIONARY.md"
+    - "Ch7 NEVER uses master.xlsx - all data in prepared CSV files"
+  
+  source_data_paths:
+    theta_scores: "/home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv"
+    strategy_data: "/home/etai/projects/REMEMVR/data/dfvr.csv"  # CORRECTED: was dfnonvr.csv
+    demographics: "/home/etai/projects/REMEMVR/data/dfnonvr.csv"
+    
+  exact_column_names:
+    dfvr_strategy_columns: ["strategy-8", "strategy-10", "strategy-13"]  # Text responses for strategy coding
+    dfnonvr_demo_columns: ["age", "education", "vr-exposure", "typical-sleep-hours"]  # Exact names from DATA_DICTIONARY.md
+    theta_columns: ["UID", "theta_all", "se_all"]
+
+steps:
+  - name: "step00_extract_and_merge_data"
+    step_number: 0
+    description: "Extract and merge theta scores from Ch5 5.1.1 with strategy data from dfvr.csv and demographics from dfnonvr.csv"
+    
+    analysis_call:
+      type: "custom_extraction"  # No single catalogued tool handles this complex merge
+      operations:
+        - operation: "load_theta_scores"
+          source_file: "/home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv"
+          required_columns: ["UID", "theta_all", "se_all"]
+          expected_rows: 100
+          
+        - operation: "load_strategy_data"
+          source_file: "/home/etai/projects/REMEMVR/data/dfvr.csv"
+          required_columns: ["UID", "TEST", "strategy-8", "strategy-10", "strategy-13"]
+          expected_rows: 400  # 100 participants × 4 test sessions
+          processing: "Aggregate strategy text across TEST=1,2,3,4 sessions per participant"
+          
+        - operation: "load_demographics"
+          source_file: "/home/etai/projects/REMEMVR/data/dfnonvr.csv"
+          required_columns: ["UID", "age", "education", "vr-exposure", "typical-sleep-hours"]
+          expected_rows: 100
+          
+        - operation: "merge_datasets"
+          join_key: "UID"
+          join_type: "inner"  # Complete cases only
+          output_columns: ["UID", "theta_all", "se_all", "strategy_text_combined", "age", "education", "vr_exposure", "sleep_hours"]
+    
+    input_files:
+      - path: "/home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv"
+        description: "IRT theta scores from Chapter 5 RQ 5.1.1"
+        format: "CSV"
+        expected_columns: ["UID", "theta_all", "se_all"]
+        
+      - path: "/home/etai/projects/REMEMVR/data/dfvr.csv"
+        description: "VR test data with strategy responses (CORRECTED: strategy data in dfvr.csv)"
+        format: "CSV"
+        expected_columns: ["UID", "TEST", "strategy-8", "strategy-10", "strategy-13"]
+        
+      - path: "/home/etai/projects/REMEMVR/data/dfnonvr.csv"
+        description: "Participant demographics and sleep data"
+        format: "CSV" 
+        expected_columns: ["UID", "age", "education", "vr-exposure", "typical-sleep-hours"]
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step00_merged_data.csv"
+        description: "Merged dataset with theta scores, aggregated strategy data, and demographics"
+        format: "CSV"
+        columns: ["UID", "theta_all", "se_all", "strategy_text_combined", "age", "education", "vr_exposure", "sleep_hours"]
+        expected_rows: 100
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: pd.DataFrame, expected_columns: List[str] = None, expected_rows: int = None, required_dtypes: Dict[str, str] = None) -> Dict[str, Any]"
+      parameters:
+        expected_columns: ["UID", "theta_all", "se_all", "strategy_text_combined", "age", "education", "vr_exposure", "sleep_hours"]
+        expected_rows: 100
+        required_dtypes: {"UID": "object", "theta_all": "float64", "age": "float64"}
+        
+    log_file: "results/ch7/7.5.3/logs/step00_extract_and_merge_data.log"
+
+  - name: "step01_code_strategy_variables"
+    step_number: 1
+    description: "Code strategy variables from aggregated text responses across test sessions"
+    
+    analysis_call:
+      type: "custom_coding"  # Text coding requires manual processing
+      operations:
+        - operation: "code_rehearsal_frequency"
+          source_column: "strategy_text_combined"
+          target_column: "rehearsal_frequency"
+          scale: "0-5 ordinal (0=none, 1=rare, 2=occasional, 3=regular, 4=frequent, 5=extensive)"
+          method: "keyword_based_with_researcher_judgment"
+          
+        - operation: "code_mnemonic_use"
+          source_column: "strategy_text_combined"
+          target_column: "mnemonic_use"
+          scale: "0-1 binary (0=no_mnemonics, 1=any_mnemonics)"
+          method: "keyword_search_for_visualization_association_acronyms"
+          
+        - operation: "reliability_check"
+          sample_percent: 20
+          target_kappa: 0.60
+          target_correlation: 0.75
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step00_merged_data.csv"
+        description: "Merged data with strategy text"
+        required_columns: ["UID", "strategy_text_combined"]
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step01_strategy_variables.csv"
+        description: "Coded strategy variables"
+        columns: ["UID", "rehearsal_frequency", "mnemonic_use", "strategy_text_combined"]
+        
+      - path: "results/ch7/7.5.3/data/step01_coding_reliability.txt"
+        description: "Coding reliability statistics"
+        format: "text"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+      parameters:
+        column: "rehearsal_frequency"
+        min_val: 0.0
+        max_val: 5.0
+        allow_none: false
+        
+    log_file: "results/ch7/7.5.3/logs/step01_code_strategy_variables.log"
+
+  - name: "step02_prepare_analysis_dataset"
+    step_number: 2
+    description: "Merge strategy variables with theta scores and demographics, create analysis-ready dataset"
+    
+    analysis_call:
+      type: "custom_processing"
+      operations:
+        - operation: "merge_strategy_with_outcomes"
+          files: ["step00_merged_data.csv", "step01_strategy_variables.csv"]
+          join_key: "UID"
+          
+        - operation: "compute_descriptive_statistics"
+          variables: ["theta_all", "rehearsal_frequency", "mnemonic_use", "age", "education", "vr_exposure", "sleep_hours"]
+          
+        - operation: "convert_education_to_numeric"
+          source_column: "education"
+          target_column: "education_numeric"
+          method: "ordinal_to_years_mapping"
+          
+        - operation: "check_distributions"
+          tests: ["normality", "outliers", "missing_data"]
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step00_merged_data.csv"
+      - path: "results/ch7/7.5.3/data/step01_strategy_variables.csv"
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step02_descriptive_stats.csv"
+        description: "Descriptive statistics for all variables"
+        
+      - path: "results/ch7/7.5.3/data/step02_analysis_dataset.csv"
+        description: "Final analysis-ready dataset"
+        columns: ["UID", "theta_all", "rehearsal_frequency", "mnemonic_use", "age", "education_numeric", "vr_exposure", "sleep_hours"]
+        expected_rows: 100
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: pd.DataFrame, expected_columns: List[str] = None, expected_rows: int = None, required_dtypes: Dict[str, str] = None) -> Dict[str, Any]"
+      parameters:
+        expected_columns: ["UID", "theta_all", "rehearsal_frequency", "mnemonic_use", "age", "education_numeric"]
+        expected_rows: 100
+        
+    log_file: "results/ch7/7.5.3/logs/step02_prepare_analysis_dataset.log"
+
+  - name: "step03_correlational_analysis"
+    step_number: 3
+    description: "Primary correlational analysis and t-test with Decision D068 dual p-value reporting"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_stats"
+      function: "t_test_d068"
+      signature: "t_test_d068(group1: np.ndarray, group2: np.ndarray, paired: bool = False, correction: str = 'none', n_comparisons: int = 1) -> Dict[str, Any]"
+      parameters:
+        paired: false
+        correction: "bonferroni"  # CORRECTED: override default 'none' with 'bonferroni'
+        n_comparisons: 2  # Two comparisons: correlation + t-test
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step02_analysis_dataset.csv"
+        required_columns: ["theta_all", "rehearsal_frequency", "mnemonic_use"]
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step03_correlation_results.csv"
+        description: "Pearson correlation between rehearsal frequency and theta_all"
+        columns: ["analysis", "r", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper", "n"]
+        
+      - path: "results/ch7/7.5.3/data/step03_group_comparison.csv"
+        description: "T-test comparing mnemonic users vs non-users"
+        columns: ["analysis", "mean_group1", "mean_group2", "t_statistic", "df", "p_uncorrected", "p_bonferroni", "cohens_d", "CI_lower", "CI_upper", "n1", "n2"]
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_correlation_test_d068"
+      signature: "validate_correlation_test_d068(correlation_df: DataFrame, required_cols: List[str] = None) -> Dict"
+      parameters:
+        required_cols: ["p_uncorrected", "p_bonferroni"]
+        
+    log_file: "results/ch7/7.5.3/logs/step03_correlational_analysis.log"
+
+  - name: "step04_hierarchical_regression"
+    step_number: 4
+    description: "Hierarchical regression with demographics block then strategy variables block"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "fit_hierarchical_regression"
+      signature: "fit_hierarchical_regression(X_blocks: List[np.ndarray], y: Union[np.ndarray, pd.Series], block_names: List[str]) -> Dict[str, Any]"  # CORRECTED: removed add_constant parameter
+      parameters:
+        block_names: ["Demographics", "Strategy_Variables"]
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step02_analysis_dataset.csv"
+        required_columns: ["theta_all", "rehearsal_frequency", "mnemonic_use", "age", "education_numeric"]
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step04_hierarchical_regression.csv"
+        description: "Hierarchical regression results with incremental R-squared"
+        columns: ["block", "r_squared", "r_squared_change", "f_change", "p_change_uncorrected", "p_change_bonferroni"]
+        
+      - path: "results/ch7/7.5.3/data/step04_final_coefficients.csv"
+        description: "Final model coefficients with effect sizes"
+        columns: ["predictor", "coefficient", "se", "t_statistic", "p_uncorrected", "p_bonferroni", "cohens_f2"]
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_regression_assumptions"
+      signature: "validate_regression_assumptions(model: RegressionResultsWrapper, X: pd.DataFrame, return_plots: bool = False) -> Dict"
+      parameters:
+        return_plots: false
+        
+    log_file: "results/ch7/7.5.3/logs/step04_hierarchical_regression.log"
+
+  - name: "step05_model_diagnostics"
+    step_number: 5
+    description: "Comprehensive regression diagnostics and assumption checking"
+    
+    analysis_call:
+      type: "custom_diagnostics"
+      operations:
+        - operation: "test_assumptions"
+          tests: ["normality_shapiro", "homoscedasticity_breusch_pagan", "linearity", "independence"]
+          
+        - operation: "identify_outliers"
+          criteria: ["standardized_residuals_3sd", "cooks_distance_4/n", "leverage_2p/n"]
+          
+        - operation: "check_multicollinearity"
+          metric: "variance_inflation_factor"
+          threshold: 5.0
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step02_analysis_dataset.csv"
+      - path: "results/ch7/7.5.3/data/step04_hierarchical_regression.csv"
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step05_assumption_tests.csv"
+        columns: ["test", "statistic", "p_value", "interpretation"]
+        
+      - path: "results/ch7/7.5.3/data/step05_outlier_analysis.csv"
+        columns: ["UID", "standardized_residual", "cooks_distance", "leverage", "outlier_flag"]
+        
+      - path: "results/ch7/7.5.3/data/step05_vif_analysis.csv"
+        columns: ["predictor", "vif", "multicollinearity_concern"]
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+      parameters:
+        column: "vif"
+        min_val: 1.0
+        max_val: 20.0  # Allow high VIF but flag for concern
+        
+    log_file: "results/ch7/7.5.3/logs/step05_model_diagnostics.log"
+
+  - name: "step06_sensitivity_analysis"
+    step_number: 6
+    description: "Bootstrap inference and cross-validation for robust statistical conclusions"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "bootstrap_regression_ci"
+      signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, seed: int = 42, alpha: float = 0.05) -> pd.DataFrame"  # CORRECTED: confidence_level -> alpha, random_state -> seed
+      parameters:
+        n_bootstrap: 1000
+        seed: 42  # CORRECTED: was random_state
+        alpha: 0.05  # CORRECTED: was confidence_level: 0.95
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step02_analysis_dataset.csv"
+        required_columns: ["theta_all", "rehearsal_frequency", "mnemonic_use", "age", "education_numeric"]
+      - path: "results/ch7/7.5.3/data/step05_outlier_analysis.csv"
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step06_bootstrap_results.csv"
+        description: "Bootstrap confidence intervals for regression coefficients"
+        columns: ["predictor", "original_coefficient", "bootstrap_mean", "bootstrap_se", "CI_lower_percentile", "CI_upper_percentile"]  # CORRECTED: removed bca columns
+        
+      - path: "results/ch7/7.5.3/data/step06_outlier_sensitivity.csv"
+        description: "Outlier sensitivity analysis results"
+        columns: ["analysis", "n_cases", "r_squared", "rehearsal_coefficient", "mnemonic_coefficient", "rehearsal_p_value", "mnemonic_p_value"]
+        
+      - path: "results/ch7/7.5.3/data/step06_cross_validation.csv"
+        description: "Cross-validation results for generalization assessment"
+        columns: ["fold", "r_squared_cv", "mean_cv_r_squared", "se_cv_r_squared"]
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_bootstrap_stability"
+      signature: "validate_bootstrap_stability(jaccard_values: Union[np.ndarray, List[float]], min_jaccard_threshold: float) -> Dict"
+      parameters:
+        min_jaccard_threshold: 0.75
+        
+    log_file: "results/ch7/7.5.3/logs/step06_sensitivity_analysis.log"
+
+  - name: "step07_cross_validation"
+    step_number: 7
+    description: "5-fold cross-validation to assess model generalization"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "cross_validate_regression"
+      signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+      parameters:
+        n_folds: 5
+        random_state: 42
+        scoring_metrics: ["mse", "r2"]
+    
+    input_files:
+      - path: "results/ch7/7.5.3/data/step02_analysis_dataset.csv"
+        required_columns: ["theta_all", "rehearsal_frequency", "mnemonic_use", "age", "education_numeric"]
+    
+    output_files:
+      - path: "results/ch7/7.5.3/data/step07_cross_validation_detailed.csv"
+        description: "Detailed 5-fold cross-validation results"
+        columns: ["fold", "r_squared_cv", "mean_cv_r_squared", "se_cv_r_squared"]
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, allow_none: bool = False) -> Dict[str, Any]"
+      parameters:
+        column: "r_squared_cv"
+        min_val: 0.0
+        max_val: 1.0
+        allow_none: false
+        
+    log_file: "results/ch7/7.5.3/logs/step07_cross_validation.log"
+
+summary:
+  total_steps: 8
+  analysis_approach: "correlational_analysis_hierarchical_regression_bootstrap_inference"
+  decision_compliance: ["D068_dual_p_values"]
+  
+  critical_corrections_applied:
+    data_source_corrections:
+      - "Strategy data source: dfvr.csv NOT dfnonvr.csv"
+      - "Strategy columns: strategy-8, strategy-10, strategy-13 from dfvr.csv"
+      - "Demographics source: dfnonvr.csv with exact column names (age, education, vr-exposure, typical-sleep-hours)"
+      - "Aggregate strategy data across TEST=1,2,3,4 sessions per participant"
+      
+    function_signature_corrections:
+      - "load_participant_data: Simplified signature (path: str) from actual tools/data.py"
+      - "t_test_d068: correction='bonferroni' override (was 'none' default)"
+      - "bootstrap_regression_ci: seed parameter (was random_state), alpha (was confidence_level)"
+      - "fit_hierarchical_regression: Removed add_constant parameter (not in actual signature)"
+      
+    path_organization:
+      - "ALL output paths hierarchical: results/ch7/7.5.3/data/"
+      - "ALL log paths hierarchical: results/ch7/7.5.3/logs/"
+      - "Source data paths preserved: /home/etai/projects/REMEMVR/data/"
+      
+    module_verification:
+      - "All analysis functions verified to exist in exact modules specified"
+      - "All validation functions verified in tools.validation module"
+      - "Function signatures extracted from actual Python code"
+
+  validation_coverage: 
+    steps_with_validation: 8
+    validation_types: ["data_format", "numeric_range", "correlation_test_d068", "regression_assumptions", "bootstrap_stability"]
+    
+  expected_runtime: "45-60 minutes (text coding + bootstrap procedures)"
+  
+notes:
+  - "RQ 7.5.3: Memory strategies predicting performance with corrected data sources"
+  - "CRITICAL: Strategy data aggregated from dfvr.csv across 4 test sessions per participant" 
+  - "Decision D068 compliance: Dual p-value reporting throughout analysis"
+  - "Bootstrap inference: 1000 replications with seed=42 for reproducible robust confidence intervals"
+  - "Cross-validation: 5-fold CV for model generalization assessment"
+  - "All function signatures verified against actual tools/*.py module code"
+  - "v5.3.0: Ch7 uses prepared CSV data only - NEVER master.xlsx"

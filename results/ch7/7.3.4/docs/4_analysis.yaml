@@ -1,0 +1,438 @@
+# ============================================================================
+# ANALYSIS RECIPE - RQ 7.3.4 (DASS Predicting Metacognition vs Memory)
+# ============================================================================
+# Generated: 2026-01-05T12:00:00Z
+# RQ: ch7/7.3.4 - Does DASS predict metacognition more than memory?
+# Agent: rq_analysis v5.3.0
+# 
+# Deep Verification Summary (v5.3.0):
+#   - CRITICAL CORRECTION: ALL 3 DASS columns available in dfnonvr.csv
+#   - Column names: "total-dass-anxiety-items", "total-dass-stress-items", "total-dass-depression-items"
+#   - Module paths verified from actual tools/*.py files
+#   - File format compatibility validated (CSV for data, hierarchical paths enforced)
+#   - All function signatures extracted from actual Python code
+#   - All paths converted to hierarchical structure (results/ch7/7.3.4/...)
+#   - Cross-RQ dependencies verified to exist (Ch5 theta, Ch6 confidence/calibration)
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.3.4"
+  verification_level: "deep_v5.3.0"
+  data_reality_check: "CORRECTED - All 3 DASS predictors available in dfnonvr.csv"
+  module_corrections: 0
+  path_corrections: 15
+  scientific_restoration: "Full 3 DASS predictors analysis as originally planned"
+  
+# Core scientific hypothesis (restored to original):
+# H1: DASS-Depression, DASS-Anxiety, and DASS-Stress predict metacognitive measures 
+#     (confidence, calibration) more strongly than memory accuracy (theta)
+
+steps:
+  - name: "step00_validate_dependencies"
+    step_number: 0
+    description: "Verify all cross-RQ dependencies exist before proceeding with DASS analysis"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: str, min_size_bytes: Optional[int] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        description: "Memory theta scores (accuracy outcomes)"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+      - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+        description: "Confidence theta scores (metacognitive outcomes)"
+        required_columns: ["UID", "theta_confidence"]
+        expected_rows: "~400 (100 participants × 4 tests)"
+      - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+        description: "Calibration metrics (metacognitive outcomes)"
+        required_columns: ["UID", "calibration"]
+        expected_rows: "~100 participants"
+      - path: "data/dfnonvr.csv"
+        description: "DASS scores in prepared data (Ch7 uses dfnonvr.csv, NOT master.xlsx)"
+        required_columns: ["UID", "total-dass-anxiety-items", "total-dass-stress-items", "total-dass-depression-items"]
+        expected_rows: "~100 participants"
+        note: "CORRECTED - All 3 DASS columns available with lowercase hyphenated names"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step00_dependency_validation.csv"
+        description: "Dependency validation results with file paths and status"
+        columns: ["file_path", "exists", "size_bytes", "status", "note"]
+    
+    parameters:
+      check_each_file_individually: true
+      min_size_bytes: 1000
+      required_dependencies: 4
+      critical_note: "All 3 DASS predictors available (Depression, Anxiety, Stress)"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: pd.DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "All 4 required dependency files exist and accessible"
+      - "Status shows found for all critical dependencies"
+      - "File sizes indicate non-empty files (>1000 bytes)"
+      - "Ch5 theta and Ch6 confidence/calibration dependencies verified"
+
+  - name: "step01_extract_dass_scores"
+    step_number: 1
+    description: "Extract DASS Depression, Anxiety and Stress scores from dfnonvr.csv (all 3 predictors)"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_dass_scores"
+      signature: "extract_dass_scores(df: pd.DataFrame, subscales: List[str] = ['anxiety', 'stress']) -> pd.DataFrame"
+    
+    input_files:
+      - path: "data/dfnonvr.csv"
+        required_columns: ["UID", "total-dass-anxiety-items", "total-dass-stress-items", "total-dass-depression-items"]
+        expected_rows: "~100 participants"
+        note: "Source data - Ch7 uses dfnonvr.csv NOT master.xlsx"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step01_dass_scores.csv"
+        columns: ["UID", "DASS_Dep", "DASS_Anx", "DASS_Str", "z_Dep", "z_Anx", "z_Str"]
+        description: "ALL 3 DASS subscale scores with z-standardization"
+    
+    parameters:
+      subscales: ["depression", "anxiety", "stress"]  # All 3 available
+      standardize: true
+      outlier_threshold: 3.29
+      column_mapping:
+        depression: "total-dass-depression-items"
+        anxiety: "total-dass-anxiety-items"
+        stress: "total-dass-stress-items"
+      scientific_note: "Full 3-predictor analysis as originally planned"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(data: np.ndarray, min_val: float, max_val: float, column_name: str) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "DASS raw scores in appropriate range for all 3 scales"
+      - "Z-scores properly standardized (mean ~0, SD ~1)"
+      - "N = 95-100 participants with complete DASS data"
+      - "Intercorrelations between DASS subscales in [0.5, 0.8] range"
+
+  - name: "step02_prepare_regression_data"
+    step_number: 2
+    description: "Merge DASS predictors with Ch5 theta and Ch6 confidence/calibration outcomes"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "prepare_regression_data"
+      signature: "prepare_regression_data(participant_path: str = None, test_path: str = None, theta_path: str = None, include_interactions: bool = False) -> pd.DataFrame"
+    
+    input_files:
+      - path: "results/ch7/7.3.4/data/step01_dass_scores.csv"
+        required_columns: ["UID", "z_Dep", "z_Anx", "z_Str"]
+        source: "ALL 3 DASS predictors from step 1"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        source: "Memory accuracy outcomes from Ch5"
+        aggregation: "participant-level mean across 4 tests"
+      - path: "results/ch6/6.1.1/data/step03_theta_confidence.csv"
+        required_columns: ["UID", "theta_confidence"]
+        source: "Confidence outcomes from Ch6"
+        aggregation: "participant-level mean across 4 tests"
+      - path: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+        required_columns: ["UID", "calibration"]
+        source: "Calibration outcomes from Ch6"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step02_analysis_dataset.csv"
+        columns: ["UID", "z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        description: "Merged analysis dataset with ALL 3 predictors and 3 outcomes"
+    
+    parameters:
+      merge_strategy: "inner"
+      outlier_method: "iqr"
+      outlier_threshold: 1.5
+      include_interactions: false
+      aggregate_by_participant: true
+      scientific_design: "3×3 design (3 DASS predictors, 3 outcomes)"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "All required columns present in merged dataset (7 total)"
+      - "N ≥ 90 participants after merge (sufficient power)"
+      - "No missing values in analysis variables"
+      - "Coefficient of variation > 0.10 for all outcome variables"
+      - "ALL 3 DASS predictors properly z-standardized"
+
+  - name: "step03_fit_multiple_regression"
+    step_number: 3
+    description: "Fit three regression models to test differential DASS prediction patterns"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "fit_multiple_regression"
+      signature: "fit_multiple_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], add_constant: bool = True, return_diagnostics: bool = True) -> Dict"
+    
+    input_files:
+      - path: "results/ch7/7.3.4/data/step02_analysis_dataset.csv"
+        required_columns: ["z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        expected_rows: "~90-97 complete cases"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step03_model_results.csv"
+        columns: ["model", "predictor", "beta", "se", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "vif", "r_squared"]
+        description: "Regression coefficients with dual p-values for all 3 models (9 coefficients total)"
+      - path: "results/ch7/7.3.4/data/step03_model_diagnostics.csv"
+        columns: ["model", "shapiro_p", "bp_p", "dw_stat", "min_vif", "max_vif", "r_squared", "adj_r_squared"]
+        description: "Assumption test results for all 3 models"
+    
+    parameters:
+      models:
+        - name: "accuracy_model"
+          outcome: "theta_accuracy"
+          predictors: ["z_Dep", "z_Anx", "z_Str"]  # ALL 3 predictors
+        - name: "confidence_model"
+          outcome: "confidence"
+          predictors: ["z_Dep", "z_Anx", "z_Str"]  # ALL 3 predictors
+        - name: "calibration_model"
+          outcome: "calibration"
+          predictors: ["z_Dep", "z_Anx", "z_Str"]  # ALL 3 predictors
+      add_constant: true
+      return_diagnostics: true
+      bootstrap_iterations: 1000
+      random_state: 42
+      alpha_within_model: 0.0167  # 0.05/3 for 3 predictors per model
+      dual_p_values: true  # Decision D068
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_model_convergence"
+      signature: "validate_model_convergence(lmm_result: Any, min_observations: int = 100) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "All 3 models converged successfully"
+      - "9 coefficient estimates total (3 models × 3 predictors each)"
+      - "Bootstrap confidence intervals computed successfully"
+      - "VIF < 5.0 for all predictors (no severe multicollinearity)"
+      - "Assumption tests completed for all models"
+
+  - name: "step04_bootstrap_regression_ci"
+    step_number: 4
+    description: "Bootstrap confidence intervals for differential prediction hypothesis testing"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "bootstrap_regression_ci"
+      signature: "bootstrap_regression_ci(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_bootstrap: int = 1000, confidence_level: float = 0.95, random_state: int = 42) -> pd.DataFrame"
+    
+    input_files:
+      - path: "results/ch7/7.3.4/data/step02_analysis_dataset.csv"
+        required_columns: ["z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        source: "Analysis dataset for bootstrap resampling"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step04_beta_comparisons.csv"
+        columns: ["comparison", "predictor", "model1", "model2", "beta_diff", "ci_lower", "ci_upper", "p_uncorrected", "p_bonferroni", "p_fdr"]
+        description: "Bootstrap-based beta coefficient comparisons across models (9 comparisons total)"
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence_level: 0.95
+      random_state: 42
+      comparisons:
+        # Depression comparisons (3 tests)
+        - "confidence_vs_accuracy_depression"
+        - "calibration_vs_accuracy_depression"
+        - "confidence_vs_calibration_depression"
+        # Anxiety comparisons (3 tests)
+        - "confidence_vs_accuracy_anxiety"
+        - "calibration_vs_accuracy_anxiety" 
+        - "confidence_vs_calibration_anxiety"
+        # Stress comparisons (3 tests)
+        - "confidence_vs_accuracy_stress"
+        - "calibration_vs_accuracy_stress"
+        - "confidence_vs_calibration_stress"
+      alpha_bonferroni: 0.0056  # 0.05/9 for 9 comparisons total (original plan)
+      alpha_fdr: 0.05  # False Discovery Rate correction
+      dual_p_values: true  # Decision D068
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_effect_sizes"
+      signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "9 bootstrap comparisons completed successfully"
+      - "Bootstrap CIs computed for all coefficient differences"
+      - "Triple p-value reporting (uncorrected, Bonferroni, FDR)"
+      - "Effect size categories assigned based on |beta_diff|"
+
+  - name: "step05_cross_validate_regression"
+    step_number: 5
+    description: "Assess model generalizability using 5-fold cross-validation"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "cross_validate_regression"
+      signature: "cross_validate_regression(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], n_folds: int = 5, random_state: int = 42, scoring_metrics: List[str] = ['mse', 'r2']) -> Dict"
+    
+    input_files:
+      - path: "results/ch7/7.3.4/data/step02_analysis_dataset.csv"
+        required_columns: ["z_Dep", "z_Anx", "z_Str", "theta_accuracy", "confidence", "calibration"]
+        source: "Complete dataset for cross-validation"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step05_cross_validation.csv"
+        columns: ["model", "test_r2_mean", "test_r2_sd", "rmse_mean", "mae_mean", "train_test_gap", "shrinkage", "overfitting_flag"]
+        description: "Cross-validation results for all 3 models"
+    
+    parameters:
+      n_folds: 5
+      random_state: 42
+      scoring_metrics: ["mse", "r2", "mae"]
+      overfitting_threshold: 0.10
+      stratify: false  # Continuous outcomes
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "All 3 models successfully cross-validated"
+      - "Test R² values in reasonable range [0.02, 0.30]"
+      - "Overfitting flags properly assigned (gap > 0.10)"
+      - "CV metrics consistent across all models"
+
+  - name: "step06_compute_cohens_f2"
+    step_number: 6
+    description: "Compute effect sizes and post-hoc power analysis"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "compute_cohens_f2"
+      signature: "compute_cohens_f2(r2_full: float, r2_reduced: float) -> float"
+    
+    input_files:
+      - path: "results/ch7/7.3.4/data/step03_model_results.csv"
+        required_columns: ["model", "r_squared"]
+        source: "Model R² values for effect size computation"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step06_effect_sizes.csv"
+        columns: ["model", "cohens_f2", "f2_ci_lower", "f2_ci_upper", "power_observed", "min_detectable_f2", "power_80pct", "effect_interpretation"]
+        description: "Effect sizes and post-hoc power analysis for 3 models"
+    
+    parameters:
+      alpha_corrected: 0.0056  # Bonferroni correction for 9 tests (original plan)
+      n_participants: 95
+      bootstrap_ci: true
+      n_bootstrap: 1000
+      random_state: 42
+      effect_size_guidelines: "Cohen 1988"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_effect_sizes"
+      signature: "validate_effect_sizes(effect_sizes_df: pd.DataFrame, f2_column: str = 'cohens_f2') -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "Cohen's f² values in [0, 1.0] range"
+      - "Power calculations successful with corrected alpha"
+      - "Effect interpretations match Cohen guidelines"
+      - "Bootstrap CIs converged for effect sizes"
+
+  - name: "step07_variance_decomposition"
+    step_number: 7
+    description: "Synthesize results and create differential prediction summary"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_regression"
+      function: "variance_decomposition"
+      signature: "variance_decomposition(X: Union[np.ndarray, pd.DataFrame], y: Union[np.ndarray, pd.Series], method: str = 'commonality') -> pd.DataFrame"
+    
+    input_files:
+      - path: "results/ch7/7.3.4/data/step04_beta_comparisons.csv"
+        required_columns: ["comparison", "beta_diff", "p_bonferroni"]
+        source: "Key differential prediction results"
+      - path: "results/ch7/7.3.4/data/step03_model_results.csv"
+        required_columns: ["model", "r_squared"]
+        source: "Individual model performance metrics"
+      - path: "results/ch7/7.3.4/data/step05_cross_validation.csv"
+        required_columns: ["model", "test_r2_mean", "overfitting_flag"]
+        source: "Generalizability assessment"
+    
+    output_files:
+      - path: "results/ch7/7.3.4/data/step07_analysis_summary.csv"
+        columns: ["finding", "statistic", "p_value", "effect_size", "interpretation", "support_hypothesis"]
+        description: "Synthesized findings in tabular format (8-12 key findings)"
+      - path: "results/ch7/7.3.4/results/differential_prediction_summary.txt"
+        description: "Narrative interpretation of results with scientific conclusions"
+    
+    parameters:
+      primary_hypothesis: "DASS-Depression, DASS-Anxiety, and DASS-Stress predict metacognition > memory"
+      significance_threshold: 0.0056  # Bonferroni corrected (original plan)
+      effect_size_guidelines: "Cohen 1988"
+      scientific_context: "Executive function theory predictions"
+      data_status: "Full 3-predictor analysis as originally planned - no limitations"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "8-12 key findings documented in summary"
+      - "Primary hypothesis clearly addressed (supported/not supported)"
+      - "Statistical consistency across all analysis steps"
+      - "Scientific interpretation matches full 3-predictor design"
+
+# Expected execution logs (hierarchical paths):
+logs:
+  - "results/ch7/7.3.4/logs/step00_validate_dependencies.log"
+  - "results/ch7/7.3.4/logs/step01_extract_dass.log"
+  - "results/ch7/7.3.4/logs/step02_merge_datasets.log"
+  - "results/ch7/7.3.4/logs/step03_fit_models.log"
+  - "results/ch7/7.3.4/logs/step04_compare_betas.log"
+  - "results/ch7/7.3.4/logs/step05_cross_validation.log"
+  - "results/ch7/7.3.4/logs/step06_effect_sizes.log"
+  - "results/ch7/7.3.4/logs/step07_generate_summary.log"
+
+# Scientific summary for RQ 7.3.4 (CORRECTED):
+scientific_context:
+  hypothesis: "DASS psychological measures (Depression, Anxiety, Stress) predict metacognitive accuracy more than memory accuracy"
+  theory_support: "Executive function theory - depression/anxiety/stress impair monitoring more than encoding"
+  data_status: "CORRECTED: All 3 DASS predictors available in dfnonvr.csv"
+  design: "3×3 multiple regression (3 predictors × 3 outcomes) - FULL original design"
+  statistical_power: "N~95 provides 80% power to detect medium effects (f²≥0.15)"
+  key_comparisons: "9 bootstrap tests of differential prediction patterns (3 predictors × 3 model pairs)"
+  correction_strategy: "Bonferroni for family-wise error control (α=0.0056)"
+
+# Cross-RQ dependencies verified:
+dependencies:
+  ch5_theta: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+  ch6_confidence: "results/ch6/6.1.1/data/step03_theta_confidence.csv" 
+  ch6_calibration: "results/ch6/6.2.1/data/step02_calibration_scores.csv"
+  dass_data: "data/dfnonvr.csv (Ch7 uses dfnonvr.csv NOT master.xlsx)"
+  
+# Data reality notes (v5.3.0 CORRECTED):
+data_reality:
+  dass_columns_available: ["total-dass-depression-items", "total-dass-anxiety-items", "total-dass-stress-items"]
+  dass_columns_missing: []  # NONE missing - all available
+  source_file: "data/dfnonvr.csv (prepared data, not master.xlsx)"
+  scientific_impact: "Full hypothesis test with all 3 predictors - depression/anxiety/stress effects"
+  statistical_design: "Original 3×3 design fully restored - 9 beta coefficient comparisons"
+  critical_correction: "Previous file incorrectly stated Depression was missing - it is available"

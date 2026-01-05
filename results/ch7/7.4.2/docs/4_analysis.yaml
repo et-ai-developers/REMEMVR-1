@@ -1,0 +1,471 @@
+# ============================================================================
+# ANALYSIS RECIPE - DEEPLY VERIFIED AND COMPLETE v5.3.0
+# ============================================================================
+# Generated: 2026-01-05T20:00:00Z
+# RQ: ch7/7.4.2
+# Agent: rq_analysis v5.3.0
+# 
+# v5.3.0 Deep Verification Summary:
+#   - CRITICAL: Ch7 uses dfnonvr.csv ONLY (NEVER master.xlsx)
+#   - All module paths verified against actual tools/*.py files
+#   - All column names verified against DATA_DICTIONARY.md
+#   - All file formats validated for compatibility
+#   - All functions verified to exist in exact modules
+#   - All output paths made hierarchical (results/ch7/7.4.2/)
+#   - BVMT columns: bvmt-total-recall, bvmt-trial-1-score, etc.
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.4.2"
+  rq_title: "BVMT predicts Where more than What"
+  verification_level: "deep_v5.3.0"
+  analysis_type: "bivariate_correlations_steiger_test"
+  methodology: "Bivariate correlations + Steiger's Z-test"
+  critical_data_source: "dfnonvr.csv ONLY - no master.xlsx"
+  
+verification_report:
+  version: "v5.3.0"
+  total_steps: 7
+  
+  module_verification:
+    checked: 6
+    corrected: 5  # All corrected to actual existing modules/functions
+    all_verified: true
+    
+  data_source_verification:
+    source_file: "data/dfnonvr.csv"  # CRITICAL - not master.xlsx
+    bvmt_column: "bvmt-total-recall"  # From DATA_DICTIONARY.md
+    verified_columns: true
+    
+  path_organization:
+    checked: 15
+    hierarchical: 15  # All use results/ch7/7.4.2/
+    
+  corrections_log:
+    - "Step 0: validate_file_paths -> validate_data_columns (file validation)"
+    - "Step 1: extract_domain_scores_from_ch5 -> extract_domain_theta_scores (actual function)"
+    - "Step 2: extract_cognitive_test_scores -> extract_cognitive_tests (actual function)"
+    - "Step 3: merge_datasets_on_uid -> merge_theta_cognitive (actual function)"
+    - "Step 4: bootstrap_correlation_ci -> bootstrap_correlation_ci (verified exists)"
+    - "Step 5: compare_correlations_dependent -> compare_correlations_dependent (verified exists)"
+    - "Data Source: master.xlsx -> dfnonvr.csv (Ch7 uses prepared data)"
+    - "BVMT Column: BVMT_TotR -> bvmt-total-recall (DATA_DICTIONARY.md format)"
+    
+  final_status: "READY_FOR_G_CODE"
+
+steps:
+  - name: "step00_validate_dependencies"
+    step_number: 0
+    description: "Validate Ch5 domain outputs and dfnonvr.csv BVMT data exist before proceeding"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: pd.DataFrame, required_columns: List[str], column_types: Optional[Dict[str, Any]] = None) -> Dict[str, Any]"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        description: "Where domain theta scores from Ch5 analysis"
+        required_columns: ["UID", "theta_Where", "theta_What"]
+        fallback_paths: 
+          - "results/ch5/5.2.2/data/step03_theta_scores.csv"
+          - "results/ch5/5.2.1/data/theta_scores.csv"
+      - path: "data/dfnonvr.csv"  # CRITICAL: Uses dfnonvr.csv NOT master.xlsx
+        description: "Participant cognitive test data with BVMT scores"
+        required_columns: ["UID", "bvmt-total-recall"]
+        note: "Ch7 uses prepared data, not master.xlsx"
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step00_dependency_validation.txt"
+        description: "Validation summary of required dependency files"
+    
+    parameters:
+      required_columns: ["UID", "bvmt-total-recall"]
+      fallback_verification: true
+      min_participants: 100
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_file_existence"
+      signature: "validate_file_existence(file_paths: List[str]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "Ch5 domain files located and contain theta scores"
+      - "dfnonvr.csv contains bvmt-total-recall column"
+      - "Minimum 100 participants present in both sources"
+      - "Required columns present and accessible"
+    
+    failure_behavior:
+      action: "raise FileNotFoundError"
+      log_to: "results/ch7/7.4.2/logs/step00_validate_dependencies.log"
+      invoke: "g_debug"
+
+  - name: "step01_extract_domain_theta_scores"
+    step_number: 1
+    description: "Extract Where and What domain-specific theta scores from Ch5 analyses"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_domain_theta_scores"
+      signature: "extract_domain_theta_scores(rq_path: str, domain: str) -> pd.DataFrame"
+    
+    input_files:
+      - path: "results/ch5/5.2.1/data/step03_theta_scores.csv"
+        description: "Domain-specific theta scores from Ch5 analysis"
+        required_columns: ["UID", "theta_Where", "theta_What"]
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step01_domain_theta_scores.csv"
+        description: "Where and What domain means per participant"
+        columns: ["UID", "Where_mean", "What_mean"]
+    
+    parameters:
+      rq_path: "results/ch5/5.2.1"
+      domains: ["Where", "What"]
+      domain_tags:
+        Where: ["-L-", "-U-", "-D-"]  # spatial location subtypes
+        What: ["-N-"]  # object identity
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, columns: List[str], min_val: float, max_val: float) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "100 participants with domain theta scores"
+      - "Theta scores in IRT range [-3, 3]"
+      - "Both Where and What domains have adequate variance"
+      - "No missing UIDs or theta values"
+    
+    failure_behavior:
+      action: "raise ValueError"
+      log_to: "results/ch7/7.4.2/logs/step01_extract_domains.log"
+      invoke: "g_debug"
+
+  - name: "step02_extract_bvmt_scores"
+    step_number: 2
+    description: "Extract BVMT Total Recall scores from dfnonvr.csv"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "extract_cognitive_tests"
+      signature: "extract_cognitive_tests(uid_list: Optional[List[str]] = None, data_path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+    
+    input_files:
+      - path: "data/dfnonvr.csv"  # CRITICAL: Uses dfnonvr.csv with correct column names
+        description: "Participant cognitive test data"
+        required_columns: ["UID", "bvmt-total-recall"]
+        note: "Column name from DATA_DICTIONARY.md: bvmt-total-recall"
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step02_bvmt_scores.csv"
+        description: "BVMT Total Recall scores per participant"
+        columns: ["UID", "bvmt_total"]
+    
+    parameters:
+      data_path: "data/dfnonvr.csv"
+      test_focus: "bvmt"  # Extract only BVMT scores
+      uid_list: null  # Extract for all participants
+      column_mapping:
+        bvmt_source: "bvmt-total-recall"  # Exact column name from DATA_DICTIONARY.md
+        bvmt_target: "bvmt_total"  # Standardized name for analysis
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, columns: List[str], min_val: float, max_val: float) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "100 participants with BVMT scores"
+      - "BVMT scores in valid range [0, 36]"
+      - "Missing data < 5% of participants"
+      - "Standard deviation > 2.0 (adequate variance)"
+    
+    failure_behavior:
+      action: "raise ValueError"
+      log_to: "results/ch7/7.4.2/logs/step02_extract_bvmt.log"
+      invoke: "g_debug"
+
+  - name: "step03_merge_analysis_dataset"
+    step_number: 3
+    description: "Merge domain theta scores with BVMT scores to create analysis-ready dataset"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "merge_theta_cognitive"
+      signature: "merge_theta_cognitive(theta_df: pd.DataFrame, cognitive_df: pd.DataFrame, uid_col: str = 'UID') -> pd.DataFrame"
+    
+    input_files:
+      - path: "results/ch7/7.4.2/data/step01_domain_theta_scores.csv"
+        description: "Domain theta scores from Step 1"
+        required_columns: ["UID", "Where_mean", "What_mean"]
+      - path: "results/ch7/7.4.2/data/step02_bvmt_scores.csv"
+        description: "BVMT scores from Step 2"
+        required_columns: ["UID", "bvmt_total"]
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step03_analysis_dataset.csv"
+        description: "Complete analysis dataset with all variables"
+        columns: ["UID", "bvmt_total", "Where_mean", "What_mean"]
+    
+    parameters:
+      uid_col: "UID"
+      merge_type: "inner"
+      verify_complete_merge: true
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_completeness"
+      signature: "validate_data_completeness(df: pd.DataFrame, expected_n: int, required_cols: List[str]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "Exactly 100 participants retained (no data loss)"
+      - "No duplicate UIDs"
+      - "No missing values in analysis variables"
+      - "All variables within expected ranges"
+    
+    failure_behavior:
+      action: "raise ValueError"
+      log_to: "results/ch7/7.4.2/logs/step03_merge_dataset.log"
+      invoke: "g_debug"
+
+  - name: "step04_compute_correlations"
+    step_number: 4
+    description: "Compute r(BVMT, Where) and r(BVMT, What) with bootstrap 95% confidence intervals"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.bootstrap"
+      function: "bootstrap_correlation_ci"
+      signature: "bootstrap_correlation_ci(x: np.ndarray, y: np.ndarray, n_bootstrap: int = 1000, confidence: float = 0.95, method: str = 'pearson', seed: Optional[int] = None) -> Dict"
+    
+    input_files:
+      - path: "results/ch7/7.4.2/data/step03_analysis_dataset.csv"
+        description: "Complete analysis dataset"
+        required_columns: ["UID", "bvmt_total", "Where_mean", "What_mean"]
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step04_correlations.csv"
+        description: "Bootstrap correlation results with confidence intervals"
+        columns: ["correlation", "r", "ci_lower", "ci_upper", "n", "p_uncorrected", "assumption_check", "effect_size"]
+    
+    parameters:
+      n_bootstrap: 1000
+      confidence: 0.95
+      method: "pearson"
+      seed: 42  # For reproducibility
+      correlations_to_compute:
+        - variables: ["bvmt_total", "Where_mean"]
+          name: "BVMT_Where"
+        - variables: ["bvmt_total", "What_mean"]
+          name: "BVMT_What"
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, columns: List[str], min_val: float, max_val: float) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "Both correlations computed successfully"
+      - "Correlation coefficients in valid range [-1, 1]"
+      - "Bootstrap CIs contain point estimates"
+      - "Confidence intervals are valid (lower < upper)"
+    
+    failure_behavior:
+      action: "raise ValueError"
+      log_to: "results/ch7/7.4.2/logs/step04_compute_correlations.log"
+      invoke: "g_debug"
+
+  - name: "step05_steiger_test"
+    step_number: 5
+    description: "Test domain-specificity hypothesis using Steiger's Z-test with dual p-value reporting"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.analysis_extensions"
+      function: "compare_correlations_dependent"
+      signature: "compare_correlations_dependent(r12: float, r13: float, r23: float, n: int) -> Dict[str, float]"
+    
+    input_files:
+      - path: "results/ch7/7.4.2/data/step04_correlations.csv"
+        description: "Correlation results from Step 4"
+        required_columns: ["correlation", "r"]
+      - path: "results/ch7/7.4.2/data/step03_analysis_dataset.csv"
+        description: "Raw data for Where-What correlation"
+        required_columns: ["Where_mean", "What_mean"]
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step05_steiger_test.csv"
+        description: "Steiger's Z-test results with dual p-value reporting"
+        columns: ["z_statistic", "p_uncorrected", "p_bonferroni", "p_fdr", "cohens_q", "ci_lower", "ci_upper", "direction", "n"]
+    
+    parameters:
+      n: 100
+      hypothesis: "r_BVMT_Where > r_BVMT_What"
+      correction_method: "bonferroni"
+      n_comparisons: 28  # Chapter 7 family size
+      alpha: 0.05
+      corrected_alpha: 0.00179  # 0.05/28
+      dual_p_values: true  # Decision D068
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_numeric_range"
+      signature: "validate_numeric_range(df: pd.DataFrame, columns: List[str], min_val: float, max_val: float) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "Single test result (1 row)"
+      - "Z-statistic is finite (not NaN)"
+      - "Dual p-values computed (uncorrected + corrected)"
+      - "All p-values in valid range [0, 1]"
+      - "Effect size (Cohen's q) computed"
+    
+    failure_behavior:
+      action: "raise ValueError"
+      log_to: "results/ch7/7.4.2/logs/step05_steiger_test.log"
+      invoke: "g_debug"
+
+  - name: "step06_sensitivity_analysis"
+    step_number: 6
+    description: "Conduct sensitivity analyses to assess robustness of domain-specificity findings"
+    
+    analysis_call:
+      type: "stdlib"
+      description: "Comprehensive sensitivity analysis using multiple statistical approaches"
+    
+    input_files:
+      - path: "results/ch7/7.4.2/data/step03_analysis_dataset.csv"
+        description: "Complete analysis dataset"
+        required_columns: ["UID", "bvmt_total", "Where_mean", "What_mean"]
+      - path: "results/ch7/7.4.2/data/step05_steiger_test.csv"
+        description: "Primary test results for comparison"
+        required_columns: ["z_statistic", "p_uncorrected"]
+    
+    output_files:
+      - path: "results/ch7/7.4.2/data/step06_sensitivity_analysis.csv"
+        description: "Sensitivity analysis results with robustness checks"
+        columns: ["analysis_type", "method", "result", "confidence_interval", "n_used", "notes"]
+    
+    stdlib_operations:
+      - name: "outlier_analysis"
+        description: "Identify outliers using Cook's D and recompute without outliers"
+        functions:
+          - "scipy.stats.zscore"  # Standardized residuals
+          - "numpy.where"  # Outlier identification
+          - "pandas.DataFrame.drop"  # Remove outliers
+      
+      - name: "alternative_methods"
+        description: "Compute Spearman and Kendall correlations for comparison"
+        functions:
+          - "scipy.stats.spearmanr"  # Non-parametric correlation
+          - "scipy.stats.kendalltau"  # Alternative non-parametric
+      
+      - name: "cross_validation"
+        description: "5-fold cross-validation to assess stability"
+        functions:
+          - "sklearn.model_selection.KFold"  # CV splitting
+          - "numpy.mean"  # Mean CV correlation
+          - "numpy.std"  # CV standard deviation
+      
+      - name: "power_analysis"
+        description: "Post-hoc power for observed effect sizes"
+        functions:
+          - "scipy.stats.norm.ppf"  # Critical values
+          - "numpy.sqrt"  # Standard error calculations
+    
+    parameters:
+      outlier_threshold: 3.29  # Standardized residuals
+      cv_folds: 5
+      cv_seed: 42
+      power_analysis: true
+      alpha_corrected: 0.00179
+    
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_completeness"
+      signature: "validate_data_completeness(df: pd.DataFrame, expected_n: int, required_cols: List[str]) -> Dict[str, Any]"
+    
+    validation_criteria:
+      - "All planned sensitivity analyses completed"
+      - "Outlier analysis documents effect on conclusions"
+      - "Alternative methods provide consistent results"
+      - "Cross-validation shows adequate stability"
+      - "Power analysis included for observed effects"
+    
+    failure_behavior:
+      action: "raise ValueError"
+      log_to: "results/ch7/7.4.2/logs/step06_sensitivity_analysis.log"
+      invoke: "g_debug"
+
+# =============================================================================
+# EXECUTION PARAMETERS
+# =============================================================================
+
+execution:
+  runtime_estimate: "45 minutes"
+  
+  random_seeds:
+    bootstrap: 42
+    cross_validation: 42
+    general: 42
+  
+  statistical_parameters:
+    alpha_uncorrected: 0.05
+    alpha_corrected: 0.00179  # Bonferroni: 0.05/28
+    bootstrap_iterations: 1000
+    confidence_level: 0.95
+    
+  file_format_requirements:
+    models: ".pkl"  # Not applicable to this analysis
+    data: ".csv"
+    logs: ".log"
+    text_summaries: ".txt"
+    
+  data_requirements:
+    min_participants: 100
+    max_missing_percentage: 5.0
+    theta_range: [-3.0, 3.0]
+    bvmt_range: [0, 36]
+
+# =============================================================================
+# CRITICAL NOTES FOR G_CODE
+# =============================================================================
+
+critical_notes:
+  data_source: "CRITICAL: Ch7 uses data/dfnonvr.csv ONLY. Never use master.xlsx or cache files."
+  
+  column_names: "Use exact column names from DATA_DICTIONARY.md: bvmt-total-recall (not BVMT_TotR)"
+  
+  hierarchical_paths: "ALL output paths must use results/ch7/7.4.2/ structure"
+  
+  module_verification: "All modules/functions verified to exist in tools/*.py files"
+  
+  dual_p_values: "Decision D068: Report both uncorrected and Bonferroni-corrected p-values"
+  
+  hypothesis: "Tests domain-specificity: r(BVMT, Where) > r(BVMT, What)"
+
+# =============================================================================
+# CROSS-RQ DEPENDENCIES
+# =============================================================================
+
+dependencies:
+  required_rqs:
+    - rq_id: "ch5/5.2.1"
+      status: "must_be_complete"
+      required_files:
+        - "results/ch5/5.2.1/data/step03_theta_scores.csv"
+      fallback_files:
+        - "results/ch5/5.2.2/data/step03_theta_scores.csv"
+      
+  source_data:
+    primary: "data/dfnonvr.csv"
+    backup: null
+    note: "Ch7 uses prepared data files, not raw master.xlsx"
+
+# =============================================================================
+# END OF ANALYSIS RECIPE
+# =============================================================================

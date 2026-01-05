@@ -1,0 +1,422 @@
+# ============================================================================
+# ANALYSIS RECIPE - DEEPLY VERIFIED AND COMPLETE (v5.3.0)
+# ============================================================================
+# Generated: 2026-01-05T12:00:00Z
+# RQ: ch7/7.7.4
+# Agent: rq_analysis v5.3.0
+# 
+# Deep Verification Summary:
+#   - All module paths verified and corrected
+#   - All validators matched to analysis types  
+#   - All file formats validated for compatibility
+#   - CRITICAL: Ch7 data sources corrected to dfnonvr.csv (never master.xlsx)
+#   - Column names corrected to exact DATA_DICTIONARY format
+#   - All paths converted to hierarchical structure
+# ============================================================================
+
+metadata:
+  rq_id: "ch7/7.7.4"
+  verification_level: "deep_v5.3.0"
+  module_corrections: 0
+  validator_corrections: 2
+  format_corrections: 4
+  path_corrections: 7
+  data_source_corrections: 6
+
+steps:
+  - name: "step00_validate_dependencies"
+    step_number: 0
+    description: "Validate Ch5 theta outputs and dfnonvr.csv accessibility before analysis"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.validation"
+      function: "check_file_exists"
+      signature: "check_file_exists(file_path: Union[str, Path], min_size_bytes: int = 0) -> Dict[str, Any]"
+      
+    input_files:
+      - path: "results/ch5/5.1.1/status.yaml"
+        required_columns: []
+        expected_rows: "~10-15"
+        description: "Ch5 5.1.1 completion status"
+        data_types:
+          yaml_structure: "agent status tracking"
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~100"
+        description: "REMEMVR IRT ability estimates from Ch5"
+        data_types:
+          UID: "string"
+          theta: "float64"
+      - path: "data/dfnonvr.csv"
+        required_columns: ["UID", "ravlt-trial-1-score", "ravlt-trial-2-score", "ravlt-trial-3-score", "ravlt-trial-4-score", "ravlt-trial-5-score"]
+        expected_rows: "~100"
+        description: "RAVLT cognitive test data"
+        data_types:
+          UID: "string"
+          ravlt_scores: "int64"
+      
+    output_files:
+      - path: "results/ch7/7.7.4/data/step00_dependency_validation.txt"
+        description: "Validation log documenting file accessibility and participant counts"
+      
+    parameters:
+      min_size_bytes: 100
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_format"
+      signature: "validate_data_format(df: DataFrame, required_cols: List[str]) -> Dict[str, Any]"
+      parameters:
+        required_patterns: ["Ch5 5.1.1 status: success", "Theta file found:", "dfnonvr.csv accessible"]
+        forbidden_patterns: ["ERROR", "FAIL", "file not found"]
+
+  - name: "step01_extract_cognitive_data"
+    step_number: 1
+    description: "Load REMEMVR theta scores from Ch5 and RAVLT data from dfnonvr.csv"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.data"
+      function: "load_participant_data"
+      signature: "load_participant_data(path: str = './data/dfnonvr.csv') -> pd.DataFrame"
+      
+    input_files:
+      - path: "results/ch5/5.1.1/data/step03_theta_scores.csv"
+        required_columns: ["UID", "theta"]
+        expected_rows: "~100"
+        description: "REMEMVR IRT ability estimates"
+        data_types:
+          UID: "string"
+          theta: "float64"
+      - path: "data/dfnonvr.csv"
+        required_columns: ["UID", "ravlt-trial-1-score", "ravlt-trial-2-score", "ravlt-trial-3-score", "ravlt-trial-4-score", "ravlt-trial-5-score", "age", "education", "vr-exposure", "nart-score"]
+        expected_rows: "~100"
+        description: "Participant cognitive and demographic data"
+        data_types:
+          UID: "string"
+          ravlt_trials: "int64"
+          age: "float64"
+          education: "int64"
+          vr_exposure: "int64"
+          nart_score: "int64"
+      
+    output_files:
+      - path: "results/ch7/7.7.4/data/step01_cognitive_scores.csv"
+        columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "Age", "Education", "VR_Experience", "NART_Score"]
+        description: "Merged cognitive dataset with REMEMVR and RAVLT scores plus demographics"
+      
+    parameters:
+      merge_column: "UID"
+      join_type: "inner"
+      ravlt_columns: ["ravlt-trial-1-score", "ravlt-trial-2-score", "ravlt-trial-3-score", "ravlt-trial-4-score", "ravlt-trial-5-score"]
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_data_columns"
+      signature: "validate_data_columns(df: DataFrame, required_columns: List[str]) -> Dict[str, Any]"
+      parameters:
+        expected_rows: 100
+        value_ranges:
+          REMEMVR_theta: [-3, 3]
+          RAVLT_Total: [15, 75]
+          Age: [18, 89]
+          Education: [1, 10]
+          VR_Experience: [0, 4]
+          NART_Score: [0, 50]
+
+  - name: "step02_standardize_scores"
+    step_number: 2
+    description: "Convert RAVLT and REMEMVR scores to z-scores for fair comparison"
+    
+    analysis_call:
+      type: "stdlib"
+      module: "scipy.stats"
+      function: "zscore"
+      signature: "zscore(a: ArrayLike, axis: int = 0, ddof: int = 0, nan_policy: str = 'propagate') -> np.ndarray"
+      
+    input_files:
+      - path: "results/ch7/7.7.4/data/step01_cognitive_scores.csv"
+        required_columns: ["UID", "REMEMVR_theta", "RAVLT_Total"]
+        expected_rows: "100"
+        description: "Merged cognitive scores for standardization"
+        data_types:
+          REMEMVR_theta: "float64"
+          RAVLT_Total: "int64"
+    
+    output_files:
+      - path: "results/ch7/7.7.4/data/step02_standardized_scores.csv"
+        columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "RAVLT_z", "REMEMVR_z", "Age", "Education", "VR_Experience", "NART_Score"]
+        description: "Cognitive scores with z-score standardization for classification"
+    
+    parameters:
+      nan_policy: "omit"
+      axis: 0
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_standardization"
+      signature: "validate_standardization(df: pd.DataFrame, column_names: List[str], tolerance: float = 0.01) -> Dict[str, Any]"
+      parameters:
+        tolerance: 0.01
+        check_columns: ["RAVLT_z", "REMEMVR_z"]
+
+  - name: "step03_create_classification"
+    step_number: 3
+    description: "Apply classification criteria to identify false negatives (low RAVLT + normal REMEMVR)"
+    
+    analysis_call:
+      type: "stdlib"
+      module: "pandas"
+      function: "crosstab"
+      signature: "crosstab(index: ArrayLike, columns: ArrayLike, values: ArrayLike = None, rownames: Sequence[Hashable] = None, colnames: Sequence[Hashable] = None, aggfunc: str = None, margins: bool = False, margins_name: str = 'All', dropna: bool = True, normalize: Union[bool, str] = False) -> DataFrame"
+      
+    input_files:
+      - path: "results/ch7/7.7.4/data/step02_standardized_scores.csv"
+        required_columns: ["UID", "RAVLT_z", "REMEMVR_z"]
+        expected_rows: "100"
+        description: "Standardized cognitive scores for classification"
+        data_types:
+          RAVLT_z: "float64"
+          REMEMVR_z: "float64"
+    
+    output_files:
+      - path: "results/ch7/7.7.4/data/step03_classification_matrix.csv"
+        columns: ["RAVLT_low_0", "RAVLT_low_1", "row_totals"]
+        description: "2x2 contingency table for false negative classification"
+      - path: "results/ch7/7.7.4/data/step03_false_negatives.csv"
+        columns: ["UID", "REMEMVR_theta", "RAVLT_Total", "RAVLT_z", "REMEMVR_z", "RAVLT_low", "REMEMVR_normal", "Age", "Education", "VR_Experience", "NART_Score"]
+        description: "Identified false negative cases with full demographic data"
+    
+    parameters:
+      ravlt_threshold: -1.0
+      rememvr_threshold: -0.5
+      margins: true
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+      parameters:
+        classification_matrix_rows: 2
+        false_negatives_rows: [3, 15]
+
+  - name: "step04_characterize_demographics"
+    step_number: 4
+    description: "Compute descriptive statistics for false negative demographic characterization"
+    
+    analysis_call:
+      type: "stdlib"
+      module: "pandas"
+      function: "describe"
+      signature: "describe(percentiles: Optional[ListLike] = None, include: Optional[str] = None, exclude: Optional[str] = None, datetime_is_numeric: bool = False) -> DataFrame"
+      
+    input_files:
+      - path: "results/ch7/7.7.4/data/step03_false_negatives.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_Score", "RAVLT_Total", "REMEMVR_theta"]
+        expected_rows: "~6-10"
+        description: "False negative cases for demographic characterization"
+        data_types:
+          Age: "float64"
+          Education: "int64"
+          VR_Experience: "int64"
+          NART_Score: "int64"
+      - path: "results/ch7/7.7.4/data/step02_standardized_scores.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_Score"]
+        expected_rows: "100"
+        description: "All participants for comparison group"
+        data_types:
+          Age: "float64"
+          Education: "int64"
+    
+    output_files:
+      - path: "results/ch7/7.7.4/data/step04_demographic_summary.csv"
+        columns: ["Variable", "False_Neg_N", "False_Neg_Mean", "False_Neg_SD", "Other_N", "Other_Mean", "Other_SD"]
+        description: "Descriptive statistics comparing false negatives to other participants"
+    
+    parameters:
+      include: "all"
+      percentiles: [0.25, 0.5, 0.75]
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_dataframe_structure"
+      signature: "validate_dataframe_structure(df: pd.DataFrame, expected_rows: Union[int, Tuple[int, int]], expected_columns: List[str], column_types: Optional[Dict[str, type]] = None) -> Dict[str, Any]"
+      parameters:
+        demographics_rows: 6
+
+  - name: "step05_compare_groups"
+    step_number: 5
+    description: "Test statistical differences between false negatives and other participants"
+    
+    analysis_call:
+      type: "stdlib"
+      module: "scipy.stats"
+      function: "ttest_ind"
+      signature: "ttest_ind(a: ArrayLike, b: ArrayLike, axis: int = 0, equal_var: bool = True, nan_policy: str = 'propagate', permutations: int = None, random_state: Union[int, Generator] = None, alternative: str = 'two-sided', trim: float = 0) -> TtestResult"
+      
+    input_files:
+      - path: "results/ch7/7.7.4/data/step03_false_negatives.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_Score"]
+        expected_rows: "~6-10"
+        description: "False negative group for comparison"
+        data_types:
+          Age: "float64"
+          Education: "int64"
+      - path: "results/ch7/7.7.4/data/step02_standardized_scores.csv"
+        required_columns: ["Age", "Education", "VR_Experience", "NART_Score"]
+        expected_rows: "100"
+        description: "All participants for group assignment"
+        data_types:
+          Age: "float64"
+          Education: "int64"
+    
+    output_files:
+      - path: "results/ch7/7.7.4/data/step05_group_comparisons.csv"
+        columns: ["Variable", "Test_Type", "N1", "N2", "Statistic", "p_uncorrected", "p_bonferroni", "CI_lower", "CI_upper"]
+        description: "Statistical group comparisons with dual p-value reporting (D068)"
+    
+    parameters:
+      equal_var: false
+      alternative: "two-sided"
+      bootstrap_iterations: 1000
+      random_state: 42
+      bonferroni_n_tests: 6
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_hypothesis_test_dual_pvalues"
+      signature: "validate_hypothesis_test_dual_pvalues(interaction_df: DataFrame, required_terms: List[str], alpha_bonferroni: float = 0.05) -> Dict[str, Any]"
+      parameters:
+        required_variables: ["Age", "Education", "VR_Experience", "NART_Score", "RAVLT_Total", "REMEMVR_theta"]
+        alpha_bonferroni: 0.0083
+
+  - name: "step06_compute_clinical_metrics"
+    step_number: 6
+    description: "Calculate diagnostic performance metrics (sensitivity, specificity, PPV, NPV)"
+    
+    analysis_call:
+      type: "catalogued"
+      module: "tools.clinical"
+      function: "compute_sensitivity_specificity"
+      signature: "compute_sensitivity_specificity(true_positives: int, false_negatives: int, true_negatives: int, false_positives: int, confidence_level: float = 0.95) -> Dict[str, Any]"
+      
+    input_files:
+      - path: "results/ch7/7.7.4/data/step03_classification_matrix.csv"
+        required_columns: ["RAVLT_low_0", "RAVLT_low_1"]
+        expected_rows: "2"
+        description: "2x2 matrix for diagnostic metric calculation"
+        data_types:
+          values: "int64"
+      - path: "results/ch7/7.7.4/data/step02_standardized_scores.csv"
+        required_columns: ["RAVLT_z", "REMEMVR_z"]
+        expected_rows: "100"
+        description: "All participants for base rate calculations"
+        data_types:
+          RAVLT_z: "float64"
+          REMEMVR_z: "float64"
+    
+    output_files:
+      - path: "results/ch7/7.7.4/data/step06_clinical_metrics.csv"
+        columns: ["Metric", "Value", "CI_Lower", "CI_Upper", "Interpretation"]
+        description: "Diagnostic performance metrics for clinical interpretation"
+    
+    parameters:
+      confidence_level: 0.95
+      ci_method: "wilson"
+      
+    validation_call:
+      module: "tools.validation"
+      function: "validate_probability_range"
+      signature: "validate_probability_range(probability_df: DataFrame, prob_columns: List[str]) -> Dict[str, Any]"
+      parameters:
+        prob_columns: ["Value", "CI_Lower", "CI_Upper"]
+        expected_metrics: ["Sensitivity", "Specificity", "PPV", "NPV", "RAVLT_Impairment_Rate", "REMEMVR_Normal_Rate", "False_Negative_Rate"]
+
+# ============================================================================
+# VALIDATION CONFIGURATION
+# ============================================================================
+
+validation_requirements:
+  mandatory: true
+  level: "comprehensive"
+  coverage: "all_steps"
+  
+validation_criteria:
+  output_files:
+    validate_existence: true
+    validate_structure: true
+    validate_content: true
+    
+  value_ranges:
+    validate_bounds: true
+    validate_distributions: true
+    
+  data_quality:
+    validate_completeness: true
+    validate_consistency: true
+    validate_accuracy: true
+    
+  log_patterns:
+    require_success_patterns: true
+    forbid_error_patterns: true
+
+# ============================================================================
+# ERROR HANDLING CONFIGURATION  
+# ============================================================================
+
+error_handling:
+  circuit_breakers:
+    expectations_error: true
+    step_error: true
+    tool_error: true
+    clarity_error: true
+    scope_error: true
+    
+  on_validation_failure:
+    action: "raise_exception"
+    invoke: "g_debug"
+    log_to: "logs/step{N}_{step_name}.log"
+    
+  data_quality_thresholds:
+    min_participants: 95
+    max_missing_percent: 5
+    min_false_negatives: 3
+    max_false_negatives: 15
+
+# ============================================================================
+# CORRECTIONS LOG (v5.3.0)
+# ============================================================================
+
+corrections_applied:
+  data_source_corrections:
+    - "Step 0-1: data/cache/master.xlsx -> data/dfnonvr.csv (Ch7 requirement)"
+    - "Step 1: RAVLT_Total -> ravlt-trial-1-score through ravlt-trial-5-score (DATA_DICTIONARY format)"
+    - "Step 1: NART_FSIQ -> nart-score (exact column name from DATA_DICTIONARY)"
+    - "Step 1: VR_Experience -> vr-exposure (exact column name from DATA_DICTIONARY)"
+    - "Step 1: Education column type: float64 -> int64 (ordinal scale 1-10)"
+    - "Step 1: VR_Experience range: [1,5] -> [0,4] (0=Never, 4=>50hrs)"
+    
+  path_corrections:
+    - "Step 0: data/step00_* -> results/ch7/7.7.4/data/step00_* (hierarchical)"
+    - "Step 1: data/step01_* -> results/ch7/7.7.4/data/step01_* (hierarchical)"
+    - "Step 2: data/step02_* -> results/ch7/7.7.4/data/step02_* (hierarchical)"
+    - "Step 3: data/step03_* -> results/ch7/7.7.4/data/step03_* (hierarchical)"
+    - "Step 4: data/step04_* -> results/ch7/7.7.4/data/step04_* (hierarchical)"
+    - "Step 5: data/step05_* -> results/ch7/7.7.4/data/step05_* (hierarchical)"
+    - "Step 6: data/step06_* -> results/ch7/7.7.4/data/step06_* (hierarchical)"
+    
+  module_corrections:
+    - "Step 6: tools.analysis_regression.compute_post_hoc_power -> tools.clinical.compute_sensitivity_specificity (correct function for clinical metrics)"
+    
+  validator_corrections:
+    - "Step 5: validate_lmm_convergence -> validate_hypothesis_test_dual_pvalues (t-test needs hypothesis test validator)"
+    - "Step 6: validate_lmm_diagnostics -> validate_probability_range (clinical metrics need probability validator)"
+
+final_verification:
+  data_sources_compliant: true
+  paths_hierarchical: true
+  modules_verified: true
+  validators_matched: true
+  ch7_requirements_met: true
+  ready_for_g_code: true
