@@ -1,0 +1,37 @@
+{
+  "status": "success",
+  "state_md_tokens": 19295,
+  "tokens_archived": 14353,
+  "topics_updated": [
+    "data_dictionary_creation", 
+    "ch7_data_integrity_complete",
+    "rq_analysis_v5_3_verified", 
+    "anti_rushing_protocols_implemented",
+    "metacognitive_dissociation_confirmed"
+  ],
+  "archive_index_updated": true,
+  "entries_archived": 5,
+  "errors": [],
+  "curation_details": {
+    "original_tokens": 33648,
+    "final_tokens": 19295,
+    "reduction": 14353,
+    "sessions_archived": [
+      "Session 2026-01-05 19:00 - Ch7 data integrity fixes",
+      "Session 2026-01-05 20:30 - Ch7 analysis.yaml creation"
+    ],
+    "sessions_preserved": [
+      "Session 2026-01-05 21:30 - RQ 7.3.1 + anti-rushing protocols",
+      "Session 2026-01-05 22:45 - RQ 7.3.2 + metacognitive dissociation"
+    ],
+    "new_topics_created": [
+      "ch7_data_integrity_complete",
+      "rq_analysis_v5_3_verified", 
+      "anti_rushing_protocols_implemented",
+      "metacognitive_dissociation_confirmed"
+    ],
+    "existing_topics_updated": [
+      "data_dictionary_creation"
+    ]
+  }
+}
