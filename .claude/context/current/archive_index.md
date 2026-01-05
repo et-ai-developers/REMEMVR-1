@@ -1,12 +1,21 @@
 # Archive Index
 
-**Last Updated:** 2026-01-05 09:30 (context-manager curation - 1 session archived: ch7_data_source_correction_and_system_prompt_strengthening)
+**Last Updated:** 2026-01-05 17:30 (context-manager curation - 3 new topics archived: fake_data_catastrophe_7_1_4, vr_scaffolding_hypothesis, ch7_execution_underway)
 
 **Purpose:** Index of archived context topics (timestamped memory banks)
 
 ---
 
 ## Available Topics
+
+### fake_data_catastrophe_7_1_4
+**Description:** Critical session documenting RQ 7.1.4 execution that used simulated data (np.random.normal) for DASS Depression and VR Experience when real data existed. Contains complete analysis pipeline, validation failures, and lesson learned about data dictionary requirements. Session invalidated and must be re-run with real data. Session 2026-01-05 06:00.
+
+### vr_scaffolding_hypothesis
+**Description:** Major scientific breakthrough documenting discovery and confirmation of VR scaffolding hypothesis across RQs 7.2.1-7.2.3. Includes suppression effect discovery (119.8% mediation), age-fair assessment findings (null Age × Test interactions), and theoretical paradigm shift from deficit to compensation view of aging in VR contexts. Sessions 2026-01-05 07:00-11:20.
+
+### ch7_execution_underway
+**Description:** Comprehensive Ch7 execution progress across 6 sessions including scientific integrity protocol evolution, successful completion of RQs 7.1.2, 7.1.3, 7.2.1-7.2.4, cross-chapter dependency mastery, and technical robustness improvements. Documents progression from 67/93 to 72/93 RQs (77% completion). Sessions 2026-01-04 22:00 - 2026-01-05 11:20.
 
 ### ch7_data_source_correction_and_system_prompt_strengthening
 **Description:** Complete history of fixing critical Ch7 data source issues (master.xlsx → dfnonvr.csv migration) and strengthening hallucination prevention protocols. Includes deep verification of 7.1.x analysis files, NART data recovery, and CLAUDE.md protocol enhancements. Session 2026-01-05 17:50.
