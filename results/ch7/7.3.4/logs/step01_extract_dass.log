@@ -1,0 +1,29 @@
+[START] Step 01: extract_dass_scores
+[LOAD] Loading participant data from dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 participants, 235 columns)
+[VERIFY] Found all 3 DASS columns: ['total-dass-depression-items', 'total-dass-anxiety-items', 'total-dass-stress-items']
+[EXTRACT] Extracting DASS Depression, Anxiety, and Stress scores...
+[CLEAN] Retained 100/100 participants with complete DASS data
+[STANDARDIZE] Computing z-scores for all 3 DASS subscales...
+[OUTLIERS] Checking for extreme z-scores (|z| > 3.29)...
+[OUTLIERS] z_Dep: 1 extreme values (|z| > 3.29)
+[OUTLIERS] z_Anx: 3 extreme values (|z| > 3.29)
+[OUTLIERS] z_Str: 1 extreme values (|z| > 3.29)
+[DONE] DASS extraction complete
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.3.4/data/step01_dass_scores.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.3.4/data/step01_dass_scores.csv (100 participants, 7 columns)
+[DESCRIPTIVES] DASS raw score statistics:
+[DESCRIPTIVES] DASS_Dep: Mean=2.32, SD=3.27, Range=[0.0, 17.0]
+[DESCRIPTIVES] DASS_Anx: Mean=1.44, SD=2.38, Range=[0.0, 12.0]
+[DESCRIPTIVES] DASS_Str: Mean=3.34, SD=3.60, Range=[0.0, 16.0]
+[CORRELATIONS] DASS subscale intercorrelations:
+[CORRELATIONS] Depression-Anxiety: r=0.423
+[CORRELATIONS] Depression-Stress: r=0.649
+[CORRELATIONS] Anxiety-Stress: r=0.717
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] z_Dep: Mean=0.0000, SD=1.0000
+[VALIDATION] z_Anx: Mean=-0.0000, SD=1.0000
+[VALIDATION] z_Str: Mean=0.0000, SD=1.0000
+[VALIDATION] WARNING: Some z-scores outside expected range
+[VALIDATION] DASS intercorrelations in expected range [0.3, 0.8]
+[SUCCESS] Step 01 complete

@@ -1,0 +1,10 @@
+comparison,predictor,model1,model2,beta_diff,ci_lower,ci_upper,p_uncorrected,p_bonferroni,p_fdr,effect_size,effect_interpretation,direction,significant_bonferroni,significant_fdr,n_bootstrap_successful
+confidence_vs_accuracy_depression,z_Dep,confidence,theta_accuracy,0.010610532335101085,-0.19727344027441351,0.20692455772068893,0.976,1.0,0.976,0.010610532335101085,negligible,confidence > theta_accuracy,False,False,1000
+calibration_vs_accuracy_depression,z_Dep,calibration,theta_accuracy,0.006728734211178047,-0.27065021200003164,0.2044562443174014,0.9199999999999999,1.0,0.976,0.006728734211178047,negligible,calibration > theta_accuracy,False,False,1000
+confidence_vs_calibration_depression,z_Dep,confidence,calibration,0.0038817981239230373,-0.16071904193969114,0.23555727522239864,0.878,1.0,0.976,0.0038817981239230373,negligible,confidence > calibration,False,False,1000
+confidence_vs_accuracy_anxiety,z_Anx,confidence,theta_accuracy,-0.08467066712336148,-0.298267987915,0.11874606470765078,0.452,1.0,0.976,0.08467066712336148,negligible,theta_accuracy > confidence,False,False,1000
+calibration_vs_accuracy_anxiety,z_Anx,calibration,theta_accuracy,-0.16835114419234454,-0.44593611497517627,0.05379955568117996,0.15,1.0,0.976,0.16835114419234454,small,theta_accuracy > calibration,False,False,1000
+confidence_vs_calibration_anxiety,z_Anx,confidence,calibration,0.08368047706898307,-0.08804883284568402,0.25876732094180954,0.312,1.0,0.976,0.08368047706898307,negligible,confidence > calibration,False,False,1000
+confidence_vs_accuracy_stress,z_Str,confidence,theta_accuracy,-0.03679784523354872,-0.26343924206246155,0.20990072590455366,0.832,1.0,0.976,0.03679784523354872,negligible,theta_accuracy > confidence,False,False,1000
+calibration_vs_accuracy_stress,z_Str,calibration,theta_accuracy,-0.06308444113133788,-0.3086348694709014,0.2298632456726845,0.706,1.0,0.976,0.06308444113133788,negligible,theta_accuracy > calibration,False,False,1000
+confidence_vs_calibration_stress,z_Str,confidence,calibration,0.026286595897789165,-0.18294824352319192,0.23169230228518384,0.854,1.0,0.976,0.026286595897789165,negligible,confidence > calibration,False,False,1000

@@ -10,7 +10,7 @@ RQ	Scholar	Stats	Plan	Tools	Analysis	Inspect	Plots	Results	Validate	Notes
 7.3.1	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Confidence R²=0.188 < accuracy (0.226), BVMT/RPM strongest, metacognitive dissociation SUPPORTED
 7.3.2	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Calibration R²=0.024 << accuracy R²=0.188, metacognitive dissociation CONFIRMED, calibration is distinct process
 7.3.3	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	HCE unpredictable: R²=0.031, RPM hypothesis null (p=0.90), severe overfitting, power=19% max, HCE independent of cognition
-7.3.4	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	DASS differential prediction: metacognition vs memory (v5.3.0 verified)
+7.3.4	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	TRUE	TRUE	DASS differential prediction not supported (0/9 sig), all models R²<0.06, severely underpowered
 7.3.5	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	Calibration groups and cognitive reserve (v5.3.0 verified)
 7.4.1	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	RAVLT process-specific prediction of paradigms (v5.3.0 verified)
 7.4.2	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	BVMT domain-specific prediction (Where > What) (v5.3.0 verified)

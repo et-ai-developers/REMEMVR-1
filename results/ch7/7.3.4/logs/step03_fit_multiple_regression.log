@@ -1,0 +1,71 @@
+[START] Step 03: Fit Multiple Regression Models
+[LOAD] Loading analysis dataset...
+[LOADED] step02_analysis_dataset.csv (100 rows, 7 cols)
+[CHECK] All required columns present: ['z_Dep', 'z_Anx', 'z_Str', 'theta_accuracy', 'confidence', 'calibration']
+[SETUP] Predictors: ['z_Dep', 'z_Anx', 'z_Str']
+[SETUP] Models: ['accuracy_model', 'confidence_model', 'calibration_model']
+[SETUP] Sample size: N = 100
+[ANALYSIS] Fitting multiple regression models...
+[MODEL] Fitting accuracy_model (outcome: theta_accuracy)...
+[DONE] accuracy_model: R² = 0.051, F-test p = 0.1683
+[MODEL] Fitting confidence_model (outcome: confidence)...
+[DONE] confidence_model: R² = 0.031, F-test p = 0.3924
+[MODEL] Fitting calibration_model (outcome: calibration)...
+[DONE] calibration_model: R² = 0.017, F-test p = 0.6397
+[ANALYSIS] All 3 models fitted successfully
+[SAVE] Saving model results...
+[SAVED] step03_model_results.csv (9 rows, 10 cols)
+[SAVE] Saving model diagnostics...
+[SAVED] step03_model_diagnostics.csv (3 rows, 8 cols)
+[VALIDATION] Running model convergence validation...
+[VALIDATION] Checking accuracy_model...
+[ERROR] validate_model_convergence() got an unexpected keyword argument 'min_observations'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.3.4/code/step03_fit_multiple_regression.py", line 421, in <module>
+    validation_result = validate_model_convergence(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_model_convergence() got an unexpected keyword argument 'min_observations'
+[START] Step 03: Fit Multiple Regression Models
+[LOAD] Loading analysis dataset...
+[LOADED] step02_analysis_dataset.csv (100 rows, 7 cols)
+[CHECK] All required columns present: ['z_Dep', 'z_Anx', 'z_Str', 'theta_accuracy', 'confidence', 'calibration']
+[SETUP] Predictors: ['z_Dep', 'z_Anx', 'z_Str']
+[SETUP] Models: ['accuracy_model', 'confidence_model', 'calibration_model']
+[SETUP] Sample size: N = 100
+[ANALYSIS] Fitting multiple regression models...
+[MODEL] Fitting accuracy_model (outcome: theta_accuracy)...
+[DONE] accuracy_model: R² = 0.051, F-test p = 0.1683
+[MODEL] Fitting confidence_model (outcome: confidence)...
+[DONE] confidence_model: R² = 0.031, F-test p = 0.3924
+[MODEL] Fitting calibration_model (outcome: calibration)...
+[DONE] calibration_model: R² = 0.017, F-test p = 0.6397
+[ANALYSIS] All 3 models fitted successfully
+[SAVE] Saving model results...
+[SAVED] step03_model_results.csv (9 rows, 10 cols)
+[SAVE] Saving model diagnostics...
+[SAVED] step03_model_diagnostics.csv (3 rows, 8 cols)
+[VALIDATION] Running model convergence validation...
+[VALIDATION] Checking accuracy_model...
+[VALIDATION] accuracy_model valid: False
+[VALIDATION] accuracy_model message: Model object missing "converged" attribute. Cannot validate convergence.
+[VALIDATION] accuracy_model converged: False
+[VALIDATION] Checking confidence_model...
+[VALIDATION] confidence_model valid: False
+[VALIDATION] confidence_model message: Model object missing "converged" attribute. Cannot validate convergence.
+[VALIDATION] confidence_model converged: False
+[VALIDATION] Checking calibration_model...
+[VALIDATION] calibration_model valid: False
+[VALIDATION] calibration_model message: Model object missing "converged" attribute. Cannot validate convergence.
+[VALIDATION] calibration_model converged: False
+[VALIDATION] Summary checks:
+[CHECK] All 3 models converged: True
+[CHECK] 9 coefficient estimates: True
+[CHECK] Bootstrap CIs computed: True
+[CHECK] VIF < 5.0 check: True (max VIF = 2.07)
+[CHECK] Assumption tests completed: True
+[SUMMARY] Model performance:
+[SUMMARY] accuracy_model: R² = 0.051, Adj R² = 0.021
+[SUMMARY] confidence_model: R² = 0.031, Adj R² = 0.000
+[SUMMARY] calibration_model: R² = 0.017, Adj R² = -0.013
+[SUCCESS] Step 03 complete

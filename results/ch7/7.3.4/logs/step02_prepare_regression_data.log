@@ -1,0 +1,68 @@
+[START] Step 02: Prepare Regression Data
+[LOAD] Loading input data...
+[LOADED] DASS scores (100 rows, 7 cols)
+[LOADED] DASS columns: ['UID', 'DASS_Dep', 'DASS_Anx', 'DASS_Str', 'z_Dep', 'z_Anx', 'z_Str']
+[LOADED] Ch5 theta scores (400 rows, 3 cols)
+[LOADED] Ch5 columns: ['UID', 'test', 'Theta_All']
+[LOADED] Ch6 confidence scores (400 rows, 3 cols)
+[LOADED] Ch6 confidence columns: ['composite_ID', 'theta_All', 'se_All']
+[LOADED] Ch6 calibration scores (400 rows, 7 cols)
+[LOADED] Ch6 calibration columns: ['UID', 'test', 'composite_ID', 'TSVR_hours', 'z_theta_accuracy', 'z_theta_confidence', 'calibration']
+[TRANSFORM] Handling column name variations...
+[TRANSFORM] Renamed Theta_All -> theta in Ch5 data
+[TRANSFORM] Ch5 aggregated to participant level: 100 participants
+[TRANSFORM] Parsed UID from composite_ID and renamed theta_All -> theta_confidence
+[TRANSFORM] Ch6 confidence aggregated to participant level: 100 participants
+[TRANSFORM] Ch6 calibration aggregated to participant level: 100 participants
+[MERGE] Merging all datasets with inner join...
+[MERGE] Starting with DASS predictors: 100 participants
+[MERGE] After Ch5 theta merge: 100 participants
+[MERGE] After Ch6 confidence merge: 100 participants
+[MERGE] After Ch6 calibration merge: 100 participants
+[MERGE] Final dataset: 100 participants with complete data
+[MERGE] Final columns: ['UID', 'z_Dep', 'z_Anx', 'z_Str', 'theta_accuracy', 'confidence', 'calibration']
+[OUTLIERS] Checking for outliers in outcome variables...
+[OUTLIERS] theta_accuracy: 1 outliers (1.00%)
+[OUTLIERS] theta_accuracy: bounds = [-1.789, 1.776]
+[OUTLIERS] confidence: 1 outliers (1.00%)
+[OUTLIERS] confidence: bounds = [-1.437, 0.211]
+[OUTLIERS] calibration: 5 outliers (5.00%)
+[OUTLIERS] calibration: bounds = [-1.414, 1.536]
+[MISSING] Missing value check:
+[MISSING] UID: No missing values
+[MISSING] z_Dep: No missing values
+[MISSING] z_Anx: No missing values
+[MISSING] z_Str: No missing values
+[MISSING] theta_accuracy: No missing values
+[MISSING] confidence: No missing values
+[MISSING] calibration: No missing values
+[VARIANCE] Checking coefficient of variation for outcome variables...
+[CV] theta_accuracy: CV = 109.539 (mean=0.006, std=0.677)
+[CV] confidence: CV = 0.515 (mean=-0.633, std=0.326)
+[CV] calibration: CV = 24537584087350264.000 (mean=-0.000, std=0.654)
+[PASS] All outcome variables have sufficient variance (CV > 0.10)
+[SAVED] Analysis dataset: /home/etai/projects/REMEMVR/results/ch7/7.3.4/data/step02_analysis_dataset.csv
+[SAVED] Dataset shape: (100, 7) (rows, columns)
+[SUMMARY] Descriptive statistics for final dataset:
+[SUMMARY] z_Dep: mean=0.000, std=1.000, range=[-0.709, 4.487]
+[SUMMARY] z_Anx: mean=0.000, std=1.000, range=[-0.605, 4.438]
+[SUMMARY] z_Str: mean=0.000, std=1.000, range=[-0.927, 3.512]
+[SUMMARY] theta_accuracy: mean=0.006, std=0.677, range=[-1.954, 1.559]
+[SUMMARY] confidence: mean=-0.633, std=0.326, range=[-1.792, 0.089]
+[SUMMARY] calibration: mean=-0.000, std=0.654, range=[-1.969, 1.818]
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['z_Dep', 'confidence', 'theta_accuracy', 'z_Anx', 'z_Str', 'UID', 'calibration']
+[VALIDATION] n_required: 7
+[VALIDATION] n_missing: 0
+[VALIDATION] Checking analysis criteria...
+[VALIDATION] PASS - All 7 required columns present
+[VALIDATION] PASS - Sufficient sample size: N=100 >= 90
+[VALIDATION] PASS - No missing values in analysis dataset
+[VALIDATION] PASS - All outcome variables have CV > 0.10
+[VALIDATION] Checking DASS z-standardization...
+[VALIDATION] PASS - z_Dep: mean=0.000, std=1.000
+[VALIDATION] PASS - z_Anx: mean=0.000, std=1.000
+[VALIDATION] PASS - z_Str: mean=0.000, std=1.000
+[SUCCESS] Step 02 complete

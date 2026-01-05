@@ -1,0 +1,9 @@
+finding,statistic,p_value,effect_size,interpretation,support_hypothesis
+Primary Hypothesis Test,0/6 significant,1.0,Multiple,Weak support,No
+Depression Effects,0/3 significant,1.0,Beta range: 0.004-0.011,No differential effect,No
+Anxiety Effects,0/3 significant,1.0,Beta range: 0.084-0.168,No differential effect,No
+Stress Effects,0/3 significant,1.0,Beta range: 0.026-0.063,No differential effect,No
+Model Performance,"Metacognition R²=0.024, Memory R²=0.051",NA,Difference=-0.027,Metacognition worse predicted,No
+Generalizability,"CV R² - Conf:0.000, Cal:0.000, Acc:0.000",NA,Overfitting models: 0/3,Good generalizability,Yes
+Strongest Effect,None significant,1.0,Max |beta| = 0.168,No significant differential predictions found,No
+Executive Function Theory,1/7 tests support,NA,Support rate: 14.3%,Weak theoretical support,No

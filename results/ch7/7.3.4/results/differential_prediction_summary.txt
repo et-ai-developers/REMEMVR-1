@@ -1,0 +1,55 @@
+DASS DIFFERENTIAL PREDICTION ANALYSIS - RQ 7.3.4 SUMMARY
+
+RESEARCH QUESTION:
+Do DASS psychological measures (Depression, Anxiety, Stress) predict metacognitive accuracy (confidence, calibration) more strongly than memory accuracy (theta scores)?
+
+STATISTICAL DESIGN:
+- Three regression models: DASS predicting (1) memory accuracy, (2) confidence, (3) calibration
+- Bootstrap hypothesis testing: 9 pairwise model comparisons
+- Bonferroni correction: alpha = 0.0056 (0.05/9 comparisons)
+- Effect size guidelines: Cohen (1988)
+
+PRIMARY FINDINGS:
+
+1. OVERALL HYPOTHESIS SUPPORT: 1/8 tests support executive function theory
+   - Result: WEAK evidence for differential prediction
+   - Interpretation: DASS measures do not preferentially predict metacognition over memory
+
+2. SIGNIFICANT DIFFERENTIAL PREDICTIONS: 0/9 comparisons significant (p < 0.0056)
+
+   No significant differential predictions detected
+
+3. MODEL PERFORMANCE:
+   - Metacognition R²=0.024, Memory R²=0.051
+   - Metacognition worse predicted
+   - Generalizability: Good generalizability
+
+4. INDIVIDUAL DASS SUBSCALES:
+   - Depression: 0/3 significant (No differential effect)
+   - Anxiety: 0/3 significant (No differential effect)
+   - Stress: 0/3 significant (No differential effect)
+
+THEORETICAL IMPLICATIONS:
+
+Executive Function Theory Predictions:
+- Depression/anxiety/stress should impair metacognitive monitoring more than memory encoding
+- Metacognitive processes require executive control; memory encoding more automatic
+- Evidence: Weak theoretical support
+
+Clinical Relevance:
+- DASS measures assess psychological distress affecting executive function
+- Does not support theory that psychological distress preferentially impairs metacognition
+- Inconsistent with clinical models of depression/anxiety affecting self-monitoring
+
+METHODOLOGICAL NOTES:
+- Analysis used all 3 DASS subscales as originally planned (no missing data issues)
+- Bootstrap confidence intervals provide robust inference
+- Cross-validation assesses generalizability beyond sample
+- Bonferroni correction controls family-wise error rate
+
+CONCLUSION:
+The hypothesis that DASS psychological measures predict metacognitive accuracy more than memory accuracy receives WEAK empirical support. Executive function theory predictions are not supported by the differential prediction pattern analysis.
+
+Generated: 2026-01-05
+RQ: 7.3.4 (Chapter 7 - Psychological Predictors)
+Analysis: g_code step07_variance_decomposition.py

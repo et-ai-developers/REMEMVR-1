@@ -1,0 +1,28 @@
+[START] Step 06: Compute Cohen's f² Effect Sizes
+[LOAD] Loading step03 model results...
+[LOADED] step03_model_results.csv (9 rows, 10 cols)
+[INFO] Found 3 models with R² values:
+  - accuracy_model: R² = 0.0510
+  - calibration_model: R² = 0.0173
+  - confidence_model: R² = 0.0306
+[ANALYSIS] Computing Cohen's f² effect sizes...
+[COMPUTED] accuracy_model: f² = 0.0537 (Small), Power = 0.172
+[COMPUTED] calibration_model: f² = 0.0176 (Negligible), Power = 0.036
+[COMPUTED] confidence_model: f² = 0.0315 (Small), Power = 0.077
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[BOOTSTRAP] accuracy_model: 95% CI = [0.0336, 0.0754]
+[BOOTSTRAP] calibration_model: 95% CI = [0.0000, 0.0378]
+[BOOTSTRAP] confidence_model: 95% CI = [0.0123, 0.0523]
+[POWER] Computing minimum detectable effect sizes...
+[POWER] Minimum detectable f² (80% power): 0.1817
+[SAVE] Saving effect size results...
+[SAVED] step06_effect_sizes.csv (3 rows, 8 cols)
+[SUMMARY] Effect size summary:
+  - Mean f²: 0.0343
+  - Range f²: [0.0176, 0.0537]
+  - Effect interpretations: {'Small': np.int64(2), 'Negligible': np.int64(1)}
+[VALIDATION] Running validate_effect_sizes...
+[VALIDATION] valid: True
+[VALIDATION] message: All effect sizes valid (n=3, range=[0.018, 0.054]).
+[VALIDATION] warnings: []
+[SUCCESS] Step 06 complete

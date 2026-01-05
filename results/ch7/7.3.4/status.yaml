@@ -47,9 +47,14 @@ rq_plots:
   context_dump: ""
 
 rq_results:
-  status: pending
-  context_dump: ""
-
+  status: success
+  timestamp: 2026-01-05T08:45:00Z
+  context_dump: |
+    Results validated for scientific plausibility (WORKFLOW IRREGULARITY FLAGGED)
+    0/9 differential predictions significant (p > 0.0056)
+    Study severely underpowered (power < 20%), hypothesis not supported
+    Summary documented in results/summary.md
+    
 analysis_steps:
   # To be populated during execution
 
