@@ -1,0 +1,80 @@
+[START] Step 03: Merge Analysis Dataset
+[LOAD] Loading cognitive test data...
+[LOADED] step01_cognitive_tests.csv (100 rows, 8 cols)
+[INFO] Cognitive columns: ['uid', 'ravlt_total', 'bvmt_total', 'rpm_score', 'age', 'sex', 'education', 'nart_iq']
+[LOAD] Loading HCE rate data...
+[LOADED] step02_hce_rates.csv (100 rows, 2 cols)
+[INFO] HCE columns: ['UID', 'hce_rate']
+[PREP] Standardizing UID column names...
+[PREP] Cognitive data now has UID column (was uid)
+[ANALYSIS] Running merge_theta_cognitive...
+[ERROR] 'uid'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.3.3/code/step03_merge_analysis_dataset.py", line 158, in <module>
+    merged_df = merge_theta_cognitive(
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/data.py", line 225, in merge_theta_cognitive
+    return pd.merge(theta_df, cognitive_df, on='uid', how=how)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 170, in merge
+    op = _MergeOperation(
+         ^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 794, in __init__
+    ) = self._get_merge_keys()
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1298, in _get_merge_keys
+    right_keys.append(right._get_label_or_level_values(rk))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 1914, in _get_label_or_level_values
+    raise KeyError(key)
+KeyError: 'uid'
+[START] Step 03: Merge Analysis Dataset
+[LOAD] Loading cognitive test data...
+[LOADED] step01_cognitive_tests.csv (100 rows, 8 cols)
+[INFO] Cognitive columns: ['uid', 'ravlt_total', 'bvmt_total', 'rpm_score', 'age', 'sex', 'education', 'nart_iq']
+[LOAD] Loading HCE rate data...
+[LOADED] step02_hce_rates.csv (100 rows, 2 cols)
+[INFO] HCE columns: ['UID', 'hce_rate']
+[PREP] Standardizing UID column names...
+[PREP] HCE data now has uid column (was UID)
+[ANALYSIS] Running merge_theta_cognitive...
+[DONE] Merge complete
+[INFO] Merged dataset: 100 rows, 9 cols
+[INFO] Merged columns: ['uid', 'hce_rate', 'ravlt_total', 'bvmt_total', 'rpm_score', 'age', 'sex', 'education', 'nart_iq']
+[ANALYSIS] Creating centered predictors...
+[CENTERED] age -> age_c (mean=44.570)
+[CENTERED] ravlt_total -> ravlt_c (mean=50.600)
+[CENTERED] bvmt_total -> bvmt_c (mean=39.110)
+[CENTERED] rpm_score -> rpm_c (mean=9.870)
+[PREP] Standardizing final column names...
+[PREP] Final columns: ['uid', 'hce_rate', 'ravlt_total', 'bvmt_total', 'rpm_score', 'age', 'sex', 'education', 'nart_iq', 'age_c', 'ravlt_c', 'bvmt_c', 'rpm_c']
+[SAVE] Saving step03_analysis_dataset.csv...
+[SAVED] step03_analysis_dataset.csv (100 rows, 13 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['age', 'nart_iq', 'uid', 'age_c', 'hce_rate', 'sex', 'ravlt_c', 'education', 'rpm_score', 'ravlt_total', 'rpm_c', 'bvmt_total', 'bvmt_c']
+[VALIDATION] n_required: 7
+[VALIDATION] n_missing: 0
+[VALIDATION] Additional quality checks...
+[VALIDATION] Missing data summary:
+[VALIDATION]   uid: 0 missing
+[VALIDATION]   hce_rate: 0 missing
+[VALIDATION]   ravlt_total: 0 missing
+[VALIDATION]   bvmt_total: 0 missing
+[VALIDATION]   rpm_score: 0 missing
+[VALIDATION]   age: 0 missing
+[VALIDATION]   sex: 0 missing
+[VALIDATION]   education: 0 missing
+[VALIDATION]   nart_iq: 3 missing (3.0%)
+[VALIDATION]   age_c: 0 missing
+[VALIDATION]   ravlt_c: 0 missing
+[VALIDATION]   bvmt_c: 0 missing
+[VALIDATION]   rpm_c: 0 missing
+[VALIDATION] Centered variable means (should be ~0):
+[VALIDATION]   age_c: mean=0.000000
+[VALIDATION]   ravlt_c: mean=-0.000000
+[VALIDATION]   bvmt_c: mean=0.000000
+[VALIDATION]   rpm_c: mean=0.000000
+[SUCCESS] Step 03 complete

@@ -1,0 +1,51 @@
+[START] Step 08: Power analysis
+[LOAD] Loading model comparison results...
+[LOADED] step04_model_comparison.csv (2 rows, 8 cols)
+[LOAD] Loading effect sizes...
+[LOADED] step06_effect_sizes.csv (8 rows, 5 cols)
+[ANALYSIS] Setting up power analysis parameters...
+[PARAMS] Sample size: 100
+[PARAMS] Full model df: 6, denominator df: 93
+[PARAMS] Incremental df: 3
+[PARAMS] Alpha uncorrected: 0.05
+[PARAMS] Alpha corrected: 0.000448
+[POWER] Analyzing overall model power...
+[OVERALL] F-statistic: 0.4914
+[OVERALL] R²: 0.0307
+[OVERALL] Power (α=0.05): 0.1909 (inadequate)
+[OVERALL] Power (α=0.000448): 0.0066 (inadequate)
+[POWER] Analyzing incremental F-change power...
+[INCREMENTAL] F-change: 0.2113
+[INCREMENTAL] Power (α=0.05): 0.0883 (inadequate)
+[INCREMENTAL] Power (α=0.000448): 0.0015 (inadequate)
+[POWER] Analyzing individual predictor power...
+[INDIVIDUAL] ravlt_c: f²=0.0085
+[INDIVIDUAL] ravlt_c: Power (α=0.05)=0.1499 (inadequate)
+[INDIVIDUAL] ravlt_c: Power (α=0.000448)=0.0045 (inadequate)
+[INDIVIDUAL] bvmt_c: f²=0.0044
+[INDIVIDUAL] bvmt_c: Power (α=0.05)=0.1004 (inadequate)
+[INDIVIDUAL] bvmt_c: Power (α=0.000448)=0.0021 (inadequate)
+[INDIVIDUAL] rpm_c: f²=0.0014
+[INDIVIDUAL] rpm_c: Power (α=0.05)=0.0661 (inadequate)
+[INDIVIDUAL] rpm_c: Power (α=0.000448)=0.0009 (inadequate)
+[SENSITIVITY] Calculating minimum detectable effects...
+[SENSITIVITY] overall_model_uncorrected: Min f²=0.0199, Min R²=0.0195
+[SENSITIVITY] overall_model_corrected: Min f²=0.0252, Min R²=0.0246
+[SENSITIVITY] incremental_cognitive_uncorrected: Min f²=0.0295, Min R²=0.0287
+[SENSITIVITY] incremental_cognitive_corrected: Min f²=0.0474, Min R²=0.0452
+[RPM_HYPOTHESIS] Analyzing RPM hypothesis power...
+[RPM_HYPOTHESIS] Effect size f²: 0.0014
+[RPM_HYPOTHESIS] Power assessment: INADEQUATE_POWER
+[RPM_HYPOTHESIS] Minimum detectable individual f²: 0.2051
+[RPM_HYPOTHESIS] Observed effect below minimum detectable threshold
+[SAVE] Saving power analysis results...
+[SAVED] step08_power_analysis.csv (10 rows, 5 cols)
+[SAVED] step08_sensitivity.csv (4 rows, 4 cols)
+[VALIDATION] Running validate_numeric_range...
+[ERROR] validate_numeric_range() got an unexpected keyword argument 'values'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.3.3/code/step08_power_analysis.py", line 560, in <module>
+    validation_result = validate_numeric_range(
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_numeric_range() got an unexpected keyword argument 'values'

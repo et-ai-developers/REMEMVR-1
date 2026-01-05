@@ -1,0 +1,63 @@
+[START] Step 04: Hierarchical Regression
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 13 cols)
+[VALIDATE] All required columns present: ['hce_rate', 'age_c', 'sex', 'education', 'ravlt_c', 'bvmt_c', 'rpm_c']
+[INFO] HCE rate range: 0.000 to 0.215
+[PREPARE] Setting up hierarchical regression blocks...
+[PREPARED] Demographics block: 3 predictors
+[PREPARED] Full model block: 6 predictors
+[PREPARED] Sample size: N = 100
+[ANALYSIS] Running fit_hierarchical_regression...
+[DONE] Hierarchical regression complete
+[RESULTS] Demographics model R² = 0.0171
+[RESULTS] Full model R² = 0.0307
+[RESULTS] Incremental R² (cognitive) = 0.0137
+[RESULTS] F-change = 0.211, p = 0.972374
+[EXTRACT] Extracting coefficients with dual p-value reporting...
+[ERROR] 'numpy.ndarray' object has no attribute 'iloc'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.3.3/code/step04_hierarchical_regression.py", line 222, in <module>
+    'ci_lower': model_demo.conf_int().iloc[i, 0],
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'iloc'
+[START] Step 04: Hierarchical Regression
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 13 cols)
+[VALIDATE] All required columns present: ['hce_rate', 'age_c', 'sex', 'education', 'ravlt_c', 'bvmt_c', 'rpm_c']
+[INFO] HCE rate range: 0.000 to 0.215
+[PREPARE] Setting up hierarchical regression blocks...
+[PREPARED] Demographics block: 3 predictors
+[PREPARED] Full model block: 6 predictors
+[PREPARED] Sample size: N = 100
+[ANALYSIS] Running fit_hierarchical_regression...
+[DONE] Hierarchical regression complete
+[RESULTS] Demographics model R² = 0.0171
+[RESULTS] Full model R² = 0.0307
+[RESULTS] Incremental R² (cognitive) = 0.0137
+[RESULTS] F-change = 0.211, p = 0.972374
+[EXTRACT] Extracting coefficients with dual p-value reporting...
+[CORRECT] Applying multiple comparison corrections...
+[APPLIED] Bonferroni correction (α = 0.000448)
+[APPLIED] FDR correction (α = 0.05)
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[WARNING] Bootstrap CI computation failed: bootstrap_regression_ci() got an unexpected keyword argument 'confidence_level'
+[INFO] Using OLS confidence intervals for all models
+[COMPARE] Creating model comparison table...
+[CREATED] Model comparison table
+[SAVE] Saving regression results...
+[SAVED] step04_regression_results.csv (11 rows, 10 cols)
+[SAVED] step04_model_comparison.csv (2 rows, 8 cols)
+[KEY FINDINGS]
+  Demographics R² = 0.0171
+  Full model R² = 0.0307
+  Incremental R² (cognitive) = 0.0137
+  F-change = 0.211
+  p-value (uncorrected) = 0.972374
+  p-value significant at α = 0.000448? False
+[VALIDATION] Running validate_regression_assumptions...
+[VALIDATION] normality: PASS (stat=N/A, p=2.4787318728329263e-07)
+[VALIDATION] homoscedasticity: PASS (stat=N/A, p=0.23445994543622828)
+[VALIDATION] linearity: PASS (stat=N/A, p=N/A)
+[VALIDATION] independence: PASS (stat=N/A, p=N/A)
+[SUCCESS] Step 04 complete

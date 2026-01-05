@@ -1,0 +1,30 @@
+[START] Step 02: extract_hce_rates
+[LOAD] Loading HCE rates from Ch6 analysis...
+[LOADED] /home/etai/projects/REMEMVR/results/ch6/6.6.1/data/step01_hce_rates.csv (400 rows, 6 cols)
+[INFO] Columns found: ['UID', 'TEST', 'TSVR', 'HCE_rate', 'n_HCE', 'n_total']
+[INFO] Found 100 unique participants
+[INFO] Average 4.0 tests per participant
+[ANALYSIS] Aggregating HCE rates to participant level...
+[PASS] All HCE rates in valid [0,1] range
+[ANALYSIS] Aggregated to 100 participants
+[INFO] Mean tests per participant: 4.0
+[INFO] HCE rate range: 0.000 - 0.215
+[INFO] Mean HCE rate: 0.042 (SD = 0.036)
+[SAVE] Saving participant-level HCE rates...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.3.3/data/step02_hce_rates.csv (100 rows, 2 cols)
+[SUMMARY] Participant HCE rate statistics:
+  - N participants: 100
+  - Mean HCE rate: 0.0418
+  - SD HCE rate: 0.0356
+  - Min HCE rate: 0.0000
+  - Max HCE rate: 0.2153
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['hce_rate', 'UID']
+[VALIDATION] n_required: 2
+[VALIDATION] n_missing: 0
+[VALIDATION] Column validation PASSED
+[VALIDATION] Verifying HCE rates in [0,1] range...
+[VALIDATION] All final HCE rates in valid [0,1] range
+[SUCCESS] Step 02 complete

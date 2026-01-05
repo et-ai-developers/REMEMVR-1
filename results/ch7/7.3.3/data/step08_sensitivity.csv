@@ -1,0 +1,5 @@
+test,min_detectable_f2,min_detectable_r2,power_threshold
+overall_model_uncorrected,0.01986897115600171,0.0194818861225679,0.8
+overall_model_corrected,0.02522414436364874,0.024603541091304706,0.8
+incremental_cognitive_uncorrected,0.02952616404941477,0.028679372200974575,0.8
+incremental_cognitive_corrected,0.047375324577697435,0.04523242381788898,0.8

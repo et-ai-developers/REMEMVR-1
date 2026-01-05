@@ -1,0 +1,30 @@
+[START] Step 01: extract_cognitive_tests
+[LOAD] Loading dfnonvr.csv...
+[LOAD] Data path: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+[LOAD] Loaded 100 participants, 235 columns
+[COPY] UID column copied
+[CALC] RAVLT total calculated from 5 trials
+[CALC] RAVLT total range: 26.0 to 68.0
+[CALC] BVMT total calculated from 4 scores
+[CALC] BVMT total range: 17.0 to 48.0
+[COPY] RPM score copied from rpm-score column
+[COPY] RPM score range: 4.0 to 12.0
+[COPY] Age copied (range: 20 to 70)
+[COPY] Sex copied (values: [1 0])
+[COPY] Education copied (range: 1 to 9)
+[COPY] NART IQ copied from nart-score column
+[COPY] NART IQ range: 6 to 50
+[VALIDATE] Running data quality checks...
+[MISSING] Missing value summary:
+  nart_iq: 3 missing (3.0%)
+[VALIDATE] Running validate_data_columns...
+[PASS] Data validation successful
+[SAVE] Saving extracted cognitive test data to /home/etai/projects/REMEMVR/results/ch7/7.3.3/data/step01_cognitive_tests.csv
+[SAVED] Output shape: (100, 8)
+[SAVED] Output columns: ['uid', 'ravlt_total', 'bvmt_total', 'rpm_score', 'age', 'sex', 'education', 'nart_iq']
+[SUMMARY] Cognitive test statistics:
+  ravlt_total: Mean = 50.60, SD = 8.42
+  bvmt_total: Mean = 39.11, SD = 6.33
+  rpm_score: Mean = 9.87, SD = 1.93
+  age: Mean = 44.57, SD = 14.58
+[SUCCESS] Step 01 complete - cognitive tests extracted

@@ -1,74 +1,25 @@
-rq_id: "ch7/7.3.3"
-
-rq_builder:
-  status: success
-  context_dump: |
-    Created results/ch7/7.3.3/ with 6 folders
-    Folders: docs/, data/, code/, logs/, plots/, results/
-    All folders empty, ready for agents
-    status.yaml initialized with 10 RQ-specific agents
-    Next: rq_concept extracts concept from specs
-
-rq_concept:
-  status: success
-  context_dump: |
-    RQ 7.3.3: Cognitive Predictors of High-Confidence Errors
-    Type: Metacognition Predictors / HCE Rate Prediction
-    Analysis: Multiple regression (hierarchical) + cross-validation
-    Data: DERIVED from Ch6 HCE rates + master.xlsx cognitive tests
-    Critical: RPM hypothesis (negative β), dual p-value reporting required
-
-rq_scholar:
-  status: success
-  context_dump: |
-    7.3.3 validated: 9.3/10 APPROVED. Strong theory, weak lit support, methodologically sophisticated. Ready for stats validation.
-
-rq_stats:
-  status: success
-  context_dump: "9.3/10 APPROVED. Cat1: 2.7/3 (strong approach, minor alternatives gap). Cat2: 1.8/2 (75% reuse). Cat3: 2.0/2 (excellent parameters). Cat4: 1.8/2 (strong validation). Cat5: 1.0/1 (8 concerns, comprehensive devil's advocate)."
-
-rq_planner:
-  status: success
-  context_dump: |
-    RQ 7.3.3 analysis plan complete: 9 steps (validation + 8 analysis)
-    Pipeline: Hierarchical multiple regression with cross-validation
-    Dependencies: Ch6 HCE rates + master.xlsx cognitive tests
-    Primary: RPM hypothesis (negative β), dual p-value reporting (D068)
-    Statistical specs: seed=42, 1000 bootstrap, 5-fold CV, comprehensive diagnostics
-
-rq_tools:
-  status: success
-  context_dump: |
-    8 analysis + 3 validation tools cataloged for hierarchical multiple regression
-    Pipeline: Cognitive predictors → HCE rates with comprehensive diagnostics
-    Tools: extraction, regression, diagnostics, effect sizes, cross-validation, power analysis
-    Validation: 100% coverage with tool pairing (analysis → validation per step)
-    Next: rq_analysis creates step-by-step analysis sequencing in 4_analysis.yaml
-
-rq_analysis:
-  status: success
-  context_dump: |
-    4_analysis.yaml created with v5.3.0 deep verification
-    9 steps: hierarchical regression + diagnostics + cross-validation
-    Corrections: tools.extraction→tools.data, master.xlsx→dfnonvr.csv
-    Dependencies: Ch6 6.6.1 HCE rates + dfnonvr.csv cognitive tests
-    Ready for g_code execution with comprehensive validation
-
-rq_inspect:
-  status: pending
-  context_dump: ""
-
-rq_plots:
-  status: pending
-  context_dump: ""
-
-rq_results:
-  status: pending
-  context_dump: ""
-
+rq_id: ch7/7.3.3
 analysis_steps:
-  # To be populated during execution
-
-rq_platinum:
-  status: pending
-  context_dump: ""
+  - step00_validate_dependencies: success
+  - step01_extract_cognitive_tests: success
+  - step02_extract_hce_rates: success
+  - step03_merge_datasets: success
+  - step04_hierarchical_regression: success
+  - step05_model_diagnostics: success
+  - step06_effect_sizes: success
+  - step07_cross_validation: success
+  - step08_power_analysis: success
+validation_agents:
+  rq_inspect: success
+  rq_plots: success
+  rq_results: success
+  rq_validate: pending
+status: in_progress
+agents:
+  rq_results:
+    status: success
+    timestamp: 2026-01-06T07:00:00Z
+    context_dump: |
+      Results validated for scientific plausibility
+      3 anomalies flagged: 1 implausible values (HCE rate low), 1 wrong direction (RPM positive), 1 severe overfitting (details in summary.md)
+      Summary documented in results/summary.md

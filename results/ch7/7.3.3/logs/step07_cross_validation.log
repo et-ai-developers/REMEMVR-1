@@ -1,0 +1,58 @@
+[START] Step 07: Cross-validation
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 13 cols)
+[CV_SETUP] Setting up 5-fold cross-validation...
+[CV_SETUP] Final dataset: 100 observations, 6 predictors
+[CV_RUN] Running cross-validation...
+[CV_FOLD] Processing fold 1/5...
+[CV_FOLD] Fold 1: train=80, test=20
+[CV_FOLD] Fold 1 results:
+[CV_FOLD]   Train R²: 0.0354
+[CV_FOLD]   Test R²: -0.0426
+[CV_FOLD]   RMSE: 0.0415
+[CV_FOLD]   MAE: 0.0311
+[CV_FOLD]   Gap: 0.0780
+[CV_FOLD] Processing fold 2/5...
+[CV_FOLD] Fold 2: train=80, test=20
+[CV_FOLD] Fold 2 results:
+[CV_FOLD]   Train R²: 0.0474
+[CV_FOLD]   Test R²: -0.3902
+[CV_FOLD]   RMSE: 0.0333
+[CV_FOLD]   MAE: 0.0267
+[CV_FOLD]   Gap: 0.4376
+[CV_FOLD] Processing fold 3/5...
+[CV_FOLD] Fold 3: train=80, test=20
+[CV_FOLD] Fold 3 results:
+[CV_FOLD]   Train R²: 0.0489
+[CV_FOLD]   Test R²: -0.3109
+[CV_FOLD]   RMSE: 0.0344
+[CV_FOLD]   MAE: 0.0245
+[CV_FOLD]   Gap: 0.3599
+[CV_FOLD] Processing fold 4/5...
+[CV_FOLD] Fold 4: train=80, test=20
+[CV_FOLD] Fold 4 results:
+[CV_FOLD]   Train R²: 0.0709
+[CV_FOLD]   Test R²: -0.5201
+[CV_FOLD]   RMSE: 0.0316
+[CV_FOLD]   MAE: 0.0264
+[CV_FOLD]   Gap: 0.5910
+[CV_FOLD] Processing fold 5/5...
+[CV_FOLD] Fold 5: train=80, test=20
+[CV_FOLD] Fold 5 results:
+[CV_FOLD]   Train R²: 0.0403
+[CV_FOLD]   Test R²: -0.1160
+[CV_FOLD]   RMSE: 0.0480
+[CV_FOLD]   MAE: 0.0307
+[CV_FOLD]   Gap: 0.1564
+[CV_RUN] Cross-validation complete: 5/5 folds successful
+[CV_AGGREGATE] Computing aggregated statistics...
+[CV_WARNING] OVERFITTING DETECTED: Gap > 0.10
+[SAVE] Saving cross-validation results...
+[SAVED] step07_cross_validation.csv (5 rows, 7 cols)
+[SAVED] step07_cv_summary.csv (5 rows, 6 cols)
+[SUMMARY] Cross-validation results:
+[SUMMARY] - Mean train R²: 0.0486
+[SUMMARY] - Mean test R²: -0.2760
+[SUMMARY] - Mean generalization gap: 0.3246
+[SUMMARY] - WARNING: Negative test R² indicates model performs worse than mean baseline
+[SUCCESS] Step 07 complete

@@ -1,0 +1,47 @@
+[START] Step 00: validate_dependencies
+[VALIDATE] Checking Ch6 HCE data availability...
+[FOUND] Ch6 HCE data at primary path: /home/etai/projects/REMEMVR/results/ch6/6.6.1/data/step01_hce_rates.csv
+[VALIDATE] Checking HCE data format: /home/etai/projects/REMEMVR/results/ch6/6.6.1/data/step01_hce_rates.csv
+[COLUMNS] HCE data has columns: ['UID', 'TEST', 'TSVR', 'HCE_rate', 'n_HCE', 'n_total']
+[DIMENSIONS] HCE data: 400 rows, 100 unique participants
+[RANGE] HCE rates: 0.0000 to 0.2778
+[PASS] Ch6 HCE data validation successful
+[VALIDATE] Checking dfnonvr.csv accessibility...
+[FOUND] dfnonvr.csv at: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+[VALIDATE] Checking dfnonvr.csv column names...
+[COLUMNS] dfnonvr.csv has 235 total columns
+[CHECKING] Required columns for cognitive analysis:
+  [PASS] UID
+  [PASS] ravlt-trial-1-score
+  [PASS] ravlt-trial-2-score
+  [PASS] ravlt-trial-3-score
+  [PASS] ravlt-trial-4-score
+  [PASS] ravlt-trial-5-score
+  [PASS] bvmt-trial-1-score
+  [PASS] bvmt-trial-2-score
+  [PASS] bvmt-trial-3-score
+  [PASS] bvmt-delayed-recall-score
+  [PASS] rpm-score
+  [PASS] age
+  [PASS] sex
+  [PASS] education
+[PASS] All 14 required columns found in dfnonvr.csv
+[DIMENSIONS] dfnonvr.csv: 100 rows, 100 unique participants
+[DATA QUALITY] Checking for missing values in key columns:
+  UID: 0 missing (0.0%)
+  rpm-score: 0 missing (0.0%)
+  age: 0 missing (0.0%)
+  sex: 0 missing (0.0%)
+[PASS] dfnonvr.csv validation successful
+[VALIDATE] Checking participant overlap between datasets...
+[OVERLAP] HCE data participants: 100
+[OVERLAP] Cognitive data participants: 100
+[OVERLAP] Overlapping participants: 100
+[OVERLAP] HCE only: 0
+[OVERLAP] Cognitive only: 0
+[OVERLAP] Overlap percentage: 100.0%
+[PASS] Sufficient participant overlap (100) for analysis
+[SAVE] Creating validation report...
+[SAVED] Validation report: /home/etai/projects/REMEMVR/results/ch7/7.3.3/data/step00_dependency_validation.txt
+[REPORT] 235 columns verified, 100 participants available
+[SUCCESS] Step 00 complete - all dependencies validated

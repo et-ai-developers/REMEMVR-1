@@ -1,0 +1,6 @@
+assumption,test_statistic,p_value,interpretation,remedial_action
+multicollinearity,1.7865755836777726,,OK,none
+normality,0.8831739959890115,2.4787318728330407e-07,VIOLATION,use_bootstrap_cis
+homoscedasticity,8.050042556006364,0.23445994543622672,OK,none
+outliers,0.2829538892192988,,DETECTED,sensitivity_analysis
+autocorrelation,2.248251708714357,,OK,none
