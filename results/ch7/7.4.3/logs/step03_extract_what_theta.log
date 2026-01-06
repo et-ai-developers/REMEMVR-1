@@ -1,0 +1,17 @@
+[START] Step 3: extract_what_theta
+[LOAD] Loading domain-specific theta scores from Ch5 5.2.1...
+[LOADED] step03_theta_scores.csv (400 rows, 4 cols)
+[ANALYSIS] Extracting UID from composite_ID and aggregating What theta scores...
+[EXTRACTED] UIDs from composite_ID format (pattern: A###_N -> A###)
+[AGGREGATED] What theta scores by UID (100 unique participants)
+[COMPUTED] Standard errors from within-participant variability
+[FILLED] Missing SE values with mean SE (0.3417)
+[DONE] Analysis complete
+[SAVE] Saving step03_what_theta.csv...
+[SAVED] step03_what_theta.csv (100 rows, 3 cols)
+[VALIDATION] Running validate_numeric_range on theta_what...
+[VALIDATION] valid: True
+[VALIDATION] message: theta_what: All values within range [-4.0, 4.0] (n=100).
+[VALIDATION] out_of_range_count: 0
+[VALIDATION] violations: []
+[SUCCESS] Step 3 complete

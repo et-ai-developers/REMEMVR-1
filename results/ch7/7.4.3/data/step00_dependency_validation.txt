@@ -1,0 +1,23 @@
+# RQ 7.4.3 Dependency Validation Report
+# Generated: 2026-01-06 11:30:52.567678
+# Overall Status: PASS
+
+File: results/ch5/5.2.1/data/step03_theta_scores.csv
+Description: What-domain theta scores from Ch5 5.2.1
+Status: PASS
+Size: 16072 bytes (min: 1000)
+Message: File exists and meets minimum size: 16072 bytes (>= 1000 bytes)
+
+File: results/ch5/5.1.1/data/step03_theta_scores.csv
+Description: Overall theta scores from Ch5 5.1.1
+Status: PASS
+Size: 7186 bytes (min: 1000)
+Message: File exists and meets minimum size: 7186 bytes (>= 1000 bytes)
+
+File: data/dfnonvr.csv
+Description: Non-VR data including RPM scores
+Status: PASS
+Size: 60164 bytes (min: 50000)
+Message: File exists and meets minimum size: 60164 bytes (>= 50000 bytes)
+
+Summary: 3 of 3 dependencies valid

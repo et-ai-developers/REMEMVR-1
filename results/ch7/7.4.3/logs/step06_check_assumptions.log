@@ -1,0 +1,29 @@
+[START] Step 6: Check Assumptions
+[LOAD] Loading input data...
+[LOADED] step01_rpm_scores.csv (100 rows, 3 cols)
+[LOADED] step02_overall_theta.csv (100 rows, 3 cols)
+[LOADED] step03_what_theta.csv (100 rows, 3 cols)
+[MERGED] Combined dataset (100 rows with complete data)
+[ANALYSIS] Running assumption checks...
+[TEST] Checking assumptions for rpm_score...
+[SHAPIRO] rpm_score: statistic=0.8928, p=0.000001
+[OUTLIERS] rpm_score: 0 outliers found (|z| > 3.29)
+[RESULT] rpm_score: assumption_met=False, action=Use bootstrap CIs (already computed)
+[TEST] Checking assumptions for theta_overall...
+[SHAPIRO] theta_overall: statistic=0.9753, p=0.056903
+[OUTLIERS] theta_overall: 0 outliers found (|z| > 3.29)
+[RESULT] theta_overall: assumption_met=True, action=No action needed
+[TEST] Checking assumptions for theta_what...
+[SHAPIRO] theta_what: statistic=0.9781, p=0.094877
+[OUTLIERS] theta_what: 0 outliers found (|z| > 3.29)
+[RESULT] theta_what: assumption_met=True, action=No action needed
+[TEST] Checking multivariate outliers...
+[MAHALANOBIS] 0 multivariate outliers found (critical=16.266)
+[DONE] Analysis complete
+[SAVE] Saving assumption_checks.csv...
+[SAVED] step06_assumption_checks.csv (4 rows, 5 cols)
+[VALIDATION] Running validate_data_format...
+[VALIDATION] valid: True
+[VALIDATION] message: All required columns present (5 columns). DataFrame has 4 rows.
+[VALIDATION] missing_cols: []
+[SUCCESS] Step 6 complete

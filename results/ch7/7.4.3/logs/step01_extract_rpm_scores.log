@@ -1,0 +1,21 @@
+[START] Step 1: extract_rpm_scores
+[LOAD] Loading RPM data from dfnonvr.csv...
+[INFO] CRITICAL: Using dfnonvr.csv NOT master.xlsx per Ch7 v5.3.0 compliance
+[LOADED] dfnonvr.csv (100 rows, 2 cols)
+[PROCESS] Cleaning and standardizing RPM data...
+[RENAMED] Column 'rpm-score' -> 'rpm_score'
+[CLEANED] Removed 0 rows with missing RPM scores (100 remain)
+[RANGE] RPM scores: min=4, max=12, mean=9.87
+[STANDARDIZED] rpm_standardized: mean=0.000000, std=1.000000
+[DONE] Data processing complete
+[SAVE] Saving processed RPM scores...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.4.3/data/step01_rpm_scores.csv (100 rows, 3 cols)
+[COLUMNS] Output columns: ['UID', 'rpm_score', 'rpm_standardized']
+[SAMPLE] First few UIDs: ['A010', 'A011', 'A012']
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] PASS - All required columns present
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['UID', 'rpm_standardized', 'rpm_score']
+[VALIDATION] n_required: 3
+[VALIDATION] n_missing: 0
+[SUCCESS] Step 1 complete

@@ -1,0 +1,45 @@
+[START] Step 04: compute_correlations
+[LOAD] Loading input data...
+[LOADED] step01_rpm_scores.csv (100 rows, 3 cols)
+[LOADED] step02_overall_theta.csv (100 rows, 3 cols)
+[LOADED] step03_what_theta.csv (100 rows, 3 cols)
+[MERGE] Creating complete cases dataset...
+[MERGED] Complete cases: 100 participants
+[ANALYSIS] Computing correlations with bootstrap CIs...
+[ERROR] 'correlation'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.4.3/code/step04_compute_correlations.py", line 190, in <module>
+    log(f"[CORRELATION] RPM vs Overall theta: r = {result1['correlation']:.4f}")
+                                                   ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'correlation'
+[START] Step 04: compute_correlations
+[LOAD] Loading input data...
+[LOADED] step01_rpm_scores.csv (100 rows, 3 cols)
+[LOADED] step02_overall_theta.csv (100 rows, 3 cols)
+[LOADED] step03_what_theta.csv (100 rows, 3 cols)
+[MERGE] Creating complete cases dataset...
+[MERGED] Complete cases: 100 participants
+[ANALYSIS] Computing correlations with bootstrap CIs...
+[CORRELATION] RPM vs Overall theta: r = 0.4569
+[CORRELATION] RPM vs What theta: r = 0.4453
+[P-VALUES] Calculating significance tests...
+[P-VALUES] RPM-Overall: p_uncorr=0.0000, p_bonf=0.0000, p_fdr=0.0000
+[P-VALUES] RPM-What: p_uncorr=0.0000, p_bonf=0.0000, p_fdr=0.0000
+[SAVE] Creating results DataFrame...
+[SAVED] step04_correlation_results.csv (2 rows, 8 cols)
+[CV] Running 5-fold cross-validation assessment...
+[CV] Fold 1: r_diff = 0.0023 (n=80)
+[CV] Fold 2: r_diff = 0.0243 (n=80)
+[CV] Fold 3: r_diff = 0.0043 (n=80)
+[CV] Fold 4: r_diff = 0.0098 (n=80)
+[CV] Fold 5: r_diff = 0.0200 (n=80)
+[CV] Cross-validation stability: SD = 0.0096
+[VALIDATION] Running simple validation...
+[VALIDATION] required_columns: [PASS]
+[VALIDATION] correlations_in_range: [PASS]
+[VALIDATION] p_values_valid: [PASS]
+[VALIDATION] confidence_intervals_ordered: [PASS]
+[VALIDATION] adequate_sample_size: [PASS]
+[VALIDATION] dual_p_values_computed: [PASS]
+[SUCCESS] Step 04 complete
