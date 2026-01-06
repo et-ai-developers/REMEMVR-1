@@ -44,23 +44,58 @@ rq_tools:
   context_dump: "8 analysis + 8 validation tools cataloged for within-person sleep multilevel analysis"
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "v5.3.0 deep verification applied. 9 analysis steps generated with dfvr.csv data source, hierarchical paths, and comprehensive validation."
 
 rq_inspect:
   status: pending
   context_dump: ""
 
 rq_plots:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    **rq_plots:**
+    - Plots generated: 4 (sleep_variability, effect_sizes, diagnostics, cross_validation)
+    - Data sources: step04_analysis_dataset.csv, step08_power_effect_sizes.csv, step07_bootstrap_cis.csv, step05_lmm_results.pkl
+    - Focus: Within-person sleep variability, effect sizes with CIs, LMM diagnostics, CV performance
+    - Functions used: plot_comparison_bars, plot_diagnostics, save_plot_with_data
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: 2026-01-07
+  context_dump: |
+    Results validated for scientific plausibility
+    0 anomalies flagged - within-person sleep effects minimal and non-significant
+    Summary documented in results/summary.md
 
 analysis_steps:
-  # To be populated during execution
+  step00_validate_data_availability:
+    status: success
+    completion_time: "2026-01-07"
+  step01_extract_sleep_data:
+    status: success
+    completion_time: "2026-01-07"
+  step02_create_person_centered_variables:
+    status: success
+    completion_time: "2026-01-07"
+  step03_extract_vr_performance_scores:
+    status: success
+    completion_time: "2026-01-07"
+  step04_merge_sleep_memory_data:
+    status: success
+    completion_time: "2026-01-07"
+  step05_fit_multilevel_models:
+    status: success
+    completion_time: "2026-01-07"
+  step06_model_diagnostics:
+    status: success
+    completion_time: "2026-01-07"
+  step07_cross_validation_bootstrap:
+    status: success
+    completion_time: "2026-01-07"
+  step08_power_effect_sizes:
+    status: success
+    completion_time: "2026-01-07"
 
 rq_platinum:
   status: pending

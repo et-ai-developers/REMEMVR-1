@@ -1,0 +1,47 @@
+[START] Step 04: merge_sleep_memory_data
+[LOAD] Loading sleep-centered data from step02...
+[LOADED] sleep_centered.csv (400 rows, 8 cols)
+[LOAD] Loading memory scores from step03...
+[LOADED] memory_scores.csv (400 rows, 3 cols)
+[CHECK] Validating input data structure...
+[CHECK] Input data structure validated
+[ANALYSIS] Merging sleep and memory data...
+[MERGED] Analysis dataset: 400 rows, 9 cols
+[MERGE] Sleep data: 400 → 400 (100.0% retained)
+[MERGE] Memory data: 400 → 400 (100.0% retained)
+[ANALYSIS] Checking participant coverage...
+[COVERAGE] Participants: 100
+[COVERAGE] Total observations: 400
+[COVERAGE] Tests per participant - Min: 4, Max: 4, Mean: 4.0
+[COVERAGE] Participants with <3 tests: 0
+[COVERAGE] Test session distribution: {1: 100, 2: 100, 3: 100, 4: 100}
+[DONE] Data merge and coverage check complete
+[SAVE] Preparing final analysis dataset...
+[MISSING] Missing data summary:
+[MISSING]   UID: 0/400 (0.0%)
+[MISSING]   TEST: 0/400 (0.0%)
+[MISSING]   Memory_Score: 0/400 (0.0%)
+[MISSING]   Sleep_Hours_WP: 0/400 (0.0%)
+[MISSING]   Sleep_Quality_WP: 0/400 (0.0%)
+[MISSING]   Sleep_Hours_PM: 0/400 (0.0%)
+[MISSING]   Sleep_Quality_PM: 0/400 (0.0%)
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.5.4/data/step04_analysis_dataset.csv (400 rows, 7 cols)
+[VALIDATION] Running final dataset validation...
+[VALIDATION] Data completeness: 400/400 (100.0%)
+[VALIDATION] Completeness threshold (95%): PASS
+[VALIDATION] Column validation: PASS
+[VALIDATION] Data completeness: PASS
+
+=== SCIENTIFIC MANTRA ===
+1. What question did we ask?
+   -> Can we create a complete dataset linking sleep and memory performance?
+2. What did we find?
+   -> 400 complete observations from 100 participants
+   -> Data completeness: 100.0%, validation passed: True
+3. What does it mean?
+   -> We have sufficient data for multilevel modeling of sleep effects
+4. What should we do next?
+   -> Proceed to step05: fit multilevel models for within-person sleep effects
+=========================
+
+[SUCCESS] Step 04 complete

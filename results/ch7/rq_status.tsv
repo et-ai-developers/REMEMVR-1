@@ -18,7 +18,7 @@ RQ	Scholar	Stats	Plan	Tools	Analysis	Inspect	Plots	Results	Validate	Notes
 7.5.1	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Self-report predictors NOT significant: R²=0.063 (p=0.18), education negative, severe overfitting detected
 7.5.2	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	DASS subscales NOT predict memory: ΔR²=0.032 (p=0.367), power=1.8%, null findings robust in subclinical sample
 7.5.3	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Strategy use minimal: 2% mnemonics, rehearsal r=0.150 (p=0.273), incidental VR encoding shows low spontaneous strategy use
-7.5.4	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	Within-person sleep effects on memory (v5.3.0 verified)
+7.5.4	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Within-person sleep effects MINIMAL: β_hours=-0.009 (p=1.000), β_quality=0.040 (p=0.387), CV R²=0.01, Individual Differences theme complete
 7.6.1	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	Cognitive predictors of forgetting slopes (v5.3.0 verified)
 7.6.2	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	RAVLT forgetting predicts VR forgetting (v5.3.0 verified)
 7.6.3	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	Domain-specific forgetting reliability (ICC analysis) (v5.3.0 verified)

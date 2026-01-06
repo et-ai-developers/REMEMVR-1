@@ -1,0 +1,102 @@
+[START] Step 08: power_effect_sizes
+[LOAD] Loading fixed effects from step05...
+[LOADED] fixed_effects.csv (7 rows, 6 cols)
+[LOAD] Loading bootstrap CIs from step07...
+[LOADED] bootstrap_cis.csv (4 rows, 5 cols)
+[ANALYSIS] Extracting sleep parameters...
+[PARAMS] Sleep parameters found: ['Sleep_Hours_WP', 'Sleep_Quality_WP', 'Sleep_Hours_PM', 'Sleep_Quality_PM']
+[CIs] Bootstrap CIs available: ['Sleep_Hours_WP', 'Sleep_Quality_WP', 'Sleep_Hours_PM', 'Sleep_Quality_PM']
+[ANALYSIS] Computing effect sizes...
+[SD] Memory_Score SD: 0.1744
+[EFFECT] Sleep_Hours_WP: estimate=-0.0087, Cohen's d=0.0497, negligible
+[EFFECT] Sleep_Quality_WP: estimate=0.0402, Cohen's d=0.2305, small
+[EFFECT] Sleep_Hours_PM: estimate=0.0131, Cohen's d=0.0752, negligible
+[EFFECT] Sleep_Quality_PM: estimate=0.0081, Cohen's d=0.0464, negligible
+[ANALYSIS] Computing post-hoc power...
+[POWER] Sample size: 400 observations, 100 participants
+[POWER] Predictors: 5
+[POWER] Alpha (Bonferroni): 0.0125
+[WARNING] Power computation failed for Sleep_Hours_WP: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[WARNING] Power computation failed for Sleep_Quality_WP: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[WARNING] Power computation failed for Sleep_Hours_PM: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[WARNING] Power computation failed for Sleep_Quality_PM: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[ANALYSIS] Merging effect size and power results...
+[MERGED] Final results: 4 parameters
+[SAVE] Saving power and effect size results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.5.4/data/step08_power_effect_sizes.csv (4 rows, 6 cols)
+[VALIDATION] Running effect size validation...
+[VALIDATION] Effect sizes: PASS
+[SUMMARY] Effect size summary:
+[SUMMARY]   negligible: 3 parameters
+[SUMMARY]   small: 1 parameters
+[ERROR] 'practical_significance'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'practical_significance'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.4/code/step08_power_effect_sizes.py", line 345, in <module>
+    practical_meaningful = (final_output['practical_significance'] == True).sum()
+                            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'practical_significance'
+[START] Step 08: power_effect_sizes
+[LOAD] Loading fixed effects from step05...
+[LOADED] fixed_effects.csv (7 rows, 6 cols)
+[LOAD] Loading bootstrap CIs from step07...
+[LOADED] bootstrap_cis.csv (4 rows, 5 cols)
+[ANALYSIS] Extracting sleep parameters...
+[PARAMS] Sleep parameters found: ['Sleep_Hours_WP', 'Sleep_Quality_WP', 'Sleep_Hours_PM', 'Sleep_Quality_PM']
+[CIs] Bootstrap CIs available: ['Sleep_Hours_WP', 'Sleep_Quality_WP', 'Sleep_Hours_PM', 'Sleep_Quality_PM']
+[ANALYSIS] Computing effect sizes...
+[SD] Memory_Score SD: 0.1744
+[EFFECT] Sleep_Hours_WP: estimate=-0.0087, Cohen's d=0.0497, negligible
+[EFFECT] Sleep_Quality_WP: estimate=0.0402, Cohen's d=0.2305, small
+[EFFECT] Sleep_Hours_PM: estimate=0.0131, Cohen's d=0.0752, negligible
+[EFFECT] Sleep_Quality_PM: estimate=0.0081, Cohen's d=0.0464, negligible
+[ANALYSIS] Computing post-hoc power...
+[POWER] Sample size: 400 observations, 100 participants
+[POWER] Predictors: 5
+[POWER] Alpha (Bonferroni): 0.0125
+[WARNING] Power computation failed for Sleep_Hours_WP: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[WARNING] Power computation failed for Sleep_Quality_WP: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[WARNING] Power computation failed for Sleep_Hours_PM: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[WARNING] Power computation failed for Sleep_Quality_PM: compute_post_hoc_power() got an unexpected keyword argument 'k'
+[ANALYSIS] Merging effect size and power results...
+[MERGED] Final results: 4 parameters
+[SAVE] Saving power and effect size results...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.5.4/data/step08_power_effect_sizes.csv (4 rows, 6 cols)
+[VALIDATION] Running effect size validation...
+[VALIDATION] Effect sizes: PASS
+[SUMMARY] Effect size summary:
+[SUMMARY]   negligible: 3 parameters
+[SUMMARY]   small: 1 parameters
+[SUMMARY] Practically significant effects: 0/4
+
+=== SCIENTIFIC MANTRA ===
+1. What question did we ask?
+   -> What is the practical significance of our sleep-memory effects?
+2. What did we find?
+   -> 4 sleep parameters analyzed
+   -> Mean Cohen's d: 0.100
+   -> Practically significant: 0 parameters
+3. What does it mean?
+   -> Effect sizes quantify real-world impact beyond statistical significance
+4. What should we do next?
+   -> Interpret findings for clinical and theoretical implications
+=========================
+
+[SUCCESS] Step 08 complete
