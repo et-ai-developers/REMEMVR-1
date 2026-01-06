@@ -35,23 +35,44 @@ rq_tools:
   context_dump: "7 analysis + 5 validation tools cataloged for hierarchical regression analysis. D068 dual p-values embedded. Bootstrap CIs + cross-validation + power analysis covered. Ch5 dependency + master.xlsx self-report predictors."
 
 rq_analysis:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: "Analysis recipe v5.3.0 created and executed: 9 steps (step00-step08) completed with hierarchical regression, bootstrap CIs, dual p-values"
 
 rq_inspect:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Validated step08 power analysis
+    Output: step08_power_analysis.csv (4 tests), step08_sensitivity_analysis.csv (2 alphas)
+    Power: 0.05-0.50 range, min detectable f²=0.28-0.33 (medium effects)
+    All validation layers passed: files exist, structure correct, values valid
+    Log confirmed: analysis complete with embedded validation passed
 
 rq_plots:
-  status: pending
-  context_dump: ""
+  status: success
+  context_dump: |
+    Plots generated: 4 (diagnostics, effect_sizes, predictor_importance, cv_performance)
+    Data sources: step05_residuals_data.csv, step06_effect_sizes.csv, step06_relative_importance.csv, step07_cv_results.csv
+    Functions used: plot_diagnostics, plot_comparison_bars
+    Option B architecture: reads analysis outputs, calls tools/plotting.py only
 
 rq_results:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: 2026-01-06T12:48:00Z
+  context_dump: |
+    Results validated for scientific plausibility
+    5 anomalies flagged: 1 unexpected null, 1 wrong direction, 1 low effect, 1 CV failure, 1 power inadequacy
+    Summary documented in results/summary.md
 
 analysis_steps:
-  # To be populated during execution
+  step00_validate_dependencies: success
+  step01_extract_self_report_measures: success
+  step02_extract_theta_scores: success
+  step03_merge_analysis_dataset: success
+  step04_hierarchical_regression: success
+  step05_model_diagnostics: success
+  step06_effect_size_analysis: success
+  step07_cross_validation: success
+  step08_power_analysis: success
 
 rq_platinum:
   status: pending

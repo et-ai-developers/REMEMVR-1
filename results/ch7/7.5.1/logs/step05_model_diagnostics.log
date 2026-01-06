@@ -1,0 +1,27 @@
+[START] Step 05: model_diagnostics
+[LOAD] Loading input data...
+[LOADED] step03_analysis_dataset.csv (100 rows, 6 cols)
+[LOADED] step04_regression_models.csv (2 rows, 8 cols)
+[REFIT] Re-fitting full regression model...
+[DONE] Model re-fitted successfully
+[MODEL] R² = 0.0626, N = 100.0
+[ANALYSIS] Running compute_regression_diagnostics...
+[DONE] Comprehensive diagnostics computed
+[EXTRACT] Extracting diagnostic components...
+[EXTRACTED] Residuals: 100 observations
+[EXTRACTED] Cook's D range: [0.000001, 0.075778]
+[TESTS] Running assumption tests...
+[TEST] Shapiro-Wilk: W = 0.9839, p = 0.263745
+[TEST] Breusch-Pagan: LM = 2.1060, p = 0.716274
+[TEST] VIF: max = 1.1565
+[TEST] Cook's D: 8 outliers > 0.0400
+[SAVE] Saving diagnostic outputs...
+[SAVED] step05_diagnostics_summary.csv (4 rows, 4 cols)
+[SAVED] step05_residuals_data.csv (100 rows, 5 cols)
+[SAVED] step05_outlier_analysis.csv (8 outliers identified)
+[VALIDATION] Running validate_variance_positivity...
+[VALIDATION] valid: True
+[VALIDATION] message: All 4 components have positive variance (range: 0.9839 to 8.0000).
+[VALIDATION] negative_components: []
+[VALIDATION] Diagnostic statistics validation PASSED
+[SUCCESS] Step 05 complete

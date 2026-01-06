@@ -1,0 +1,49 @@
+[START] Step 04: Hierarchical Regression
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 6 cols)
+[VALIDATED] All expected columns present: ['UID', 'theta_all', 'Education_z', 'VR_Experience_z', 'Typical_Sleep_z', 'Age_z']
+[PREP] Preparing predictor blocks...
+[PREP] Block 1 (Control): ['Age_z']
+[PREP] Block 2 (Full): ['Age_z', 'Education_z', 'VR_Experience_z', 'Typical_Sleep_z']
+[PREP] Outcome variable: theta_all (N=100)
+[ANALYSIS] Running fit_hierarchical_regression...
+[DONE] Hierarchical regression complete
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[DONE] Bootstrap analysis complete (1000 iterations)
+[CORRECTIONS] Applying multiple comparison corrections...
+[ERROR] 'numpy.ndarray' object has no attribute 'iloc'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.1/code/step04_hierarchical_regression.py", line 228, in <module>
+    main_p_values.append(full_model.pvalues.iloc[idx])
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'iloc'
+[START] Step 04: Hierarchical Regression
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 6 cols)
+[VALIDATED] All expected columns present: ['UID', 'theta_all', 'Education_z', 'VR_Experience_z', 'Typical_Sleep_z', 'Age_z']
+[PREP] Preparing predictor blocks...
+[PREP] Block 1 (Control): ['Age_z']
+[PREP] Block 2 (Full): ['Age_z', 'Education_z', 'VR_Experience_z', 'Typical_Sleep_z']
+[PREP] Outcome variable: theta_all (N=100)
+[ANALYSIS] Running fit_hierarchical_regression...
+[DONE] Hierarchical regression complete
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[DONE] Bootstrap analysis complete (1000 iterations)
+[CORRECTIONS] Applying multiple comparison corrections...
+[CORRECTIONS] Bonferroni correction applied (k=3)
+[CORRECTIONS] FDR correction applied
+[SAVE] Saving model comparison results...
+[SAVED] step04_regression_models.csv (2 models)
+[SAVE] Saving coefficients with bootstrap CIs and dual p-values...
+[SAVED] step04_coefficients_ci.csv (4 coefficients)
+[VALIDATION] Running validate_probability_range...
+[VALIDATION] valid: True
+[VALIDATION] message: All probability values valid (n=3 columns, 12 total values in [0, 1]).
+[VALIDATION] violations: []
+[SUMMARY] Control model R2: 0.0374
+[SUMMARY] Full model R2: 0.0626
+[SUMMARY] R2 change: 0.0253
+[SUMMARY] Bootstrap CIs computed: 95% confidence intervals
+[SUMMARY] Multiple comparisons: Bonferroni + FDR for 3 predictors
+[SUCCESS] Step 04 complete

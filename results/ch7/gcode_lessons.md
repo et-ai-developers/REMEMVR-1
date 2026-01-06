@@ -341,6 +341,140 @@ significance_results['term'] = significance_results['predictor']
 
 ---
 
+### 15. validate_data_columns Function Signature Mismatch (RQ 7.5.1 Step 00)
+
+**BUG:** 4_analysis.yaml specifies `validate_data_columns(df_path=..., required_columns=...)` but actual function has `validate_data_columns(df: pd.DataFrame, required_columns: List[str])`
+
+**SYMPTOM:** TypeError: validate_data_columns() got an unexpected keyword argument 'df_path'
+
+**FIX:**
+```python
+# Wrong: Pass path
+validation_result = validate_data_columns(
+    df_path=str(dfnonvr_path),
+    required_columns=required_columns
+)
+
+# Correct: Load DataFrame first, then pass it
+df_for_validation = pd.read_csv(dfnonvr_path)
+validation_result = validate_data_columns(
+    df=df_for_validation,
+    required_columns=required_columns
+)
+```
+
+**PREVENTION:** Always check actual function signatures in tools/validation.py before using
+
+---
+
+### 16. validate_probability_range Custom Range Parameter Not Supported (RQ 7.5.1 Step 02)
+
+**BUG:** 4_analysis.yaml specifies `validate_probability_range(custom_range=[-3, 3])` but actual function only accepts `probability_df, prob_columns` parameters
+
+**SYMPTOM:** TypeError: validate_probability_range() got an unexpected keyword argument 'custom_range'
+
+**FIX:**
+```python
+# Wrong: Pass custom_range parameter
+validation_result = validate_probability_range(
+    probability_df=output_df,
+    prob_columns=["theta_all"],
+    custom_range=[-3, 3]
+)
+
+# Correct: Manual bounds validation
+theta_values = output_df['theta_all']
+within_bounds = theta_values.between(-3, 3)
+validation_result = {
+    'valid': within_bounds.all(),
+    'out_of_bounds_count': (~within_bounds).sum(),
+    'min_value': theta_values.min(),
+    'max_value': theta_values.max()
+}
+```
+
+**PREVENTION:** Check parameter support in actual validation functions, create custom validation when needed
+
+---
+
+### 17. Statsmodels Model Attributes Are Numpy Arrays Not Pandas (RQ 7.5.1 Step 04)
+
+**BUG:** Trying to use .iloc indexing on statsmodels model attributes like params, pvalues, bse which are numpy arrays
+
+**SYMPTOM:** AttributeError: 'numpy.ndarray' object has no attribute 'iloc'
+
+**FIX:**
+```python
+# Wrong: Use pandas .iloc indexing on numpy arrays
+beta = full_model.params.iloc[coef_idx]
+p_val = full_model.pvalues.iloc[coef_idx]
+conf_lower = conf_int.iloc[coef_idx, 0]
+
+# Correct: Use direct numpy indexing
+beta = full_model.params[coef_idx]        # params is numpy array
+p_val = full_model.pvalues[coef_idx]      # pvalues is numpy array
+conf_lower = conf_int[coef_idx, 0]        # conf_int is numpy array
+```
+
+**PREVENTION:** Remember statsmodels attributes (params, pvalues, bse, conf_int) return numpy arrays, not pandas objects
+
+---
+
+### 18. Cross-Validation Function Returns Different Structure Than Expected (RQ 7.5.1 Step 07)
+
+**BUG:** Expected train_scores and test_scores keys but actual function returns cv_scores (test only) and fold_predictions
+
+**SYMPTOM:** KeyError: 'scores' or 'train_scores' when accessing CV results
+
+**FIX:**
+```python
+# Wrong: Assume train/test score arrays
+train_r2 = cv_results['train_scores'][fold]
+test_r2 = cv_results['test_scores'][fold]
+
+# Correct: Use actual return structure
+test_r2 = cv_results['cv_scores'][fold]  # Only test scores available
+train_r2 = np.nan  # Function doesn't return train scores
+
+# Compute RMSE/MAE from predictions
+fold_preds = cv_results['fold_predictions'][f'fold_{fold+1}']
+rmse = np.sqrt(np.mean((fold_preds['y_true'] - fold_preds['y_pred']) ** 2))
+```
+
+**PREVENTION:** Always check actual function return structure in tools/analysis_regression.py before using
+
+---
+
+### 19. FTestAnovaPower Parameter Name Error (RQ 7.5.1 Step 08)
+
+**BUG:** Used non-existent parameter k_constraint in FTestAnovaPower.solve_power() function call
+
+**SYMPTOM:** TypeError: FTestAnovaPower.solve_power() got an unexpected keyword argument 'k_constraint'
+
+**FIX:**
+```python
+# Wrong: Use unsupported k_constraint parameter
+min_f2 = power_test.solve_power(
+    effect_size=None,
+    nobs=n,
+    alpha=0.05,
+    power=0.8,
+    k_constraint=k_predictors
+)
+
+# Correct: Use only supported parameters
+min_f2 = power_test.solve_power(
+    effect_size=None,
+    nobs=n,
+    alpha=0.05,
+    power=0.8
+)
+```
+
+**PREVENTION:** Check function documentation with help() before using new statsmodels power functions
+
+---
+
 ## TO ADD AS YOU FIND MORE BUGS
 
 When you encounter a new bug pattern:

@@ -1,0 +1,39 @@
+[START] Step 02: extract_theta_scores
+[LOAD] Loading Ch5 theta scores...
+[LOADED] step03_theta_scores.csv (400 rows, 3 cols)
+[VERIFY] Column check passed: ['UID', 'test', 'Theta_All']
+[VERIFY] Data format: 400 rows (expected ~400)
+[VERIFY] 100 unique participants
+[VERIFY] Tests per participant: min=4, max=4
+[ANALYSIS] Aggregating theta scores by participant...
+[ANALYSIS] Aggregation complete: 100 participants
+[ANALYSIS] Theta range: [-1.954, 1.560]
+[SAVE] Saving aggregated theta scores...
+[SAVED] step02_theta_scores.csv (100 rows, 3 cols)
+[VALIDATION] Running validate_probability_range...
+[ERROR] validate_probability_range() got an unexpected keyword argument 'custom_range'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.1/code/step02_extract_theta_scores.py", line 199, in <module>
+    validation_result = validate_probability_range(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: validate_probability_range() got an unexpected keyword argument 'custom_range'
+[START] Step 02: extract_theta_scores
+[LOAD] Loading Ch5 theta scores...
+[LOADED] step03_theta_scores.csv (400 rows, 3 cols)
+[VERIFY] Column check passed: ['UID', 'test', 'Theta_All']
+[VERIFY] Data format: 400 rows (expected ~400)
+[VERIFY] 100 unique participants
+[VERIFY] Tests per participant: min=4, max=4
+[ANALYSIS] Aggregating theta scores by participant...
+[ANALYSIS] Aggregation complete: 100 participants
+[ANALYSIS] Theta range: [-1.954, 1.560]
+[SAVE] Saving aggregated theta scores...
+[SAVED] step02_theta_scores.csv (100 rows, 3 cols)
+[VALIDATION] Running theta bounds validation (manual)...
+[VALIDATION] valid: True
+[VALIDATION] out_of_bounds_count: 0
+[VALIDATION] min_value: -1.9537
+[VALIDATION] max_value: 1.5595
+[VALIDATION] range_check: [-1.954, 1.560]
+[SUCCESS] Step 02 complete

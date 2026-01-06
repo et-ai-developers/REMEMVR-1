@@ -1,0 +1,45 @@
+[START] Step 08: power_analysis
+[LOAD] Loading model results...
+[LOADED] step04_regression_models.csv (2 rows, 8 cols)
+[LOAD] Loading coefficient results...
+[LOADED] step04_coefficients_ci.csv (4 rows, 8 cols)
+[EXTRACT] Full model parameters: N=100, k=4, R2=0.0626
+[ANALYSIS] Computing post-hoc power for overall model...
+[COMPUTED] Uncorrected power (alpha=0.05): 0.4958
+[COMPUTED] Corrected power (alpha=0.0167): 0.3235
+[ANALYSIS] Computing approximate power for individual predictors...
+[COMPUTED] Education_z power: 0.1608 (effect size: 0.0514)
+[COMPUTED] VR_Experience_z power: 0.0438 (effect size: 0.0469)
+[COMPUTED] Typical_Sleep_z power: 0.0936 (effect size: 0.0796)
+[ANALYSIS] Computing sensitivity analysis - minimum detectable effects...
+[ERROR] FTestAnovaPower.solve_power() got an unexpected keyword argument 'k_constraint'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.1/code/step08_power_analysis.py", line 248, in <module>
+    min_f2_uncorrected = power_test.solve_power(
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: FTestAnovaPower.solve_power() got an unexpected keyword argument 'k_constraint'
+[START] Step 08: power_analysis
+[LOAD] Loading model results...
+[LOADED] step04_regression_models.csv (2 rows, 8 cols)
+[LOAD] Loading coefficient results...
+[LOADED] step04_coefficients_ci.csv (4 rows, 8 cols)
+[EXTRACT] Full model parameters: N=100, k=4, R2=0.0626
+[ANALYSIS] Computing post-hoc power for overall model...
+[COMPUTED] Uncorrected power (alpha=0.05): 0.4958
+[COMPUTED] Corrected power (alpha=0.0167): 0.3235
+[ANALYSIS] Computing approximate power for individual predictors...
+[COMPUTED] Education_z power: 0.1608 (effect size: 0.0514)
+[COMPUTED] VR_Experience_z power: 0.0438 (effect size: 0.0469)
+[COMPUTED] Typical_Sleep_z power: 0.0936 (effect size: 0.0796)
+[ANALYSIS] Computing sensitivity analysis - minimum detectable effects...
+[COMPUTED] Minimum detectable f² (alpha=0.05): 0.2829 (Medium effect)
+[COMPUTED] Minimum detectable f² (alpha=0.0167): 0.3283 (Medium effect)
+[SAVE] Saving power analysis results...
+[SAVED] step08_power_analysis.csv (4 rows, 5 cols)
+[SAVE] Saving sensitivity analysis results...
+[SAVED] step08_sensitivity_analysis.csv (2 rows, 4 cols)
+[VALIDATION] Running power value validation...
+[VALIDATION] PASS: All power values within valid range [0,1]
+[VALIDATION] Range: [0.0438, 0.4958]
+[SUCCESS] Step 08 complete

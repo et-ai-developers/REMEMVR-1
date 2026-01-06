@@ -1,0 +1,43 @@
+[START] Step 07: Cross-validation for Generalizability Assessment
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 6 cols)
+[PREPARED] Predictors: ['Age_z', 'Education_z', 'VR_Experience_z', 'Typical_Sleep_z']
+[PREPARED] Outcome: theta_all
+[PREPARED] Sample size: N=100
+[ANALYSIS] Running 5-fold cross-validation...
+[DONE] Cross-validation complete
+[PROCESSING] Extracting fold-level results...
+[ERROR] 'scores'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.1/code/step07_cross_validation.py", line 176, in <module>
+    train_r2 = cv_results['train_scores'][fold] if 'train_scores' in cv_results else cv_results['scores']['train_r2'][fold]
+                                                                                     ~~~~~~~~~~^^^^^^^^^^
+KeyError: 'scores'
+[START] Step 07: Cross-validation for Generalizability Assessment
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 6 cols)
+[PREPARED] Predictors: ['Age_z', 'Education_z', 'VR_Experience_z', 'Typical_Sleep_z']
+[PREPARED] Outcome: theta_all
+[PREPARED] Sample size: N=100
+[ANALYSIS] Running 5-fold cross-validation...
+[DONE] Cross-validation complete
+[PROCESSING] Extracting fold-level results...
+[SAVED] step07_cv_results.csv (5 rows, 6 cols)
+[PROCESSING] Analyzing coefficient stability...
+[WARNING] Coefficient data not available in CV results
+[SAVED] step07_cv_stability.csv (4 rows, 4 cols)
+[ASSESSMENT] Evaluating model generalizability...
+[ASSESSMENT] Mean train R² = nan
+[ASSESSMENT] Mean test R² = -0.134
+[ASSESSMENT] Mean train-test gap = nan
+[ASSESSMENT] Test R² variability (SD) = 0.217
+[GOOD] No significant overfitting (gap = nan <= 0.1)
+[VALIDATION] Running validate_probability_range...
+[VALIDATION] valid: False
+[VALIDATION] message: 2 violation(s) found. Probabilities must be in [0, 1]. Issues: train_r2: NaN values, test_r2: Values below 0
+[VALIDATION] violations: [{'column': 'train_r2', 'issue': 'NaN values', 'count': 5}, {'column': 'test_r2', 'issue': 'Values below 0', 'count': 4, 'example': -0.10242388543059522}]
+[SUCCESS] Step 07: Cross-validation complete
+[SUMMARY] 5-fold cross-validation completed
+[SUMMARY] Mean test R² = -0.134 (generalization estimate)
+[SUMMARY] Overfitting status: NOT DETECTED

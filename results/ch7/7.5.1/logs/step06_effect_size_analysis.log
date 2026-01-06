@@ -1,0 +1,30 @@
+[START] Step 06: Effect Size Analysis
+[LOAD] Loading input data...
+[LOADED] step04_regression_models.csv (2 models, 8 cols)
+[LOADED] step04_coefficients_ci.csv (4 predictors, 8 cols)
+[LOADED] step03_analysis_dataset.csv (100 participants, 6 cols)
+[ANALYSIS] Computing Cohen's f² effect size...
+[INFO] Control model R² = 0.0374
+[INFO] Full model R² = 0.0626
+[ANALYSIS] Cohen's f² = 0.0270
+[ANALYSIS] f² change = 0.0270
+[BOOTSTRAP] Computing bootstrap confidence intervals (1000 iterations, seed=42)...
+[BOOTSTRAP] Completed: 1000 valid samples
+[SAVE] Saving effect sizes...
+[SAVED] step06_effect_sizes.csv (3 measures, 6 cols)
+[ANALYSIS] Computing relative importance via semi-partial correlations...
+[SAVE] Saving relative importance rankings...
+[SAVED] step06_relative_importance.csv (3 predictors, 4 cols)
+[VALIDATION] Running validate_effect_sizes...
+[VALIDATION] valid: True
+[VALIDATION] message: All effect sizes valid (n=3, range=[0.027, 0.063]).
+[VALIDATION] warnings: []
+[SUMMARY] Effect Size Analysis Results:
+  Cohen's f² = 0.0270 (Small)
+  R² full model = 0.0626
+  Bootstrap 95% CI: f² [0.0172, 0.2781]
+[SUMMARY] Relative Importance Rankings:
+  Rank 1: Typical_Sleep_z (sr² = 0.0059, 9.5% of R²)
+  Rank 2: Education_z (sr² = 0.0025, 3.9% of R²)
+  Rank 3: VR_Experience_z (sr² = 0.0021, 3.3% of R²)
+[SUCCESS] Step 06 complete

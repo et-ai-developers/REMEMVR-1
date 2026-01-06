@@ -1,0 +1,27 @@
+[START] Step 01: extract_self_report_measures
+[LOAD] Loading participant data from dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 rows, 235 cols)
+[ANALYSIS] Extracting required self-report columns...
+[EXTRACTED] 5 columns: ['UID', 'education', 'vr-exposure', 'typical-sleep-hours', 'age']
+[QUALITY] Checking missing data patterns...
+[MISSING] UID: 0/100 (0.0%)
+[MISSING] education: 0/100 (0.0%)
+[MISSING] vr-exposure: 0/100 (0.0%)
+[MISSING] typical-sleep-hours: 0/100 (0.0%)
+[MISSING] age: 0/100 (0.0%)
+[QUALITY] Missing data levels acceptable (all <5%)
+[RENAME] Renaming columns for analysis consistency...
+[RENAMED] Columns renamed to: ['UID', 'Education', 'VR_Experience', 'Typical_Sleep', 'Age']
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.5.1/data/step01_self_report_data.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.5.1/data/step01_self_report_data.csv (100 rows, 5 cols)
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['Typical_Sleep', 'Education', 'VR_Experience', 'UID', 'Age']
+[VALIDATION] n_required: 5
+[VALIDATION] n_missing: 0
+[VALIDATION] All required columns present in output dataset
+[SUCCESS] Step 01 complete
+[OUTPUT] Self-report extraction complete: 100 participants
+[QUALITY] Data completeness check passed
+[FORMAT] Column renaming complete for downstream compatibility
