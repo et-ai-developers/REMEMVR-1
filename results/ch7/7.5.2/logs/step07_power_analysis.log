@@ -1,0 +1,27 @@
+[START] Step 07: Power Analysis
+[LOAD] Loading hierarchical regression results...
+[LOADED] step03_hierarchical_models.csv (2 models)
+[EXTRACT] Controls R² = 0.0594
+[EXTRACT] Full model R² = 0.0914
+[EXTRACT] ΔR² (DASS increment) = 0.0319
+[ANALYSIS] Computing Cohen's f² effect sizes...
+[COMPUTED] Hierarchical Cohen's f² = 0.0352
+[COMPUTED] Individual predictor f² (estimated) = 0.0117
+[ANALYSIS] Running post-hoc power analysis...
+[COMPUTED] Hierarchical power (α=0.05) = 0.280
+[COMPUTED] Hierarchical power (α=0.00060) = 0.018
+[COMPUTED] Individual power (α=0.05) = 0.184
+[COMPUTED] Individual power (α=0.00060) = 0.008
+[ANALYSIS] Computing minimum detectable effects...
+[COMPUTED] Min detectable f² (α=0.05) = 0.1180
+[COMPUTED] Min detectable f² (α=0.00060) = 0.2590
+[COMPUTED] N=1000 achieves power=0.961 for α=0.00060
+[SAVE] Saving power analysis results...
+[SAVED] step07_power_analysis.csv (6 analyses)
+[SAVED] step07_effect_sizes.csv (3 predictors)
+[SAVED] step07_power_summary.txt (power interpretation and recommendations)
+[VALIDATION] Running validate_effect_sizes...
+[VALIDATION] valid: True
+[VALIDATION] message: All effect sizes valid (n=4, range=[0.012, 0.259]).
+[VALIDATION] warnings: []
+[SUCCESS] Step 07 complete

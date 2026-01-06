@@ -1,0 +1,48 @@
+[START] Step 04: Individual DASS Predictor Analysis
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[CHECK] All required columns present: ['UID', 'theta_all', 'nart_score', 'age', 'dass_anx', 'dass_str', 'dass_dep']
+[PREP] Preparing regression data...
+[PREP] Full model: 6 predictors (including constant)
+[PREP] Sample size: N = 97
+[ANALYSIS] Fitting full regression model...
+[MODEL] R² = 0.0914, Adjusted R² = 0.0415
+[MODEL] F(5.0, 91.0) = 1.830, p = 0.1147
+[VIF] age: 9.40
+[VIF] nart_score: 10.90
+[VIF] dass_dep: 2.63
+[VIF] dass_anx: 2.87
+[VIF] dass_str: 5.59
+[WARNING] High multicollinearity detected: [{'predictor': 'age', 'VIF': np.float64(9.403703912672817)}, {'predictor': 'nart_score', 'VIF': np.float64(10.903156351741982)}, {'predictor': 'dass_str', 'VIF': np.float64(5.585263342856973)}]
+[EXTRACT] Extracting individual DASS predictor effects...
+[PREDICTOR] dass_dep: β = -0.0212, t = -0.817, sr² = 0.0067, p = 0.4161
+[PREDICTOR] dass_anx: β = 0.0429, t = 1.082, sr² = 0.0111, p = 0.2819
+[PREDICTOR] dass_str: β = 0.0136, t = 0.439, sr² = 0.0017, p = 0.6616
+[BOOTSTRAP] Computing bootstrap confidence intervals (1000 iterations)...
+[BOOTSTRAP] dass_dep: 95% CI [-0.0759, 0.0316]
+[BOOTSTRAP] dass_anx: 95% CI [-0.0296, 0.1277]
+[BOOTSTRAP] dass_str: 95% CI [-0.0468, 0.0659]
+[CORRECTION] Applying multiple comparison corrections (Decision D068)...
+[CORRECTION] dass_dep:
+    p_uncorrected = 0.416061
+    p_bonferroni = 0.416061
+    p_fdr = 0.624091
+[CORRECTION] dass_anx:
+    p_uncorrected = 0.281896
+    p_bonferroni = 0.281896
+    p_fdr = 0.624091
+[CORRECTION] dass_str:
+    p_uncorrected = 0.661590
+    p_bonferroni = 0.661590
+    p_fdr = 0.661590
+[SIGNIFICANCE] Significant predictors (Bonferroni α = 0.000597): 0
+[SAVE] Saving individual predictor results...
+[SAVED] step04_individual_predictors.csv (3 rows, 10 cols)
+[SAVED] step04_multiple_corrections.txt
+[VALIDATION] Running validate_contrasts_dual_pvalues...
+[VALIDATION] valid: True
+[VALIDATION] d068_compliant: True
+[VALIDATION] missing_comparisons: []
+[VALIDATION] message: Decision D068 compliant: ALL required comparisons present (3 total) with both p_uncorrected and p_bonferroni.
+[VALIDATION] PASS - Results comply with Decision D068 requirements
+[SUCCESS] Step 04 complete - Individual DASS predictor analysis with dual p-values

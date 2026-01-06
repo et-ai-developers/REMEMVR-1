@@ -1,0 +1,15 @@
+NORMALITY TEST RESULTS - STEP 02
+==================================================
+
+Variable: theta_all
+Test: Shapiro-Wilk
+Test Statistic: 0.971292
+P-value: 0.031796
+Sample Size: 97
+Normal Distribution: False
+Interpretation: Non-normal distribution (p=0.032 <= 0.05)
+
+RECOMMENDATION:
+- Consider bootstrap confidence intervals for regression
+- Report both parametric and robust standard errors
+- Check for outliers and transformations

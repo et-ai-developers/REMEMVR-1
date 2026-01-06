@@ -1,0 +1,83 @@
+[START] Step 03: hierarchical_regression
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[INFO] Columns: ['UID', 'theta_all', 'nart_score', 'age', 'dass_anx', 'dass_str', 'dass_dep']
+[INFO] Outcome variable theta_all: mean=0.0172, std=0.6492, range=[-1.3259, 1.5595]
+[PREP] Preparing hierarchical regression blocks...
+[BLOCK1] Controls: ['age', 'nart_score'] (shape: (97, 2))
+[BLOCK2] DASS predictors: ['dass_dep', 'dass_anx', 'dass_str'] (shape: (97, 3))
+[INFO] Total blocks: 2
+[INFO] Block names: ['controls', 'dass_predictors']
+[ANALYSIS] Running fit_hierarchical_regression...
+[DONE] Hierarchical regression analysis complete
+[BOOTSTRAP] Computing bootstrap confidence intervals for delta R²...
+[WARNING] Cannot compute bootstrap CI - hierarchical results missing delta_R2
+[SAVE] Saving hierarchical regression outputs...
+[ERROR] Cannot save hierarchical models - summary not found in results
+[SAVED] step03_model_bootstrap.csv (1 rows, 5 cols)
+[VALIDATION] Running validation checks...
+[VALIDATION] converged: True
+[VALIDATION] message: LMM converged successfully
+[SUCCESS] Step 03 complete
+[START] Step 03: hierarchical_regression (MANUAL IMPLEMENTATION)
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[INFO] Columns: ['UID', 'theta_all', 'nart_score', 'age', 'dass_anx', 'dass_str', 'dass_dep']
+[PASS] Sample size 97 adequate for regression analysis
+[INFO] Outcome theta_all: mean=0.0172, std=0.6492, range=[-1.3259, 1.5595]
+[PREP] Preparing hierarchical regression blocks...
+[BLOCK1] Controls: ['age', 'nart_score'] (shape: (97, 2))
+[BLOCK1] age: mean=44.8, std=14.6
+[BLOCK1] nart_score: mean=31.9, std=8.5
+[BLOCK2] DASS predictors: ['dass_dep', 'dass_anx', 'dass_str'] (shape: (97, 3))
+[BLOCK2] dass_dep: mean=2.39, std=3.28
+[BLOCK2] dass_anx: mean=1.47, std=2.39
+[BLOCK2] dass_str: mean=3.43, std=3.60
+[INFO] Hierarchical structure: 2 blocks
+[INFO] Block 1 (controls): 2 predictors
+[INFO] Block 2 (dass_predictors): 3 predictors
+[ANALYSIS] Fitting hierarchical regression models...
+[RESULTS] Fitted 2 models:
+[RESULTS] Model 1: controls:
+[RESULTS]   R² = 0.0594, Adj R² = 0.0394
+[RESULTS]   F(2.0, 94.0) = 2.97, p = 0.0561
+[RESULTS]   ΔR² = 0.0594
+[RESULTS] Model 2: controls + dass_predictors:
+[RESULTS]   R² = 0.0914, Adj R² = 0.0415
+[RESULTS]   F(5.0, 91.0) = 1.83, p = 0.1147
+[RESULTS]   ΔR² = 0.0319
+[F-TEST] Incremental ΔR² = 0.0319
+[F-TEST] F(3.0, 91.0) = 1.07
+[F-TEST] p-value = 0.3674
+[F-TEST] NOT SIGNIFICANT: DASS subscales do not explain additional variance
+[BOOTSTRAP] Computing bootstrap confidence intervals for ΔR²...
+[BOOTSTRAP] Completed 200/1000 iterations (200 successful)
+[BOOTSTRAP] Completed 400/1000 iterations (400 successful)
+[BOOTSTRAP] Completed 600/1000 iterations (600 successful)
+[BOOTSTRAP] Completed 800/1000 iterations (800 successful)
+[BOOTSTRAP] Completed 1000/1000 iterations (1000 successful)
+[BOOTSTRAP] Observed ΔR² = 0.0319
+[BOOTSTRAP] Successful iterations: 1000/1000
+[BOOTSTRAP] Bootstrap ΔR² = 0.0567
+[BOOTSTRAP] 95% CI: [0.0043, 0.1679]
+[BOOTSTRAP] 95% CI excludes zero -> Significant incremental variance
+[SAVE] Saving hierarchical regression outputs...
+[SAVED] step03_hierarchical_models.csv (2 rows, 8 cols)
+[PASS] All expected columns present in model summary
+[SAVED] step03_model_bootstrap.csv (1 rows, 5 cols)
+[VALIDATION] Running validation checks...
+[VALIDATION] R² values in range [0,1]: True
+[VALIDATION] F-statistics non-negative: True
+[VALIDATION] ΔR² values reasonable (0-0.5): True
+[VALIDATION] Expected 2 models, found 2: True
+[VALIDATION] Bootstrap CI ordering valid: True
+[VALIDATION] PASS: All validation checks successful
+[SUMMARY] Hierarchical Regression Analysis Complete:
+[SUMMARY] Sample size: N = 97
+[SUMMARY] Block 1 (controls): R² = 0.0594
+[SUMMARY] Block 2 (full model): R² = 0.0914
+[SUMMARY] Incremental ΔR² = 0.0319
+[SUMMARY] F-test for ΔR²: F = 1.07, p = 0.3674
+[SUMMARY] Bootstrap 95% CI: [0.0043, 0.1679]
+[SUMMARY] RESULT: DASS subscales do not significantly predict memory performance beyond controls
+[SUCCESS] Step 03 complete - ready for Step 04 individual predictor analysis

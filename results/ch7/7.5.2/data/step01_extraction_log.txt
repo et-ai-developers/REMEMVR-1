@@ -1,0 +1,23 @@
+RQ 7.5.2 Step 01 - Data Extraction and Merge Log
+==================================================
+
+INPUT DATA SUMMARY:
+Ch5 theta scores: 400 rows, 100 unique UIDs
+dfnonvr.csv: 100 rows
+
+THETA AGGREGATION:
+Aggregated to: 100 participants
+Tests per participant: 4-4 (mean: 4.0)
+Theta range: -1.954 to 1.559
+
+MERGE RESULTS:
+Final sample size: 97 complete cases
+Retention rate: 97.0% of theta participants
+
+VARIABLE RANGES (for validation):
+theta_all: -1.33 to 1.56 (mean: 0.02)
+dass_dep: 0.00 to 17.00 (mean: 2.39)
+dass_anx: 0.00 to 12.00 (mean: 1.47)
+dass_str: 0.00 to 16.00 (mean: 3.43)
+age: 20.00 to 70.00 (mean: 44.81)
+nart_score: 6.00 to 50.00 (mean: 31.90)

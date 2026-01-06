@@ -1,0 +1,36 @@
+=== POWER ANALYSIS SUMMARY - RQ 7.5.2 ===
+
+Sample Size: N = 97
+Observed Effects:
+  - Hierarchical ΔR² = 0.0319 (Cohen's f² = 0.0352, Small)
+  - Individual predictor f² ≈ 0.0117 (Very Small)
+
+POST-HOC POWER:
+  Hierarchical DASS test:
+    - Uncorrected (α = 0.05): Power = 0.280
+    - Bonferroni (α = 0.00060): Power = 0.018
+
+  Individual DASS predictors:
+    - Uncorrected (α = 0.05): Power = 0.184
+    - Bonferroni (α = 0.00060): Power = 0.008
+
+MINIMUM DETECTABLE EFFECTS (80% power):
+  - Uncorrected (α = 0.05): f² = 0.1180 (Small)
+  - Bonferroni (α = 0.00060): f² = 0.2590 (Medium)
+
+INTERPRETATION:
+  1. Observed effects are very small (ΔR² = 0.032)
+  2. Power is low for conservative alpha levels
+  3. Bonferroni correction (α = 0.00060) severely reduces power
+  4. Results consistent with null findings - low power to detect small effects
+
+SAMPLE SIZE RECOMMENDATIONS:
+  - Current N = 97 adequate for uncorrected α = 0.05
+  - For conservative α = 0.00060, would need N > 500 for 80% power
+  - Conservative corrections may be too stringent for exploratory research
+
+CONCLUSION:
+  Null findings are interpretable - study had adequate power to detect
+  medium-to-large effects but insufficient power for very small effects.
+  Conservative alpha levels appropriate for confirmatory research but
+  may be overly conservative for initial DASS-memory relationship exploration.

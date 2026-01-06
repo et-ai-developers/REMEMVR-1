@@ -1,0 +1,36 @@
+[START] Step 06: Cross-Validation Analysis
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[DATA] All required columns present: ['theta_all', 'age', 'nart_score', 'dass_dep', 'dass_anx', 'dass_str']
+[DATA] Sample size: N=97 (expected ~97)
+[ANALYSIS] Preparing regression data...
+[ANALYSIS] Outcome: theta_all
+[ANALYSIS] Predictors: ['age', 'nart_score', 'dass_dep', 'dass_anx', 'dass_str']
+[ANALYSIS] Complete cases: N=97 (no missingness expected)
+[ANALYSIS] Running 5-fold cross-validation...
+[CUSTOM CV] Creating custom cross-validation function due to signature mismatch
+[CUSTOM CV] Using 5 folds, random_state=42
+[CUSTOM CV] Starting 5-fold cross-validation on 97 samples
+[CUSTOM CV] Processing fold 1/5
+[CUSTOM CV] Fold 1: Train R²=0.1002, Test R²=-0.0853, Generalization Gap=0.1855
+[CUSTOM CV] Processing fold 2/5
+[CUSTOM CV] Fold 2: Train R²=0.1028, Test R²=0.0180, Generalization Gap=0.0847
+[CUSTOM CV] Processing fold 3/5
+[CUSTOM CV] Fold 3: Train R²=0.1485, Test R²=-0.5643, Generalization Gap=0.7128
+[CUSTOM CV] Processing fold 4/5
+[CUSTOM CV] Fold 4: Train R²=0.0719, Test R²=-0.3655, Generalization Gap=0.4374
+[CUSTOM CV] Processing fold 5/5
+[CUSTOM CV] Fold 5: Train R²=0.0719, Test R²=0.1428, Generalization Gap=-0.0709
+[CUSTOM CV] Cross-validation complete, computing aggregate statistics
+[DONE] Cross-validation complete
+[SAVE] Saving cross-validation results...
+[SAVED] step06_cross_validation.csv (5 rows, 8 cols)
+[SAVED] step06_cv_summary.csv (6 rows, 5 cols)
+[SAVED] step06_generalization_assessment.txt
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] R² validation: FAIL
+[VALIDATION] R² violations: R_squared: 3 values out of range [0.0, 1.0]. Violations: below minimum. First violations: [-0.08530760332880294, -0.5642603765292484, -0.36550005242616335]
+[VALIDATION] RMSE validation: PASS
+[VALIDATION] Generalization gap validation: PASS
+[VALIDATION] Overall: FAIL
+[SUCCESS] Step 06 complete

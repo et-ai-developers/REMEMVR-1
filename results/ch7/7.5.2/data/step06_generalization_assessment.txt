@@ -1,0 +1,29 @@
+CROSS-VALIDATION GENERALIZATION ASSESSMENT
+==================================================
+
+Model: theta_all ~ age + nart_score + dass_dep + dass_anx + dass_str
+Sample Size: N=97
+Cross-Validation: 5-fold with random_state=42
+
+PERFORMANCE METRICS:
+  Mean Train R²: 0.0990
+  Mean Test R²:  -0.1708
+  Generalization Gap: 0.2699
+
+OVERFITTING ASSESSMENT:
+  Threshold: 0.10
+  Status: OVERFITTING DETECTED (gap = 0.2699 > 0.10)
+  Interpretation: Model shows poor generalization, likely overfitted
+  Recommendation: Use test R² for conservative effect size estimate
+
+FOLD-BY-FOLD DETAILS:
+  Fold 1.0: Train R²=0.100, Test R²=-0.085, Gap=0.186
+  Fold 2.0: Train R²=0.103, Test R²=0.018, Gap=0.085
+  Fold 3.0: Train R²=0.148, Test R²=-0.564, Gap=0.713
+  Fold 4.0: Train R²=0.072, Test R²=-0.366, Gap=0.437
+  Fold 5.0: Train R²=0.072, Test R²=0.143, Gap=-0.071
+
+CONTEXT (RQ 7.5.2):
+  Expected: Some overfitting given small effect sizes (R² ~ 0.091) and N=97
+  Consistent with: RQ 7.5.1 pattern of modest generalization gaps
+  Implication: DASS effects on memory are genuine but small

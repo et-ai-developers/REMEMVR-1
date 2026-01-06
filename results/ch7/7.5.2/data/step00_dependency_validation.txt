@@ -1,0 +1,40 @@
+=== RQ 7.5.2 DEPENDENCY VALIDATION LOG ===
+Generated: 2026-01-06
+Validation tool: tools.validation.check_file_exists
+
+=== OVERALL STATUS ===
+Ch5 5.1.1 status: SUCCESS
+File existence: SUCCESS
+Column validation: FAIL
+Ready for analysis: NO
+
+=== FILE EXISTENCE VALIDATION ===
+[PASS] results/ch5/5.1.1/status.yaml
+    Size: 6395 bytes
+    Message: File exists and meets minimum size: 6395 bytes (>= 100 bytes)
+    Path: /home/etai/projects/REMEMVR/results/ch5/5.1.1/status.yaml
+
+[PASS] results/ch5/5.1.1/data/step03_theta_scores.csv
+    Size: 7186 bytes
+    Message: File exists and meets minimum size: 7186 bytes (>= 100 bytes)
+    Path: /home/etai/projects/REMEMVR/results/ch5/5.1.1/data/step03_theta_scores.csv
+
+[PASS] data/dfnonvr.csv
+    Size: 60164 bytes
+    Message: File exists and meets minimum size: 60164 bytes (>= 100 bytes)
+    Path: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+
+=== CH5 5.1.1 STATUS VALIDATION ===
+Status: Ch5 5.1.1 status: success
+Valid: YES
+
+=== CSV COLUMN VALIDATION ===
+[FAIL] step03_theta_scores.csv
+    Message: Theta CSV columns: ['UID', 'test', 'Theta_All'] (expected: ['composite_ID', 'theta_all'])
+
+[PASS] dfnonvr.csv
+    Message: dfnonvr.csv has required DASS columns: True
+
+=== VALIDATION PATTERNS ===
+Required patterns found: ['Ch5 5.1.1 status: success', 'dfnonvr.csv accessible', 'theta file found']
+Forbidden patterns found: validation failures present

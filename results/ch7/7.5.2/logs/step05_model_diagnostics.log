@@ -1,0 +1,68 @@
+[START] Step 05: Model Diagnostics
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[VERIFIED] All required columns present: ['UID', 'theta_all', 'dass_dep', 'dass_anx', 'dass_str', 'age', 'nart_score']
+[PREPARE] Setting up regression model data...
+[PREPARED] Predictors: ['age', 'nart_score', 'dass_dep', 'dass_anx', 'dass_str']
+[PREPARED] Outcome: theta_all
+[PREPARED] Sample size: 97 observations
+[VERIFIED] No missing data in regression variables
+[ANALYSIS] Fitting full regression model...
+[DONE] Regression model fitted successfully
+[MODEL] R-squared: 0.0914
+[MODEL] Adj. R-squared: 0.0415
+[MODEL] F-statistic: 1.8304 (p=0.114680)
+[DIAGNOSTICS] Computing model-level diagnostics...
+[VIF] Computed VIF for 5 predictors
+[CONDITION] Condition number: 266.26
+[BREUSCH-PAGAN] LM statistic: 10.0546, p-value: 0.073703
+[ERROR] cannot import name 'durbin_watson' from 'statsmodels.stats.diagnostic' (/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/stats/diagnostic.py)
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.2/code/step05_model_diagnostics.py", line 244, in <module>
+    from statsmodels.stats.diagnostic import durbin_watson
+ImportError: cannot import name 'durbin_watson' from 'statsmodels.stats.diagnostic' (/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/statsmodels/stats/diagnostic.py)
+[START] Step 05: Model Diagnostics
+[LOAD] Loading analysis dataset...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[VERIFIED] All required columns present: ['UID', 'theta_all', 'dass_dep', 'dass_anx', 'dass_str', 'age', 'nart_score']
+[PREPARE] Setting up regression model data...
+[PREPARED] Predictors: ['age', 'nart_score', 'dass_dep', 'dass_anx', 'dass_str']
+[PREPARED] Outcome: theta_all
+[PREPARED] Sample size: 97 observations
+[VERIFIED] No missing data in regression variables
+[ANALYSIS] Fitting full regression model...
+[DONE] Regression model fitted successfully
+[MODEL] R-squared: 0.0914
+[MODEL] Adj. R-squared: 0.0415
+[MODEL] F-statistic: 1.8304 (p=0.114680)
+[DIAGNOSTICS] Computing model-level diagnostics...
+[VIF] Computed VIF for 5 predictors
+[CONDITION] Condition number: 266.26
+[BREUSCH-PAGAN] LM statistic: 10.0546, p-value: 0.073703
+[DURBIN-WATSON] Test statistic: 1.6535 (Manual calculation)
+[DIAGNOSTICS] Model-level diagnostics computed for 5 predictors
+[DIAGNOSTICS] Computing observation-level diagnostics...
+[DIAGNOSTICS] Observation-level diagnostics computed for 97 observations
+[COOKS-D WARNING] 4 observations exceed Cook's D threshold 0.0412
+[COOKS-D] Influential observations: [5, 9, 35, 75]
+[ASSUMPTIONS] Running assumption tests...
+[SHAPIRO-WILK] Normality test on residuals: W=0.9798, p=0.139908
+[ASSUMPTIONS] 2 potential violations identified
+[SAVE] Saving model diagnostics...
+[SAVED] step05_model_diagnostics.csv (5 rows, 5 cols)
+[SAVE] Saving residual analysis...
+[SAVED] step05_residual_analysis.csv (97 rows, 6 cols)
+[SAVE] Saving assumption checks summary...
+[SAVED] step05_assumption_checks.txt
+[VALIDATION] Attempting validation...
+[VALIDATION] valid: False
+[VALIDATION] diagnostics: {'residual_normality': {'test': 'Shapiro-Wilk', 'statistic': 0.979761965926799, 'p_value': 0.13990759476085457, 'pass': np.True_, 'threshold': 0.05}, 'homoscedasticity': {'test': 'Breusch-Pagan', 'statistic': 10.054578531140947, 'p_value': 0.07370347605301329, 'pass': np.True_, 'threshold': 0.05}, 'random_effects_normality': {'intercepts': {'test': 'Shapiro-Wilk', 'statistic': None, 'p_value': None, 'pass': True, 'warning': "Extraction failed: 'OLSResults' object has no attribute 'random_effects'"}, 'slopes': {'test': 'Shapiro-Wilk', 'statistic': None, 'p_value': None, 'pass': True, 'warning': 'Extraction failed'}}, 'autocorrelation': {'lag1_acf': 0.16302058953210843, 'pass': False, 'threshold': 0.1}, 'outliers': {'method': 'Studentized Residuals', 'threshold': 3.0, 'n_outliers': 0, 'outlier_percentage': 0.0, 'pass': True, 'outlier_indices': []}, 'convergence': {'converged': True, 'pass': True}}
+[VALIDATION] plot_paths: [PosixPath('/home/etai/projects/REMEMVR/results/ch7/7.5.2/plots/qq_plot_residuals.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch7/7.5.2/plots/residuals_vs_fitted.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch7/7.5.2/plots/acf_plot.png'), PosixPath('/home/etai/projects/REMEMVR/results/ch7/7.5.2/plots/studentized_residuals.png')]
+[VALIDATION] message: LMM assumption violations detected (1/7 checks failed):
+  - Autocorrelation detected (Lag-1 ACF = 0.163 exceeds 0.1)
+
+Recommended remedial actions:
+  1. Add AR(1) correlation structure to account for temporal dependencies
+
+[SUCCESS] Step 05 complete

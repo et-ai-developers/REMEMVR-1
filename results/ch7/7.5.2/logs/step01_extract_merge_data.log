@@ -1,0 +1,33 @@
+[START] Step 01: extract_merge_data
+[LOAD] Loading Ch5 theta scores...
+[LOADED] Ch5 theta scores (400 rows, 3 cols)
+[INFO] Theta columns: ['UID', 'test', 'Theta_All']
+[INFO] Unique UIDs: 100, Unique tests: [np.int64(1), np.int64(2), np.int64(3), np.int64(4)]
+[ANALYSIS] Aggregating theta scores by participant...
+[AGGREGATED] Theta scores: 100 participants
+[INFO] Tests per participant: min=4, max=4, mean=4.0
+[INFO] Theta range: -1.954 to 1.559
+[LOAD] Loading DASS subscales and controls from dfnonvr.csv...
+[LOADED] dfnonvr.csv subset (100 rows, 6 cols)
+[RENAMED] Columns standardized: ['UID', 'nart_score', 'age', 'dass_anx', 'dass_str', 'dass_dep']
+[MERGE] Merging theta scores with DASS subscales and controls...
+[MERGED] Analysis dataset: 100 complete cases
+[WARNING] Missing data found:
+  nart_score: 3 missing values
+[CLEANED] Dropped 3 rows with missing data
+[SAVE] Saving analysis dataset...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.5.2/data/step01_analysis_dataset.csv (97 rows, 7 cols)
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.5.2/data/step01_extraction_log.txt
+[VALIDATION] Running validate_data_columns...
+[VALIDATION] valid: True
+[VALIDATION] missing_columns: []
+[VALIDATION] existing_columns: ['nart_score', 'UID', 'dass_dep', 'dass_anx', 'age', 'theta_all', 'dass_str']
+[VALIDATION] n_required: 7
+[VALIDATION] n_missing: 0
+[VALIDATION] Additional checks...
+[PASS] Sample size 97 within expected range [90, 100]
+[PASS] Theta range within expected bounds [-3.0, 3.0]
+[PASS] dass_dep within DASS-21 range [0, 21]
+[PASS] dass_anx within DASS-21 range [0, 21]
+[PASS] dass_str within DASS-21 range [0, 21]
+[SUCCESS] Step 01 complete

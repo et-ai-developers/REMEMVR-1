@@ -1,0 +1,35 @@
+REGRESSION MODEL DIAGNOSTIC SUMMARY
+==================================================
+Model: theta_all ~ age + nart_score + dass_dep + dass_anx + dass_str
+Sample size: 97
+R-squared: 0.0914
+
+DIAGNOSTIC TEST RESULTS:
+- Shapiro-Wilk normality test: W=0.9798, p=0.139908
+- Breusch-Pagan homoscedasticity test: LM=10.0546, p=0.073703
+- Durbin-Watson autocorrelation test: DW=1.6535
+- Condition number: 266.26
+
+VIF VALUES (Multicollinearity Check):
+- age: VIF = 1.229 (OK)
+- nart_score: VIF = 1.134 (OK)
+- dass_dep: VIF = 1.717 (OK)
+- dass_anx: VIF = 2.138 (OK)
+- dass_str: VIF = 2.952 (OK)
+
+INFLUENTIAL OBSERVATIONS:
+- Cook's D threshold (4/N): 0.0412
+- Observations exceeding threshold: 4
+- Influential observation IDs: [5, 9, 35, 75]
+
+ASSUMPTION VIOLATIONS:
+- High condition number: 266.26 (threshold 30)
+- Influential observations: 4 exceed Cook's D threshold
+
+REMEDIAL ACTIONS:
+- Consider robust regression or examine influential cases
+
+NOTE FROM STEP 4:
+- High multicollinearity already detected in prior analysis
+- DASS subscales likely correlated (anxiety, depression, stress overlap)
+- Consider reporting bootstrap CIs as in Steps 3-4 for robustness

@@ -1,0 +1,55 @@
+[START] Step 02: Descriptive Statistics and Data Exploration
+[LOAD] Loading analysis dataset from Step 1...
+[LOADED] step01_analysis_dataset.csv (97 rows, 7 cols)
+[INFO] Analysis variables: ['theta_all', 'dass_dep', 'dass_anx', 'dass_str', 'age', 'nart_score']
+[INFO] Sample size: 97
+[ANALYSIS] Computing descriptive statistics...
+[DESC] theta_all: M=0.017, SD=0.653, n=97
+[DESC] dass_dep: M=2.392, SD=3.296, n=97
+[DESC] dass_anx: M=1.474, SD=2.407, n=97
+[DESC] dass_str: M=3.433, SD=3.620, n=97
+[DESC] age: M=44.814, SD=14.672, n=97
+[DESC] nart_score: M=31.897, SD=8.570, n=97
+[DONE] Descriptive statistics complete
+[ANALYSIS] Computing correlation matrix...
+[CORR] theta_all <-> dass_dep: r=0.038, p=0.713, n=97
+[CORR] theta_all <-> dass_anx: r=0.209, p=0.040, n=97
+[CORR] theta_all <-> dass_str: r=0.171, p=0.095, n=97
+[CORR] theta_all <-> age: r=-0.185, p=0.069, n=97
+[CORR] theta_all <-> nart_score: r=0.091, p=0.373, n=97
+[CORR] dass_dep <-> dass_anx: r=0.417, p=0.000, n=97
+[CORR] dass_dep <-> dass_str: r=0.643, p=0.000, n=97
+[CORR] dass_dep <-> age: r=-0.141, p=0.167, n=97
+[CORR] dass_dep <-> nart_score: r=0.024, p=0.813, n=97
+[CORR] dass_anx <-> dass_str: r=0.715, p=0.000, n=97
+[CORR] dass_anx <-> age: r=-0.303, p=0.003, n=97
+[CORR] dass_anx <-> nart_score: r=-0.088, p=0.391, n=97
+[CORR] dass_str <-> age: r=-0.261, p=0.010, n=97
+[CORR] dass_str <-> nart_score: r=0.015, p=0.885, n=97
+[CORR] age <-> nart_score: r=0.317, p=0.002, n=97
+[DONE] Correlation analysis complete
+[ANALYSIS] Testing normality of outcome variable...
+[NORMALITY] theta_all: W=0.971, p=0.032 -> Non-normal distribution (p=0.032 <= 0.05)
+[DONE] Normality test complete
+[ANALYSIS] Standardizing predictor variables...
+[STANDARDIZE] dass_dep: M=2.392->0.000, SD=3.296->1.000
+[STANDARDIZE] dass_anx: M=1.474->0.000, SD=2.407->1.000
+[STANDARDIZE] dass_str: M=3.433->0.000, SD=3.620->1.000
+[STANDARDIZE] age: M=44.814->0.000, SD=14.672->1.000
+[STANDARDIZE] nart_score: M=31.897->0.000, SD=8.570->1.000
+[DONE] Predictor standardization complete
+[SAVED] step02_descriptives.csv (6 variables)
+[SAVED] step02_correlations.csv (15 correlations)
+[SAVED] step02_normality_tests.txt
+[SAVED] step02_standardized_dataset.csv (97 standardized cases)
+[SAVED] step02_standardization_log.csv (5 variables)
+[VALIDATION] Running validation checks...
+[VALIDATION] descriptives_valid: True
+[VALIDATION] correlations_computed: True
+[VALIDATION] normality_tested: True
+[VALIDATION] standardization_complete: True
+[VALIDATION] high_correlations: 0
+[VALIDATION] normality_violation: True
+[VALIDATION] sample_size: 97
+[WARNING] Outcome variable violates normality - consider robust methods
+[SUCCESS] Step 02 complete - descriptive statistics generated

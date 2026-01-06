@@ -1,0 +1,47 @@
+MULTIPLE COMPARISON CORRECTIONS - STEP 04
+==========================================
+
+DECISION D068 COMPLIANCE: Dual P-value Reporting
+
+Family of Tests: 3 DASS subscale predictors
+  - dass_dep (Depression)
+  - dass_anx (Anxiety)
+  - dass_str (Stress)
+
+Bonferroni Correction:
+  Family-wise α = 0.00179 (Chapter 7 alpha)
+  Per-test α = 0.00179 / 3 = 0.00060
+  Method: p_bonferroni = min(p_uncorrected × 3, 1.0)
+
+FDR Correction:
+  Method: Benjamini-Hochberg procedure
+  Controls False Discovery Rate at 5%
+
+RESULTS SUMMARY:
+
+dass_dep:
+  β = -0.0212, SE = 0.0259
+  t = -0.817, sr² = 0.0067
+  95% CI: [-0.0759, 0.0316]
+  p_uncorrected = 0.416061
+  p_bonferroni = 0.416061
+  p_fdr = 0.624091
+  Significance: Uncorrected , Bonferroni [NS]
+
+dass_anx:
+  β = 0.0429, SE = 0.0396
+  t = 1.082, sr² = 0.0111
+  95% CI: [-0.0296, 0.1277]
+  p_uncorrected = 0.281896
+  p_bonferroni = 0.281896
+  p_fdr = 0.624091
+  Significance: Uncorrected , Bonferroni [NS]
+
+dass_str:
+  β = 0.0136, SE = 0.0310
+  t = 0.439, sr² = 0.0017
+  95% CI: [-0.0468, 0.0659]
+  p_uncorrected = 0.661590
+  p_bonferroni = 0.661590
+  p_fdr = 0.661590
+  Significance: Uncorrected , Bonferroni [NS]
