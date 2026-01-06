@@ -263,4 +263,101 @@ results/ch7/X.Y.Z/
 
 ---
 
+## RQ 7.3.5 Complete - Calibration Groups and Cognitive Reserve (2026-01-06 02:00)
+
+**Archived from:** state.md
+**Original Date:** 2026-01-06 02:00
+**Reason:** Task completed - RQ 7.3.5 fully executed and validated
+
+**Achievement:** Successfully completed RQ 7.3.5 (calibration groups and cognitive reserve) with full scientific rigor. Created three calibration groups (Well-calibrated n=41, Overconfident n=33, Underconfident n=26) based on confidence-accuracy residuals. Key finding: Calibration does NOT predict cognitive reserve indicators (all p > 0.05), continuing the pattern of metacognitive independence.
+
+### Step-by-Step Execution with Scientific Mantra:
+
+**Step 00 - Validate Dependencies:**
+- Initial validation failed due to column name mismatches
+- Ch5 has 'Theta_All' not 'theta_all' (case sensitivity)
+- Ch6 has 'composite_ID' not 'UID' and 'theta_All' not 'theta_confidence'
+- dfnonvr.csv has exact hyphenated names: 'rpm-score', 'age', 'education'
+
+**Step 01 - Extract and Merge Data:**
+- Fixed all column name mismatches programmatically
+- Aggregated Ch5 theta scores across 4 tests (mean)
+- Extracted UID from Ch6 composite_ID format ("A001_1" → "A001")
+- Aggregated Ch6 confidence across 4 tests (mean)
+- Successfully merged 100 participants with complete data
+- Theta range: -1.95 to 1.56, Confidence range: -1.79 to 0.09
+
+**Step 02 - Create Calibration Groups:**
+- Fit regression: confidence_theta ~ theta_all (R² = 0.367, p < 0.001)
+- Created groups based on standardized residuals (±0.5 SD cutoffs)
+- Well-calibrated: n = 41 (residuals within ±0.5 SD)
+- Overconfident: n = 33 (residuals > +0.5 SD)
+- Underconfident: n = 26 (residuals < -0.5 SD)
+- All groups meet minimum size requirement (n >= 15)
+
+**Step 03 - ANOVA Comparisons:**
+- Education by group: p = 0.993 (no difference)
+- RPM by group: p = 0.041 uncorrected, p = 0.246 corrected (no difference after correction)
+- Age by group: p = 0.970 (no difference)
+- Issue: F-statistics missing from output (tool compatibility problem)
+- Decision D068 compliance: Dual p-values reported throughout
+
+**Step 04 - Correlation Analysis with Bootstrap:**
+- Residual vs Education: r = -0.006, p = 0.956, CI [-0.173, 0.172]
+- Residual vs RPM: r = 0.108, p = 0.283, CI [-0.065, 0.285]
+- Residual vs Age: r = -0.018, p = 0.861, CI [-0.215, 0.185]
+- All correlations negligible, none significant
+- Bootstrap with 1000 iterations, seed = 42
+
+**Step 05 - Effect Sizes and Power:**
+- Cohen's d mostly negligible (7/9 comparisons)
+- Exception: Underconfident vs Well-calibrated on RPM (d = -0.608, medium effect)
+- Power analysis: <1% power for all tests (severely underpowered)
+- Would need N > 500 for adequate power to detect small effects
+
+**Step 06 - Sensitivity Analysis:**
+- Outlier detection: 5 by Cook's distance, 5 by Mahalanobis
+- Tertile-based groups: Similar null findings
+- Bootstrap stability: Low (Jaccard = 0.193), group assignments unstable
+- Robustness: Null findings consistent across methods
+
+### Validation Pipeline Results:
+- rq_inspect: Initially failed due to empty status.yaml analysis_steps, all output files exist
+- Plots: calibration_groups_comparison.png, calibration_correlations.png
+- rq_results: Summary.md with 3 anomalies flagged (missing F-statistics, extreme power limitation, education restriction)
+- rq_validate: PASS WITH NOTES (3 issues: 0 critical, 0 high, 2 moderate, 1 low)
+
+### Key Scientific Findings:
+**Core Result:** Metacognitive calibration does NOT predict cognitive reserve
+
+**Null Findings Interpretation:**
+1. Well-calibrated individuals don't differ on education, RPM, or age
+2. Calibration quality appears independent of cognitive reserve indicators
+3. Metacognition operates separately from both memory and reserve
+4. Continues pattern of metacognitive independence across RQs 7.3.1-7.3.5
+
+**Methodological Issues:**
+- Severe power limitation (<1% power)
+- Education range restriction (mostly 6 years)
+- ANOVA tool compatibility issue (missing F-statistics)
+- Group assignment instability in bootstrap
+
+### Files Created/Modified:
+**RQ 7.3.5 Complete Analysis:**
+- code/: 7 Python scripts (step00-step06)
+- data/: 14 CSV outputs across all steps
+- logs/: 7 execution logs
+- plots/: 2 PNG visualizations + plots.py generator
+- results/: summary.md, validation.md
+
+**Key Bug Fixes Applied:**
+- Column name case sensitivity (Theta_All vs theta_all)
+- Composite_ID parsing for UID extraction
+- ANOVA post_hoc parameter (boolean vs string)
+- Bootstrap function key name handling ('r' vs 'correlation')
+
+**Status:** RQ 7.3.5 COMPLETE WITH NULL FINDINGS (86/93 RQs = 92.5% complete)
+
+---
+
 **End of Ch7 Execution Progress Archive**
