@@ -1,0 +1,71 @@
+[START] Step 02: merge_datasets
+[LOAD] Loading input datasets...
+[LOADED] step00_cognitive_tests.csv (100 rows, 2 cols)
+[LOADED] Columns: ['uid', 'ravlt_total']
+[LOADED] step01_paradigm_theta.csv (100 rows, 3 cols)
+[LOADED] Columns: ['uid', 'theta_free_recall', 'theta_recognition']
+[ANALYSIS] Running inner join on 'uid'...
+[ANALYSIS] Merge complete: 100 rows retained
+[ANALYSIS] Final columns: ['uid', 'ravlt_total', 'theta_free_recall', 'theta_recognition']
+[SUCCESS] No data loss - 100 participants maintained
+[SAVE] Saving merged correlation input dataset...
+[SAVED] step02_correlation_input.csv (100 rows, 4 cols)
+[VALIDATION] Running validate_dataframe_structure...
+[ERROR] data type 'o' not understood
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.4.1/code/step02_merge_datasets.py", line 201, in <module>
+    validation_result = validate_dataframe_structure(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in validate_dataframe_structure
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in <genexpr>
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/.venv/lib/python3.12/site-packages/numpy/_core/numerictypes.py", line 536, in issubdtype
+    arg2 = dtype(arg2).type
+           ^^^^^^^^^^^
+TypeError: data type 'o' not understood
+[START] Step 02: merge_datasets
+[LOAD] Loading input datasets...
+[LOADED] step00_cognitive_tests.csv (100 rows, 2 cols)
+[LOADED] Columns: ['uid', 'ravlt_total']
+[LOADED] step01_paradigm_theta.csv (100 rows, 3 cols)
+[LOADED] Columns: ['uid', 'theta_free_recall', 'theta_recognition']
+[ANALYSIS] Running inner join on 'uid'...
+[ANALYSIS] Merge complete: 100 rows retained
+[ANALYSIS] Final columns: ['uid', 'ravlt_total', 'theta_free_recall', 'theta_recognition']
+[SUCCESS] No data loss - 100 participants maintained
+[SAVE] Saving merged correlation input dataset...
+[SAVED] step02_correlation_input.csv (100 rows, 4 cols)
+[VALIDATION] Running validate_dataframe_structure...
+[ERROR] 'type' object is not iterable
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.4.1/code/step02_merge_datasets.py", line 202, in <module>
+    validation_result = validate_dataframe_structure(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/tools/validation.py", line 2838, in validate_dataframe_structure
+    if not any(actual_type == exp_type or np.issubdtype(actual_type, exp_type) for exp_type in expected_types):
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'type' object is not iterable
+[START] Step 02: merge_datasets
+[LOAD] Loading input datasets...
+[LOADED] step00_cognitive_tests.csv (100 rows, 2 cols)
+[LOADED] Columns: ['uid', 'ravlt_total']
+[LOADED] step01_paradigm_theta.csv (100 rows, 3 cols)
+[LOADED] Columns: ['uid', 'theta_free_recall', 'theta_recognition']
+[ANALYSIS] Running inner join on 'uid'...
+[ANALYSIS] Merge complete: 100 rows retained
+[ANALYSIS] Final columns: ['uid', 'ravlt_total', 'theta_free_recall', 'theta_recognition']
+[SUCCESS] No data loss - 100 participants maintained
+[SAVE] Saving merged correlation input dataset...
+[SAVED] step02_correlation_input.csv (100 rows, 4 cols)
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] Results:
+[VALIDATION] valid: True
+[VALIDATION] message: DataFrame structure valid: 100 rows, 4 columns (required: 4).
+[VALIDATION] checks: {'row_count_valid': True, 'actual_rows': 100, 'columns_valid': True, 'missing_columns': [], 'types_valid': True}
+[VALIDATION] PASSED - Dataset structure meets all requirements
+[SUCCESS] Step 02 complete

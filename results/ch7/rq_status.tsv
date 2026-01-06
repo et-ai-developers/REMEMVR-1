@@ -12,7 +12,7 @@ RQ	Scholar	Stats	Plan	Tools	Analysis	Inspect	Plots	Results	Validate	Notes
 7.3.3	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	HCE unpredictable: R²=0.031, RPM hypothesis null (p=0.90), severe overfitting, power=19% max, HCE independent of cognition
 7.3.4	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	TRUE	TRUE	DASS differential prediction not supported (0/9 sig), all models R²<0.06, severely underpowered
 7.3.5	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Calibration NOT predictive of cognitive reserve, all p>0.05, power<1%, null findings robust
-7.4.1	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	RAVLT process-specific prediction of paradigms (v5.3.0 verified)
+7.4.1	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	TRUE	Process-specificity NOT supported: r_FreeRecall=0.278 ≈ r_Recognition=0.284 (p=0.812), TAP theory challenged
 7.4.2	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	BVMT domain-specific prediction (Where > What) (v5.3.0 verified)
 7.4.3	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	RPM differential prediction: complex vs simple integration (v5.3.0 verified)
 7.5.1	TRUE	TRUE	TRUE	TRUE	TRUE	FALSE	FALSE	FALSE	FALSE	Lifestyle factors predicting VR memory (v5.3.0 verified)

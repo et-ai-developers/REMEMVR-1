@@ -1,0 +1,2 @@
+statistic,value,ci_lower,ci_upper,excludes_zero,n_bootstrap,seed
+correlation_difference,-0.00702139469873088,-0.04381081141028382,0.029019949956380745,False,1000,42

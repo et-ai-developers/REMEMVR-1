@@ -1,0 +1,23 @@
+[START] Step 0: extract_cognitive_tests
+[LOAD] Loading dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 rows, 235 cols)
+[ANALYSIS] Extracting RAVLT cognitive test scores...
+[FOUND] All required RAVLT columns: ['ravlt-trial-1-score', 'ravlt-trial-2-score', 'ravlt-trial-3-score', 'ravlt-trial-4-score', 'ravlt-trial-5-score']
+[EXTRACTED] 100 participants with complete RAVLT data
+[COMPUTED] RAVLT total scores (range: 26-68)
+[DONE] RAVLT extraction complete
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.4.1/data/step00_cognitive_tests.csv...
+[SAVED] step00_cognitive_tests.csv (100 rows, 2 cols)
+[VALIDATION] Running validate_data_format...
+[VALIDATION] valid: True
+[VALIDATION] message: All required columns present (2 columns). DataFrame has 100 rows.
+[VALIDATION] missing_cols: []
+[VALIDATION] Running RAVLT-specific validation...
+[VALIDATION] Participant count: 100 (expected)
+[VALIDATION] RAVLT total range: 26-68 (within [0,75])
+[VALIDATION] No missing values in output
+[VALIDATION] Spot checking RAVLT total calculation...
+[VALIDATION] A010: trials [np.int64(8) np.int64(7) np.int64(9) np.int64(9) np.int64(11)] -> total 44 (correct)
+[VALIDATION] A011: trials [np.int64(8) np.int64(12) np.int64(15) np.int64(14) np.int64(14)] -> total 63 (correct)
+[VALIDATION] A012: trials [np.int64(4) np.int64(9) np.int64(9) np.int64(12) np.int64(11)] -> total 45 (correct)
+[SUCCESS] Step 0 complete

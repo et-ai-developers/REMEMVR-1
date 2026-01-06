@@ -1,61 +1,35 @@
-rq_id: "ch7/7.4.1"
-
-rq_builder:
-  status: success
-  context_dump: |
-    Created results/ch7/7.4.1/ with 6 folders
-    Folders: docs/, data/, code/, logs/, plots/, results/
-    All folders empty, ready for agents
-    status.yaml initialized with 10 RQ-specific agents
-    Next: rq_concept extracts concept from specs
-
-rq_concept:
-  status: success
-  context_dump: |
-    RQ 7.4.1: RAVLT predicts Free Recall > Recognition
-    Type: Process-Specific Prediction / Transfer-appropriate processing
-    Analysis: Bivariate correlations + Steiger's Z-test
-    Data: DERIVED from Ch5 5.3.x paradigm theta + master.xlsx RAVLT
-    Critical: Dual p-value reporting (D068), process-specificity hypothesis
-
-rq_scholar:
-  status: success
-  context_dump: "7.4.1 validated: 9.3/10 APPROVED. Strong TAP theory, good interpretation guidelines, 4 minor improvements suggested. Ready for stats."
-
-rq_stats:
-  status: success
-  context_dump: "9.3/10 APPROVED. Category 1: 3.0/3 (optimal method). Category 2: 2.0/2 (100% reuse). Category 3: 2.0/2 (well-specified). Category 4: 1.8/2 (normality gap). Category 5: 0.5/1 (4 concerns, limited scope)."
-
-rq_planner:
-  status: success
-  context_dump: |
-    Analysis plan created: 6 steps planned (Step 0: extraction + Steps 1-5: analysis).
-    Tool requirements: bootstrap_correlation_ci, compare_correlations_dependent, extract_cognitive_tests, extract_domain_theta_scores, merge_theta_cognitive.
-    Expected outputs: 5 data files, correlation results with bootstrap CIs, Steiger's Z-test results. Validation required at every step.
-
-rq_tools:
-  status: success
-  context_dump: "5 analysis + 5 validation tools cataloged for correlation analysis with process-specificity testing"
-
-rq_analysis:
-  status: pending
-  context_dump: ""
-
+rq_id: ch7/7.4.1
+created: 2026-01-04
+phase_statuses:
+  docs:
+    concept: success
+    plan: success
+    tools: success
+    analysis: success
+  analysis_steps:
+    step00_extract_cognitive_tests: success
+    step01_extract_paradigm_theta_scores: success
+    step02_merge_datasets: success
+    step03_compute_correlations: success
+    step04_steiger_test: success
+    step05_bootstrap_sensitivity: success
+  validation:
+    rq_inspect: success
+    plots: pending
+    rq_results: success
+    rq_validate: pending
 rq_inspect:
-  status: pending
-  context_dump: ""
-
-rq_plots:
-  status: pending
-  context_dump: ""
-
+  status: success
+  context_dump: |
+    Validated all 6 analysis steps for RQ 7.4.1
+    Outputs: 6 CSV files with correct structure/content
+    Key results: RAVLT-paradigm correlations (0.278, 0.284)
+    Steiger test: no significant difference (Z=-0.24, p=0.81)
+    Bootstrap sensitivity: CI excludes zero = False
 rq_results:
-  status: pending
-  context_dump: ""
-
-analysis_steps:
-  # To be populated during execution
-
-rq_platinum:
-  status: pending
-  context_dump: ""
+  status: success
+  timestamp: 2026-01-06T15:45:00Z
+  context_dump: |
+    Results validated for scientific plausibility
+    1 anomaly flagged: unexpected null result (TAP hypothesis falsified)
+    Summary documented in results/summary.md

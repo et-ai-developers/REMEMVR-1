@@ -1,0 +1,35 @@
+[START] Step 5: bootstrap_sensitivity_analysis
+[LOAD] Loading correlation input data...
+[LOADED] step02_correlation_input.csv (100 rows, 4 cols)
+[VALIDATED] All required columns present: ['ravlt_total', 'theta_free_recall', 'theta_recognition']
+[ANALYSIS] Running bootstrap correlation difference analysis...
+[BOOTSTRAP] Starting 1000 iterations with seed=42
+[ORIGINAL] r(RAVLT, FreeRecall) = 0.2783
+[ORIGINAL] r(RAVLT, Recognition) = 0.2843
+[ORIGINAL] Difference = -0.0060
+[PROGRESS] Completed 100/1000 bootstrap iterations
+[PROGRESS] Completed 200/1000 bootstrap iterations
+[PROGRESS] Completed 300/1000 bootstrap iterations
+[PROGRESS] Completed 400/1000 bootstrap iterations
+[PROGRESS] Completed 500/1000 bootstrap iterations
+[PROGRESS] Completed 600/1000 bootstrap iterations
+[PROGRESS] Completed 700/1000 bootstrap iterations
+[PROGRESS] Completed 800/1000 bootstrap iterations
+[PROGRESS] Completed 900/1000 bootstrap iterations
+[PROGRESS] Completed 1000/1000 bootstrap iterations
+[BOOTSTRAP] Mean difference = -0.0070
+[BOOTSTRAP] 95% CI = [-0.0438, 0.0290]
+[BOOTSTRAP] Excludes zero: False
+[DONE] Bootstrap analysis complete
+[SAVE] Saving bootstrap sensitivity results...
+[SAVED] step05_bootstrap_sensitivity.csv (1 rows, 7 cols)
+[RESULT] Correlation difference: -0.0070
+[RESULT] 95% CI: [-0.0438, 0.0290]
+[RESULT] Excludes zero: False
+[VALIDATION] Running custom bootstrap validation...
+[VALIDATION] valid: True
+[VALIDATION] message: Bootstrap results validation passed
+[VALIDATION] n_successful_bootstrap: 1000
+[VALIDATION] ci_width: 0.07283076136666457
+[INTERPRETATION] Bootstrap CI includes zero - does not support process-specificity hypothesis
+[SUCCESS] Step 5 complete

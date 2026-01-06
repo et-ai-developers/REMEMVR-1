@@ -1,0 +1,23 @@
+[START] Step 3: compute_correlations_with_bootstrap_ci
+[LOAD] Loading correlation input data...
+[LOADED] step02_correlation_input.csv (100 rows, 4 cols)
+[VALIDATE] Columns match expected: ['uid', 'ravlt_total', 'theta_free_recall', 'theta_recognition']
+[VALIDATE] Data shape: (100, 4)
+[ANALYSIS] Computing correlations with bootstrap confidence intervals...
+[ANALYSIS] Bootstrap parameters: n=1000, confidence=0.95, method=pearson, seed=42
+[ANALYSIS] Computing r(RAVLT, FreeRecall)...
+[ANALYSIS] r(RAVLT, FreeRecall) = 0.2783 [0.1075, 0.4426]
+[ANALYSIS] Computing r(RAVLT, Recognition)...
+[ANALYSIS] r(RAVLT, Recognition) = 0.2843 [0.1170, 0.4447]
+[ANALYSIS] Calculating p-values for correlations...
+[ANALYSIS] p-values (uncorrected): r1=0.005061, r2=0.004150
+[ANALYSIS] p-values (Bonferroni): r1=0.010122, r2=0.008301
+[SAVE] Compiling correlation results...
+[SAVED] step03_correlation_results.csv (2 rows, 7 cols)
+[VALIDATION] Running validate_correlation_test_d068...
+[VALIDATION] valid: True
+[VALIDATION] d068_compliant: True
+[VALIDATION] missing_cols: []
+[VALIDATION] message: Custom validation: 6 required columns.
+[VALIDATION] [PASS] D068 compliance validated
+[SUCCESS] Step 3 complete
