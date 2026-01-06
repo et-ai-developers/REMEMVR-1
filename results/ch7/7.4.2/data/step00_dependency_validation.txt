@@ -1,0 +1,35 @@
+DEPENDENCY VALIDATION SUMMARY - RQ 7.4.2
+Generated: 2026-01-06
+Step: step00_validate_dependencies
+
+FILES VALIDATED:
+  Ch5 Domain Data: /home/etai/projects/REMEMVR/results/ch5/5.2.1/data/step03_theta_scores.csv
+    Size: 16072 bytes
+    Participants: 400
+    Columns: ['theta_what', 'theta_where']
+    
+  BVMT Cognitive Data: /home/etai/projects/REMEMVR/data/dfnonvr.csv
+    Size: 60164 bytes
+    Participants: 100
+    Columns: ['UID', 'bvmt-total-recall']
+
+PARTICIPANT OVERLAP:
+  Ch5 UIDs: 100
+  BVMT UIDs: 100
+  Overlap: 100
+  Analysis-Ready: 100 participants
+
+VALIDATION RESULTS:
+  [PASS] Ch5 domain files located and accessible
+  [PASS] dfnonvr.csv contains bvmt-total-recall column
+  [PASS] Minimum 100 participants present in both sources
+  [PASS] Required columns present and accessible
+
+STATUS: ALL DEPENDENCIES VALIDATED - READY FOR ANALYSIS
+
+Next Steps:
+  1. Extract domain theta scores (step01)
+  2. Extract BVMT scores (step02) 
+  3. Merge datasets (step03)
+  4. Compute correlations (step04)
+  5. Run Steiger test (step05)

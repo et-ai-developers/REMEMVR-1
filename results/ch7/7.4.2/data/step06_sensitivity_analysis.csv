@@ -1,0 +1,7 @@
+analysis_type,method,result,confidence_interval,n_used,notes
+outlier_detection,standardized_residuals,"n_outliers=1, n_clean=99",N/A,99,"Threshold=3.29, Where_change=0.031, What_change=0.042"
+outlier_robust_correlation,pearson_no_outliers,"r_BVMT_Where=0.379, r_BVMT_What=0.415",N/A,99,"Original: Where=0.348, What=0.373"
+alternative_correlation,spearman,"r_BVMT_Where=0.360, r_BVMT_What=0.387",N/A,100,"p_Where=0.0002, p_What=0.0001"
+alternative_correlation,kendall_tau,"tau_BVMT_Where=0.254, tau_BVMT_What=0.270",N/A,100,"p_Where=0.0003, p_What=0.0001"
+cross_validation,5_fold_cv,"mean_r_Where=0.344, mean_r_What=0.378","Where_SD=0.228, What_SD=0.250",100,"Stability_ratio_Where=0.664, Stability_ratio_What=0.662"
+power_analysis,post_hoc_power,"Power_Where=0.676, Power_What=0.771",Min_detectable_r=0.382,100,"Alpha=0.00179, Adequate_power_Where=False, Adequate_power_What=False"

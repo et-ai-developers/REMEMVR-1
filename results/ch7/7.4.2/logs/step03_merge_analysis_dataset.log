@@ -1,0 +1,28 @@
+[START] Step 03: merge_analysis_dataset
+[LOAD] Loading input data...
+[LOADED] step01_domain_theta_scores.csv (100 rows, 3 cols)
+[COLUMNS] Theta data: ['UID', 'Where_mean', 'What_mean']
+[LOADED] step02_bvmt_scores.csv (100 rows, 2 cols)
+[COLUMNS] BVMT data: ['UID', 'bvmt_total']
+[ANALYSIS] Running custom merge_theta_cognitive...
+[MERGE] Custom merge on column: UID
+[MERGE] Theta data shape: (100, 3)
+[MERGE] Cognitive data shape: (100, 2)
+[MERGE] Merged shape: (100, 4)
+[MERGE] Participants retained: 100
+[DONE] Merge analysis complete
+[SAVE] Saving step03_analysis_dataset.csv...
+[SAVED] step03_analysis_dataset.csv (100 rows, 4 cols)
+[WARNING] Column order mismatch. Expected: ['UID', 'bvmt_total', 'Where_mean', 'What_mean'], Actual: ['UID', 'Where_mean', 'What_mean', 'bvmt_total']
+[VALIDATION] Running validate_dataframe_structure...
+[VALIDATION] valid: True
+[VALIDATION] message: DataFrame structure valid: 100 rows, 4 columns (required: 4).
+[VALIDATION] checks: {'row_count_valid': True, 'actual_rows': 100, 'columns_valid': True, 'missing_columns': [], 'types_valid': True}
+[VALIDATION] Additional checks...
+[VALIDATION] Participant count: PASS (100 retained)
+[VALIDATION] Duplicate UIDs: PASS (none found)
+[VALIDATION] Missing values: PASS (none found)
+[VALIDATION] BVMT range: PASS (12.0 to 36.0)
+[VALIDATION] Where theta range: PASS (-1.83 to 1.59)
+[VALIDATION] What theta range: PASS (-1.95 to 1.47)
+[SUCCESS] Step 03 complete

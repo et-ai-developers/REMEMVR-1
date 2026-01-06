@@ -1,0 +1,82 @@
+[START] Step 05: steiger_test
+[LOAD] Loading correlation results from Step 4...
+[LOADED] step04_correlations.csv (2 rows, 8 cols)
+[INFO] Available correlations: ['BVMT_Where', 'BVMT_What']
+[LOAD] Loading analysis dataset from Step 3 for r23 calculation...
+[LOADED] step03_analysis_dataset.csv (100 rows, 4 cols)
+[ANALYSIS] Extracting correlations for Steiger's test...
+[INFO] r12 (BVMT-Where): 0.3483
+[INFO] r13 (BVMT-What): 0.3734
+[INFO] Sample size n: 100
+[INFO] r23 (Where-What): 0.9615
+[ANALYSIS] Running Steiger's Z-test for domain-specificity...
+[DONE] Steiger's Z-test complete
+[ANALYSIS] Computing dual p-values per Decision D068...
+[INFO] p_uncorrected: 0.336375
+[INFO] p_bonferroni: 1.000000 (alpha_corrected: 0.00179)
+[INFO] Cohen's q effect size: 0.0289
+[SAVE] Saving Steiger's Z-test results...
+[ERROR] 'z_statistic'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.4.2/code/step05_steiger_test.py", line 239, in <module>
+    'z_statistic': [float(steiger_result['z_statistic'])],
+                          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'z_statistic'
+[START] Step 05: steiger_test
+[LOAD] Loading correlation results from Step 4...
+[LOADED] step04_correlations.csv (2 rows, 8 cols)
+[INFO] Available correlations: ['BVMT_Where', 'BVMT_What']
+[LOAD] Loading analysis dataset from Step 3 for r23 calculation...
+[LOADED] step03_analysis_dataset.csv (100 rows, 4 cols)
+[ANALYSIS] Extracting correlations for Steiger's test...
+[INFO] r12 (BVMT-Where): 0.3483
+[INFO] r13 (BVMT-What): 0.3734
+[INFO] Sample size n: 100
+[INFO] r23 (Where-What): 0.9615
+[ANALYSIS] Running Steiger's Z-test for domain-specificity...
+[DONE] Steiger's Z-test complete
+[DEBUG] Steiger result keys: ['z', 'p_value']
+[ANALYSIS] Computing dual p-values per Decision D068...
+[INFO] p_uncorrected: 0.336375
+[INFO] p_bonferroni: 1.000000 (alpha_corrected: 0.00179)
+[INFO] Cohen's q effect size: 0.0289
+[SAVE] Saving Steiger's Z-test results...
+[ERROR] 'z_statistic'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.4.2/code/step05_steiger_test.py", line 242, in <module>
+    'z_statistic': [float(steiger_result['z_statistic'])],
+                          ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'z_statistic'
+[START] Step 05: steiger_test
+[LOAD] Loading correlation results from Step 4...
+[LOADED] step04_correlations.csv (2 rows, 8 cols)
+[INFO] Available correlations: ['BVMT_Where', 'BVMT_What']
+[LOAD] Loading analysis dataset from Step 3 for r23 calculation...
+[LOADED] step03_analysis_dataset.csv (100 rows, 4 cols)
+[ANALYSIS] Extracting correlations for Steiger's test...
+[INFO] r12 (BVMT-Where): 0.3483
+[INFO] r13 (BVMT-What): 0.3734
+[INFO] Sample size n: 100
+[INFO] r23 (Where-What): 0.9615
+[ANALYSIS] Running Steiger's Z-test for domain-specificity...
+[DONE] Steiger's Z-test complete
+[DEBUG] Steiger result keys: ['z', 'p_value']
+[ANALYSIS] Computing dual p-values per Decision D068...
+[INFO] p_uncorrected: 0.336375
+[INFO] p_bonferroni: 1.000000 (alpha_corrected: 0.00179)
+[INFO] Cohen's q effect size: 0.0289
+[SAVE] Saving Steiger's Z-test results...
+[SAVED] step05_steiger_test.csv (1 rows, 9 cols)
+[VALIDATION] Running custom validation checks...
+[VALIDATION] Single test result: PASS
+[VALIDATION] Z-statistic finite: PASS (-0.9614)
+[VALIDATION] P-values valid range: PASS
+[VALIDATION] Effect size computed: PASS (Cohen's q = 0.0289)
+[VALIDATION] Summary: 4/4 checks passed
+[VALIDATION] Single test result: PASS
+[VALIDATION] Z-statistic finite: PASS
+[VALIDATION] P-values valid range: PASS
+[VALIDATION] Effect size computed: PASS
+[SUCCESS] Step 05 complete

@@ -1,0 +1,20 @@
+[START] Step 02: Extract BVMT Scores
+[LOAD] Loading cognitive test data from dfnonvr.csv...
+[LOADED] dfnonvr.csv (100 rows, 235 cols)
+[VERIFIED] Required columns present: ['UID', 'bvmt-total-recall']
+[EXTRACT] Extracting BVMT Total Recall scores...
+[EXTRACTED] BVMT scores for 100 participants
+[RENAME] Column 'bvmt-total-recall' -> 'bvmt_total'
+[MISSING] 0 participants (0.0%) with missing BVMT scores
+[SAVE] Saving /home/etai/projects/REMEMVR/results/ch7/7.4.2/data/step02_bvmt_scores.csv...
+[SAVED] /home/etai/projects/REMEMVR/results/ch7/7.4.2/data/step02_bvmt_scores.csv (100 rows, 2 cols)
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] valid: True
+[VALIDATION] message: bvmt_total: All values within range [0.0, 36.0] (n=100).
+[VALIDATION] out_of_range_count: 0
+[VALIDATION] violations: []
+[VALIDATION] Participants with BVMT scores: 100/100
+[VALIDATION] Missing data percentage: 0.0%
+[VALIDATION] BVMT standard deviation: 5.06
+[VALIDATION] BVMT score range: [12.0, 36.0]
+[SUCCESS] Step 02 complete

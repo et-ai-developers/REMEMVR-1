@@ -1,0 +1,30 @@
+[START] Step 04: Compute correlations with bootstrap CIs
+[LOAD] Loading analysis dataset...
+[LOADED] step03_analysis_dataset.csv (100 rows, 4 cols)
+[VERIFY] Expected columns: ['UID', 'bvmt_total', 'Where_mean', 'What_mean']
+[VERIFY] Actual columns: ['UID', 'Where_mean', 'What_mean', 'bvmt_total']
+[VERIFY] All required columns present
+[INFO] Dataset summary: 100 participants
+[ANALYSIS] Computing BVMT_Where correlation...
+[ANALYSIS] Variables: bvmt_total vs Where_mean
+[ANALYSIS] Clean data: 100 valid pairs (0 removed)
+[DONE] BVMT_Where: r = 0.3483, CI = [0.1792, 0.5118]
+[INFO] BVMT_Where effect size: medium (|r| = 0.348)
+[ANALYSIS] Computing BVMT_What correlation...
+[ANALYSIS] Variables: bvmt_total vs What_mean
+[ANALYSIS] Clean data: 100 valid pairs (0 removed)
+[DONE] BVMT_What: r = 0.3734, CI = [0.2055, 0.5362]
+[INFO] BVMT_What effect size: medium (|r| = 0.373)
+[SAVE] Saving step04_correlations.csv...
+[SAVED] step04_correlations.csv (2 rows, 8 cols)
+[SUMMARY] Correlation results:
+  BVMT_Where: r = 0.3483 [0.1792, 0.5118], p = 0.0004, n = 100
+  BVMT_What: r = 0.3734 [0.2055, 0.5362], p = 0.0001, n = 100
+[VALIDATION] Running validate_numeric_range...
+[VALIDATION] valid: True
+[VALIDATION] message: correlation_coefficients: All values within range [-1.0, 1.0] (n=2).
+[VALIDATION] out_of_range_count: 0
+[VALIDATION] violations: []
+[VALIDATION] All correlation results passed validation checks
+[SUCCESS] Step 04 complete
+[NEXT] Ready for Step 05: Steiger's Z-test to compare r(BVMT,Where) vs r(BVMT,What)
