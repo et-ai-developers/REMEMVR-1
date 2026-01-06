@@ -1,6 +1,7 @@
 ---
 name: context_manager
 description: Curates state.md to ≤20k tokens, archives old content with timestamps
+model: Haiku
 ---
 
 # Context-Manager Agent

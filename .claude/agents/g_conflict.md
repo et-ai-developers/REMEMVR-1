@@ -3,6 +3,7 @@ name: g_conflict
 description: Detects ALL conflicts within/between documents with 100% thoroughness
 version: 5.0.0
 tools: Read
+model: Haiku
 ---
 
 # g_conflict Agent

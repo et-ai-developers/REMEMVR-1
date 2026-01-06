@@ -1,0 +1,97 @@
+[START] Step 06: Sensitivity analysis
+[LOAD] Loading analysis dataset...
+[LOADED] Analysis dataset (100 rows, 8 cols)
+[LOAD] Loading outlier analysis...
+[LOADED] Outlier analysis (100 rows, 5 cols)
+[COMPLETE CASES] n=100 participants
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[WARNING] Tools bootstrap function failed: could not broadcast input array from shape (4,) into shape (5,), using custom implementation
+[BOOTSTRAP] Bootstrap confidence intervals:
+  age: β = nan, 95% CI [nan, nan]
+  education_numeric: β = nan, 95% CI [nan, nan]
+  rehearsal_frequency: β = nan, 95% CI [nan, nan]
+  mnemonic_use: β = nan, 95% CI [nan, nan]
+[SAVED] Bootstrap results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step06_bootstrap_results.csv
+[SENSITIVITY] Performing outlier sensitivity analysis...
+[SENSITIVITY] Analysis 1: Full sample
+[ERROR] 'numpy.ndarray' object has no attribute 'iloc'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.3/code/step06_sensitivity_analysis.py", line 422, in <module>
+    sensitivity_df = outlier_sensitivity_analysis(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.3/code/step06_sensitivity_analysis.py", line 195, in outlier_sensitivity_analysis
+    'rehearsal_coefficient': model_full.params.iloc[rehearsal_idx],
+                             ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'numpy.ndarray' object has no attribute 'iloc'
+[START] Step 06: Sensitivity analysis
+[LOAD] Loading analysis dataset...
+[LOADED] Analysis dataset (100 rows, 8 cols)
+[LOAD] Loading outlier analysis...
+[LOADED] Outlier analysis (100 rows, 5 cols)
+[COMPLETE CASES] n=100 participants
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[WARNING] Tools bootstrap function failed: could not broadcast input array from shape (4,) into shape (5,), using custom implementation
+[BOOTSTRAP] Bootstrap confidence intervals:
+  age: β = nan, 95% CI [nan, nan]
+  education_numeric: β = nan, 95% CI [nan, nan]
+  rehearsal_frequency: β = nan, 95% CI [nan, nan]
+  mnemonic_use: β = nan, 95% CI [nan, nan]
+[SAVED] Bootstrap results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step06_bootstrap_results.csv
+[SENSITIVITY] Performing outlier sensitivity analysis...
+[SENSITIVITY] Analysis 1: Full sample
+[ERROR] index 4 is out of bounds for axis 0 with size 4
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.3/code/step06_sensitivity_analysis.py", line 422, in <module>
+    sensitivity_df = outlier_sensitivity_analysis(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.3/code/step06_sensitivity_analysis.py", line 196, in outlier_sensitivity_analysis
+    'mnemonic_coefficient': model_full.params[mnemonic_idx] if hasattr(model_full.params, 'iloc') else model_full.params[mnemonic_idx],
+                                                                                                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+IndexError: index 4 is out of bounds for axis 0 with size 4
+[START] Step 06: Sensitivity analysis
+[LOAD] Loading analysis dataset...
+[LOADED] Analysis dataset (100 rows, 8 cols)
+[LOAD] Loading outlier analysis...
+[LOADED] Outlier analysis (100 rows, 5 cols)
+[COMPLETE CASES] n=100 participants
+[BOOTSTRAP] Computing bootstrap confidence intervals...
+[WARNING] Tools bootstrap function failed: could not broadcast input array from shape (4,) into shape (5,), using custom implementation
+[BOOTSTRAP] Bootstrap confidence intervals:
+  age: β = nan, 95% CI [nan, nan]
+  education_numeric: β = nan, 95% CI [nan, nan]
+  rehearsal_frequency: β = nan, 95% CI [nan, nan]
+  mnemonic_use: β = nan, 95% CI [nan, nan]
+[SAVED] Bootstrap results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step06_bootstrap_results.csv
+[SENSITIVITY] Performing outlier sensitivity analysis...
+[SENSITIVITY] Analysis 1: Full sample
+[DEBUG] Model params shape: (4,)
+[DEBUG] Predictor vars: ['age', 'education_numeric', 'rehearsal_frequency', 'mnemonic_use']
+[SENSITIVITY] Analysis 2: Outliers excluded (n=97)
+[SENSITIVITY] Skipping extreme outliers analysis - insufficient extreme outliers
+[SENSITIVITY] Outlier sensitivity results:
+  full_sample: n=100, R²=0.0402, rehearsal_β=0.7195, mnemonic_β=nan
+  outliers_excluded: n=97, R²=0.0040, rehearsal_β=0.0000, mnemonic_β=nan
+[SAVED] Outlier sensitivity: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step06_outlier_sensitivity.csv
+[CROSS-VALIDATION] Performing 5-fold cross-validation...
+[CROSS-VALIDATION] Mean CV R² = -0.0964 (SE = 0.0418)
+[CROSS-VALIDATION] Fold-wise results:
+  Fold 1.0: R² = -0.1286
+  Fold 2.0: R² = -0.0906
+  Fold 3.0: R² = -0.2152
+  Fold 4.0: R² = -0.1187
+  Fold 5.0: R² = 0.0709
+[SAVED] Cross-validation results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step06_cross_validation.csv
+[VALIDATION] Validating bootstrap stability...
+[VALIDATION] Custom validation due to function limitations: validate_bootstrap_stability() got an unexpected keyword argument 'jaccard_values'
+[VALIDATION] [PASS] reasonable_ses: True
+[VALIDATION] [PASS] no_extreme_ses: True
+[VALIDATION] [PASS] bootstrap_completed: True
+[VALIDATION] [PASS] valid: True
+[SUMMARY] Sensitivity analysis completed:
+  Bootstrap CIs: 0 / 4 predictors with reasonable SEs
+  Outlier impact: ΔR² = 0.0362 when excluding outliers
+  Generalization: Mean CV R² = -0.0964 ± 0.0418
+[ROBUSTNESS] Results have CONCERNS (multiple stability issues)
+[SUCCESS] Step 06 complete - comprehensive sensitivity analysis

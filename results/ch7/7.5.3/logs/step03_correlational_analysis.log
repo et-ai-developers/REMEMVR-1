@@ -1,0 +1,54 @@
+[START] Step 03: Correlational analysis
+[LOAD] Loading analysis dataset...
+[LOADED] Analysis dataset (100 rows, 8 cols)
+[INFO] Analysis variables extracted (n=100)
+[INFO] Theta range: -2.516 to 1.553
+[INFO] Rehearsal frequency range: 0 to 2
+[INFO] Mnemonic users: 2 / 100 (2.0%)
+[ANALYSIS] Computing Pearson correlation: rehearsal_frequency vs theta_all...
+[CORRELATION] r=0.150, p_uncorrected=0.136670, n=100
+[BOOTSTRAP] 95% CI for correlation: [0.129, 0.303]
+[CORRECTION] p_bonferroni=0.273341 (n_comparisons=2)
+[SAVED] Correlation results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step03_correlation_results.csv
+[ANALYSIS] Comparing theta scores: mnemonic users vs non-users...
+[GROUPS] Mnemonic users: n=2, Non-users: n=98
+[MEANS] Mnemonic users: M=0.165, Non-users: M=-0.513
+[T-TEST] Running independent t-test with D068 dual p-values...
+[ERROR] 't_statistic'
+[TRACEBACK] Full error details:
+Traceback (most recent call last):
+  File "/home/etai/projects/REMEMVR/results/ch7/7.5.3/code/step03_correlational_analysis.py", line 306, in <module>
+    t_statistic = ttest_result['t_statistic']
+                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 't_statistic'
+[START] Step 03: Correlational analysis
+[LOAD] Loading analysis dataset...
+[LOADED] Analysis dataset (100 rows, 8 cols)
+[INFO] Analysis variables extracted (n=100)
+[INFO] Theta range: -2.516 to 1.553
+[INFO] Rehearsal frequency range: 0 to 2
+[INFO] Mnemonic users: 2 / 100 (2.0%)
+[ANALYSIS] Computing Pearson correlation: rehearsal_frequency vs theta_all...
+[CORRELATION] r=0.150, p_uncorrected=0.136670, n=100
+[BOOTSTRAP] 95% CI for correlation: [0.129, 0.303]
+[CORRECTION] p_bonferroni=0.273341 (n_comparisons=2)
+[SAVED] Correlation results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step03_correlation_results.csv
+[ANALYSIS] Comparing theta scores: mnemonic users vs non-users...
+[GROUPS] Mnemonic users: n=2, Non-users: n=98
+[MEANS] Mnemonic users: M=0.165, Non-users: M=-0.513
+[T-TEST] Running independent t-test with D068 dual p-values...
+[DEBUG] t_test_d068 returned keys: ['t', 'p_uncorrected', 'p_corrected', 'cohens_d', 'df', 'ci_lower', 'ci_upper', 'mean_diff', 'hedges_g']
+[T-TEST] t=0.000, df=98, p_uncorrected=0.250939
+[T-TEST] p_bonferroni=0.501879
+[EFFECT SIZE] Cohen's d=0.825
+[BOOTSTRAP] 95% CI for mean difference: [0.515, 0.836]
+[SAVED] Group comparison results: /home/etai/projects/REMEMVR/results/ch7/7.5.3/data/step03_group_comparison.csv
+[VALIDATION] Running correlation test validation...
+[VALIDATION] Correlation results: PASS
+[VALIDATION] Group comparison results: PASS
+[SUMMARY] Analysis completed successfully:
+  Correlation (rehearsal ~ theta): r=0.150, p=0.273341 (Bonferroni)
+  Group comparison (mnemonic vs no mnemonic): t=0.000, p=0.501879
+  Effect sizes: r=0.150, Cohen's d=0.825
+  Both analyses used Bonferroni correction for 2 comparisons
+[SUCCESS] Step 03 complete - correlational analysis with dual p-values
